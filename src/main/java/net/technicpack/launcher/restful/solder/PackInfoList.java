@@ -1,4 +1,4 @@
-package net.technicpack.launcher.restful.technic;
+package net.technicpack.launcher.restful.solder;
 
 import java.util.List;
 

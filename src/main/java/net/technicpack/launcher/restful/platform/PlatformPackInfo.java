@@ -1,4 +1,7 @@
-package net.technicpack.launcher.restful.technic;
+package net.technicpack.launcher.restful.platform;
+
+import net.technicpack.launcher.restful.ImageResource;
+import net.technicpack.launcher.restful.PackInfo;
 
 public class PlatformPackInfo implements PackInfo {
 	private String name;

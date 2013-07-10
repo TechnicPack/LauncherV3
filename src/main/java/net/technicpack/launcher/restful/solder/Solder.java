@@ -1,4 +1,4 @@
-package net.technicpack.launcher.restful.technic;
+package net.technicpack.launcher.restful.solder;
 
 public class Solder {
 	private String api;

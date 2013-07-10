@@ -1,4 +1,5 @@
-package net.technicpack.launcher.restful.technic;
+package net.technicpack.launcher.restful;
+
 
 public interface PackInfo {
 

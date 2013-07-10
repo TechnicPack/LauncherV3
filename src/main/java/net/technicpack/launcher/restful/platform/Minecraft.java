@@ -1,4 +1,4 @@
-package net.technicpack.launcher.restful.technic;
+package net.technicpack.launcher.restful.platform;
 
 import java.util.List;
 

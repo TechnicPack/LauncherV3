@@ -1,6 +1,9 @@
-package net.technicpack.launcher.restful.technic;
+package net.technicpack.launcher.restful.solder;
 
 import java.util.List;
+
+import net.technicpack.launcher.restful.ImageResource;
+import net.technicpack.launcher.restful.PackInfo;
 
 public class SolderPackInfo implements PackInfo {
 
