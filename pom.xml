@@ -69,8 +69,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.0</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.7</source>
+					<target>1.7</target>
 					<compilerArguments>
 						<O>-Xlint:all</O>
 						<O>-Xlint:-path</O>
@@ -138,10 +138,6 @@
 								<configuration>
 									<headerType>gui</headerType>
 									<stayAlive>false</stayAlive>
-									<singleInstance>
-										<mutexName>${project.name}</mutexName>
-										<windowTitle>${project.name}</windowTitle>
-									</singleInstance>
 									<jar>${project.build.directory}/${project.artifactId}-${project.version}.jar</jar>
 									<outfile>${project.build.directory}/${project.artifactId}-${project.version}.exe</outfile>
 									<classPath>
