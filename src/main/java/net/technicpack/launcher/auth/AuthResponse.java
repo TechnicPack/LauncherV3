@@ -1,6 +1,8 @@
 package net.technicpack.launcher.auth;
 
-public class AuthResponse {
+import java.util.Arrays;
+
+public class AuthResponse extends Response {
 	private String accessToken;
 	private String clientToken;
 	private Profile[] availableProfiles;
@@ -20,5 +22,15 @@ public class AuthResponse {
 
 	public Profile getSelectedProfile() {
 		return selectedProfile;
+	}
+
+	@Override
+	public String toString() {
+		return "AuthResponse{" +
+				"accessToken='" + accessToken + '\'' +
+				", clientToken='" + clientToken + '\'' +
+				", availableProfiles=" + Arrays.toString(availableProfiles) +
+				", selectedProfile=" + selectedProfile +
+				'}';
 	}
 }

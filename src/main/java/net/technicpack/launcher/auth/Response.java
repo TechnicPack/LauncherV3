@@ -1,6 +1,6 @@
 package net.technicpack.launcher.auth;
 
-public class ErrorResponse {
+public class Response {
 	private String error;
 	private String errorMessage;
 	private String cause;
@@ -15,5 +15,14 @@ public class ErrorResponse {
 
 	public String getCause() {
 		return cause;
+	}
+
+	@Override
+	public String toString() {
+		return "Response{" +
+				"error='" + error + '\'' +
+				", errorMessage='" + errorMessage + '\'' +
+				", cause='" + cause + '\'' +
+				'}';
 	}
 }

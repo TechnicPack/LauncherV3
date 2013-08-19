@@ -12,6 +12,9 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import net.technicpack.launcher.auth.AuthResponse;
+import net.technicpack.launcher.auth.AuthenticationService;
+import net.technicpack.launcher.auth.Response;
 import net.technicpack.launcher.gui.DraggableBackground;
 
 public class TechnicLauncher extends Application {
@@ -35,6 +38,12 @@ public class TechnicLauncher extends Application {
 		stage.getScene().getStylesheets().add("technic.css");
 		stage.show();
 		borderPane.setupDragging();
+
+		AuthenticationService authenticationService = new AuthenticationService();
+		AuthResponse response = authenticationService.requestLogin("someUsername", "somePassword", "someClientToken");
+		System.out.println(response.getError());
+		System.out.println(response.getErrorMessage());
+		System.out.println(response.getCause());
 	}
 
 	class WindowButtons extends HBox {
