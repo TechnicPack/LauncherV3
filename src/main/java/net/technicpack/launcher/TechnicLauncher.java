@@ -16,6 +16,8 @@ import net.technicpack.launcher.auth.AuthResponse;
 import net.technicpack.launcher.auth.AuthenticationService;
 import net.technicpack.launcher.auth.Response;
 import net.technicpack.launcher.gui.DraggableBackground;
+import net.technicpack.launcher.gui.LauncherWindow;
+import net.technicpack.launcher.gui.LoginWindow;
 
 public class TechnicLauncher extends Application {
 
@@ -25,46 +27,6 @@ public class TechnicLauncher extends Application {
 
 	@Override
 	public void start(Stage stage) throws Exception {
-		stage.initStyle(StageStyle.UNDECORATED);
-		stage.setTitle("Technic Launcher");
-
-		DraggableBackground borderPane = new DraggableBackground();
-		borderPane.setStyle("-fx-background-color: black;");
-
-		WindowButtons exit = new WindowButtons();
-		borderPane.setTop(exit);
-
-		stage.setScene(new Scene(borderPane, 400, 300));
-		stage.getScene().getStylesheets().add("technic.css");
-		stage.show();
-		borderPane.setupDragging();
-
-		AuthenticationService authenticationService = new AuthenticationService();
-		AuthResponse response = authenticationService.requestLogin("someUsername", "somePassword", "someClientToken");
-		System.out.println(response.getError());
-		System.out.println(response.getErrorMessage());
-		System.out.println(response.getCause());
-	}
-
-	class WindowButtons extends HBox {
-
-		public WindowButtons() {
-			Button closeBtn = new Button("Exit");
-			closeBtn.setAlignment(Pos.CENTER_RIGHT);
-
-			closeBtn.setOnAction(new EventHandler<ActionEvent>() {
-
-				@Override
-				public void handle(ActionEvent actionEvent) {
-					Platform.exit();
-				}
-			});
-
-			StackPane stackPane = new StackPane();
-			stackPane.getChildren().add(closeBtn);
-			stackPane.setAlignment(Pos.CENTER_RIGHT);
-			this.getChildren().add(stackPane);
-			HBox.setHgrow(stackPane, Priority.ALWAYS);
-		}
+		LauncherWindow launcherWindow = new LauncherWindow();
 	}
 }
