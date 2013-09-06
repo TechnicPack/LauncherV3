@@ -22,7 +22,8 @@ public class Download implements Runnable {
 	private DownloadListener listener;
 	private Result result = Result.FAILURE;
 	private File outFile = null;
-	private Exception exception = null;;
+	private Exception exception = null;
+	private String md5 = "";
 
 	public Download(String url, String outPath) throws MalformedURLException {
 		this.url = new URL(url);
@@ -53,6 +54,11 @@ public class Download implements Runnable {
 			conn.setInstanceFollowRedirects(true);
 			int response = conn.getResponseCode();
 			InputStream in = getConnectionInputStream(conn);
+
+			String eTag = conn.getHeaderField("ETag").replaceAll("^\"|\"$", "");
+			if (eTag.length() == 32) {
+				md5 = eTag;
+			}
 
 			size = conn.getContentLength();
 			outFile = new File(outPath);
@@ -141,6 +147,10 @@ public class Download implements Runnable {
 
 	public File getOutFile() {
 		return outFile;
+	}
+
+	public String getMd5() {
+		return md5;
 	}
 
 	private static class StreamThread extends Thread {

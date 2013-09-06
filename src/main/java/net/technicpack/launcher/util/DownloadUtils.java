@@ -30,8 +30,13 @@ public class DownloadUtils {
 					listener.stateChanged("Download failed, retries remaining: " + tries, 0F);
 				}
 			} else {
+				String eTag = download.getMd5();
+				if (!eTag.isEmpty()) {
+					md5 = eTag;
+				}
 				if (md5 != null) {
 					String resultMD5 = MD5Utils.getMD5(download.getOutFile());
+
 					System.out.println("Expected MD5: " + md5 + " Calculated MD5: " + resultMD5);
 					if (md5.equalsIgnoreCase(resultMD5)) {
 						outputFile = download.getOutFile();

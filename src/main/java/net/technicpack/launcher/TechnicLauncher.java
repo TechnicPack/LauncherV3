@@ -1,32 +1,18 @@
 package net.technicpack.launcher;
 
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import net.technicpack.launcher.auth.AuthResponse;
-import net.technicpack.launcher.auth.AuthenticationService;
-import net.technicpack.launcher.auth.Response;
-import net.technicpack.launcher.gui.DraggableBackground;
-import net.technicpack.launcher.gui.LauncherWindow;
-import net.technicpack.launcher.gui.LoginWindow;
+import net.technicpack.launcher.util.DownloadUtils;
 
-public class TechnicLauncher extends Application {
+import java.io.IOException;
+
+public class TechnicLauncher {
 
 	public static void main(String[] args) {
-		launch(args);
+		try {
+			DownloadUtils.downloadFile("http://mirror.technicpack.net/Technic/tekkit/resources/logo_180.png", "E:/logo.png");
+			DownloadUtils.downloadFile("https://s3.amazonaws.com/Minecraft.Download/versions/1.5.2/1.5.2.json", "E:/1.5.2.json");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
-	@Override
-	public void start(Stage stage) throws Exception {
-		LauncherWindow launcherWindow = new LauncherWindow();
-	}
 }
