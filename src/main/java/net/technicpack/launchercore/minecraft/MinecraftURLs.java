@@ -17,17 +17,19 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.launchercore;
+package net.technicpack.launchercore.minecraft;
 
-public class UpdateThread extends Thread {
+public class MinecraftURLs {
+	public static final String baseURL = "https://s3.amazonaws.com/Minecraft.Download/";
+	public static final String versions = baseURL + "versions/";
 
-	public UpdateThread() {
-		// TODO Auto-generated constructor stub
+	public static final String versionList = versions + "versions.json";
+
+	public static String getVersionJson(String version) {
+		return versions + version + "/" + version + ".json";
 	}
 
-	@Override
-	public void run() {
-
+	public static String getVersionDownload(String version) {
+		return versions + version + "/" + version + ".jar";
 	}
-
 }

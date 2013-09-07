@@ -34,6 +34,7 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 	private String forge;
 	private String build;
 	private String solder;
+	private boolean forceDir;
 
 	@Override
 	public Resource getBackground() {
@@ -85,6 +86,10 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 
 	public String getSolder() {
 		return solder;
+	}
+
+	public boolean shouldForceDirectory() {
+		return forceDir;
 	}
 
 	public boolean hasSolder() {

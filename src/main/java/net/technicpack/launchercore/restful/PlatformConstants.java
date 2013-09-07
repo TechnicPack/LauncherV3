@@ -17,49 +17,12 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.launchercore.restful.platform;
+package net.technicpack.launchercore.restful;
 
-import net.technicpack.launchercore.restful.PlatformConstants;
-import net.technicpack.launchercore.restful.Resource;
+public class PlatformConstants {
+	public static final String PLATFORM = "http://www.technicpack.net/";
 
-public class Article {
-	private String title;
-	private String displayTitle;
-	private Resource image;
-	private String category;
-	private String user;
-	private String summary;
-	private String date;
+	public static final String API = PLATFORM + "api/";
 
-	public String getTitle() {
-		return title;
-	}
-
-	public String getDisplayTitle() {
-		return displayTitle;
-	}
-
-	public Resource getImage() {
-		return image;
-	}
-
-	public String getCategory() {
-		return category;
-	}
-
-	public String getUser() {
-		return user;
-	}
-
-	public String getSummary() {
-		return summary;
-	}
-
-	public String getDate() {
-		return date;
-	}
-
-	public String getUrl() {
-		return PlatformConstants.PLATFORM + "article/view/" + title;
-	}
+	public static final String NEWS = API + "news/";
 }
