@@ -19,37 +19,20 @@
 
 package net.technicpack.launchercore.restful.solder;
 
-import net.technicpack.launchercore.restful.Resource;
+import net.technicpack.launchercore.restful.RestObject;
 
-public class Mod extends Resource {
-	private String name;
-	private String version;
+import java.util.LinkedHashMap;
 
-	public Mod() {
+public class FullModpacks extends RestObject {
 
+	private LinkedHashMap<String, SolderPackInfo> modpacks;
+	private String mirror_url;
+
+	public LinkedHashMap<String, SolderPackInfo> getModpacks() {
+		return modpacks;
 	}
 
-	public Mod(String name, String version, String url, String md5) {
-		super(url, md5);
-		this.name = name;
-		this.version = version;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public String getVersion() {
-		return version;
-	}
-
-	@Override
-	public String toString() {
-		return "Mod{" +
-				"name='" + name + '\'' +
-				", version='" + version + '\'' +
-				", url='" + getUrl() + '\'' +
-				", md5='" + getMd5() + '\'' +
-				'}';
+	public String getMirrorUrl() {
+		return mirror_url;
 	}
 }

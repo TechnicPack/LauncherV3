@@ -19,13 +19,32 @@
 
 package net.technicpack.launchercore.restful;
 
+import net.technicpack.launchercore.restful.platform.PlatformPackInfo;
 import net.technicpack.launchercore.restful.solder.Mod;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public interface Modpack {
+public class Modpack extends RestObject {
+	private String minecraft;
+	private List<Mod> mods;
 
-	public String getMinecraft();
+	public Modpack() {
 
-	public List<Mod> getMods();
+	}
+
+	public Modpack(PlatformPackInfo info) {
+		minecraft = info.getMinecraft();
+		mods = new ArrayList<Mod>();
+		Mod mod = new Mod(info.getName(), info.getRecommended(), info.getUrl(), "");
+		mods.add(mod);
+	}
+
+	public String getMinecraft() {
+		return minecraft;
+	}
+
+	public List<Mod> getMods() {
+		return mods;
+	}
 }

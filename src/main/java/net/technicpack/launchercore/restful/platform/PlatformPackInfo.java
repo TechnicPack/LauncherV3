@@ -19,9 +19,15 @@
 
 package net.technicpack.launchercore.restful.platform;
 
-import net.technicpack.launchercore.restful.Resource;
+import net.technicpack.launchercore.exception.RestfulAPIException;
+import net.technicpack.launchercore.restful.Modpack;
 import net.technicpack.launchercore.restful.PackInfo;
+import net.technicpack.launchercore.restful.PlatformConstants;
+import net.technicpack.launchercore.restful.Resource;
 import net.technicpack.launchercore.restful.RestObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlatformPackInfo extends RestObject implements PackInfo {
 	private String name;
@@ -36,29 +42,8 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 	private String solder;
 	private boolean forceDir;
 
-	@Override
-	public Resource getBackground() {
-		return background;
-	}
+	public PlatformPackInfo() {
 
-	@Override
-	public String getDisplayName() {
-		return displayName;
-	}
-
-	@Override
-	public Resource getIcon() {
-		return icon;
-	}
-
-	@Override
-	public String getLatest() {
-		return build;
-	}
-
-	@Override
-	public Resource getLogo() {
-		return logo;
 	}
 
 	@Override
@@ -67,13 +52,50 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 	}
 
 	@Override
-	public String getRecommended() {
-		return build;
+	public String getDisplayName() {
+		return displayName;
 	}
 
 	@Override
 	public String getUrl() {
 		return url;
+	}
+
+	@Override
+	public Resource getIcon() {
+		return icon;
+	}
+
+	@Override
+	public Resource getBackground() {
+		return background;
+	}
+
+	@Override
+	public Resource getLogo() {
+		return logo;
+	}
+
+	@Override
+	public String getRecommended() {
+		return build;
+	}
+
+	@Override
+	public String getLatest() {
+		return build;
+	}
+
+	@Override
+	public boolean shouldForceDirectory() {
+		return forceDir;
+	}
+
+	@Override
+	public List<String> getBuilds() {
+		List<String> builds = new ArrayList<String>();
+		builds.add(build);
+		return builds;
 	}
 
 	public String getMinecraft() {
@@ -88,11 +110,33 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 		return solder;
 	}
 
-	public boolean shouldForceDirectory() {
-		return forceDir;
-	}
-
 	public boolean hasSolder() {
 		return solder == null || solder.equals("");
+	}
+
+	@Override
+	public Modpack getModpack(String build) {
+		return new Modpack(this);
+	}
+
+	@Override
+	public String toString() {
+		return "PlatformPackInfo{" +
+				"name='" + name + '\'' +
+				", displayName='" + displayName + '\'' +
+				", url='" + url + '\'' +
+				", icon=" + icon +
+				", logo=" + logo +
+				", background=" + background +
+				", minecraft='" + minecraft + '\'' +
+				", forge='" + forge + '\'' +
+				", build='" + build + '\'' +
+				", solder='" + solder + '\'' +
+				", forceDir=" + forceDir +
+				'}';
+	}
+
+	public static PlatformPackInfo getPlatformPackInfo(String name) throws RestfulAPIException {
+		return getRestObject(PlatformPackInfo.class, PlatformConstants.getPlatformInfoUrl(name));
 	}
 }

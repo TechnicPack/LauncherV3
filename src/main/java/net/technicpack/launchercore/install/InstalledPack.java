@@ -1,0 +1,329 @@
+/*
+ * This file is part of Technic Launcher Core.
+ * Copyright (C) 2013 Syndicate, LLC
+ *
+ * Technic Launcher Core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Technic Launcher Core is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * as well as a copy of the GNU Lesser General Public License,
+ * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package net.technicpack.launchercore.install;
+
+import net.technicpack.launchercore.restful.PackInfo;
+import net.technicpack.launchercore.restful.Resource;
+import net.technicpack.launchercore.util.Download;
+import net.technicpack.launchercore.util.DownloadUtils;
+import net.technicpack.launchercore.util.MD5Utils;
+import net.technicpack.launchercore.util.ResourceUtils;
+import net.technicpack.launchercore.util.Utils;
+
+import javax.imageio.IIOException;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
+
+public class InstalledPack {
+	public static final String RECOMMENDED = "recommended";
+	public static final String LATEST = "latest";
+	public static final String LAUNCHER_DIR = "launcher\\";
+	public static final String MODPACKS_DIR = "%MODPACKS%\\";
+
+	private static BufferedImage BACKUP_LOGO;
+	private static BufferedImage BACKUP_BACKGROUND;
+	private static BufferedImage BACKUP_ICON;
+	private transient AtomicReference<BufferedImage> logo = new AtomicReference<BufferedImage>();
+	private transient AtomicReference<BufferedImage> background = new AtomicReference<BufferedImage>();
+	private transient AtomicReference<BufferedImage> icon = new AtomicReference<BufferedImage>();
+	private transient HashMap<AtomicReference<BufferedImage>, AtomicReference<Boolean>> downloading = new HashMap<AtomicReference<BufferedImage>, AtomicReference<Boolean>>(3);
+	private transient File installedDirectory;
+	private transient File binDir;
+	private transient File configDir;
+	private transient File savesDir;
+	private transient File cacheDir;
+	private transient File resourceDir;
+	private transient File coremodsDir;
+	private transient PackInfo info;
+	private String name;
+	private boolean platform;
+	private String build;
+	private String directory;
+
+	public InstalledPack(String name, boolean platform, String build, String directory) {
+		this();
+		this.name = name;
+		this.platform = platform;
+		this.build = build;
+		this.directory = directory;
+	}
+
+	public InstalledPack(String name, boolean platform) {
+		this(name, platform, RECOMMENDED, MODPACKS_DIR + name);
+	}
+
+	public InstalledPack() {
+		downloading.put(logo, new AtomicReference<Boolean>(false));
+		downloading.put(background, new AtomicReference<Boolean>(false));
+		downloading.put(icon, new AtomicReference<Boolean>(false));
+	}
+
+	public void init() {
+		if (directory != null) {
+			installedDirectory = new File(getDirectory());
+			initDirectories();
+		}
+	}
+
+	public String getDirectory() {
+		if (directory != null && directory.startsWith(LAUNCHER_DIR)) {
+			directory = new File(Utils.getLauncherDirectory(), directory.substring(9)).getAbsolutePath();
+		}
+		if (directory != null && directory.startsWith(MODPACKS_DIR)) {
+			directory = new File(Utils.getModpacksDirectory(), directory.substring(11)).getAbsolutePath();
+		}
+		return directory;
+	}
+
+	public void initDirectories() {
+		binDir = new File(installedDirectory, "bin");
+		configDir = new File(installedDirectory, "config");
+		savesDir = new File(installedDirectory, "saves");
+		cacheDir = new File(installedDirectory, "cache");
+		resourceDir = new File(installedDirectory, "resources");
+		coremodsDir = new File(installedDirectory, "coremods");
+
+		binDir.mkdirs();
+		configDir.mkdirs();
+		savesDir.mkdirs();
+		cacheDir.mkdirs();
+		resourceDir.mkdirs();
+		coremodsDir.mkdirs();
+	}
+
+	public String getDisplayName() {
+		if (info == null) {
+			return name;
+		}
+		return info.getDisplayName();
+	}
+
+	public boolean isPlatform() {
+		return platform;
+	}
+
+	public PackInfo getInfo() {
+		return info;
+	}
+
+	public void setInfo(PackInfo info) {
+		this.info = info;
+	}
+
+	public String getBuild() {
+		if (build.equals(RECOMMENDED)) {
+			return info.getRecommended();
+		}
+		if (build.equals(LATEST)) {
+			return info.getLatest();
+		}
+		return build;
+	}
+
+	public File getInstalledDirectory() {
+		if (installedDirectory == null) {
+			setPackDirectory(new File(info.getName()));
+		}
+		return installedDirectory;
+	}
+
+	public void setPackDirectory(File packPath) {
+		if (installedDirectory != null) {
+			try {
+				org.apache.commons.io.FileUtils.copyDirectory(installedDirectory, packPath);
+				org.apache.commons.io.FileUtils.cleanDirectory(installedDirectory);
+			} catch (IOException e) {
+				e.printStackTrace();
+				return;
+			}
+		}
+		installedDirectory = packPath;
+		initDirectories();
+	}
+
+	public File getBinDir() {
+		return binDir;
+	}
+
+	public File getConfigDir() {
+		return configDir;
+	}
+
+	public File getSavesDir() {
+		return savesDir;
+	}
+
+	public File getCacheDir() {
+		return cacheDir;
+	}
+
+	public File getResourceDir() {
+		return resourceDir;
+	}
+
+	public File getCoremodsDir() {
+		return coremodsDir;
+	}
+
+	public synchronized BufferedImage getLogo() {
+		if (logo.get() != null) {
+			return logo.get();
+		} else {
+			Resource resource = info != null ? info.getLogo() : null;
+			if (loadImage(logo, "logo.png", resource)) {
+				return logo.get();
+			}
+		}
+
+		if (BACKUP_LOGO == null) {
+			BACKUP_LOGO = loadBackup("/org/spoutcraft/launcher/resources/noLogo.png");
+		}
+		return BACKUP_LOGO;
+	}
+
+	private boolean loadImage(AtomicReference<BufferedImage> image, String name, Resource resource) {
+		File assets = new File(Utils.getAssetsDirectory(), "packs");
+		File packs = new File(assets, getName());
+		packs.mkdirs();
+		File resourceFile = new File(packs, name);
+
+		String url = "";
+		String md5 = "";
+
+		if (resource != null) {
+			url = resource.getUrl();
+			md5 = resource.getMd5();
+		}
+
+		boolean cached = loadCachedImage(image, resourceFile, url, md5);
+
+		if (!cached) {
+			downloadImage(image, resourceFile, url, md5);
+		}
+
+		return cached;
+	}
+
+	private boolean loadCachedImage(AtomicReference<BufferedImage> image, File file, String url, String md5) {
+		try {
+			if (file.exists() && (url.isEmpty() || md5.isEmpty() || MD5Utils.getMD5(file).equalsIgnoreCase(md5))) {
+				BufferedImage newImage;
+				newImage = ImageIO.read(file);
+				image.set(newImage);
+				return true;
+			}
+		} catch (IIOException e) {
+			Utils.getLogger().log(Level.INFO, "Failed to load image " + file.getAbsolutePath() + " from file.");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return false;
+	}
+
+	private void downloadImage(final AtomicReference<BufferedImage> image, final File temp, final String url, final String md5) {
+		if (url.isEmpty() || downloading.get(image).get()) {
+			return;
+		}
+
+		downloading.get(image).set(true);
+		final String name = getName();
+		Thread thread = new Thread(name + " Image Download Worker") {
+			@Override
+			public void run() {
+				try {
+					if (temp.exists()) {
+						System.out.println("Pack: " + getName() + " Calculated MD5: " + MD5Utils.getMD5(temp) + " Required MD5: " + md5);
+					}
+					Download download = DownloadUtils.downloadFile(url, temp.getAbsolutePath());
+					BufferedImage newImage;
+					newImage = ImageIO.read(download.getOutFile());
+					image.set(newImage);
+					downloading.get(image).set(false);
+				} catch (IOException e) {
+					System.out.println("Failed to download and load image from: " + url);
+					e.printStackTrace();
+				}
+			}
+		};
+		thread.start();
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	private BufferedImage loadBackup(String backup) {
+		try {
+			return ImageIO.read(ResourceUtils.getResourceAsStream(backup));
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public synchronized BufferedImage getBackground() {
+		if (background.get() != null) {
+			return background.get();
+		} else {
+			Resource resource = info != null ? info.getBackground() : null;
+			if (loadImage(background, "background.jpg", resource)) {
+				return background.get();
+			}
+		}
+
+		if (BACKUP_BACKGROUND == null) {
+			BACKUP_BACKGROUND = loadBackup("/org/spoutcraft/launcher/resources/background.jpg");
+		}
+		return BACKUP_BACKGROUND;
+	}
+
+	public synchronized BufferedImage getIcon() {
+		if (icon.get() != null) {
+			return icon.get();
+		} else {
+			Resource resource = info != null ? info.getIcon() : null;
+			if (loadImage(icon, "icon.png", resource)) {
+				return icon.get();
+			}
+		}
+
+		if (BACKUP_ICON == null) {
+			BACKUP_ICON = loadBackup("/org/spoutcraft/launcher/resources/icon.png");
+		}
+		return BACKUP_ICON;
+	}
+
+	@Override
+	public String toString() {
+		return "InstalledPack{" +
+				"info=" + info +
+				", name='" + name + '\'' +
+				", platform=" + platform +
+				", build='" + build + '\'' +
+				", directory='" + directory + '\'' +
+				'}';
+	}
+}

@@ -20,6 +20,8 @@
 package net.technicpack.launchercore.restful;
 
 
+import java.util.List;
+
 public interface PackInfo {
 
 	public String getName();
@@ -37,4 +39,10 @@ public interface PackInfo {
 	public String getRecommended();
 
 	public String getLatest();
+
+	public List<String> getBuilds();
+
+	public boolean shouldForceDirectory();
+
+	public Modpack getModpack(String build);
 }

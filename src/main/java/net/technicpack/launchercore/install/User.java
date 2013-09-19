@@ -17,39 +17,38 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.launchercore.restful.solder;
+package net.technicpack.launchercore.install;
 
-import net.technicpack.launchercore.restful.Resource;
+public class User {
+	private String username;
+	private String accessToken;
+	private String clientToken;
+	private String displayName;
 
-public class Mod extends Resource {
-	private String name;
-	private String version;
-
-	public Mod() {
+	public User() {
 
 	}
 
-	public Mod(String name, String version, String url, String md5) {
-		super(url, md5);
-		this.name = name;
-		this.version = version;
+	public User(String username, String accessToken, String clientToken, String displayName) {
+		this.username = username;
+		this.accessToken = accessToken;
+		this.clientToken = clientToken;
+		this.displayName = displayName;
 	}
 
-	public String getName() {
-		return name;
+	public String getUsername() {
+		return username;
 	}
 
-	public String getVersion() {
-		return version;
+	public String getAccessToken() {
+		return accessToken;
 	}
 
-	@Override
-	public String toString() {
-		return "Mod{" +
-				"name='" + name + '\'' +
-				", version='" + version + '\'' +
-				", url='" + getUrl() + '\'' +
-				", md5='" + getMd5() + '\'' +
-				'}';
+	public String getClientToken() {
+		return clientToken;
+	}
+
+	public String getDisplayName() {
+		return displayName;
 	}
 }

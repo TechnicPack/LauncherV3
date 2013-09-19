@@ -1,0 +1,140 @@
+/*
+ * This file is part of Technic Launcher.
+ * Copyright (C) 2013 Syndicate, LLC
+ *
+ * Technic Launcher is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Technic Launcher is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Technic Launcher.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package net.technicpack.launchercore.util;
+
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.logging.Level;
+
+public class Settings {
+	public static Settings instance = new Settings();
+	private String directory;
+	private int build;
+	private int memory;
+	private String buildStream;
+	private boolean showConsole;
+	private boolean migrate;
+	private String migrateDir;
+
+	public static void load() {
+		File settings = new File(Utils.getSettingsDirectory(), "settings.json");
+		if (!settings.exists()) {
+			Utils.getLogger().log(Level.WARNING, "Unable to load settings from " + settings + " because it does not exist.");
+			return;
+		}
+
+		try {
+			String json = FileUtils.readFileToString(settings, Charset.forName("UTF-8"));
+			instance = Utils.getGson().fromJson(json, Settings.class);
+		} catch (IOException e) {
+			Utils.getLogger().log(Level.WARNING, "Unable to load settings from " + settings, e);
+		}
+	}
+
+	public static String getDirectory() {
+		return instance.directory;
+	}
+
+	public static void setDirectory(String directory) {
+		instance.directory = directory;
+		save();
+	}
+
+	public static void save() {
+		File settings = new File(Utils.getSettingsDirectory(), "settings.json");
+
+		String json = Utils.getGson().toJson(instance);
+
+		try {
+			FileUtils.writeStringToFile(settings, json, Charset.forName("UTF-8"));
+		} catch (IOException e) {
+			Utils.getLogger().log(Level.WARNING, "Unable to save settings " + settings, e);
+		}
+	}
+
+	public static int getBuild() {
+		return instance.build;
+	}
+
+	public static void setBuild(int build) {
+		instance.build = build;
+		save();
+	}
+
+	public static int getMemory() {
+		return instance.memory;
+	}
+
+	public static void setMemory(int memory) {
+		instance.memory = memory;
+		save();
+	}
+
+	public static String getBuildStream() {
+		return instance.buildStream;
+	}
+
+	public static void setBuildStream(String buildStream) {
+		instance.buildStream = buildStream;
+		save();
+	}
+
+	public static boolean getShowConsole() {
+		return instance.showConsole;
+	}
+
+	public static void setShowConsole(boolean showConsole) {
+		instance.showConsole = showConsole;
+		save();
+	}
+
+	public static boolean getMigrate() {
+		return instance.migrate;
+	}
+
+	public static void setMigrate(boolean migrate) {
+		instance.migrate = migrate;
+		save();
+	}
+
+	public static String getMigrateDir() {
+		return instance.migrateDir;
+	}
+
+	public static void setMigrateDir(String migrateDir) {
+		instance.migrateDir = migrateDir;
+		save();
+	}
+
+	@Override
+	public String toString() {
+		return "Settings{" +
+				"directory='" + directory + '\'' +
+				", build=" + build +
+				", memory=" + memory +
+				", buildStream='" + buildStream + '\'' +
+				", showConsole=" + showConsole +
+				", migrate=" + migrate +
+				", migrateDir='" + migrateDir + '\'' +
+				'}';
+	}
+}

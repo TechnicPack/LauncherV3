@@ -17,39 +17,28 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.launchercore.restful.solder;
+package net.technicpack.launchercore.install;
 
-import net.technicpack.launchercore.restful.Resource;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-public class Mod extends Resource {
-	private String name;
-	private String version;
+public class Users {
+	private Map<String, User> savedUsers = new HashMap<String, User>();
 
-	public Mod() {
-
+	public void addUser(User user) {
+		savedUsers.put(user.getUsername(), user);
 	}
 
-	public Mod(String name, String version, String url, String md5) {
-		super(url, md5);
-		this.name = name;
-		this.version = version;
+	public User getUser(String accountName) {
+		return savedUsers.get(accountName);
 	}
 
-	public String getName() {
-		return name;
+	public Collection<String> getUsers() {
+		return savedUsers.keySet();
 	}
 
-	public String getVersion() {
-		return version;
-	}
-
-	@Override
-	public String toString() {
-		return "Mod{" +
-				"name='" + name + '\'' +
-				", version='" + version + '\'' +
-				", url='" + getUrl() + '\'' +
-				", md5='" + getMd5() + '\'' +
-				'}';
+	public Collection<User> getSavedUsers() {
+		return savedUsers.values();
 	}
 }

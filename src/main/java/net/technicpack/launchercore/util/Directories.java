@@ -17,39 +17,20 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.launchercore.restful.solder;
+package net.technicpack.launchercore.util;
 
-import net.technicpack.launchercore.restful.Resource;
+import java.io.File;
 
-public class Mod extends Resource {
-	private String name;
-	private String version;
+public abstract class Directories {
+	public static Directories instance;
 
-	public Mod() {
+	public abstract File getLauncherDirectory();
 
-	}
+	public abstract File getSettingsDirectory();
 
-	public Mod(String name, String version, String url, String md5) {
-		super(url, md5);
-		this.name = name;
-		this.version = version;
-	}
+	public abstract File getCacheDirectory();
 
-	public String getName() {
-		return name;
-	}
+	public abstract File getAssetsDirectory();
 
-	public String getVersion() {
-		return version;
-	}
-
-	@Override
-	public String toString() {
-		return "Mod{" +
-				"name='" + name + '\'' +
-				", version='" + version + '\'' +
-				", url='" + getUrl() + '\'' +
-				", md5='" + getMd5() + '\'' +
-				'}';
-	}
+	public abstract File getModpacksDirectory();
 }

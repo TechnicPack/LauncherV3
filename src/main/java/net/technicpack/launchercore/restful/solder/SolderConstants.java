@@ -19,21 +19,18 @@
 
 package net.technicpack.launchercore.restful.solder;
 
-import net.technicpack.launchercore.restful.Modpack;
+public class SolderConstants {
+	public static final String TECHNIC = "http://solder.technicpack.net/api/";
 
-import java.util.List;
-
-public class SolderModpack implements Modpack {
-	private String minecraft;
-	private List<Mod> mods;
-
-	@Override
-	public String getMinecraft() {
-		return minecraft;
+	public static String getSolderPackInfoUrl(String solder, String modpack) {
+		return solder + "modpack/" + modpack + "/";
 	}
 
-	@Override
-	public List<Mod> getMods() {
-		return mods;
+	public static String getSolderBuildUrl(String solder, String modpack, String build) {
+		return getSolderPackInfoUrl(solder, modpack) + build + "/";
+	}
+
+	public static String getFullSolderUrl(String solder) {
+		return solder + "modpack/?include=full";
 	}
 }

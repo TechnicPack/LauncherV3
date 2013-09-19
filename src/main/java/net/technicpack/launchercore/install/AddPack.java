@@ -17,39 +17,43 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.launchercore.restful.solder;
+package net.technicpack.launchercore.install;
 
-import net.technicpack.launchercore.restful.Resource;
+import net.technicpack.launchercore.util.ResourceUtils;
 
-public class Mod extends Resource {
-	private String name;
-	private String version;
+import java.awt.image.BufferedImage;
 
-	public Mod() {
+public class AddPack extends InstalledPack {
+	private final static BufferedImage icon = ResourceUtils.getImage("icon.png", 32, 32);
+	private final static BufferedImage logo = ResourceUtils.getImage("addNewPack.png", 180, 110);
+	private final static BufferedImage background = ResourceUtils.getImage("background.jpg", 880, 520);
 
-	}
-
-	public Mod(String name, String version, String url, String md5) {
-		super(url, md5);
-		this.name = name;
-		this.version = version;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public String getVersion() {
-		return version;
+	public AddPack() {
+		super();
 	}
 
 	@Override
-	public String toString() {
-		return "Mod{" +
-				"name='" + name + '\'' +
-				", version='" + version + '\'' +
-				", url='" + getUrl() + '\'' +
-				", md5='" + getMd5() + '\'' +
-				'}';
+	public synchronized BufferedImage getIcon() {
+		return icon;
+	}
+
+	@Override
+	public synchronized BufferedImage getBackground() {
+		return background;
+	}
+
+	@Override
+	public synchronized BufferedImage getLogo() {
+		return logo;
+	}
+
+	@Override
+	public String getName() {
+		return "addpack";
+	}
+
+	@Override
+	public String getDisplayName() {
+		return "Add Pack";
 	}
 }

@@ -19,8 +19,10 @@
 
 package net.technicpack.launchercore.restful.solder;
 
-import net.technicpack.launchercore.restful.Resource;
+import net.technicpack.launchercore.exception.RestfulAPIException;
+import net.technicpack.launchercore.restful.Modpack;
 import net.technicpack.launchercore.restful.PackInfo;
+import net.technicpack.launchercore.restful.Resource;
 import net.technicpack.launchercore.restful.RestObject;
 
 import java.util.List;
@@ -36,8 +38,11 @@ public class SolderPackInfo extends RestObject implements PackInfo {
 	private String recommended;
 	private String latest;
 	private List<String> builds;
-
 	private transient Solder solder;
+
+	public SolderPackInfo() {
+
+	}
 
 	public Solder getSolder() {
 		return solder;
@@ -87,7 +92,49 @@ public class SolderPackInfo extends RestObject implements PackInfo {
 		return latest;
 	}
 
+	@Override
 	public List<String> getBuilds() {
 		return builds;
+	}
+
+	@Override
+	public boolean shouldForceDirectory() {
+		//TODO: This is not really implemented properly
+		return false;
+	}
+
+	@Override
+	public Modpack getModpack(String build) {
+		Modpack modpack = null;
+		try {
+			modpack = RestObject.getRestObject(Modpack.class, SolderConstants.getSolderBuildUrl(solder.getUrl(), name, build));
+		} catch (RestfulAPIException e) {
+			e.printStackTrace();
+		}
+		return modpack;
+	}
+
+	@Override
+	public String toString() {
+		return "SolderPackInfo{" +
+				"name='" + name + '\'' +
+				", display_name='" + display_name + '\'' +
+				", url='" + url + '\'' +
+				", icon_md5='" + icon_md5 + '\'' +
+				", logo_md5='" + logo_md5 + '\'' +
+				", background_md5='" + background_md5 + '\'' +
+				", recommended='" + recommended + '\'' +
+				", latest='" + latest + '\'' +
+				", builds=" + builds +
+				", solder=" + solder +
+				'}';
+	}
+
+	public static SolderPackInfo getSolderPackInfo(String solderUrl, String name) throws RestfulAPIException {
+		SolderPackInfo info = getRestObject(SolderPackInfo.class, SolderConstants.getSolderPackInfoUrl(solderUrl, name));
+		Solder solder = RestObject.getRestObject(Solder.class, solderUrl + "modpack/");
+		solder.setUrl(solderUrl);
+		info.setSolder(solder);
+		return info;
 	}
 }
