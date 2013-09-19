@@ -22,8 +22,10 @@ package net.technicpack.launchercore.install;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class Users {
+	private UUID clientToken = UUID.randomUUID();
 	private Map<String, User> savedUsers = new HashMap<String, User>();
 
 	public void addUser(User user) {
@@ -32,6 +34,10 @@ public class Users {
 
 	public User getUser(String accountName) {
 		return savedUsers.get(accountName);
+	}
+
+	public UUID getClientToken() {
+		return clientToken;
 	}
 
 	public Collection<String> getUsers() {

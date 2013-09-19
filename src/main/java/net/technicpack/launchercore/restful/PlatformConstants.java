@@ -29,6 +29,6 @@ public class PlatformConstants {
 	public static final String NEWS = API + "news/";
 
 	public static String getPlatformInfoUrl(String modpack) {
-		return API + modpack;
+		return MODPACK + modpack;
 	}
 }

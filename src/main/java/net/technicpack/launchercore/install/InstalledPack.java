@@ -26,6 +26,7 @@ import net.technicpack.launchercore.util.DownloadUtils;
 import net.technicpack.launchercore.util.MD5Utils;
 import net.technicpack.launchercore.util.ResourceUtils;
 import net.technicpack.launchercore.util.Utils;
+import org.apache.commons.io.FileUtils;
 
 import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
@@ -80,21 +81,15 @@ public class InstalledPack {
 		downloading.put(icon, new AtomicReference<Boolean>(false));
 	}
 
-	public void init() {
-		if (directory != null) {
-			installedDirectory = new File(getDirectory());
-			initDirectories();
-		}
-	}
-
 	public String getDirectory() {
+		String path = directory;
 		if (directory != null && directory.startsWith(LAUNCHER_DIR)) {
-			directory = new File(Utils.getLauncherDirectory(), directory.substring(9)).getAbsolutePath();
+			path = new File(Utils.getLauncherDirectory(), directory.substring(9)).getAbsolutePath();
 		}
 		if (directory != null && directory.startsWith(MODPACKS_DIR)) {
-			directory = new File(Utils.getModpacksDirectory(), directory.substring(11)).getAbsolutePath();
+			path = new File(Utils.getModpacksDirectory(), directory.substring(11)).getAbsolutePath();
 		}
-		return directory;
+		return path;
 	}
 
 	public void initDirectories() {
@@ -144,7 +139,7 @@ public class InstalledPack {
 
 	public File getInstalledDirectory() {
 		if (installedDirectory == null) {
-			setPackDirectory(new File(info.getName()));
+			setPackDirectory(new File(getDirectory()));
 		}
 		return installedDirectory;
 	}
@@ -152,14 +147,20 @@ public class InstalledPack {
 	public void setPackDirectory(File packPath) {
 		if (installedDirectory != null) {
 			try {
-				org.apache.commons.io.FileUtils.copyDirectory(installedDirectory, packPath);
-				org.apache.commons.io.FileUtils.cleanDirectory(installedDirectory);
+				FileUtils.copyDirectory(installedDirectory, packPath);
+				FileUtils.cleanDirectory(installedDirectory);
 			} catch (IOException e) {
 				e.printStackTrace();
 				return;
 			}
 		}
 		installedDirectory = packPath;
+		String path = installedDirectory.getAbsolutePath();
+		if (path.startsWith(Utils.getModpacksDirectory().getAbsolutePath())) {
+			directory = MODPACKS_DIR + path.substring(Utils.getModpacksDirectory().getAbsolutePath().length() + 1);
+		} else if (path.startsWith(Utils.getLauncherDirectory().getAbsolutePath())) {
+			directory = LAUNCHER_DIR + path.substring(Utils.getLauncherDirectory().getAbsolutePath().length() + 1);
+		}
 		initDirectories();
 	}
 

@@ -38,7 +38,7 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 	private Resource background;
 	private String minecraft;
 	private String forge;
-	private String build;
+	private String version;
 	private String solder;
 	private boolean forceDir;
 
@@ -78,12 +78,12 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 
 	@Override
 	public String getRecommended() {
-		return build;
+		return version;
 	}
 
 	@Override
 	public String getLatest() {
-		return build;
+		return version;
 	}
 
 	@Override
@@ -94,7 +94,7 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 	@Override
 	public List<String> getBuilds() {
 		List<String> builds = new ArrayList<String>();
-		builds.add(build);
+		builds.add(version);
 		return builds;
 	}
 
@@ -111,7 +111,7 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 	}
 
 	public boolean hasSolder() {
-		return solder == null || solder.equals("");
+		return solder != null && !solder.equals("");
 	}
 
 	@Override
@@ -130,7 +130,7 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 				", background=" + background +
 				", minecraft='" + minecraft + '\'' +
 				", forge='" + forge + '\'' +
-				", build='" + build + '\'' +
+				", version='" + version + '\'' +
 				", solder='" + solder + '\'' +
 				", forceDir=" + forceDir +
 				'}';

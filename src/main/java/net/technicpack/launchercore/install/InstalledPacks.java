@@ -125,7 +125,7 @@ public class InstalledPacks {
 	}
 
 	public InstalledPack addNew(InstalledPack installedPack) {
-		InstalledPack pack = put(installedPack.getName(), installedPack);
+		InstalledPack pack = installedPacks.put(installedPack.getName(), installedPack);
 		if (pack == null) {
 			int loc = byIndex.size() - 1;
 			byIndex.add(loc, installedPack.getName());
