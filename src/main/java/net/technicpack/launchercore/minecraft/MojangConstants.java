@@ -19,7 +19,7 @@
 
 package net.technicpack.launchercore.minecraft;
 
-public class MinecraftURLs {
+public class MojangConstants {
 	public static final String baseURL = "https://s3.amazonaws.com/Minecraft.Download/";
 	public static final String versions = baseURL + "versions/";
 

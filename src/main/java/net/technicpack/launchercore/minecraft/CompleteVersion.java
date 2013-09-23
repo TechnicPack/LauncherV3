@@ -19,6 +19,7 @@
 
 package net.technicpack.launchercore.minecraft;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -76,6 +77,16 @@ public class CompleteVersion implements Version {
 
 	public List<Library> getLibraries() {
 		return libraries;
+	}
+
+	public List<Library> getLibrariesForOS() {
+		List<Library> libraryList = new ArrayList<Library>(libraries.size());
+		for (Library library : libraries) {
+			if (library.isForCurrentOS()) {
+				libraryList.add(library);
+			}
+		}
+		return libraryList;
 	}
 
 	public String getMainClass() {

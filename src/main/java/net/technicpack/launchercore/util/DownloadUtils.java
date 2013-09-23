@@ -21,6 +21,9 @@ package net.technicpack.launchercore.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
 
@@ -29,6 +32,33 @@ import net.technicpack.launchercore.util.Download.Result;
 
 public class DownloadUtils {
 	private static final int DOWNLOAD_RETRIES = 3;
+
+	public static String getETag(String address) {
+		String md5 = "";
+
+		try {
+			URL url = new URL(address);
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setDoInput(true);
+			conn.setDoOutput(false);
+			System.setProperty("http.agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.162 Safari/535.19");
+			conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.162 Safari/535.19");
+			HttpURLConnection.setFollowRedirects(true);
+			conn.setUseCaches(false);
+			conn.setInstanceFollowRedirects(true);
+
+			String eTag = conn.getHeaderField("ETag").replaceAll("^\"|\"$", "");
+			if (eTag.length() == 32) {
+				md5 = eTag;
+			}
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return md5;
+	}
 
 	public static Download downloadFile(String url, String output, File cache, String md5, DownloadListener listener) throws IOException {
 		int tries = DOWNLOAD_RETRIES;
@@ -49,10 +79,6 @@ public class DownloadUtils {
 					listener.stateChanged("Download failed, retries remaining: " + tries, 0F);
 				}
 			} else {
-				String eTag = download.getMd5();
-				if (!eTag.isEmpty()) {
-					md5 = eTag;
-				}
 				if (md5 != null) {
 					String resultMD5 = MD5Utils.getMD5(download.getOutFile());
 

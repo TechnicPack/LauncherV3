@@ -41,6 +41,10 @@ public class MD5Utils {
 		return null;
 	}
 
+	public static boolean checkMD5(File file, String md5) {
+		return checkMD5(md5, getMD5(file));
+	}
+
 	public static boolean checkMD5(String md5, String otherMd5) {
 		return md5.equalsIgnoreCase(otherMd5);
 	}
