@@ -49,10 +49,6 @@ public class Library {
 		return extract;
 	}
 
-	public String getUrl() {
-		return url;
-	}
-
 	public boolean isForCurrentOS() {
 		if (rules == null) {
 			return true;
@@ -87,7 +83,13 @@ public class Library {
 		}
 
 		String[] parts = this.name.split(":", 3);
-		String result = String.format("%s-%s%s.jar", parts[1], parts[2], "-" + classifier);
+		String result;
+
+		if (classifier != null) {
+			result = String.format("%s-%s%s.jar", parts[1], parts[2], "-" + classifier);
+		} else {
+			result = String.format("%s-%s%s.jar", parts[1], parts[2], "");
+		}
 
 		return SUBSTITUTOR.replace(result);
 	}

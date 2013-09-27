@@ -27,11 +27,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Date;
 import java.util.logging.Logger;
 
 public class Utils {
-	private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+	private static final Gson gson;
 	private static final Logger logger = Logger.getLogger("net.technicpack.launcher.Main");
+
+	static {
+		GsonBuilder builder = new GsonBuilder();
+		builder.setPrettyPrinting();
+		builder.registerTypeAdapterFactory(new LowerCaseEnumTypeAdapterFactory());
+		builder.registerTypeAdapter(Date.class, new DateTypeAdapter());
+		builder.enableComplexMapKeySerialization();
+		gson = builder.create();
+	}
 
 	public static Gson getGson() {
 		return gson;

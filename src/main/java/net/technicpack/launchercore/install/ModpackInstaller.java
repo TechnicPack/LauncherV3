@@ -28,10 +28,10 @@ import net.technicpack.launchercore.restful.solder.Mod;
 import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.launchercore.util.DownloadUtils;
 import net.technicpack.launchercore.util.MD5Utils;
+import net.technicpack.launchercore.util.OperatingSystem;
 import net.technicpack.launchercore.util.Utils;
 import net.technicpack.launchercore.util.ZipUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,6 +41,7 @@ public class ModpackInstaller {
 	private final DownloadListener listener;
 	private final InstalledPack installedPack;
 	private final String build;
+	private boolean finished = false;
 
 	public ModpackInstaller(DownloadListener listener, InstalledPack installedPack, String build) {
 		this.listener = listener;
@@ -56,12 +57,63 @@ public class ModpackInstaller {
 
 		installModpack(modpack);
 		installMinecraft(minecraft);
+		finished = true;
+		System.out.println("Finished installing pack!");
 	}
 
-	private void installModpack(Modpack modpack) throws IOException {
-		for (Mod mod : modpack.getMods()) {
-			installMod(mod);
+	public boolean isFinished() {
+		return finished;
+	}
+
+	private void installMinecraft(String version) throws IOException {
+		CompleteVersion completeVersion = getMinecraftVersion(version);
+		System.out.println(completeVersion);
+		installCompleteVersion(completeVersion);
+
+		String url = MojangConstants.getVersionDownload(version);
+		String md5 = DownloadUtils.getETag(url);
+
+		// Install the minecraft jar
+		File cache = new File(Utils.getCacheDirectory(), "minecraft_" + version + ".jar");
+		if (!cache.exists() || md5.isEmpty() || !MD5Utils.checkMD5(cache, md5)) {
+			String output = installedPack.getCacheDir() + File.separator + "minecraft.jar";
+			DownloadUtils.downloadFile(url, output, cache, md5, listener);
 		}
+		FileUtils.copyFile(cache, new File(installedPack.getBinDir(), "minecraft.jar"));
+
+
+	}
+
+	private void installCompleteVersion(CompleteVersion version) throws IOException {
+		for (Library library : version.getLibrariesForOS()) {
+			installLibrary(library);
+		}
+	}
+
+	private void installLibrary(Library library) throws IOException {
+		String natives = null;
+		if (library.getNatives() != null) {
+			natives = library.getNatives().get(OperatingSystem.getOperatingSystem());
+		}
+		String path = library.getArtifactPath(natives);
+		String url = library.getDownloadUrl() + path;
+		String md5 = DownloadUtils.getETag(url);
+
+		File cache = new File(Utils.getCacheDirectory(), path);
+		cache.mkdirs();
+
+		if (!cache.exists() || md5.isEmpty() || !MD5Utils.checkMD5(cache, md5)) {
+			DownloadUtils.downloadFile(url, cache.getAbsolutePath(), null, md5, listener);
+		}
+
+		if (natives != null && cache.exists()) {
+			extractNatives(library, cache, natives);
+		}
+	}
+
+	private void extractNatives(Library library, File cache, String natives) {
+		File folder = new File(installedPack.getBinDir(), "natives");
+
 	}
 
 	private CompleteVersion getMinecraftVersion(String version) throws IOException {
@@ -82,29 +134,10 @@ public class ModpackInstaller {
 		return Utils.getGson().fromJson(json, CompleteVersion.class);
 	}
 
-	private void installMinecraft(String version) throws IOException {
-		CompleteVersion completeVersion = getMinecraftVersion(version);
-
-		String url = MojangConstants.getVersionDownload(version);
-		String md5 = DownloadUtils.getETag(url);
-
-		// Install the minecraft jar
-		File cache = new File(Utils.getCacheDirectory(), "minecraft_" + version + ".jar");
-		if (!cache.exists() || md5.isEmpty() || !MD5Utils.checkMD5(cache, md5)) {
-			String output = installedPack.getCacheDir() + File.separator + "minecraft.jar";
-			DownloadUtils.downloadFile(url, output, cache, md5, listener);
+	private void installModpack(Modpack modpack) throws IOException {
+		for (Mod mod : modpack.getMods()) {
+			installMod(mod);
 		}
-		FileUtils.copyFile(cache, new File(installedPack.getBinDir(), "minecraft.jar"));
-
-
-	}
-
-	private void installCompleteVersion(CompleteVersion version) {
-
-	}
-
-	private void installLibrary(Library library) {
-
 	}
 
 	private void installMod(Mod mod) throws IOException {

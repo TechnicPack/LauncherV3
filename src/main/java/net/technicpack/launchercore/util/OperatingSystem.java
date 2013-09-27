@@ -25,6 +25,8 @@ public enum OperatingSystem {
 	OSX("osx", new String[] {"mac"}),
 	UNKNOWN("unknown", new String[0]);
 
+	private static OperatingSystem operatingSystem;
+
 	private final String name;
 	private final String[] aliases;
 
@@ -46,11 +48,15 @@ public enum OperatingSystem {
 	}
 
 	public static OperatingSystem getOperatingSystem() {
+		if (OperatingSystem.operatingSystem != null) {
+			return OperatingSystem.operatingSystem;
+		}
 		String osName = System.getProperty("os.name").toLowerCase();
 
 		for (OperatingSystem operatingSystem : values()) {
 			for (String alias : operatingSystem.getAliases()) {
 				if (osName.contains(alias)) {
+					OperatingSystem.operatingSystem = operatingSystem;
 					return operatingSystem;
 				}
 			}

@@ -47,9 +47,12 @@ public class DownloadUtils {
 			conn.setUseCaches(false);
 			conn.setInstanceFollowRedirects(true);
 
-			String eTag = conn.getHeaderField("ETag").replaceAll("^\"|\"$", "");
-			if (eTag.length() == 32) {
-				md5 = eTag;
+			String eTag = conn.getHeaderField("ETag");
+			if (eTag != null) {
+				eTag = eTag.replaceAll("^\"|\"$", "");
+				if (eTag.length() == 32) {
+					md5 = eTag;
+				}
 			}
 		} catch (MalformedURLException e) {
 			e.printStackTrace();

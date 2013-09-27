@@ -104,4 +104,20 @@ public class CompleteVersion implements Version {
 	public List<Rule> getRules() {
 		return rules;
 	}
+
+	@Override
+	public String toString() {
+		return "CompleteVersion{" +
+				"id='" + id + '\'' +
+				", time=" + time +
+				", releaseTime=" + releaseTime +
+				", type=" + type +
+				", minecraftArguments='" + minecraftArguments + '\'' +
+				", libraries=" + libraries +
+				", mainClass='" + mainClass + '\'' +
+				", minimumLauncherVersion=" + minimumLauncherVersion +
+				", incompatibilityReason='" + incompatibilityReason + '\'' +
+				", rules=" + rules +
+				'}';
+	}
 }

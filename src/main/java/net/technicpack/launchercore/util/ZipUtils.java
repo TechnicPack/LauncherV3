@@ -72,7 +72,6 @@ public class ZipUtils {
 			zipFile.extractFile(fileName, output.getAbsolutePath());
 			return true;
 		} catch (ZipException e) {
-			e.printStackTrace();
 			return false;
 		}
 	}
