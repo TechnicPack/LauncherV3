@@ -61,8 +61,23 @@ public class ModpackInstaller {
 		System.out.println("Finished installing pack!");
 	}
 
-	public boolean isFinished() {
-		return finished;
+	private void installModpack(Modpack modpack) throws IOException {
+		for (Mod mod : modpack.getMods()) {
+			installMod(mod);
+		}
+	}
+
+	private void installMod(Mod mod) throws IOException {
+		String url = mod.getUrl();
+		String md5 = mod.getMd5();
+		String name = mod.getName() + "-" + build + ".zip";
+
+		File cache = new File(installedPack.getCacheDir(), name);
+		if (!cache.exists() || md5.isEmpty() || !MD5Utils.checkMD5(cache, md5)) {
+			DownloadUtils.downloadFile(url, cache.getAbsolutePath(), null, md5, listener);
+		}
+
+		ZipUtils.unzipFile(cache, installedPack.getInstalledDirectory(), listener);
 	}
 
 	private void installMinecraft(String version) throws IOException {
@@ -84,6 +99,24 @@ public class ModpackInstaller {
 
 	}
 
+	private CompleteVersion getMinecraftVersion(String version) throws IOException {
+		File versionFile = new File(installedPack.getBinDir(), "version.json");
+		File modpackJar = new File(installedPack.getBinDir(), "modpack.jar");
+
+		boolean extracted = ZipUtils.extractFile(modpackJar, installedPack.getBinDir(), "version.json");
+		if (!extracted && !versionFile.exists()) {
+			String url = MojangConstants.getVersionJson(version);
+			DownloadUtils.downloadFile(url, versionFile.getAbsolutePath(), null, null, listener);
+		}
+
+		if (!versionFile.exists()) {
+			throw new IOException("Unable to find a valid version profile for minecraft " + version);
+		}
+
+		String json = FileUtils.readFileToString(versionFile, Charset.forName("UTF-8"));
+		return Utils.getMojangGson().fromJson(json, CompleteVersion.class);
+	}
+
 	private void installCompleteVersion(CompleteVersion version) throws IOException {
 		for (Library library : version.getLibrariesForOS()) {
 			installLibrary(library);
@@ -96,60 +129,25 @@ public class ModpackInstaller {
 			natives = library.getNatives().get(OperatingSystem.getOperatingSystem());
 		}
 		String path = library.getArtifactPath(natives);
-		String url = library.getDownloadUrl() + path;
+		String url = library.getDownloadUrl(path);
 		String md5 = DownloadUtils.getETag(url);
 
 		File cache = new File(Utils.getCacheDirectory(), path);
-		cache.mkdirs();
+		if (cache.getParentFile() != null) {
+			cache.getParentFile().mkdirs();
+		}
 
 		if (!cache.exists() || md5.isEmpty() || !MD5Utils.checkMD5(cache, md5)) {
 			DownloadUtils.downloadFile(url, cache.getAbsolutePath(), null, md5, listener);
 		}
 
 		if (natives != null && cache.exists()) {
-			extractNatives(library, cache, natives);
+			File folder = new File(installedPack.getBinDir(), "natives");
+			ZipUtils.unzipFile(cache, folder, library.getExtract(), listener);
 		}
 	}
 
-	private void extractNatives(Library library, File cache, String natives) {
-		File folder = new File(installedPack.getBinDir(), "natives");
-
-	}
-
-	private CompleteVersion getMinecraftVersion(String version) throws IOException {
-		File versionFile = new File(installedPack.getBinDir(), "version.json");
-		File modpackJar = new File(installedPack.getBinDir(), "modpack.jar");
-
-		boolean extracted = ZipUtils.extractFile(modpackJar, versionFile, "version.json");
-		if (!extracted && !versionFile.exists()) {
-			String url = MojangConstants.getVersionJson(version);
-			DownloadUtils.downloadFile(url, versionFile.getAbsolutePath(), null, null, listener);
-		}
-
-		if (!versionFile.exists()) {
-			throw new IOException("Unable to find a valid version profile for minecraft " + version);
-		}
-
-		String json = FileUtils.readFileToString(versionFile, Charset.forName("UTF-8"));
-		return Utils.getGson().fromJson(json, CompleteVersion.class);
-	}
-
-	private void installModpack(Modpack modpack) throws IOException {
-		for (Mod mod : modpack.getMods()) {
-			installMod(mod);
-		}
-	}
-
-	private void installMod(Mod mod) throws IOException {
-		String url = mod.getUrl();
-		String md5 = mod.getMd5();
-		String name = mod.getName() + "-" + build + ".zip";
-
-		File cache = new File(installedPack.getCacheDir(), name);
-		if (!cache.exists() || md5.isEmpty() || !MD5Utils.checkMD5(cache, md5)) {
-			DownloadUtils.downloadFile(url, cache.getAbsolutePath(), null, md5, listener);
-		}
-
-		ZipUtils.unzipFile(cache, installedPack.getInstalledDirectory(), listener);
+	public boolean isFinished() {
+		return finished;
 	}
 }

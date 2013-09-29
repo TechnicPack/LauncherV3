@@ -18,15 +18,19 @@
 
 package net.technicpack.launchercore.util;
 
-import net.lingala.zip4j.core.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.model.FileHeader;
-import net.lingala.zip4j.model.UnzipParameters;
-import net.lingala.zip4j.progress.ProgressMonitor;
-import net.technicpack.launchercore.exception.UnzipException;
 
+import net.technicpack.launchercore.minecraft.ExtractRules;
+import org.apache.commons.io.IOUtils;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Enumeration;
 import java.util.logging.Level;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public class ZipUtils {
 
@@ -62,18 +66,36 @@ public class ZipUtils {
 		return dir.list().length == 0;
 	}
 
-	public static boolean extractFile(File zip, File output, String fileName) {
+	public static boolean extractFile(File zip, File output, String fileName) throws IOException {
 		if (!zip.exists() || fileName == null) {
 			return false;
 		}
 
+		ZipFile zipFile = new ZipFile(zip);
 		try {
-			ZipFile zipFile = new ZipFile(zip);
-			zipFile.extractFile(fileName, output.getAbsolutePath());
+			ZipEntry entry = zipFile.getEntry(fileName);
+			if (entry == null) {
+				Utils.getLogger().log(Level.WARNING, "File " + fileName + " not found in " + zip.getAbsolutePath());
+				return false;
+			}
+			File outputFile = new File(output, entry.getName());
+
+			if (outputFile.getParentFile() != null) {
+				outputFile.getParentFile().mkdirs();
+			}
+
+			unzipEntry(zipFile, zipFile.getEntry(fileName), outputFile);
 			return true;
-		} catch (ZipException e) {
+		} catch (IOException e) {
+			Utils.getLogger().log(Level.WARNING, "Error extracting file " + fileName + " from " + zip.getAbsolutePath());
 			return false;
+		} finally {
+			zipFile.close();
 		}
+	}
+
+	public static void unzipFile(File zip, File output, DownloadListener listener) throws IOException {
+		unzipFile(zip, output, null, listener);
 	}
 
 	/**
@@ -81,9 +103,10 @@ public class ZipUtils {
 	 *
 	 * @param zip      file to unzip
 	 * @param output   directory to unzip into
+	 * @param extractRules extractRules for this zip file. May be null indicating no rules.
 	 * @param listener to update progress on - may be null for no progress indicator
 	 */
-	public static void unzipFile(File zip, File output, DownloadListener listener) {
+	public static void unzipFile(File zip, File output, ExtractRules extractRules, DownloadListener listener) throws IOException {
 		if (!zip.exists()) {
 			Utils.getLogger().log(Level.SEVERE, "File to unzip does not exist: " + zip.getAbsolutePath());
 			return;
@@ -91,29 +114,50 @@ public class ZipUtils {
 		if (!output.exists()) {
 			output.mkdirs();
 		}
+
+		ZipFile zipFile = new ZipFile(zip);
+		int size = zipFile.size() + 1;
+		int progress = 1;
 		try {
-			ZipFile zipFile = new ZipFile(zip);
+			Enumeration<? extends ZipEntry> entries = zipFile.entries();
+			while (entries.hasMoreElements()) {
+				ZipEntry entry = entries.nextElement();
 
-			for (Object header : zipFile.getFileHeaders()) {
-				FileHeader fileHeader = (FileHeader) header;
-				if (fileHeader.getFileName().contains("../")) {
-					throw new UnzipException("Zip detected to contain a reverse folder, cancelling unzip process for " + zip);
+				if ((extractRules == null || extractRules.shouldExtract(entry.getName())) && !entry.getName().contains("../")) {
+					File outputFile = new File(output, entry.getName());
+
+					if (outputFile.getParentFile() != null) {
+						outputFile.getParentFile().mkdirs();
+					}
+
+					if (!entry.isDirectory()) {
+						unzipEntry(zipFile, entry, outputFile);
+					}
 				}
-			}
 
-			zipFile.setRunInThread(true);
-			zipFile.extractAll(output.getAbsolutePath());
-
-			ProgressMonitor monitor = zipFile.getProgressMonitor();
-			while (monitor.getState() == ProgressMonitor.STATE_BUSY) {
-
-				long totalProgress = monitor.getWorkCompleted() / (monitor.getTotalWork() + 1);
 				if (listener != null) {
-					listener.stateChanged("Extracting " + monitor.getFileName() + "...", totalProgress);
+					long totalProgress = progress / size;
+					listener.stateChanged("Extracting " + entry.getName() + "...", totalProgress);
 				}
+				progress++;
 			}
-		} catch (ZipException e) {
-			throw new UnzipException("Error unzipping file: " + zip, e);
+		} finally {
+			zipFile.close();
+		}
+	}
+
+	private static void unzipEntry(ZipFile zipFile, ZipEntry entry, File outputFile) throws IOException {
+		byte[] buffer = new byte[2048];
+		BufferedInputStream inputStream = new BufferedInputStream(zipFile.getInputStream(entry));
+		BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(outputFile));
+		try {
+			int length;
+			while ((length = inputStream.read(buffer, 0, buffer.length)) != -1) {
+				outputStream.write(buffer, 0, length);
+			}
+		} finally {
+			IOUtils.closeQuietly(outputStream);
+			IOUtils.closeQuietly(inputStream);
 		}
 	}
 }

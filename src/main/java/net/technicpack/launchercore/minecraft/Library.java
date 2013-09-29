@@ -20,6 +20,7 @@
 package net.technicpack.launchercore.minecraft;
 
 import net.technicpack.launchercore.util.OperatingSystem;
+import net.technicpack.launchercore.util.Utils;
 import org.apache.commons.lang3.text.StrSubstitutor;
 
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.Map;
 
 public class Library {
 	private static final StrSubstitutor SUBSTITUTOR = new StrSubstitutor();
+	private static final String[] fallback = {"http://mirror.technicpack.net/Technic/maven/", "http://search.maven.org/remotecontent?filepath="};
 	private String name;
 	private List<Rule> rules;
 	private Map<OperatingSystem, String> natives;
@@ -77,6 +79,14 @@ public class Library {
 		return String.format("%s/%s", getArtifactBaseDir(), getArtifactFilename(classifier));
 	}
 
+	public String getArtifactBaseDir() {
+		if (this.name == null) {
+			throw new IllegalStateException("Cannot get artifact dir of empty/blank artifact");
+		}
+		String[] parts = this.name.split(":", 3);
+		return String.format("%s/%s/%s", parts[0].replaceAll("\\.", "/"), parts[1], parts[2]);
+	}
+
 	public String getArtifactFilename(String classifier) {
 		if (this.name == null) {
 			throw new IllegalStateException("Cannot get artifact filename of empty/blank artifact");
@@ -94,22 +104,19 @@ public class Library {
 		return SUBSTITUTOR.replace(result);
 	}
 
-	public String getArtifactBaseDir() {
-		if (this.name == null) {
-			throw new IllegalStateException("Cannot get artifact dir of empty/blank artifact");
-		}
-		String[] parts = this.name.split(":", 3);
-		return String.format("%s/%s/%s", parts[0].replaceAll("\\.", "/"), parts[1], parts[2]);
-	}
-
-	public boolean hasCustomUrl() {
-		return this.url != null;
-	}
-
-	public String getDownloadUrl() {
+	public String getDownloadUrl(String path) {
 		if (this.url != null) {
-			return this.url;
+			String checkUrl = url + path;
+			if (Utils.pingURL(checkUrl)) {
+				return checkUrl;
+			}
+			for (String string : fallback) {
+				checkUrl = string + path;
+				if (Utils.pingURL(checkUrl)) {
+					return checkUrl;
+				}
+			}
 		}
-		return "https://s3.amazonaws.com/Minecraft.Download/libraries/";
+		return "https://s3.amazonaws.com/Minecraft.Download/libraries/" + path;
 	}
 }

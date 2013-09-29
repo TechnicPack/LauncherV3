@@ -32,6 +32,7 @@ import java.util.logging.Logger;
 
 public class Utils {
 	private static final Gson gson;
+	private static final Gson mojangGson;
 	private static final Logger logger = Logger.getLogger("net.technicpack.launcher.Main");
 
 	static {
@@ -40,11 +41,18 @@ public class Utils {
 		builder.registerTypeAdapterFactory(new LowerCaseEnumTypeAdapterFactory());
 		builder.registerTypeAdapter(Date.class, new DateTypeAdapter());
 		builder.enableComplexMapKeySerialization();
+		mojangGson = builder.create();
+		builder = new GsonBuilder();
+		builder.setPrettyPrinting();
 		gson = builder.create();
 	}
 
 	public static Gson getGson() {
 		return gson;
+	}
+
+	public static Gson getMojangGson() {
+		return mojangGson;
 	}
 
 	public static File getLauncherDirectory() {

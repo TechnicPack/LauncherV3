@@ -82,7 +82,7 @@ public class DownloadUtils {
 					listener.stateChanged("Download failed, retries remaining: " + tries, 0F);
 				}
 			} else {
-				if (md5 != null) {
+				if (md5 != null && !md5.isEmpty()) {
 					String resultMD5 = MD5Utils.getMD5(download.getOutFile());
 
 					System.out.println("Expected MD5: " + md5 + " Calculated MD5: " + resultMD5);
