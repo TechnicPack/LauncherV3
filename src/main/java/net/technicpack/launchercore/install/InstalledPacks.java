@@ -19,6 +19,8 @@
 
 package net.technicpack.launchercore.install;
 
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.MalformedJsonException;
 import net.technicpack.launchercore.util.Utils;
 import org.apache.commons.io.FileUtils;
 
@@ -39,17 +41,20 @@ public class InstalledPacks {
 	private int selectedIndex = 0;
 
 	public static InstalledPacks load() {
-		File settings = new File(Utils.getSettingsDirectory(), "installedPacks.json");
-		if (!settings.exists()) {
-			Utils.getLogger().log(Level.WARNING, "Unable to load settings from " + settings + " because it does not exist.");
+		File installedPacks = new File(Utils.getSettingsDirectory(), "installedPacks");
+		if (!installedPacks.exists()) {
+			Utils.getLogger().log(Level.WARNING, "Unable to load installedPacks from " + installedPacks + " because it does not exist.");
 			return null;
 		}
 
 		try {
-			String json = FileUtils.readFileToString(settings, Charset.forName("UTF-8"));
+			String json = FileUtils.readFileToString(installedPacks, Charset.forName("UTF-8"));
 			return Utils.getGson().fromJson(json, InstalledPacks.class);
+		} catch (JsonSyntaxException e) {
+			Utils.getLogger().log(Level.WARNING, "Unable to load installedPacks from " + installedPacks);
+			return null;
 		} catch (IOException e) {
-			Utils.getLogger().log(Level.WARNING, "Unable to load settings from " + settings, e);
+			Utils.getLogger().log(Level.WARNING, "Unable to load installedPacks from " + installedPacks);
 			return null;
 		}
 	}
@@ -110,7 +115,7 @@ public class InstalledPacks {
 	}
 
 	public void save() {
-		File settings = new File(Utils.getSettingsDirectory(), "installedPacks.json");
+		File settings = new File(Utils.getSettingsDirectory(), "installedPacks");
 		String json = Utils.getGson().toJson(this);
 
 		try {

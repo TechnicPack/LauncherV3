@@ -19,21 +19,26 @@
 
 package net.technicpack.launchercore.install;
 
+import net.technicpack.launchercore.auth.AuthResponse;
+import net.technicpack.launchercore.auth.Profile;
+
 public class User {
 	private String username;
 	private String accessToken;
 	private String clientToken;
 	private String displayName;
+	private Profile profile;
 
 	public User() {
 
 	}
 
-	public User(String username, String accessToken, String clientToken, String displayName) {
+	public User(String username, AuthResponse response) {
 		this.username = username;
-		this.accessToken = accessToken;
-		this.clientToken = clientToken;
-		this.displayName = displayName;
+		this.accessToken = response.getAccessToken();
+		this.clientToken = response.getClientToken();
+		this.displayName = response.getSelectedProfile().getName();
+		this.profile = response.getSelectedProfile();
 	}
 
 	public String getUsername() {
@@ -50,5 +55,13 @@ public class User {
 
 	public String getDisplayName() {
 		return displayName;
+	}
+
+	public Profile getProfile() {
+		return profile;
+	}
+
+	public String getSessionId() {
+		return "token:" + accessToken + ":" + profile.getId();
 	}
 }

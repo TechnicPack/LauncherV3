@@ -18,6 +18,7 @@
 
 package net.technicpack.launchercore.util;
 
+import com.google.gson.JsonSyntaxException;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -45,8 +46,10 @@ public class Settings {
 		try {
 			String json = FileUtils.readFileToString(settings, Charset.forName("UTF-8"));
 			instance = Utils.getGson().fromJson(json, Settings.class);
+		}  catch (JsonSyntaxException e) {
+			Utils.getLogger().log(Level.WARNING, "Unable to load settings from " + settings);
 		} catch (IOException e) {
-			Utils.getLogger().log(Level.WARNING, "Unable to load settings from " + settings, e);
+			Utils.getLogger().log(Level.WARNING, "Unable to load settings from " + settings);
 		}
 	}
 

@@ -17,20 +17,33 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.launchercore.auth;
+package net.technicpack.launchercore.launch;
 
-public class RefreshRequest extends Response {
-	private String accessToken;
-	private String clientToken;
-	private Profile selectedProfile;
+import java.util.List;
 
-	public RefreshRequest() {
+public class MinecraftProcess {
+	private final List<String> commands;
+	private final Process process;
+	private MinecraftExitListener exitListener;
+	private final ProcessMonitorThread monitorThread;
 
+	public MinecraftProcess(List<String> commands, Process process) {
+		this.commands = commands;
+		this.process = process;
+		this.monitorThread = new ProcessMonitorThread(this);
+		this.monitorThread.start();
+		System.out.println("Thread Started?");
 	}
 
-	public RefreshRequest(String accessToken, String clientToken, Profile profile) {
-		this.accessToken = accessToken;
-		this.clientToken = clientToken;
-		this.selectedProfile = profile;
+	public MinecraftExitListener getExitListener() {
+		return exitListener;
+	}
+
+	public void setExitListener(MinecraftExitListener exitListener) {
+		this.exitListener = exitListener;
+	}
+
+	public Process getProcess() {
+		return process;
 	}
 }

@@ -17,20 +17,9 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.launchercore.auth;
+package net.technicpack.launchercore.launch;
 
-public class RefreshRequest extends Response {
-	private String accessToken;
-	private String clientToken;
-	private Profile selectedProfile;
+public interface MinecraftExitListener {
 
-	public RefreshRequest() {
-
-	}
-
-	public RefreshRequest(String accessToken, String clientToken, Profile profile) {
-		this.accessToken = accessToken;
-		this.clientToken = clientToken;
-		this.selectedProfile = profile;
-	}
+	public void onMinecraftExit(MinecraftProcess process);
 }

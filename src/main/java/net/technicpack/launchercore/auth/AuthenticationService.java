@@ -19,7 +19,9 @@
 
 package net.technicpack.launchercore.auth;
 
-import com.google.gson.Gson;
+import net.technicpack.launchercore.install.User;
+import net.technicpack.launchercore.install.Users;
+import net.technicpack.launchercore.util.Utils;
 import org.apache.commons.io.IOUtils;
 
 import java.io.DataOutputStream;
@@ -30,26 +32,27 @@ import java.net.URL;
 
 public class AuthenticationService {
 	private static final String AUTH_SERVER = "https://authserver.mojang.com/";
-	private final Gson gson;
 
-	public AuthenticationService() {
-		gson = new Gson();
+	public static boolean refresh(User user) {
+		RefreshResponse response = requestRefresh(user);
+
+		return response.getError() != null;
 	}
 
-	public AuthResponse requestLogin(String username, String password, String clientToken) {
-		Agent agent = new Agent("Minecraft", "1");
 
-		AuthRequest request = new AuthRequest(agent, username, password, clientToken);
-		String data = gson.toJson(request);
+	public static RefreshResponse requestRefresh(User user) {
+		RefreshRequest refreshRequest = new RefreshRequest(user.getAccessToken(), user.getClientToken(), user.getProfile());
+		String data = Utils.getMojangGson().toJson(refreshRequest);
 
-		AuthResponse response;
+		RefreshResponse response;
 		try {
-			String returned = postJson(AUTH_SERVER + "authenticate", data);
-			response = gson.fromJson(returned, AuthResponse.class);
+			String returned = postJson(AUTH_SERVER + "refresh", data);
+			response = Utils.getMojangGson().fromJson(returned, RefreshResponse.class);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
 		}
+
 		return response;
 	}
 
@@ -83,5 +86,22 @@ public class AuthenticationService {
 		}
 
 		return IOUtils.toString(stream);
+	}
+
+	public static AuthResponse requestLogin(String username, String password, String clientToken) {
+		Agent agent = new Agent("Minecraft", "1");
+
+		AuthRequest request = new AuthRequest(agent, username, password, clientToken);
+		String data = Utils.getMojangGson().toJson(request);
+
+		AuthResponse response;
+		try {
+			String returned = postJson(AUTH_SERVER + "authenticate", data);
+			response = Utils.getMojangGson().fromJson(returned, AuthResponse.class);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+		return response;
 	}
 }

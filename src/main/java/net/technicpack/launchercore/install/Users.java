@@ -19,24 +19,69 @@
 
 package net.technicpack.launchercore.install;
 
+import com.google.gson.JsonSyntaxException;
+import net.technicpack.launchercore.util.Utils;
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class Users {
-	private UUID clientToken = UUID.randomUUID();
+	private String clientToken = UUID.randomUUID().toString();
 	private Map<String, User> savedUsers = new HashMap<String, User>();
+	private String lastUser;
+
+	public static Users load() {
+		File users = new File(Utils.getSettingsDirectory(), "users.json");
+		if (!users.exists()) {
+			Utils.getLogger().log(Level.WARNING, "Unable to load users from " + users + " because it does not exist.");
+			return null;
+		}
+
+		try {
+			String json = FileUtils.readFileToString(users, Charset.forName("UTF-8"));
+			return Utils.getGson().fromJson(json, Users.class);
+		} catch (JsonSyntaxException e) {
+			Utils.getLogger().log(Level.WARNING, "Unable to load users from " + users);
+			return null;
+		} catch (IOException e) {
+			Utils.getLogger().log(Level.WARNING, "Unable to load users from " + users);
+			return null;
+		}
+	}
+
+	public void save() {
+		File users = new File(Utils.getSettingsDirectory(), "users.json");
+		String json = Utils.getGson().toJson(this);
+
+		try {
+			FileUtils.writeStringToFile(users, json, Charset.forName("UTF-8"));
+		} catch (IOException e) {
+			Utils.getLogger().log(Level.WARNING, "Unable to save users " + users);
+		}
+	}
 
 	public void addUser(User user) {
 		savedUsers.put(user.getUsername(), user);
+		save();
+	}
+
+	public void removeUser(String username) {
+		savedUsers.remove(username);
+		save();
 	}
 
 	public User getUser(String accountName) {
 		return savedUsers.get(accountName);
 	}
 
-	public UUID getClientToken() {
+	public String getClientToken() {
 		return clientToken;
 	}
 
@@ -46,5 +91,14 @@ public class Users {
 
 	public Collection<User> getSavedUsers() {
 		return savedUsers.values();
+	}
+
+	public void setLastUser(String lastUser) {
+		this.lastUser = lastUser;
+		save();
+	}
+
+	public String getLastUser() {
+		return lastUser;
 	}
 }

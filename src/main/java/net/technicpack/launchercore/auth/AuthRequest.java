@@ -25,6 +25,10 @@ public class AuthRequest {
 	private String password;
 	private String clientToken;
 
+	public AuthRequest() {
+
+	}
+
 	public AuthRequest(Agent agent, String username, String password, String clientToken) {
 		this.agent = agent;
 		this.username = username;

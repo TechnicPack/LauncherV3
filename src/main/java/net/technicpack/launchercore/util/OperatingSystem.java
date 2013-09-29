@@ -19,14 +19,15 @@
 
 package net.technicpack.launchercore.util;
 
+import java.io.File;
+
 public enum OperatingSystem {
-	LINUX("linux", new String[] {"linux", "unix"}),
-	WINDOWS("windows", new String[] {"win"}),
-	OSX("osx", new String[] {"mac"}),
+	LINUX("linux", new String[]{"linux", "unix"}),
+	WINDOWS("windows", new String[]{"win"}),
+	OSX("osx", new String[]{"mac"}),
 	UNKNOWN("unknown", new String[0]);
 
 	private static OperatingSystem operatingSystem;
-
 	private final String name;
 	private final String[] aliases;
 
@@ -35,16 +36,16 @@ public enum OperatingSystem {
 		this.aliases = aliases;
 	}
 
-	public String getName() {
-		return name;
-	}
+	public static String getJavaDir() {
+		String separator = System.getProperty("file.separator");
+		String path = System.getProperty("java.home") + separator + "bin" + separator;
 
-	public String[] getAliases() {
-		return aliases;
-	}
+		if ((getOperatingSystem() == WINDOWS) &&
+				(new File(path + "javaw.exe").isFile())) {
+			return path + "javaw.exe";
+		}
 
-	public boolean isSupported() {
-		return this != UNKNOWN;
+		return path + "java";
 	}
 
 	public static OperatingSystem getOperatingSystem() {
@@ -63,5 +64,17 @@ public enum OperatingSystem {
 		}
 
 		return UNKNOWN;
+	}
+
+	public String[] getAliases() {
+		return aliases;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public boolean isSupported() {
+		return this != UNKNOWN;
 	}
 }

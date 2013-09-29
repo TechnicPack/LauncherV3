@@ -49,16 +49,16 @@ public class ModpackInstaller {
 		this.build = build;
 	}
 
-	public void installPack() throws IOException {
+	public CompleteVersion installPack() throws IOException {
 		installedPack.getInstalledDirectory();
 		PackInfo packInfo = installedPack.getInfo();
 		Modpack modpack = packInfo.getModpack(build);
 		String minecraft = modpack.getMinecraft();
 
 		installModpack(modpack);
-		installMinecraft(minecraft);
+		CompleteVersion version = installMinecraft(minecraft);
 		finished = true;
-		System.out.println("Finished installing pack!");
+		return version;
 	}
 
 	private void installModpack(Modpack modpack) throws IOException {
@@ -80,7 +80,7 @@ public class ModpackInstaller {
 		ZipUtils.unzipFile(cache, installedPack.getInstalledDirectory(), listener);
 	}
 
-	private void installMinecraft(String version) throws IOException {
+	private CompleteVersion installMinecraft(String version) throws IOException {
 		CompleteVersion completeVersion = getMinecraftVersion(version);
 		System.out.println(completeVersion);
 		installCompleteVersion(completeVersion);
@@ -88,15 +88,15 @@ public class ModpackInstaller {
 		String url = MojangConstants.getVersionDownload(version);
 		String md5 = DownloadUtils.getETag(url);
 
-		// Install the minecraft jar
+//		// Install the minecraft jar
 		File cache = new File(Utils.getCacheDirectory(), "minecraft_" + version + ".jar");
 		if (!cache.exists() || md5.isEmpty() || !MD5Utils.checkMD5(cache, md5)) {
 			String output = installedPack.getCacheDir() + File.separator + "minecraft.jar";
 			DownloadUtils.downloadFile(url, output, cache, md5, listener);
 		}
-		FileUtils.copyFile(cache, new File(installedPack.getBinDir(), "minecraft.jar"));
+		ZipUtils.copyMinecraftJar(cache, new File(installedPack.getBinDir(), "minecraft.jar"));
 
-
+		return completeVersion;
 	}
 
 	private CompleteVersion getMinecraftVersion(String version) throws IOException {
