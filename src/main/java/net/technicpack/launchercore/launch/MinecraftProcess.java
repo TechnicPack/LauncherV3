@@ -32,7 +32,6 @@ public class MinecraftProcess {
 		this.process = process;
 		this.monitorThread = new ProcessMonitorThread(this);
 		this.monitorThread.start();
-		System.out.println("Thread Started?");
 	}
 
 	public MinecraftExitListener getExitListener() {
