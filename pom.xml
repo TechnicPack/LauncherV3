@@ -5,7 +5,7 @@
     <name>Technic Launcher Core</name>
     <groupId>net.technicpack</groupId>
     <artifactId>launchercore</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.0-SNAPSHOT</version>
     <url>http://www.technicpack.net/</url>
     <inceptionYear>2013</inceptionYear>
     <description>The core of the Technic Launcher, for connecting to Mojang, the Platform, and launching modpacks.</description>

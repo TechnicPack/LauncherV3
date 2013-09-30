@@ -27,11 +27,13 @@ import java.nio.charset.Charset;
 import java.util.logging.Level;
 
 public class Settings {
+	public static final String STABLE = "stable";
+	public static final String BETA = "beta";
 	public static Settings instance = new Settings();
 	private String directory;
 	private int build;
 	private int memory;
-	private String buildStream;
+	private String buildStream = STABLE;
 	private boolean showConsole;
 	private boolean migrate;
 	private String migrateDir;
