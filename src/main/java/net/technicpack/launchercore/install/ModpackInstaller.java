@@ -33,6 +33,8 @@ import net.technicpack.launchercore.util.Utils;
 import net.technicpack.launchercore.util.ZipUtils;
 import org.apache.commons.io.FileUtils;
 
+import javax.swing.JOptionPane;
+import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -40,7 +42,7 @@ import java.nio.charset.Charset;
 public class ModpackInstaller {
 	private final DownloadListener listener;
 	private final InstalledPack installedPack;
-	private final String build;
+	private String build;
 	private boolean finished = false;
 
 	public ModpackInstaller(DownloadListener listener, InstalledPack installedPack, String build) {
@@ -49,16 +51,58 @@ public class ModpackInstaller {
 		this.build = build;
 	}
 
-	public CompleteVersion installPack() throws IOException {
+	public CompleteVersion installPack(Component component) throws IOException {
 		installedPack.getInstalledDirectory();
 		PackInfo packInfo = installedPack.getInfo();
 		Modpack modpack = packInfo.getModpack(build);
 		String minecraft = modpack.getMinecraft();
 
-		installModpack(modpack);
-		CompleteVersion version = installMinecraft(minecraft);
+		installOldForgeLibs(minecraft);
+
+		Version installedVersion = getInstalledVersion();
+		boolean shouldUpdate = installedVersion == null;
+		if (!shouldUpdate && !build.equals(installedVersion.getVersion())) {
+			int result = JOptionPane.showConfirmDialog(component, "Would you like to update this pack?", "Update Found", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+
+			if (result == JOptionPane.YES_OPTION) {
+				shouldUpdate = true;
+			} else {
+				build = installedVersion.getVersion();
+			}
+		}
+
+		if (shouldUpdate) {
+			installModpack(modpack);
+		}
+
+		CompleteVersion version = getMinecraftVersion(minecraft);
+
+		boolean isLegacy = installedVersion != null && installedVersion.isLegacy();
+		if (shouldUpdate || isLegacy) {
+			installMinecraft(version, minecraft);
+		}
+
+		Version versionFile = new Version(build, false);
+		versionFile.save(installedPack.getBinDir());
+
 		finished = true;
 		return version;
+	}
+
+	private void installOldForgeLibs(String minecraft) throws IOException {
+		if (minecraft.startsWith("1.5")) {
+			installOldForgeLib("fml_libs15.zip");
+		} else if (minecraft.startsWith("1.4")) {
+			installOldForgeLib("fml_libs.zip");
+		}
+	}
+
+	private void installOldForgeLib(String lib) throws IOException {
+		File cache = new File(Utils.getCacheDirectory(), lib);
+		if (!cache.exists()) {
+			DownloadUtils.downloadFile("http://mirror.technicpack.net/Technic/lib/fml/" + lib, cache.getAbsolutePath(), null, null, listener);
+		}
+		ZipUtils.unzipFile(cache, new File(installedPack.getInstalledDirectory(), "lib"), listener);
 	}
 
 	private void installModpack(Modpack modpack) throws IOException {
@@ -80,8 +124,7 @@ public class ModpackInstaller {
 		ZipUtils.unzipFile(cache, installedPack.getInstalledDirectory(), listener);
 	}
 
-	private CompleteVersion installMinecraft(String version) throws IOException {
-		CompleteVersion completeVersion = getMinecraftVersion(version);
+	private void installMinecraft(CompleteVersion completeVersion, String version) throws IOException {
 		System.out.println(completeVersion);
 		installCompleteVersion(completeVersion);
 
@@ -95,8 +138,6 @@ public class ModpackInstaller {
 			DownloadUtils.downloadFile(url, output, cache, md5, listener);
 		}
 		ZipUtils.copyMinecraftJar(cache, new File(installedPack.getBinDir(), "minecraft.jar"));
-
-		return completeVersion;
 	}
 
 	private CompleteVersion getMinecraftVersion(String version) throws IOException {
@@ -145,6 +186,15 @@ public class ModpackInstaller {
 			File folder = new File(installedPack.getBinDir(), "natives");
 			ZipUtils.unzipFile(cache, folder, library.getExtract(), listener);
 		}
+	}
+
+	private Version getInstalledVersion() {
+		Version version = null;
+		File versionFile = new File(installedPack.getBinDir(), "version");
+		if (versionFile.exists()) {
+			version = Version.load(versionFile);
+		}
+		return version;
 	}
 
 	public boolean isFinished() {

@@ -58,6 +58,7 @@ public class InstalledPack {
 	private transient File resourceDir;
 	private transient File coremodsDir;
 	private transient PackInfo info;
+	private transient PackRefreshListener refreshListener;
 	private String name;
 	private boolean platform;
 	private String build;
@@ -79,6 +80,10 @@ public class InstalledPack {
 		downloading.put(logo, new AtomicReference<Boolean>(false));
 		downloading.put(background, new AtomicReference<Boolean>(false));
 		downloading.put(icon, new AtomicReference<Boolean>(false));
+	}
+
+	public void setRefreshListener(PackRefreshListener refreshListener) {
+		this.refreshListener = refreshListener;
 	}
 
 	public String getDirectory() {
@@ -134,6 +139,14 @@ public class InstalledPack {
 		if (build.equals(LATEST)) {
 			return info.getLatest();
 		}
+		return build;
+	}
+
+	public void setBuild(String build) {
+		this.build = build;
+	}
+
+	public String getRawBuild() {
 		return build;
 	}
 
@@ -251,6 +264,7 @@ public class InstalledPack {
 
 		downloading.get(image).set(true);
 		final String name = getName();
+		final InstalledPack pack = this;
 		Thread thread = new Thread(name + " Image Download Worker") {
 			@Override
 			public void run() {
@@ -263,6 +277,9 @@ public class InstalledPack {
 					newImage = ImageIO.read(download.getOutFile());
 					image.set(newImage);
 					downloading.get(image).set(false);
+					if (refreshListener != null) {
+						refreshListener.refreshPack(pack);
+					}
 				} catch (IOException e) {
 					System.out.println("Failed to download and load image from: " + url);
 					e.printStackTrace();
