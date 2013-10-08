@@ -20,9 +20,9 @@
 package net.technicpack.launchercore.restful;
 
 public class PlatformConstants {
-	public static final String PLATFORM = "http://platform.sctgaming.com/";
+	public static final String PLATFORM = "http://www.technicpack.net/";
 
-	public static final String API = PLATFORM + "api/";
+	public static final String API = PLATFORM + "apiv2/";
 
 	public static final String MODPACK = API + "modpack/";
 
