@@ -106,8 +106,8 @@ public class MinecraftLauncher {
 		map.put("profile_name", user.getDisplayName());
 		map.put("version_name", version.getId());
 
-		map.put("game_directory", gameDirectory.getAbsolutePath());
-		map.put("game_assets", Utils.getAssetsDirectory().getAbsolutePath());
+		map.put("game_directory", "\"" + gameDirectory.getAbsolutePath() + "\"");
+		map.put("game_assets", "\"" + Utils.getAssetsDirectory().getAbsolutePath() + "\"");
 
 		for (int i = 0; i < split.length; i++) {
 			split[i] = substitutor.replace(split[i]);
