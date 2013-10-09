@@ -63,7 +63,7 @@ public class MinecraftLauncher {
 
 	private List<String> buildCommands(User user) {
 		List<String> commands = new ArrayList<String>();
-		commands.add("\"" + OperatingSystem.getJavaDir() + "\"");
+		commands.add(OperatingSystem.getJavaDir());
 
 		OperatingSystem operatingSystem = OperatingSystem.getOperatingSystem();
 
@@ -80,8 +80,8 @@ public class MinecraftLauncher {
 			permSize = 256;
 		}
 		commands.add("-XX:MaxPermSize=" + permSize + "m");
-		commands.add("-Djava.library.path=" + "\"" + new File(pack.getBinDir(), "natives").getAbsolutePath() + "\"");
-		commands.add("-Dminecraft.applet.TargetDirectory=" + "\"" + pack.getInstalledDirectory().getAbsolutePath() + "\"");
+		commands.add("-Djava.library.path=" + new File(pack.getBinDir(), "natives").getAbsolutePath());
+		commands.add("-Dminecraft.applet.TargetDirectory=" +  pack.getInstalledDirectory().getAbsolutePath());
 		commands.add("-cp");
 		commands.add(buildClassPath());
 		commands.add(version.getMainClass());
@@ -106,8 +106,8 @@ public class MinecraftLauncher {
 		map.put("profile_name", user.getDisplayName());
 		map.put("version_name", version.getId());
 
-		map.put("game_directory", "\"" + gameDirectory.getAbsolutePath() + "\"");
-		map.put("game_assets", "\"" + Utils.getAssetsDirectory().getAbsolutePath() + "\"");
+		map.put("game_directory", gameDirectory.getAbsolutePath());
+		map.put("game_assets", Utils.getAssetsDirectory().getAbsolutePath());
 
 		for (int i = 0; i < split.length; i++) {
 			split[i] = substitutor.replace(split[i]);
@@ -119,7 +119,6 @@ public class MinecraftLauncher {
 	private String buildClassPath() {
 		StringBuilder result = new StringBuilder();
 		String separator = System.getProperty("path.separator");
-		result.append("\"");
 
 		// Add all the libraries to the classpath.
 		for (Library library : version.getLibrariesForOS()) {
@@ -161,8 +160,6 @@ public class MinecraftLauncher {
 			result.append(separator);
 		}
 		result.append(minecraft.getAbsolutePath());
-
-		result.append("\"");
 
 		return result.toString();
 	}
