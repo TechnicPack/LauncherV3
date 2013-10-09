@@ -80,8 +80,8 @@ public class MinecraftLauncher {
 			permSize = 256;
 		}
 		commands.add("-XX:MaxPermSize=" + permSize + "m");
-		commands.add("-Djava.library.path=" + new File(pack.getBinDir(), "natives").getAbsolutePath());
-		commands.add("-Dminecraft.applet.TargetDirectory="+pack.getInstalledDirectory().getAbsolutePath());
+		commands.add("-Djava.library.path=" + "\"" + new File(pack.getBinDir(), "natives").getAbsolutePath() + "\"");
+		commands.add("-Dminecraft.applet.TargetDirectory=" + "\"" + pack.getInstalledDirectory().getAbsolutePath() + "\"");
 		commands.add("-cp");
 		commands.add(buildClassPath());
 		commands.add(version.getMainClass());
