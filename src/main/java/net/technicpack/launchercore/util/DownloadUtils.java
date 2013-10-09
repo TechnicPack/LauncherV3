@@ -63,14 +63,14 @@ public class DownloadUtils {
 		return md5;
 	}
 
-	public static Download downloadFile(String url, String output, File cache, String md5, DownloadListener listener) throws IOException {
+	public static Download downloadFile(String url, String name, String output, File cache, String md5, DownloadListener listener) throws IOException {
 		int tries = DOWNLOAD_RETRIES;
 		File outputFile = null;
 		Download download = null;
 		while (tries > 0) {
 			System.out.println("Starting download of " + url + ", with " + tries + " tries remaining");
 			tries--;
-			download = new Download(url, output);
+			download = new Download(url, name, output);
 			download.setListener(listener);
 			download.run();
 			if (download.getResult() != Result.SUCCESS) {
@@ -105,11 +105,11 @@ public class DownloadUtils {
 		return download;
 	}
 
-	public static Download downloadFile(String url, String output, File cache) throws IOException {
-		return downloadFile(url, output, cache, null, null);
+	public static Download downloadFile(String url, String name, String output, File cache) throws IOException {
+		return downloadFile(url, name, output, cache, null, null);
 	}
 
-	public static Download downloadFile(String url, String output) throws IOException {
-		return downloadFile(url, output, null);
+	public static Download downloadFile(String url, String name, String output) throws IOException {
+		return downloadFile(url, name, output, null);
 	}
 }

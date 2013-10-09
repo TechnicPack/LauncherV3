@@ -272,7 +272,7 @@ public class InstalledPack {
 					if (temp.exists()) {
 						System.out.println("Pack: " + getName() + " Calculated MD5: " + MD5Utils.getMD5(temp) + " Required MD5: " + md5);
 					}
-					Download download = DownloadUtils.downloadFile(url, temp.getAbsolutePath());
+					Download download = DownloadUtils.downloadFile(url, temp.getName(), temp.getAbsolutePath());
 					BufferedImage newImage;
 					newImage = ImageIO.read(download.getOutFile());
 					image.set(newImage);

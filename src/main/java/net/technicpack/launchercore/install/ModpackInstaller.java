@@ -100,7 +100,7 @@ public class ModpackInstaller {
 	private void installOldForgeLib(String lib) throws IOException {
 		File cache = new File(Utils.getCacheDirectory(), lib);
 		if (!cache.exists()) {
-			DownloadUtils.downloadFile("http://mirror.technicpack.net/Technic/lib/fml/" + lib, cache.getAbsolutePath(), null, null, listener);
+			DownloadUtils.downloadFile("http://mirror.technicpack.net/Technic/lib/fml/" + lib, cache.getName(), cache.getAbsolutePath(), null, null, listener);
 		}
 		ZipUtils.unzipFile(cache, new File(installedPack.getInstalledDirectory(), "lib"), listener);
 	}
@@ -118,7 +118,7 @@ public class ModpackInstaller {
 
 		File cache = new File(installedPack.getCacheDir(), name);
 		if (!cache.exists() || md5.isEmpty() || !MD5Utils.checkMD5(cache, md5)) {
-			DownloadUtils.downloadFile(url, cache.getAbsolutePath(), null, md5, listener);
+			DownloadUtils.downloadFile(url, cache.getName(), cache.getAbsolutePath(), null, md5, listener);
 		}
 
 		ZipUtils.unzipFile(cache, installedPack.getInstalledDirectory(), listener);
@@ -135,7 +135,7 @@ public class ModpackInstaller {
 		File cache = new File(Utils.getCacheDirectory(), "minecraft_" + version + ".jar");
 		if (!cache.exists() || md5.isEmpty() || !MD5Utils.checkMD5(cache, md5)) {
 			String output = installedPack.getCacheDir() + File.separator + "minecraft.jar";
-			DownloadUtils.downloadFile(url, output, cache, md5, listener);
+			DownloadUtils.downloadFile(url, cache.getName(), output, cache, md5, listener);
 		}
 		ZipUtils.copyMinecraftJar(cache, new File(installedPack.getBinDir(), "minecraft.jar"));
 	}
@@ -147,7 +147,7 @@ public class ModpackInstaller {
 		boolean extracted = ZipUtils.extractFile(modpackJar, installedPack.getBinDir(), "version.json");
 		if (!extracted && !versionFile.exists()) {
 			String url = MojangConstants.getVersionJson(version);
-			DownloadUtils.downloadFile(url, versionFile.getAbsolutePath(), null, null, listener);
+			DownloadUtils.downloadFile(url, versionFile.getName(), versionFile.getAbsolutePath(), null, null, listener);
 		}
 
 		if (!versionFile.exists()) {
@@ -179,7 +179,7 @@ public class ModpackInstaller {
 		}
 
 		if (!cache.exists() || md5.isEmpty() || !MD5Utils.checkMD5(cache, md5)) {
-			DownloadUtils.downloadFile(url, cache.getAbsolutePath(), null, md5, listener);
+			DownloadUtils.downloadFile(url, cache.getName(), cache.getAbsolutePath(), null, md5, listener);
 		}
 
 		if (natives != null && cache.exists()) {
