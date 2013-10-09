@@ -28,7 +28,7 @@ import java.util.Map;
 
 public class Library {
 	private static final StrSubstitutor SUBSTITUTOR = new StrSubstitutor();
-	private static final String[] fallback = {"http://mirror.technicpack.net/Technic/maven/", "http://search.maven.org/remotecontent?filepath="};
+	private static final String[] fallback = {"http://mirror.technicpack.net/Technic/lib/", "http://search.maven.org/remotecontent?filepath="};
 	private String name;
 	private List<Rule> rules;
 	private Map<OperatingSystem, String> natives;
