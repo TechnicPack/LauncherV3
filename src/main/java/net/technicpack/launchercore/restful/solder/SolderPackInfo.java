@@ -130,6 +130,20 @@ public class SolderPackInfo extends RestObject implements PackInfo {
 				'}';
 	}
 
+	public static SolderPackInfo getSolderPackInfo(String url) throws RestfulAPIException {
+		SolderPackInfo info = getRestObject(SolderPackInfo.class, url);
+		if (info == null) {
+			return null;
+		}
+		String solderUrl = url.substring(0, url.length() - info.getName().length() - 1);
+		Solder solder = RestObject.getRestObject(Solder.class, solderUrl);
+		if (solder != null) {
+			solder.setUrl(solderUrl.replace("modpack/", ""));
+			info.setSolder(solder);
+		}
+		return info;
+	}
+
 	public static SolderPackInfo getSolderPackInfo(String solderUrl, String name) throws RestfulAPIException {
 		SolderPackInfo info = getRestObject(SolderPackInfo.class, SolderConstants.getSolderPackInfoUrl(solderUrl, name));
 		Solder solder = RestObject.getRestObject(Solder.class, solderUrl + "modpack/");
