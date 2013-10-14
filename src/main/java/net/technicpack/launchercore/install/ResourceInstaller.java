@@ -32,6 +32,7 @@ public class ResourceInstaller {
 			Element eContent = (Element) content;
 
 			String fileName = eContent.getElementsByTagName("Key").item(0).getTextContent();
+			String fileSize = eContent.getElementsByTagName("Size").item(0).getTextContent();
 
 			String rawETag = eContent.getElementsByTagName("ETag").item(0).getTextContent();
 			String fileHash = rawETag.replace("\"", "");
@@ -41,7 +42,7 @@ public class ResourceInstaller {
 
 			File fContent = new File(assetsDirectory, fileName);
 
-			if (!fileName.contains(".")) {
+			if (fileSize.equals("0")) {
 				continue;
 			}
 
