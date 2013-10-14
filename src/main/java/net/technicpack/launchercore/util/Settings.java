@@ -31,7 +31,6 @@ public class Settings {
 	public static final String BETA = "beta";
 	public static Settings instance = new Settings();
 	private String directory;
-	private int build;
 	private int memory;
 	private String buildStream = STABLE;
 	private boolean showConsole;
@@ -74,15 +73,6 @@ public class Settings {
 		} catch (IOException e) {
 			Utils.getLogger().log(Level.WARNING, "Unable to save settings " + settings, e);
 		}
-	}
-
-	public static int getBuild() {
-		return instance.build;
-	}
-
-	public static void setBuild(int build) {
-		instance.build = build;
-		save();
 	}
 
 	public static int getMemory() {
@@ -134,7 +124,6 @@ public class Settings {
 	public String toString() {
 		return "Settings{" +
 				"directory='" + directory + '\'' +
-				", build=" + build +
 				", memory=" + memory +
 				", buildStream='" + buildStream + '\'' +
 				", showConsole=" + showConsole +
