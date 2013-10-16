@@ -38,6 +38,10 @@ import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ModpackInstaller {
 	private final DownloadListener listener;
@@ -53,6 +57,7 @@ public class ModpackInstaller {
 
 	public CompleteVersion installPack(Component component) throws IOException {
 		installedPack.getInstalledDirectory();
+		installedPack.initDirectories();
 		PackInfo packInfo = installedPack.getInfo();
 		Modpack modpack = packInfo.getModpack(build);
 		String minecraft = modpack.getMinecraft();
@@ -109,12 +114,13 @@ public class ModpackInstaller {
 		for (Mod mod : modpack.getMods()) {
 			installMod(mod);
 		}
+		cleanupCache(modpack.getMods());
 	}
 
 	private void installMod(Mod mod) throws IOException {
 		String url = mod.getUrl();
 		String md5 = mod.getMd5();
-		String name = mod.getName() + "-" + build + ".zip";
+		String name = mod.getName() + "-" + mod.getVersion() + ".zip";
 
 		File cache = new File(installedPack.getCacheDir(), name);
 		if (!cache.exists() || md5.isEmpty() || !MD5Utils.checkMD5(cache, md5)) {
@@ -185,6 +191,28 @@ public class ModpackInstaller {
 		if (natives != null && cache.exists()) {
 			File folder = new File(installedPack.getBinDir(), "natives");
 			ZipUtils.unzipFile(cache, folder, library.getExtract(), listener);
+		}
+	}
+
+	private void cleanupCache(List<Mod> mods) {
+		File[] files = installedPack.getCacheDir().listFiles();
+
+		if (files == null) {
+			return;
+		}
+
+		Set<String> keepFiles = new HashSet<String>(mods.size() + 1);
+		for (Mod mod : mods) {
+			keepFiles.add(mod.getName() + "-" + mod.getVersion() + ".zip");
+		}
+		keepFiles.add("minecraft.jar");
+
+		for (File file : files) {
+			String fileName = file.getName();
+			if (keepFiles.contains(fileName)) {
+				continue;
+			}
+			FileUtils.deleteQuietly(file);
 		}
 	}
 
