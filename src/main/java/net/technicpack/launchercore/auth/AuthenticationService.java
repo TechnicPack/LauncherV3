@@ -33,12 +33,18 @@ import java.net.URL;
 public class AuthenticationService {
 	private static final String AUTH_SERVER = "https://authserver.mojang.com/";
 
-	public static boolean refresh(User user) {
-		RefreshResponse response = requestRefresh(user);
+	public static boolean validate(User user) {
+		ValidateRequest validateRequest = new ValidateRequest(user.getAccessToken());
+		String data = Utils.getMojangGson().toJson(validateRequest);
 
-		return response.getError() != null;
+		try {
+			String returned = postJson(AUTH_SERVER + "validate", data);
+			System.out.println("Valid: " + returned);
+			return returned.isEmpty();
+		} catch (IOException e) {
+			return false;
+		}
 	}
-
 
 	public static RefreshResponse requestRefresh(User user) {
 		RefreshRequest refreshRequest = new RefreshRequest(user.getAccessToken(), user.getClientToken(), user.getProfile());
@@ -47,6 +53,7 @@ public class AuthenticationService {
 		RefreshResponse response;
 		try {
 			String returned = postJson(AUTH_SERVER + "refresh", data);
+			System.out.println(returned);
 			response = Utils.getMojangGson().fromJson(returned, RefreshResponse.class);
 		} catch (IOException e) {
 			e.printStackTrace();
