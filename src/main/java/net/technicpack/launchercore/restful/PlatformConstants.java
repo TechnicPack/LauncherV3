@@ -31,4 +31,12 @@ public class PlatformConstants {
 	public static String getPlatformInfoUrl(String modpack) {
 		return MODPACK + modpack;
 	}
+
+	public static String getRunCountUrl(String modpack) {
+		return getPlatformInfoUrl(modpack) + "/run";
+	}
+
+	public static String getDownloadCountUrl(String modpack) {
+		return getPlatformInfoUrl(modpack) + "/download";
+	}
 }

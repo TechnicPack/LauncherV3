@@ -23,6 +23,7 @@ import net.technicpack.launchercore.install.InstalledPack;
 import net.technicpack.launchercore.install.User;
 import net.technicpack.launchercore.minecraft.CompleteVersion;
 import net.technicpack.launchercore.minecraft.Library;
+import net.technicpack.launchercore.restful.PlatformConstants;
 import net.technicpack.launchercore.util.OperatingSystem;
 import net.technicpack.launchercore.util.Utils;
 import org.apache.commons.lang3.text.StrSubstitutor;
@@ -57,6 +58,7 @@ public class MinecraftLauncher {
 			first = false;
 		}
 		System.out.println("Running " + full.toString());
+		Utils.pingURL(PlatformConstants.getRunCountUrl(pack.getName()));
 		Process process = new ProcessBuilder(commands).directory(pack.getInstalledDirectory()).redirectErrorStream(true).start();
 		return new MinecraftProcess(commands, process);
 	}

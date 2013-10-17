@@ -24,6 +24,7 @@ import net.technicpack.launchercore.minecraft.Library;
 import net.technicpack.launchercore.minecraft.MojangConstants;
 import net.technicpack.launchercore.restful.Modpack;
 import net.technicpack.launchercore.restful.PackInfo;
+import net.technicpack.launchercore.restful.PlatformConstants;
 import net.technicpack.launchercore.restful.solder.Mod;
 import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.launchercore.util.DownloadUtils;
@@ -221,6 +222,8 @@ public class ModpackInstaller {
 		File versionFile = new File(installedPack.getBinDir(), "version");
 		if (versionFile.exists()) {
 			version = Version.load(versionFile);
+		} else {
+			Utils.pingURL(PlatformConstants.getDownloadCountUrl(installedPack.getName()));
 		}
 		return version;
 	}
