@@ -22,16 +22,12 @@ package net.technicpack.launchercore.install;
 import net.technicpack.launchercore.minecraft.CompleteVersion;
 import net.technicpack.launchercore.minecraft.Library;
 import net.technicpack.launchercore.minecraft.MojangConstants;
+import net.technicpack.launchercore.minecraft.TechnicConstants;
 import net.technicpack.launchercore.restful.Modpack;
 import net.technicpack.launchercore.restful.PackInfo;
 import net.technicpack.launchercore.restful.PlatformConstants;
 import net.technicpack.launchercore.restful.solder.Mod;
-import net.technicpack.launchercore.util.DownloadListener;
-import net.technicpack.launchercore.util.DownloadUtils;
-import net.technicpack.launchercore.util.MD5Utils;
-import net.technicpack.launchercore.util.OperatingSystem;
-import net.technicpack.launchercore.util.Utils;
-import net.technicpack.launchercore.util.ZipUtils;
+import net.technicpack.launchercore.util.*;
 import org.apache.commons.io.FileUtils;
 
 import javax.swing.JOptionPane;
@@ -39,10 +35,7 @@ import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ModpackInstaller {
 	private final DownloadListener listener;
@@ -152,9 +145,28 @@ public class ModpackInstaller {
 		File modpackJar = new File(installedPack.getBinDir(), "modpack.jar");
 
 		boolean extracted = ZipUtils.extractFile(modpackJar, installedPack.getBinDir(), "version.json");
-		if (!extracted && !versionFile.exists()) {
-			String url = MojangConstants.getVersionJson(version);
-			DownloadUtils.downloadFile(url, versionFile.getName(), versionFile.getAbsolutePath(), null, null, listener);
+
+        //HACK:  I hate myself for this, but I do only what is necessary TODO
+        boolean versionExists = versionFile.exists() && versionFile.lastModified() >= 1382115600;
+
+		if (!extracted && !versionExists) {
+            String url = TechnicConstants.getTechnicVersionJson(version);
+
+            Download download = null;
+
+            try
+            {
+                download = DownloadUtils.downloadFile(url, versionFile.getName(), versionFile.getAbsolutePath(), null, null, listener);
+            } catch (IOException ex)
+            {
+                download = null;
+            }
+
+            if (download == null || download.getException() != null || download.getResult() != Download.Result.SUCCESS)
+            {
+                url = MojangConstants.getVersionJson(version);
+                DownloadUtils.downloadFile(url, versionFile.getName(), versionFile.getAbsolutePath(), null, null, listener);
+            }
 		}
 
 		if (!versionFile.exists()) {
