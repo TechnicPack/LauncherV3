@@ -42,6 +42,7 @@ public class ModpackInstaller {
 	private final InstalledPack installedPack;
 	private String build;
 	private boolean finished = false;
+	private boolean shouldUpdate = false;
 
 	public ModpackInstaller(DownloadListener listener, InstalledPack installedPack, String build) {
 		this.listener = listener;
@@ -59,7 +60,7 @@ public class ModpackInstaller {
 		installOldForgeLibs(minecraft);
 
 		Version installedVersion = getInstalledVersion();
-		boolean shouldUpdate = installedVersion == null;
+		shouldUpdate = installedVersion == null;
 		if (!shouldUpdate && !build.equals(installedVersion.getVersion())) {
 			int result = JOptionPane.showConfirmDialog(component, "Would you like to update this pack?", "Update Found", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
 
@@ -148,6 +149,9 @@ public class ModpackInstaller {
 
         //HACK:  I hate myself for this, but I do only what is necessary TODO
         boolean versionExists = versionFile.exists() && versionFile.lastModified() >= 1382115600000L;
+		if (!versionExists) {
+			shouldUpdate = true;
+		}
 
 		if (!extracted && !versionExists) {
             String url = TechnicConstants.getTechnicVersionJson(version);
