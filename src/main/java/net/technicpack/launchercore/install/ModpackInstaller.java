@@ -156,9 +156,6 @@ public class ModpackInstaller {
 
         //HACK:  I hate myself for this, but I do only what is necessary TODO
         boolean versionExists = versionFile.exists() && versionFile.lastModified() >= 1382115600000L;
-		if (!versionExists) {
-			shouldUpdate = true;
-		}
 
 		if (!extracted && !versionExists) {
             String url = TechnicConstants.getTechnicVersionJson(version);
@@ -168,6 +165,7 @@ public class ModpackInstaller {
             try
             {
                 download = DownloadUtils.downloadFile(url, versionFile.getName(), versionFile.getAbsolutePath(), null, null, listener);
+	            shouldUpdate = true;
             } catch (IOException ex)
             {
                 download = null;
@@ -208,7 +206,7 @@ public class ModpackInstaller {
 			cache.getParentFile().mkdirs();
 		}
 
-		if (!cache.exists() || md5.isEmpty() || !MD5Utils.checkMD5(cache, md5)) {
+		if (!cache.exists() || (!md5.isEmpty() && !MD5Utils.checkMD5(cache, md5))) {
 			DownloadUtils.downloadFile(url, cache.getName(), cache.getAbsolutePath(), null, md5, listener);
 		}
 
