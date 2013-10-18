@@ -147,7 +147,7 @@ public class ModpackInstaller {
 		boolean extracted = ZipUtils.extractFile(modpackJar, installedPack.getBinDir(), "version.json");
 
         //HACK:  I hate myself for this, but I do only what is necessary TODO
-        boolean versionExists = versionFile.exists() && versionFile.lastModified() >= 1382115600;
+        boolean versionExists = versionFile.exists() && versionFile.lastModified() >= 1382115600000;
 
 		if (!extracted && !versionExists) {
             String url = TechnicConstants.getTechnicVersionJson(version);
