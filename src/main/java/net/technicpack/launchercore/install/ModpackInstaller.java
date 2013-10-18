@@ -106,6 +106,13 @@ public class ModpackInstaller {
 	}
 
 	private void installModpack(Modpack modpack) throws IOException {
+		File modsDir = installedPack.getModsDir();
+
+		for (File mod : modsDir.listFiles()) {
+			if (mod.isDirectory()) continue;
+			mod.delete();
+		}
+
 		for (Mod mod : modpack.getMods()) {
 			installMod(mod);
 		}
