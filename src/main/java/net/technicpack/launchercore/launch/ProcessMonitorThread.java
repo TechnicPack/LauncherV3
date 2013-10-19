@@ -45,8 +45,6 @@ public class ProcessMonitorThread extends Thread {
 			try {
 				while ((line = buf.readLine()) != null) {
 					System.out.println(" " + line);
-//					Utils.getLogger().log(Level.WARNING, line);
-//					this.process.getSysOutLines().add(line);
 				}
 			} catch (IOException ex) {
 //				Logger.getLogger(ProcessMonitorThread.class.getName()).log(Level.SEVERE, null, ex);
@@ -55,18 +53,20 @@ public class ProcessMonitorThread extends Thread {
 					buf.close();
 				} catch (IOException ex) {
 //					Logger.getLogger(ProcessMonitorThread.class.getName()).log(Level.SEVERE, null, ex);
-				}
+				} finally
+                {
+                    try {
+                        process.getProcess().waitFor();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
 			}
 		}
-//		try {
-//			process.getProcess().waitFor();
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//			return;
-//		}
-//
-//		if (process.getExitListener() != null) {
-//			process.getExitListener().onMinecraftExit(process);
-//		}
+
+		if (process.getExitListener() != null) {
+			process.getExitListener().onMinecraftExit(process);
+		}
 	}
 }
