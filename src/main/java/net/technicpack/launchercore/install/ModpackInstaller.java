@@ -160,18 +160,11 @@ public class ModpackInstaller {
 		if (!extracted && !versionExists) {
             String url = TechnicConstants.getTechnicVersionJson(version);
 
-            Download download = null;
-
-            try
+            if (Utils.pingURL(url))
             {
-                download = DownloadUtils.downloadFile(url, versionFile.getName(), versionFile.getAbsolutePath(), null, null, listener);
-	            shouldUpdate = true;
-            } catch (IOException ex)
-            {
-                download = null;
-            }
-
-            if (download == null || download.getException() != null || download.getResult() != Download.Result.SUCCESS)
+                DownloadUtils.downloadFile(url, versionFile.getName(), versionFile.getAbsolutePath(), null, null, listener);
+                shouldUpdate = true;
+            } else
             {
                 url = MojangConstants.getVersionJson(version);
                 DownloadUtils.downloadFile(url, versionFile.getName(), versionFile.getAbsolutePath(), null, null, listener);
