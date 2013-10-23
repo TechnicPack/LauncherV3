@@ -22,12 +22,17 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.io.IOUtils;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Date;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 public class Utils {
@@ -91,6 +96,42 @@ public class Utils {
 			return false;
 		} finally {
 			IOUtils.closeQuietly(stream);
+		}
+	}
+	
+	public static boolean sendTracking(String category, String action, String label) {
+		String url = "http://www.google-analytics.com/collect";
+		try {
+			URL urlObj = new URL(url);
+			HttpURLConnection con = (HttpURLConnection) urlObj.openConnection();
+			con.setRequestMethod("POST");
+			
+			String urlParameters = "v=1&tid=UA-30896795-3&cid=" + UUID.randomUUID() + "&t=event&ec=" + category + "&ea=" + action + "&el=" + label;
+			
+			con.setDoOutput(true);
+			DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+			wr.writeBytes(urlParameters);
+			wr.flush();
+			wr.close();
+	 
+			int responseCode = con.getResponseCode();
+			System.out.println("Analytics Response [" + category + "]: " + responseCode);
+	 
+			BufferedReader in = new BufferedReader(
+			        new InputStreamReader(con.getInputStream()));
+			String inputLine;
+			StringBuffer response = new StringBuffer();
+	 
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+			
+			
+			return true;
+		} catch (IOException e) {
+			return false;
+		} finally {
 		}
 	}
 }

@@ -28,6 +28,7 @@ import net.technicpack.launchercore.restful.PackInfo;
 import net.technicpack.launchercore.restful.PlatformConstants;
 import net.technicpack.launchercore.restful.solder.Mod;
 import net.technicpack.launchercore.util.*;
+
 import org.apache.commons.io.FileUtils;
 
 import javax.swing.JOptionPane;
@@ -238,6 +239,7 @@ public class ModpackInstaller {
 			version = Version.load(versionFile);
 		} else {
 			Utils.pingURL(PlatformConstants.getDownloadCountUrl(installedPack.getName()));
+			Utils.sendTracking("installModpack", installedPack.getName(), installedPack.getBuild());
 		}
 		return version;
 	}
