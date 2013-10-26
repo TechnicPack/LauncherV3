@@ -25,6 +25,10 @@ public class ResourceInstaller {
 	}
 
 	public void updateResources() {
+
+        if (resourceXML == null)
+            return;
+
 		NodeList contentList = resourceXML.getElementsByTagName("Contents");
 
 		for (int i = 0; i < contentList.getLength(); i++) {

@@ -64,6 +64,8 @@ public class InstalledPack {
 	private String build;
 	private String directory;
 
+	private boolean isLocalOnly;
+
 	public InstalledPack(String name, boolean platform, String build, String directory) {
 		this();
 		this.name = name;
@@ -80,6 +82,7 @@ public class InstalledPack {
 		downloading.put(logo, new AtomicReference<Boolean>(false));
 		downloading.put(background, new AtomicReference<Boolean>(false));
 		downloading.put(icon, new AtomicReference<Boolean>(false));
+		isLocalOnly = false;
 	}
 
 	public void setRefreshListener(PackRefreshListener refreshListener) {
@@ -130,6 +133,19 @@ public class InstalledPack {
 
 	public void setInfo(PackInfo info) {
 		this.info = info;
+	}
+
+	public boolean isLocalOnly() {
+		return isLocalOnly;
+	}
+
+	public void setLocalOnly() {
+		this.isLocalOnly = true;
+	}
+
+	public boolean hasLogo()
+	{
+		return (getLogo() != BACKUP_LOGO);
 	}
 
 	public String getBuild() {
