@@ -64,7 +64,7 @@ public class InstalledPack {
 	private String build;
 	private String directory;
 
-	private boolean isLocalOnly;
+	private transient boolean isLocalOnly;
 
 	public InstalledPack(String name, boolean platform, String build, String directory) {
 		this();
@@ -149,12 +149,16 @@ public class InstalledPack {
 	}
 
 	public String getBuild() {
-		if (build.equals(RECOMMENDED)) {
-			return info.getRecommended();
+		if (info != null)
+		{
+			if (build.equals(RECOMMENDED)) {
+				return info.getRecommended();
+			}
+			if (build.equals(LATEST)) {
+				return info.getLatest();
+			}
 		}
-		if (build.equals(LATEST)) {
-			return info.getLatest();
-		}
+
 		return build;
 	}
 
