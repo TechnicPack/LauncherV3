@@ -19,6 +19,7 @@
 
 package net.technicpack.launchercore.install;
 
+import net.technicpack.launchercore.exception.PackNotAvailableOfflineException;
 import net.technicpack.launchercore.minecraft.CompleteVersion;
 import net.technicpack.launchercore.minecraft.Library;
 import net.technicpack.launchercore.minecraft.MojangConstants;
@@ -153,12 +154,9 @@ public class ModpackInstaller {
 		File versionFile = new File(installedPack.getBinDir(), "version.json");
 		File modpackJar = new File(installedPack.getBinDir(), "modpack.jar");
 
-		boolean extracted = ZipUtils.extractFile(modpackJar, installedPack.getBinDir(), "version.json");
+		ZipUtils.extractFile(modpackJar, installedPack.getBinDir(), "version.json");
 
-        //HACK:  I hate myself for this, but I do only what is necessary TODO
-        boolean versionExists = versionFile.exists() && versionFile.lastModified() >= 1382115600000L;
-
-		if (!extracted && !versionExists) {
+		if (!versionFile.exists() && !installedPack.isLocalOnly()) {
             String url = TechnicConstants.getTechnicVersionJson(version);
 
             if (Utils.pingURL(url))
@@ -170,10 +168,13 @@ public class ModpackInstaller {
                 url = MojangConstants.getVersionJson(version);
                 DownloadUtils.downloadFile(url, versionFile.getName(), versionFile.getAbsolutePath(), null, null, listener);
             }
-		}
 
-		if (!versionFile.exists()) {
-			throw new IOException("Unable to find a valid version profile for minecraft " + version);
+			if (!versionFile.exists()) {
+				throw new IOException("Unable to find a valid version profile for minecraft " + version);
+			}
+		} else if (!versionFile.exists())
+		{
+			throw new PackNotAvailableOfflineException(installedPack.getDisplayName());
 		}
 
 		String json = FileUtils.readFileToString(versionFile, Charset.forName("UTF-8"));
@@ -246,5 +247,11 @@ public class ModpackInstaller {
 
 	public boolean isFinished() {
 		return finished;
+	}
+
+	public CompleteVersion prepareOfflinePack() throws IOException {
+		installedPack.getInstalledDirectory();
+		installedPack.initDirectories();
+		return this.getMinecraftVersion(null);
 	}
 }
