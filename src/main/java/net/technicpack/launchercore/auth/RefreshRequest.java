@@ -22,15 +22,13 @@ package net.technicpack.launchercore.auth;
 public class RefreshRequest extends Response {
 	private String accessToken;
 	private String clientToken;
-	private Profile selectedProfile;
 
 	public RefreshRequest() {
 
 	}
 
-	public RefreshRequest(String accessToken, String clientToken, Profile profile) {
+	public RefreshRequest(String accessToken, String clientToken) {
 		this.accessToken = accessToken;
 		this.clientToken = clientToken;
-		this.selectedProfile = profile;
 	}
 }

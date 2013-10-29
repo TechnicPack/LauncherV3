@@ -17,34 +17,28 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.launchercore.auth;
+package net.technicpack.launchercore.exception;
 
-public class Profile {
-	private String id;
-	private String name;
+import java.io.IOException;
 
-    public Profile() {
+public class AuthenticationNetworkFailureException extends IOException {
+	private Throwable cause;
 
-    }
+	public AuthenticationNetworkFailureException() {
 
-    public Profile(String id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
-	public String getId() {
-		return id;
 	}
 
-	public String getName() {
-		return name;
+	public AuthenticationNetworkFailureException(Throwable cause) {
+		this.cause = cause;
 	}
 
 	@Override
-	public String toString() {
-		return "Profile{" +
-				"id='" + id + '\'' +
-				", name='" + name + '\'' +
-				'}';
+	public String getMessage() {
+		return "An error was raised while attempting to communicate with auth.minecraft.net.";
+	}
+
+	@Override
+	public Throwable getCause() {
+		return cause;
 	}
 }
