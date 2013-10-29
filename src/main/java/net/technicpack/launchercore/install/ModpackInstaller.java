@@ -115,6 +115,11 @@ public class ModpackInstaller {
 			mod.delete();
 		}
 
+		//If we're installing a new version of modpack, then we need to get rid of the existing version.json
+		File versionFile = new File(installedPack.getBinDir(), "version.json");
+		if (versionFile.exists())
+			versionFile.delete();
+
 		for (Mod mod : modpack.getMods()) {
 			installMod(mod);
 		}
