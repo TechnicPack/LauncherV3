@@ -86,6 +86,8 @@ public class MinecraftLauncher {
 		}
 		commands.add("-XX:MaxPermSize=" + permSize + "m");
 		commands.add("-Djava.library.path=" + new File(pack.getBinDir(), "natives").getAbsolutePath());
+		// Tell forge 1.5 to download from our mirror instead
+		commands.add("-Dfml.core.libraries.mirror=http://mirror.technicpack.net/Technic/lib/fml/%s");
 		commands.add("-Dminecraft.applet.TargetDirectory=" +  pack.getInstalledDirectory().getAbsolutePath());
 		commands.add("-cp");
 		commands.add(buildClassPath());
