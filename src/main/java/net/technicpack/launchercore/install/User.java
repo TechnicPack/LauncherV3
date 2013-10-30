@@ -105,7 +105,7 @@ public class User {
 		assets.mkdirs();
 		File file = new File(assets, this.getDisplayName() + ".png");
 		try {
-			DownloadUtils.downloadFile("http://skins.technicpack.net/helm/" + this.getDisplayName() + "/100", file.getName(), file.getAbsolutePath());
+			DownloadUtils.downloadFile("https://minotar.net/helm/" + this.getDisplayName() + "/100", file.getName(), file.getAbsolutePath());
 		} catch (IOException e) {
 			Utils.getLogger().log(Level.INFO, "Error downloading user face image: " + this.getDisplayName(), e);
 		}
