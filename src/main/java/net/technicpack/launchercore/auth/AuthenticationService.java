@@ -104,6 +104,7 @@ public class AuthenticationService {
 		AuthResponse response;
 		try {
 			String returned = postJson(AUTH_SERVER + "authenticate", data);
+			System.out.println("Auth: " + returned);
 			response = Utils.getMojangGson().fromJson(returned, AuthResponse.class);
 		} catch (IOException e) {
 			throw new AuthenticationNetworkFailureException(e);
