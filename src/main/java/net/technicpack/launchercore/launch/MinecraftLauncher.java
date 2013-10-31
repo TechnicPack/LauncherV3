@@ -140,7 +140,7 @@ public class MinecraftLauncher {
 
 			File file = new File(Utils.getCacheDirectory(), library.getArtifactPath());
 			if (!file.isFile() || !file.exists()) {
-				throw new RuntimeException("Library " + library + " not found.");
+				throw new RuntimeException("Library " + library.getName() + " not found.");
 			}
 
 			if (result.length() > 1) {
