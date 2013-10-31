@@ -47,7 +47,7 @@ public class AuthResponse extends Response {
 	public String getError() {
 		String error = super.getError();
 
-		if (this.availableProfiles.length == 0 && (error == null || error.isEmpty())) {
+		if (this.availableProfiles != null && this.availableProfiles.length == 0 && (error == null || error.isEmpty())) {
 			return "No Minecraft License";
 		} else {
 			return error;
@@ -58,7 +58,7 @@ public class AuthResponse extends Response {
 	public String getErrorMessage() {
 		String message = super.getErrorMessage();
 
-		if (this.availableProfiles.length == 0 && (message == null || message.isEmpty())) {
+		if (this.availableProfiles != null && this.availableProfiles.length == 0 && (message == null || message.isEmpty())) {
 			return "This Mojang account has no purchased copies of Minecraft attached.";
 		} else {
 			return message;
