@@ -44,6 +44,28 @@ public class AuthResponse extends Response {
 	}
 
 	@Override
+	public String getError() {
+		String error = super.getError();
+
+		if (this.availableProfiles.length == 0 && (error == null || error.isEmpty())) {
+			return "No Minecraft License";
+		} else {
+			return error;
+		}
+	}
+
+	@Override
+	public String getErrorMessage() {
+		String message = super.getErrorMessage();
+
+		if (this.availableProfiles.length == 0 && (message == null || message.isEmpty())) {
+			return "This Mojang account has no purchased copies of Minecraft attached.";
+		} else {
+			return message;
+		}
+	}
+
+	@Override
 	public String toString() {
 		return "AuthResponse{" +
 				"accessToken='" + accessToken + '\'' +
