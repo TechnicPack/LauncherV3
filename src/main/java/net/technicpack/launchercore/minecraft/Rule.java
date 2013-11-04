@@ -47,7 +47,7 @@ public class Rule {
 				return false;
 			}
 
-			boolean matched = false;
+			boolean matched = true;
 
 			if (this.version != null) {
 				String osVersion = System.getProperty("os.version");

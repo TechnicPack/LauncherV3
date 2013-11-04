@@ -20,6 +20,7 @@
 package net.technicpack.launchercore.util;
 
 import java.io.File;
+import java.util.Locale;
 
 public enum OperatingSystem {
 	LINUX("linux", new String[]{"linux", "unix"}),
@@ -52,7 +53,10 @@ public enum OperatingSystem {
 		if (OperatingSystem.operatingSystem != null) {
 			return OperatingSystem.operatingSystem;
 		}
-		String osName = System.getProperty("os.name").toLowerCase();
+
+		//Always specify english when tolowercase/touppercasing values for comparison against well-known values
+		//Prevents an issue with turkish users
+		String osName = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
 
 		for (OperatingSystem operatingSystem : values()) {
 			for (String alias : operatingSystem.getAliases()) {
