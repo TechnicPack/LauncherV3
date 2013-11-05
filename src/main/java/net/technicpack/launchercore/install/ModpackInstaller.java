@@ -162,23 +162,14 @@ public class ModpackInstaller {
 		ZipUtils.extractFile(modpackJar, installedPack.getBinDir(), "version.json");
 
 		if (!versionFile.exists() && !installedPack.isLocalOnly()) {
-            String url = TechnicConstants.getTechnicVersionJson(version);
-
-            if (Utils.pingURL(url))
-            {
-                DownloadUtils.downloadFile(url, versionFile.getName(), versionFile.getAbsolutePath(), null, null, listener);
-                shouldUpdate = true;
-            } else
-            {
-                url = MojangConstants.getVersionJson(version);
-                DownloadUtils.downloadFile(url, versionFile.getName(), versionFile.getAbsolutePath(), null, null, listener);
-            }
+			String url = TechnicConstants.getTechnicVersionJson(version);
+			DownloadUtils.downloadFile(url, versionFile.getName(), versionFile.getAbsolutePath(), null, null, listener);
+			shouldUpdate = true;
 
 			if (!versionFile.exists()) {
 				throw new IOException("Unable to find a valid version profile for minecraft " + version);
 			}
-		} else if (!versionFile.exists())
-		{
+		} else if (!versionFile.exists()) {
 			throw new PackNotAvailableOfflineException(installedPack.getDisplayName());
 		}
 
@@ -244,7 +235,7 @@ public class ModpackInstaller {
 		if (versionFile.exists()) {
 			version = Version.load(versionFile);
 		} else {
-			Utils.pingURL(PlatformConstants.getDownloadCountUrl(installedPack.getName()));
+			Utils.pingHttpURL(PlatformConstants.getDownloadCountUrl(installedPack.getName()));
 			Utils.sendTracking("installModpack", installedPack.getName(), installedPack.getBuild());
 		}
 		return version;

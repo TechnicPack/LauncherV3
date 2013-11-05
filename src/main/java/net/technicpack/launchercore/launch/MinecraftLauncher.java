@@ -58,7 +58,7 @@ public class MinecraftLauncher {
 			first = false;
 		}
 		System.out.println("Running " + full.toString());
-		Utils.pingURL(PlatformConstants.getRunCountUrl(pack.getName()));
+		Utils.pingHttpURL(PlatformConstants.getRunCountUrl(pack.getName()));
 		if (!Utils.sendTracking("runModpack", pack.getName(), pack.getBuild())) {
 			System.out.println("Failed to record event");
 		}

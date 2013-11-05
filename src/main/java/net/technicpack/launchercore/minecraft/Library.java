@@ -107,12 +107,12 @@ public class Library {
 	public String getDownloadUrl(String path) {
 		if (this.url != null) {
 			String checkUrl = url + path;
-			if (Utils.pingURL(checkUrl)) {
+			if (Utils.pingHttpURL(checkUrl)) {
 				return checkUrl;
 			}
 			for (String string : fallback) {
 				checkUrl = string + path;
-				if (Utils.pingURL(checkUrl)) {
+				if (Utils.pingHttpURL(checkUrl)) {
 					return checkUrl;
 				}
 			}

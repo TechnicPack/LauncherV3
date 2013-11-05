@@ -64,15 +64,16 @@ public class Download implements Runnable {
 		ReadableByteChannel rbc = null;
 		FileOutputStream fos = null;
 		try {
-			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setDoInput(true);
-			conn.setDoOutput(false);
-			System.setProperty("http.agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.162 Safari/535.19");
-			conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.162 Safari/535.19");
-			HttpURLConnection.setFollowRedirects(true);
-			conn.setUseCaches(false);
-			conn.setInstanceFollowRedirects(true);
+			HttpURLConnection conn = Utils.openHttpConnection(url);
 			int response = conn.getResponseCode();
+			int responseFamily = response/100;
+
+			if (responseFamily == 3) {
+				throw new DownloadException("The server issued a redirect response which Technic failed to follow.");
+			} else if (responseFamily != 2) {
+				throw new DownloadException("The server issued a "+response+" response code.");
+			}
+
 			InputStream in = getConnectionInputStream(conn);
 
 			size = conn.getContentLength();
