@@ -79,6 +79,8 @@ public class ModpackInstaller {
 
 		CompleteVersion version = getMinecraftVersion(minecraft);
 
+		installVersionLibs(version);
+
 		boolean isLegacy = installedVersion != null && installedVersion.isLegacy();
 		if (shouldUpdate || isLegacy) {
 			installMinecraft(version, minecraft);
@@ -150,7 +152,6 @@ public class ModpackInstaller {
 
 	private void installMinecraft(CompleteVersion completeVersion, String version) throws IOException {
 		System.out.println(completeVersion);
-		installCompleteVersion(completeVersion);
 
 		String url = MojangConstants.getVersionDownload(version);
 		String md5 = DownloadUtils.getETag(url);
@@ -186,7 +187,7 @@ public class ModpackInstaller {
 		return Utils.getMojangGson().fromJson(json, CompleteVersion.class);
 	}
 
-	private void installCompleteVersion(CompleteVersion version) throws IOException {
+	private void installVersionLibs(CompleteVersion version) throws IOException {
 		for (Library library : version.getLibrariesForOS()) {
 			installLibrary(library);
 		}
