@@ -57,6 +57,7 @@ public class InstalledPack {
 	private transient File cacheDir;
 	private transient File resourceDir;
 	private transient File modsDir;
+	private transient File coremodsDir;
 	private transient PackInfo info;
 	private transient PackRefreshListener refreshListener;
 	private String name;
@@ -107,6 +108,7 @@ public class InstalledPack {
 		cacheDir = new File(installedDirectory, "cache");
 		resourceDir = new File(installedDirectory, "resources");
 		modsDir = new File(installedDirectory, "mods");
+		coremodsDir = new File(installedDirectory, "coremods");
 
 		binDir.mkdirs();
 		configDir.mkdirs();
@@ -114,6 +116,7 @@ public class InstalledPack {
 		cacheDir.mkdirs();
 		resourceDir.mkdirs();
 		modsDir.mkdirs();
+		coremodsDir.mkdirs();
 	}
 
 	public String getDisplayName() {
@@ -219,6 +222,10 @@ public class InstalledPack {
 
 	public File getModsDir() {
 		return modsDir;
+	}
+
+	public File getCoremodsDir() {
+		return coremodsDir;
 	}
 
 	public synchronized BufferedImage getLogo() {

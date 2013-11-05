@@ -115,6 +115,15 @@ public class ModpackInstaller {
 			mod.delete();
 		}
 
+		File coremodsDir = installedPack.getCoremodsDir();
+
+		if (coremodsDir != null && coremodsDir.exists()) {
+			for (File mod : coremodsDir.listFiles()) {
+				if (mod.isDirectory()) continue;
+				mod.delete();
+			}
+		}
+
 		//If we're installing a new version of modpack, then we need to get rid of the existing version.json
 		File versionFile = new File(installedPack.getBinDir(), "version.json");
 		if (versionFile.exists())
