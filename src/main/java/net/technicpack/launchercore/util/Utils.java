@@ -118,7 +118,7 @@ public class Utils {
 			final HttpURLConnection conn = openHttpConnection(url);
 			conn.setConnectTimeout(10000);
 
-			int responseCode = conn.getResponseCode() / 100;
+			int responseCode = conn.getResponseCode();
 			int responseFamily = responseCode / 100;
 
 			if (responseFamily == 2) {
