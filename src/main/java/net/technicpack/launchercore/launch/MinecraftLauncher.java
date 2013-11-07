@@ -134,6 +134,8 @@ public class MinecraftLauncher {
 			}
 
 			// If minecraftforge is described in the libraries, skip it
+			// HACK - Please let us get rid of this when we move to actually hosting forge,
+			// or at least only do it if the users are sticking with modpack.jar
 			if (library.getName().startsWith("net.minecraftforge:minecraftforge")) {
 				continue;
 			}

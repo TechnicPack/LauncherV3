@@ -169,7 +169,9 @@ public class ModpackInstaller {
 		File versionFile = new File(installedPack.getBinDir(), "version.json");
 		File modpackJar = new File(installedPack.getBinDir(), "modpack.jar");
 
-		ZipUtils.extractFile(modpackJar, installedPack.getBinDir(), "version.json");
+		if (modpackJar.exists()) {
+			ZipUtils.extractFile(modpackJar, installedPack.getBinDir(), "version.json");
+		}
 
 		if (!versionFile.exists() && !installedPack.isLocalOnly()) {
 			String url = TechnicConstants.getTechnicVersionJson(version);
@@ -189,6 +191,14 @@ public class ModpackInstaller {
 
 	private void installVersionLibs(CompleteVersion version) throws IOException {
 		for (Library library : version.getLibrariesForOS()) {
+
+			// If minecraftforge is described in the libraries, skip it
+			// HACK - Please let us get rid of this when we move to actually hosting forge,
+			// or at least only do it if the users are sticking with modpack.jar
+			if (library.getName().startsWith("net.minecraftforge:minecraftforge")) {
+				continue;
+			}
+
 			installLibrary(library);
 		}
 	}
@@ -208,7 +218,11 @@ public class ModpackInstaller {
 		}
 
 		if (!cache.exists() || (!md5.isEmpty() && !MD5Utils.checkMD5(cache, md5))) {
-			DownloadUtils.downloadFile(url, cache.getName(), cache.getAbsolutePath(), null, md5, listener);
+			try {
+				DownloadUtils.downloadFile(url, cache.getName(), cache.getAbsolutePath(), null, md5, listener);
+			} catch (IOException ex) {
+
+			}
 		}
 
 		if (natives != null && cache.exists()) {
