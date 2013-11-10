@@ -44,7 +44,6 @@ public class ModpackInstaller {
 	private final InstalledPack installedPack;
 	private String build;
 	private boolean finished = false;
-	private boolean shouldUpdate = false;
 
 	public ModpackInstaller(DownloadListener listener, InstalledPack installedPack, String build) {
 		this.listener = listener;
@@ -62,7 +61,7 @@ public class ModpackInstaller {
 		installOldForgeLibs(minecraft);
 
 		Version installedVersion = getInstalledVersion();
-		shouldUpdate = installedVersion == null;
+		boolean shouldUpdate = installedVersion == null;
 		if (!shouldUpdate && !build.equals(installedVersion.getVersion())) {
 			int result = JOptionPane.showConfirmDialog(component, "Would you like to update this pack?", "Update Found", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
 
@@ -169,19 +168,20 @@ public class ModpackInstaller {
 		File versionFile = new File(installedPack.getBinDir(), "version.json");
 		File modpackJar = new File(installedPack.getBinDir(), "modpack.jar");
 
+		boolean didExtract = false;
+
 		if (modpackJar.exists()) {
-			ZipUtils.extractFile(modpackJar, installedPack.getBinDir(), "version.json");
+			didExtract = ZipUtils.extractFile(modpackJar, installedPack.getBinDir(), "version.json");
 		}
 
-		if (!versionFile.exists() && !installedPack.isLocalOnly()) {
+		if (!didExtract && !installedPack.isLocalOnly()) {
 			String url = TechnicConstants.getTechnicVersionJson(version);
 			DownloadUtils.downloadFile(url, versionFile.getName(), versionFile.getAbsolutePath(), null, null, listener);
-			shouldUpdate = true;
 
 			if (!versionFile.exists()) {
 				throw new IOException("Unable to find a valid version profile for minecraft " + version);
 			}
-		} else if (!versionFile.exists()) {
+		} else if (!versionFile.exists() && installedPack.isLocalOnly()) {
 			throw new PackNotAvailableOfflineException(installedPack.getDisplayName());
 		}
 
