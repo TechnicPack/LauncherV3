@@ -47,8 +47,8 @@ public class MinecraftLauncher {
 		this.version = version;
 	}
 
-	public MinecraftProcess launch(User user) throws IOException {
-		List<String> commands = buildCommands(user);
+	public MinecraftProcess launch(User user, LaunchOptions options) throws IOException {
+		List<String> commands = buildCommands(user, options);
 		StringBuilder full = new StringBuilder();
 		boolean first = true;
 
@@ -66,7 +66,7 @@ public class MinecraftLauncher {
 		return new MinecraftProcess(commands, process);
 	}
 
-	private List<String> buildCommands(User user) {
+	private List<String> buildCommands(User user, LaunchOptions options) {
 		List<String> commands = new ArrayList<String>();
 		commands.add(OperatingSystem.getJavaDir());
 
@@ -93,6 +93,7 @@ public class MinecraftLauncher {
 		commands.add(buildClassPath());
 		commands.add(version.getMainClass());
 		commands.addAll(Arrays.asList(getMinecraftArguments(version, pack.getInstalledDirectory(), user)));
+		options.appendToCommands(commands);
 
 		//TODO: Add all the other less important commands
 		return commands;

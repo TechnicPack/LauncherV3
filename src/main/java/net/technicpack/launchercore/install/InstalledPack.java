@@ -361,6 +361,10 @@ public class InstalledPack {
 		return BACKUP_ICON;
 	}
 
+	public String getIconPath() {
+		return Utils.getAssetsDirectory() + "/packs/" + getName() + "/icon.png";
+	}
+
 	@Override
 	public String toString() {
 		return "InstalledPack{" +
