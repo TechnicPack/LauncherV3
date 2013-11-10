@@ -58,26 +58,26 @@ public class LaunchOptions {
 
 	public void appendToCommands(List<String> commands) {
 		if (getTitle() != null) {
-			commands.add("-title");
+			commands.add("--title");
 			commands.add(title);
 		}
 
 		if (getWidth() > -1) {
-			commands.add("-width");
+			commands.add("--width");
 			commands.add(Integer.toString(getWidth()));
 		}
 
 		if (getHeight() > -1) {
-			commands.add("-height");
+			commands.add("--height");
 			commands.add(Integer.toString(getHeight()));
 		}
 
 		if (getFullscreen()) {
-			commands.add("-fullscreen");
+			commands.add("--fullscreen");
 		}
 
 		if (getIconPath() != null) {
-			commands.add("-icon");
+			commands.add("--icon");
 			commands.add(getIconPath());
 		}
 	}
