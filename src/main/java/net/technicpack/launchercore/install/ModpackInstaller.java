@@ -19,6 +19,7 @@
 
 package net.technicpack.launchercore.install;
 
+import net.technicpack.launchercore.exception.CacheDeleteException;
 import net.technicpack.launchercore.exception.PackNotAvailableOfflineException;
 import net.technicpack.launchercore.minecraft.CompleteVersion;
 import net.technicpack.launchercore.minecraft.Library;
@@ -113,7 +114,10 @@ public class ModpackInstaller {
 
 		for (File mod : modsDir.listFiles()) {
 			if (mod.isDirectory()) continue;
-			mod.delete();
+
+			if (!mod.delete()) {
+				throw new CacheDeleteException(mod.getAbsolutePath());
+			}
 		}
 
 		File coremodsDir = installedPack.getCoremodsDir();
@@ -121,14 +125,20 @@ public class ModpackInstaller {
 		if (coremodsDir != null && coremodsDir.exists()) {
 			for (File mod : coremodsDir.listFiles()) {
 				if (mod.isDirectory()) continue;
-				mod.delete();
+
+				if (!mod.delete()) {
+					throw new CacheDeleteException(mod.getAbsolutePath());
+				}
 			}
 		}
 
 		//If we're installing a new version of modpack, then we need to get rid of the existing version.json
 		File versionFile = new File(installedPack.getBinDir(), "version.json");
-		if (versionFile.exists())
-			versionFile.delete();
+		if (versionFile.exists()) {
+			if (!versionFile.delete()) {
+				throw new CacheDeleteException(versionFile.getAbsolutePath());
+			}
+		}
 
 		for (Mod mod : modpack.getMods()) {
 			installMod(mod);
