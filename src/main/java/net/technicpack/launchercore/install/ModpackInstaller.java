@@ -112,24 +112,11 @@ public class ModpackInstaller {
 	private void installModpack(Modpack modpack) throws IOException {
 		File modsDir = installedPack.getModsDir();
 
-		for (File mod : modsDir.listFiles()) {
-			if (mod.isDirectory()) continue;
-
-			if (!mod.delete()) {
-				throw new CacheDeleteException(mod.getAbsolutePath());
-			}
-		}
-
+		deleteMods(modsDir);
 		File coremodsDir = installedPack.getCoremodsDir();
 
 		if (coremodsDir != null && coremodsDir.exists()) {
-			for (File mod : coremodsDir.listFiles()) {
-				if (mod.isDirectory()) continue;
-
-				if (!mod.delete()) {
-					throw new CacheDeleteException(mod.getAbsolutePath());
-				}
-			}
+			deleteMods(coremodsDir);
 		}
 
 		//If we're installing a new version of modpack, then we need to get rid of the existing version.json
@@ -283,5 +270,23 @@ public class ModpackInstaller {
 		installedPack.getInstalledDirectory();
 		installedPack.initDirectories();
 		return this.getMinecraftVersion(null);
+	}
+
+	private void deleteMods(File modsDir) throws CacheDeleteException {
+		for (File mod : modsDir.listFiles()) {
+			
+			if (mod.isDirectory()) {
+				File modDir = mod;
+				for (File modRecurse : modDir.listFiles()) {
+					if (modRecurse.getName().endsWith(".zip") || modRecurse.getName().endsWith(".jar")) modRecurse.delete();
+					if (modRecurse.isDirectory()) deleteMods(modRecurse);
+				}
+				continue;
+			}
+
+			if (!mod.delete()) {
+				throw new CacheDeleteException(mod.getAbsolutePath());
+			}
+		}
 	}
 }
