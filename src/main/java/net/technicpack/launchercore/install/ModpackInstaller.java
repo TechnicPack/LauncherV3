@@ -274,18 +274,15 @@ public class ModpackInstaller {
 
 	private void deleteMods(File modsDir) throws CacheDeleteException {
 		for (File mod : modsDir.listFiles()) {
-			
 			if (mod.isDirectory()) {
-				File modDir = mod;
-				for (File modRecurse : modDir.listFiles()) {
-					if (modRecurse.getName().endsWith(".zip") || modRecurse.getName().endsWith(".jar")) modRecurse.delete();
-					if (modRecurse.isDirectory()) deleteMods(modRecurse);
-				}
+				deleteMods(mod);
 				continue;
 			}
 
-			if (!mod.delete()) {
-				throw new CacheDeleteException(mod.getAbsolutePath());
+			if (mod.getName().endsWith(".zip") || mod.getName().endsWith(".jar")) {
+				if (!mod.delete()) {
+					throw new CacheDeleteException(mod.getAbsolutePath());
+				}
 			}
 		}
 	}
