@@ -32,7 +32,7 @@ public class Settings {
 	public static Settings instance = new Settings();
 	private String directory;
 	private int memory;
-	private int launchAction;
+	private LaunchAction launchAction;
 	private String buildStream = STABLE;
 	private boolean showConsole;
 	private boolean migrate;
@@ -85,11 +85,11 @@ public class Settings {
 		save();
 	}
 
-	public static int getLaunchAction() {
+	public static LaunchAction getLaunchAction() {
 		return instance.launchAction;
 	}
 
-	public static void setLaunchAction(int launchAction) {
+	public static void setLaunchAction(LaunchAction launchAction) {
 	    instance.launchAction = launchAction;
 	    save();
 	}
