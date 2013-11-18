@@ -20,7 +20,7 @@ package net.technicpack.launchercore.util;
 
 public enum LaunchAction {
 	HIDE("Hide Launcher"),
-	CLOSE("Close Launcher and Console"),
+	CLOSE("Close Launcher"),
 	NOTHING("Stay Open");
 	private final String display;
 
