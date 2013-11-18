@@ -48,6 +48,10 @@ public class MinecraftLauncher {
 	}
 
 	public MinecraftProcess launch(User user, LaunchOptions options) throws IOException {
+		return launch(user, options, null);
+	}
+
+	public MinecraftProcess launch(User user, LaunchOptions options, MinecraftExitListener exitListener) throws IOException {
 		List<String> commands = buildCommands(user, options);
 		StringBuilder full = new StringBuilder();
 		boolean first = true;
@@ -63,7 +67,9 @@ public class MinecraftLauncher {
 			System.out.println("Failed to record event");
 		}
 		Process process = new ProcessBuilder(commands).directory(pack.getInstalledDirectory()).redirectErrorStream(true).start();
-		return new MinecraftProcess(commands, process);
+		MinecraftProcess mcProcess = new MinecraftProcess(commands, process);
+		if (exitListener != null) mcProcess.setExitListener(exitListener);
+		return mcProcess;
 	}
 
 	private List<String> buildCommands(User user, LaunchOptions options) {
