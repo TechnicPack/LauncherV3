@@ -139,6 +139,7 @@ public class Settings {
 				", showConsole=" + showConsole +
 				", migrate=" + migrate +
 				", migrateDir='" + migrateDir + '\'' +
+				", launchAction='" + launchAction +'\'' +
 				'}';
 	}
 }
