@@ -136,6 +136,7 @@ public class InstalledPack {
 
 	public void setInfo(PackInfo info) {
 		this.info = info;
+		this.isLocalOnly = false;
 	}
 
 	public boolean isLocalOnly() {
