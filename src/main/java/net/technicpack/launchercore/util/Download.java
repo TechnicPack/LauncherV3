@@ -213,7 +213,10 @@ public class Download implements Runnable {
 						try {
 							rbc.close();
 							downloadThread.interrupt();
-						} catch (IOException ignore) {
+						} catch (Exception ignore) {
+							//We catch all exceptions here, because ReadableByteChannel is AWESOME
+							//and was throwing NPE's sometimes when we tried to close it after
+							//the connection broke.
 						}
 						return;
 					}
