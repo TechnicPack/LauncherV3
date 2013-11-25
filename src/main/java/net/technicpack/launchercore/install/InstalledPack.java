@@ -265,6 +265,10 @@ public class InstalledPack {
 			downloadImage(image, resourceFile, url, md5);
 		}
 
+		if (image.get() == null) {
+			return false;
+		}
+
 		return cached;
 	}
 
