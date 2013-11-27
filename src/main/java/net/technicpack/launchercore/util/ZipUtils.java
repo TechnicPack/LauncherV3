@@ -34,6 +34,7 @@ import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.logging.Level;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 public class ZipUtils {
@@ -137,7 +138,15 @@ public class ZipUtils {
 		try {
 			Enumeration<? extends ZipEntry> entries = zipFile.entries();
 			while (entries.hasMoreElements()) {
-				ZipEntry entry = entries.nextElement();
+				ZipEntry entry = null;
+
+				try {
+					entry = entries.nextElement();
+				} catch (IllegalArgumentException ex) {
+					//We must catch & rethrow as a zip exception because some crappy code in the zip lib will
+					//throw illegal argument exceptions for malformed zips.
+					throw new ZipException("IllegalArgumentException while parsing next element.");
+				}
 
 				if ((extractRules == null || extractRules.shouldExtract(entry.getName())) && !entry.getName().contains("../")) {
 					File outputFile = new File(output, entry.getName());
