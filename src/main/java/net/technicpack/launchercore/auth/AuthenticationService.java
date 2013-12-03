@@ -34,19 +34,6 @@ import java.net.URL;
 public class AuthenticationService {
 	private static final String AUTH_SERVER = "https://authserver.mojang.com/";
 
-	public static boolean validate(User user) throws AuthenticationNetworkFailureException {
-		ValidateRequest validateRequest = new ValidateRequest(user.getAccessToken());
-		String data = Utils.getMojangGson().toJson(validateRequest);
-
-		try {
-			String returned = postJson(AUTH_SERVER + "validate", data);
-			System.out.println("Valid: " + returned);
-			return returned.isEmpty();
-		} catch (IOException e) {
-			throw new AuthenticationNetworkFailureException(e);
-		}
-	}
-
 	public static RefreshResponse requestRefresh(User user) throws AuthenticationNetworkFailureException {
 		RefreshRequest refreshRequest = new RefreshRequest(user.getAccessToken(), user.getClientToken());
 		String data = Utils.getMojangGson().toJson(refreshRequest);
