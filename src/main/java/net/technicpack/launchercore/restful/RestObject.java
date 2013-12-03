@@ -57,6 +57,10 @@ public class RestObject {
 			String data = IOUtils.toString(stream);
 			T result = gson.fromJson(data, restObject);
 
+			if (result == null ) {
+				throw new RestfulAPIException("Unable to access URL [" + url + "]");
+			}
+
 			if (result.hasError()) {
 				throw new RestfulAPIException("Error in response: " + result.getError());
 			}
