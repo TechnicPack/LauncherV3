@@ -84,6 +84,7 @@ public class InstalledPack {
 		downloading.put(background, new AtomicReference<Boolean>(false));
 		downloading.put(icon, new AtomicReference<Boolean>(false));
 		isLocalOnly = false;
+		build = RECOMMENDED;
 	}
 
 	public void setRefreshListener(PackRefreshListener refreshListener) {
