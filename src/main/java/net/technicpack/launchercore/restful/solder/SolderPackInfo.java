@@ -19,6 +19,7 @@
 
 package net.technicpack.launchercore.restful.solder;
 
+import net.technicpack.launchercore.exception.BuildInaccessibleException;
 import net.technicpack.launchercore.exception.RestfulAPIException;
 import net.technicpack.launchercore.restful.Modpack;
 import net.technicpack.launchercore.restful.PackInfo;
@@ -104,14 +105,18 @@ public class SolderPackInfo extends RestObject implements PackInfo {
 	}
 
 	@Override
-	public Modpack getModpack(String build) {
-		Modpack modpack = null;
+	public Modpack getModpack(String build) throws BuildInaccessibleException {
 		try {
-			modpack = RestObject.getRestObject(Modpack.class, SolderConstants.getSolderBuildUrl(solder.getUrl(), name, build));
+			Modpack pack = RestObject.getRestObject(Modpack.class, SolderConstants.getSolderBuildUrl(solder.getUrl(), name, build));
+
+			if (pack != null) {
+				return pack;
+			}
 		} catch (RestfulAPIException e) {
-			e.printStackTrace();
+			throw new BuildInaccessibleException(display_name, build, e);
 		}
-		return modpack;
+
+		throw new BuildInaccessibleException(display_name, build);
 	}
 
 	@Override
