@@ -19,8 +19,14 @@ public class BuildInaccessibleException extends IOException {
 
 	@Override
 	public String getMessage() {
-		if (this.cause == null) {
-			return "An error was raised while attempting to read pack info for modpack "+packDisplayName+", build "+build+".  Try again in a few minutes, or contact the pack host if the problem persists.";
+		if (this.cause != null) {
+			Throwable rootCause = this.cause;
+
+			while (rootCause.getCause() != null) {
+				rootCause = rootCause.getCause();
+			}
+
+			return "An error was raised while attempting to read pack info for modpack "+packDisplayName+", build "+build+": "+rootCause.getMessage();
 		} else {
 			return "The pack host returned unrecognizable garbage while attempting to read pack info for modpack "+packDisplayName+", build "+build+".";
 		}
