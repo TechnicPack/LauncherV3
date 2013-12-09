@@ -19,18 +19,24 @@
 
 package net.technicpack.launchercore.restful.solder;
 
+import net.technicpack.launchercore.util.Settings;
+
 public class SolderConstants {
 	public static final String TECHNIC = "http://solder.technicpack.net/api/";
 
 	public static String getSolderPackInfoUrl(String solder, String modpack) {
+		return solder + "modpack/" + modpack + "/?cid=" + Settings.getClientId();
+	}
+	
+	public static String getSolderPackInfoUrlWithoutCid(String solder, String modpack) {
 		return solder + "modpack/" + modpack + "/";
 	}
 
 	public static String getSolderBuildUrl(String solder, String modpack, String build) {
-		return getSolderPackInfoUrl(solder, modpack) + build + "/";
+		return getSolderPackInfoUrlWithoutCid(solder, modpack) + build + "/?cid=" + Settings.getClientId();
 	}
 
 	public static String getFullSolderUrl(String solder) {
-		return solder + "modpack/?include=full";
+		return solder + "modpack/?include=full&cid=" + Settings.getClientId();
 	}
 }

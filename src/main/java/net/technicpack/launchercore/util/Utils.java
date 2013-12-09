@@ -141,7 +141,7 @@ public class Utils {
 			HttpURLConnection con = (HttpURLConnection) urlObj.openConnection();
 			con.setRequestMethod("POST");
 			
-			String urlParameters = "v=1&tid=UA-30896795-3&cid=" + UUID.randomUUID() + "&t=event&ec=" + category + "&ea=" + action + "&el=" + label;
+			String urlParameters = "v=1&tid=UA-30896795-3&cid=" + Settings.getClientId() + "&t=event&ec=" + category + "&ea=" + action + "&el=" + label;
 			
 			con.setDoOutput(true);
 			DataOutputStream wr = new DataOutputStream(con.getOutputStream());
