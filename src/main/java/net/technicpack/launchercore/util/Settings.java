@@ -24,6 +24,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.UUID;
 import java.util.logging.Level;
 
 public class Settings {
@@ -36,6 +37,7 @@ public class Settings {
 	private String buildStream = STABLE;
 	private boolean showConsole;
 	private boolean migrate;
+	private String clientId = UUID.randomUUID().toString();
 	private String migrateDir;
 
 	public static void load() {
@@ -101,6 +103,10 @@ public class Settings {
 	public static void setBuildStream(String buildStream) {
 		instance.buildStream = buildStream;
 		save();
+	}
+	
+	public static String getClientId() {
+		return instance.clientId;
 	}
 
 	public static boolean getShowConsole() {
