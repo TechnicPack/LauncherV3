@@ -36,6 +36,7 @@ public class Settings {
 	private LaunchAction launchAction;
 	private String buildStream = STABLE;
 	private boolean showConsole;
+	private String languageCode = "default";
 	private boolean migrate;
 	private String clientId = UUID.randomUUID().toString();
 	private String migrateDir;
@@ -118,6 +119,15 @@ public class Settings {
 		save();
 	}
 
+	public static String getLanguageCode() {
+		return instance.languageCode;
+	}
+
+	public static void setLanguageCode(String languageCode) {
+		instance.languageCode = languageCode;
+		save();
+	}
+
 	public static boolean getMigrate() {
 		return instance.migrate;
 	}
@@ -146,6 +156,7 @@ public class Settings {
 				", migrate=" + migrate +
 				", migrateDir='" + migrateDir + '\'' +
 				", launchAction='" + launchAction +'\'' +
+				", languageCode='" + languageCode + '\'' +
 				'}';
 	}
 }
