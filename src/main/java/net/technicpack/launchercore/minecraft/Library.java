@@ -117,6 +117,6 @@ public class Library {
 				}
 			}
 		}
-		return "https://s3.amazonaws.com/Minecraft.Download/libraries/" + path;
+		return " https://libraries.minecraft.net/" + path;
 	}
 }
