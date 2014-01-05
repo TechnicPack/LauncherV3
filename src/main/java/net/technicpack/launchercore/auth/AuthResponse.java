@@ -26,6 +26,7 @@ public class AuthResponse extends Response {
 	private String clientToken;
 	private Profile[] availableProfiles;
 	private Profile selectedProfile;
+	private User user;
 
 	public String getAccessToken() {
 		return accessToken;
@@ -41,6 +42,10 @@ public class AuthResponse extends Response {
 
 	public Profile getSelectedProfile() {
 		return selectedProfile;
+	}
+
+	public User getUser() {
+		return user;
 	}
 
 	@Override

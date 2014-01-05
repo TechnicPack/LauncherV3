@@ -22,6 +22,7 @@ package net.technicpack.launchercore.auth;
 public class Profile {
 	private String id;
 	private String name;
+	private boolean legacy;
 
     public Profile() {
 
@@ -38,6 +39,10 @@ public class Profile {
 
 	public String getName() {
 		return name;
+	}
+
+	public boolean isLegacy() {
+		return legacy;
 	}
 
 	@Override

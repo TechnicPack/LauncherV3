@@ -34,15 +34,15 @@ import java.net.URL;
 public class AuthenticationService {
 	private static final String AUTH_SERVER = "https://authserver.mojang.com/";
 
-	public static RefreshResponse requestRefresh(User user) throws AuthenticationNetworkFailureException {
+	public static AuthResponse requestRefresh(User user) throws AuthenticationNetworkFailureException {
 		RefreshRequest refreshRequest = new RefreshRequest(user.getAccessToken(), user.getClientToken());
 		String data = Utils.getMojangGson().toJson(refreshRequest);
 
-		RefreshResponse response;
+		AuthResponse response;
 		try {
 			String returned = postJson(AUTH_SERVER + "refresh", data);
 			System.out.println(returned);
-			response = Utils.getMojangGson().fromJson(returned, RefreshResponse.class);
+			response = Utils.getMojangGson().fromJson(returned, AuthResponse.class);
 		} catch (IOException e) {
 			throw new AuthenticationNetworkFailureException(e);
 		}

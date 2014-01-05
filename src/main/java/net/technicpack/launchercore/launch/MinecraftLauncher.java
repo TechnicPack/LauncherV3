@@ -121,7 +121,24 @@ public class MinecraftLauncher {
 		map.put("version_name", version.getId());
 
 		map.put("game_directory", gameDirectory.getAbsolutePath());
-		map.put("game_assets", Utils.getAssetsDirectory().getAbsolutePath());
+
+		String targetAssets = Utils.getAssetsDirectory().getAbsolutePath();
+
+		String assetsKey = this.version.getAssetsKey();
+
+		if (assetsKey == null || assetsKey.isEmpty()) {
+			assetsKey = "legacy";
+		}
+
+		if (this.version.getAreAssetsVirtual()) {
+			targetAssets += File.separator + "virtual" + File.separator + assetsKey;
+		}
+
+		map.put("game_assets",targetAssets);
+		map.put("assets_root", targetAssets);
+		map.put("assets_index_name", assetsKey);
+		map.put("user_type", user.getProfile().isLegacy()?"legacy":"mojang");
+		map.put("user_properties", user.getUserPropertiesAsJson());
 
 		for (int i = 0; i < split.length; i++) {
 			split[i] = substitutor.replace(split[i]);
@@ -148,7 +165,7 @@ public class MinecraftLauncher {
 				continue;
 			}
 
-			File file = new File(Utils.getCacheDirectory(), library.getArtifactPath());
+			File file = new File(Utils.getCacheDirectory(), library.getArtifactPath().replace("${arch}", System.getProperty("sun.arch.data.model")));
 			if (!file.isFile() || !file.exists()) {
 				throw new RuntimeException("Library " + library.getName() + " not found.");
 			}

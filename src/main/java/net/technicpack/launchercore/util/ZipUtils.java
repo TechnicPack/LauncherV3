@@ -161,8 +161,8 @@ public class ZipUtils {
 				}
 
 				if (listener != null) {
-					long totalProgress = progress / size;
-					listener.stateChanged("Extracting " + entry.getName() + "...", totalProgress);
+					float totalProgress = (float)progress / (float)size;
+					listener.stateChanged("Extracting " + entry.getName() + "...", totalProgress * 100.0f);
 				}
 				progress++;
 			}

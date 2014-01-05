@@ -35,6 +35,8 @@ public class CompleteVersion implements Version {
 	private int minimumLauncherVersion;
 	private String incompatibilityReason;
 	private List<Rule> rules;
+	private String assets;
+	private transient boolean areAssetsVirtual;
 
 	@Override
 	public String getId() {
@@ -103,6 +105,18 @@ public class CompleteVersion implements Version {
 
 	public List<Rule> getRules() {
 		return rules;
+	}
+
+	public String getAssetsKey() {
+		return assets;
+	}
+
+	public boolean getAreAssetsVirtual() {
+		return areAssetsVirtual;
+	}
+
+	public void setAreAssetsVirtual(boolean areAssetsVirtual) {
+		this.areAssetsVirtual = areAssetsVirtual;
 	}
 
 	@Override

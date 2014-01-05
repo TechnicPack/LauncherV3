@@ -19,11 +19,10 @@
 
 package net.technicpack.launchercore.install;
 
+import com.google.gson.JsonObject;
 import net.technicpack.launchercore.auth.AuthResponse;
 import net.technicpack.launchercore.auth.Profile;
-import net.technicpack.launchercore.auth.RefreshResponse;
 import net.technicpack.launchercore.util.DownloadUtils;
-import net.technicpack.launchercore.util.ResourceUtils;
 import net.technicpack.launchercore.util.Utils;
 
 import javax.imageio.ImageIO;
@@ -38,6 +37,7 @@ public class User {
 	private String clientToken;
 	private String displayName;
 	private Profile profile;
+	private JsonObject userProperties;
     private transient boolean isOffline;
 
 	public User() {
@@ -52,6 +52,7 @@ public class User {
         this.clientToken = "0";
         this.profile = new Profile("0", "");
         this.isOffline = true;
+	    this.userProperties = Utils.getGson().fromJson("{}", JsonObject.class);
     }
 
 	public User(String username, AuthResponse response) {
@@ -61,15 +62,12 @@ public class User {
 		this.clientToken = response.getClientToken();
 		this.displayName = response.getSelectedProfile().getName();
 		this.profile = response.getSelectedProfile();
-	}
 
-	public User(String username, RefreshResponse response) {
-		this.isOffline = false;
-		this.username = username;
-		this.accessToken = response.getAccessToken();
-		this.clientToken = response.getClientToken();
-		this.displayName = response.getSelectedProfile().getName();
-		this.profile = response.getSelectedProfile();
+		if (response.getUser() == null) {
+			this.userProperties = Utils.getGson().fromJson("{}", JsonObject.class);
+		} else {
+			this.userProperties = response.getUser().getUserProperties();
+		}
 	}
 
 	public String getUsername() {
@@ -98,6 +96,10 @@ public class User {
 
 	public String getSessionId() {
 		return "token:" + accessToken + ":" + profile.getId();
+	}
+
+	public String getUserPropertiesAsJson() {
+		return Utils.getGson().toJson(this.userProperties);
 	}
 
 	public void downloadFaceImage() {
