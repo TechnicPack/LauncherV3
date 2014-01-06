@@ -47,7 +47,7 @@ public class InstallModpackTask implements IInstallTask {
 
 			File cache = new File(this.pack.getCacheDir(), name);
 
-			queue.AddTask(new EnsureFileTask(cache, packOutput, url, md5, null));
+			queue.AddNextTask(new EnsureFileTask(cache, packOutput, url, md5, null));
 		}
 
 		queue.AddTask(new CleanupModpackCacheTask(this.pack, this.build));

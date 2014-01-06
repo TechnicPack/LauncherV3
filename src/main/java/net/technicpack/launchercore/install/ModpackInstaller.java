@@ -81,9 +81,6 @@ public class ModpackInstaller {
 			}
 		}
 
-		queue.AddTask(new VerifyVersionFilePresentTask(installedPack, minecraft));
-		queue.AddTask(new HandleVersionFileTask(installedPack));
-
 		if (shouldUpdate) {
 			//If we're installing a new version of modpack, then we need to get rid of the existing version.json
 			File versionFile = new File(installedPack.getBinDir(), "version.json");
@@ -96,17 +93,20 @@ public class ModpackInstaller {
 			queue.AddTask(new InstallModpackTask(this.installedPack, this.build));
 		}
 
-		if ((installedVersion != null && installedVersion.isLegacy()) || shouldUpdate)
+		queue.AddTask(new VerifyVersionFilePresentTask	(installedPack, minecraft));
+	queue.AddTask(new HandleVersionFileTask(installedPack));
+
+	if ((installedVersion != null && installedVersion.isLegacy()) || shouldUpdate)
 			queue.AddTask(new InstallMinecraftIfNecessaryTask(this.installedPack, minecraft));
 
-		queue.RunAllTasks();
+	queue.RunAllTasks();
 
-		Version versionFile = new Version(build, false);
-		versionFile.save(installedPack.getBinDir());
+	Version versionFile = new Version(build, false);
+	versionFile.save(installedPack.getBinDir());
 
-		finished = true;
-		return queue.getCompleteVersion();
-	}
+	finished = true;
+	return queue.getCompleteVersion();
+}
 
 	private Version getInstalledVersion() {
 		Version version = null;
