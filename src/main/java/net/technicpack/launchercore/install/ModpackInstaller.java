@@ -68,6 +68,7 @@ public class ModpackInstaller {
 			queue.AddTask(new EnsureFileTask(new File(Utils.getCacheDirectory(), "fml_libs.zip"),new File(installedPack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs.zip"));
 		}
 
+		queue.RunAllTasks();
 		Version installedVersion = this.getInstalledVersion();
 
 		boolean shouldUpdate = installedVersion == null;
