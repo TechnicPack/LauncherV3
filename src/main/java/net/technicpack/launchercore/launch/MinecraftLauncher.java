@@ -165,7 +165,7 @@ public class MinecraftLauncher {
 				continue;
 			}
 
-			File file = new File(Utils.getCacheDirectory(), library.getArtifactPath().replace("${arch}", System.getProperty("sun.arch.data.launcher")));
+			File file = new File(Utils.getCacheDirectory(), library.getArtifactPath().replace("${arch}", System.getProperty("sun.arch.data.model")));
 			if (!file.isFile() || !file.exists()) {
 				throw new RuntimeException("Library " + library.getName() + " not found.");
 			}

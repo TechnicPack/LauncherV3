@@ -59,8 +59,8 @@ public class HandleVersionFileTask implements IInstallTask {
 				}
 			}
 
-			String path = library.getArtifactPath(natives).replace("${arch}", System.getProperty("sun.arch.data.launcher"));
-			String url = library.getDownloadUrl(path).replace("${arch}", System.getProperty("sun.arch.data.launcher"));
+			String path = library.getArtifactPath(natives).replace("${arch}", System.getProperty("sun.arch.data.model"));
+			String url = library.getDownloadUrl(path).replace("${arch}", System.getProperty("sun.arch.data.model"));
 			String md5 = DownloadUtils.getETag(url);
 
 			File cache = new File(Utils.getCacheDirectory(), path);
