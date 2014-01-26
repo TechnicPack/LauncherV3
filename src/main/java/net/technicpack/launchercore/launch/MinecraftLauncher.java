@@ -20,7 +20,7 @@
 package net.technicpack.launchercore.launch;
 
 import net.technicpack.launchercore.install.InstalledPack;
-import net.technicpack.launchercore.install.User;
+import net.technicpack.launchercore.install.user.User;
 import net.technicpack.launchercore.minecraft.CompleteVersion;
 import net.technicpack.launchercore.minecraft.Library;
 import net.technicpack.launchercore.restful.PlatformConstants;
@@ -165,7 +165,7 @@ public class MinecraftLauncher {
 				continue;
 			}
 
-			File file = new File(Utils.getCacheDirectory(), library.getArtifactPath().replace("${arch}", System.getProperty("sun.arch.data.model")));
+			File file = new File(Utils.getCacheDirectory(), library.getArtifactPath().replace("${arch}", System.getProperty("sun.arch.data.launcher")));
 			if (!file.isFile() || !file.exists()) {
 				throw new RuntimeException("Library " + library.getName() + " not found.");
 			}

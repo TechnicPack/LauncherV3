@@ -21,6 +21,7 @@ package net.technicpack.launchercore.restful;
 
 
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
+import net.technicpack.launchercore.install.user.User;
 
 import java.util.List;
 
@@ -46,5 +47,5 @@ public interface PackInfo {
 
 	public boolean shouldForceDirectory();
 
-	public Modpack getModpack(String build) throws BuildInaccessibleException;
+	public Modpack getModpack(String build, User user) throws BuildInaccessibleException;
 }

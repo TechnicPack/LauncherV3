@@ -20,8 +20,7 @@
 package net.technicpack.launchercore.auth;
 
 import net.technicpack.launchercore.exception.AuthenticationNetworkFailureException;
-import net.technicpack.launchercore.install.User;
-import net.technicpack.launchercore.install.Users;
+import net.technicpack.launchercore.install.user.User;
 import net.technicpack.launchercore.util.Utils;
 import org.apache.commons.io.IOUtils;
 

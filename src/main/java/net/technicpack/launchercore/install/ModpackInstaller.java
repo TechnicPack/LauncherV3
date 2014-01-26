@@ -28,6 +28,7 @@ import net.technicpack.launchercore.install.tasks.InstallMinecraftIfNecessaryTas
 import net.technicpack.launchercore.install.tasks.InstallModpackTask;
 import net.technicpack.launchercore.install.tasks.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.VerifyVersionFilePresentTask;
+import net.technicpack.launchercore.install.user.User;
 import net.technicpack.launchercore.minecraft.CompleteVersion;
 import net.technicpack.launchercore.restful.Modpack;
 import net.technicpack.launchercore.restful.PackInfo;
@@ -54,12 +55,12 @@ public class ModpackInstaller {
 		this.build = build;
 	}
 
-	public CompleteVersion installPack(Component component) throws IOException {
+	public CompleteVersion installPack(Component component, User user) throws IOException {
 		InstallTasksQueue queue = new InstallTasksQueue(this.listener, component, this.installedPack, this.build);
 		queue.AddTask(new InitPackDirectoryTask(this.installedPack));
 
 		PackInfo packInfo = this.installedPack.getInfo();
-		Modpack modpack = packInfo.getModpack(this.build);
+		Modpack modpack = packInfo.getModpack(this.build, user);
 		String minecraft = modpack.getMinecraft();
 
 		if (minecraft.startsWith("1.5")) {
@@ -91,7 +92,7 @@ public class ModpackInstaller {
 				}
 			}
 
-			queue.AddTask(new InstallModpackTask(this.installedPack, this.build));
+			queue.AddTask(new InstallModpackTask(this.installedPack, modpack));
 		}
 
 		queue.AddTask(new VerifyVersionFilePresentTask	(installedPack, minecraft));

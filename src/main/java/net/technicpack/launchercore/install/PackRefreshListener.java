@@ -19,6 +19,8 @@
 
 package net.technicpack.launchercore.install;
 
+import net.technicpack.launchercore.install.InstalledPack;
+
 public interface PackRefreshListener {
 
 	public void refreshPack(InstalledPack pack);

@@ -10,11 +10,11 @@ import java.io.IOException;
 
 public class InstallModpackTask implements IInstallTask {
 	private InstalledPack pack;
-	private String build;
+	private Modpack modpack;
 
-	public InstallModpackTask(InstalledPack pack, String build) {
+	public InstallModpackTask(InstalledPack pack, Modpack modpack) {
 		this.pack = pack;
-		this.build = build;
+		this.modpack = modpack;
 	}
 
 	@Override
@@ -38,7 +38,6 @@ public class InstallModpackTask implements IInstallTask {
 			deleteMods(coremodsDir);
 		}
 
-		Modpack modpack = this.pack.getInfo().getModpack(this.build);
 		File packOutput = this.pack.getInstalledDirectory();
 		for (Mod mod : modpack.getMods()) {
 			String url = mod.getUrl();
@@ -50,7 +49,7 @@ public class InstallModpackTask implements IInstallTask {
 			queue.AddNextTask(new EnsureFileTask(cache, packOutput, url, md5, null));
 		}
 
-		queue.AddTask(new CleanupModpackCacheTask(this.pack, this.build));
+		queue.AddTask(new CleanupModpackCacheTask(this.pack, modpack));
 	}
 
 	private void deleteMods(File modsDir) throws CacheDeleteException {

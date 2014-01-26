@@ -17,7 +17,7 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.launchercore.install;
+package net.technicpack.launchercore.install.user;
 
 import com.google.gson.JsonObject;
 import net.technicpack.launchercore.auth.AuthResponse;
@@ -100,29 +100,5 @@ public class User {
 
 	public String getUserPropertiesAsJson() {
 		return Utils.getGson().toJson(this.userProperties);
-	}
-
-	public void downloadFaceImage() {
-		File assets = new File(Utils.getAssetsDirectory(), "avatars");
-		assets.mkdirs();
-		File file = new File(assets, this.getDisplayName() + ".png");
-		try {
-			DownloadUtils.downloadFile("https://minotar.net/helm/" + this.getDisplayName() + "/100", file.getName(), file.getAbsolutePath());
-		} catch (IOException e) {
-			Utils.getLogger().log(Level.INFO, "Error downloading user face image: " + this.getDisplayName(), e);
-		}
-	}
-
-	public BufferedImage getFaceImage() {
-		File assets = new File(Utils.getAssetsDirectory(), "avatars");
-		assets.mkdirs();
-		File file = new File(assets, this.getDisplayName() + ".png");
-
-		try {
-			return ImageIO.read(file);
-		} catch (IOException ex) {
-			//It almost certainly just doesn't exist and that's OK
-			return null;
-		}
 	}
 }

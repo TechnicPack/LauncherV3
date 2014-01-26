@@ -21,6 +21,7 @@ package net.technicpack.launchercore.restful.platform;
 
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
 import net.technicpack.launchercore.exception.RestfulAPIException;
+import net.technicpack.launchercore.install.user.User;
 import net.technicpack.launchercore.restful.Modpack;
 import net.technicpack.launchercore.restful.PackInfo;
 import net.technicpack.launchercore.restful.PlatformConstants;
@@ -116,7 +117,7 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 	}
 
 	@Override
-	public Modpack getModpack(String build) throws BuildInaccessibleException {
+	public Modpack getModpack(String build, User user) throws BuildInaccessibleException {
 		return new Modpack(this);
 	}
 

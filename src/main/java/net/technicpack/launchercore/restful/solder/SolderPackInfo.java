@@ -21,6 +21,7 @@ package net.technicpack.launchercore.restful.solder;
 
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
 import net.technicpack.launchercore.exception.RestfulAPIException;
+import net.technicpack.launchercore.install.user.User;
 import net.technicpack.launchercore.restful.Modpack;
 import net.technicpack.launchercore.restful.PackInfo;
 import net.technicpack.launchercore.restful.Resource;
@@ -117,9 +118,9 @@ public class SolderPackInfo extends RestObject implements PackInfo {
 	}
 
 	@Override
-	public Modpack getModpack(String build) throws BuildInaccessibleException {
+	public Modpack getModpack(String build, User user) throws BuildInaccessibleException {
 		try {
-			Modpack pack = RestObject.getRestObject(Modpack.class, SolderConstants.getSolderBuildUrl(solder.getUrl(), name, build));
+			Modpack pack = RestObject.getRestObject(Modpack.class, SolderConstants.getSolderBuildUrl(solder.getUrl(), name, build, user.getProfile().getName()));
 
 			if (pack != null) {
 				return pack;
@@ -147,7 +148,7 @@ public class SolderPackInfo extends RestObject implements PackInfo {
 				'}';
 	}
 
-	public static SolderPackInfo getSolderPackInfo(String url) throws RestfulAPIException {
+	public static SolderPackInfo getSolderPackInfo(String url, User user) throws RestfulAPIException {
 		SolderPackInfo info = getRestObject(SolderPackInfo.class, url);
 		if (info == null) {
 			return null;
@@ -161,8 +162,8 @@ public class SolderPackInfo extends RestObject implements PackInfo {
 		return info;
 	}
 
-	public static SolderPackInfo getSolderPackInfo(String solderUrl, String name) throws RestfulAPIException {
-		SolderPackInfo info = getRestObject(SolderPackInfo.class, SolderConstants.getSolderPackInfoUrl(solderUrl, name));
+	public static SolderPackInfo getSolderPackInfo(String solderUrl, String name, User user) throws RestfulAPIException {
+		SolderPackInfo info = getRestObject(SolderPackInfo.class, SolderConstants.getSolderPackInfoUrl(solderUrl, name, user.getProfile().getName()));
 		Solder solder = RestObject.getRestObject(Solder.class, solderUrl + "modpack/");
 		solder.setUrl(solderUrl);
 		info.setSolder(solder);

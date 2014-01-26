@@ -13,11 +13,11 @@ import java.util.Set;
 
 public class CleanupModpackCacheTask implements IInstallTask {
 	private InstalledPack pack;
-	private String build;
+	private Modpack modpack;
 
-	public CleanupModpackCacheTask(InstalledPack pack, String build) {
+	public CleanupModpackCacheTask(InstalledPack pack, Modpack modpack) {
 		this.pack = pack;
-		this.build = build;
+		this.modpack = modpack;
 	}
 
 	@Override
@@ -38,7 +38,6 @@ public class CleanupModpackCacheTask implements IInstallTask {
 			return;
 		}
 
-		Modpack modpack = this.pack.getInfo().getModpack(this.build);
 		Set<String> keepFiles = new HashSet<String>(modpack.getMods().size() + 1);
 		for (Mod mod : modpack.getMods()) {
 			keepFiles.add(mod.getName() + "-" + mod.getVersion() + ".zip");
