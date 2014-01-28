@@ -171,6 +171,7 @@ public class AvailablePackList implements IAuthListener, PackRefreshListener {
 						InstalledPack pack = null;
 						if (mPackStore.getInstalledPacks().containsKey(name)) {
 							pack = mPackStore.getInstalledPacks().get(info.getName());
+							pack.setRefreshListener(packList);
 							pack.setInfo(info);
 						} else {
 							pack = new InstalledPack(name, false);
