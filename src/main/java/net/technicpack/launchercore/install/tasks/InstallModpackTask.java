@@ -31,11 +31,21 @@ public class InstallModpackTask implements IInstallTask {
 	public void runTask(InstallTasksQueue queue) throws IOException {
 		File modsDir = this.pack.getModsDir();
 
-		deleteMods(modsDir);
+		if (modsDir != null && modsDir.exists()) {
+			deleteMods(modsDir);
+		}
+
 		File coremodsDir = this.pack.getCoremodsDir();
 
 		if (coremodsDir != null && coremodsDir.exists()) {
 			deleteMods(coremodsDir);
+		}
+
+		//HACK - jamioflan is a big jerk who needs to put his mods in the dang mod directory!
+		File flansDir = new File(this.pack.getInstalledDirectory(), "Flan");
+
+		if (flansDir != null && flansDir.exists()) {
+			deleteMods(flansDir);
 		}
 
 		File packOutput = this.pack.getInstalledDirectory();
