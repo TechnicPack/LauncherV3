@@ -7,6 +7,7 @@ import net.technicpack.launchercore.minecraft.Library;
 import net.technicpack.launchercore.util.DownloadUtils;
 import net.technicpack.launchercore.util.OperatingSystem;
 import net.technicpack.launchercore.util.Utils;
+import net.technicpack.launchercore.util.verifiers.MD5FileVerifier;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -68,7 +69,7 @@ public class HandleVersionFileTask implements IInstallTask {
 				cache.getParentFile().mkdirs();
 			}
 
-			queue.AddTask(new EnsureFileTask(cache, extractDirectory, url, md5, library.getExtract()));
+			queue.AddTask(new EnsureFileTask(cache, new MD5FileVerifier(md5), extractDirectory, url, library.getExtract()));
 		}
 
 		queue.AddTask(new GetAssetsIndexTask(this.pack));

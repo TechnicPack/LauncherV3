@@ -25,6 +25,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import net.technicpack.launchercore.util.verifiers.IFileVerifier;
 import org.apache.commons.io.FileUtils;
 
 import net.technicpack.launchercore.exception.DownloadException;
@@ -63,7 +64,7 @@ public class DownloadUtils {
 		return md5;
 	}
 
-	public static Download downloadFile(String url, String name, String output, File cache, String md5, DownloadListener listener) throws IOException {
+	public static Download downloadFile(String url, String name, String output, File cache, IFileVerifier verifier, DownloadListener listener) throws IOException {
 		int tries = DOWNLOAD_RETRIES;
 		File outputFile = null;
 		Download download = null;
@@ -82,18 +83,10 @@ public class DownloadUtils {
 					listener.stateChanged("Download failed, retries remaining: " + tries, 0F);
 				}
 			} else {
-				if (md5 != null && !md5.isEmpty()) {
-					String resultMD5 = MD5Utils.getMD5(download.getOutFile());
-
-					System.out.println("Expected MD5: " + md5 + " Calculated MD5: " + resultMD5);
-					if (md5.equalsIgnoreCase(resultMD5)) {
-						outputFile = download.getOutFile();
-						break;
-					}
-				} else {
-					outputFile = download.getOutFile();
-					break;
-				}
+                if (download.getOutFile().exists() && (verifier == null || verifier.isFileValid(download.getOutFile()))) {
+                    outputFile = download.getOutFile();
+                    break;
+                }
 			}
 		}
 		if (outputFile == null) {

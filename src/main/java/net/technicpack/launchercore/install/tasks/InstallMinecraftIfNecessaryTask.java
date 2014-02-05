@@ -6,6 +6,7 @@ import net.technicpack.launchercore.util.DownloadUtils;
 import net.technicpack.launchercore.util.MD5Utils;
 import net.technicpack.launchercore.util.Utils;
 import net.technicpack.launchercore.util.ZipUtils;
+import net.technicpack.launchercore.util.verifiers.MD5FileVerifier;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +35,7 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask {
 
 		if (!cache.exists() || md5.isEmpty() || !MD5Utils.checkMD5(cache, md5)) {
 			String output = this.pack.getCacheDir() + File.separator + "minecraft.jar";
-			DownloadUtils.downloadFile(url, cache.getName(), output, cache, md5, this);
+			DownloadUtils.downloadFile(url, cache.getName(), output, cache, new MD5FileVerifier(md5), this);
 		}
 
 		ZipUtils.copyMinecraftJar(cache, new File(this.pack.getBinDir(), "minecraft.jar"));

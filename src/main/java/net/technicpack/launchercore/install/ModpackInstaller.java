@@ -35,6 +35,7 @@ import net.technicpack.launchercore.restful.PackInfo;
 import net.technicpack.launchercore.restful.PlatformConstants;
 import net.technicpack.launchercore.util.*;
 
+import net.technicpack.launchercore.util.verifiers.ValidZipFileVerifier;
 import org.apache.commons.io.FileUtils;
 
 import javax.swing.JOptionPane;
@@ -64,9 +65,9 @@ public class ModpackInstaller {
 		String minecraft = modpack.getMinecraft();
 
 		if (minecraft.startsWith("1.5")) {
-			queue.AddTask(new EnsureFileTask(new File(Utils.getCacheDirectory(), "fml_libs15.zip"),new File(installedPack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs15.zip"));
+			queue.AddTask(new EnsureFileTask(new File(Utils.getCacheDirectory(), "fml_libs15.zip"), new ValidZipFileVerifier(), new File(installedPack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs15.zip"));
 		} else if (minecraft.startsWith("1.4")) {
-			queue.AddTask(new EnsureFileTask(new File(Utils.getCacheDirectory(), "fml_libs.zip"),new File(installedPack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs.zip"));
+			queue.AddTask(new EnsureFileTask(new File(Utils.getCacheDirectory(), "fml_libs.zip"), new ValidZipFileVerifier(), new File(installedPack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs.zip"));
 		}
 
 		queue.RunAllTasks();
