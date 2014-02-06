@@ -194,7 +194,11 @@ public class InstalledPack {
 		}
 		installedDirectory = packPath;
 		String path = installedDirectory.getAbsolutePath();
-		if (path.startsWith(Utils.getModpacksDirectory().getAbsolutePath())) {
+        if (path.equals(Utils.getModpacksDirectory().getAbsolutePath())) {
+            directory = MODPACKS_DIR;
+        } else if (path.equals(Utils.getLauncherDirectory().getAbsolutePath())) {
+            directory = LAUNCHER_DIR;
+        } else if (path.startsWith(Utils.getModpacksDirectory().getAbsolutePath())) {
 			directory = MODPACKS_DIR + path.substring(Utils.getModpacksDirectory().getAbsolutePath().length() + 1);
 		} else if (path.startsWith(Utils.getLauncherDirectory().getAbsolutePath())) {
 			directory = LAUNCHER_DIR + path.substring(Utils.getLauncherDirectory().getAbsolutePath().length() + 1);
