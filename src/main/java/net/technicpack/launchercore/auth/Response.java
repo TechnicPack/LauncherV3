@@ -36,6 +36,10 @@ public class Response {
 		return cause;
 	}
 
+    public Response() {
+
+    }
+
     public Response(String error, String errorMessage) {
         this.error = error;
         this.errorMessage = errorMessage;
