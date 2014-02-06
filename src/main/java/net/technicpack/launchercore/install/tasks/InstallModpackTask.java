@@ -4,7 +4,10 @@ import net.technicpack.launchercore.exception.CacheDeleteException;
 import net.technicpack.launchercore.install.InstalledPack;
 import net.technicpack.launchercore.restful.Modpack;
 import net.technicpack.launchercore.restful.solder.Mod;
+import net.technicpack.launchercore.util.verifiers.IFileVerifier;
 import net.technicpack.launchercore.util.verifiers.MD5FileVerifier;
+import net.technicpack.launchercore.util.verifiers.ValidZipFileVerifier;
+import sun.plugin.cache.FileVersion;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,7 +60,14 @@ public class InstallModpackTask implements IInstallTask {
 
 			File cache = new File(this.pack.getCacheDir(), name);
 
-			queue.AddNextTask(new EnsureFileTask(cache, new MD5FileVerifier(md5), packOutput, url));
+            IFileVerifier verifier = null;
+
+            if (md5 != null && !md5.isEmpty())
+                verifier = new MD5FileVerifier(md5);
+            else
+                verifier = new ValidZipFileVerifier();
+
+			queue.AddNextTask(new EnsureFileTask(cache, verifier, packOutput, url));
 		}
 
 		queue.AddTask(new CleanupModpackCacheTask(this.pack, modpack));
