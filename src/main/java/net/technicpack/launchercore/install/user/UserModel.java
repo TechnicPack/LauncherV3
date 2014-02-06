@@ -57,7 +57,10 @@ public class UserModel {
 
 	public AuthError AttemptUserRefresh(User user) throws AuthenticationNetworkFailureException {
 		AuthResponse response = AuthenticationService.requestRefresh(user);
-		if (response.getError() != null) {
+        if (response == null) {
+            mUserStore.removeUser(user.getUsername());
+            return new AuthError("Session Error", "Please log in again.");
+        } else if (response.getError() != null) {
 			mUserStore.removeUser(user.getUsername());
 			return new AuthError(response.getError(), response.getErrorMessage());
 		} else {
