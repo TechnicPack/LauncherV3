@@ -46,6 +46,8 @@ public class AuthenticationService {
 			throw new AuthenticationNetworkFailureException(e);
 		}
 
+        if (response == null)
+            response = new AuthResponse("NULL","We got some kind of crazy null response I guess.");
 		return response;
 	}
 

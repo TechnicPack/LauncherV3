@@ -48,6 +48,10 @@ public class AuthResponse extends Response {
 		return user;
 	}
 
+    public AuthResponse(String error, String errorMessage) {
+        super(error,errorMessage);
+    }
+
 	@Override
 	public String getError() {
 		String error = super.getError();

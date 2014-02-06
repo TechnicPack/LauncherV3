@@ -36,6 +36,11 @@ public class Response {
 		return cause;
 	}
 
+    public Response(String error, String errorMessage) {
+        this.error = error;
+        this.errorMessage = errorMessage;
+    }
+
 	@Override
 	public String toString() {
 		return "Response{" +
