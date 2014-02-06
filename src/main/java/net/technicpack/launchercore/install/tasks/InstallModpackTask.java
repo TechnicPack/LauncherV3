@@ -70,7 +70,7 @@ public class InstallModpackTask implements IInstallTask {
 				continue;
 			}
 
-			if (mod.getName().endsWith(".zip") || mod.getName().endsWith(".jar")) {
+			if (mod.getName().endsWith(".zip") || mod.getName().endsWith(".jar") || mod.getName().endsWith(".litemod")) {
 				if (!mod.delete()) {
 					throw new CacheDeleteException(mod.getAbsolutePath());
 				}
