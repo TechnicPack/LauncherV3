@@ -279,7 +279,19 @@ public class InstalledPack {
 
 	private boolean loadCachedImage(AtomicReference<BufferedImage> image, File file, String url, String md5) {
 		try {
-			if (file.exists() && (url.isEmpty() || md5.isEmpty() || MD5Utils.getMD5(file).equalsIgnoreCase(md5))) {
+            if (!file.exists())
+                return false;
+
+            boolean reloadImage = (url.isEmpty() || md5.isEmpty());
+
+            if (!reloadImage) {
+                String fileMd5 = MD5Utils.getMD5(file);
+
+                if (fileMd5 != null && !fileMd5.isEmpty())
+                    reloadImage = fileMd5.equalsIgnoreCase(md5);
+            }
+
+			if (reloadImage) {
 				BufferedImage newImage;
 				newImage = ImageIO.read(file);
 				image.set(newImage);
