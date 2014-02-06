@@ -7,7 +7,6 @@ import net.technicpack.launchercore.restful.solder.Mod;
 import net.technicpack.launchercore.util.verifiers.IFileVerifier;
 import net.technicpack.launchercore.util.verifiers.MD5FileVerifier;
 import net.technicpack.launchercore.util.verifiers.ValidZipFileVerifier;
-import sun.plugin.cache.FileVersion;
 
 import java.io.File;
 import java.io.IOException;
