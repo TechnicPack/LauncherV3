@@ -45,7 +45,7 @@ public class InstallModpackTask implements IInstallTask {
 		//HACK - jamioflan is a big jerk who needs to put his mods in the dang mod directory!
 		File flansDir = new File(this.pack.getInstalledDirectory(), "Flan");
 
-		if (flansDir != null && flansDir.exists()) {
+		if (flansDir.exists()) {
 			deleteMods(flansDir);
 		}
 

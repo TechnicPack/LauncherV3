@@ -6,11 +6,9 @@ import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.install.InstalledPack;
 import net.technicpack.launchercore.minecraft.MojangConstants;
 import net.technicpack.launchercore.util.DownloadUtils;
-import net.technicpack.launchercore.util.MD5Utils;
 import net.technicpack.launchercore.util.Utils;
 import net.technicpack.launchercore.util.verifiers.FileSizeVerifier;
 import net.technicpack.launchercore.util.verifiers.IFileVerifier;
-import net.technicpack.launchercore.util.verifiers.MD5FileVerifier;
 import net.technicpack.launchercore.util.verifiers.ValidJsonFileVerifier;
 import org.apache.commons.io.FileUtils;
 

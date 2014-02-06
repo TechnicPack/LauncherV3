@@ -68,17 +68,24 @@ public class AuthenticationService {
 		writer.close();
 
 		InputStream stream = null;
+        String returnable = null;
 		try {
 			stream = connection.getInputStream();
+            returnable = IOUtils.toString(stream);
 		} catch (IOException e) {
 			stream = connection.getErrorStream();
 
 			if (stream == null) {
 				throw e;
 			}
-		}
+		} finally {
+            try {
+                if (stream != null)
+                    stream.close();
+            } catch (IOException e) {}
+        }
 
-		return IOUtils.toString(stream);
+        return returnable;
 	}
 
 	public static AuthResponse requestLogin(String username, String password, String clientToken) throws AuthenticationNetworkFailureException {

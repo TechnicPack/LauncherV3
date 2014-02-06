@@ -1,14 +1,10 @@
 package net.technicpack.launchercore.install.tasks;
 
-import net.technicpack.launchercore.install.InstalledPack;
 import net.technicpack.launchercore.minecraft.CompleteVersion;
 import net.technicpack.launchercore.util.DownloadListener;
-import sun.misc.Launcher;
 
-import java.awt.Component;
 import java.io.IOException;
 import java.util.LinkedList;
-import java.util.Queue;
 
 public class InstallTasksQueue {
 	private DownloadListener listener;
@@ -16,7 +12,7 @@ public class InstallTasksQueue {
 	private IInstallTask currentTask;
 	private CompleteVersion completeVersion;
 
-	public InstallTasksQueue(DownloadListener listener, Component uiParent, InstalledPack pack, String build) {
+	public InstallTasksQueue(DownloadListener listener) {
 		this.listener = listener;
 		this.tasks = new LinkedList<IInstallTask>();
 		this.currentTask = null;

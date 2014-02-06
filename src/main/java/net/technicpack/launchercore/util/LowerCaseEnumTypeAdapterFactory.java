@@ -34,6 +34,7 @@ import java.util.Map;
 
 public class LowerCaseEnumTypeAdapterFactory implements TypeAdapterFactory {
 
+    @SuppressWarnings("unchecked")
 	public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
 		Class rawType = type.getRawType();
 		if (!rawType.isEnum()) {

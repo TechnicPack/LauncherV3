@@ -45,7 +45,7 @@ public class DownloadException extends IOException {
 	}
 
 	@Override
-	public Throwable getCause() {
+	public synchronized Throwable getCause() {
 		return this.cause;
 	}
 

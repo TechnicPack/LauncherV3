@@ -1,6 +1,5 @@
 package net.technicpack.launchercore.install;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 

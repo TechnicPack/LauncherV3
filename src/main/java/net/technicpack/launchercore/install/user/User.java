@@ -22,14 +22,7 @@ package net.technicpack.launchercore.install.user;
 import com.google.gson.JsonObject;
 import net.technicpack.launchercore.auth.AuthResponse;
 import net.technicpack.launchercore.auth.Profile;
-import net.technicpack.launchercore.util.DownloadUtils;
 import net.technicpack.launchercore.util.Utils;
-
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.util.logging.Level;
 
 public class User {
 	private String username;

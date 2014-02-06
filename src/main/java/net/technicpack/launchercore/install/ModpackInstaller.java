@@ -57,7 +57,7 @@ public class ModpackInstaller {
 	}
 
 	public CompleteVersion installPack(Component component, User user) throws IOException {
-		InstallTasksQueue queue = new InstallTasksQueue(this.listener, component, this.installedPack, this.build);
+		InstallTasksQueue queue = new InstallTasksQueue(this.listener);
 		queue.AddTask(new InitPackDirectoryTask(this.installedPack));
 
 		PackInfo packInfo = this.installedPack.getInfo();

@@ -6,6 +6,7 @@ public class BuildInaccessibleException extends IOException {
 	private String packDisplayName;
 	private String build;
 	private Throwable cause;
+    private static final long serialVersionUID = -4905270588640056830L;
 
 	public BuildInaccessibleException(String displayName, String build) {
 		this.packDisplayName = displayName;
@@ -33,7 +34,7 @@ public class BuildInaccessibleException extends IOException {
 	}
 
 	@Override
-	public Throwable getCause() {
+	public synchronized Throwable getCause() {
 		return cause;
 	}
 }

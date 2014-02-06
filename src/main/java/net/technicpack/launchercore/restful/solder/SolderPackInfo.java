@@ -148,7 +148,7 @@ public class SolderPackInfo extends RestObject implements PackInfo {
 				'}';
 	}
 
-	public static SolderPackInfo getSolderPackInfo(String url, User user) throws RestfulAPIException {
+	public static SolderPackInfo getSolderPackInfo(String url) throws RestfulAPIException {
 		SolderPackInfo info = getRestObject(SolderPackInfo.class, url);
 		if (info == null) {
 			return null;

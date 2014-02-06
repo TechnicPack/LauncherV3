@@ -1,7 +1,6 @@
 package net.technicpack.launchercore.install.tasks;
 
 import net.technicpack.launchercore.minecraft.ExtractRules;
-import net.technicpack.launchercore.util.MD5Utils;
 import net.technicpack.launchercore.util.verifiers.IFileVerifier;
 
 import java.io.File;

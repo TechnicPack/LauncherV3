@@ -24,6 +24,7 @@ import java.io.IOException;
 public class PackNotAvailableOfflineException extends IOException {
 	private String packDisplayName;
 	private Throwable cause;
+    private static final long serialVersionUID = 3246491999503435492L;
 
 	public PackNotAvailableOfflineException(String displayName) {
 		this.packDisplayName = displayName;
@@ -40,7 +41,7 @@ public class PackNotAvailableOfflineException extends IOException {
 	}
 
 	@Override
-	public Throwable getCause() {
+	public synchronized Throwable getCause() {
 		return cause;
 	}
 }

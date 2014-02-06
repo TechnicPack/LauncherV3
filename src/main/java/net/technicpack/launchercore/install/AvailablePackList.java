@@ -128,8 +128,7 @@ public class AvailablePackList implements IAuthListener, PackRefreshListener {
 							PlatformPackInfo platformPackInfo = PlatformPackInfo.getPlatformPackInfo(name);
 							PackInfo info = platformPackInfo;
 							if (platformPackInfo.hasSolder()) {
-								SolderPackInfo solderPackInfo = SolderPackInfo.getSolderPackInfo(platformPackInfo.getSolder(), name, threadUser);
-								info = solderPackInfo;
+                                info = SolderPackInfo.getSolderPackInfo(platformPackInfo.getSolder(), name, threadUser);
 							}
 
 							info.getLogo();
@@ -212,7 +211,7 @@ public class AvailablePackList implements IAuthListener, PackRefreshListener {
 			public void run() {
 				for (String solder : mForcedSolderPacks) {
 					try {
-						SolderPackInfo info = SolderPackInfo.getSolderPackInfo(solder, threadUser);
+						SolderPackInfo info = SolderPackInfo.getSolderPackInfo(solder);
 						if (info == null) {
 							throw new RestfulAPIException();
 						}

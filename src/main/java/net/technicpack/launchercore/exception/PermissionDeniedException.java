@@ -43,7 +43,7 @@ public class PermissionDeniedException extends DownloadException {
 	}
 
 	@Override
-	public Throwable getCause() {
+	public synchronized Throwable getCause() {
 		return this.cause;
 	}
 

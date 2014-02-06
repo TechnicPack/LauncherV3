@@ -2,18 +2,13 @@ package net.technicpack.launchercore.install.tasks;
 
 import net.technicpack.launchercore.exception.PackNotAvailableOfflineException;
 import net.technicpack.launchercore.install.InstalledPack;
-import net.technicpack.launchercore.minecraft.CompleteVersion;
 import net.technicpack.launchercore.minecraft.TechnicConstants;
-import net.technicpack.launchercore.util.DownloadUtils;
-import net.technicpack.launchercore.util.Utils;
 import net.technicpack.launchercore.util.ZipUtils;
 import net.technicpack.launchercore.util.verifiers.IFileVerifier;
 import net.technicpack.launchercore.util.verifiers.ValidJsonFileVerifier;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 public class VerifyVersionFilePresentTask implements IInstallTask {
 	private InstalledPack pack;
@@ -52,7 +47,6 @@ public class VerifyVersionFilePresentTask implements IInstallTask {
 				throw new PackNotAvailableOfflineException(this.pack.getDisplayName());
 			} else {
 				queue.AddNextTask(new DownloadFileTask(TechnicConstants.getTechnicVersionJson(this.minecraftVersion), versionFile, fileVerifier));
-				return;
 			}
 		}
 	}

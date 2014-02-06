@@ -19,13 +19,9 @@
 
 package net.technicpack.launchercore.launch;
 
-import net.technicpack.launchercore.util.Utils;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class ProcessMonitorThread extends Thread {
 
@@ -66,7 +62,7 @@ public class ProcessMonitorThread extends Thread {
 		}
 
 		if (process.getExitListener() != null) {
-			process.getExitListener().onMinecraftExit(process);
+			process.getExitListener().onMinecraftExit();
 		}
 	}
 }

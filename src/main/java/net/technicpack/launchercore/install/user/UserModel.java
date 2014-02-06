@@ -4,7 +4,6 @@ import net.technicpack.launchercore.auth.AuthResponse;
 import net.technicpack.launchercore.auth.AuthenticationService;
 import net.technicpack.launchercore.exception.AuthenticationNetworkFailureException;
 
-import javax.swing.JOptionPane;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;

@@ -24,6 +24,7 @@ import java.io.IOException;
 public class CacheDeleteException extends IOException {
 	private Throwable cause;
 	String filePath;
+    private static final long serialVersionUID = 6462027370292375448L;
 
 	public CacheDeleteException(String filePath) {
 		this.filePath = filePath;
@@ -39,7 +40,7 @@ public class CacheDeleteException extends IOException {
 	}
 
 	@Override
-	public Throwable getCause() {
+	public synchronized Throwable getCause() {
 		return this.cause;
 	}
 

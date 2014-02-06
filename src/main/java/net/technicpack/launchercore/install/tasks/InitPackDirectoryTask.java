@@ -2,7 +2,6 @@ package net.technicpack.launchercore.install.tasks;
 
 import net.technicpack.launchercore.install.InstalledPack;
 
-import java.io.File;
 import java.io.IOException;
 
 public class InitPackDirectoryTask implements IInstallTask {
