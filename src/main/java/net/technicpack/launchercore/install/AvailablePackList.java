@@ -92,8 +92,10 @@ public class AvailablePackList implements IAuthListener, PackRefreshListener {
 
 		index += offset;
 
-		while (index < 0) { index += mPackStore.getInstalledPacks().size(); }
-		while (index >= mPackStore.getInstalledPacks().size()) { index -= mPackStore.getInstalledPacks().size(); }
+        int size = mPackStore.getPackNames().size();
+
+		while (index < 0) { index += size; }
+		while (index >= size) { index -= size; }
 
 		return mPackStore.getInstalledPacks().get(mPackStore.getPackNames().get(index));
 	}
