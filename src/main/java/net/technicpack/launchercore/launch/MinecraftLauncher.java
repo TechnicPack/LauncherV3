@@ -95,6 +95,13 @@ public class MinecraftLauncher {
 		// Tell forge 1.5 to download from our mirror instead
 		commands.add("-Dfml.core.libraries.mirror=http://mirror.technicpack.net/Technic/lib/fml/%s");
 		commands.add("-Dminecraft.applet.TargetDirectory=" +  pack.getInstalledDirectory().getAbsolutePath());
+
+        String javaArguments = version.getJavaArguments();
+
+        if (javaArguments != null && !javaArguments.isEmpty()) {
+            commands.addAll(Arrays.asList(javaArguments.split(" ")));
+        }
+
 		commands.add("-cp");
 		commands.add(buildClassPath());
 		commands.add(version.getMainClass());

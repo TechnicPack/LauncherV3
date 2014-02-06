@@ -30,6 +30,7 @@ public class CompleteVersion implements Version {
 	private Date releaseTime;
 	private ReleaseType type;
 	private String minecraftArguments;
+    private String javaArguments;
 	private List<Library> libraries;
 	private String mainClass;
 	private int minimumLauncherVersion;
@@ -76,6 +77,8 @@ public class CompleteVersion implements Version {
 	public String getMinecraftArguments() {
 		return minecraftArguments;
 	}
+
+    public String getJavaArguments() { return javaArguments; }
 
 	public List<Library> getLibraries() {
 		return libraries;
