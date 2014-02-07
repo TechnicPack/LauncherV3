@@ -174,23 +174,34 @@ public class AvailablePackList implements IAuthListener, PackRefreshListener {
 							pack = mPackStore.getInstalledPacks().get(info.getName());
 							pack.setRefreshListener(packList);
 							pack.setInfo(info);
+
+                            final InstalledPack deferredPack = pack;
+                            final int deferredIndex = index;
+                            EventQueue.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    packList.triggerUpdateListeners(deferredPack);
+                                    mPackStore.reorder(deferredIndex, deferredPack.getName());
+                                }
+                            });
 						} else {
 							pack = new InstalledPack(name, false);
 							pack.setRefreshListener(packList);
 							pack.setInfo(info);
-							mPackStore.add(pack);
+
+                            final InstalledPack deferredPack = pack;
+                            final int deferredIndex = index;
+                            EventQueue.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mPackStore.add(deferredPack);
+                                    packList.triggerUpdateListeners(deferredPack);
+                                    mPackStore.reorder(deferredIndex, deferredPack.getName());
+                                }
+                            });
 						}
 
-						final InstalledPack deferredPack = pack;
 
-						EventQueue.invokeLater(new Runnable() {
-							@Override
-							public void run() {
-								packList.triggerUpdateListeners(deferredPack);
-							}
-						});
-
-						mPackStore.reorder(index, name);
 						index++;
 					}
 				} catch (RestfulAPIException e) {
@@ -226,21 +237,29 @@ public class AvailablePackList implements IAuthListener, PackRefreshListener {
 						if (mPackStore.getInstalledPacks().containsKey(info.getName())) {
 							pack = mPackStore.getInstalledPacks().get(info.getName());
 							pack.setInfo(info);
+
+                            final InstalledPack deferredPack = pack;
+                            EventQueue.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    packList.triggerUpdateListeners(deferredPack);
+                                }
+                            });
 						} else {
 							pack = new InstalledPack(info.getName(), true);
 							pack.setRefreshListener(packList);
 							pack.setInfo(info);
-							mPackStore.add(pack);
+
+                            final InstalledPack deferredPack = pack;
+                            EventQueue.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mPackStore.add(deferredPack);
+                                    packList.triggerUpdateListeners(deferredPack);
+                                }
+                            });
 						}
 
-						final InstalledPack deferredPack = pack;
-
-						EventQueue.invokeLater(new Runnable() {
-							@Override
-							public void run() {
-								packList.triggerUpdateListeners(deferredPack);
-							}
-						});
 					} catch (RestfulAPIException e) {
 						Utils.getLogger().log(Level.WARNING, "Unable to load forced solder pack " + solder, e);
 					}
