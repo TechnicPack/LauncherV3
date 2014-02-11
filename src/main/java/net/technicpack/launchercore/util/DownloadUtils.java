@@ -90,7 +90,7 @@ public class DownloadUtils {
 			}
 		}
 		if (outputFile == null) {
-			throw new DownloadException("Failed to download " + url, download != null ? download.getException() : null);
+			throw new DownloadException("Failed to download " + url, new URL(url), download != null ? download.getException() : null);
 		}
 		if (cache != null) {
 			FileUtils.copyFile(outputFile, cache);

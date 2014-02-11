@@ -19,36 +19,24 @@
 
 package net.technicpack.launchercore.exception;
 
+import java.net.URL;
+
 public class PermissionDeniedException extends DownloadException {
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 
-	private final Throwable cause;
-	private final String message;
-
-	public PermissionDeniedException(String message, Throwable cause) {
-		this.cause = cause;
-		this.message = message;
+	public PermissionDeniedException(String message, URL url, Throwable cause) {
+		super(message, url, cause);
 	}
 
-	public PermissionDeniedException(Throwable cause) {
-		this(null, cause);
+	public PermissionDeniedException(URL url, Throwable cause) {
+		this(null, url, cause);
 	}
 
-	public PermissionDeniedException(String message) {
-		this(message, null);
+	public PermissionDeniedException(String message, URL url) {
+		this(message, url, null);
 	}
 
 	public PermissionDeniedException() {
-		this(null, null);
-	}
-
-	@Override
-	public synchronized Throwable getCause() {
-		return this.cause;
-	}
-
-	@Override
-	public String getMessage() {
-		return message;
+		this(null, null, null);
 	}
 }

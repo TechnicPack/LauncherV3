@@ -44,16 +44,17 @@ public class GetAssetsIndexTask extends ListenerTask {
 		(new File(output.getParent())).mkdirs();
 
         IFileVerifier fileVerifier = new ValidJsonFileVerifier();
+        String assetsUrl = MojangConstants.getAssetsIndex(assets);
 
 		if (!output.exists() || !fileVerifier.isFileValid(output)) {
-			DownloadUtils.downloadFile(MojangConstants.getAssetsIndex(assets), output.getName(), output.getAbsolutePath(), null, fileVerifier, this);
+			DownloadUtils.downloadFile(assetsUrl, output.getName(), output.getAbsolutePath(), null, fileVerifier, this);
 		}
 
 		String json = FileUtils.readFileToString(output, Charset.forName("UTF-8"));
 		JsonObject obj = Utils.getMojangGson().fromJson(json, JsonObject.class);
 
 		if (obj == null) {
-			throw new DownloadException("The assets json file was invalid.");
+			throw new DownloadException("The assets json file was invalid.", null);
 		}
 
 		boolean isVirtual = false;
@@ -66,7 +67,7 @@ public class GetAssetsIndexTask extends ListenerTask {
 		JsonObject allObjects = obj.get("objects").getAsJsonObject();
 
 		if (allObjects == null) {
-			throw new DownloadException("The assets json file was invalid.");
+			throw new DownloadException("The assets json file was invalid.", null);
 		}
 
 		for(Map.Entry<String, JsonElement> field : allObjects.entrySet()) {

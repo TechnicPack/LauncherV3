@@ -40,7 +40,7 @@ public class HandleVersionFileTask implements IInstallTask {
 		CompleteVersion version = Utils.getMojangGson().fromJson(json, CompleteVersion.class);
 
 		if (version == null) {
-			throw new DownloadException("The version.json file was invalid.");
+			throw new DownloadException("The version.json file was invalid.", null);
 		}
 
 		for (Library library : version.getLibrariesForOS()) {

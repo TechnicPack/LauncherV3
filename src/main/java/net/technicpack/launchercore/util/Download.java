@@ -69,9 +69,9 @@ public class Download implements Runnable {
 			int responseFamily = response/100;
 
 			if (responseFamily == 3) {
-				throw new DownloadException("The server issued a redirect response which Technic failed to follow.");
+				throw new DownloadException("The server issued a redirect response which Technic failed to follow.", url);
 			} else if (responseFamily != 2) {
-				throw new DownloadException("The server issued a "+response+" response code.");
+				throw new DownloadException("The server issued a "+response+" response code.", url);
 			}
 
 			InputStream in = getConnectionInputStream(conn);
@@ -129,7 +129,7 @@ public class Download implements Runnable {
 			}
 
 			if (stream.permDenied.get()) {
-				throw new PermissionDeniedException("Permission denied!");
+				throw new PermissionDeniedException("Permission denied!", urlconnection.getURL());
 			}
 
 			if (is.get() != null) {
@@ -143,7 +143,7 @@ public class Download implements Runnable {
 		}
 
 		if (is.get() == null) {
-			throw new DownloadException("Unable to download file from " + urlconnection.getURL());
+			throw new DownloadException("Unable to download file from " + urlconnection.getURL(), urlconnection.getURL());
 		}
 		return new BufferedInputStream(is.get());
 	}

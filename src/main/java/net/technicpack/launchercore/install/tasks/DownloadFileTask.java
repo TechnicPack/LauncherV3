@@ -6,6 +6,7 @@ import net.technicpack.launchercore.util.verifiers.IFileVerifier;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 public class DownloadFileTask extends ListenerTask {
 	private String url;
@@ -36,7 +37,7 @@ public class DownloadFileTask extends ListenerTask {
 		DownloadUtils.downloadFile(url, this.destination.getName(), this.destination.getAbsolutePath(), null, fileVerifier, this);
 
 		if (!this.destination.exists()) {
-			throw new DownloadException("Failed to download "+this.destination.getName()+".");
+			throw new DownloadException("Failed to download "+this.destination.getName()+".", new URL(url));
 		}
 	}
 }
