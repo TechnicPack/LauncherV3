@@ -31,6 +31,9 @@ public class SecureToken {
     private UserModel userModel;
     private ISecureMirror mirror;
 
+    private String tokenUserName;
+    private String tokenAccessToken;
+
     public SecureToken(UserModel userModel, ISecureMirror mirror) {
         this.token = null;
         this.receivedTime = null;
@@ -39,7 +42,9 @@ public class SecureToken {
     }
 
     public String queryForSecureToken() throws DownloadException {
-        if (this.token != null && this.receivedTime != null) {
+        if (this.token != null && this.receivedTime != null && this.userModel.getCurrentUser() != null && this.tokenUserName != null &&
+                this.tokenAccessToken != null && this.userModel.getCurrentUser().getUsername().equals(this.tokenUserName) &&
+                this.userModel.getCurrentUser().getAccessToken().equals(this.tokenAccessToken)) {
             Date now = new Date();
             long diffInMinutes = ((now.getTime() - receivedTime.getTime()) / 1000) / 60;
 
@@ -49,7 +54,12 @@ public class SecureToken {
 
         //We need to hit the mirror for a new token
         this.token = userModel.retrieveDownloadToken(this.mirror);
-        this.receivedTime = new Date();
+
+        if (this.token != null) {
+            this.receivedTime = new Date();
+            this.tokenUserName = userModel.getCurrentUser().getUsername();
+            this.tokenAccessToken = userModel.getCurrentUser().getAccessToken();
+        }
 
         return this.token;
     }
