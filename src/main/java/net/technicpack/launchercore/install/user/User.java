@@ -91,6 +91,10 @@ public class User {
 		return "token:" + accessToken + ":" + profile.getId();
 	}
 
+    public void rotateAccessToken(String newToken) {
+        this.accessToken = newToken;
+    }
+
 	public String getUserPropertiesAsJson() {
 		return Utils.getGson().toJson(this.userProperties);
 	}

@@ -30,6 +30,7 @@ import net.technicpack.launchercore.install.tasks.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.VerifyVersionFilePresentTask;
 import net.technicpack.launchercore.install.user.User;
 import net.technicpack.launchercore.minecraft.CompleteVersion;
+import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.launchercore.restful.Modpack;
 import net.technicpack.launchercore.restful.PackInfo;
 import net.technicpack.launchercore.restful.PlatformConstants;
@@ -56,8 +57,8 @@ public class ModpackInstaller {
 		this.build = build;
 	}
 
-	public CompleteVersion installPack(Component component, User user) throws IOException {
-		InstallTasksQueue queue = new InstallTasksQueue(this.listener);
+	public CompleteVersion installPack(Component component, User user, MirrorStore mirrorStore) throws IOException {
+		InstallTasksQueue queue = new InstallTasksQueue(this.listener, mirrorStore);
 		queue.AddTask(new InitPackDirectoryTask(this.installedPack));
 
 		PackInfo packInfo = this.installedPack.getInfo();

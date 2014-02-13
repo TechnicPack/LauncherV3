@@ -2,7 +2,7 @@ package net.technicpack.launchercore.install.tasks;
 
 import net.technicpack.launchercore.install.InstalledPack;
 import net.technicpack.launchercore.minecraft.MojangConstants;
-import net.technicpack.launchercore.util.DownloadUtils;
+import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.launchercore.util.Utils;
 import net.technicpack.launchercore.util.ZipUtils;
 import net.technicpack.launchercore.util.verifiers.IFileVerifier;
@@ -31,7 +31,7 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask {
 		super.runTask(queue);
 
 		String url = MojangConstants.getVersionDownload(this.minecraftVersion);
-		String md5 = DownloadUtils.getETag(url);
+		String md5 = queue.getMirrorStore().getETag(url);
 		File cache = new File(Utils.getCacheDirectory(), "minecraft_" + this.minecraftVersion + ".jar");
 
         IFileVerifier verifier = null;
@@ -44,7 +44,7 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask {
 
 		if (!cache.exists() || !verifier.isFileValid(cache)) {
 			String output = this.pack.getCacheDir() + File.separator + "minecraft.jar";
-			DownloadUtils.downloadFile(url, cache.getName(), output, cache, verifier, this);
+			queue.getMirrorStore().downloadFile(url, cache.getName(), output, cache, verifier, this);
 		}
 
 		ZipUtils.copyMinecraftJar(cache, new File(this.pack.getBinDir(), "minecraft.jar"));

@@ -3,6 +3,7 @@ package net.technicpack.launchercore.install;
 import net.technicpack.launchercore.exception.RestfulAPIException;
 import net.technicpack.launchercore.install.user.IAuthListener;
 import net.technicpack.launchercore.install.user.User;
+import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.launchercore.restful.PackInfo;
 import net.technicpack.launchercore.restful.RestObject;
 import net.technicpack.launchercore.restful.platform.PlatformPackInfo;
@@ -23,9 +24,11 @@ public class AvailablePackList implements IAuthListener, PackRefreshListener {
 	private IPackStore mPackStore;
 	private Collection<String> mForcedSolderPacks = new ArrayList<String>();
 	private List<IPackListener> mPackListeners = new LinkedList<IPackListener>();
+    private final MirrorStore mirrorStore;
 
-	public AvailablePackList(IPackStore packStore) {
+	public AvailablePackList(IPackStore packStore, MirrorStore mirrorStore) {
 		this.mPackStore = packStore;
+        this.mirrorStore = mirrorStore;
 		this.mPackStore.put(new AddPack());
 	}
 
@@ -185,7 +188,7 @@ public class AvailablePackList implements IAuthListener, PackRefreshListener {
                                 }
                             });
 						} else {
-							pack = new InstalledPack(name, false);
+							pack = new InstalledPack(mirrorStore, name, false);
 							pack.setRefreshListener(packList);
 							pack.setInfo(info);
 
@@ -246,7 +249,7 @@ public class AvailablePackList implements IAuthListener, PackRefreshListener {
                                 }
                             });
 						} else {
-							pack = new InstalledPack(info.getName(), true);
+							pack = new InstalledPack(mirrorStore, info.getName(), true);
 							pack.setRefreshListener(packList);
 							pack.setInfo(info);
 

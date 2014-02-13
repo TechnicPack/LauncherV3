@@ -1,6 +1,7 @@
 package net.technicpack.launchercore.install.tasks;
 
 import net.technicpack.launchercore.minecraft.CompleteVersion;
+import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.launchercore.util.DownloadListener;
 
 import java.io.IOException;
@@ -11,9 +12,11 @@ public class InstallTasksQueue {
 	private LinkedList<IInstallTask> tasks;
 	private IInstallTask currentTask;
 	private CompleteVersion completeVersion;
+    private MirrorStore mirrorStore;
 
-	public InstallTasksQueue(DownloadListener listener) {
+	public InstallTasksQueue(DownloadListener listener, MirrorStore mirrorStore) {
 		this.listener = listener;
+        this.mirrorStore = mirrorStore;
 		this.tasks = new LinkedList<IInstallTask>();
 		this.currentTask = null;
 	}
@@ -45,4 +48,5 @@ public class InstallTasksQueue {
 	public CompleteVersion getCompleteVersion() {
 		return this.completeVersion;
 	}
+    public MirrorStore getMirrorStore() { return this.mirrorStore; }
 }

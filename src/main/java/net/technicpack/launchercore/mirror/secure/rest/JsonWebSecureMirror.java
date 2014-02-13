@@ -1,4 +1,9 @@
-/*
+package net.technicpack.launchercore.mirror.secure.rest;
+
+import net.technicpack.launchercore.exception.RestfulAPIException;
+import net.technicpack.launchercore.restful.RestObject;
+
+/**
  * This file is part of Technic Launcher Core.
  * Copyright (C) 2013 Syndicate, LLC
  *
@@ -17,26 +22,22 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.launchercore.exception;
+public class JsonWebSecureMirror implements ISecureMirror {
+    private String baseUrl;
 
-import java.net.URL;
+    public JsonWebSecureMirror(String baseUrl) {
+        this.baseUrl = baseUrl;
+    }
 
-public class PermissionDeniedException extends DownloadException {
-	private static final long serialVersionUID = 2L;
+    @Override
+    public ValidateResponse validate(ValidateRequest req) {
+        String constructedUrl = baseUrl + "validate?a=" + req.getAccessToken() + "&c="+req.getClientToken();
 
-	public PermissionDeniedException(String message, Throwable cause) {
-		super(message, cause);
-	}
-
-	public PermissionDeniedException(Throwable cause) {
-		this(null, cause);
-	}
-
-	public PermissionDeniedException(String message) {
-		this(message, null);
-	}
-
-	public PermissionDeniedException() {
-		this(null, null);
-	}
+        try {
+            return RestObject.getRestObject(ValidateResponse.class, constructedUrl);
+        } catch (RestfulAPIException ex) {
+            ex.printStackTrace();
+            return new ValidateResponse(ex.getMessage());
+        }
+    }
 }

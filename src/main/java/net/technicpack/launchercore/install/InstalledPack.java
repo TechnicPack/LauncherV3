@@ -19,10 +19,10 @@
 
 package net.technicpack.launchercore.install;
 
+import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.launchercore.restful.PackInfo;
 import net.technicpack.launchercore.restful.Resource;
-import net.technicpack.launchercore.util.Download;
-import net.technicpack.launchercore.util.DownloadUtils;
+import net.technicpack.launchercore.mirror.download.Download;
 import net.technicpack.launchercore.util.MD5Utils;
 import net.technicpack.launchercore.util.ResourceUtils;
 import net.technicpack.launchercore.util.Utils;
@@ -60,6 +60,7 @@ public class InstalledPack {
 	private transient File coremodsDir;
 	private transient PackInfo info;
 	private transient PackRefreshListener refreshListener;
+    private transient MirrorStore mirrorStore;
 	private String name;
 	private boolean platform;
 	private String build;
@@ -67,16 +68,17 @@ public class InstalledPack {
 
 	private transient boolean isLocalOnly;
 
-	public InstalledPack(String name, boolean platform, String build, String directory) {
+	public InstalledPack(MirrorStore mirrorStore, String name, boolean platform, String build, String directory) {
 		this();
+        this.mirrorStore = mirrorStore;
 		this.name = name;
 		this.platform = platform;
 		this.build = build;
 		this.directory = directory;
 	}
 
-	public InstalledPack(String name, boolean platform) {
-		this(name, platform, RECOMMENDED, MODPACKS_DIR + name);
+	public InstalledPack(MirrorStore mirrorStore, String name, boolean platform) {
+		this(mirrorStore, name, platform, RECOMMENDED, MODPACKS_DIR + name);
 	}
 
 	public InstalledPack() {
@@ -86,6 +88,10 @@ public class InstalledPack {
 		isLocalOnly = false;
 		build = RECOMMENDED;
 	}
+
+    public void setMirrorStore(MirrorStore mirrorStore) {
+        this.mirrorStore = mirrorStore;
+    }
 
 	public void setRefreshListener(PackRefreshListener refreshListener) {
 		this.refreshListener = refreshListener;
@@ -314,6 +320,7 @@ public class InstalledPack {
 		downloading.get(image).set(true);
 		final String name = getName();
 		final InstalledPack pack = this;
+        final MirrorStore mirror = mirrorStore;
 		Thread thread = new Thread(name + " Image Download Worker") {
 			@Override
 			public void run() {
@@ -321,7 +328,7 @@ public class InstalledPack {
 					if (temp.exists()) {
 						System.out.println("Pack: " + getName() + " Calculated MD5: " + MD5Utils.getMD5(temp) + " Required MD5: " + md5);
 					}
-					Download download = DownloadUtils.downloadFile(url, temp.getName(), temp.getAbsolutePath());
+					Download download = mirror.downloadFile(url, temp.getName(), temp.getAbsolutePath());
 					BufferedImage newImage;
 					newImage = ImageIO.read(download.getOutFile());
 					image.set(newImage);

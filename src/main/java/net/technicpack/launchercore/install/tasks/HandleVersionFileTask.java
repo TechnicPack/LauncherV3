@@ -4,7 +4,7 @@ import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.install.InstalledPack;
 import net.technicpack.launchercore.minecraft.CompleteVersion;
 import net.technicpack.launchercore.minecraft.Library;
-import net.technicpack.launchercore.util.DownloadUtils;
+import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.launchercore.util.OperatingSystem;
 import net.technicpack.launchercore.util.Utils;
 import net.technicpack.launchercore.util.verifiers.IFileVerifier;
@@ -40,7 +40,7 @@ public class HandleVersionFileTask implements IInstallTask {
 		CompleteVersion version = Utils.getMojangGson().fromJson(json, CompleteVersion.class);
 
 		if (version == null) {
-			throw new DownloadException("The version.json file was invalid.", null);
+			throw new DownloadException("The version.json file was invalid.");
 		}
 
 		for (Library library : version.getLibrariesForOS()) {
@@ -64,7 +64,7 @@ public class HandleVersionFileTask implements IInstallTask {
 
 			String path = library.getArtifactPath(natives).replace("${arch}", System.getProperty("sun.arch.data.model"));
 			String url = library.getDownloadUrl(path).replace("${arch}", System.getProperty("sun.arch.data.model"));
-			String md5 = DownloadUtils.getETag(url);
+			String md5 = queue.getMirrorStore().getETag(url);
 
 			File cache = new File(Utils.getCacheDirectory(), path);
 			if (cache.getParentFile() != null) {

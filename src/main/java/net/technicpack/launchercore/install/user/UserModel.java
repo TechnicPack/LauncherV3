@@ -3,6 +3,11 @@ package net.technicpack.launchercore.install.user;
 import net.technicpack.launchercore.auth.AuthResponse;
 import net.technicpack.launchercore.auth.AuthenticationService;
 import net.technicpack.launchercore.exception.AuthenticationNetworkFailureException;
+import net.technicpack.launchercore.exception.DownloadException;
+import net.technicpack.launchercore.mirror.download.Download;
+import net.technicpack.launchercore.mirror.secure.rest.ISecureMirror;
+import net.technicpack.launchercore.mirror.secure.rest.ValidateRequest;
+import net.technicpack.launchercore.mirror.secure.rest.ValidateResponse;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -71,6 +76,20 @@ public class UserModel {
 			return null;
 		}
 	}
+
+    public String retrieveDownloadToken(ISecureMirror mirror) throws DownloadException {
+        if (this.getCurrentUser() == null)
+            return null;
+
+        ValidateResponse response = mirror.validate(new ValidateRequest(this.getCurrentUser().getClientToken(), this.getCurrentUser().getAccessToken()));
+
+        if (!response.wasValid())
+            throw new DownloadException(response.getErrorMessage());
+
+        this.getCurrentUser().rotateAccessToken(response.getAccessToken());
+        mUserStore.addUser(this.getCurrentUser());
+        return response.getDownloadToken();
+    }
 
 	public Collection<User> getUsers() {
 		return mUserStore.getSavedUsers();

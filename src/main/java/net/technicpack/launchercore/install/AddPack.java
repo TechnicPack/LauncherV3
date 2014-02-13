@@ -19,6 +19,7 @@
 
 package net.technicpack.launchercore.install;
 
+import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.launchercore.util.ResourceUtils;
 
 import java.awt.image.BufferedImage;

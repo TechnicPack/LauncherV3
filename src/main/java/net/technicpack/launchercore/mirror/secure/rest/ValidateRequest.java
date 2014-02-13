@@ -1,4 +1,8 @@
-/*
+package net.technicpack.launchercore.mirror.secure.rest;
+
+import net.technicpack.launchercore.restful.RestObject;
+
+/**
  * This file is part of Technic Launcher Core.
  * Copyright (C) 2013 Syndicate, LLC
  *
@@ -17,26 +21,15 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.launchercore.exception;
+public class ValidateRequest extends RestObject {
+    private String accessToken;
+    private String clientToken;
 
-import java.net.URL;
+    public ValidateRequest(String clientToken, String accessToken) {
+        this.clientToken = clientToken;
+        this.accessToken = accessToken;
+    }
 
-public class PermissionDeniedException extends DownloadException {
-	private static final long serialVersionUID = 2L;
-
-	public PermissionDeniedException(String message, Throwable cause) {
-		super(message, cause);
-	}
-
-	public PermissionDeniedException(Throwable cause) {
-		this(null, cause);
-	}
-
-	public PermissionDeniedException(String message) {
-		this(message, null);
-	}
-
-	public PermissionDeniedException() {
-		this(null, null);
-	}
+    public String getAccessToken() { return accessToken; }
+    public String getClientToken() { return clientToken; }
 }

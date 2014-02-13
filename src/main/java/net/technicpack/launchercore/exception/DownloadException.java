@@ -27,24 +27,22 @@ public class DownloadException extends IOException {
 
 	private final Throwable cause;
 	private final String message;
-    private final URL url;
 
-	public DownloadException(String message, URL url, Throwable cause) {
+	public DownloadException(String message, Throwable cause) {
 		this.cause = cause;
 		this.message = message;
-        this.url = url;
 	}
 
-	public DownloadException(URL url, Throwable cause) {
-		this(null, url, cause);
+	public DownloadException(Throwable cause) {
+		this(null, cause);
 	}
 
-	public DownloadException(String message, URL url) {
-		this(message, url, null);
+	public DownloadException(String message) {
+		this(message, null);
 	}
 
 	public DownloadException() {
-		this(null, null, null);
+		this(null, null);
 	}
 
 	@Override
@@ -56,6 +54,4 @@ public class DownloadException extends IOException {
 	public String getMessage() {
 		return message;
 	}
-
-    public URL getUrl() { return url; }
 }
