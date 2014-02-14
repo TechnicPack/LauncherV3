@@ -86,8 +86,8 @@ public class UserModel {
         if (!response.wasValid())
             throw new DownloadException(response.getErrorMessage());
 
-        this.getCurrentUser().rotateAccessToken(response.getAccessToken());
-        mUserStore.addUser(this.getCurrentUser());
+        //this.getCurrentUser().rotateAccessToken(response.getAccessToken());
+        //mUserStore.addUser(this.getCurrentUser());
         return response.getDownloadToken();
     }
 
