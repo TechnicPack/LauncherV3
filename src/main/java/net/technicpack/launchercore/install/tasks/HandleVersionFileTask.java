@@ -18,6 +18,7 @@ import java.nio.charset.Charset;
 
 public class HandleVersionFileTask implements IInstallTask {
 	private InstalledPack pack;
+    private String libraryName;
 
 	public HandleVersionFileTask(InstalledPack pack) {
 		this.pack = pack;
@@ -25,7 +26,10 @@ public class HandleVersionFileTask implements IInstallTask {
 
 	@Override
 	public String getTaskDescription() {
-		return "Processing version.";
+        if (libraryName == null)
+		    return "Processing version.";
+        else
+            return "Verifying "+libraryName+".";
 	}
 
 	@Override
@@ -51,6 +55,10 @@ public class HandleVersionFileTask implements IInstallTask {
 					library.getName().startsWith("net.minecraftforge:forge")) {
 				continue;
 			}
+
+            String[] nameBits = library.getName().split(":",3);
+            libraryName = nameBits[1]+"-"+nameBits[2]+".jar";
+            queue.RefreshProgress();
 
 			String natives = null;
 			File extractDirectory = null;
