@@ -20,6 +20,7 @@ package net.technicpack.launchercore.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.technicpack.launchercore.mirror.MirrorStore;
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedReader;
@@ -109,10 +110,10 @@ public class Utils {
 	 * @param urlLoc The HTTP URL indicating the location of the content.
 	 * @return True if the content can be accessed successfully, false otherwise.
 	 */
-	public static boolean pingHttpURL(String urlLoc) {
+	public static boolean pingHttpURL(String urlLoc, MirrorStore mirrorStore) {
 		InputStream stream = null;
 		try {
-			final URL url = new URL(urlLoc);
+			final URL url = mirrorStore.getFullUrl(urlLoc);
 			final HttpURLConnection conn = openHttpConnection(url);
 			conn.setConnectTimeout(10000);
 

@@ -50,14 +50,16 @@ public class ModpackInstaller {
 	private final InstalledPack installedPack;
 	private String build;
 	private boolean finished = false;
+    private MirrorStore mirrorStore;
 
-	public ModpackInstaller(DownloadListener listener, InstalledPack installedPack, String build) {
+	public ModpackInstaller(DownloadListener listener, InstalledPack installedPack, String build, MirrorStore mirrorStore) {
 		this.listener = listener;
 		this.installedPack = installedPack;
 		this.build = build;
+        this.mirrorStore = mirrorStore;
 	}
 
-	public CompleteVersion installPack(Component component, User user, MirrorStore mirrorStore) throws IOException {
+	public CompleteVersion installPack(Component component, User user) throws IOException {
 		InstallTasksQueue queue = new InstallTasksQueue(this.listener, mirrorStore);
 		queue.AddTask(new InitPackDirectoryTask(this.installedPack));
 
@@ -118,7 +120,7 @@ public class ModpackInstaller {
 		if (versionFile.exists()) {
 			version = Version.load(versionFile);
 		} else {
-			Utils.pingHttpURL(PlatformConstants.getDownloadCountUrl(this.installedPack.getName()));
+			Utils.pingHttpURL(PlatformConstants.getDownloadCountUrl(this.installedPack.getName()), mirrorStore);
 			Utils.sendTracking("installModpack", this.installedPack.getName(), this.installedPack.getBuild());
 		}
 		return version;

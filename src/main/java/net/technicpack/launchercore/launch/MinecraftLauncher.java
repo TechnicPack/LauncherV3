@@ -23,6 +23,7 @@ import net.technicpack.launchercore.install.InstalledPack;
 import net.technicpack.launchercore.install.user.User;
 import net.technicpack.launchercore.minecraft.CompleteVersion;
 import net.technicpack.launchercore.minecraft.Library;
+import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.launchercore.restful.PlatformConstants;
 import net.technicpack.launchercore.util.OperatingSystem;
 import net.technicpack.launchercore.util.Utils;
@@ -47,11 +48,11 @@ public class MinecraftLauncher {
 		this.version = version;
 	}
 
-	public MinecraftProcess launch(User user, LaunchOptions options) throws IOException {
-		return launch(user, options, null);
+	public MinecraftProcess launch(User user, LaunchOptions options, MirrorStore mirrorStore) throws IOException {
+		return launch(user, options, null, mirrorStore);
 	}
 
-	public MinecraftProcess launch(User user, LaunchOptions options, MinecraftExitListener exitListener) throws IOException {
+	public MinecraftProcess launch(User user, LaunchOptions options, MinecraftExitListener exitListener, MirrorStore mirrorStore) throws IOException {
 		List<String> commands = buildCommands(user, options);
 		StringBuilder full = new StringBuilder();
 		boolean first = true;
@@ -62,7 +63,7 @@ public class MinecraftLauncher {
 			first = false;
 		}
 		System.out.println("Running " + full.toString());
-		Utils.pingHttpURL(PlatformConstants.getRunCountUrl(pack.getName()));
+		Utils.pingHttpURL(PlatformConstants.getRunCountUrl(pack.getName()), mirrorStore);
 		if (!Utils.sendTracking("runModpack", pack.getName(), pack.getBuild())) {
 			System.out.println("Failed to record event");
 		}

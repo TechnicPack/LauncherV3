@@ -19,6 +19,7 @@
 
 package net.technicpack.launchercore.minecraft;
 
+import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.launchercore.util.OperatingSystem;
 import net.technicpack.launchercore.util.Utils;
 import org.apache.commons.lang3.text.StrSubstitutor;
@@ -104,15 +105,15 @@ public class Library {
 		return SUBSTITUTOR.replace(result);
 	}
 
-	public String getDownloadUrl(String path) {
+	public String getDownloadUrl(String path, MirrorStore mirrorStore) {
 		if (this.url != null) {
 			String checkUrl = url + path;
-			if (Utils.pingHttpURL(checkUrl)) {
+			if (Utils.pingHttpURL(checkUrl, mirrorStore)) {
 				return checkUrl;
 			}
 			for (String string : fallback) {
 				checkUrl = string + path;
-				if (Utils.pingHttpURL(checkUrl)) {
+				if (Utils.pingHttpURL(checkUrl, mirrorStore)) {
 					return checkUrl;
 				}
 			}
