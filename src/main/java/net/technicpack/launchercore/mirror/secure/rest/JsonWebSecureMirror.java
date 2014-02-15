@@ -24,9 +24,16 @@ import net.technicpack.launchercore.restful.RestObject;
 
 public class JsonWebSecureMirror implements ISecureMirror {
     private String baseUrl;
+    private String downloadHost;
 
-    public JsonWebSecureMirror(String baseUrl) {
+    public JsonWebSecureMirror(String baseUrl, String downloadHost) {
         this.baseUrl = baseUrl;
+        this.downloadHost = downloadHost;
+    }
+
+    @Override
+    public String getDownloadHost() {
+        return downloadHost;
     }
 
     @Override

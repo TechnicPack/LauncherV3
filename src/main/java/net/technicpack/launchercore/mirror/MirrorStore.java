@@ -66,7 +66,7 @@ public class MirrorStore {
             String downloadKey = token.queryForSecureToken();
 
             if (downloadKey != null)
-                return addDownloadKey(urlObject, downloadKey, userModel.getClientToken());
+                return addDownloadKey(urlObject, token.getDownloadHost(), downloadKey, userModel.getClientToken());
         }
 
         return urlObject;
@@ -146,7 +146,17 @@ public class MirrorStore {
         return downloadFile(url, name, output, null);
     }
 
-    private URL addDownloadKey(URL url, String downloadKey, String clientId) {
+    private URL addDownloadKey(URL url, String downloadHost, String downloadKey, String clientId) {
+        if (downloadHost != null && !downloadHost.isEmpty()) {
+            try {
+                url = new URI(url.getProtocol(), url.getUserInfo(), downloadHost, url.getPort(), url.getPath(), url.getQuery(), null).toURL();
+            } catch (URISyntaxException ex) {
+                //Ignore, just keep old url
+            } catch (MalformedURLException ex) {
+                //Ignore, just keep old url
+            }
+        }
+
         String textUrl = url.toString();
 
         if (url.getQuery() == null || url.getQuery().isEmpty()) {
