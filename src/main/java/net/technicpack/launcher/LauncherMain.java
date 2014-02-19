@@ -1,6 +1,9 @@
-package net.technicpack;
+package net.technicpack.launcher;
 
-/*
+import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.launcher.ui.LauncherFrame;
+
+/**
  * This file is part of The Technic Launcher Version 3.
  * Copyright (C) 2013 Syndicate, LLC
  *
@@ -19,11 +22,12 @@ package net.technicpack;
  * along with The Technic Launcher.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import net.technicpack.ui.LauncherFrame;
-
 public class LauncherMain {
     public static void main(String[] args) {
-        LauncherFrame frame = new LauncherFrame();
+
+        ResourceLoader resources = new ResourceLoader();
+
+        LauncherFrame frame = new LauncherFrame(resources);
         frame.setVisible(true);
     }
 }

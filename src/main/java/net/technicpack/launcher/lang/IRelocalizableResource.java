@@ -1,6 +1,6 @@
-package net.technicpack.ui;
+package net.technicpack.launcher.lang;
 
-/*
+/**
  * This file is part of The Technic Launcher Version 3.
  * Copyright (C) 2013 Syndicate, LLC
  *
@@ -19,16 +19,6 @@ package net.technicpack.ui;
  * along with The Technic Launcher.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import javax.swing.*;
-
-public class LauncherFrame extends JFrame {
-
-    public static final int FRAME_WIDTH = 1200;
-    public static final int FRAME_HEIGHT = 720;
-
-    public LauncherFrame() {
-        super("Technic Launcher");
-        setSize(FRAME_WIDTH, FRAME_HEIGHT);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-    }
+public interface IRelocalizableResource {
+    public void Relocalize(ResourceLoader loader);
 }
