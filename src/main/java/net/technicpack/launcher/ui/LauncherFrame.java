@@ -3,6 +3,7 @@ package net.technicpack.launcher.ui;
 import net.technicpack.launcher.lang.IRelocalizableResource;
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.components.ModpackInfoPanel;
+import net.technicpack.launcher.ui.components.ModpackSelector;
 import net.technicpack.launcher.ui.controls.HeaderTab;
 import net.technicpack.launcher.ui.controls.TiledBackground;
 import net.technicpack.launcher.ui.controls.UserWidget;
@@ -46,7 +47,7 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
     public static final Color COLOR_WHITE_TEXT = Color.white;
     public static final Color COLOR_CHARCOAL = new Color(45, 45, 45);
     public static final Color COLOR_BANNER = new Color(0, 0, 0, 160);
-    public static final Color COLOR_PANEL = new Color(0, 0, 0, 160);
+    public static final Color COLOR_PANEL = new Color(45, 45, 45, 160);
 
     private ResourceLoader resources;
 
@@ -150,9 +151,7 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
         BorderLayout leftLayout = new BorderLayout();
         leftPanel.setLayout(leftLayout);
 
-        BufferedImage backgroundImage = resources.getImage("background_repeat.png");
-        TiledBackground modpackSelector = new TiledBackground(backgroundImage);
-        modpackSelector.setForeground(COLOR_WHITE_TEXT);
+        ModpackSelector modpackSelector = new ModpackSelector(resources);
         leftPanel.add(modpackSelector, BorderLayout.CENTER);
 
         JPanel sidekick = new JPanel();

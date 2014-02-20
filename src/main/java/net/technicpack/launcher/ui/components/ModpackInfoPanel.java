@@ -112,7 +112,7 @@ public class ModpackInfoPanel extends JPanel {
         topline.add(rightButton);
 
         HorizontalGallery gallery = new HorizontalGallery();
-        gallery.setBackground(LauncherFrame.COLOR_PANEL);
+        gallery.setBackground(LauncherFrame.COLOR_BANNER);
         gallery.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
         constraints = new GridBagConstraints();
         constraints.gridx = 0;
