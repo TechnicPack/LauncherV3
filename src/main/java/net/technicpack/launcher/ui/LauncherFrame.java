@@ -4,6 +4,7 @@ import net.technicpack.launcher.lang.IRelocalizableResource;
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.components.ModpackInfoPanel;
 import net.technicpack.launcher.ui.components.ModpackSelector;
+import net.technicpack.launcher.ui.controls.CountCircle;
 import net.technicpack.launcher.ui.controls.HeaderTab;
 import net.technicpack.launcher.ui.controls.TiledBackground;
 import net.technicpack.launcher.ui.controls.UserWidget;
@@ -41,6 +42,7 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
     private static final int SIDEKICK_WIDTH = 300;
     private static final int SIDEKICK_HEIGHT = 250;
 
+    public static final Color COLOR_RED = new Color(229,0,0);
     public static final Color COLOR_GREEN = new Color(45, 130, 11);
     public static final Color COLOR_BLUE = new Color(16, 108, 163);
     public static final Color COLOR_BLUE_DARKER = new Color(12, 94, 145);
@@ -96,7 +98,16 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
         header.add(modpacksControl);
 
         HeaderTab newControl = new HeaderTab("NEWS", resources);
+        newControl.setLayout(null);
         header.add(newControl);
+
+        CountCircle newsCircle = new CountCircle();
+        newsCircle.setBackground(COLOR_RED);
+        newsCircle.setForeground(COLOR_WHITE_TEXT);
+        newsCircle.setFont(resources.getFont("Raleway-ExtraLight.ttf",16));
+        newsCircle.setCount(9);
+        newControl.add(newsCircle);
+        newsCircle.setBounds(10,17,25,25);
 
         header.add(Box.createHorizontalGlue());
 
