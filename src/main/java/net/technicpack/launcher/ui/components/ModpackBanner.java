@@ -121,7 +121,7 @@ public class ModpackBanner extends JPanel {
         packDoodads.add(Box.createRigidArea(new Dimension(0, 5)));
 
         JLabel modpackOptions = new JLabel("Modpack Options");
-        Font font = resources.getFont("Raleway-ExtraLight.ttf", 15);
+        Font font = resources.getFont("Raleway-ExtraLight.ttf", 15, Font.BOLD);
         Map attributes = font.getAttributes();
         attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
         modpackOptions.setFont(font.deriveFont(attributes));

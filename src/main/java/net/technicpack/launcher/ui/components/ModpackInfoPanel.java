@@ -4,6 +4,7 @@ import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.FeedItem;
 import net.technicpack.launcher.ui.controls.HorizontalGallery;
+import net.technicpack.launcher.ui.controls.RectButton;
 import net.technicpack.launcher.ui.controls.TiledBackground;
 
 import javax.swing.*;
@@ -150,13 +151,14 @@ public class ModpackInfoPanel extends JPanel {
         Component horizFill = Box.createGlue();
         feedBottom.add(horizFill, constraints);
 
-        JButton playButton = new JButton("PLAY");
+        RectButton playButton = new RectButton("PLAY");
         playButton.setPreferredSize(new Dimension(295, 40));
         playButton.setMinimumSize(new Dimension(295, 40));
         playButton.setFont(resources.getFont("Raleway-ExtraLight.ttf", 24));
         playButton.setBorder(BorderFactory.createEmptyBorder());
         playButton.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         playButton.setBackground(LauncherFrame.COLOR_BLUE);
+        playButton.setHoverBackground(LauncherFrame.COLOR_BLUE_DARKER);
         playButton.setAlignmentX(RIGHT_ALIGNMENT);
 
         constraints = new GridBagConstraints();

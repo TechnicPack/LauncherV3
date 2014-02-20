@@ -40,7 +40,7 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
 
     public static final Color COLOR_GREEN = new Color(45, 130, 11);
     public static final Color COLOR_BLUE = new Color(16, 108, 163);
-    public static final Color COLOR_BLUE_DARKER = new Color(25, 123, 181);
+    public static final Color COLOR_BLUE_DARKER = new Color(12, 94, 145);
     public static final Color COLOR_WHITE_TEXT = Color.white;
     public static final Color COLOR_CHARCOAL = new Color(45, 45, 45);
     public static final Color COLOR_BANNER = new Color(0, 0, 0, 160);
