@@ -3,10 +3,12 @@ package net.technicpack.launcher.ui;
 import net.technicpack.launcher.lang.IRelocalizableResource;
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.components.ModpackInfoPanel;
+import net.technicpack.launcher.ui.controls.HeaderTab;
 import net.technicpack.launcher.ui.controls.TiledBackground;
 import net.technicpack.launcher.ui.controls.UserWidget;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -73,7 +75,7 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
         header.setLayout(new BoxLayout(header, BoxLayout.LINE_AXIS));
         header.setBackground(COLOR_BLUE);
         header.setForeground(COLOR_WHITE_TEXT);
-        header.setBorder(BorderFactory.createEmptyBorder(5,5,5,10));
+        header.setBorder(BorderFactory.createEmptyBorder(0,5,0,10));
         this.add(header, BorderLayout.PAGE_START);
 
         ImageIcon headerIcon = resources.getIcon("platform_icon_title.png");
@@ -81,27 +83,18 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
         headerLabel.setBorder(BorderFactory.createEmptyBorder(5,8,5,0));
         header.add(headerLabel);
 
-        header.add(Box.createRigidArea(new Dimension(24, 0)));
+        header.add(Box.createRigidArea(new Dimension(6, 0)));
 
-        JLabel discoverControl = new JLabel("DISCOVER");
-        discoverControl.setFont(resources.getFont("Raleway-ExtraLight.ttf", 26));
-        discoverControl.setForeground(COLOR_WHITE_TEXT);
+        HeaderTab discoverControl = new HeaderTab("DISCOVER", resources);
         header.add(discoverControl);
 
-        header.add(Box.createRigidArea(new Dimension(36, 0)));
-
-        JLabel modpacksControl = new JLabel("MODPACKS");
+        HeaderTab modpacksControl = new HeaderTab("MODPACKS", resources);
+        modpacksControl.setIsActive(true);
         modpacksControl.setIcon(resources.getIcon("downTriangle.png"));
-        modpacksControl.setFont(resources.getFont("Raleway-ExtraLight.ttf", 26));
-        modpacksControl.setForeground(COLOR_WHITE_TEXT);
         modpacksControl.setHorizontalTextPosition(SwingConstants.LEADING);
         header.add(modpacksControl);
 
-        header.add(Box.createRigidArea(new Dimension(36, 0)));
-
-        JLabel newControl = new JLabel("NEWS");
-        newControl.setFont(resources.getFont("Raleway-ExtraLight.ttf", 26));
-        newControl.setForeground(COLOR_WHITE_TEXT);
+        HeaderTab newControl = new HeaderTab("NEWS", resources);
         header.add(newControl);
 
         header.add(Box.createHorizontalGlue());
@@ -109,6 +102,7 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
         JPanel rightHeaderPanel = new JPanel();
         rightHeaderPanel.setOpaque(false);
         rightHeaderPanel.setLayout(new BoxLayout(rightHeaderPanel, BoxLayout.PAGE_AXIS));
+        rightHeaderPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
 
         JPanel windowGadgetPanel = new JPanel();
         windowGadgetPanel.setOpaque(false);

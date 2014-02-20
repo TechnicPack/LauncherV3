@@ -1,6 +1,9 @@
 package net.technicpack.launcher.ui.controls;
 
 
+import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.launcher.ui.LauncherFrame;
+
 import javax.swing.*;
 
 /**
@@ -23,4 +26,23 @@ import javax.swing.*;
  */
 
 public class HeaderTab extends JLabel {
+    private boolean isActive;
+
+    public HeaderTab(String text, ResourceLoader resources) {
+        super(text);
+
+        setIsActive(false);
+
+        setFont(resources.getFont("Raleway-ExtraLight.ttf", 26));
+        setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        setBackground(LauncherFrame.COLOR_BLUE_DARKER);
+        setBorder(BorderFactory.createEmptyBorder(20,18,20,18));
+    }
+
+    public boolean isActive() { return isActive; }
+
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
+        this.setOpaque(isActive);
+    }
 }
