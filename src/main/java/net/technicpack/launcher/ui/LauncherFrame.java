@@ -104,7 +104,7 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
         CountCircle newsCircle = new CountCircle();
         newsCircle.setBackground(COLOR_RED);
         newsCircle.setForeground(COLOR_WHITE_TEXT);
-        newsCircle.setFont(resources.getFont("Raleway-ExtraLight.ttf",16));
+        newsCircle.setFont(resources.getFont("OpenSans-Bold.ttf",14));
         newsCircle.setCount(9);
         newControl.add(newsCircle);
         newsCircle.setBounds(10,17,25,25);

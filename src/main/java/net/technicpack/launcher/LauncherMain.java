@@ -25,6 +25,10 @@ import net.technicpack.launcher.ui.LauncherFrame;
 public class LauncherMain {
     public static void main(String[] args) {
 
+        // enable anti-aliased text:
+        System.setProperty("awt.useSystemAAFontSettings","on");
+        System.setProperty("swing.aatext", "true");
+
         ResourceLoader resources = new ResourceLoader();
 
         LauncherFrame frame = new LauncherFrame(resources);
