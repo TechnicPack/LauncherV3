@@ -1,6 +1,4 @@
-package net.technicpack.launcher.lang;
-
-/**
+/*
  * This file is part of The Technic Launcher Version 3.
  * Copyright (C) 2013 Syndicate, LLC
  *
@@ -18,6 +16,7 @@ package net.technicpack.launcher.lang;
  * as well as a copy of the GNU Lesser General Public License,
  * along with The Technic Launcher.  If not, see <http://www.gnu.org/licenses/>.
  */
+package net.technicpack.launcher.lang;
 
 public interface IRelocalizableResource {
     public void relocalize(ResourceLoader loader);

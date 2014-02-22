@@ -1,14 +1,4 @@
-package net.technicpack.launcher.lang;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.LinkedList;
-
-/**
+/*
  * This file is part of The Technic Launcher Version 3.
  * Copyright (C) 2013 Syndicate, LLC
  *
@@ -26,6 +16,15 @@ import java.util.LinkedList;
  * as well as a copy of the GNU Lesser General Public License,
  * along with The Technic Launcher.  If not, see <http://www.gnu.org/licenses/>.
  */
+package net.technicpack.launcher.lang;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedList;
 
 public class ResourceLoader {
     private Collection<IRelocalizableResource> resources = new LinkedList<IRelocalizableResource>();

@@ -1,15 +1,4 @@
-package net.technicpack.launcher.ui.controls;
-
-
-import net.technicpack.launcher.lang.ResourceLoader;
-import net.technicpack.launcher.ui.LauncherFrame;
-
-import javax.swing.*;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-
-/**
+/*
  * This file is part of The Technic Launcher Version 3.
  * Copyright (C) 2013 Syndicate, LLC
  *
@@ -27,6 +16,15 @@ import java.awt.event.MouseListener;
  * as well as a copy of the GNU Lesser General Public License,
  * along with The Technic Launcher.  If not, see <http://www.gnu.org/licenses/>.
  */
+package net.technicpack.launcher.ui.controls;
+
+import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.launcher.ui.LauncherFrame;
+
+import javax.swing.*;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 public class HeaderTab extends AAJLabel implements MouseListener {
     private boolean isActive;

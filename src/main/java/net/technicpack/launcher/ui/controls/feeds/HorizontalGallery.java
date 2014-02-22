@@ -1,11 +1,4 @@
-package net.technicpack.launcher.ui.controls.feeds;
-
-import javax.swing.*;
-import java.awt.*;
-import java.util.Collection;
-import java.util.LinkedList;
-
-/**
+/*
  * This file is part of The Technic Launcher Version 3.
  * Copyright (C) 2013 Syndicate, LLC
  *
@@ -23,6 +16,10 @@ import java.util.LinkedList;
  * as well as a copy of the GNU Lesser General Public License,
  * along with The Technic Launcher.  If not, see <http://www.gnu.org/licenses/>.
  */
+package net.technicpack.launcher.ui.controls.feeds;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class HorizontalGallery extends JPanel {
     public HorizontalGallery() {

@@ -1,11 +1,4 @@
-package net.technicpack.launcher.ui.controls;
-
-import net.technicpack.launcher.lang.ResourceLoader;
-import net.technicpack.launcher.ui.LauncherFrame;
-
-import javax.swing.*;
-
-/**
+/*
  * This file is part of The Technic Launcher Version 3.
  * Copyright (C) 2013 Syndicate, LLC
  *
@@ -23,6 +16,12 @@ import javax.swing.*;
  * as well as a copy of the GNU Lesser General Public License,
  * along with The Technic Launcher.  If not, see <http://www.gnu.org/licenses/>.
  */
+package net.technicpack.launcher.ui.controls;
+
+import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.launcher.ui.LauncherFrame;
+
+import javax.swing.*;
 
 public class SelectorWidget extends JPanel {
 

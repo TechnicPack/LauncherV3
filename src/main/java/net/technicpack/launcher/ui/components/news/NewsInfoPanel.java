@@ -1,17 +1,4 @@
-package net.technicpack.launcher.ui.components.news;
-
-import net.technicpack.launcher.lang.ResourceLoader;
-import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launcher.ui.controls.AAJLabel;
-import net.technicpack.launcher.ui.controls.RectButton;
-import net.technicpack.launcher.ui.controls.TiledBackground;
-import sun.plugin.javascript.JSClassLoader;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-
-/**
+/*
  * This file is part of The Technic Launcher Version 3.
  * Copyright (C) 2013 Syndicate, LLC
  *
@@ -29,6 +16,17 @@ import java.awt.image.BufferedImage;
  * as well as a copy of the GNU Lesser General Public License,
  * along with The Technic Launcher.  If not, see <http://www.gnu.org/licenses/>.
  */
+package net.technicpack.launcher.ui.components.news;
+
+import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.launcher.ui.LauncherFrame;
+import net.technicpack.launcher.ui.controls.AAJLabel;
+import net.technicpack.launcher.ui.controls.RectButton;
+import net.technicpack.launcher.ui.controls.TiledBackground;
+
+import javax.swing.*;
+import java.awt.*;
+
 public class NewsInfoPanel extends TiledBackground {
     private ResourceLoader resources;
 

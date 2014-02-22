@@ -1,10 +1,4 @@
-package net.technicpack.launcher.ui.controls;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-
-/**
+/*
  * This file is part of The Technic Launcher Version 3.
  * Copyright (C) 2013 Syndicate, LLC
  *
@@ -22,6 +16,11 @@ import java.awt.image.BufferedImage;
  * as well as a copy of the GNU Lesser General Public License,
  * along with The Technic Launcher.  If not, see <http://www.gnu.org/licenses/>.
  */
+package net.technicpack.launcher.ui.controls;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public class TiledBackground extends JPanel {
     private BufferedImage image;
