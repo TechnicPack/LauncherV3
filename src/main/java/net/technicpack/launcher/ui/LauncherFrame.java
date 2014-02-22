@@ -144,7 +144,7 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
 
         JLabel launcherOptionsLabel = new JLabel("Launcher Options");
         launcherOptionsLabel.setIcon(resources.getIcon("options_cog.png"));
-        launcherOptionsLabel.setFont(resources.getFont("Raleway-ExtraLight.ttf", 14));
+        launcherOptionsLabel.setFont(resources.getFont("Raleway-Light.ttf", 14));
         launcherOptionsLabel.setForeground(COLOR_WHITE_TEXT);
         launcherOptionsLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         launcherOptionsLabel.setHorizontalTextPosition(SwingConstants.LEADING);
@@ -195,7 +195,7 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
 
         JLabel buildCtrl = new JLabel("Launcher Build 315 (STABLE)");
         buildCtrl.setForeground(COLOR_WHITE_TEXT);
-        buildCtrl.setFont(resources.getFont("Raleway-ExtraLight.ttf", 14));
+        buildCtrl.setFont(resources.getFont("Raleway-Light.ttf", 14));
         buildCtrl.setHorizontalTextPosition(SwingConstants.RIGHT);
         buildCtrl.setHorizontalAlignment(SwingConstants.RIGHT);
         footer.add(buildCtrl);

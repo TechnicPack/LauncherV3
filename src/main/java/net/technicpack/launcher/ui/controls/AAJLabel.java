@@ -1,7 +1,7 @@
-package net.technicpack.launcher;
+package net.technicpack.launcher.ui.controls;
 
-import net.technicpack.launcher.lang.ResourceLoader;
-import net.technicpack.launcher.ui.LauncherFrame;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * This file is part of The Technic Launcher Version 3.
@@ -22,16 +22,25 @@ import net.technicpack.launcher.ui.LauncherFrame;
  * along with The Technic Launcher.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class LauncherMain {
-    public static void main(String[] args) {
+public class AAJLabel extends JLabel {
 
-        // enable anti-aliased text:
-        //System.setProperty("awt.useSystemAAFontSettings","on");
-        //System.setProperty("swing.aatext", "true");
+    public AAJLabel(String text) {
+        super(text);
+    }
 
-        ResourceLoader resources = new ResourceLoader();
+    @Override
+    public void paintComponent(Graphics g) {
+        Graphics2D g2d = (Graphics2D)g;
 
-        LauncherFrame frame = new LauncherFrame(resources);
-        frame.setVisible(true);
+        g2d.setRenderingHint(
+                RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(
+                RenderingHints.KEY_TEXT_ANTIALIASING,
+                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2d.setRenderingHint(
+                RenderingHints.KEY_FRACTIONALMETRICS,
+                RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+        super.paintComponent(g2d);
     }
 }

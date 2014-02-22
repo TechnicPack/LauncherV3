@@ -2,10 +2,7 @@ package net.technicpack.launcher.ui.components;
 
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launcher.ui.controls.FeedItem;
-import net.technicpack.launcher.ui.controls.HorizontalGallery;
-import net.technicpack.launcher.ui.controls.RectButton;
-import net.technicpack.launcher.ui.controls.TiledBackground;
+import net.technicpack.launcher.ui.controls.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -95,8 +92,8 @@ public class ModpackInfoPanel extends JPanel {
         constraints.fill = GridBagConstraints.HORIZONTAL;
         feedBottom.add(topline, constraints);
 
-        JLabel toplineLabel = new JLabel("LATEST UPDATES");
-        toplineLabel.setFont(resources.getFont("Raleway-ExtraLight.ttf", 28));
+        JLabel toplineLabel = new AAJLabel("LATEST UPDATES");
+        toplineLabel.setFont(resources.getFont("Raleway-Light.ttf", 28));
         toplineLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         topline.add(toplineLabel);
         topline.add(Box.createHorizontalGlue());
@@ -154,7 +151,7 @@ public class ModpackInfoPanel extends JPanel {
         RectButton playButton = new RectButton("PLAY");
         playButton.setPreferredSize(new Dimension(295, 40));
         playButton.setMinimumSize(new Dimension(295, 40));
-        playButton.setFont(resources.getFont("Raleway-ExtraLight.ttf", 24));
+        playButton.setFont(resources.getFont("Raleway-Light.ttf", 24));
         playButton.setBorder(BorderFactory.createEmptyBorder());
         playButton.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         playButton.setBackground(LauncherFrame.COLOR_BLUE);

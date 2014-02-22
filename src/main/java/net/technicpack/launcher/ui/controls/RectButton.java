@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * This file is part of The Technic Launcher Version 3.
@@ -60,19 +61,31 @@ public class RectButton extends JButton implements MouseListener {
 
     @Override
     public void paint(Graphics g) {
-        if (isClicked) g.setColor(getClickBackground());
-        else if (isHovered) g.setColor(getHoverBackground());
-        else g.setColor(getBackground());
+        Graphics2D g2d = (Graphics2D)g;
 
-        g.fillRect(0, 0, getWidth(), getHeight());
+        g2d.setRenderingHint(
+                RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(
+                RenderingHints.KEY_TEXT_ANTIALIASING,
+                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2d.setRenderingHint(
+                RenderingHints.KEY_FRACTIONALMETRICS,
+                RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
-        if (isClicked) g.setColor(getClickForeground());
-        else if (isHovered) g.setColor(getHoverForeground());
-        else g.setColor(getForeground());
+        if (isClicked) g2d.setColor(getClickBackground());
+        else if (isHovered) g2d.setColor(getHoverBackground());
+        else g2d.setColor(getBackground());
 
-        g.setFont(getFont());
+        g2d.fillRect(0, 0, getWidth(), getHeight());
 
-        int width = g.getFontMetrics().stringWidth(getText());
+        if (isClicked) g2d.setColor(getClickForeground());
+        else if (isHovered) g2d.setColor(getHoverForeground());
+        else g2d.setColor(getForeground());
+
+        g2d.setFont(getFont());
+
+        int width = g2d.getFontMetrics().stringWidth(getText());
         int textHeight =  getFont().getSize();
         int otherTextHeight = getFontMetrics(getFont()).getHeight();
 

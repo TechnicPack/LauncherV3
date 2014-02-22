@@ -2,6 +2,7 @@ package net.technicpack.launcher.ui.components;
 
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
+import net.technicpack.launcher.ui.controls.AAJLabel;
 import net.technicpack.launcher.ui.controls.StatBox;
 
 import javax.swing.*;
@@ -56,51 +57,39 @@ public class ModpackDataDisplay extends JPanel {
         imagePanel.add(packImage);
 
         JPanel packInfoPanel = new JPanel();
-        packInfoPanel.setLayout(new BoxLayout(packInfoPanel, BoxLayout.PAGE_AXIS));
+        packInfoPanel.setLayout(new GridBagLayout());
         packInfoPanel.setOpaque(false);
         packInfoPanel.setAlignmentY(TOP_ALIGNMENT);
         packInfoPanel.setBorder(BorderFactory.createEmptyBorder(5,0,0,0));
         this.add(packInfoPanel, BorderLayout.CENTER);
 
-        JPanel statsBoxes = new JPanel();
-        statsBoxes.setOpaque(false);
-        statsBoxes.setLayout(new BoxLayout(statsBoxes, BoxLayout.LINE_AXIS));
-        statsBoxes.setAlignmentX(LEFT_ALIGNMENT);
-        packInfoPanel.add(statsBoxes);
-
         StatBox ratings = new StatBox(resources, "RATINGS", 1799);
         ratings.setBackground(LauncherFrame.COLOR_GREEN);
         ratings.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        statsBoxes.add(ratings);
-
-        statsBoxes.add(Box.createRigidArea(new Dimension(5, 0)));
+        packInfoPanel.add(ratings,new GridBagConstraints(0,0,1,1,0.0,0.0,GridBagConstraints.NORTHEAST,GridBagConstraints.BOTH, new Insets(0,0,0,5), 0,0));
 
         StatBox downloads = new StatBox(resources, "DOWNLOADS", 80429);
         downloads.setBackground(LauncherFrame.COLOR_BLUE);
         downloads.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        statsBoxes.add(downloads);
-
-        statsBoxes.add(Box.createRigidArea(new Dimension(5, 0)));
+        packInfoPanel.add(downloads, new GridBagConstraints(1,0,1,1,0.0,0.0, GridBagConstraints.NORTH, GridBagConstraints.BOTH, new Insets(0,0,0,5), 0,0));
 
         StatBox runs = new StatBox(resources, "RUNS", 172319);
         runs.setBackground(LauncherFrame.COLOR_BLUE);
         runs.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        statsBoxes.add(runs);
+        packInfoPanel.add(runs, new GridBagConstraints(2,0,1,1,0.0,0.0,GridBagConstraints.NORTH,GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
 
-        packInfoPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        packInfoPanel.add(Box.createGlue(), new GridBagConstraints(3,0,1,1,1.0,0.0,GridBagConstraints.NORTH,GridBagConstraints.NONE, new Insets(0,0,0,0),0,0));
 
-        JLabel title = new JLabel("About Modpack");
-        title.setFont(resources.getFont("Raleway-ExtraLight.ttf", 24, Font.BOLD));
+        JLabel title = new AAJLabel("About Modpack");
+        title.setFont(resources.getFont("Raleway-Light.ttf", 24, Font.BOLD));
         title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         title.setHorizontalAlignment(SwingConstants.LEFT);
         title.setHorizontalTextPosition(SwingConstants.LEFT);
         title.setAlignmentX(LEFT_ALIGNMENT);
-        packInfoPanel.add(title);
-
-        packInfoPanel.add(Box.createRigidArea(new Dimension(0,10)));
+        packInfoPanel.add(title, new GridBagConstraints(0,1,4,1,1.0,0.0,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(20,0,0,0),0,0));
 
         JTextArea description = new JTextArea("Gear up and set forth on a campaign worthy of legend, for Hexxit has been unearthed! Dark dungeons, towering spires, weathered ruins and musty tomes lay before you. Lay claim to riches or create your own artifacts, tame beasts and carve out your own story in endless wonder. Alone or with friends, adventure awaits in Hexxit.");
-        description.setFont(resources.getFont("OpenSans-Bold.ttf", 13));
+        description.setFont(resources.getFont("OpenSans-Regular.ttf", 14));
         description.setLineWrap(true);
         description.setWrapStyleWord(true);
         description.setOpaque(false);
@@ -109,6 +98,6 @@ public class ModpackDataDisplay extends JPanel {
         description.setAlignmentX(LEFT_ALIGNMENT);
         description.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 
-        packInfoPanel.add(description);
+        packInfoPanel.add(description, new GridBagConstraints(0,2,4,1,1.0,1.0,GridBagConstraints.NORTH,GridBagConstraints.BOTH, new Insets(10,0,0,0),0,0));
     }
 }

@@ -49,7 +49,7 @@ public class ModpackWidget extends JPanel {
         add(Box.createHorizontalStrut(14));
 
         JLabel text = new JLabel("Modpack");
-        text.setFont(resources.getFont("Raleway-ExtraLight.ttf", 15));
+        text.setFont(resources.getFont("Raleway-Light.ttf", 15));
         text.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         add(text);
 

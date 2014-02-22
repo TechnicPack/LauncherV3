@@ -2,6 +2,7 @@ package net.technicpack.launcher.ui.components;
 
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
+import net.technicpack.launcher.ui.controls.AAJLabel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -49,9 +50,9 @@ public class ModpackBanner extends JPanel {
         modpackNamePanel.setLayout(new BoxLayout(modpackNamePanel, BoxLayout.PAGE_AXIS));
         this.add(modpackNamePanel);
 
-        JLabel modpackName = new JLabel("MODPACK");
+        JLabel modpackName = new AAJLabel("MODPACK");
         modpackName.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        modpackName.setFont(resources.getFont("Raleway-ExtraLight.ttf", 26, Font.BOLD));
+        modpackName.setFont(resources.getFont("Raleway-Light.ttf", 26));
         modpackName.setHorizontalTextPosition(SwingConstants.LEFT);
         modpackName.setAlignmentX(LEFT_ALIGNMENT);
         modpackName.setBorder(BorderFactory.createEmptyBorder(0,5,0,0));
@@ -103,15 +104,15 @@ public class ModpackBanner extends JPanel {
         versionPanel.add(updateReady);
 
         JLabel boldText = new JLabel("Installed Version:");
-        boldText.setFont(resources.getFont("Raleway-ExtraLight.ttf", 16, Font.BOLD));
+        boldText.setFont(resources.getFont("Raleway-Light.ttf", 16, Font.BOLD));
         boldText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         boldText.setHorizontalTextPosition(SwingConstants.LEADING);
         boldText.setHorizontalAlignment(SwingConstants.RIGHT);
         boldText.setAlignmentX(RIGHT_ALIGNMENT);
         versionPanel.add(boldText);
 
-        JLabel installedVersion = new JLabel("1.0.7");
-        installedVersion.setFont(resources.getFont("Raleway-ExtraLight.ttf", 16));
+        JLabel installedVersion = new AAJLabel("1.0.7");
+        installedVersion.setFont(resources.getFont("Raleway-Light.ttf", 16));
         installedVersion.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         installedVersion.setHorizontalTextPosition(SwingConstants.LEADING);
         installedVersion.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -121,7 +122,7 @@ public class ModpackBanner extends JPanel {
         packDoodads.add(Box.createRigidArea(new Dimension(0, 5)));
 
         JLabel modpackOptions = new JLabel("Modpack Options");
-        Font font = resources.getFont("Raleway-ExtraLight.ttf", 15, Font.BOLD);
+        Font font = resources.getFont("Raleway-Light.ttf", 15, Font.BOLD);
         Map attributes = font.getAttributes();
         attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
         modpackOptions.setFont(font.deriveFont(attributes));

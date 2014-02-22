@@ -25,7 +25,7 @@ import javax.swing.*;
  * along with The Technic Launcher.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class HeaderTab extends JLabel {
+public class HeaderTab extends AAJLabel {
     private boolean isActive;
 
     public HeaderTab(String text, ResourceLoader resources) {
@@ -33,7 +33,7 @@ public class HeaderTab extends JLabel {
 
         setIsActive(false);
 
-        setFont(resources.getFont("Raleway-ExtraLight.ttf", 26));
+        setFont(resources.getFont("Raleway-Light.ttf", 26));
         setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         setBackground(LauncherFrame.COLOR_BLUE_DARKER);
         setBorder(BorderFactory.createEmptyBorder(20,18,20,18));

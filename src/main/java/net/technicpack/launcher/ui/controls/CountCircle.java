@@ -6,6 +6,7 @@ import javax.annotation.Resource;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
+import java.util.Map;
 
 /**
  * This file is part of The Technic Launcher Version 3.
@@ -51,20 +52,30 @@ public class CountCircle extends JComponent {
 
     @Override
     public void paint(Graphics g) {
-        String text = getText();
-        g.setFont(getFont());
+        Graphics2D g2d = (Graphics2D)g;
 
-        Rectangle2D bounds = g.getFontMetrics().getStringBounds(text, g);
-        int width = g.getFontMetrics().stringWidth(text);
+        g2d.setRenderingHint(
+                RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(
+                RenderingHints.KEY_TEXT_ANTIALIASING,
+                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2d.setRenderingHint(
+                RenderingHints.KEY_FRACTIONALMETRICS,
+                RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+        String text = getText();
+        g2d.setFont(getFont());
+
+        Rectangle2D bounds = g2d.getFontMetrics().getStringBounds(text, g2d);
 
         double radius = (bounds.getWidth() > bounds.getHeight())?bounds.getWidth():bounds.getHeight();
         int size = (int)Math.ceil(radius);
 
-        g.setColor(getBackground());
-        g.fillOval(0, 0, size, size);
+        g2d.setColor(getBackground());
+        g2d.fillOval(0, 0, size, size);
 
-        g.setColor(getForeground()); 
-        
-        g.drawString(text, 1 + (size/2) - (int)(0.5 + bounds.getWidth()/2), (size/2) - (int)(0.5 + bounds.getY() + bounds.getHeight()/2));
+        g2d.setColor(getForeground());
+
+        g2d.drawString(text, (size/2) - (int)(0.5 + bounds.getWidth()/2), (size/2) - (int)(0.5 + bounds.getY() + bounds.getHeight()/2));
     }
 }
