@@ -36,7 +36,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class LauncherFrame extends DraggableFrame implements ActionListener, IRelocalizableResource {
+public class LauncherFrame extends DraggableFrame implements IRelocalizableResource {
 
     private static final int FRAME_WIDTH = 1200;
     private static final int FRAME_HEIGHT = 720;
@@ -52,6 +52,10 @@ public class LauncherFrame extends DraggableFrame implements ActionListener, IRe
     public static final Color COLOR_CHARCOAL = new Color(31, 31, 31);
     public static final Color COLOR_BANNER = new Color(0, 0, 0, 160);
     public static final Color COLOR_PANEL = new Color(45, 45, 45, 160);
+
+    public static final String TAB_DISCOVER = "discover";
+    public static final String TAB_MODPACKS = "modpacks";
+    public static final String TAB_NEWS = "news";
 
     private ResourceLoader resources;
 
@@ -79,21 +83,33 @@ public class LauncherFrame extends DraggableFrame implements ActionListener, IRe
         selectTab("modpacks");
     }
 
-    private void selectTab(String tabName) {
+    /////////////////////////////////////////////////
+    // Action responses
+    /////////////////////////////////////////////////
+
+    protected void selectTab(String tabName) {
         discoverTab.setIsActive(false);
         modpacksTab.setIsActive(false);
         newsTab.setIsActive(false);
 
-        if (tabName.equalsIgnoreCase("discover"))
+        if (tabName.equalsIgnoreCase(TAB_DISCOVER))
             discoverTab.setIsActive(true);
-        else if (tabName.equalsIgnoreCase("modpacks"))
+        else if (tabName.equalsIgnoreCase(TAB_MODPACKS))
             modpacksTab.setIsActive(true);
-        else if (tabName.equalsIgnoreCase("news"))
+        else if (tabName.equalsIgnoreCase(TAB_NEWS))
             newsTab.setIsActive(true);
 
         infoLayout.show(infoSwap, tabName);
         selectorLayout.show(selectorSwap, tabName);
     }
+
+    protected void closeWindow() {
+        this.dispose();
+    }
+
+    /////////////////////////////////////////////////
+    // End Action responses
+    /////////////////////////////////////////////////
 
     private void initComponents() {
         BorderLayout layout = new BorderLayout();
@@ -116,23 +132,30 @@ public class LauncherFrame extends DraggableFrame implements ActionListener, IRe
 
         header.add(Box.createRigidArea(new Dimension(6, 0)));
 
+        ActionListener tabListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectTab(e.getActionCommand());
+            }
+        };
+
         discoverTab = new HeaderTab("DISCOVER", resources);
         header.add(discoverTab);
-        discoverTab.setActionCommand("discover");
-        discoverTab.addActionListener(this);
+        discoverTab.setActionCommand(TAB_DISCOVER);
+        discoverTab.addActionListener(tabListener);
 
         modpacksTab = new HeaderTab("MODPACKS", resources);
         modpacksTab.setIsActive(true);
         modpacksTab.setIcon(resources.getIcon("downTriangle.png"));
         modpacksTab.setHorizontalTextPosition(SwingConstants.LEADING);
-        modpacksTab.addActionListener(this);
-        modpacksTab.setActionCommand("modpacks");
+        modpacksTab.addActionListener(tabListener);
+        modpacksTab.setActionCommand(TAB_MODPACKS);
         header.add(modpacksTab);
 
         newsTab = new HeaderTab("NEWS", resources);
         newsTab.setLayout(null);
-        newsTab.addActionListener(this);
-        newsTab.setActionCommand("news");
+        newsTab.addActionListener(tabListener);
+        newsTab.setActionCommand(TAB_NEWS);
         header.add(newsTab);
 
         CountCircle newsCircle = new CountCircle();
@@ -159,8 +182,6 @@ public class LauncherFrame extends DraggableFrame implements ActionListener, IRe
         JButton minimizeButton = new JButton(minimizeIcon);
         minimizeButton.setBorder(BorderFactory.createEmptyBorder());
         minimizeButton.setContentAreaFilled(false);
-        minimizeButton.setActionCommand("minimize");
-        minimizeButton.addActionListener(this);
         minimizeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         windowGadgetPanel.add(minimizeButton);
 
@@ -168,8 +189,12 @@ public class LauncherFrame extends DraggableFrame implements ActionListener, IRe
         JButton closeButton = new JButton(closeIcon);
         closeButton.setBorder(BorderFactory.createEmptyBorder());
         closeButton.setContentAreaFilled(false);
-        closeButton.setActionCommand("close");
-        closeButton.addActionListener(this);
+        closeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                closeWindow();
+            }
+        });
         closeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         windowGadgetPanel.add(closeButton);
 
@@ -246,21 +271,6 @@ public class LauncherFrame extends DraggableFrame implements ActionListener, IRe
         footer.add(buildCtrl);
 
         infoContainer.add(footer, BorderLayout.PAGE_END);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getActionCommand() == null)
-            return;
-
-        if (e.getActionCommand().equalsIgnoreCase("close")) {
-            this.dispose();
-            return;
-        } else if (e.getActionCommand().equalsIgnoreCase("discover") ||
-                e.getActionCommand().equalsIgnoreCase("modpacks") ||
-                e.getActionCommand().equalsIgnoreCase("news")) {
-            selectTab(e.getActionCommand());
-        }
     }
 
     @Override
