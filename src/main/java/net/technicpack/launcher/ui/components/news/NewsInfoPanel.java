@@ -46,7 +46,7 @@ public class NewsInfoPanel extends TiledBackground {
 
         JLabel title = new AAJLabel("SOMETHING UPDATED");
         title.setForeground(LauncherFrame.COLOR_BLUE);
-        title.setFont(resources.getFont("Raleway-Light.ttf", 36));
+        title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 36));
         add(title, new GridBagConstraints(0,0,2,1,1.0,0.0,GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0));
 
         JPanel authorshipInfo = new JPanel();
@@ -56,20 +56,20 @@ public class NewsInfoPanel extends TiledBackground {
 
         JLabel author = new AAJLabel("Skuli");
         author.setForeground(LauncherFrame.COLOR_BLUE);
-        author.setFont(resources.getFont("Raleway-Light.ttf", 18, Font.BOLD));
+        author.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 18, Font.BOLD));
         author.setIcon(resources.getIcon("news/authorHelm.png"));
         authorshipInfo.add(author);
 
         JLabel postedTime = new AAJLabel("/ Posted 3 Hours Ago");
         postedTime.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        postedTime.setFont(resources.getFont("Raleway-Light.ttf", 18));
+        postedTime.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 18));
         authorshipInfo.add(postedTime);
 
         newsText = new JTextArea();
         newsText.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
         newsText.setBackground(LauncherFrame.COLOR_CHARCOAL);
         newsText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        newsText.setFont(resources.getFont("OpenSans-Regular.ttf", 13.5f));
+        newsText.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 13.5f));
         newsText.setEditable(false);
         newsText.setHighlighter(null);
         newsText.setAlignmentX(LEFT_ALIGNMENT);
@@ -94,7 +94,7 @@ public class NewsInfoPanel extends TiledBackground {
         RectButton discussButton = new RectButton("DISCUSS ON THE PLATFORM");
         discussButton.setPreferredSize(new Dimension(400, 40));
         discussButton.setMinimumSize(new Dimension(400, 40));
-        discussButton.setFont(resources.getFont("Raleway-Light.ttf", 24));
+        discussButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 24));
         discussButton.setBorder(BorderFactory.createEmptyBorder());
         discussButton.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         discussButton.setBackground(LauncherFrame.COLOR_BLUE);

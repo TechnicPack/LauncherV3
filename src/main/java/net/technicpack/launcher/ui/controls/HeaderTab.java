@@ -36,7 +36,7 @@ public class HeaderTab extends AAJLabel implements MouseListener {
         model = new DefaultButtonModel();
         setIsActive(false);
 
-        setFont(resources.getFont("Raleway-Light.ttf", 26));
+        setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
         setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         setBackground(LauncherFrame.COLOR_BLUE_DARKER);
         setBorder(BorderFactory.createEmptyBorder(20,18,20,18));

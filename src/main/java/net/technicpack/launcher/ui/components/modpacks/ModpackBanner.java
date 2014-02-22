@@ -51,7 +51,7 @@ public class ModpackBanner extends JPanel {
 
         JLabel modpackName = new AAJLabel("MODPACK");
         modpackName.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        modpackName.setFont(resources.getFont("Raleway-Light.ttf", 26));
+        modpackName.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
         modpackName.setHorizontalTextPosition(SwingConstants.LEFT);
         modpackName.setAlignmentX(LEFT_ALIGNMENT);
         modpackName.setBorder(BorderFactory.createEmptyBorder(0,5,0,0));
@@ -103,7 +103,7 @@ public class ModpackBanner extends JPanel {
         versionPanel.add(updateReady);
 
         JLabel boldText = new JLabel("Installed Version:");
-        boldText.setFont(resources.getFont("Raleway-Light.ttf", 16, Font.BOLD));
+        boldText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 16, Font.BOLD));
         boldText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         boldText.setHorizontalTextPosition(SwingConstants.LEADING);
         boldText.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -111,7 +111,7 @@ public class ModpackBanner extends JPanel {
         versionPanel.add(boldText);
 
         JLabel installedVersion = new AAJLabel("1.0.7");
-        installedVersion.setFont(resources.getFont("Raleway-Light.ttf", 16));
+        installedVersion.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 16));
         installedVersion.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         installedVersion.setHorizontalTextPosition(SwingConstants.LEADING);
         installedVersion.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -121,7 +121,7 @@ public class ModpackBanner extends JPanel {
         packDoodads.add(Box.createRigidArea(new Dimension(0, 5)));
 
         JLabel modpackOptions = new JLabel("Modpack Options");
-        Font font = resources.getFont("Raleway-Light.ttf", 15, Font.BOLD);
+        Font font = resources.getFont(ResourceLoader.FONT_RALEWAY, 15, Font.BOLD);
         Map attributes = font.getAttributes();
         attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
         modpackOptions.setFont(font.deriveFont(attributes));

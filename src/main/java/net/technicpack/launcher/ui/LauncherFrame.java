@@ -26,6 +26,7 @@ import net.technicpack.launcher.ui.components.modpacks.ModpackInfoPanel;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launcher.ui.components.news.NewsInfoPanel;
 import net.technicpack.launcher.ui.components.news.NewsSelector;
+import net.technicpack.launcher.ui.controls.DraggableFrame;
 import net.technicpack.launcher.ui.controls.feeds.CountCircle;
 import net.technicpack.launcher.ui.controls.HeaderTab;
 import net.technicpack.launcher.ui.controls.TiledBackground;
@@ -35,7 +36,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class LauncherFrame extends JFrame implements ActionListener, IRelocalizableResource, MouseListener, MouseMotionListener {
+public class LauncherFrame extends DraggableFrame implements ActionListener, IRelocalizableResource {
 
     private static final int FRAME_WIDTH = 1200;
     private static final int FRAME_HEIGHT = 720;
@@ -53,9 +54,6 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
     public static final Color COLOR_PANEL = new Color(45, 45, 45, 160);
 
     private ResourceLoader resources;
-
-    private int dragGripX;
-    private int dragGripY;
 
     private HeaderTab discoverTab;
     private HeaderTab modpacksTab;
@@ -140,7 +138,7 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
         CountCircle newsCircle = new CountCircle();
         newsCircle.setBackground(COLOR_RED);
         newsCircle.setForeground(COLOR_WHITE_TEXT);
-        newsCircle.setFont(resources.getFont("OpenSans-Bold.ttf", 14));
+        newsCircle.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS_BOLD, 14));
         newsCircle.setCount(9);
         newsTab.add(newsCircle);
         newsCircle.setBounds(10,17,25,25);
@@ -180,7 +178,7 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
 
         JLabel launcherOptionsLabel = new JLabel("Launcher Options");
         launcherOptionsLabel.setIcon(resources.getIcon("options_cog.png"));
-        launcherOptionsLabel.setFont(resources.getFont("Raleway-Light.ttf", 14));
+        launcherOptionsLabel.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 14));
         launcherOptionsLabel.setForeground(COLOR_WHITE_TEXT);
         launcherOptionsLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         launcherOptionsLabel.setHorizontalTextPosition(SwingConstants.LEADING);
@@ -242,7 +240,7 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
 
         JLabel buildCtrl = new JLabel("Launcher Build 315 (STABLE)");
         buildCtrl.setForeground(COLOR_WHITE_TEXT);
-        buildCtrl.setFont(resources.getFont("Raleway-Light.ttf", 14));
+        buildCtrl.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 14));
         buildCtrl.setHorizontalTextPosition(SwingConstants.RIGHT);
         buildCtrl.setHorizontalAlignment(SwingConstants.RIGHT);
         footer.add(buildCtrl);
@@ -279,45 +277,5 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
         //Clear references to existing controls
 
         initComponents();
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-        if (e.getButton() == MouseEvent.BUTTON1) {
-            dragGripX = e.getX();
-            dragGripY = e.getY();
-        }
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseDragged(MouseEvent e) {
-        if ((e.getModifiersEx() & InputEvent.BUTTON1_DOWN_MASK) != 0) {
-            this.setLocation(e.getXOnScreen() - dragGripX, e.getYOnScreen() - dragGripY);
-        }
-    }
-
-    @Override
-    public void mouseMoved(MouseEvent e) {
-
     }
 }

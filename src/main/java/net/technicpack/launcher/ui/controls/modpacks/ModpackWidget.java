@@ -40,7 +40,7 @@ public class ModpackWidget extends SelectorWidget {
         add(Box.createHorizontalStrut(14));
 
         JLabel text = new JLabel("Modpack");
-        text.setFont(getResources().getFont("Raleway-Light.ttf", 15));
+        text.setFont(getResources().getFont(ResourceLoader.FONT_RALEWAY, 15));
         text.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         add(text);
 

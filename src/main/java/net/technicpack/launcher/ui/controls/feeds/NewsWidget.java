@@ -41,14 +41,14 @@ public class NewsWidget extends SelectorWidget {
         add(Box.createHorizontalStrut(14));
 
         JLabel text = new JLabel("Something Updated");
-        text.setFont(getResources().getFont("Raleway-Light.ttf", 15));
+        text.setFont(getResources().getFont(ResourceLoader.FONT_RALEWAY, 15));
         text.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         add(text);
 
         add(Box.createHorizontalGlue());
 
         JLabel date = new JLabel("3/23/14");
-        date.setFont(getResources().getFont("Raleway-Light.ttf", 15));
+        date.setFont(getResources().getFont(ResourceLoader.FONT_RALEWAY, 15));
         date.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         add(date);
     }

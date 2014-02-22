@@ -78,7 +78,7 @@ public class ModpackDataDisplay extends JPanel {
         packInfoPanel.add(Box.createGlue(), new GridBagConstraints(3,0,1,1,1.0,0.0,GridBagConstraints.NORTH,GridBagConstraints.NONE, new Insets(0,0,0,0),0,0));
 
         JLabel title = new AAJLabel("About Modpack");
-        title.setFont(resources.getFont("Raleway-Light.ttf", 24, Font.BOLD));
+        title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 24, Font.BOLD));
         title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         title.setHorizontalAlignment(SwingConstants.LEFT);
         title.setHorizontalTextPosition(SwingConstants.LEFT);
@@ -86,7 +86,7 @@ public class ModpackDataDisplay extends JPanel {
         packInfoPanel.add(title, new GridBagConstraints(0,1,4,1,1.0,0.0,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(20,0,0,0),0,0));
 
         JTextArea description = new JTextArea("Gear up and set forth on a campaign worthy of legend, for Hexxit has been unearthed! Dark dungeons, towering spires, weathered ruins and musty tomes lay before you. Lay claim to riches or create your own artifacts, tame beasts and carve out your own story in endless wonder. Alone or with friends, adventure awaits in Hexxit.");
-        description.setFont(resources.getFont("OpenSans-Regular.ttf", 14));
+        description.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         description.setLineWrap(true);
         description.setWrapStyleWord(true);
         description.setOpaque(false);

@@ -94,7 +94,7 @@ public class ModpackInfoPanel extends JPanel {
         feedBottom.add(topline, constraints);
 
         JLabel toplineLabel = new AAJLabel("LATEST UPDATES");
-        toplineLabel.setFont(resources.getFont("Raleway-Light.ttf", 28));
+        toplineLabel.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 28));
         toplineLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         topline.add(toplineLabel);
         topline.add(Box.createHorizontalGlue());
@@ -152,7 +152,7 @@ public class ModpackInfoPanel extends JPanel {
         RectButton playButton = new RectButton("PLAY");
         playButton.setPreferredSize(new Dimension(295, 40));
         playButton.setMinimumSize(new Dimension(295, 40));
-        playButton.setFont(resources.getFont("Raleway-Light.ttf", 24));
+        playButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 24));
         playButton.setBorder(BorderFactory.createEmptyBorder());
         playButton.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         playButton.setBackground(LauncherFrame.COLOR_BLUE);

@@ -29,6 +29,10 @@ import java.util.LinkedList;
 public class ResourceLoader {
     private Collection<IRelocalizableResource> resources = new LinkedList<IRelocalizableResource>();
 
+    public static final String FONT_OPENSANS_BOLD = "OpenSans-Bold.ttf";
+    public static final String FONT_OPENSANS = "OpenSans-Regular.ttf";
+    public static final String FONT_RALEWAY = "Raleway-Light.ttf";
+
     public ImageIcon getIcon(String iconName) {
         return new ImageIcon(ResourceLoader.class.getResource("/" + iconName));
     }

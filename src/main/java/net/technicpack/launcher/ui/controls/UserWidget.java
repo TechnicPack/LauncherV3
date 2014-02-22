@@ -44,22 +44,22 @@ public class UserWidget extends JPanel {
 
         JLabel staticText = new JLabel("Logged in as");
         staticText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        staticText.setFont(resources.getFont("Raleway-Light.ttf", 15));
+        staticText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
         this.add(staticText);
 
         JLabel userName = new JLabel("sct");
         userName.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        userName.setFont(resources.getFont("Raleway-Light.ttf", 15, Font.BOLD));
+        userName.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15, Font.BOLD));
         this.add(userName);
 
         JLabel staticText2 = new JLabel(" | ");
         staticText2.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        staticText2.setFont(resources.getFont("Raleway-Light.ttf", 15));
+        staticText2.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
         this.add(staticText2);
 
         JLabel logout = new JLabel("Logout");
         logout.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        logout.setFont(resources.getFont("Raleway-Light.ttf", 15));
+        logout.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
         this.add(logout);
     }
 }
