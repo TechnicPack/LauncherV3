@@ -1,4 +1,4 @@
-package net.technicpack.launcher.ui.controls;
+package net.technicpack.launcher.ui.controls.modpacks;
 
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;

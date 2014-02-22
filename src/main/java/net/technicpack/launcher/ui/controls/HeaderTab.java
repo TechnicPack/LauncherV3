@@ -5,6 +5,9 @@ import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 
 import javax.swing.*;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 /**
  * This file is part of The Technic Launcher Version 3.
@@ -25,18 +28,21 @@ import javax.swing.*;
  * along with The Technic Launcher.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class HeaderTab extends AAJLabel {
+public class HeaderTab extends AAJLabel implements MouseListener {
     private boolean isActive;
+    private DefaultButtonModel model;
 
     public HeaderTab(String text, ResourceLoader resources) {
         super(text);
 
+        model = new DefaultButtonModel();
         setIsActive(false);
 
         setFont(resources.getFont("Raleway-Light.ttf", 26));
         setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         setBackground(LauncherFrame.COLOR_BLUE_DARKER);
         setBorder(BorderFactory.createEmptyBorder(20,18,20,18));
+        addMouseListener(this);
     }
 
     public boolean isActive() { return isActive; }
@@ -44,5 +50,52 @@ public class HeaderTab extends AAJLabel {
     public void setIsActive(boolean isActive) {
         this.isActive = isActive;
         this.setOpaque(isActive);
+        repaint();
+    }
+
+    public void addActionListener(ActionListener listener) {
+        model.addActionListener(listener);
+    }
+
+    public String getActionCommand() {
+        return model.getActionCommand();
+    }
+
+    public ActionListener[] getActionListeners() {
+        return model.getActionListeners();
+    }
+
+    public void removeActionListener(ActionListener listener) {
+        model.removeActionListener(listener);
+    }
+
+    public void setActionCommand(String command) {
+        model.setActionCommand(command);
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        model.setPressed(true);
+        model.setArmed(true);
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        model.setPressed(false);
+        model.setArmed(false);
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+        model.setRollover(true);
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+        model.setRollover(false);
     }
 }

@@ -73,11 +73,13 @@ public class RectButton extends JButton implements MouseListener {
                 RenderingHints.KEY_FRACTIONALMETRICS,
                 RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
-        if (isClicked) g2d.setColor(getClickBackground());
-        else if (isHovered) g2d.setColor(getHoverBackground());
-        else g2d.setColor(getBackground());
+        if (isContentAreaFilled()) {
+            if (isClicked) g2d.setColor(getClickBackground());
+            else if (isHovered) g2d.setColor(getHoverBackground());
+            else g2d.setColor(getBackground());
 
-        g2d.fillRect(0, 0, getWidth(), getHeight());
+            g2d.fillRect(0, 0, getWidth(), getHeight());
+        }
 
         if (isClicked) g2d.setColor(getClickForeground());
         else if (isHovered) g2d.setColor(getHoverForeground());

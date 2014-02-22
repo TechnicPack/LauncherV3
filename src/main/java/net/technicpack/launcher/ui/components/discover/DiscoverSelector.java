@@ -1,9 +1,9 @@
-package net.technicpack.launcher.ui.controls;
+package net.technicpack.launcher.ui.components.discover;
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.Collection;
-import java.util.LinkedList;
+import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.launcher.ui.controls.TiledBackground;
+
+import java.awt.image.BufferedImage;
 
 /**
  * This file is part of The Technic Launcher Version 3.
@@ -23,14 +23,8 @@ import java.util.LinkedList;
  * as well as a copy of the GNU Lesser General Public License,
  * along with The Technic Launcher.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-public class HorizontalGallery extends JPanel {
-    public HorizontalGallery() {
-        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-    }
-
-    @Override
-    public Dimension getMinimumSize() {
-        return new Dimension(0,0);
+public class DiscoverSelector extends TiledBackground {
+    public DiscoverSelector(ResourceLoader resources) {
+        super(resources.getImage("background_repeat.png"));
     }
 }

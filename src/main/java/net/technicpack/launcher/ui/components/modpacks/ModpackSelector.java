@@ -1,13 +1,12 @@
-package net.technicpack.launcher.ui.components;
+package net.technicpack.launcher.ui.components.modpacks;
 
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launcher.ui.controls.ModpackWidget;
+import net.technicpack.launcher.ui.controls.modpacks.ModpackWidget;
 import net.technicpack.launcher.ui.controls.TiledBackground;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 
 /**
  * This file is part of The Technic Launcher Version 3.

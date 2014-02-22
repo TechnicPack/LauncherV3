@@ -1,4 +1,4 @@
-package net.technicpack.launcher.ui.controls;
+package net.technicpack.launcher.ui.controls.feeds;
 
 import net.technicpack.launcher.lang.ResourceLoader;
 

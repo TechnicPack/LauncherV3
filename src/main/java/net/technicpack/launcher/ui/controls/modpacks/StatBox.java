@@ -1,7 +1,8 @@
-package net.technicpack.launcher.ui.controls;
+package net.technicpack.launcher.ui.controls.modpacks;
 
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
+import net.technicpack.launcher.ui.controls.AAJLabel;
 
 import javax.annotation.Resource;
 import javax.swing.*;

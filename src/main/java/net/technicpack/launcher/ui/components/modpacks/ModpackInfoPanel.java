@@ -1,8 +1,10 @@
-package net.technicpack.launcher.ui.components;
+package net.technicpack.launcher.ui.components.modpacks;
 
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.*;
+import net.technicpack.launcher.ui.controls.feeds.FeedItem;
+import net.technicpack.launcher.ui.controls.feeds.HorizontalGallery;
 
 import javax.swing.*;
 import java.awt.*;

@@ -2,18 +2,20 @@ package net.technicpack.launcher.ui;
 
 import net.technicpack.launcher.lang.IRelocalizableResource;
 import net.technicpack.launcher.lang.ResourceLoader;
-import net.technicpack.launcher.ui.components.ModpackInfoPanel;
-import net.technicpack.launcher.ui.components.ModpackSelector;
-import net.technicpack.launcher.ui.controls.CountCircle;
+import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
+import net.technicpack.launcher.ui.components.discover.DiscoverSelector;
+import net.technicpack.launcher.ui.components.modpacks.ModpackInfoPanel;
+import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
+import net.technicpack.launcher.ui.components.news.NewsInfoPanel;
+import net.technicpack.launcher.ui.components.news.NewsSelector;
+import net.technicpack.launcher.ui.controls.feeds.CountCircle;
 import net.technicpack.launcher.ui.controls.HeaderTab;
 import net.technicpack.launcher.ui.controls.TiledBackground;
 import net.technicpack.launcher.ui.controls.UserWidget;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
 
 /**
  * This file is part of The Technic Launcher Version 3.
@@ -56,6 +58,24 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
     private int dragGripX;
     private int dragGripY;
 
+    private HeaderTab discoverTab;
+    private HeaderTab modpacksTab;
+    private HeaderTab newsTab;
+
+    private JPanel selectorContainer;
+    private BorderLayout selectorLayout;
+    private JPanel infoContainer;
+    private BorderLayout infoLayout;
+
+    private DiscoverInfoPanel discoverInfo;
+    private DiscoverSelector discoverSelector;
+
+    private ModpackInfoPanel modpackInfo;
+    private ModpackSelector modpackSelector;
+
+    private NewsInfoPanel newsInfo;
+    private NewsSelector newsSelector;
+
     public LauncherFrame(ResourceLoader resources) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -88,25 +108,31 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
 
         header.add(Box.createRigidArea(new Dimension(6, 0)));
 
-        HeaderTab discoverControl = new HeaderTab("DISCOVER", resources);
-        header.add(discoverControl);
+        discoverTab = new HeaderTab("DISCOVER", resources);
+        header.add(discoverTab);
+        discoverTab.setActionCommand("discover");
+        discoverTab.addActionListener(this);
 
-        HeaderTab modpacksControl = new HeaderTab("MODPACKS", resources);
-        modpacksControl.setIsActive(true);
-        modpacksControl.setIcon(resources.getIcon("downTriangle.png"));
-        modpacksControl.setHorizontalTextPosition(SwingConstants.LEADING);
-        header.add(modpacksControl);
+        modpacksTab = new HeaderTab("MODPACKS", resources);
+        modpacksTab.setIsActive(true);
+        modpacksTab.setIcon(resources.getIcon("downTriangle.png"));
+        modpacksTab.setHorizontalTextPosition(SwingConstants.LEADING);
+        modpacksTab.addActionListener(this);
+        modpacksTab.setActionCommand("modpacks");
+        header.add(modpacksTab);
 
-        HeaderTab newControl = new HeaderTab("NEWS", resources);
-        newControl.setLayout(null);
-        header.add(newControl);
+        newsTab = new HeaderTab("NEWS", resources);
+        newsTab.setLayout(null);
+        newsTab.addActionListener(this);
+        newsTab.setActionCommand("news");
+        header.add(newsTab);
 
         CountCircle newsCircle = new CountCircle();
         newsCircle.setBackground(COLOR_RED);
         newsCircle.setForeground(COLOR_WHITE_TEXT);
-        newsCircle.setFont(resources.getFont("OpenSans-Bold.ttf",14));
+        newsCircle.setFont(resources.getFont("OpenSans-Bold.ttf", 14));
         newsCircle.setCount(9);
-        newControl.add(newsCircle);
+        newsTab.add(newsCircle);
         newsCircle.setBounds(10,17,25,25);
 
         header.add(Box.createHorizontalGlue());
@@ -156,32 +182,37 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
         /////////////////////////////////////////////////////////////
         // LEFT SETUP
         /////////////////////////////////////////////////////////////
-        JPanel leftPanel = new JPanel();
-        this.add(leftPanel, BorderLayout.LINE_START);
+        selectorContainer = new JPanel();
+        this.add(selectorContainer, BorderLayout.LINE_START);
 
-        BorderLayout leftLayout = new BorderLayout();
-        leftPanel.setLayout(leftLayout);
+        selectorLayout = new BorderLayout();
+        selectorContainer.setLayout(selectorLayout);
 
-        ModpackSelector modpackSelector = new ModpackSelector(resources);
-        leftPanel.add(modpackSelector, BorderLayout.CENTER);
+        discoverSelector = new DiscoverSelector(resources);
+        newsSelector = new NewsSelector(resources);
+        modpackSelector = new ModpackSelector(resources);
+        selectorContainer.add(modpackSelector, BorderLayout.CENTER);
 
         JPanel sidekick = new JPanel();
         sidekick.setForeground(COLOR_WHITE_TEXT);
         sidekick.setPreferredSize(new Dimension(SIDEKICK_WIDTH, SIDEKICK_HEIGHT));
-        leftPanel.add(sidekick, BorderLayout.PAGE_END);
+        selectorContainer.add(sidekick, BorderLayout.PAGE_END);
 
         /////////////////////////////////////////////////////////////
         // CENTRAL AREA
         /////////////////////////////////////////////////////////////
-        JPanel center = new JPanel();
-        center.setBackground(COLOR_CHARCOAL);
-        center.setForeground(COLOR_WHITE_TEXT);
-        this.add(center, BorderLayout.CENTER);
+        infoContainer = new JPanel();
+        infoContainer.setBackground(COLOR_CHARCOAL);
+        infoContainer.setForeground(COLOR_WHITE_TEXT);
+        this.add(infoContainer, BorderLayout.CENTER);
 
-        BorderLayout centralLayout = new BorderLayout();
-        center.setLayout(centralLayout);
+        infoLayout = new BorderLayout();
+        infoContainer.setLayout(infoLayout);
 
-        center.add(new ModpackInfoPanel(resources), BorderLayout.CENTER);
+        discoverInfo = new DiscoverInfoPanel(resources);
+        newsInfo = new NewsInfoPanel(resources);
+        modpackInfo = new ModpackInfoPanel(resources);
+        infoContainer.add(modpackInfo, BorderLayout.CENTER);
 
         TiledBackground footer = new TiledBackground(resources.getImage("background_repeat.png"));
         footer.setLayout(new BoxLayout(footer, BoxLayout.LINE_AXIS));
@@ -200,7 +231,7 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
         buildCtrl.setHorizontalAlignment(SwingConstants.RIGHT);
         footer.add(buildCtrl);
 
-        center.add(footer, BorderLayout.PAGE_END);
+        infoContainer.add(footer, BorderLayout.PAGE_END);
     }
 
     @Override
@@ -211,6 +242,42 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
         if (e.getActionCommand().equalsIgnoreCase("close")) {
             this.dispose();
             return;
+        } else if (e.getActionCommand().equalsIgnoreCase("discover")) {
+            discoverTab.setIsActive(true);
+            modpacksTab.setIsActive(false);
+            newsTab.setIsActive(false);
+
+            infoContainer.remove(infoLayout.getLayoutComponent(infoContainer, BorderLayout.CENTER));
+            selectorContainer.remove(selectorLayout.getLayoutComponent(selectorContainer, BorderLayout.CENTER));
+
+            infoContainer.add(discoverInfo, BorderLayout.CENTER);
+            selectorContainer.add(discoverSelector, BorderLayout.CENTER);
+            validate();
+            repaint();
+        } else if (e.getActionCommand().equalsIgnoreCase("modpacks")) {
+            discoverTab.setIsActive(false);
+            modpacksTab.setIsActive(true);
+            newsTab.setIsActive(false);
+
+            infoContainer.remove(infoLayout.getLayoutComponent(infoContainer, BorderLayout.CENTER));
+            selectorContainer.remove(selectorLayout.getLayoutComponent(selectorContainer, BorderLayout.CENTER));
+
+            infoContainer.add(modpackInfo, BorderLayout.CENTER);
+            selectorContainer.add(modpackSelector, BorderLayout.CENTER);
+            validate();
+            repaint();
+        } else if (e.getActionCommand().equalsIgnoreCase("news")) {
+            discoverTab.setIsActive(false);
+            modpacksTab.setIsActive(false);
+            newsTab.setIsActive(true);
+
+            infoContainer.remove(infoLayout.getLayoutComponent(infoContainer, BorderLayout.CENTER));
+            selectorContainer.remove(selectorLayout.getLayoutComponent(selectorContainer, BorderLayout.CENTER));
+
+            infoContainer.add(newsInfo, BorderLayout.CENTER);
+            selectorContainer.add(newsSelector, BorderLayout.CENTER);
+            validate();
+            repaint();
         }
     }
 

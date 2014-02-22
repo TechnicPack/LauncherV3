@@ -1,14 +1,12 @@
-package net.technicpack.launcher.ui.components;
+package net.technicpack.launcher.ui.components.modpacks;
 
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.AAJLabel;
-import net.technicpack.launcher.ui.controls.StatBox;
+import net.technicpack.launcher.ui.controls.modpacks.StatBox;
 
 import javax.swing.*;
-import javax.swing.text.DefaultCaret;
 import java.awt.*;
-import java.awt.event.*;
 
 /**
  * This file is part of The Technic Launcher Version 3.
