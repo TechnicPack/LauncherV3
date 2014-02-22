@@ -49,7 +49,7 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
     public static final Color COLOR_BLUE = new Color(16, 108, 163);
     public static final Color COLOR_BLUE_DARKER = new Color(12, 94, 145);
     public static final Color COLOR_WHITE_TEXT = Color.white;
-    public static final Color COLOR_CHARCOAL = new Color(45, 45, 45);
+    public static final Color COLOR_CHARCOAL = new Color(31, 31, 31);
     public static final Color COLOR_BANNER = new Color(0, 0, 0, 160);
     public static final Color COLOR_PANEL = new Color(45, 45, 45, 160);
 
@@ -62,19 +62,12 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
     private HeaderTab modpacksTab;
     private HeaderTab newsTab;
 
-    private JPanel selectorContainer;
-    private BorderLayout selectorLayout;
-    private JPanel infoContainer;
-    private BorderLayout infoLayout;
+    private CardLayout selectorLayout;
+    private JPanel selectorSwap;
+    private CardLayout infoLayout;
+    private JPanel infoSwap;
 
-    private DiscoverInfoPanel discoverInfo;
-    private DiscoverSelector discoverSelector;
-
-    private ModpackInfoPanel modpackInfo;
-    private ModpackSelector modpackSelector;
-
-    private NewsInfoPanel newsInfo;
-    private NewsSelector newsSelector;
+    NewsInfoPanel newsInfoPanel;
 
     public LauncherFrame(ResourceLoader resources) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
@@ -85,6 +78,24 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
 
         //Handles rebuilding the frame, so use it to build the frame in the first place
         Relocalize(resources);
+
+        selectTab("modpacks");
+    }
+
+    private void selectTab(String tabName) {
+        discoverTab.setIsActive(false);
+        modpacksTab.setIsActive(false);
+        newsTab.setIsActive(false);
+
+        if (tabName.equalsIgnoreCase("discover"))
+            discoverTab.setIsActive(true);
+        else if (tabName.equalsIgnoreCase("modpacks"))
+            modpacksTab.setIsActive(true);
+        else if (tabName.equalsIgnoreCase("news"))
+            newsTab.setIsActive(true);
+
+        infoLayout.show(infoSwap, tabName);
+        selectorLayout.show(selectorSwap, tabName);
     }
 
     private void initComponents() {
@@ -182,16 +193,19 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
         /////////////////////////////////////////////////////////////
         // LEFT SETUP
         /////////////////////////////////////////////////////////////
-        selectorContainer = new JPanel();
+        JPanel selectorContainer = new JPanel();
         this.add(selectorContainer, BorderLayout.LINE_START);
 
-        selectorLayout = new BorderLayout();
-        selectorContainer.setLayout(selectorLayout);
+        selectorContainer.setLayout(new BorderLayout());
 
-        discoverSelector = new DiscoverSelector(resources);
-        newsSelector = new NewsSelector(resources);
-        modpackSelector = new ModpackSelector(resources);
-        selectorContainer.add(modpackSelector, BorderLayout.CENTER);
+        selectorSwap = new JPanel();
+        selectorSwap.setOpaque(false);
+        this.selectorLayout = new CardLayout();
+        selectorSwap.setLayout(selectorLayout);
+        selectorSwap.add(new DiscoverSelector(resources), "discover");
+        selectorSwap.add(new ModpackSelector(resources), "modpacks");
+        selectorSwap.add(new NewsSelector(resources), "news");
+        selectorContainer.add(selectorSwap, BorderLayout.CENTER);
 
         JPanel sidekick = new JPanel();
         sidekick.setForeground(COLOR_WHITE_TEXT);
@@ -201,18 +215,21 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
         /////////////////////////////////////////////////////////////
         // CENTRAL AREA
         /////////////////////////////////////////////////////////////
-        infoContainer = new JPanel();
+        JPanel infoContainer = new JPanel();
         infoContainer.setBackground(COLOR_CHARCOAL);
         infoContainer.setForeground(COLOR_WHITE_TEXT);
         this.add(infoContainer, BorderLayout.CENTER);
+        infoContainer.setLayout(new BorderLayout());
 
-        infoLayout = new BorderLayout();
-        infoContainer.setLayout(infoLayout);
-
-        discoverInfo = new DiscoverInfoPanel(resources);
-        newsInfo = new NewsInfoPanel(resources);
-        modpackInfo = new ModpackInfoPanel(resources);
-        infoContainer.add(modpackInfo, BorderLayout.CENTER);
+        infoSwap = new JPanel();
+        infoLayout = new CardLayout();
+        infoSwap.setLayout(infoLayout);
+        infoSwap.setOpaque(false);
+        newsInfoPanel = new NewsInfoPanel(resources);
+        infoSwap.add(new DiscoverInfoPanel(resources),"discover");
+        infoSwap.add(newsInfoPanel, "news");
+        infoSwap.add(new ModpackInfoPanel(resources), "modpacks");
+        infoContainer.add(infoSwap, BorderLayout.CENTER);
 
         TiledBackground footer = new TiledBackground(resources.getImage("background_repeat.png"));
         footer.setLayout(new BoxLayout(footer, BoxLayout.LINE_AXIS));
@@ -242,42 +259,10 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
         if (e.getActionCommand().equalsIgnoreCase("close")) {
             this.dispose();
             return;
-        } else if (e.getActionCommand().equalsIgnoreCase("discover")) {
-            discoverTab.setIsActive(true);
-            modpacksTab.setIsActive(false);
-            newsTab.setIsActive(false);
-
-            infoContainer.remove(infoLayout.getLayoutComponent(infoContainer, BorderLayout.CENTER));
-            selectorContainer.remove(selectorLayout.getLayoutComponent(selectorContainer, BorderLayout.CENTER));
-
-            infoContainer.add(discoverInfo, BorderLayout.CENTER);
-            selectorContainer.add(discoverSelector, BorderLayout.CENTER);
-            validate();
-            repaint();
-        } else if (e.getActionCommand().equalsIgnoreCase("modpacks")) {
-            discoverTab.setIsActive(false);
-            modpacksTab.setIsActive(true);
-            newsTab.setIsActive(false);
-
-            infoContainer.remove(infoLayout.getLayoutComponent(infoContainer, BorderLayout.CENTER));
-            selectorContainer.remove(selectorLayout.getLayoutComponent(selectorContainer, BorderLayout.CENTER));
-
-            infoContainer.add(modpackInfo, BorderLayout.CENTER);
-            selectorContainer.add(modpackSelector, BorderLayout.CENTER);
-            validate();
-            repaint();
-        } else if (e.getActionCommand().equalsIgnoreCase("news")) {
-            discoverTab.setIsActive(false);
-            modpacksTab.setIsActive(false);
-            newsTab.setIsActive(true);
-
-            infoContainer.remove(infoLayout.getLayoutComponent(infoContainer, BorderLayout.CENTER));
-            selectorContainer.remove(selectorLayout.getLayoutComponent(selectorContainer, BorderLayout.CENTER));
-
-            infoContainer.add(newsInfo, BorderLayout.CENTER);
-            selectorContainer.add(newsSelector, BorderLayout.CENTER);
-            validate();
-            repaint();
+        } else if (e.getActionCommand().equalsIgnoreCase("discover") ||
+                e.getActionCommand().equalsIgnoreCase("modpacks") ||
+                e.getActionCommand().equalsIgnoreCase("news")) {
+            selectTab(e.getActionCommand());
         }
     }
 

@@ -9,7 +9,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.Map;
 
 /**
  * This file is part of The Technic Launcher Version 3.

@@ -43,14 +43,14 @@ public class ResourceLoader {
         }
     }
 
-    public Font getFont(String name, int size) {
+    public Font getFont(String name, float size) {
         return getFont(name,size,0);
     }
 
-    public Font getFont(String name, int size, int style) {
+    public Font getFont(String name, float size, int style) {
         Font font;
         try {
-            font = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.class.getResourceAsStream("/fonts/"+name)).deriveFont((float) size).deriveFont(style);
+            font = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.class.getResourceAsStream("/fonts/"+name)).deriveFont(size).deriveFont(style);
         } catch (Exception e) {
             e.printStackTrace();
             // Fallback

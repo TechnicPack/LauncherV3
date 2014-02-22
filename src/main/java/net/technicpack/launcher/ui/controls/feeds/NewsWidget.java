@@ -1,4 +1,4 @@
-package net.technicpack.launcher.ui.controls.modpacks;
+package net.technicpack.launcher.ui.controls.feeds;
 
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
@@ -25,14 +25,15 @@ import javax.swing.*;
  * along with The Technic Launcher.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class ModpackWidget extends SelectorWidget {
-    public ModpackWidget(ResourceLoader resources) {
+public class NewsWidget extends SelectorWidget {
+
+    public NewsWidget(ResourceLoader resources) {
         super(resources);
     }
 
     protected void initComponents() {
         super.initComponents();
-        setBorder(BorderFactory.createEmptyBorder(4,20,4,8));
+        setBorder(BorderFactory.createEmptyBorder(4,10,4,8));
 
         JLabel icon = new JLabel();
         icon.setIcon(getResources().getIcon("icon.png"));
@@ -40,15 +41,16 @@ public class ModpackWidget extends SelectorWidget {
 
         add(Box.createHorizontalStrut(14));
 
-        JLabel text = new JLabel("Modpack");
+        JLabel text = new JLabel("Something Updated");
         text.setFont(getResources().getFont("Raleway-Light.ttf", 15));
         text.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         add(text);
 
         add(Box.createHorizontalGlue());
 
-        JLabel updateIcon = new JLabel();
-        updateIcon.setIcon(getResources().getIcon("update_available.png"));
-        add(updateIcon);
+        JLabel date = new JLabel("3/23/14");
+        date.setFont(getResources().getFont("Raleway-Light.ttf", 15));
+        date.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        add(date);
     }
 }

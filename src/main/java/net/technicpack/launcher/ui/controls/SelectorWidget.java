@@ -1,12 +1,9 @@
-package net.technicpack.launcher.ui.components.news;
+package net.technicpack.launcher.ui.controls;
 
 import net.technicpack.launcher.lang.ResourceLoader;
-import net.technicpack.launcher.ui.controls.TiledBackground;
-import net.technicpack.launcher.ui.controls.feeds.NewsWidget;
+import net.technicpack.launcher.ui.LauncherFrame;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.image.BufferedImage;
 
 /**
  * This file is part of The Technic Launcher Version 3.
@@ -26,31 +23,30 @@ import java.awt.image.BufferedImage;
  * as well as a copy of the GNU Lesser General Public License,
  * along with The Technic Launcher.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class NewsSelector extends TiledBackground {
+
+public class SelectorWidget extends JPanel {
+
     private ResourceLoader resources;
 
-    public NewsSelector(ResourceLoader resources) {
-        super(resources.getImage("background_repeat.png"));
+    private boolean isSelected;
+
+    public SelectorWidget(ResourceLoader resources) {
         this.resources = resources;
 
         initComponents();
     }
 
-    private void initComponents() {
-        setLayout(new GridBagLayout());
+    protected ResourceLoader getResources() { return resources; }
 
-        GridBagConstraints constraints = new GridBagConstraints(0,0,1,1,1.0,0.0,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0);
+    protected void initComponents() {
+        setBackground(LauncherFrame.COLOR_PANEL);
+        setOpaque(false);
+        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+    }
 
-        for (int i = 0; i < 5; i++) {
-            NewsWidget widget = new NewsWidget(resources);
-
-            if (i == 2)
-                widget.setIsSelected(true);
-            add(widget, constraints);
-            constraints.gridy++;
-        }
-
-        constraints.weighty = 1.0;
-        add(Box.createGlue(), constraints);
+    public boolean isSelected() { return isSelected; }
+    public void setIsSelected(boolean isSelected) {
+        this.isSelected = isSelected;
+        this.setOpaque(isSelected);
     }
 }
