@@ -21,6 +21,7 @@ package net.technicpack.launcher.ui.controls;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -92,26 +93,26 @@ public class RectButton extends JButton implements MouseListener {
     }
 
     @Override
-    public void mouseClicked(java.awt.event.MouseEvent e) {
+    public void mouseClicked(MouseEvent e) {
     }
 
     @Override
-    public void mousePressed(java.awt.event.MouseEvent e) {
+    public void mousePressed(MouseEvent e) {
         isClicked = true;
     }
 
     @Override
-    public void mouseReleased(java.awt.event.MouseEvent e) {
+    public void mouseReleased(MouseEvent e) {
         isClicked = false;
     }
 
     @Override
-    public void mouseEntered(java.awt.event.MouseEvent e) {
+    public void mouseEntered(MouseEvent e) {
         isHovered = true;
     }
 
     @Override
-    public void mouseExited(java.awt.event.MouseEvent e) {
+    public void mouseExited(MouseEvent e) {
         isHovered = false;
     }
 }
