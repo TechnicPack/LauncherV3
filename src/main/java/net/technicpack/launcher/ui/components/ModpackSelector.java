@@ -81,37 +81,9 @@ public class ModpackSelector extends TiledBackground {
         constraints.gridheight = 1;
         constraints.weightx = 1.0;
         constraints.weighty = 0.0;
-        constraints.insets = new Insets(0, 8, 0, 8);
+        constraints.insets = new Insets(0, 8, 0, 0);
         constraints.fill = GridBagConstraints.BOTH;
         header.add(filterContents, constraints);
-
-        JButton listMode = new JButton();
-        listMode.setIcon(resources.getIcon("listMode.png"));
-        listMode.setBorder(BorderFactory.createEmptyBorder());
-        listMode.setContentAreaFilled(false);
-
-        constraints = new GridBagConstraints();
-        constraints.gridx = 2;
-        constraints.gridy = 0;
-        constraints.gridwidth = 1;
-        constraints.gridheight = 1;
-        constraints.weightx = 0.0;
-        constraints.weighty = 0.0;
-        header.add(listMode, constraints);
-
-        JButton gridMode = new JButton();
-        gridMode.setIcon(resources.getIcon("gridMode.png"));
-        gridMode.setBorder(BorderFactory.createEmptyBorder());
-        gridMode.setContentAreaFilled(false);
-
-        constraints = new GridBagConstraints();
-        constraints.gridx = 3;
-        constraints.gridy = 0;
-        constraints.gridwidth = 1;
-        constraints.gridheight = 1;
-        constraints.weightx = 0.0;
-        constraints.weighty = 0.0;
-        header.add(gridMode, constraints);
 
         constraints = new GridBagConstraints();
         constraints.gridx = 0;
