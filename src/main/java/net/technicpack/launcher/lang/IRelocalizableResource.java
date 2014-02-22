@@ -20,5 +20,5 @@ package net.technicpack.launcher.lang;
  */
 
 public interface IRelocalizableResource {
-    public void Relocalize(ResourceLoader loader);
+    public void relocalize(ResourceLoader loader);
 }

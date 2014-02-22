@@ -61,7 +61,7 @@ public class ResourceLoader {
 
     private void relocalizeResources() {
         for(IRelocalizableResource resource : resources) {
-            resource.Relocalize(this);
+            resource.relocalize(this);
         }
     }
 

@@ -77,7 +77,7 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
         addMouseMotionListener(this);
 
         //Handles rebuilding the frame, so use it to build the frame in the first place
-        Relocalize(resources);
+        relocalize(resources);
 
         selectTab("modpacks");
     }
@@ -267,7 +267,7 @@ public class LauncherFrame extends JFrame implements ActionListener, IRelocaliza
     }
 
     @Override
-    public void Relocalize(ResourceLoader loader) {
+    public void relocalize(ResourceLoader loader) {
         this.resources = loader;
         this.resources.registerResource(this);
 
