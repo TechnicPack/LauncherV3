@@ -29,6 +29,7 @@ public class LauncherMain {
         //System.setProperty("swing.aatext", "true");
 
         ResourceLoader resources = new ResourceLoader();
+        resources.setLocale("default");
 
         LauncherFrame frame = new LauncherFrame(resources);
         frame.setVisible(true);

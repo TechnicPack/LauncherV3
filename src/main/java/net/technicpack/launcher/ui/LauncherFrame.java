@@ -139,12 +139,12 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             }
         };
 
-        discoverTab = new HeaderTab("DISCOVER", resources);
+        discoverTab = new HeaderTab(resources.getString("launcher.title.discover"), resources);
         header.add(discoverTab);
         discoverTab.setActionCommand(TAB_DISCOVER);
         discoverTab.addActionListener(tabListener);
 
-        modpacksTab = new HeaderTab("MODPACKS", resources);
+        modpacksTab = new HeaderTab(resources.getString("launcher.title.modpacks"), resources);
         modpacksTab.setIsActive(true);
         modpacksTab.setIcon(resources.getIcon("downTriangle.png"));
         modpacksTab.setHorizontalTextPosition(SwingConstants.LEADING);
@@ -152,7 +152,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         modpacksTab.setActionCommand(TAB_MODPACKS);
         header.add(modpacksTab);
 
-        newsTab = new HeaderTab("NEWS", resources);
+        newsTab = new HeaderTab(resources.getString("launcher.title.news"), resources);
         newsTab.setLayout(null);
         newsTab.addActionListener(tabListener);
         newsTab.setActionCommand(TAB_NEWS);
@@ -201,7 +201,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         rightHeaderPanel.add(windowGadgetPanel);
         rightHeaderPanel.add(Box.createVerticalGlue());
 
-        JLabel launcherOptionsLabel = new JLabel("Launcher Options");
+        JLabel launcherOptionsLabel = new JLabel(resources.getString("launcher.title.options"));
         launcherOptionsLabel.setIcon(resources.getIcon("options_cog.png"));
         launcherOptionsLabel.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 14));
         launcherOptionsLabel.setForeground(COLOR_WHITE_TEXT);
@@ -263,7 +263,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
         footer.add(Box.createHorizontalGlue());
 
-        JLabel buildCtrl = new JLabel("Launcher Build 315 (STABLE)");
+        JLabel buildCtrl = new JLabel(resources.getString("launcher.build.text", Integer.toString(315), resources.getString("launcher.build.stable")));
         buildCtrl.setForeground(COLOR_WHITE_TEXT);
         buildCtrl.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 14));
         buildCtrl.setHorizontalTextPosition(SwingConstants.RIGHT);

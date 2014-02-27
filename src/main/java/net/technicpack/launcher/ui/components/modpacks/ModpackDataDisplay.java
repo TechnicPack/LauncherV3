@@ -60,24 +60,24 @@ public class ModpackDataDisplay extends JPanel {
         packInfoPanel.setBorder(BorderFactory.createEmptyBorder(5,0,0,0));
         this.add(packInfoPanel, BorderLayout.CENTER);
 
-        StatBox ratings = new StatBox(resources, "RATINGS", 1799);
+        StatBox ratings = new StatBox(resources, resources.getString("launcher.packstats.ratings"), 1799);
         ratings.setBackground(LauncherFrame.COLOR_GREEN);
         ratings.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         packInfoPanel.add(ratings,new GridBagConstraints(0,0,1,1,0.0,0.0,GridBagConstraints.NORTHEAST,GridBagConstraints.BOTH, new Insets(0,0,0,5), 0,0));
 
-        StatBox downloads = new StatBox(resources, "DOWNLOADS", 80429);
+        StatBox downloads = new StatBox(resources, resources.getString("launcher.packstats.downloads"), 80429);
         downloads.setBackground(LauncherFrame.COLOR_BLUE);
         downloads.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         packInfoPanel.add(downloads, new GridBagConstraints(1,0,1,1,0.0,0.0, GridBagConstraints.NORTH, GridBagConstraints.BOTH, new Insets(0,0,0,5), 0,0));
 
-        StatBox runs = new StatBox(resources, "RUNS", 172319);
+        StatBox runs = new StatBox(resources, resources.getString("launcher.packstats.runs"), 172319);
         runs.setBackground(LauncherFrame.COLOR_BLUE);
         runs.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         packInfoPanel.add(runs, new GridBagConstraints(2,0,1,1,0.0,0.0,GridBagConstraints.NORTH,GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
 
         packInfoPanel.add(Box.createGlue(), new GridBagConstraints(3,0,1,1,1.0,0.0,GridBagConstraints.NORTH,GridBagConstraints.NONE, new Insets(0,0,0,0),0,0));
 
-        JLabel title = new AAJLabel("About Modpack");
+        JLabel title = new AAJLabel(resources.getString("launcher.packstats.title", "Modpack"));
         title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 24, Font.BOLD));
         title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         title.setHorizontalAlignment(SwingConstants.LEFT);

@@ -93,7 +93,7 @@ public class ModpackInfoPanel extends JPanel {
         constraints.fill = GridBagConstraints.HORIZONTAL;
         feedBottom.add(topline, constraints);
 
-        JLabel toplineLabel = new AAJLabel("LATEST UPDATES");
+        JLabel toplineLabel = new AAJLabel(resources.getString("launcher.packfeed.title"));
         toplineLabel.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 28));
         toplineLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         topline.add(toplineLabel);
@@ -149,7 +149,7 @@ public class ModpackInfoPanel extends JPanel {
         Component horizFill = Box.createGlue();
         feedBottom.add(horizFill, constraints);
 
-        RectButton playButton = new RectButton("PLAY");
+        RectButton playButton = new RectButton(resources.getString("launcher.pack.launch"));
         playButton.setPreferredSize(new Dimension(295, 40));
         playButton.setMinimumSize(new Dimension(295, 40));
         playButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 24));

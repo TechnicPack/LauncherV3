@@ -60,7 +60,7 @@ public class NewsInfoPanel extends TiledBackground {
         author.setIcon(resources.getIcon("news/authorHelm.png"));
         authorshipInfo.add(author);
 
-        JLabel postedTime = new AAJLabel("/ Posted 3 Hours Ago");
+        JLabel postedTime = new AAJLabel("/ " + resources.getString("launcher.news.posted", resources.getString("time.hours", Integer.toString(3))));
         postedTime.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         postedTime.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 18));
         authorshipInfo.add(postedTime);
@@ -91,7 +91,7 @@ public class NewsInfoPanel extends TiledBackground {
 
         add(Box.createGlue(), new GridBagConstraints(0, 3, 1, 1, 1.0, 0.0, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
-        RectButton discussButton = new RectButton("DISCUSS ON THE PLATFORM");
+        RectButton discussButton = new RectButton(resources.getString("launcher.news.discuss"));
         discussButton.setPreferredSize(new Dimension(400, 40));
         discussButton.setMinimumSize(new Dimension(400, 40));
         discussButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 24));

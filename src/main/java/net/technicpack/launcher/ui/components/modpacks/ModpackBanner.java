@@ -102,7 +102,7 @@ public class ModpackBanner extends JPanel {
         updateReady.setAlignmentX(RIGHT_ALIGNMENT);
         versionPanel.add(updateReady);
 
-        JLabel boldText = new JLabel("Installed Version:");
+        JLabel boldText = new JLabel(resources.getString("launcher.packbanner.version"));
         boldText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 16, Font.BOLD));
         boldText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         boldText.setHorizontalTextPosition(SwingConstants.LEADING);
@@ -120,7 +120,7 @@ public class ModpackBanner extends JPanel {
 
         packDoodads.add(Box.createRigidArea(new Dimension(0, 5)));
 
-        JLabel modpackOptions = new JLabel("Modpack Options");
+        JLabel modpackOptions = new JLabel(resources.getString("launcher.packbanner.options"));
         Font font = resources.getFont(ResourceLoader.FONT_RALEWAY, 15, Font.BOLD);
         Map attributes = font.getAttributes();
         attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);

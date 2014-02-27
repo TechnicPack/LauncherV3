@@ -56,7 +56,7 @@ public class ModpackSelector extends TiledBackground {
         constraints.anchor = GridBagConstraints.NORTH;
         add(header, constraints);
 
-        JLabel filterLabel = new JLabel("FILTER");
+        JLabel filterLabel = new JLabel(resources.getString("launcher.packselector.filter"));
         filterLabel.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY,14));
         filterLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 
