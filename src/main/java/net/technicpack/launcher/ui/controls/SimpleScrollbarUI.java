@@ -36,6 +36,7 @@ public class SimpleScrollbarUI extends BasicScrollBarUI {
     @Override
     protected void layoutVScrollbar(JScrollBar sb)
     {
+        sb.setPreferredSize(new Dimension(10,10));
         Dimension sbSize = sb.getSize();
         Insets sbInsets = sb.getInsets();
 
