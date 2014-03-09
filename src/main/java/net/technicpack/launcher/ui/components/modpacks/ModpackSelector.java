@@ -20,8 +20,10 @@ package net.technicpack.launcher.ui.components.modpacks;
 
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
+import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
 import net.technicpack.launcher.ui.controls.modpacks.ModpackWidget;
 import net.technicpack.launcher.ui.controls.TiledBackground;
+import sun.tools.jar.resources.jar;
 
 import javax.swing.*;
 import java.awt.*;
@@ -38,29 +40,20 @@ public class ModpackSelector extends TiledBackground {
     }
 
     private void initComponents() {
-        setLayout(new GridBagLayout());
+        setLayout(new BorderLayout());
+        setOpaque(false);
 
         JPanel header = new JPanel();
         header.setLayout(new GridBagLayout());
         header.setBorder(BorderFactory.createEmptyBorder(9,8,8,8));
         header.setBackground(LauncherFrame.COLOR_PANEL);
-
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.gridx = 0;
-        constraints.gridy = 0;
-        constraints.gridwidth = 1;
-        constraints.gridheight = 1;
-        constraints.weightx = 1.0;
-        constraints.weighty = 0.0;
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-        constraints.anchor = GridBagConstraints.NORTH;
-        add(header, constraints);
+        add(header, BorderLayout.PAGE_START);
 
         JLabel filterLabel = new JLabel(resources.getString("launcher.packselector.filter"));
         filterLabel.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY,14));
         filterLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 
-        constraints = new GridBagConstraints();
+        GridBagConstraints constraints = new GridBagConstraints();
         constraints.gridx = 0;
         constraints.gridy = 0;
         constraints.gridwidth = 1;
@@ -83,6 +76,17 @@ public class ModpackSelector extends TiledBackground {
         constraints.fill = GridBagConstraints.BOTH;
         header.add(filterContents, constraints);
 
+        JPanel widgetList = new JPanel();
+        widgetList.setOpaque(false);
+        widgetList.setLayout(new GridBagLayout());
+
+        JScrollPane scrollPane = new JScrollPane(widgetList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setOpaque(false);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.getVerticalScrollBar().setUI(new SimpleScrollbarUI());
+        add(scrollPane, BorderLayout.CENTER);
+
         constraints = new GridBagConstraints();
         constraints.gridx = 0;
         constraints.gridy = 1;
@@ -94,18 +98,18 @@ public class ModpackSelector extends TiledBackground {
 
         ModpackWidget modpack = null;
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 12; i++) {
             modpack = new ModpackWidget(resources);
 
             if (i == 2)
                 modpack.setIsSelected(true);
 
-            add(modpack, constraints);
+            widgetList.add(modpack, constraints);
 
             constraints.gridy++;
         }
 
         constraints.weighty = 1.0;
-        add(Box.createGlue(), constraints);
+        widgetList.add(Box.createGlue(), constraints);
     }
 }
