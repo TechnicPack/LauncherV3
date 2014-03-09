@@ -21,6 +21,7 @@ package net.technicpack.launcher.ui.components.modpacks;
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.AAJLabel;
+import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
 import net.technicpack.launcher.ui.controls.modpacks.StatBox;
 
 import javax.swing.*;
@@ -85,7 +86,7 @@ public class ModpackDataDisplay extends JPanel {
         title.setAlignmentX(LEFT_ALIGNMENT);
         packInfoPanel.add(title, new GridBagConstraints(0,1,4,1,1.0,0.0,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(20,0,0,0),0,0));
 
-        JTextArea description = new JTextArea("Gear up and set forth on a campaign worthy of legend, for Hexxit has been unearthed! Dark dungeons, towering spires, weathered ruins and musty tomes lay before you. Lay claim to riches or create your own artifacts, tame beasts and carve out your own story in endless wonder. Alone or with friends, adventure awaits in Hexxit.");
+        JTextArea description = new JTextArea("Gear up and set forth on a campaign worthy of legend, for Hexxit has been unearthed! Dark dungeons, towering spires, weathered ruins and musty tomes lay before you. Lay claim to riches or create your own artifacts, tame beasts and carve out your own story in endless wonder. Alone or with friends, adventure awaits in Hexxit.  Also this text is too big butts farts butts farts butts.");
         description.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         description.setLineWrap(true);
         description.setWrapStyleWord(true);
@@ -95,6 +96,13 @@ public class ModpackDataDisplay extends JPanel {
         description.setAlignmentX(LEFT_ALIGNMENT);
         description.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 
-        packInfoPanel.add(description, new GridBagConstraints(0,2,4,1,1.0,1.0,GridBagConstraints.NORTH,GridBagConstraints.BOTH, new Insets(10,0,0,0),0,0));
+        JScrollPane scrollPane = new JScrollPane(description, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.getVerticalScrollBar().setUI(new SimpleScrollbarUI());
+        scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(10,10));
+
+        packInfoPanel.add(scrollPane, new GridBagConstraints(0,2,4,1,1.0,1.0,GridBagConstraints.NORTH,GridBagConstraints.BOTH, new Insets(10,0,0,0),0,0));
     }
 }
