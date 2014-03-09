@@ -80,6 +80,7 @@ public class NewsInfoPanel extends TiledBackground {
 
         newsScroller = new JScrollPane(newsText, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         newsScroller.getVerticalScrollBar().setUI(new SimpleScrollbarUI());
+        newsScroller.getVerticalScrollBar().setPreferredSize(new Dimension(10, 10));
         newsScroller.setBorder(BorderFactory.createEmptyBorder());
         newsScroller.setMaximumSize(new Dimension(32000,900));
 

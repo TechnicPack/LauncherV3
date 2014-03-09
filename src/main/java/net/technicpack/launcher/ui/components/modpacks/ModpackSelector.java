@@ -85,6 +85,8 @@ public class ModpackSelector extends TiledBackground {
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getViewport().setOpaque(false);
         scrollPane.getVerticalScrollBar().setUI(new SimpleScrollbarUI());
+        scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(10, 10));
+        scrollPane.getVerticalScrollBar().setUnitIncrement(12);
         add(scrollPane, BorderLayout.CENTER);
 
         constraints = new GridBagConstraints();
