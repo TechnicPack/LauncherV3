@@ -52,6 +52,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     public static final Color COLOR_CHARCOAL = new Color(31, 31, 31);
     public static final Color COLOR_BANNER = new Color(0, 0, 0, 160);
     public static final Color COLOR_PANEL = new Color(45, 45, 45, 160);
+    public static final Color COLOR_SCROLL_TRACK = new Color(18, 18, 18);
+    public static final Color COLOR_SCROLL_THUMB = new Color(53, 53, 53);
 
     public static final String TAB_DISCOVER = "discover";
     public static final String TAB_MODPACKS = "modpacks";

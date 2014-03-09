@@ -20,14 +20,12 @@ package net.technicpack.launcher;
 
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
+import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
+
+import javax.swing.*;
 
 public class LauncherMain {
     public static void main(String[] args) {
-
-        // enable anti-aliased text:
-        //System.setProperty("awt.useSystemAAFontSettings","on");
-        //System.setProperty("swing.aatext", "true");
-
         ResourceLoader resources = new ResourceLoader();
         resources.setLocale("default");
 
