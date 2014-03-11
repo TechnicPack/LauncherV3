@@ -100,10 +100,10 @@ public class FeedItem extends JComponent {
         g2d.clipRect(3, 2, background.getWidth() - 5, background.getHeight() - 24);
         g2d.setFont(getFont());
 
-        drawTextUgly(text, g2d);
+        drawTextUgly(text, g2d, 2+background.getHeight()-24);
     }
 
-    private void drawTextUgly(String text, Graphics2D g2)
+    private void drawTextUgly(String text, Graphics2D g2, int maxY)
     {
         // Ugly code to wrap text
         String textToDraw = text;
@@ -113,7 +113,6 @@ public class FeedItem extends JComponent {
         int startY = 3;
         int lineSize = (int)g2.getFontMetrics().getHeight();
         int elipsisSize = (int)g2.getFontMetrics().stringWidth("...");
-        int maxY = g2.getClipBounds().y+g2.getClipBounds().height;
 
         while ( nIndex < arr.length )
         {
