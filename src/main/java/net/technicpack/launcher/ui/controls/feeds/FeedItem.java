@@ -19,31 +19,39 @@
 package net.technicpack.launcher.ui.controls.feeds;
 
 import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.launcher.ui.LauncherFrame;
+import net.technicpack.launcher.ui.controls.AAJLabel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 
 public class FeedItem extends JComponent {
     private ResourceLoader resources;
-    private String text;
     private URL url;
     private String author;
+    private String text;
     private BufferedImage authorAvatar;
 
     private static BufferedImage background;
 
     public FeedItem(ResourceLoader loader, String text, URL url, String author, BufferedImage avatar) {
+        this.setOpaque(false);
+        this.setBackground(new Color(0,0,0,0));
+        this.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        this.setFont(loader.getFont(ResourceLoader.FONT_OPENSANS, 12));
+
         if (background == null) {
             background = loader.getImage("news/FeedItem.png");
         }
 
         this.resources = loader;
-        this.text = text;
         this.url = url;
         this.author = author;
         this.authorAvatar = avatar;
+        this.text = text;
     }
 
     private Dimension getCalcSize() {
@@ -74,7 +82,67 @@ public class FeedItem extends JComponent {
 
     @Override
     public void paint(Graphics g) {
-        g.drawImage(background, 0, 0, null);
-        g.drawImage(authorAvatar, 0, background.getHeight()-10, null);
+        Graphics2D g2d = (Graphics2D)g;
+
+        g2d.setRenderingHint(
+                RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(
+                RenderingHints.KEY_TEXT_ANTIALIASING,
+                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2d.setRenderingHint(
+                RenderingHints.KEY_FRACTIONALMETRICS,
+                RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+
+        g2d.drawImage(background, 0, 0, null);
+        g2d.drawImage(authorAvatar, 0, background.getHeight() - 10, null);
+
+        g2d.clipRect(3, 2, background.getWidth() - 5, background.getHeight() - 24);
+        g2d.setFont(getFont());
+
+        drawTextUgly(text, g2d);
+    }
+
+    private void drawTextUgly(String text, Graphics2D g2)
+    {
+        // Ugly code to wrap text
+        String textToDraw = text;
+        String[] arr = textToDraw.split(" ");
+        int nIndex = 0;
+        int startX = 4;
+        int startY = 3;
+        int lineSize = (int)g2.getFontMetrics().getHeight();
+        int elipsisSize = (int)g2.getFontMetrics().stringWidth("...");
+        int maxY = g2.getClipBounds().y+g2.getClipBounds().height;
+
+        while ( nIndex < arr.length )
+        {
+            int nextStartY = startY + lineSize;
+
+            if (nextStartY > maxY)
+                break;
+
+            int nextEndY = nextStartY + lineSize;
+
+            String line = arr[nIndex++];
+            int lineWidth = g2.getFontMetrics().stringWidth(line+" "+arr[nIndex]);
+            if (nextEndY >= maxY)
+                lineWidth += elipsisSize;
+            while ( ( nIndex < arr.length ) && (lineWidth < background.getWidth()-7) )
+            {
+                line = line + " " + arr[nIndex];
+                nIndex++;
+
+                lineWidth = g2.getFontMetrics().stringWidth(line+" "+arr[nIndex]);
+                if (nextEndY >= maxY)
+                    lineWidth += elipsisSize;
+            }
+
+            if (nextEndY >= maxY && nIndex < arr.length)
+                line += "...";
+
+            g2.drawString(line, startX, startY + g2.getFontMetrics().getAscent());
+            startY = nextStartY;
+        }
     }
 }

@@ -124,7 +124,10 @@ public class ModpackInfoPanel extends JPanel {
         feedBottom.add(gallery, constraints);
 
         try {
-            gallery.add(new FeedItem(resources, "FARTS FARTS FARTS", new URL("http://www.technicpack.net/"), "sct", resources.getImage("news/AuthorAvatar.jpg")));
+            for (int i = 0; i < 10; i++) {
+                gallery.add(new FeedItem(resources, "FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND ", new URL("http://www.technicpack.net/"), "sct", resources.getImage("news/AuthorAvatar.jpg")));
+                gallery.add(Box.createHorizontalStrut(8));
+            }
         } catch (MalformedURLException ex) {
             //it's only a model
         }

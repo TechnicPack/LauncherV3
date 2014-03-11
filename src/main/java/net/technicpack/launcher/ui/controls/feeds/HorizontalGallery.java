@@ -30,4 +30,16 @@ public class HorizontalGallery extends JPanel {
     public Dimension getMinimumSize() {
         return new Dimension(0,0);
     }
+
+    @Override
+    public void paintChildren(Graphics g) {
+        Graphics2D g2d = (Graphics2D)g;
+        g2d.clipRect(0, 0, getWidth(), getHeight());
+
+        super.paintChildren(g);
+
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setPaint(new GradientPaint(getWidth()-80, 0, new Color(0,0,0,0), getWidth()-10, 0, new Color(0,0,0,255)));
+        g2d.fillRect(0,0,getWidth(),getHeight());
+    }
 }
