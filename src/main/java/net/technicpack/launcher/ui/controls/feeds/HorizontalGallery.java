@@ -18,18 +18,20 @@
  */
 package net.technicpack.launcher.ui.controls.feeds;
 
+import sun.java2d.SunGraphics2D;
+
 import javax.swing.*;
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
 
 public class HorizontalGallery extends JPanel {
     private int pixelPosition = -8;
-    private int targetPixelPosition = -8;
-    private int pixelChaseSpeed = 20;
-    private boolean runningPixelChase;
     private Component selectedComponent;
+    private Component lastDisplayedComponent;
 
     public HorizontalGallery() {
         setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+        setOpaque(false);
     }
 
     @Override
@@ -41,30 +43,47 @@ public class HorizontalGallery extends JPanel {
     public void doLayout() {
         super.doLayout();
 
-        int pixel = 0;
-        synchronized (this) {
-            pixel = pixelPosition;
-        }
-        int startX = 0 - pixel;
+        int startX = 0 - pixelPosition;
 
         for (Component component : getComponents()) {
             Rectangle cBounds = component.getBounds();
             component.setBounds(startX, cBounds.y, cBounds.width, cBounds.height);
             component.invalidate();
+
+            if (startX >= 2 && (startX + cBounds.width) < getWidth())
+                lastDisplayedComponent = component;
+
             startX += cBounds.width + 8;
         }
+
+        repaint();
+    }
+
+    @Override
+    public void paintComponent(Graphics g) {
+        g.setColor(getBackground());
+        ((Graphics2D)g).setPaint(getBackground());
+        g.fillRect(0,0,getWidth(),getHeight());
     }
 
     @Override
     public void paintChildren(Graphics g) {
         Graphics2D g2d = (Graphics2D)g;
-        g2d.clipRect(0, 0, getWidth(), getHeight());
+        Paint oldPaint = g2d.getPaint();
 
         super.paintChildren(g);
 
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setPaint(new GradientPaint(getWidth()-80, 0, new Color(0,0,0,0), getWidth()-10, 0, new Color(0,0,0,255)));
-        g2d.fillRect(0,0,getWidth(),getHeight());
+
+        if (getSelectedComponent() != getComponent(0)) {
+            g2d.setPaint(new GradientPaint(0, 0, new Color(0,0,0,255), 70, 0, new Color(0,0,0,0)));
+            g2d.fillRect(0,0,getWidth(),getHeight());
+        }
+        if (lastDisplayedComponent != getComponents()[getComponentCount()-1]) {
+            g2d.setPaint(new GradientPaint(getWidth()-80, 0, new Color(0,0,0,0), getWidth()-10, 0, new Color(0,0,0,255)));
+            g2d.fillRect(0,0,getWidth(),getHeight());
+        }
+        g2d.setPaint(oldPaint);
     }
 
     public Component getSelectedComponent() {
@@ -81,8 +100,11 @@ public class HorizontalGallery extends JPanel {
     public void selectNextComponent() {
         boolean getNextComponent = false;
 
+        if (getComponents()[getComponentCount()-1] == lastDisplayedComponent)
+            return;
+
         for (Component component : getComponents()) {
-            if (component == selectedComponent) {
+            if (component == getSelectedComponent()) {
                 getNextComponent = true;
             } else if (getNextComponent) {
                 selectComponent(component);
@@ -95,7 +117,7 @@ public class HorizontalGallery extends JPanel {
         Component previousComponent = null;
 
         for (Component component : getComponents()) {
-            if (component == selectedComponent && previousComponent != null) {
+            if (component == getSelectedComponent() && previousComponent != null) {
                 selectComponent(previousComponent);
                 return;
             }
@@ -137,61 +159,8 @@ public class HorizontalGallery extends JPanel {
         return foundSelected;
     }
 
-    public void runPixelChase() {
-        try {
-            while(!chaseTargetPixel()) {
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        repaint();
-                    }
-                });
-                Thread.sleep(200);
-            }
-            EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    repaint();
-                }
-            });
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-        }
-    }
-
     public void setTargetPixelPosition(int targetPixelPosition) {
-        synchronized (this) {
-            this.targetPixelPosition = targetPixelPosition;
-
-            if (!runningPixelChase && this.targetPixelPosition != this.pixelPosition) {
-                runningPixelChase = true;
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        runPixelChase();
-                    }
-                }).run();
-            }
-        }
-    }
-
-    protected boolean chaseTargetPixel() {
-        synchronized (this) {
-            if (targetPixelPosition != pixelPosition) {
-                if (Math.abs(targetPixelPosition-pixelPosition) < pixelChaseSpeed) {
-                    pixelPosition = targetPixelPosition;
-                    runningPixelChase = false;
-                    return true;
-                } else if (targetPixelPosition < pixelPosition)
-                    pixelPosition -= pixelChaseSpeed;
-                else
-                    pixelPosition += pixelChaseSpeed;
-
-                return false;
-            }
-
-            runningPixelChase = false;
-            return true;
-        }
+        this.pixelPosition = targetPixelPosition;
+        revalidate();
     }
 }

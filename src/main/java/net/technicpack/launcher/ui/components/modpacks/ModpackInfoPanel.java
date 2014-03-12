@@ -26,6 +26,8 @@ import net.technicpack.launcher.ui.controls.feeds.HorizontalGallery;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -36,6 +38,7 @@ public class ModpackInfoPanel extends JPanel {
     private BufferedImage defaultImage;
 
     private TiledBackground background;
+    private HorizontalGallery feedGallery;
 
     public ModpackInfoPanel(ResourceLoader loader) {
         this.resources  = loader;
@@ -102,16 +105,28 @@ public class ModpackInfoPanel extends JPanel {
         JButton leftButton = new JButton(resources.getIcon("status_left.png"));
         leftButton.setBorder(BorderFactory.createEmptyBorder());
         leftButton.setContentAreaFilled(false);
+        leftButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                feedGallery.selectPreviousComponent();
+            }
+        });
         topline.add(leftButton);
 
         JButton rightButton = new JButton(resources.getIcon("status_right.png"));
         rightButton.setBorder(BorderFactory.createEmptyBorder());
         rightButton.setContentAreaFilled(false);
+        rightButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                feedGallery.selectNextComponent();
+            }
+        });
         topline.add(rightButton);
 
-        HorizontalGallery gallery = new HorizontalGallery();
-        gallery.setBackground(LauncherFrame.COLOR_BANNER);
-        gallery.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
+        feedGallery = new HorizontalGallery();
+        feedGallery.setBackground(LauncherFrame.COLOR_BANNER);
+        feedGallery.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         constraints = new GridBagConstraints();
         constraints.gridx = 0;
         constraints.gridy = 1;
@@ -121,12 +136,12 @@ public class ModpackInfoPanel extends JPanel {
         constraints.gridheight = 1;
         constraints.ipady = 150;
         constraints.fill = GridBagConstraints.BOTH;
-        feedBottom.add(gallery, constraints);
+        feedBottom.add(feedGallery, constraints);
 
         try {
             for (int i = 0; i < 10; i++) {
                 FeedItem item = new FeedItem(resources, "FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND ", new URL("http://www.technicpack.net/"), "sct", resources.getImage("news/AuthorAvatar.jpg"));
-                gallery.add(item);
+                feedGallery.add(item);
             }
         } catch (MalformedURLException ex) {
             //it's only a model

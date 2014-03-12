@@ -97,10 +97,12 @@ public class FeedItem extends JComponent {
         g2d.drawImage(background, 0, 0, null);
         g2d.drawImage(authorAvatar, 0, background.getHeight() - 10, null);
 
+        Shape oldClip = g2d.getClip();
         g2d.clipRect(3, 2, background.getWidth() - 5, background.getHeight() - 24);
         g2d.setFont(getFont());
 
         drawTextUgly(text, g2d, 2+background.getHeight()-24);
+        g2d.setClip(oldClip);
     }
 
     private void drawTextUgly(String text, Graphics2D g2, int maxY)
