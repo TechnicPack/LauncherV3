@@ -28,16 +28,16 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 
-public class FeedItem extends JComponent {
+public class FeedItem extends JButton {
     private ResourceLoader resources;
-    private URL url;
+    private String url;
     private String author;
     private String text;
     private BufferedImage authorAvatar;
 
     private static BufferedImage background;
 
-    public FeedItem(ResourceLoader loader, String text, URL url, String author, BufferedImage avatar) {
+    public FeedItem(ResourceLoader loader, String text, String url, String author, BufferedImage avatar) {
         this.setOpaque(false);
         this.setBackground(new Color(0,0,0,0));
         this.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
@@ -52,6 +52,10 @@ public class FeedItem extends JComponent {
         this.author = author;
         this.authorAvatar = avatar;
         this.text = text;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     private Dimension getCalcSize() {

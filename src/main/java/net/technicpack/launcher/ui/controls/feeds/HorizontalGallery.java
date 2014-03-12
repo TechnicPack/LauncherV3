@@ -123,9 +123,9 @@ public class HorizontalGallery extends JPanel {
         }
     }
 
-    public void selectComponent(Component selection) {
+    public boolean selectComponent(Component selection) {
         if (!containsComponent(selection))
-            return;
+            return false;
 
         boolean isAfterCurrentSelection = true;
 
@@ -138,6 +138,7 @@ public class HorizontalGallery extends JPanel {
         }
 
         Component lastComponent = null;
+        boolean didMoveGallery = false;
         do {
             lastComponent = getSelectedComponent();
 
@@ -145,7 +146,13 @@ public class HorizontalGallery extends JPanel {
                 selectNextComponent();
             else
                 selectPreviousComponent();
+
+            if (getSelectedComponent() != lastComponent)
+                didMoveGallery = true;
+
         } while (getSelectedComponent() != lastComponent && getSelectedComponent() != selection);
+
+        return didMoveGallery;
     }
 
     protected void internalSelectComponent(Component selection) {

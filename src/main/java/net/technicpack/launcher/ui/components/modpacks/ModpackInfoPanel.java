@@ -29,7 +29,10 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 public class ModpackInfoPanel extends JPanel {
@@ -44,6 +47,32 @@ public class ModpackInfoPanel extends JPanel {
         this.resources  = loader;
 
         initComponents();
+    }
+
+    protected void clickLeftFeedButton() {
+        feedGallery.selectPreviousComponent();
+    }
+
+    protected void clickRightFeedButton() {
+        feedGallery.selectNextComponent();
+    }
+
+    protected void clickFeedItem(FeedItem item) {
+        if (!feedGallery.selectComponent(item)) {
+            try {
+                Desktop.getDesktop().browse(new URI(item.getUrl()));
+            } catch (IOException ex) {
+                //Thrown by Desktop.browse() - just log & ignore
+                ex.printStackTrace();
+            } catch (URISyntaxException ex) {
+                //If we got a bogus URL from the internet, then this will throw.  Log & Ignore
+                ex.printStackTrace();
+            } catch (RuntimeException ex) {
+                //browse() throws a bunch of runtime exceptions if you give it bad input
+                //WHICH IS AWESOME
+                ex.printStackTrace();
+            }
+        }
     }
 
     private void initComponents() {
@@ -108,7 +137,7 @@ public class ModpackInfoPanel extends JPanel {
         leftButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                feedGallery.selectPreviousComponent();
+                clickLeftFeedButton();
             }
         });
         topline.add(leftButton);
@@ -119,7 +148,7 @@ public class ModpackInfoPanel extends JPanel {
         rightButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                feedGallery.selectNextComponent();
+                clickRightFeedButton();
             }
         });
         topline.add(rightButton);
@@ -138,13 +167,15 @@ public class ModpackInfoPanel extends JPanel {
         constraints.fill = GridBagConstraints.BOTH;
         feedBottom.add(feedGallery, constraints);
 
-        try {
-            for (int i = 0; i < 10; i++) {
-                FeedItem item = new FeedItem(resources, "FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND ", new URL("http://www.technicpack.net/"), "sct", resources.getImage("news/AuthorAvatar.jpg"));
-                feedGallery.add(item);
-            }
-        } catch (MalformedURLException ex) {
-            //it's only a model
+        for (int i = 0; i < 10; i++) {
+            FeedItem item = new FeedItem(resources, "FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND ", "http://www.technicpack.net/", "sct", resources.getImage("news/AuthorAvatar.jpg"));
+            item.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    clickFeedItem((FeedItem)e.getSource());
+                }
+            });
+            feedGallery.add(item);
         }
 
         constraints = new GridBagConstraints();
