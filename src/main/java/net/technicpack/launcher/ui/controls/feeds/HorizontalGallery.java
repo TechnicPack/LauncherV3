@@ -18,11 +18,8 @@
  */
 package net.technicpack.launcher.ui.controls.feeds;
 
-import sun.java2d.SunGraphics2D;
-
 import javax.swing.*;
 import java.awt.*;
-import java.lang.reflect.InvocationTargetException;
 
 public class HorizontalGallery extends JPanel {
     private int pixelPosition = -8;
@@ -92,7 +89,7 @@ public class HorizontalGallery extends JPanel {
         Component first = getComponent(0);
 
         if (!containsComponent(selectedComponent))
-            selectComponent(first);
+            internalSelectComponent(first);
 
         return selectedComponent;
     }
@@ -107,7 +104,7 @@ public class HorizontalGallery extends JPanel {
             if (component == getSelectedComponent()) {
                 getNextComponent = true;
             } else if (getNextComponent) {
-                selectComponent(component);
+                internalSelectComponent(component);
                 return;
             }
         }
@@ -118,7 +115,7 @@ public class HorizontalGallery extends JPanel {
 
         for (Component component : getComponents()) {
             if (component == getSelectedComponent() && previousComponent != null) {
-                selectComponent(previousComponent);
+                internalSelectComponent(previousComponent);
                 return;
             }
 
@@ -127,6 +124,31 @@ public class HorizontalGallery extends JPanel {
     }
 
     public void selectComponent(Component selection) {
+        if (!containsComponent(selection))
+            return;
+
+        boolean isAfterCurrentSelection = true;
+
+        for (Component component : getComponents()) {
+            if (component == selection) {
+                isAfterCurrentSelection = false;
+                break;
+            } else if (component == getSelectedComponent())
+                break;
+        }
+
+        Component lastComponent = null;
+        do {
+            lastComponent = getSelectedComponent();
+
+            if (isAfterCurrentSelection)
+                selectNextComponent();
+            else
+                selectPreviousComponent();
+        } while (getSelectedComponent() != lastComponent && getSelectedComponent() != selection);
+    }
+
+    protected void internalSelectComponent(Component selection) {
         if (containsComponent(selection)) {
             selectedComponent = selection;
 
