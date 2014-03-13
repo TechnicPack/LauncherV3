@@ -153,20 +153,40 @@ public class HorizontalGallery extends JPanel {
         if (isVisible)
             return false;
 
+        if (isAfterCurrentSelection)
+            return seekForwardToComponent(selection);
+        else
+            return seekBackwardToComponent(selection);
+    }
+
+    protected boolean seekForwardToComponent(Component component) {
         Component lastComponent = null;
         boolean didMoveGallery = false;
         do {
             lastComponent = getSelectedComponent();
 
-            if (isAfterCurrentSelection)
-                selectNextComponent();
-            else
-                selectPreviousComponent();
+            selectNextComponent();
 
             if (getSelectedComponent() != lastComponent)
                 didMoveGallery = true;
 
-        } while (getSelectedComponent() != lastComponent && getSelectedComponent() != selection);
+        } while (getSelectedComponent() != lastComponent && getSelectedComponent() != component);
+
+        return didMoveGallery;
+    }
+
+    protected boolean seekBackwardToComponent(Component component) {
+        Component lastComponent = null;
+        boolean didMoveGallery = false;
+        do {
+            lastComponent = getSelectedComponent();
+
+            selectPreviousComponent();
+
+            if (getSelectedComponent() != lastComponent)
+                didMoveGallery = true;
+
+        } while (getSelectedComponent() != lastComponent && lastDisplayedComponent != component);
 
         return didMoveGallery;
     }
