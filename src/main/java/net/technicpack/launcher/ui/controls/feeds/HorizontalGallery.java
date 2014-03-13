@@ -128,14 +128,30 @@ public class HorizontalGallery extends JPanel {
             return false;
 
         boolean isAfterCurrentSelection = true;
+        boolean isVisible = false;
 
+        //Seek forward until we find the component we're trying to select.
+        //If it's between getSelectedComponent() and lastDisplayedComponent, then isVisible will be
+        //true coming out of the loop, and we'll not move the gallery position
+
+        //If we find the component we're selecting before hitting the visual gallery items, then we need to travel
+        //backward- otherwise, we need to travel forward
         for (Component component : getComponents()) {
+            if (component == getSelectedComponent())
+                isVisible = true;
+
             if (component == selection) {
-                isAfterCurrentSelection = false;
+                if (!isVisible)
+                    isAfterCurrentSelection = false;
                 break;
-            } else if (component == getSelectedComponent())
+            } else if (component == lastDisplayedComponent) {
+                isVisible = false;
                 break;
+            }
         }
+
+        if (isVisible)
+            return false;
 
         Component lastComponent = null;
         boolean didMoveGallery = false;
