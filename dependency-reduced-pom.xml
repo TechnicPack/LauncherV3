@@ -164,7 +164,7 @@
                   <jre>
                     <minVersion>1.5.0</minVersion>
                   </jre>
-                  <icon>D:\TechnicLauncher/src/main/resources/icon.png</icon>
+                  <icon>D:\TechnicLauncher/src/main/resources/icon.ico</icon>
                   <versionInfo>
                     <fileVersion>4.0.0.0</fileVersion>
                     <txtFileVersion>4.0.0.0</txtFileVersion>

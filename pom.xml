@@ -244,7 +244,7 @@
 									<jre>
 										<minVersion>1.6.0</minVersion>
 									</jre>
-									<icon>${basedir}/src/main/resources/icon.png</icon>
+									<icon>${basedir}/src/main/resources/icon.ico</icon>
 									<versionInfo>
 										<fileVersion>4.0.0.${buildNumber}</fileVersion>
 										<txtFileVersion>4.0.0.${buildNumber}</txtFileVersion>
