@@ -1,12 +1,272 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>LauncherV3</groupId>
-    <artifactId>LauncherV3</artifactId>
-    <version>1.0-SNAPSHOT</version>
+	<!-- Project information -->
+	<name>Technic Launcher</name>
+	<groupId>net.technicpack</groupId>
+	<artifactId>launcher</artifactId>
+	<version>4.0-${buildNumber}</version>
+	<url>http://www.technicpack.net</url>
+	<inceptionYear>2014</inceptionYear>
+	<description>Minecraft launcher for installing and updating Modpacks from the Technic Platform.</description>
 
+	<!-- Build properties -->
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<mainClass>${project.groupId}.${project.artifactId}.LauncherMain</mainClass>
+		<buildNumber>0</buildNumber>
+	</properties>
+
+	<!-- Company information -->
+	<organization>
+		<url>http://www.technicpack.net</url>
+		<name>Syndicate, LLC</name>
+	</organization>
+
+	<!-- Source code access -->
+	<scm>
+		<developerConnection>scm:git:git@github.com:TechnicPack/LauncherV3.git</developerConnection>
+		<connection>scm:git:git://github.com/TechnicPack/LauncherV3.git</connection>
+		<url>https://github.com/TechnicPack/LauncherV3/tree/dev</url>
+	</scm>
+
+	<!-- Build server -->
+	<ciManagement>
+		<system>jenkins</system>
+		<url>http://build.technicpack.net/job/LauncherV3/</url>
+	</ciManagement>
+
+	<!-- Project dependencies -->
+	<dependencies>
+		<!-- Included in final JAR -->
+        <dependency>
+            <groupId>net.technicpack</groupId>
+            <artifactId>launchercore</artifactId>
+            <version>2.0.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+		<dependency>
+			<groupId>com.beust</groupId>
+			<artifactId>jcommander</artifactId>
+			<version>1.30</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+			<version>1.11</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.swinglabs</groupId>
+			<artifactId>swing-layout</artifactId>
+			<version>1.0.3</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.swinglabs</groupId>
+			<artifactId>swing-worker</artifactId>
+			<version>1.1</version>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
+
+	<!-- Build configuration -->
+	<build>
+		<defaultGoal>clean install</defaultGoal>
+
+		<!-- Resources to include -->
+		<resources>
+			<!-- Static resources -->
+			<resource>
+				<directory>${project.basedir}</directory>
+				<targetPath>.</targetPath>
+				<filtering>false</filtering>
+				<includes>
+					<include>LICENSE.txt</include>
+				</includes>
+			</resource>
+			<!-- Filtered resources -->
+			<resource>
+				<directory>${project.basedir}/src/main/resources</directory>
+				<targetPath>net/technicpack/launcher/resources</targetPath>
+				<filtering>false</filtering>
+				<includes>
+					<include>**/*</include>
+				</includes>
+				<excludes>
+					<exclude>app/*</exclude>
+					<exclude>exe/*</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>${project.basedir}/src/main/resources</directory>
+				<targetPath>net/technicpack/launcher/resources</targetPath>
+				<filtering>true</filtering>
+				<includes>
+					<include>version</include>
+				</includes>
+			</resource>
+		</resources>
+
+		<!-- Build plugins -->
+		<plugins>
+			<!-- Source compiler plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.0</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+					<compilerArguments>
+						<O>-Xlint:all</O>
+						<O>-Xlint:-path</O>
+					</compilerArguments>
+					<showWarnings>true</showWarnings>
+					<showDeprecation>true</showDeprecation>
+				</configuration>
+			</plugin>
+			<!-- JAR creation plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>${mainClass}</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+			<!-- Dependency addition plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>2.0</version>
+				<executions>
+					<execution>
+						<configuration>
+							<minimizeJar>true</minimizeJar>
+							<filters>
+								<filter>
+									<artifact>net.technicpack:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>org.jdom:jdom</artifact>
+									<includes>
+										<include>org/jdom/**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>rome:rome</artifact>
+									<includes>
+										<include>com/sun/syndication/**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>*:*</artifact>
+									<excludes>
+										<exclude>META-INF/*.txt</exclude>
+										<exclude>META-INF/info.xml</exclude>
+										<exclude>META-INF/ASL2.0</exclude>
+										<exclude>META-INF/LICENSE</exclude>
+										<exclude>META-INF/NOTICE</exclude>
+									</excludes>
+								</filter>
+							</filters>
+						</configuration>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<!-- Build profiles -->
+	<profiles>
+		    <profile>
+	        <id>static_build_number</id>
+	        <activation>
+	            <property>
+	                <name>!env.BUILD_NUMBER</name>
+	            </property>
+	        </activation>
+	        <properties>
+	            <buildNumber>0</buildNumber>
+	        </properties>
+	    </profile>
+	    <profile>
+	        <id>dynamic_build_number</id>
+	        <activation>
+	            <property>
+	                <name>env.BUILD_NUMBER</name>
+	            </property>
+	        </activation>
+	        <properties>
+	            <buildNumber>${env.BUILD_NUMBER}</buildNumber>
+	        </properties>
+	    </profile>
+		<!-- Package for Windows -->
+		<profile>
+			<id>package-win</id>
+			<activation>
+				<os>
+					<family>windows</family>
+				</os>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.bluestemsoftware.open.maven.plugin</groupId>
+						<artifactId>launch4j-plugin</artifactId>
+						<version>1.5.0.0</version>
+						<executions>
+							<execution>
+								<configuration>
+									<headerType>gui</headerType>
+									<stayAlive>false</stayAlive>
+									<jar>${project.build.directory}/${project.artifactId}-${project.version}.jar</jar>
+									<outfile>${project.build.directory}/${project.artifactId}-${project.version}.exe</outfile>
+									<classPath>
+										<mainClass>${mainClass}</mainClass>
+										<addDependencies>false</addDependencies>
+										<preCp>anything</preCp>
+									</classPath>
+									<jre>
+										<minVersion>1.6.0</minVersion>
+									</jre>
+									<icon>${basedir}/src/main/resources/icon.png</icon>
+									<versionInfo>
+										<fileVersion>4.0.0.${buildNumber}</fileVersion>
+										<txtFileVersion>4.0.0.${buildNumber}</txtFileVersion>
+										<productVersion>4.0.0.${buildNumber}</productVersion>
+										<txtProductVersion>4.0.0.${buildNumber}</txtProductVersion>
+										<fileDescription>${project.name}</fileDescription>
+										<productName>${project.name}</productName>
+										<copyright>${project.organization.name}, ${project.organization.url}</copyright>
+										<internalName>${project.artifactId}</internalName>
+										<originalFilename>${project.artifactId}.exe</originalFilename>
+									</versionInfo>
+								</configuration>
+								<phase>package</phase>
+								<goals>
+									<goal>launch4j</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 </project>
