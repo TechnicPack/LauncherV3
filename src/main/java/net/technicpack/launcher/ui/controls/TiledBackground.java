@@ -26,10 +26,14 @@ public class TiledBackground extends JPanel {
     private BufferedImage image;
     private int width;
     private int height;
+    private boolean filterImage;
 
     public TiledBackground(BufferedImage image) {
         setImage(image);
     }
+
+    public boolean getFilterImage() { return filterImage; }
+    public void setFilterImage(boolean filterImage) { this.filterImage = filterImage; }
 
     public void setImage(BufferedImage image) {
         this.image = image;
@@ -49,7 +53,7 @@ public class TiledBackground extends JPanel {
 
         if (image == null) {
             g.setColor(this.getBackground());
-            g.drawRect(0, 0, destWidth, destHeight);
+            g.fillRect(0, 0, destWidth, destHeight);
             return;
         }
 
@@ -69,6 +73,11 @@ public class TiledBackground extends JPanel {
             }
 
             startY = nextStartY;
+        }
+
+        if (filterImage) {
+            g.setColor(getBackground());
+            g.fillRect(0, 0, destWidth, destHeight);
         }
     }
 }

@@ -19,6 +19,7 @@
 package net.technicpack.launcher.ui.components.news;
 
 import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
 import net.technicpack.launcher.ui.controls.TiledBackground;
 import net.technicpack.launcher.ui.controls.feeds.NewsWidget;
@@ -27,11 +28,10 @@ import sun.tools.jar.resources.jar;
 import javax.swing.*;
 import java.awt.*;
 
-public class NewsSelector extends TiledBackground {
+public class NewsSelector extends JPanel {
     private ResourceLoader resources;
 
     public NewsSelector(ResourceLoader resources) {
-        super(resources.getImage("background_repeat.png"));
         this.resources = resources;
 
         initComponents();
@@ -39,6 +39,7 @@ public class NewsSelector extends TiledBackground {
 
     private void initComponents() {
         setLayout(new BorderLayout());
+        setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
 
         JPanel widgetHost = new JPanel();
         widgetHost.setOpaque(false);

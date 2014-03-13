@@ -154,22 +154,22 @@
                 <configuration>
                   <headerType>gui</headerType>
                   <stayAlive>false</stayAlive>
-                  <jar>D:\TechnicLauncher\target/launcher-3.0-0.jar</jar>
-                  <outfile>D:\TechnicLauncher\target/launcher-3.0-0.exe</outfile>
+                  <jar>D:\LauncherV3\target/launcher-4.0-${env.BUILD_NUMBER}.jar</jar>
+                  <outfile>D:\LauncherV3\target/launcher-4.0-${env.BUILD_NUMBER}.exe</outfile>
                   <classPath>
                     <mainClass>net.technicpack.launcher.LauncherMain</mainClass>
                     <addDependencies>false</addDependencies>
                     <preCp>anything</preCp>
                   </classPath>
                   <jre>
-                    <minVersion>1.5.0</minVersion>
+                    <minVersion>1.6.0</minVersion>
                   </jre>
-                  <icon>D:\TechnicLauncher/src/main/resources/icon.ico</icon>
+                  <icon>D:\LauncherV3/src/main/resources/icon.ico</icon>
                   <versionInfo>
-                    <fileVersion>4.0.0.0</fileVersion>
-                    <txtFileVersion>4.0.0.0</txtFileVersion>
-                    <productVersion>4.0.0.0</productVersion>
-                    <txtProductVersion>4.0.0.0</txtProductVersion>
+                    <fileVersion>4.0.0.${env.BUILD_NUMBER}</fileVersion>
+                    <txtFileVersion>4.0.0.${env.BUILD_NUMBER}</txtFileVersion>
+                    <productVersion>4.0.0.${env.BUILD_NUMBER}</productVersion>
+                    <txtProductVersion>4.0.0.${env.BUILD_NUMBER}</txtProductVersion>
                     <fileDescription>Technic Launcher</fileDescription>
                     <productName>Technic Launcher</productName>
                     <copyright>Syndicate, LLC, http://www.technicpack.net</copyright>

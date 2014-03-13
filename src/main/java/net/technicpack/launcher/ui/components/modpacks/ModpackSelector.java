@@ -28,12 +28,10 @@ import sun.tools.jar.resources.jar;
 import javax.swing.*;
 import java.awt.*;
 
-public class ModpackSelector extends TiledBackground {
+public class ModpackSelector extends JPanel {
     private ResourceLoader resources;
 
     public ModpackSelector(ResourceLoader resources) {
-        super(resources.getImage("background_repeat.png"));
-
         this.resources = resources;
 
         initComponents();
@@ -41,7 +39,7 @@ public class ModpackSelector extends TiledBackground {
 
     private void initComponents() {
         setLayout(new BorderLayout());
-        setOpaque(false);
+        setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
 
         JPanel header = new JPanel();
         header.setLayout(new GridBagLayout());

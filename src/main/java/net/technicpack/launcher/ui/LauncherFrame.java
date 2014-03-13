@@ -54,6 +54,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     public static final Color COLOR_PANEL = new Color(45, 45, 45, 160);
     public static final Color COLOR_SCROLL_TRACK = new Color(18, 18, 18);
     public static final Color COLOR_SCROLL_THUMB = new Color(53, 53, 53);
+    public static final Color COLOR_SELECTOR_BACK = new Color(22,26,29);
+    public static final Color COLOR_CENTRAL_BACK = new Color(25, 30, 34, 160);
 
     public static final String TAB_DISCOVER = "discover";
     public static final String TAB_MODPACKS = "modpacks";
@@ -255,7 +257,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         infoSwap.add(new ModpackInfoPanel(resources), "modpacks");
         infoContainer.add(infoSwap, BorderLayout.CENTER);
 
-        TiledBackground footer = new TiledBackground(resources.getImage("background_repeat.png"));
+        JPanel footer = new JPanel();
+        footer.setBackground(COLOR_SELECTOR_BACK);
         footer.setLayout(new BoxLayout(footer, BoxLayout.LINE_AXIS));
         footer.setForeground(COLOR_WHITE_TEXT);
         footer.setBorder(BorderFactory.createEmptyBorder(4,6,5,12));

@@ -78,10 +78,13 @@ public class ModpackInfoPanel extends JPanel {
     private void initComponents() {
         setLayout(new BorderLayout());
 
-        defaultImage = resources.getImage("background_repeat2.png");
+        defaultImage = resources.getImage("modpack/background.png");
         background = new TiledBackground(defaultImage);
+        background.setOpaque(true);
         background.setLayout(new BorderLayout());
         background.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        background.setBackground(LauncherFrame.COLOR_CENTRAL_BACK);
+        background.setFilterImage(true);
         this.add(background, BorderLayout.CENTER);
 
         JPanel layoutPanel = new JPanel();
