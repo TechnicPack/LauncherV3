@@ -173,6 +173,7 @@ public class HorizontalGallery extends JPanel {
             }
 
             setTargetPixelPosition(seekPixel);
+            doLayout();
         }
     }
 
@@ -190,6 +191,5 @@ public class HorizontalGallery extends JPanel {
 
     public void setTargetPixelPosition(int targetPixelPosition) {
         this.pixelPosition = targetPixelPosition;
-        revalidate();
     }
 }
