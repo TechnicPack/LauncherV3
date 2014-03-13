@@ -36,6 +36,12 @@ public class ModpackDataDisplay extends JPanel {
         initComponents();
     }
 
+    @Override
+    public Dimension getPreferredSize() {
+        Dimension size = super.getPreferredSize();
+        return new Dimension(size.width, 220);
+    }
+
     private void initComponents() {
         BorderLayout packFeatureLayout = new BorderLayout();
         packFeatureLayout.setHgap(10);
@@ -84,7 +90,7 @@ public class ModpackDataDisplay extends JPanel {
         title.setHorizontalAlignment(SwingConstants.LEFT);
         title.setHorizontalTextPosition(SwingConstants.LEFT);
         title.setAlignmentX(LEFT_ALIGNMENT);
-        packInfoPanel.add(title, new GridBagConstraints(0,1,4,1,1.0,0.0,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(20,0,0,0),0,0));
+        packInfoPanel.add(title, new GridBagConstraints(0,1,4,1,1.0,0.0,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(14,0,0,0),0,0));
 
         JTextArea description = new JTextArea("Gear up and set forth on a campaign worthy of legend, for Hexxit has been unearthed! Dark dungeons, towering spires, weathered ruins and musty tomes lay before you. Lay claim to riches or create your own artifacts, tame beasts and carve out your own story in endless wonder. Alone or with friends, adventure awaits in Hexxit.  Also this text is too big butts farts butts farts butts.");
         description.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
