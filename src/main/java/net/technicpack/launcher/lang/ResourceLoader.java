@@ -42,7 +42,7 @@ public class ResourceLoader {
 
     public void setLocale(Locale locale) {
         currentLocale = locale;
-        stringData = ResourceBundle.getBundle("lang.UIText", locale);
+        stringData = ResourceBundle.getBundle(getBundlePath("lang.UIText"), locale);
         relocalizeResources();
     }
 
@@ -141,12 +141,12 @@ public class ResourceLoader {
     }
 
     public ImageIcon getIcon(String iconName) {
-        return new ImageIcon(ResourceLoader.class.getResource("/" + iconName));
+        return new ImageIcon(ResourceLoader.class.getResource(getResourcePath("/" + iconName)));
     }
 
     public BufferedImage getImage(String imageName) {
         try {
-            return ImageIO.read(ResourceLoader.class.getResourceAsStream("/"+imageName));
+            return ImageIO.read(ResourceLoader.class.getResourceAsStream(getResourcePath("/" + imageName)));
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
@@ -160,7 +160,7 @@ public class ResourceLoader {
     public Font getFont(String name, float size, int style) {
         Font font;
         try {
-            font = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.class.getResourceAsStream("/fonts/"+getString(name))).deriveFont(size).deriveFont(style);
+            font = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.class.getResourceAsStream(getResourcePath("/fonts/"+getString(name)))).deriveFont(size).deriveFont(style);
         } catch (Exception e) {
             e.printStackTrace();
             // Fallback
@@ -173,6 +173,14 @@ public class ResourceLoader {
         for(IRelocalizableResource resource : resources) {
             resource.relocalize(this);
         }
+    }
+      
+    private String getBundlePath(String bundle) {
+        return "net.technicpack.launcher.resources." + bundle;
+    }
+
+    private String getResourcePath(String resource) {
+        return "/net/technicpack/launcher/resources" + resource;
     }
 
     public void registerResource(IRelocalizableResource resource) {
