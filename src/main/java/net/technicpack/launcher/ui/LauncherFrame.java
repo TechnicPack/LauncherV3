@@ -268,7 +268,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
         footer.add(Box.createHorizontalGlue());
 
-        JLabel buildCtrl = new JLabel(resources.getString("launcher.build.text", Integer.toString(315), resources.getString("launcher.build.stable")));
+        JLabel buildCtrl = new JLabel(resources.getString("launcher.build.text", resources.getLauncherBuild(), resources.getString("launcher.build.stable")));
         buildCtrl.setForeground(COLOR_WHITE_TEXT);
         buildCtrl.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 14));
         buildCtrl.setHorizontalTextPosition(SwingConstants.RIGHT);

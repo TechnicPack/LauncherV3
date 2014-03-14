@@ -18,6 +18,8 @@
  */
 package net.technicpack.launcher.lang;
 
+import org.apache.commons.io.IOUtils;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -67,6 +69,16 @@ public class ResourceLoader {
         }
 
         return outString;
+    }
+
+    public String getLauncherBuild() {
+        String build = "0";
+        try {
+            build = IOUtils.toString(ResourceLoader.class.getResource(getResourcePath("/version")).openStream(), "UTF-8");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "3."+build;
     }
 
     private String getCodeFromLocale(Locale locale) {
