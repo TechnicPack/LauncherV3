@@ -21,11 +21,14 @@ package net.technicpack.launcher.ui.components.modpacks;
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.AAJLabel;
+import net.technicpack.launcher.ui.controls.RoundedButton;
 import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
 import net.technicpack.launcher.ui.controls.modpacks.StatBox;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 
 public class ModpackDataDisplay extends JPanel {
     private ResourceLoader resources;
@@ -39,7 +42,7 @@ public class ModpackDataDisplay extends JPanel {
     @Override
     public Dimension getPreferredSize() {
         Dimension size = super.getPreferredSize();
-        return new Dimension(size.width, 220);
+        return new Dimension(size.width, 225);
     }
 
     private void initComponents() {
@@ -55,7 +58,7 @@ public class ModpackDataDisplay extends JPanel {
         this.add(imagePanel, BorderLayout.LINE_START);
 
         JLabel packImage = new JLabel();
-        packImage.setIcon(resources.getIcon("modpack/HexxitFeature.jpg"));
+        packImage.setIcon(resources.getIcon("modpack/feature.png"));
         packImage.setAlignmentX(RIGHT_ALIGNMENT);
         packImage.setPreferredSize(new Dimension(370, 220));
         imagePanel.add(packImage);
@@ -64,35 +67,51 @@ public class ModpackDataDisplay extends JPanel {
         packInfoPanel.setLayout(new GridBagLayout());
         packInfoPanel.setOpaque(false);
         packInfoPanel.setAlignmentY(TOP_ALIGNMENT);
-        packInfoPanel.setBorder(BorderFactory.createEmptyBorder(5,0,0,0));
+        packInfoPanel.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
         this.add(packInfoPanel, BorderLayout.CENTER);
 
-        StatBox ratings = new StatBox(resources, resources.getString("launcher.packstats.ratings"), 1799);
-        ratings.setBackground(LauncherFrame.COLOR_GREEN);
-        ratings.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        packInfoPanel.add(ratings,new GridBagConstraints(0,0,1,1,0.0,0.0,GridBagConstraints.NORTHEAST,GridBagConstraints.BOTH, new Insets(0,0,0,5), 0,0));
+        JPanel statBoxes = new JPanel();
+        statBoxes.setLayout(new GridLayout(1,3,5,0));
+        statBoxes.setOpaque(false);
+        statBoxes.setBorder(BorderFactory.createEmptyBorder(5,0,0,0));
 
-        StatBox downloads = new StatBox(resources, resources.getString("launcher.packstats.downloads"), 80429);
-        downloads.setBackground(LauncherFrame.COLOR_BLUE);
-        downloads.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        packInfoPanel.add(downloads, new GridBagConstraints(1,0,1,1,0.0,0.0, GridBagConstraints.NORTH, GridBagConstraints.BOTH, new Insets(0,0,0,5), 0,0));
+        StatBox ratings = new StatBox(resources, resources.getString("launcher.packstats.ratings"), 1799);
+        ratings.setBackground(LauncherFrame.COLOR_LIKES_BACK);
+        ratings.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        statBoxes.add(ratings);
 
         StatBox runs = new StatBox(resources, resources.getString("launcher.packstats.runs"), 172319);
-        runs.setBackground(LauncherFrame.COLOR_BLUE);
+        runs.setBackground(LauncherFrame.COLOR_FEEDITEM_BACK);
         runs.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        packInfoPanel.add(runs, new GridBagConstraints(2,0,1,1,0.0,0.0,GridBagConstraints.NORTH,GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
+        statBoxes.add(runs);
 
-        packInfoPanel.add(Box.createGlue(), new GridBagConstraints(3,0,1,1,1.0,0.0,GridBagConstraints.NORTH,GridBagConstraints.NONE, new Insets(0,0,0,0),0,0));
+        StatBox downloads = new StatBox(resources, resources.getString("launcher.packstats.downloads"), 80429);
+        downloads.setBackground(LauncherFrame.COLOR_FEEDITEM_BACK);
+        downloads.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        statBoxes.add(downloads);
 
-        JLabel title = new AAJLabel(resources.getString("launcher.packstats.title", "Modpack"));
+        packInfoPanel.add(statBoxes, new GridBagConstraints(0,2,3,1,0.0,0.0,GridBagConstraints.SOUTH, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
+
+        RoundedButton platformButton = new RoundedButton(resources.getString("launcher.pack.platform"));
+        platformButton.setPreferredSize(new Dimension(295, 40));
+        platformButton.setMinimumSize(new Dimension(295, 40));
+        platformButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 20, Font.BOLD));
+        platformButton.setBorder(BorderFactory.createEmptyBorder());
+        platformButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        platformButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        platformButton.setContentAreaFilled(false);
+        platformButton.setAlignmentX(RIGHT_ALIGNMENT);
+        packInfoPanel.add(platformButton, new GridBagConstraints(3,2,1,1,1.0,0.0,GridBagConstraints.CENTER,GridBagConstraints.HORIZONTAL, new Insets(5,8,0,0),0,0));
+
+        JLabel title = new AAJLabel(resources.getString("launcher.packstats.title", "Tekkify"));
         title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 24, Font.BOLD));
         title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         title.setHorizontalAlignment(SwingConstants.LEFT);
         title.setHorizontalTextPosition(SwingConstants.LEFT);
         title.setAlignmentX(LEFT_ALIGNMENT);
-        packInfoPanel.add(title, new GridBagConstraints(0,1,4,1,1.0,0.0,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(14,0,0,0),0,0));
+        packInfoPanel.add(title, new GridBagConstraints(0,0,4,1,1.0,0.0,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0));
 
-        JTextArea description = new JTextArea("Gear up and set forth on a campaign worthy of legend, for Hexxit has been unearthed! Dark dungeons, towering spires, weathered ruins and musty tomes lay before you. Lay claim to riches or create your own artifacts, tame beasts and carve out your own story in endless wonder. Alone or with friends, adventure awaits in Hexxit.  Also this text is too big butts farts butts farts butts.");
+        JTextArea description = new JTextArea("Gear up and set forth on a campaign worthy of legend, for Hexxit has been unearthed! Dark dungeons, towering spires, weathered ruins and musty tomes lay before you. Lay claim to riches or create your own artifacts, tame beasts and carve out your own story in endless wonder. Alone or with friends, adventure awaits in Hexxit.  Also this text is too big to fit in this spot so now there's a scrollbar. Farts butts farts butts farts butts.");
         description.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         description.setLineWrap(true);
         description.setWrapStyleWord(true);
@@ -109,6 +128,19 @@ public class ModpackDataDisplay extends JPanel {
         scrollPane.getVerticalScrollBar().setUI(new SimpleScrollbarUI());
         scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(10,10));
 
-        packInfoPanel.add(scrollPane, new GridBagConstraints(0,2,4,1,1.0,1.0,GridBagConstraints.NORTH,GridBagConstraints.BOTH, new Insets(10,0,0,0),0,0));
+        JPanel scrollHostPanel = new JPanel();
+        scrollHostPanel.setBackground(LauncherFrame.COLOR_FEED_BACK);
+        scrollHostPanel.setBorder(BorderFactory.createEmptyBorder(3,5,5,3));
+        scrollHostPanel.setLayout(new BorderLayout());
+        scrollHostPanel.add(scrollPane, BorderLayout.CENTER);
+
+        scrollPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
+            @Override
+            public void adjustmentValueChanged(final AdjustmentEvent e) {
+                ModpackDataDisplay.this.repaint();
+            }
+        });
+
+        packInfoPanel.add(scrollHostPanel, new GridBagConstraints(0,1,4,1,1.0,1.0,GridBagConstraints.NORTH,GridBagConstraints.BOTH, new Insets(5,0,0,0),0,0));
     }
 }

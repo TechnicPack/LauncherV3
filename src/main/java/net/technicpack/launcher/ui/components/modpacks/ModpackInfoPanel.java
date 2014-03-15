@@ -30,10 +30,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
+import java.util.Date;
 
 public class ModpackInfoPanel extends JPanel {
     private ResourceLoader resources;
@@ -157,7 +156,7 @@ public class ModpackInfoPanel extends JPanel {
         topline.add(rightButton);
 
         feedGallery = new HorizontalGallery();
-        feedGallery.setBackground(LauncherFrame.COLOR_BANNER);
+        feedGallery.setBackground(LauncherFrame.COLOR_FEED_BACK);
         feedGallery.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         constraints = new GridBagConstraints();
         constraints.gridx = 0;
@@ -171,7 +170,7 @@ public class ModpackInfoPanel extends JPanel {
         feedBottom.add(feedGallery, constraints);
 
         for (int i = 0; i < 10; i++) {
-            FeedItem item = new FeedItem(resources, "FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND ", "http://www.technicpack.net/", "sct", resources.getImage("news/AuthorAvatar.jpg"));
+            FeedItem item = new FeedItem(resources, "FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND ", "http://www.technicpack.net/", "sct", new Date(), resources.getCircleClippedImage("news/AuthorAvatar.jpg"));
             item.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -201,14 +200,14 @@ public class ModpackInfoPanel extends JPanel {
         Component horizFill = Box.createGlue();
         feedBottom.add(horizFill, constraints);
 
-        RectButton playButton = new RectButton(resources.getString("launcher.pack.launch"));
+        RoundedButton playButton = new RoundedButton(resources.getString("launcher.pack.launch"));
         playButton.setPreferredSize(new Dimension(295, 40));
         playButton.setMinimumSize(new Dimension(295, 40));
-        playButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 24));
+        playButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 27, Font.BOLD));
         playButton.setBorder(BorderFactory.createEmptyBorder());
-        playButton.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        playButton.setBackground(LauncherFrame.COLOR_BLUE);
-        playButton.setHoverBackground(LauncherFrame.COLOR_BLUE_DARKER);
+        playButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        playButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        playButton.setContentAreaFilled(false);
         playButton.setAlignmentX(RIGHT_ALIGNMENT);
 
         constraints = new GridBagConstraints();

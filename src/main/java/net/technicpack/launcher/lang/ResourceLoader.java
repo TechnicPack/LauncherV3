@@ -23,6 +23,8 @@ import org.apache.commons.io.IOUtils;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Collection;
@@ -163,6 +165,35 @@ public class ResourceLoader {
             ex.printStackTrace();
             return null;
         }
+    }
+
+    public BufferedImage getCircleClippedImage(String imageName) {
+        BufferedImage contentImage = getImage(imageName);
+
+        // copy the picture to an image with transparency capabilities
+        BufferedImage outputImage = new BufferedImage(contentImage.getWidth(), contentImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = (Graphics2D)outputImage.getGraphics();
+        g2.drawImage(contentImage, 0, 0, null);
+
+        // Create the area around the circle to cut out
+        Area cutOutArea = new Area(new Rectangle(0, 0, outputImage.getWidth(), outputImage.getHeight()));
+
+        int diameter = (outputImage.getWidth() < outputImage.getHeight())?outputImage.getWidth():outputImage.getHeight();
+        cutOutArea.subtract(new Area(new Ellipse2D.Float((outputImage.getWidth() - diameter) / 2, (outputImage.getHeight() - diameter) / 2, diameter, diameter)));
+
+        // Set the fill color to an opaque color
+        g2.setColor(Color.WHITE);
+        // Set the composite to clear pixels
+        g2.setComposite(AlphaComposite.Clear);
+        // Turn on antialiasing
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        // Clear the cut out area
+        g2.fill(cutOutArea);
+
+        // dispose of the graphics object
+        g2.dispose();
+
+        return outputImage;
     }
 
     public Font getFont(String name, float size) {

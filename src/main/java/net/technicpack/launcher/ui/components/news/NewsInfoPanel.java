@@ -21,7 +21,7 @@ package net.technicpack.launcher.ui.components.news;
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.AAJLabel;
-import net.technicpack.launcher.ui.controls.RectButton;
+import net.technicpack.launcher.ui.controls.RoundedButton;
 import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
 import net.technicpack.launcher.ui.controls.TiledBackground;
 
@@ -94,15 +94,15 @@ public class NewsInfoPanel extends TiledBackground {
 
         add(Box.createGlue(), new GridBagConstraints(0, 3, 1, 1, 1.0, 0.0, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
-        RectButton discussButton = new RectButton(resources.getString("launcher.news.discuss"));
+        RoundedButton discussButton = new RoundedButton(resources.getString("launcher.news.discuss"));
         discussButton.setPreferredSize(new Dimension(400, 40));
         discussButton.setMinimumSize(new Dimension(400, 40));
         discussButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 24));
         discussButton.setBorder(BorderFactory.createEmptyBorder());
-        discussButton.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        discussButton.setBackground(LauncherFrame.COLOR_BLUE);
-        discussButton.setHoverBackground(LauncherFrame.COLOR_BLUE_DARKER);
+        discussButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        discussButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
         discussButton.setAlignmentX(RIGHT_ALIGNMENT);
+        discussButton.setContentAreaFilled(false);
         add(discussButton, new GridBagConstraints(1,3,1,1,0.0,0.0,GridBagConstraints.SOUTHEAST, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
     }
 }

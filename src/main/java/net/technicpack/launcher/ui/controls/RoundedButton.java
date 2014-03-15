@@ -26,7 +26,7 @@ import java.awt.event.MouseListener;
 import java.util.Collection;
 import java.util.LinkedList;
 
-public class RectButton extends JButton implements MouseListener {
+public class RoundedButton extends JButton implements MouseListener {
 
     private Color hoverBackground;
     private Color clickBackground;
@@ -39,7 +39,7 @@ public class RectButton extends JButton implements MouseListener {
 
     private Collection<ActionListener> actionListeners = new LinkedList<ActionListener>();
 
-    public RectButton(String text)
+    public RoundedButton(String text)
     {
         super(text);
         addMouseListener(this);
@@ -74,12 +74,17 @@ public class RectButton extends JButton implements MouseListener {
             else if (isHovered) g2d.setColor(getHoverBackground());
             else g2d.setColor(getBackground());
 
-            g2d.fillRect(0, 0, getWidth(), getHeight());
+            g2d.fillRoundRect(1, 0, getWidth()-3, getHeight()-2, getHeight(), getHeight());
         }
 
         if (isClicked) g2d.setColor(getClickForeground());
         else if (isHovered) g2d.setColor(getHoverForeground());
         else g2d.setColor(getForeground());
+
+        Stroke oldStroke = g2d.getStroke();
+        g2d.setStroke(new BasicStroke(2));
+        g2d.drawRoundRect(1, 1, getWidth()-3, getHeight()-3, getHeight(), getHeight());
+        g2d.setStroke(oldStroke);
 
         g2d.setFont(getFont());
 

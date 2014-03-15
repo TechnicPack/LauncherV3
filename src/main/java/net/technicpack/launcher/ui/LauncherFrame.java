@@ -45,17 +45,21 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private static final int SIDEKICK_HEIGHT = 250;
 
     public static final Color COLOR_RED = new Color(229,0,0);
-    public static final Color COLOR_GREEN = new Color(45, 130, 11);
     public static final Color COLOR_BLUE = new Color(16, 108, 163);
     public static final Color COLOR_BLUE_DARKER = new Color(12, 94, 145);
-    public static final Color COLOR_WHITE_TEXT = Color.white;
+    public static final Color COLOR_WHITE_TEXT = new Color(208,208,208);
+    public static final Color COLOR_HEADER_TEXT = new Color(255,255,255);
     public static final Color COLOR_CHARCOAL = new Color(31, 31, 31);
     public static final Color COLOR_BANNER = new Color(0, 0, 0, 160);
     public static final Color COLOR_PANEL = new Color(45, 45, 45, 160);
     public static final Color COLOR_SCROLL_TRACK = new Color(18, 18, 18);
     public static final Color COLOR_SCROLL_THUMB = new Color(53, 53, 53);
     public static final Color COLOR_SELECTOR_BACK = new Color(22,26,29);
+    public static final Color COLOR_FEED_BACK = new Color(22,26,29,200);
     public static final Color COLOR_CENTRAL_BACK = new Color(25, 30, 34, 160);
+    public static final Color COLOR_FEEDITEM_BACK = new Color(37, 44, 49);
+    public static final Color COLOR_LIKES_BACK = new Color(20, 65, 97);
+    public static final Color COLOR_BUTTON_BLUE = new Color(43, 128, 195);
 
     public static final String TAB_DISCOVER = "discover";
     public static final String TAB_MODPACKS = "modpacks";

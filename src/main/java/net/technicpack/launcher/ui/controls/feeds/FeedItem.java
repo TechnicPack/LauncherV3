@@ -20,38 +20,41 @@ package net.technicpack.launcher.ui.controls.feeds;
 
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launcher.ui.controls.AAJLabel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.net.URL;
+import java.util.Date;
 
 public class FeedItem extends JButton {
     private ResourceLoader resources;
     private String url;
     private String author;
     private String text;
+    private Date writtenDate;
     private BufferedImage authorAvatar;
+    private static BufferedImage talkImage;
 
-    private static BufferedImage background;
+    private Font authorFont;
+    private Font dateFont;
 
-    public FeedItem(ResourceLoader loader, String text, String url, String author, BufferedImage avatar) {
+    public FeedItem(ResourceLoader loader, String text, String url, String author, Date writtenDate, BufferedImage avatar) {
         this.setOpaque(false);
-        this.setBackground(new Color(0,0,0,0));
-        this.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        this.setBackground(LauncherFrame.COLOR_FEEDITEM_BACK);
+        this.setForeground(LauncherFrame.COLOR_HEADER_TEXT);
         this.setFont(loader.getFont(ResourceLoader.FONT_OPENSANS, 12));
+        dateFont = loader.getFont(ResourceLoader.FONT_OPENSANS, 12);
+        authorFont = loader.getFont(ResourceLoader.FONT_OPENSANS_BOLD, 12);
 
-        if (background == null) {
-            background = loader.getImage("news/FeedItem.png");
-        }
+        if (talkImage == null)
+            talkImage = loader.getImage("comment_icon.png");
 
         this.resources = loader;
         this.url = url;
         this.author = author;
         this.authorAvatar = avatar;
         this.text = text;
+        this.writtenDate = writtenDate;
     }
 
     public String getUrl() {
@@ -59,14 +62,7 @@ public class FeedItem extends JButton {
     }
 
     private Dimension getCalcSize() {
-        Dimension dimensions = new Dimension(background.getWidth(), background.getHeight());
-
-        if (authorAvatar != null) {
-            int withAvatarHeight = (dimensions.height-10)+authorAvatar.getHeight();
-            dimensions.height = (withAvatarHeight > dimensions.height)?withAvatarHeight:dimensions.height;
-        }
-
-        return dimensions;
+        return new Dimension(250, 132);
     }
 
     @Override
@@ -98,15 +94,29 @@ public class FeedItem extends JButton {
                 RenderingHints.KEY_FRACTIONALMETRICS,
                 RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
-        g2d.drawImage(background, 0, 0, null);
-        g2d.drawImage(authorAvatar, 0, background.getHeight() - 10, null);
+        g2d.setColor(getBackground());
+        g2d.fillRoundRect(0, 0, 250, 94, 15, 15);
+        g2d.drawImage(authorAvatar, 0, 102, null);
 
         Shape oldClip = g2d.getClip();
-        g2d.clipRect(3, 2, background.getWidth() - 5, background.getHeight() - 24);
+        g2d.clipRect(3, 2, 245, 90);
         g2d.setFont(getFont());
+        g2d.setColor(getForeground());
 
-        drawTextUgly(text, g2d, 2+background.getHeight()-24);
+        drawTextUgly(text, g2d, 92);
         g2d.setClip(oldClip);
+
+        g2d.setFont(authorFont);
+        int authorNameX = authorAvatar.getWidth() + 6;
+        int authorNameY = 102 + (13 + g2d.getFontMetrics().getAscent()/2);
+        g2d.drawString(author, authorNameX, authorNameY);
+
+        int postedTimeX = authorNameX + g2d.getFontMetrics().stringWidth(author) + 6;
+        g2d.setFont(dateFont);
+        int postedTimeY = 102 + (13 + g2d.getFontMetrics().getAscent()/2);
+        g2d.drawString(resources.getString("launcher.news.posted", resources.getString("time.days", Integer.toString(3))), postedTimeX, postedTimeY);
+
+        g2d.drawImage(talkImage, getWidth() - talkImage.getWidth(), 102 + (15 - talkImage.getHeight()/2), null);
     }
 
     private void drawTextUgly(String text, Graphics2D g2, int maxY)
@@ -133,7 +143,7 @@ public class FeedItem extends JButton {
             int lineWidth = g2.getFontMetrics().stringWidth(line+" "+arr[nIndex]);
             if (nextEndY >= maxY)
                 lineWidth += elipsisSize;
-            while ( ( nIndex < arr.length ) && (lineWidth < background.getWidth()-7) )
+            while ( ( nIndex < arr.length ) && (lineWidth < 243) )
             {
                 line = line + " " + arr[nIndex];
                 nIndex++;
