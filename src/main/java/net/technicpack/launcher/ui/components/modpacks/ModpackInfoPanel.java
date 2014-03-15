@@ -56,8 +56,8 @@ public class ModpackInfoPanel extends JPanel {
         feedGallery.selectNextComponent();
     }
 
-    protected void clickFeedItem(FeedItem item) {
-        if (!feedGallery.selectComponent(item)) {
+    protected void clickFeedItem(FeedItem item, String command) {
+        if (command != null && command.equalsIgnoreCase("discuss")) {
             try {
                 Desktop.getDesktop().browse(new URI(item.getUrl()));
             } catch (IOException ex) {
@@ -71,7 +71,8 @@ public class ModpackInfoPanel extends JPanel {
                 //WHICH IS AWESOME
                 ex.printStackTrace();
             }
-        }
+        } else
+            feedGallery.selectComponent(item);
     }
 
     private void initComponents() {
@@ -174,7 +175,7 @@ public class ModpackInfoPanel extends JPanel {
             item.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    clickFeedItem((FeedItem)e.getSource());
+                    clickFeedItem((FeedItem)e.getSource(), e.getActionCommand());
                 }
             });
             feedGallery.add(item);

@@ -23,6 +23,8 @@ import net.technicpack.launcher.ui.LauncherFrame;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.Date;
 
@@ -33,21 +35,21 @@ public class FeedItem extends JButton {
     private String text;
     private Date writtenDate;
     private BufferedImage authorAvatar;
-    private static BufferedImage talkImage;
 
     private Font authorFont;
     private Font dateFont;
 
     public FeedItem(ResourceLoader loader, String text, String url, String author, Date writtenDate, BufferedImage avatar) {
         this.setOpaque(false);
+        this.setLayout(null);
+        this.setBorder(BorderFactory.createEmptyBorder());
+        this.setContentAreaFilled(false);
+        this.setFocusable(false);
         this.setBackground(LauncherFrame.COLOR_FEEDITEM_BACK);
         this.setForeground(LauncherFrame.COLOR_HEADER_TEXT);
         this.setFont(loader.getFont(ResourceLoader.FONT_OPENSANS, 12));
         dateFont = loader.getFont(ResourceLoader.FONT_OPENSANS, 12);
         authorFont = loader.getFont(ResourceLoader.FONT_OPENSANS_BOLD, 12);
-
-        if (talkImage == null)
-            talkImage = loader.getImage("comment_icon.png");
 
         this.resources = loader;
         this.url = url;
@@ -55,6 +57,20 @@ public class FeedItem extends JButton {
         this.authorAvatar = avatar;
         this.text = text;
         this.writtenDate = writtenDate;
+
+        JButton button = new JButton();
+        button.setBorder(BorderFactory.createEmptyBorder());
+        button.setContentAreaFilled(false);
+        Icon image = loader.getIcon("comment_icon.png");
+        button.setIcon(image);
+        add(button);
+        button.setBounds(250-image.getIconWidth(), 102 + (15 - image.getIconHeight()/2), image.getIconWidth(), image.getIconHeight());
+        button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                fireActionPerformed(new ActionEvent(FeedItem.this, e.getID(), "discuss", e.getWhen(), e.getModifiers()));
+            }
+        });
     }
 
     public String getUrl() {
@@ -81,7 +97,8 @@ public class FeedItem extends JButton {
     }
 
     @Override
-    public void paint(Graphics g) {
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
         Graphics2D g2d = (Graphics2D)g;
 
         g2d.setRenderingHint(
@@ -115,8 +132,6 @@ public class FeedItem extends JButton {
         g2d.setFont(dateFont);
         int postedTimeY = 102 + (13 + g2d.getFontMetrics().getAscent()/2);
         g2d.drawString(resources.getString("launcher.news.posted", resources.getString("time.days", Integer.toString(3))), postedTimeX, postedTimeY);
-
-        g2d.drawImage(talkImage, getWidth() - talkImage.getWidth(), 102 + (15 - talkImage.getHeight()/2), null);
     }
 
     private void drawTextUgly(String text, Graphics2D g2, int maxY)
