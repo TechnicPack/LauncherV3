@@ -48,7 +48,7 @@ public class ModpackSelector extends JPanel {
         add(header, BorderLayout.PAGE_START);
 
         JLabel filterLabel = new JLabel(resources.getString("launcher.packselector.filter"));
-        filterLabel.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY,14));
+        filterLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS,16));
         filterLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 
         GridBagConstraints constraints = new GridBagConstraints();
