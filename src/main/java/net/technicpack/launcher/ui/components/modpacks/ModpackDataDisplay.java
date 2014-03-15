@@ -55,10 +55,12 @@ public class ModpackDataDisplay extends JPanel {
         imagePanel.setOpaque(false);
         imagePanel.setAlignmentX(RIGHT_ALIGNMENT);
         imagePanel.setAlignmentY(TOP_ALIGNMENT);
+        imagePanel.setBorder(BorderFactory.createEmptyBorder());
+        imagePanel.setPreferredSize(new Dimension(370, 220));
         this.add(imagePanel, BorderLayout.LINE_START);
 
         JLabel packImage = new JLabel();
-        packImage.setIcon(resources.getIcon("modpack/feature.png"));
+        packImage.setIcon(resources.getIcon("modpack/ModImageFiller.png"));
         packImage.setAlignmentX(RIGHT_ALIGNMENT);
         packImage.setPreferredSize(new Dimension(370, 220));
         imagePanel.add(packImage);
@@ -120,6 +122,7 @@ public class ModpackDataDisplay extends JPanel {
         description.setHighlighter(null);
         description.setAlignmentX(LEFT_ALIGNMENT);
         description.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        description.setBorder(BorderFactory.createEmptyBorder(3,5,5,3));
 
         JScrollPane scrollPane = new JScrollPane(description, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -130,7 +133,6 @@ public class ModpackDataDisplay extends JPanel {
 
         JPanel scrollHostPanel = new JPanel();
         scrollHostPanel.setBackground(LauncherFrame.COLOR_FEED_BACK);
-        scrollHostPanel.setBorder(BorderFactory.createEmptyBorder(3,5,5,3));
         scrollHostPanel.setLayout(new BorderLayout());
         scrollHostPanel.add(scrollPane, BorderLayout.CENTER);
 
