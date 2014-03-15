@@ -57,6 +57,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     public static final Color COLOR_SELECTOR_BACK = new Color(22,26,29);
     public static final Color COLOR_FEED_BACK = new Color(22,26,29,200);
     public static final Color COLOR_CENTRAL_BACK = new Color(25, 30, 34, 160);
+    public static final Color COLOR_CENTRAL_BACK_OPAQUE = new Color(25, 30, 34);
     public static final Color COLOR_FEEDITEM_BACK = new Color(37, 44, 49);
     public static final Color COLOR_LIKES_BACK = new Color(20, 65, 97);
     public static final Color COLOR_BUTTON_BLUE = new Color(43, 128, 195);

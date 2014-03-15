@@ -95,10 +95,8 @@ public class ModpackDataDisplay extends JPanel {
         packInfoPanel.add(statBoxes, new GridBagConstraints(0,2,3,1,0.0,0.0,GridBagConstraints.SOUTH, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
 
         RoundedButton platformButton = new RoundedButton(resources.getString("launcher.pack.platform"));
-        platformButton.setPreferredSize(new Dimension(295, 40));
-        platformButton.setMinimumSize(new Dimension(295, 40));
         platformButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 20, Font.BOLD));
-        platformButton.setBorder(BorderFactory.createEmptyBorder());
+        platformButton.setBorder(BorderFactory.createEmptyBorder(8, 0, 12, 0));
         platformButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         platformButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
         platformButton.setContentAreaFilled(false);

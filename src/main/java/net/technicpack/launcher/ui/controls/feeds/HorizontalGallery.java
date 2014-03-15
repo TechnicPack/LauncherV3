@@ -18,6 +18,8 @@
  */
 package net.technicpack.launcher.ui.controls.feeds;
 
+import net.technicpack.launcher.ui.LauncherFrame;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -72,12 +74,15 @@ public class HorizontalGallery extends JPanel {
 
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
 
+        Color background = getBackground();
+        Color flatBackground = new Color(background.getRed(), background.getGreen(), background.getBlue(), 255);
+
         if (getSelectedComponent() != getComponent(0)) {
-            g2d.setPaint(new GradientPaint(0, 0, new Color(0,0,0,255), 70, 0, new Color(0,0,0,0)));
+            g2d.setPaint(new GradientPaint(0, 0, flatBackground, 70, 0, new Color(0,0,0,0)));
             g2d.fillRect(0,0,getWidth(),getHeight());
         }
         if (lastDisplayedComponent != getComponents()[getComponentCount()-1]) {
-            g2d.setPaint(new GradientPaint(getWidth()-80, 0, new Color(0,0,0,0), getWidth()-10, 0, new Color(0,0,0,255)));
+            g2d.setPaint(new GradientPaint(getWidth()-80, 0, new Color(0,0,0,0), getWidth()-10, 0, flatBackground));
             g2d.fillRect(0,0,getWidth(),getHeight());
         }
         g2d.setPaint(oldPaint);

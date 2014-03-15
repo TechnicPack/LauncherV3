@@ -201,10 +201,8 @@ public class ModpackInfoPanel extends JPanel {
         feedBottom.add(horizFill, constraints);
 
         RoundedButton playButton = new RoundedButton(resources.getString("launcher.pack.launch"));
-        playButton.setPreferredSize(new Dimension(295, 40));
-        playButton.setMinimumSize(new Dimension(295, 40));
         playButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 27, Font.BOLD));
-        playButton.setBorder(BorderFactory.createEmptyBorder());
+        playButton.setBorder(BorderFactory.createEmptyBorder(5, 50, 10, 50));
         playButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         playButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
         playButton.setContentAreaFilled(false);

@@ -28,13 +28,12 @@ import net.technicpack.launcher.ui.controls.TiledBackground;
 import javax.swing.*;
 import java.awt.*;
 
-public class NewsInfoPanel extends TiledBackground {
+public class NewsInfoPanel extends JPanel {
     private ResourceLoader resources;
 
     JTextArea newsText;
     JScrollPane newsScroller;
     public NewsInfoPanel(ResourceLoader resources) {
-        super(resources.getImage("background_repeat2.png"));
 
         this.resources = resources;
 
@@ -44,15 +43,16 @@ public class NewsInfoPanel extends TiledBackground {
     private void initComponents() {
         setLayout(new GridBagLayout());
         setBorder(BorderFactory.createEmptyBorder(20,20,18,16));
+        setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
 
-        JLabel title = new AAJLabel("SOMETHING UPDATED");
-        title.setForeground(LauncherFrame.COLOR_BLUE);
+        JLabel title = new AAJLabel("Something Updated");
+        title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 36));
         add(title, new GridBagConstraints(0,0,2,1,1.0,0.0,GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0));
 
         JPanel authorshipInfo = new JPanel();
         authorshipInfo.setLayout(new FlowLayout(FlowLayout.LEADING));
-        authorshipInfo.setBackground(LauncherFrame.COLOR_CHARCOAL);
+        authorshipInfo.setOpaque(false);
         add(authorshipInfo, new GridBagConstraints(0,1,2,1,1.0,0.0,GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0,0,8,0),0,0));
 
         JLabel author = new AAJLabel("Skuli");
@@ -68,21 +68,23 @@ public class NewsInfoPanel extends TiledBackground {
 
         newsText = new JTextArea();
         newsText.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-        newsText.setBackground(LauncherFrame.COLOR_CHARCOAL);
+        newsText.setOpaque(false);
         newsText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        newsText.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 13.5f));
+        newsText.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         newsText.setEditable(false);
         newsText.setHighlighter(null);
         newsText.setAlignmentX(LEFT_ALIGNMENT);
         newsText.setLineWrap(true);
         newsText.setWrapStyleWord(true);
-        newsText.setText("Attack of the B-Team 1.0.8 is now marked Recommended in the launcher, and users will be asked to update the next time\n they attempt to launch B-Team. This is a minor version update over 1.0.7a, which fixes a number of crash issues introduced \nin that version and also updated Open Blocks.\n\nThe build includes the following changes:\n\nDragon Mounts has been updated to version r55.fix- Dragon Mounts no longer crashes clients of users who saw a dragon in SMP without seeing one in SSP in the same Minecraft session.\nWind has been disabled in the WeatherMod config, as it was causing an incompatibility with the latest version of DubStep Gun.\nHats has been reconfigured to use Hat-Hunting Mode as teh default- in Hat-Hunting mode, each user starts with no hats, and you obtain hats by killing hat-wearing mobs. Server owners and users who do not want this change shoul dmodify the config file to change it back.\nMinions has had its mod file renamed to be entirely lower-case. This standard has been adopted to deal with an ongoing issue with Forge in which mods load in different orders based on operating system case-sensitivity, frequently causing server and client to have different entity ID's due to the way that most mods determine those IDs.\nOpen Blocks Mod has been updated to version 1.2.5.\nOpen Mods Lib has been updated to version 0.2.\nServer owners can obtain the new server file from the following link: http://mirror.technicpack.net/Technic/servers/bteam/BTeam_Server_v1.0.8.zip\n\nServer owners looking to update from 1.0.7a can simply update the config files, Open Blocks, Open Mods LIb, Dragon Mounts, and rename Minions to be lower-case.");
+        newsText.setText("Attack of the B-Team 1.0.8 is now marked Recommended in the launcher, and users will be asked to update the next time they attempt to launch B-Team. This is a minor version update over 1.0.7a, which fixes a number of crash issues introduced in that version and also updated Open Blocks.\n\nThe build includes the following changes:\n\nDragon Mounts has been updated to version r55.fix- Dragon Mounts no longer crashes clients of users who saw a dragon in SMP without seeing one in SSP in the same Minecraft session.\nWind has been disabled in the WeatherMod config, as it was causing an incompatibility with the latest version of DubStep Gun.\nHats has been reconfigured to use Hat-Hunting Mode as teh default- in Hat-Hunting mode, each user starts with no hats, and you obtain hats by killing hat-wearing mobs. Server owners and users who do not want this change shoul dmodify the config file to change it back.\nMinions has had its mod file renamed to be entirely lower-case. This standard has been adopted to deal with an ongoing issue with Forge in which mods load in different orders based on operating system case-sensitivity, frequently causing server and client to have different entity ID's due to the way that most mods determine those IDs.\nOpen Blocks Mod has been updated to version 1.2.5.\nOpen Mods Lib has been updated to version 0.2.\nServer owners can obtain the new server file from the following link: http://mirror.technicpack.net/Technic/servers/bteam/BTeam_Server_v1.0.8.zip\n\nServer owners looking to update from 1.0.7a can simply update the config files, Open Blocks, Open Mods LIb, Dragon Mounts, and rename Minions to be lower-case.");
 
         newsScroller = new JScrollPane(newsText, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         newsScroller.getVerticalScrollBar().setUI(new SimpleScrollbarUI());
         newsScroller.getVerticalScrollBar().setPreferredSize(new Dimension(10, 10));
         newsScroller.setBorder(BorderFactory.createEmptyBorder());
         newsScroller.setMaximumSize(new Dimension(32000,900));
+        newsScroller.setOpaque(false);
+        newsScroller.getViewport().setOpaque(false);
 
         JPanel newsTextPanel = new JPanel();
         newsTextPanel.setLayout(new BoxLayout(newsTextPanel, BoxLayout.PAGE_AXIS));
@@ -95,10 +97,8 @@ public class NewsInfoPanel extends TiledBackground {
         add(Box.createGlue(), new GridBagConstraints(0, 3, 1, 1, 1.0, 0.0, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
         RoundedButton discussButton = new RoundedButton(resources.getString("launcher.news.discuss"));
-        discussButton.setPreferredSize(new Dimension(400, 40));
-        discussButton.setMinimumSize(new Dimension(400, 40));
         discussButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 24));
-        discussButton.setBorder(BorderFactory.createEmptyBorder());
+        discussButton.setBorder(BorderFactory.createEmptyBorder(2,25,5,25));
         discussButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         discussButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
         discussButton.setAlignmentX(RIGHT_ALIGNMENT);

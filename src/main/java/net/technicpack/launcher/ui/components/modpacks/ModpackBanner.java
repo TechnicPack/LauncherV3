@@ -49,7 +49,7 @@ public class ModpackBanner extends JPanel {
         modpackNamePanel.setLayout(new BoxLayout(modpackNamePanel, BoxLayout.PAGE_AXIS));
         this.add(modpackNamePanel);
 
-        JLabel modpackName = new AAJLabel("TEKKIFY");
+        JLabel modpackName = new AAJLabel("Tekkify");
         modpackName.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         modpackName.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
         modpackName.setHorizontalTextPosition(SwingConstants.LEFT);
