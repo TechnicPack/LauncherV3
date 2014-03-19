@@ -32,10 +32,10 @@ public class NewsWidget extends SelectorWidget {
 
     protected void initComponents() {
         super.initComponents();
-        setBorder(BorderFactory.createEmptyBorder(4,10,4,8));
+        setBorder(BorderFactory.createEmptyBorder(8,10,8,8));
 
         JLabel icon = new JLabel();
-        icon.setIcon(getResources().getIcon("icon.png"));
+        icon.setIcon(new ImageIcon(getResources().getCircleClippedImage("news/AuthorAvatar.jpg")));
         add(icon);
 
         add(Box.createHorizontalStrut(14));

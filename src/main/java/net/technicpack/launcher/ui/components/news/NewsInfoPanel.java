@@ -16,6 +16,7 @@
  * as well as a copy of the GNU Lesser General Public License,
  * along with The Technic Launcher.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package net.technicpack.launcher.ui.components.news;
 
 import net.technicpack.launcher.lang.ResourceLoader;
@@ -50,21 +51,8 @@ public class NewsInfoPanel extends JPanel {
         title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 36));
         add(title, new GridBagConstraints(0,0,2,1,1.0,0.0,GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0));
 
-        JPanel authorshipInfo = new JPanel();
-        authorshipInfo.setLayout(new FlowLayout(FlowLayout.LEADING));
-        authorshipInfo.setOpaque(false);
+        AuthorshipWidget authorshipInfo = new AuthorshipWidget(resources);
         add(authorshipInfo, new GridBagConstraints(0,1,2,1,1.0,0.0,GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0,0,8,0),0,0));
-
-        JLabel author = new AAJLabel("Skuli");
-        author.setForeground(LauncherFrame.COLOR_BLUE);
-        author.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 18, Font.BOLD));
-        author.setIcon(resources.getIcon("news/authorHelm.png"));
-        authorshipInfo.add(author);
-
-        JLabel postedTime = new AAJLabel("/ " + resources.getString("launcher.news.posted", resources.getString("time.hours", Integer.toString(3))));
-        postedTime.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        postedTime.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 18));
-        authorshipInfo.add(postedTime);
 
         newsText = new JTextArea();
         newsText.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));

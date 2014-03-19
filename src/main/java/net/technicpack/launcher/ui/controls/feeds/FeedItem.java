@@ -20,6 +20,7 @@ package net.technicpack.launcher.ui.controls.feeds;
 
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
+import net.technicpack.launcher.ui.components.news.AuthorshipWidget;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,41 +30,30 @@ import java.awt.image.BufferedImage;
 import java.util.Date;
 
 public class FeedItem extends JButton {
-    private ResourceLoader resources;
     private String url;
-    private String author;
     private String text;
-    private Date writtenDate;
-    private BufferedImage authorAvatar;
-
-    private Font authorFont;
-    private Font dateFont;
 
     public FeedItem(ResourceLoader loader, String text, String url, String author, Date writtenDate, BufferedImage avatar) {
         this.setOpaque(false);
-        this.setLayout(null);
+        this.setLayout(new GridBagLayout());
         this.setBorder(BorderFactory.createEmptyBorder());
         this.setContentAreaFilled(false);
         this.setFocusable(false);
         this.setBackground(LauncherFrame.COLOR_FEEDITEM_BACK);
         this.setForeground(LauncherFrame.COLOR_HEADER_TEXT);
         this.setFont(loader.getFont(ResourceLoader.FONT_OPENSANS, 12));
-        dateFont = loader.getFont(ResourceLoader.FONT_OPENSANS, 12);
-        authorFont = loader.getFont(ResourceLoader.FONT_OPENSANS_BOLD, 12);
 
-        this.resources = loader;
         this.url = url;
-        this.author = author;
-        this.authorAvatar = avatar;
         this.text = text;
-        this.writtenDate = writtenDate;
+
+        add(Box.createVerticalGlue(), new GridBagConstraints(0,0,3,1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
 
         JButton button = new JButton();
         button.setBorder(BorderFactory.createEmptyBorder());
         button.setContentAreaFilled(false);
         Icon image = loader.getIcon("comment_icon.png");
         button.setIcon(image);
-        add(button);
+        add(button, new GridBagConstraints(2, 1, 1, 1, 0.0,0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,0,0,0), 0,0));
         button.setBounds(250-image.getIconWidth(), 102 + (15 - image.getIconHeight()/2), image.getIconWidth(), image.getIconHeight());
         button.addActionListener(new ActionListener() {
             @Override
@@ -71,6 +61,12 @@ public class FeedItem extends JButton {
                 fireActionPerformed(new ActionEvent(FeedItem.this, e.getID(), "discuss", e.getWhen(), e.getModifiers()));
             }
         });
+
+        AuthorshipWidget authorship = new AuthorshipWidget(loader);
+        add(authorship, new GridBagConstraints(0,1,1,1,0.0,0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,0,0,0), 0,0));
+        authorship.setBounds(0, 0, getWidth(), getHeight());
+
+        add(Box.createHorizontalGlue(), new GridBagConstraints(1,1,1,1,1.0,0.0,GridBagConstraints.CENTER,GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
     }
 
     public String getUrl() {
@@ -113,7 +109,6 @@ public class FeedItem extends JButton {
 
         g2d.setColor(getBackground());
         g2d.fillRoundRect(0, 0, 250, 94, 15, 15);
-        g2d.drawImage(authorAvatar, 0, 102, null);
 
         Shape oldClip = g2d.getClip();
         g2d.clipRect(3, 2, 245, 90);
@@ -122,16 +117,6 @@ public class FeedItem extends JButton {
 
         drawTextUgly(text, g2d, 92);
         g2d.setClip(oldClip);
-
-        g2d.setFont(authorFont);
-        int authorNameX = authorAvatar.getWidth() + 6;
-        int authorNameY = 102 + (13 + g2d.getFontMetrics().getAscent()/2);
-        g2d.drawString(author, authorNameX, authorNameY);
-
-        int postedTimeX = authorNameX + g2d.getFontMetrics().stringWidth(author) + 6;
-        g2d.setFont(dateFont);
-        int postedTimeY = 102 + (13 + g2d.getFontMetrics().getAscent()/2);
-        g2d.drawString(resources.getString("launcher.news.posted", resources.getString("time.days", Integer.toString(3))), postedTimeX, postedTimeY);
     }
 
     private void drawTextUgly(String text, Graphics2D g2, int maxY)
