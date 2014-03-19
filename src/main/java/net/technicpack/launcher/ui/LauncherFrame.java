@@ -45,6 +45,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private static final int SIDEKICK_HEIGHT = 250;
 
     public static final Color COLOR_RED = new Color(229,0,0);
+    public static final Color COLOR_GREEN = new Color(49, 143, 12);
     public static final Color COLOR_BLUE = new Color(16, 108, 163);
     public static final Color COLOR_BLUE_DARKER = new Color(12, 94, 145);
     public static final Color COLOR_WHITE_TEXT = new Color(208,208,208);

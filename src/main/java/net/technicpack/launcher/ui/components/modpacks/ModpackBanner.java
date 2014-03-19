@@ -21,6 +21,7 @@ package net.technicpack.launcher.ui.components.modpacks;
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.AAJLabel;
+import net.technicpack.launcher.ui.controls.modpacks.ModpackTag;
 
 import javax.swing.*;
 import java.awt.*;
@@ -59,28 +60,33 @@ public class ModpackBanner extends JPanel {
 
         JPanel modpackTags = new JPanel();
         modpackTags.setLayout(new BoxLayout(modpackTags,BoxLayout.LINE_AXIS));
-        modpackTags.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
+        modpackTags.setBorder(BorderFactory.createEmptyBorder(0,2,2,2));
         modpackTags.setOpaque(false);
         modpackTags.setAlignmentX(LEFT_ALIGNMENT);
 
         modpackTags.add(Box.createRigidArea(new Dimension(2,0)));
 
-        JLabel tagOfficial = new JLabel();
-        tagOfficial.setIcon(resources.getIcon("modpack/tag_official.png"));
-        modpackTags.add(tagOfficial);
+        ModpackTag tag = new ModpackTag(resources.getString("launcher.pack.tag.official"));
+        tag.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        tag.setUnderlineColor(LauncherFrame.COLOR_BLUE);
+        tag.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 10));
+        modpackTags.add(tag);
 
-        modpackTags.add(Box.createRigidArea(new Dimension(2,0)));
+        modpackTags.add(Box.createRigidArea(new Dimension(5,0)));
 
-        JLabel tagSolder = new JLabel();
-        tagSolder.setIcon(resources.getIcon("modpack/tag_solder.png"));
-        modpackTags.add(tagSolder);
+        tag = new ModpackTag(resources.getString("launcher.pack.tag.solder"));
+        tag.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        tag.setUnderlineColor(LauncherFrame.COLOR_GREEN);
+        tag.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 10));
+        modpackTags.add(tag);
 
-        modpackTags.add(Box.createRigidArea(new Dimension(2,0)));
+        modpackTags.add(Box.createRigidArea(new Dimension(5,0)));
 
-        JLabel tagOffline = new JLabel();
-        tagOffline.setIcon(resources.getIcon("modpack/tag_offline.png"));
-        modpackTags.add(tagOffline);
-
+        tag = new ModpackTag(resources.getString("launcher.pack.tag.offline"));
+        tag.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        tag.setUnderlineColor(LauncherFrame.COLOR_RED);
+        tag.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 10));
+        modpackTags.add(tag);
         modpackNamePanel.add(modpackTags);
 
         this.add(Box.createHorizontalGlue());

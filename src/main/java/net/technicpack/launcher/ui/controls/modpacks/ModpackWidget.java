@@ -16,6 +16,7 @@
  * as well as a copy of the GNU Lesser General Public License,
  * along with The Technic Launcher.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package net.technicpack.launcher.ui.controls.modpacks;
 
 import net.technicpack.launcher.lang.ResourceLoader;
