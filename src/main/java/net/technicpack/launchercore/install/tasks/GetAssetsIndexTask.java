@@ -3,13 +3,13 @@ package net.technicpack.launchercore.install.tasks;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.technicpack.launchercore.exception.DownloadException;
-import net.technicpack.launchercore.install.InstalledPack;
-import net.technicpack.launchercore.minecraft.MojangConstants;
-import net.technicpack.launchercore.mirror.MirrorStore;
-import net.technicpack.launchercore.util.Utils;
-import net.technicpack.launchercore.util.verifiers.FileSizeVerifier;
-import net.technicpack.launchercore.util.verifiers.IFileVerifier;
-import net.technicpack.launchercore.util.verifiers.ValidJsonFileVerifier;
+import net.technicpack.launchercore.modpacks.InstalledPack;
+import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.minecraftcore.mojang.MojangConstants;
+import net.technicpack.utilslib.Utils;
+import net.technicpack.launchercore.install.verifiers.FileSizeVerifier;
+import net.technicpack.launchercore.install.verifiers.IFileVerifier;
+import net.technicpack.launchercore.install.verifiers.ValidJsonFileVerifier;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -18,10 +18,10 @@ import java.nio.charset.Charset;
 import java.util.Map;
 
 public class GetAssetsIndexTask extends ListenerTask {
-	private InstalledPack pack;
+    private File assetsDirectory;
 
-	public GetAssetsIndexTask(InstalledPack pack) {
-		this.pack = pack;
+	public GetAssetsIndexTask(File assetsDirectory) {
+        this.assetsDirectory = assetsDirectory;
 	}
 
 	@Override
@@ -39,7 +39,7 @@ public class GetAssetsIndexTask extends ListenerTask {
 			assets = "legacy";
 		}
 
-		File output = new File(Utils.getAssetsDirectory() + File.separator + "indexes", assets+".json");
+		File output = new File(assetsDirectory + File.separator + "indexes", assets+".json");
 
 		(new File(output.getParent())).mkdirs();
 
@@ -76,12 +76,12 @@ public class GetAssetsIndexTask extends ListenerTask {
 			String hash = file.get("hash").getAsString();
             long size = file.get("size").getAsLong();
 
-			File location = new File(Utils.getAssetsDirectory() + File.separator + "objects" + File.separator + hash.substring(0, 2) + File.separator, hash);
+			File location = new File(assetsDirectory + File.separator + "objects" + File.separator + hash.substring(0, 2) + File.separator, hash);
 			String url = MojangConstants.getResourceUrl(hash);
 
 			(new File(location.getParent())).mkdirs();
 
-			File virtualOut =  new File(Utils.getAssetsDirectory() + File.separator + "virtual" + File.separator + assets + File.separator + friendlyName);
+			File virtualOut =  new File(assetsDirectory + File.separator + "virtual" + File.separator + assets + File.separator + friendlyName);
 
 			queue.AddTask(new EnsureFileTask(location, new FileSizeVerifier(size), null, url, virtualOut.getName()));
 

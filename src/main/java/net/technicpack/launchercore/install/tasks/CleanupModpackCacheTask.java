@@ -1,8 +1,9 @@
 package net.technicpack.launchercore.install.tasks;
 
-import net.technicpack.launchercore.install.InstalledPack;
-import net.technicpack.launchercore.restful.Modpack;
-import net.technicpack.launchercore.restful.solder.Mod;
+import net.technicpack.launchercore.modpacks.InstalledPack;
+import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.rest.io.Modpack;
+import net.technicpack.rest.io.Mod;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -11,10 +12,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class CleanupModpackCacheTask implements IInstallTask {
-	private InstalledPack pack;
+	private ModpackModel pack;
 	private Modpack modpack;
 
-	public CleanupModpackCacheTask(InstalledPack pack, Modpack modpack) {
+	public CleanupModpackCacheTask(ModpackModel pack, Modpack modpack) {
 		this.pack = pack;
 		this.modpack = modpack;
 	}

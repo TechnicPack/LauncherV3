@@ -1,15 +1,16 @@
 package net.technicpack.launchercore.install.tasks;
 
 import net.technicpack.launchercore.exception.DownloadException;
-import net.technicpack.launchercore.install.InstalledPack;
-import net.technicpack.launchercore.minecraft.CompleteVersion;
-import net.technicpack.launchercore.minecraft.Library;
-import net.technicpack.launchercore.mirror.MirrorStore;
-import net.technicpack.launchercore.util.OperatingSystem;
-import net.technicpack.launchercore.util.Utils;
-import net.technicpack.launchercore.util.verifiers.IFileVerifier;
-import net.technicpack.launchercore.util.verifiers.MD5FileVerifier;
-import net.technicpack.launchercore.util.verifiers.ValidZipFileVerifier;
+import net.technicpack.launchercore.modpacks.InstalledPack;
+import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.minecraftcore.LauncherDirectories;
+import net.technicpack.minecraftcore.mojang.CompleteVersion;
+import net.technicpack.minecraftcore.mojang.Library;
+import net.technicpack.utilslib.OperatingSystem;
+import net.technicpack.utilslib.Utils;
+import net.technicpack.launchercore.install.verifiers.IFileVerifier;
+import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
+import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -17,11 +18,13 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 public class HandleVersionFileTask implements IInstallTask {
-	private InstalledPack pack;
+	private ModpackModel pack;
     private String libraryName;
+    private LauncherDirectories directories;
 
-	public HandleVersionFileTask(InstalledPack pack) {
+	public HandleVersionFileTask(ModpackModel pack, LauncherDirectories directories) {
 		this.pack = pack;
+        this.directories = directories;
 	}
 
 	@Override
@@ -74,7 +77,7 @@ public class HandleVersionFileTask implements IInstallTask {
 			String url = library.getDownloadUrl(path, queue.getMirrorStore()).replace("${arch}", System.getProperty("sun.arch.data.model"));
 			String md5 = queue.getMirrorStore().getETag(url);
 
-			File cache = new File(Utils.getCacheDirectory(), path);
+			File cache = new File(directories.getCacheDirectory(), path);
 			if (cache.getParentFile() != null) {
 				cache.getParentFile().mkdirs();
 			}
@@ -89,7 +92,7 @@ public class HandleVersionFileTask implements IInstallTask {
 			queue.AddTask(new EnsureFileTask(cache, verifier, extractDirectory, url, library.getExtract()));
 		}
 
-		queue.AddTask(new GetAssetsIndexTask(this.pack));
+		queue.AddTask(new GetAssetsIndexTask(directories.getAssetsDirectory()));
 		queue.setCompleteVersion(version);
 	}
 }

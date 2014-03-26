@@ -19,6 +19,7 @@
 package net.technicpack.launchercore.util;
 
 import com.google.gson.JsonSyntaxException;
+import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -30,47 +31,65 @@ import java.util.logging.Level;
 public class Settings {
 	public static final String STABLE = "stable";
 	public static final String BETA = "beta";
-	public static Settings instance = new Settings();
 	private String directory;
 	private int memory;
 	private LaunchAction launchAction;
 	private String buildStream = STABLE;
 	private boolean showConsole;
 	private String languageCode = "default";
-	private boolean migrate;
 	private String clientId = UUID.randomUUID().toString();
-	private String migrateDir;
 
-	public static void load() {
-		File settings = new File(Utils.getSettingsDirectory(), "settings.json");
-		if (!settings.exists()) {
+    private transient File loadedFromFile;
+
+	public static Settings load(File settings) {
+		if (settings == null || !settings.exists()) {
 			Utils.getLogger().log(Level.WARNING, "Unable to load settings from " + settings + " because it does not exist.");
-			return;
+			return null;
 		}
 
 		try {
 			String json = FileUtils.readFileToString(settings, Charset.forName("UTF-8"));
-			instance = Utils.getGson().fromJson(json, Settings.class);
+			Settings settingsObj = Utils.getGson().fromJson(json, Settings.class);
+
+            if (settingsObj == null) {
+                Utils.getLogger().log(Level.WARNING, "Unable to load settings from "+settings+" because the JSON file couldn't be parsed.");
+                return null;
+            }
+
+            settingsObj.setLoadedFromFile(settings);
+            return settingsObj;
 		}  catch (JsonSyntaxException e) {
 			Utils.getLogger().log(Level.WARNING, "Unable to load settings from " + settings);
 		} catch (IOException e) {
 			Utils.getLogger().log(Level.WARNING, "Unable to load settings from " + settings);
 		}
+
+        return null;
 	}
 
-	public static String getDirectory() {
-		return instance.directory;
+    public File getLoadedFromFile() { return loadedFromFile; }
+    public void setLoadedFromFile(File loadedFrom) { loadedFromFile = loadedFrom; }
+
+	public String getDirectory() {
+		return directory;
 	}
 
-	public static void setDirectory(String directory) {
-		instance.directory = directory;
+	public void setDirectory(String directory) {
+		this.directory = directory;
 		save();
 	}
 
-	public static void save() {
-		File settings = new File(Utils.getSettingsDirectory(), "settings.json");
+    public void save() {
+        save(loadedFromFile);
+    }
 
-		String json = Utils.getGson().toJson(instance);
+	public void save(File settings) {
+        if (settings == null) {
+            Utils.getLogger().log(Level.SEVERE, "Unable to save settings- the target file is unknown.");
+        }
+
+		String json = Utils.getGson().toJson(this);
+        loadedFromFile = settings;
 
 		try {
 			FileUtils.writeStringToFile(settings, json, Charset.forName("UTF-8"));
@@ -79,70 +98,52 @@ public class Settings {
 		}
 	}
 
-	public static int getMemory() {
-		return instance.memory;
+	public int getMemory() {
+		return memory;
 	}
 
-	public static void setMemory(int memory) {
-		instance.memory = memory;
+	public void setMemory(int memory) {
+		this.memory = memory;
 		save();
 	}
 
-	public static LaunchAction getLaunchAction() {
-		return instance.launchAction;
+	public LaunchAction getLaunchAction() {
+		return launchAction;
 	}
 
-	public static void setLaunchAction(LaunchAction launchAction) {
-	    instance.launchAction = launchAction;
+	public void setLaunchAction(LaunchAction launchAction) {
+	    this.launchAction = launchAction;
 	    save();
 	}
 
-	public static String getBuildStream() {
-		return instance.buildStream;
+	public String getBuildStream() {
+		return buildStream;
 	}
 
-	public static void setBuildStream(String buildStream) {
-		instance.buildStream = buildStream;
+	public void setBuildStream(String buildStream) {
+		this.buildStream = buildStream;
 		save();
 	}
 	
-	public static String getClientId() {
-		return instance.clientId;
+	public String getClientId() {
+		return clientId;
 	}
 
-	public static boolean getShowConsole() {
-		return instance.showConsole;
+	public boolean getShowConsole() {
+		return showConsole;
 	}
 
-	public static void setShowConsole(boolean showConsole) {
-		instance.showConsole = showConsole;
+	public void setShowConsole(boolean showConsole) {
+		this.showConsole = showConsole;
 		save();
 	}
 
-	public static String getLanguageCode() {
-		return instance.languageCode;
+	public String getLanguageCode() {
+		return languageCode;
 	}
 
-	public static void setLanguageCode(String languageCode) {
-		instance.languageCode = languageCode;
-		save();
-	}
-
-	public static boolean getMigrate() {
-		return instance.migrate;
-	}
-
-	public static void setMigrate(boolean migrate) {
-		instance.migrate = migrate;
-		save();
-	}
-
-	public static String getMigrateDir() {
-		return instance.migrateDir;
-	}
-
-	public static void setMigrateDir(String migrateDir) {
-		instance.migrateDir = migrateDir;
+	public void setLanguageCode(String languageCode) {
+		this.languageCode = languageCode;
 		save();
 	}
 
@@ -153,8 +154,6 @@ public class Settings {
 				", memory=" + memory +
 				", buildStream='" + buildStream + '\'' +
 				", showConsole=" + showConsole +
-				", migrate=" + migrate +
-				", migrateDir='" + migrateDir + '\'' +
 				", launchAction='" + launchAction +'\'' +
 				", languageCode='" + languageCode + '\'' +
 				'}';

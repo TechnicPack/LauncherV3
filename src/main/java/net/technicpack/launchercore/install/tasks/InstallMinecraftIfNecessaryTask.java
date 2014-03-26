@@ -1,24 +1,25 @@
 package net.technicpack.launchercore.install.tasks;
 
-import net.technicpack.launchercore.install.InstalledPack;
-import net.technicpack.launchercore.minecraft.MojangConstants;
-import net.technicpack.launchercore.mirror.MirrorStore;
-import net.technicpack.launchercore.util.Utils;
-import net.technicpack.launchercore.util.ZipUtils;
-import net.technicpack.launchercore.util.verifiers.IFileVerifier;
-import net.technicpack.launchercore.util.verifiers.MD5FileVerifier;
-import net.technicpack.launchercore.util.verifiers.ValidZipFileVerifier;
+import net.technicpack.launchercore.modpacks.InstalledPack;
+import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.minecraftcore.mojang.MojangConstants;
+import net.technicpack.utilslib.ZipUtils;
+import net.technicpack.launchercore.install.verifiers.IFileVerifier;
+import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
+import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
 
 import java.io.File;
 import java.io.IOException;
 
 public class InstallMinecraftIfNecessaryTask extends ListenerTask {
-	private InstalledPack pack;
+	private ModpackModel pack;
 	private String minecraftVersion;
+    private File cacheDirectory;
 
-	public InstallMinecraftIfNecessaryTask(InstalledPack pack, String minecraftVersion) {
+	public InstallMinecraftIfNecessaryTask(ModpackModel pack, String minecraftVersion, File cacheDirectory) {
 		this.pack = pack;
 		this.minecraftVersion = minecraftVersion;
+        this.cacheDirectory = cacheDirectory;
 	}
 
 	@Override
@@ -32,7 +33,7 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask {
 
 		String url = MojangConstants.getVersionDownload(this.minecraftVersion);
 		String md5 = queue.getMirrorStore().getETag(url);
-		File cache = new File(Utils.getCacheDirectory(), "minecraft_" + this.minecraftVersion + ".jar");
+		File cache = new File(cacheDirectory, "minecraft_" + this.minecraftVersion + ".jar");
 
         IFileVerifier verifier = null;
 

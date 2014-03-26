@@ -28,15 +28,19 @@ import net.technicpack.launchercore.install.tasks.InstallMinecraftIfNecessaryTas
 import net.technicpack.launchercore.install.tasks.InstallModpackTask;
 import net.technicpack.launchercore.install.tasks.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.VerifyVersionFilePresentTask;
-import net.technicpack.launchercore.install.user.User;
-import net.technicpack.launchercore.minecraft.CompleteVersion;
+import net.technicpack.launchercore.modpacks.InstalledPack;
+import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.minecraftcore.LauncherDirectories;
+import net.technicpack.minecraftcore.mojang.CompleteVersion;
 import net.technicpack.launchercore.mirror.MirrorStore;
-import net.technicpack.launchercore.restful.Modpack;
-import net.technicpack.launchercore.restful.PackInfo;
-import net.technicpack.launchercore.restful.PlatformConstants;
+import net.technicpack.platform.IPlatformApi;
+import net.technicpack.rest.io.Modpack;
+import net.technicpack.rest.io.PackInfo;
 import net.technicpack.launchercore.util.*;
 
-import net.technicpack.launchercore.util.verifiers.ValidZipFileVerifier;
+import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
+import net.technicpack.utilslib.Utils;
+import net.technicpack.utilslib.ZipUtils;
 import org.apache.commons.io.FileUtils;
 
 import javax.swing.JOptionPane;
@@ -47,30 +51,38 @@ import java.nio.charset.Charset;
 
 public class ModpackInstaller {
 	private final DownloadListener listener;
-	private final InstalledPack installedPack;
+	private final ModpackModel installedPack;
+    private final LauncherDirectories directories;
+    private final Settings settings;
+    private final IPlatformApi platformApi;
 	private String build;
 	private boolean finished = false;
     private MirrorStore mirrorStore;
 
-	public ModpackInstaller(DownloadListener listener, InstalledPack installedPack, String build, MirrorStore mirrorStore) {
+	public ModpackInstaller(DownloadListener listener, ModpackModel installedPack, LauncherDirectories directories, String build, MirrorStore mirrorStore, IPlatformApi platformApi, Settings settings) {
 		this.listener = listener;
 		this.installedPack = installedPack;
+        this.directories = directories;
+        this.settings = settings;
 		this.build = build;
         this.mirrorStore = mirrorStore;
+        this.platformApi = platformApi;
 	}
 
-	public CompleteVersion installPack(Component component, User user) throws IOException {
-		InstallTasksQueue queue = new InstallTasksQueue(this.listener, mirrorStore);
+	public CompleteVersion installPack(Component component) throws IOException {
+        installedPack.save();
+
+        InstallTasksQueue queue = new InstallTasksQueue(this.listener, mirrorStore);
 		queue.AddTask(new InitPackDirectoryTask(this.installedPack));
 
-		PackInfo packInfo = this.installedPack.getInfo();
-		Modpack modpack = packInfo.getModpack(this.build, user);
+		PackInfo packInfo = this.installedPack.getPackInfo();
+		Modpack modpack = packInfo.getModpack(this.build);
 		String minecraft = modpack.getMinecraft();
 
 		if (minecraft.startsWith("1.5")) {
-			queue.AddTask(new EnsureFileTask(new File(Utils.getCacheDirectory(), "fml_libs15.zip"), new ValidZipFileVerifier(), new File(installedPack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs15.zip"));
+			queue.AddTask(new EnsureFileTask(new File(directories.getCacheDirectory(), "fml_libs15.zip"), new ValidZipFileVerifier(), new File(installedPack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs15.zip"));
 		} else if (minecraft.startsWith("1.4")) {
-			queue.AddTask(new EnsureFileTask(new File(Utils.getCacheDirectory(), "fml_libs.zip"), new ValidZipFileVerifier(), new File(installedPack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs.zip"));
+			queue.AddTask(new EnsureFileTask(new File(directories.getCacheDirectory(), "fml_libs.zip"), new ValidZipFileVerifier(), new File(installedPack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs.zip"));
 		}
 
 		queue.RunAllTasks();
@@ -100,10 +112,10 @@ public class ModpackInstaller {
 		}
 
 		queue.AddTask(new VerifyVersionFilePresentTask	(installedPack, minecraft));
-	queue.AddTask(new HandleVersionFileTask(installedPack));
+	queue.AddTask(new HandleVersionFileTask(installedPack, directories));
 
 	if ((installedVersion != null && installedVersion.isLegacy()) || shouldUpdate)
-			queue.AddTask(new InstallMinecraftIfNecessaryTask(this.installedPack, minecraft));
+			queue.AddTask(new InstallMinecraftIfNecessaryTask(this.installedPack, minecraft, directories.getCacheDirectory()));
 
 	queue.RunAllTasks();
 
@@ -120,8 +132,8 @@ public class ModpackInstaller {
 		if (versionFile.exists()) {
 			version = Version.load(versionFile);
 		} else {
-			Utils.pingHttpURL(PlatformConstants.getDownloadCountUrl(this.installedPack.getName()), mirrorStore);
-			Utils.sendTracking("installModpack", this.installedPack.getName(), this.installedPack.getBuild());
+			platformApi.incrementPackInstalls(installedPack.getName());
+			Utils.sendTracking("installModpack", this.installedPack.getName(), this.installedPack.getBuild(), settings.getClientId());
 		}
 		return version;
 	}
@@ -131,7 +143,6 @@ public class ModpackInstaller {
 	}
 
 	public CompleteVersion prepareOfflinePack() throws IOException {
-		installedPack.getInstalledDirectory();
 		installedPack.initDirectories();
 
 		File versionFile = new File(installedPack.getBinDir(), "version.json");

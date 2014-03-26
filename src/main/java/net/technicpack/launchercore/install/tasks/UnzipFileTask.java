@@ -1,7 +1,7 @@
 package net.technicpack.launchercore.install.tasks;
 
-import net.technicpack.launchercore.minecraft.ExtractRules;
-import net.technicpack.launchercore.util.ZipUtils;
+import net.technicpack.minecraftcore.mojang.ExtractRules;
+import net.technicpack.utilslib.ZipUtils;
 
 import java.io.File;
 import java.io.IOException;

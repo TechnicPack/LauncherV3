@@ -1,21 +1,22 @@
 package net.technicpack.launchercore.install.tasks;
 
 import net.technicpack.launchercore.exception.CacheDeleteException;
-import net.technicpack.launchercore.install.InstalledPack;
-import net.technicpack.launchercore.restful.Modpack;
-import net.technicpack.launchercore.restful.solder.Mod;
-import net.technicpack.launchercore.util.verifiers.IFileVerifier;
-import net.technicpack.launchercore.util.verifiers.MD5FileVerifier;
-import net.technicpack.launchercore.util.verifiers.ValidZipFileVerifier;
+import net.technicpack.launchercore.modpacks.InstalledPack;
+import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.rest.io.Modpack;
+import net.technicpack.rest.io.Mod;
+import net.technicpack.launchercore.install.verifiers.IFileVerifier;
+import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
+import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
 
 import java.io.File;
 import java.io.IOException;
 
 public class InstallModpackTask implements IInstallTask {
-	private InstalledPack pack;
+	private ModpackModel pack;
 	private Modpack modpack;
 
-	public InstallModpackTask(InstalledPack pack, Modpack modpack) {
+	public InstallModpackTask(ModpackModel pack, Modpack modpack) {
 		this.pack = pack;
 		this.modpack = modpack;
 	}

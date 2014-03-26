@@ -1,7 +1,7 @@
 package net.technicpack.launchercore.install.tasks;
 
-import net.technicpack.launchercore.minecraft.ExtractRules;
-import net.technicpack.launchercore.util.verifiers.IFileVerifier;
+import net.technicpack.minecraftcore.mojang.ExtractRules;
+import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 
 import java.io.File;
 import java.io.IOException;

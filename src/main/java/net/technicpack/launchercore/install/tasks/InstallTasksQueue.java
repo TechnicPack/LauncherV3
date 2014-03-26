@@ -1,6 +1,6 @@
 package net.technicpack.launchercore.install.tasks;
 
-import net.technicpack.launchercore.minecraft.CompleteVersion;
+import net.technicpack.minecraftcore.mojang.CompleteVersion;
 import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.launchercore.util.DownloadListener;
 

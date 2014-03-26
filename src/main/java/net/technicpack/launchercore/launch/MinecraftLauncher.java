@@ -19,14 +19,16 @@
 
 package net.technicpack.launchercore.launch;
 
-import net.technicpack.launchercore.install.InstalledPack;
-import net.technicpack.launchercore.install.user.User;
-import net.technicpack.launchercore.minecraft.CompleteVersion;
-import net.technicpack.launchercore.minecraft.Library;
-import net.technicpack.launchercore.mirror.MirrorStore;
-import net.technicpack.launchercore.restful.PlatformConstants;
-import net.technicpack.launchercore.util.OperatingSystem;
-import net.technicpack.launchercore.util.Utils;
+import net.technicpack.launchercore.modpacks.InstalledPack;
+import net.technicpack.launchercore.auth.User;
+import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.minecraftcore.LauncherDirectories;
+import net.technicpack.minecraftcore.mojang.CompleteVersion;
+import net.technicpack.minecraftcore.mojang.Library;
+import net.technicpack.platform.IPlatformApi;
+import net.technicpack.utilslib.OperatingSystem;
+import net.technicpack.launchercore.util.Settings;
+import net.technicpack.utilslib.Utils;
 import org.apache.commons.lang3.text.StrSubstitutor;
 
 import java.io.File;
@@ -39,20 +41,24 @@ import java.util.Map;
 
 public class MinecraftLauncher {
 	private final int memory;
-	private final InstalledPack pack;
+    private final LauncherDirectories directories;
+	private final ModpackModel pack;
 	private final CompleteVersion version;
+    private final IPlatformApi platformApi;
 
-	public MinecraftLauncher(int memory, InstalledPack pack, CompleteVersion version) {
+	public MinecraftLauncher(int memory, IPlatformApi platformApi, ModpackModel pack, LauncherDirectories directories, CompleteVersion version) {
 		this.memory = memory;
 		this.pack = pack;
 		this.version = version;
+        this.directories = directories;
+        this.platformApi = platformApi;
 	}
 
-	public MinecraftProcess launch(User user, LaunchOptions options, MirrorStore mirrorStore) throws IOException {
-		return launch(user, options, null, mirrorStore);
+	public MinecraftProcess launch(User user, LaunchOptions options, Settings settings) throws IOException {
+		return launch(user, options, null, settings);
 	}
 
-	public MinecraftProcess launch(User user, LaunchOptions options, MinecraftExitListener exitListener, MirrorStore mirrorStore) throws IOException {
+	public MinecraftProcess launch(User user, LaunchOptions options, MinecraftExitListener exitListener, Settings settings) throws IOException {
 		List<String> commands = buildCommands(user, options);
 		StringBuilder full = new StringBuilder();
 		boolean first = true;
@@ -63,8 +69,8 @@ public class MinecraftLauncher {
 			first = false;
 		}
 		System.out.println("Running " + full.toString());
-		Utils.pingHttpURL(PlatformConstants.getRunCountUrl(pack.getName()), mirrorStore);
-		if (!Utils.sendTracking("runModpack", pack.getName(), pack.getBuild())) {
+        platformApi.incrementPackRuns(pack.getName());
+		if (!Utils.sendTracking("runModpack", pack.getName(), pack.getBuild(), settings.getClientId())) {
 			System.out.println("Failed to record event");
 		}
 		Process process = new ProcessBuilder(commands).directory(pack.getInstalledDirectory()).redirectErrorStream(true).start();
@@ -130,7 +136,7 @@ public class MinecraftLauncher {
 
 		map.put("game_directory", gameDirectory.getAbsolutePath());
 
-		String targetAssets = Utils.getAssetsDirectory().getAbsolutePath();
+		String targetAssets = directories.getAssetsDirectory().getAbsolutePath();
 
 		String assetsKey = this.version.getAssetsKey();
 
@@ -173,7 +179,7 @@ public class MinecraftLauncher {
 				continue;
 			}
 
-			File file = new File(Utils.getCacheDirectory(), library.getArtifactPath().replace("${arch}", System.getProperty("sun.arch.data.model")));
+			File file = new File(directories.getCacheDirectory(), library.getArtifactPath().replace("${arch}", System.getProperty("sun.arch.data.model")));
 			if (!file.isFile() || !file.exists()) {
 				throw new RuntimeException("Library " + library.getName() + " not found.");
 			}

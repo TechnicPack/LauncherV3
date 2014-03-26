@@ -1,0 +1,95 @@
+/*
+ * This file is part of Technic Launcher Core.
+ * Copyright (C) 2013 Syndicate, LLC
+ *
+ * Technic Launcher Core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Technic Launcher Core is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * as well as a copy of the GNU Lesser General Public License,
+ * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package net.technicpack.launchercore.modpacks;
+
+import net.technicpack.launchercore.mirror.MirrorStore;
+import net.technicpack.minecraftcore.LauncherDirectories;
+import net.technicpack.rest.io.PackInfo;
+import net.technicpack.rest.io.Resource;
+import net.technicpack.launchercore.mirror.download.Download;
+import net.technicpack.utilslib.MD5Utils;
+import net.technicpack.utilslib.ResourceUtils;
+import net.technicpack.utilslib.Utils;
+import org.apache.commons.io.FileUtils;
+
+import javax.imageio.IIOException;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
+
+public class InstalledPack {
+	public static final String RECOMMENDED = "recommended";
+	public static final String LATEST = "latest";
+	public static final String LAUNCHER_DIR = "launcher\\";
+	public static final String MODPACKS_DIR = "%MODPACKS%\\";
+
+	private String name;
+	private boolean platform;
+	private String build;
+	private String directory;
+
+	public InstalledPack(String name, boolean platform, String build, String directory) {
+		this();
+		this.name = name;
+		this.platform = platform;
+		this.build = build;
+		this.directory = directory;
+	}
+
+	public InstalledPack(String name, boolean platform, String build) {
+		this(name, platform, build, MODPACKS_DIR + name);
+	}
+
+	public InstalledPack() {
+		build = RECOMMENDED;
+	}
+
+	public boolean isPlatform() {
+		return platform;
+	}
+	public String getBuild() {
+		return build;
+	}
+
+	public void setBuild(String build) {
+		this.build = build;
+	}
+
+    public String getDirectory() { return directory; }
+    public void setDirectory(String directory) { this.directory = directory; }
+
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public String toString() {
+		return "InstalledPack{" +
+				", name='" + name + '\'' +
+				", platform=" + platform +
+				", build='" + build + '\'' +
+				", directory='" + directory + '\'' +
+				'}';
+	}
+}

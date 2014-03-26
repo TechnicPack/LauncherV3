@@ -1,13 +1,14 @@
 package net.technicpack.launchercore.install.tasks;
 
-import net.technicpack.launchercore.install.InstalledPack;
+import net.technicpack.launchercore.modpacks.InstalledPack;
+import net.technicpack.launchercore.modpacks.ModpackModel;
 
 import java.io.IOException;
 
 public class InitPackDirectoryTask implements IInstallTask {
-	private InstalledPack pack;
+	private ModpackModel pack;
 
-	public InitPackDirectoryTask(InstalledPack pack) {
+	public InitPackDirectoryTask(ModpackModel pack) {
 		this.pack = pack;
 	}
 
@@ -23,7 +24,6 @@ public class InitPackDirectoryTask implements IInstallTask {
 
 	@Override
 	public void runTask(InstallTasksQueue queue) throws IOException {
-		this.pack.getInstalledDirectory();
 		this.pack.initDirectories();
 	}
 }

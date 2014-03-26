@@ -1,20 +1,21 @@
 package net.technicpack.launchercore.install.tasks;
 
 import net.technicpack.launchercore.exception.PackNotAvailableOfflineException;
-import net.technicpack.launchercore.install.InstalledPack;
-import net.technicpack.launchercore.minecraft.TechnicConstants;
-import net.technicpack.launchercore.util.ZipUtils;
-import net.technicpack.launchercore.util.verifiers.IFileVerifier;
-import net.technicpack.launchercore.util.verifiers.ValidJsonFileVerifier;
+import net.technicpack.launchercore.modpacks.InstalledPack;
+import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.minecraftcore.TechnicConstants;
+import net.technicpack.utilslib.ZipUtils;
+import net.technicpack.launchercore.install.verifiers.IFileVerifier;
+import net.technicpack.launchercore.install.verifiers.ValidJsonFileVerifier;
 
 import java.io.File;
 import java.io.IOException;
 
 public class VerifyVersionFilePresentTask implements IInstallTask {
-	private InstalledPack pack;
+	private ModpackModel pack;
 	private String minecraftVersion;
 
-	public VerifyVersionFilePresentTask(InstalledPack pack, String minecraftVersion) {
+	public VerifyVersionFilePresentTask(ModpackModel pack, String minecraftVersion) {
 		this.pack = pack;
 		this.minecraftVersion = minecraftVersion;
 	}

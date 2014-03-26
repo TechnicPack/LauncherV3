@@ -1,6 +1,6 @@
 package net.technicpack.launchercore.mirror.secure.rest;
 
-import net.technicpack.launchercore.restful.RestObject;
+import net.technicpack.rest.RestObject;
 
 /**
  * This file is part of Technic Launcher Core.

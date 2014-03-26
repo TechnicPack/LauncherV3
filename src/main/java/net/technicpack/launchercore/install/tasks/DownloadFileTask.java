@@ -1,12 +1,10 @@
 package net.technicpack.launchercore.install.tasks;
 
 import net.technicpack.launchercore.exception.DownloadException;
-import net.technicpack.launchercore.mirror.MirrorStore;
-import net.technicpack.launchercore.util.verifiers.IFileVerifier;
+import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 
 public class DownloadFileTask extends ListenerTask {
 	private String url;
