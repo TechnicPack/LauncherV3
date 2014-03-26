@@ -24,8 +24,6 @@ import java.io.File;
 public abstract class LauncherDirectories {
 	public abstract File getLauncherDirectory();
 
-	public abstract File getSettingsDirectory();
-
 	public abstract File getCacheDirectory();
 
 	public abstract File getAssetsDirectory();
