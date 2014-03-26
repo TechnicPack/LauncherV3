@@ -51,46 +51,44 @@ import java.nio.charset.Charset;
 
 public class ModpackInstaller {
 	private final DownloadListener listener;
-	private final ModpackModel installedPack;
     private final LauncherDirectories directories;
-    private final Settings settings;
     private final IPlatformApi platformApi;
-	private String build;
+    private final String clientId;
+    private final Component parentComponent;
 	private boolean finished = false;
     private MirrorStore mirrorStore;
 
-	public ModpackInstaller(DownloadListener listener, ModpackModel installedPack, LauncherDirectories directories, String build, MirrorStore mirrorStore, IPlatformApi platformApi, Settings settings) {
+	public ModpackInstaller(DownloadListener listener, LauncherDirectories directories, MirrorStore mirrorStore, IPlatformApi platformApi, String clientId, Component parentComponent) {
 		this.listener = listener;
-		this.installedPack = installedPack;
+		this.clientId = clientId;
         this.directories = directories;
-        this.settings = settings;
-		this.build = build;
         this.mirrorStore = mirrorStore;
         this.platformApi = platformApi;
+        this.parentComponent = parentComponent;
 	}
 
-	public CompleteVersion installPack(Component component) throws IOException {
-        installedPack.save();
+	public CompleteVersion installPack(ModpackModel modpack, String build) throws IOException {
+        modpack.save();
 
         InstallTasksQueue queue = new InstallTasksQueue(this.listener, mirrorStore);
-		queue.AddTask(new InitPackDirectoryTask(this.installedPack));
+		queue.AddTask(new InitPackDirectoryTask(modpack));
 
-		PackInfo packInfo = this.installedPack.getPackInfo();
-		Modpack modpack = packInfo.getModpack(this.build);
-		String minecraft = modpack.getMinecraft();
+		PackInfo packInfo = modpack.getPackInfo();
+		Modpack modpackData = packInfo.getModpack(build);
+		String minecraft = modpackData.getMinecraft();
 
 		if (minecraft.startsWith("1.5")) {
-			queue.AddTask(new EnsureFileTask(new File(directories.getCacheDirectory(), "fml_libs15.zip"), new ValidZipFileVerifier(), new File(installedPack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs15.zip"));
+			queue.AddTask(new EnsureFileTask(new File(directories.getCacheDirectory(), "fml_libs15.zip"), new ValidZipFileVerifier(), new File(modpack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs15.zip"));
 		} else if (minecraft.startsWith("1.4")) {
-			queue.AddTask(new EnsureFileTask(new File(directories.getCacheDirectory(), "fml_libs.zip"), new ValidZipFileVerifier(), new File(installedPack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs.zip"));
+			queue.AddTask(new EnsureFileTask(new File(directories.getCacheDirectory(), "fml_libs.zip"), new ValidZipFileVerifier(), new File(modpack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs.zip"));
 		}
 
 		queue.RunAllTasks();
-		Version installedVersion = this.getInstalledVersion();
+		Version installedVersion = this.getInstalledVersion(modpack);
 
 		boolean shouldUpdate = installedVersion == null;
-		if (!shouldUpdate && !this.build.equals(installedVersion.getVersion())) {
-			int result = JOptionPane.showConfirmDialog(component, "Would you like to update this pack?", "Update Found", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+		if (!shouldUpdate && !build.equals(installedVersion.getVersion())) {
+			int result = JOptionPane.showConfirmDialog(parentComponent, "Would you like to update this pack?", "Update Found", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
 
 			if (result == JOptionPane.YES_OPTION) {
 				shouldUpdate = true;
@@ -101,39 +99,39 @@ public class ModpackInstaller {
 
 		if (shouldUpdate) {
 			//If we're installing a new version of modpack, then we need to get rid of the existing version.json
-			File versionFile = new File(installedPack.getBinDir(), "version.json");
+			File versionFile = new File(modpack.getBinDir(), "version.json");
 			if (versionFile.exists()) {
 				if (!versionFile.delete()) {
 					throw new CacheDeleteException(versionFile.getAbsolutePath());
 				}
 			}
 
-			queue.AddTask(new InstallModpackTask(this.installedPack, modpack));
+			queue.AddTask(new InstallModpackTask(modpack, modpackData));
 		}
 
-		queue.AddTask(new VerifyVersionFilePresentTask	(installedPack, minecraft));
-	queue.AddTask(new HandleVersionFileTask(installedPack, directories));
+		queue.AddTask(new VerifyVersionFilePresentTask	(modpack, minecraft));
+	    queue.AddTask(new HandleVersionFileTask(modpack, directories));
 
-	if ((installedVersion != null && installedVersion.isLegacy()) || shouldUpdate)
-			queue.AddTask(new InstallMinecraftIfNecessaryTask(this.installedPack, minecraft, directories.getCacheDirectory()));
+	    if ((installedVersion != null && installedVersion.isLegacy()) || shouldUpdate)
+			queue.AddTask(new InstallMinecraftIfNecessaryTask(modpack, minecraft, directories.getCacheDirectory()));
 
-	queue.RunAllTasks();
+        queue.RunAllTasks();
 
-	Version versionFile = new Version(build, false);
-	versionFile.save(installedPack.getBinDir());
+        Version versionFile = new Version(build, false);
+        versionFile.save(modpack.getBinDir());
 
-	finished = true;
-	return queue.getCompleteVersion();
-}
+        finished = true;
+        return queue.getCompleteVersion();
+    }
 
-	private Version getInstalledVersion() {
+	private Version getInstalledVersion(ModpackModel modpack) {
 		Version version = null;
-		File versionFile = new File(this.installedPack.getBinDir(), "version");
+		File versionFile = new File(modpack.getBinDir(), "version");
 		if (versionFile.exists()) {
 			version = Version.load(versionFile);
 		} else {
-			platformApi.incrementPackInstalls(installedPack.getName());
-			Utils.sendTracking("installModpack", this.installedPack.getName(), this.installedPack.getBuild(), settings.getClientId());
+			platformApi.incrementPackInstalls(modpack.getName());
+			Utils.sendTracking("installModpack", modpack.getName(), modpack.getBuild(), clientId);
 		}
 		return version;
 	}
@@ -142,20 +140,20 @@ public class ModpackInstaller {
 		return finished;
 	}
 
-	public CompleteVersion prepareOfflinePack() throws IOException {
-		installedPack.initDirectories();
+	public CompleteVersion prepareOfflinePack(ModpackModel modpack) throws IOException {
+        modpack.initDirectories();
 
-		File versionFile = new File(installedPack.getBinDir(), "version.json");
-		File modpackJar = new File(installedPack.getBinDir(), "modpack.jar");
+		File versionFile = new File(modpack.getBinDir(), "version.json");
+		File modpackJar = new File(modpack.getBinDir(), "modpack.jar");
 
 		boolean didExtract = false;
 
 		if (modpackJar.exists()) {
-			didExtract = ZipUtils.extractFile(modpackJar, installedPack.getBinDir(), "version.json");
+			didExtract = ZipUtils.extractFile(modpackJar, modpack.getBinDir(), "version.json");
 		}
 
 		if (!versionFile.exists()) {
-			throw new PackNotAvailableOfflineException(installedPack.getDisplayName());
+			throw new PackNotAvailableOfflineException(modpack.getDisplayName());
 		}
 
 		String json = FileUtils.readFileToString(versionFile, Charset.forName("UTF-8"));

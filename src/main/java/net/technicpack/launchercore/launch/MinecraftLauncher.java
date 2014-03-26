@@ -19,7 +19,6 @@
 
 package net.technicpack.launchercore.launch;
 
-import net.technicpack.launchercore.modpacks.InstalledPack;
 import net.technicpack.launchercore.auth.User;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.LauncherDirectories;
@@ -27,7 +26,6 @@ import net.technicpack.minecraftcore.mojang.CompleteVersion;
 import net.technicpack.minecraftcore.mojang.Library;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.utilslib.OperatingSystem;
-import net.technicpack.launchercore.util.Settings;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.lang3.text.StrSubstitutor;
 
@@ -40,26 +38,24 @@ import java.util.List;
 import java.util.Map;
 
 public class MinecraftLauncher {
-	private final int memory;
     private final LauncherDirectories directories;
 	private final ModpackModel pack;
-	private final CompleteVersion version;
     private final IPlatformApi platformApi;
+    private final String clientId;
 
-	public MinecraftLauncher(int memory, IPlatformApi platformApi, ModpackModel pack, LauncherDirectories directories, CompleteVersion version) {
-		this.memory = memory;
+	public MinecraftLauncher(IPlatformApi platformApi, ModpackModel pack, LauncherDirectories directories, String clientId) {
 		this.pack = pack;
-		this.version = version;
         this.directories = directories;
         this.platformApi = platformApi;
+        this.clientId = clientId;
 	}
 
-	public MinecraftProcess launch(User user, LaunchOptions options, Settings settings) throws IOException {
-		return launch(user, options, null, settings);
+	public MinecraftProcess launch(int memory, User user, LaunchOptions options, CompleteVersion version) throws IOException {
+		return launch(memory, user, options, null, version);
 	}
 
-	public MinecraftProcess launch(User user, LaunchOptions options, MinecraftExitListener exitListener, Settings settings) throws IOException {
-		List<String> commands = buildCommands(user, options);
+	public MinecraftProcess launch(int memory, User user, LaunchOptions options, MinecraftExitListener exitListener, CompleteVersion version) throws IOException {
+		List<String> commands = buildCommands(memory, version, user, options);
 		StringBuilder full = new StringBuilder();
 		boolean first = true;
 
@@ -70,7 +66,7 @@ public class MinecraftLauncher {
 		}
 		System.out.println("Running " + full.toString());
         platformApi.incrementPackRuns(pack.getName());
-		if (!Utils.sendTracking("runModpack", pack.getName(), pack.getBuild(), settings.getClientId())) {
+		if (!Utils.sendTracking("runModpack", pack.getName(), pack.getBuild(), clientId)) {
 			System.out.println("Failed to record event");
 		}
 		Process process = new ProcessBuilder(commands).directory(pack.getInstalledDirectory()).redirectErrorStream(true).start();
@@ -79,7 +75,7 @@ public class MinecraftLauncher {
 		return mcProcess;
 	}
 
-	private List<String> buildCommands(User user, LaunchOptions options) {
+	private List<String> buildCommands(int memory, CompleteVersion version, User user, LaunchOptions options) {
 		List<String> commands = new ArrayList<String>();
 		commands.add(OperatingSystem.getJavaDir());
 
@@ -110,7 +106,7 @@ public class MinecraftLauncher {
         }
 
 		commands.add("-cp");
-		commands.add(buildClassPath());
+		commands.add(buildClassPath(version));
 		commands.add(version.getMainClass());
 		commands.addAll(Arrays.asList(getMinecraftArguments(version, pack.getInstalledDirectory(), user)));
 		options.appendToCommands(commands);
@@ -138,13 +134,13 @@ public class MinecraftLauncher {
 
 		String targetAssets = directories.getAssetsDirectory().getAbsolutePath();
 
-		String assetsKey = this.version.getAssetsKey();
+		String assetsKey = version.getAssetsKey();
 
 		if (assetsKey == null || assetsKey.isEmpty()) {
 			assetsKey = "legacy";
 		}
 
-		if (this.version.getAreAssetsVirtual()) {
+		if (version.getAreAssetsVirtual()) {
 			targetAssets += File.separator + "virtual" + File.separator + assetsKey;
 		}
 
@@ -161,7 +157,7 @@ public class MinecraftLauncher {
 		return split;
 	}
 
-	private String buildClassPath() {
+	private String buildClassPath(CompleteVersion version) {
 		StringBuilder result = new StringBuilder();
 		String separator = System.getProperty("path.separator");
 
