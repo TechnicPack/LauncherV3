@@ -61,6 +61,7 @@ public class ModpackSelector extends JPanel {
         header.add(filterLabel, constraints);
 
         JTextField filterContents = new JTextField();
+        filterContents.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         filterContents.setBorder(BorderFactory.createEmptyBorder());
 
         constraints = new GridBagConstraints();

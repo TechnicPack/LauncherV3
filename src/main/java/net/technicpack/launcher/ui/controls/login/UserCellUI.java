@@ -17,30 +17,27 @@
  * along with The Technic Launcher.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.launcher.ui.controls;
+package net.technicpack.launcher.ui.controls.login;
+
+import net.technicpack.launcher.lang.ResourceLoader;
 
 import javax.swing.*;
-import java.awt.*;
+import javax.swing.plaf.basic.BasicComboBoxUI;
 
-public class AAJLabel extends JLabel {
+public class UserCellUI extends BasicComboBoxUI {
 
-    public AAJLabel(String text) {
-        super(text);
+    private ResourceLoader resources;
+
+    public UserCellUI(ResourceLoader loader) {
+        this.resources = loader;
     }
 
-    @Override
-    public void paintComponent(Graphics g) {
-        Graphics2D g2d = (Graphics2D)g;
-
-        g2d.setRenderingHint(
-                RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setRenderingHint(
-                RenderingHints.KEY_TEXT_ANTIALIASING,
-                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        g2d.setRenderingHint(
-                RenderingHints.KEY_FRACTIONALMETRICS,
-                RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-        super.paintComponent(g2d);
+    @Override protected JButton createArrowButton() {
+        JButton button = new JButton();
+        button.setOpaque(false);
+        button.setContentAreaFilled(false);
+        button.setBorder(BorderFactory.createEmptyBorder());
+        button.setIcon(resources.getIcon("comboTriangle.png"));
+        return button;
     }
 }

@@ -28,6 +28,12 @@ public class DraggableFrame extends JFrame implements MouseListener, MouseMotion
     private int dragGripX;
     private int dragGripY;
 
+    public DraggableFrame() {
+        setUndecorated(true);
+        addMouseListener(this);
+        addMouseMotionListener(this);
+    }
+
     @Override
     public void mouseClicked(MouseEvent e) {
 

@@ -16,6 +16,7 @@
  * as well as a copy of the GNU Lesser General Public License,
  * along with The Technic Launcher.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package net.technicpack.launcher.ui;
 
 import net.technicpack.launcher.lang.IRelocalizableResource;
@@ -62,6 +63,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     public static final Color COLOR_FEEDITEM_BACK = new Color(37, 44, 49);
     public static final Color COLOR_LIKES_BACK = new Color(20, 65, 97);
     public static final Color COLOR_BUTTON_BLUE = new Color(43, 128, 195);
+    public static final Color COLOR_FORMELEMENT_INTERNAL = new Color(30, 39, 46);
 
     public static final String TAB_DISCOVER = "discover";
     public static final String TAB_MODPACKS = "modpacks";
@@ -83,9 +85,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     public LauncherFrame(ResourceLoader resources) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setUndecorated(true);
-        addMouseListener(this);
-        addMouseMotionListener(this);
 
         //Handles rebuilding the frame, so use it to build the frame in the first place
         relocalize(resources);
@@ -193,6 +192,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         minimizeButton.setBorder(BorderFactory.createEmptyBorder());
         minimizeButton.setContentAreaFilled(false);
         minimizeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        minimizeButton.setFocusable(false);
         windowGadgetPanel.add(minimizeButton);
 
         ImageIcon closeIcon = resources.getIcon("close.png");
@@ -206,6 +206,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             }
         });
         closeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        closeButton.setFocusable(false);
         windowGadgetPanel.add(closeButton);
 
         rightHeaderPanel.add(windowGadgetPanel);

@@ -36,6 +36,8 @@ public class ResourceLoader {
     private Collection<IRelocalizableResource> resources = new LinkedList<IRelocalizableResource>();
     private ResourceBundle stringData;
     private Locale currentLocale;
+    private String dottedResourcePath;
+    private String slashResourcePath;
 
     public static final Locale[] SUPPORTED_LOCALES = { Locale.ENGLISH };
     public static final String DEFAULT_LOCALE = "default";
@@ -43,6 +45,16 @@ public class ResourceLoader {
     public static final String FONT_OPENSANS_BOLD = "font.opensans.bold";
     public static final String FONT_OPENSANS = "font.opensans.regular";
     public static final String FONT_RALEWAY = "font.raleway.light";
+
+    public ResourceLoader(String... resourcesPath) {
+        dottedResourcePath = "";
+        slashResourcePath = "";
+
+        for (String pathToken : resourcesPath) {
+            dottedResourcePath += pathToken + ".";
+            slashResourcePath += "/" + pathToken;
+        }
+    }
 
     public void setLocale(Locale locale) {
         currentLocale = locale;
@@ -219,11 +231,11 @@ public class ResourceLoader {
     }
       
     private String getBundlePath(String bundle) {
-        return "net.technicpack.launcher.resources." + bundle;
+        return dottedResourcePath + bundle;
     }
 
     private String getResourcePath(String resource) {
-        return "/net/technicpack/launcher/resources" + resource;
+        return slashResourcePath + resource;
     }
 
     public void registerResource(IRelocalizableResource resource) {

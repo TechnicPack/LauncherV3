@@ -19,14 +19,34 @@
 
 package net.technicpack.launcher.settings;
 
-import net.technicpack.launchercore.util.OperatingSystem;
+import net.technicpack.launchercore.util.LaunchAction;
+import net.technicpack.utilslib.OperatingSystem;
+import net.technicpack.utilslib.Utils;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.UUID;
+import java.util.logging.Level;
 
 public class TechnicSettings {
+    public static final String STABLE = "stable";
+    public static final String BETA = "beta";
+
+    private transient File settingsFile;
+    private transient File technicRoot;
+    private int memory;
+    private LaunchAction launchAction;
+    private String buildStream = STABLE;
+    private boolean showConsole;
+    private String languageCode = "default";
+    private String clientId = UUID.randomUUID().toString();
     private String directory;
 
-    private transient File technicRoot;
+    public void setFilePath(File settingsFile) {
+        this.settingsFile = settingsFile;
+    }
 
     public File getTechnicRoot() {
         if (technicRoot == null || !technicRoot.exists())
@@ -39,11 +59,51 @@ public class TechnicSettings {
         return (directory != null && !directory.isEmpty() && directory.equalsIgnoreCase("portable"));
     }
 
+    public int getMemory() { return memory; }
+    public void setMemory(int memory) {
+        this.memory = memory;
+        save();
+    }
+
+    public LaunchAction getLaunchAction() { return launchAction; }
+    public void setLaunchAction(LaunchAction launchAction) {
+        this.launchAction = launchAction;
+        save();
+    }
+
+    public String getBuildStream() { return buildStream; }
+    public void setBuildStream(String buildStream) {
+        this.buildStream = buildStream;
+        save();
+    }
+
+    public boolean getShowConsole() { return showConsole; }
+    public void setShowConsole(boolean showConsole) {
+        this.showConsole = showConsole;
+        save();
+    }
+
+    public String getLanguageCode() { return languageCode; }
+    public void setLanguageCode(String languageCode) {
+        this.languageCode = languageCode;
+        save();
+    }
+
+    public String getClientId() { return clientId; }
+
+    public void save() {
+        String json = Utils.getGson().toJson(this);
+
+        try {
+            FileUtils.writeStringToFile(settingsFile, json, Charset.forName("UTF-8"));
+        } catch (IOException e) {
+            Utils.getLogger().log(Level.WARNING, "Unable to save installed " + settingsFile);
+        }
+    }
+
     protected void buildTechnicRoot() {
-        if (directory == null || directory.isEmpty())
-            buildDefaultTechnicDirectory();
-        else if (directory.equalsIgnoreCase("portable"))
-            technicRoot = new File("technic/");
+        if (directory == null || directory.isEmpty() || directory.equalsIgnoreCase("portable"))
+            technicRoot = settingsFile.getParentFile();
         else
             technicRoot = new File(directory);
 
@@ -51,31 +111,5 @@ public class TechnicSettings {
             technicRoot.mkdirs();
     }
 
-    private void buildDefaultTechnicDirectory() {
-        String userHome = System.getProperty("user.home", ".");
 
-        OperatingSystem os = OperatingSystem.getOperatingSystem();
-        switch (os) {
-            case LINUX:
-                technicRoot = new File(userHome, ".technic/");
-                break;
-            case WINDOWS:
-                String applicationData = System.getenv("APPDATA");
-                if (applicationData != null) {
-                    technicRoot = new File(applicationData, ".technic/");
-                } else {
-                    technicRoot = new File(userHome, ".technic/");
-                }
-                break;
-            case OSX:
-                technicRoot = new File(userHome, "Library/Application Support/technic");
-                break;
-            case UNKNOWN:
-                technicRoot = new File(userHome, "technic/");
-                break;
-            default:
-                technicRoot = new File(userHome, "technic/");
-                break;
-        }
-    }
 }

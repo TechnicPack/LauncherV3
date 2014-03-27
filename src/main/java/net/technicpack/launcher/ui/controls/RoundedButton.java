@@ -89,11 +89,8 @@ public class RoundedButton extends JButton implements MouseListener {
         g2d.setFont(getFont());
 
         int width = g2d.getFontMetrics().stringWidth(getText());
-        int textHeight =  getFont().getSize();
-        int otherTextHeight = getFontMetrics(getFont()).getHeight();
+        int height = ((getHeight() - g2d.getFontMetrics().getHeight()) / 2) + g2d.getFontMetrics().getAscent();
 
-        textHeight = textHeight - (otherTextHeight-textHeight);
-        int height = textHeight + (getHeight() - textHeight)/2;
         g.drawString(getText(), (getWidth() - width) / 2, height);
     }
 
