@@ -221,7 +221,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         name.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         name.setCaretColor(LauncherFrame.COLOR_BUTTON_BLUE);
         name.addKeyListener(this);
-        add(name, new GridBagConstraints(0, 3, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(3,20,0,20),4,18));
+        add(name, new GridBagConstraints(0, 3, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(3,20,0,20),4,17));
 
         AAJLabel passLabel = new AAJLabel(resources.getString("login.password"));
         passLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
@@ -243,7 +243,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
             }
         });
         password.setCaretColor(LauncherFrame.COLOR_BUTTON_BLUE);
-        add(password, new GridBagConstraints(0, 5, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(3, 20, 0, 20), 4, 18));
+        add(password, new GridBagConstraints(0, 5, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(3, 20, 0, 20), 4, 17));
 
         // "Remember this account"
         rememberAccount = new JCheckBox(resources.getString("login.remember"), false);
