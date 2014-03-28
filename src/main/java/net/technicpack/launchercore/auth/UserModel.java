@@ -43,23 +43,7 @@ public class UserModel {
 		}
 	}
 
-	public AuthError AttemptLastUserRefresh() throws AuthenticationNetworkFailureException {
-		String lastUser = mUserStore.getLastUser();
-
-		if (lastUser == null || lastUser.isEmpty()) {
-			return new AuthError("No cached user", "Could not log into the last logged in user, as there was no cached user to log into.");
-		}
-
-		User user = mUserStore.getUser(lastUser);
-
-		if (user == null) {
-			return new AuthError("No cached user", "Could not log into the specified user, as there was no cached user to log into.");
-		}
-
-		return AttemptUserRefresh(user);
-	}
-
-	public AuthError AttemptUserRefresh(User user) throws AuthenticationNetworkFailureException {
+	public AuthError attemptUserRefresh(User user) throws AuthenticationNetworkFailureException {
 		AuthResponse response = AuthenticationService.requestRefresh(user);
         if (response == null) {
             mUserStore.removeUser(user.getUsername());
@@ -88,6 +72,23 @@ public class UserModel {
         //this.getCurrentUser().rotateAccessToken(response.getAccessToken());
         //mUserStore.addUser(this.getCurrentUser());
         return response.getDownloadToken();
+    }
+
+    public void initAuth() {
+        User user = getLastUser();
+
+        if (user != null) {
+            try {
+                AuthError error = this.attemptUserRefresh(user);
+
+                if (error != null)
+                    user = null;
+            } catch (AuthenticationNetworkFailureException ex) {
+                user = new User(user.getDisplayName());
+            }
+        }
+
+        this.setCurrentUser(user);
     }
 
 	public Collection<User> getUsers() {

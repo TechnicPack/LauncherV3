@@ -19,25 +19,6 @@
 
 package net.technicpack.launchercore.modpacks;
 
-import net.technicpack.launchercore.mirror.MirrorStore;
-import net.technicpack.minecraftcore.LauncherDirectories;
-import net.technicpack.rest.io.PackInfo;
-import net.technicpack.rest.io.Resource;
-import net.technicpack.launchercore.mirror.download.Download;
-import net.technicpack.utilslib.MD5Utils;
-import net.technicpack.utilslib.ResourceUtils;
-import net.technicpack.utilslib.Utils;
-import org.apache.commons.io.FileUtils;
-
-import javax.imageio.IIOException;
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-
 public class InstalledPack {
 	public static final String RECOMMENDED = "recommended";
 	public static final String LATEST = "latest";
