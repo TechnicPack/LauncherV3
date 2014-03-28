@@ -60,6 +60,25 @@ public class UserModel {
 		}
 	}
 
+    public AuthError attemptInitialLogin(String username, String password) {
+        try {
+            AuthResponse response = AuthenticationService.requestLogin(username, password, getClientToken());
+
+            if (response == null) {
+                return new AuthError("Auth Error","Invalid credentials. Invalid username or password.");
+            } else if (response.getError() != null) {
+                return new AuthError(response.getError(), response.getErrorMessage());
+            } else {
+                //Create an online user with the received data
+                User clearedUser = new User(username, response);
+                setCurrentUser(clearedUser);
+                return null;
+            }
+        } catch (AuthenticationNetworkFailureException ex) {
+            return new AuthError("Auth Servers Inaccessible", "An error occurred while attempting to reach Minecraft.net");
+        }
+    }
+
     public String retrieveDownloadToken(ISecureMirror mirror) throws DownloadException {
         if (this.getCurrentUser() == null)
             return null;
