@@ -19,19 +19,17 @@
 
 package net.technicpack.launcher.io;
 
+import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launchercore.auth.User;
 import net.technicpack.launchercore.image.ISkinMapper;
 import net.technicpack.minecraftcore.LauncherDirectories;
-import net.technicpack.utilslib.ResourceUtils;
-import net.technicpack.utilslib.Utils;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 
 public class TechnicSkinMapper implements ISkinMapper {
     private LauncherDirectories directories;
+    private ResourceLoader resources;
 
     public TechnicSkinMapper(LauncherDirectories directories) {
         this.directories = directories;
@@ -54,12 +52,6 @@ public class TechnicSkinMapper implements ISkinMapper {
 
     @Override
     public BufferedImage getDefaultFaceImage() {
-        try {
-            return ImageIO.read(ResourceUtils.getResourceAsStream("/net/technicpack/launcher/resources/news/authorHelm.png"));
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-
-        return null;
+        return resources.getImage("news/authorHelm.png");
     }
 }

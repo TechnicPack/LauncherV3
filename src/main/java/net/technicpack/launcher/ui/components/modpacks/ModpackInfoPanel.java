@@ -23,6 +23,7 @@ import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.*;
 import net.technicpack.launcher.ui.controls.feeds.FeedItem;
 import net.technicpack.launcher.ui.controls.feeds.HorizontalGallery;
+import net.technicpack.utilslib.DesktopUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -58,19 +59,7 @@ public class ModpackInfoPanel extends JPanel {
 
     protected void clickFeedItem(FeedItem item, String command) {
         if (command != null && command.equalsIgnoreCase("discuss")) {
-            try {
-                Desktop.getDesktop().browse(new URI(item.getUrl()));
-            } catch (IOException ex) {
-                //Thrown by Desktop.browse() - just log & ignore
-                ex.printStackTrace();
-            } catch (URISyntaxException ex) {
-                //If we got a bogus URL from the internet, then this will throw.  Log & Ignore
-                ex.printStackTrace();
-            } catch (RuntimeException ex) {
-                //browse() throws a bunch of runtime exceptions if you give it bad input
-                //WHICH IS AWESOME
-                ex.printStackTrace();
-            }
+            DesktopUtils.browseUrl(item.getUrl());
         } else
             feedGallery.selectComponent(item);
     }

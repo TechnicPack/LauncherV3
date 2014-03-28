@@ -28,9 +28,11 @@ import net.technicpack.launcher.ui.controls.borders.RoundBorder;
 import net.technicpack.launcher.ui.controls.login.UserCellEditor;
 import net.technicpack.launcher.ui.controls.login.UserCellRenderer;
 import net.technicpack.launcher.ui.controls.login.UserCellUI;
+import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.User;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.image.SkinRepository;
+import net.technicpack.utilslib.DesktopUtils;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -44,7 +46,7 @@ import java.awt.event.KeyListener;
 import java.util.Collection;
 import java.util.Locale;
 
-public class LoginFrame extends DraggableFrame implements IRelocalizableResource, KeyListener {
+public class LoginFrame extends DraggableFrame implements IRelocalizableResource, KeyListener, IAuthListener {
     private ResourceLoader resources;
     private SkinRepository skinRepository;
     private UserModel userModel;
@@ -85,6 +87,14 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         if (!rememberAccount.isSelected() && nameSelect.isVisible() && nameSelect.getSelectedItem() instanceof User) {
             forgetUser((User)nameSelect.getSelectedItem());
         }
+    }
+
+    protected void visitTerms() {
+        DesktopUtils.browseUrl("http://www.technicpack.net/terms");
+    }
+
+    protected void visitPrivacy() {
+        DesktopUtils.browseUrl("http://www.technicpack.net/privacy");
     }
 
     @Override
@@ -133,11 +143,39 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     }
 
     protected void clearCurrentUser() {
+        password.setText("");
+        password.setEditable(true);
+        password.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        rememberAccount.setSelected(false);
 
+        name.setText("");
+        nameSelect.setSelectedItem("");
     }
 
     protected void setCurrentUser(User user) {
+        if (user == null) {
+            clearCurrentUser();
+            return;
+        }
 
+        password.setText("PASSWORD");
+        password.setEditable(false);
+        password.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        rememberAccount.setSelected(true);
+
+        nameSelect.setSelectedItem(user);
+    }
+
+    protected void setCurrentUser(String user) {
+        if (this.name.isVisible())
+            this.name.setText(user);
+        else
+            this.nameSelect.setSelectedItem(user);
+
+        password.setText("");
+        password.setEditable(true);
+        password.setBackground(Color.WHITE);
+        rememberAccount.setSelected(true);
     }
 
     protected void forgetUser(User user) {
@@ -293,6 +331,12 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         termsLink.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         termsLink.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         termsLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        termsLink.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                visitTerms();
+            }
+        });
         linkPane.add(termsLink);
 
         JLabel dash = new JLabel("-");
@@ -307,6 +351,12 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         privacyLink.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         privacyLink.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         privacyLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        privacyLink.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                visitPrivacy();
+            }
+        });
         linkPane.add(privacyLink);
 
         add(linkPane, new GridBagConstraints(0, 9, 3, 1, 1.0, 0.0, GridBagConstraints.SOUTH, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
@@ -331,5 +381,14 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         initComponents();
 
         refreshUsers();
+    }
+
+    @Override
+    public void userChanged(User user) {
+        if (user == null) {
+            this.setVisible(true);
+            refreshUsers();
+        } else
+            this.setVisible(false);
     }
 }

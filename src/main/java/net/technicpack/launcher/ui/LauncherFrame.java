@@ -32,12 +32,14 @@ import net.technicpack.launcher.ui.controls.feeds.CountCircle;
 import net.technicpack.launcher.ui.controls.HeaderTab;
 import net.technicpack.launcher.ui.controls.TiledBackground;
 import net.technicpack.launcher.ui.controls.UserWidget;
+import net.technicpack.launchercore.auth.IAuthListener;
+import net.technicpack.launchercore.auth.User;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class LauncherFrame extends DraggableFrame implements IRelocalizableResource {
+public class LauncherFrame extends DraggableFrame implements IRelocalizableResource, IAuthListener {
 
     private static final int FRAME_WIDTH = 1200;
     private static final int FRAME_HEIGHT = 720;
@@ -299,5 +301,13 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         //Clear references to existing controls
 
         initComponents();
+    }
+
+    @Override
+    public void userChanged(User user) {
+        if (user == null)
+            this.setVisible(false);
+        else
+            this.setVisible(true);
     }
 }

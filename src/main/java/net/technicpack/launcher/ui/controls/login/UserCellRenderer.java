@@ -25,12 +25,9 @@ import net.technicpack.launchercore.auth.User;
 import net.technicpack.launchercore.image.ISkinListener;
 import net.technicpack.launchercore.image.SkinRepository;
 import net.technicpack.utilslib.ImageUtils;
-import net.technicpack.utilslib.ResourceUtils;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 import java.util.HashMap;
 
 public class UserCellRenderer extends JLabel implements ListCellRenderer, ISkinListener {
