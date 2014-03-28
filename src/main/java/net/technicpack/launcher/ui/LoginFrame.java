@@ -19,6 +19,7 @@
 
 package net.technicpack.launcher.ui;
 
+import net.technicpack.launcher.io.TechnicLauncherDirectories;
 import net.technicpack.launcher.lang.IRelocalizableResource;
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.controls.AAJLabel;
@@ -251,7 +252,8 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     protected void clearCurrentUser() {
         password.setText("");
         password.setEditable(true);
-        password.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        password.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        password.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
         rememberAccount.setSelected(false);
 
         name.setText("");
@@ -266,7 +268,8 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
 
         password.setText("PASSWORD");
         password.setEditable(false);
-        password.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        password.setForeground(LauncherFrame.COLOR_SCROLL_THUMB);
+        password.setBorder(new RoundBorder(LauncherFrame.COLOR_SCROLL_THUMB, 1, 10));
         rememberAccount.setSelected(true);
 
         nameSelect.setSelectedItem(user);
@@ -280,7 +283,8 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
 
         password.setText("");
         password.setEditable(true);
-        password.setBackground(Color.WHITE);
+        password.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        password.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
         rememberAccount.setSelected(true);
     }
 

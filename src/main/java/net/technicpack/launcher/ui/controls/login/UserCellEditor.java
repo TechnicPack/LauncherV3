@@ -81,6 +81,7 @@ public class UserCellEditor implements ComboBoxEditor, DocumentListener, ISkinLi
         textField.setBorder(null);
         textField.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         textField.getDocument().addDocumentListener(this);
+        textField.setCaretColor(LauncherFrame.COLOR_BUTTON_BLUE);
         parentPanel.add(textField, STRING);
     }
 
