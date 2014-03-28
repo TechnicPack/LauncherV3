@@ -56,7 +56,7 @@ public class LauncherMain {
 
         SkinRepository skinRepo = new SkinRepository(new TechnicSkinMapper(directories), new MinotarSkinStore("https://minotar.net/", mirrorStore));
 
-        LauncherFrame frame = new LauncherFrame(resources, userModel);
+        LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel);
         userModel.addAuthListener(frame);
 
         LoginFrame login = new LoginFrame(resources, userModel, skinRepo);

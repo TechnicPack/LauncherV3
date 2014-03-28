@@ -35,6 +35,7 @@ import net.technicpack.launcher.ui.controls.UserWidget;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.User;
 import net.technicpack.launchercore.auth.UserModel;
+import net.technicpack.launchercore.image.SkinRepository;
 
 import javax.swing.*;
 import java.awt.*;
@@ -74,6 +75,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     private ResourceLoader resources;
     private UserModel userModel;
+    private SkinRepository skinRepository;
 
     private HeaderTab discoverTab;
     private HeaderTab modpacksTab;
@@ -84,13 +86,16 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private CardLayout infoLayout;
     private JPanel infoSwap;
 
+    private UserWidget userWidget;
+
     NewsInfoPanel newsInfoPanel;
 
-    public LauncherFrame(ResourceLoader resources, UserModel userModel) {
+    public LauncherFrame(ResourceLoader resources, SkinRepository skinRepository, UserModel userModel) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         this.userModel = userModel;
+        this.skinRepository = skinRepository;
 
         //Handles rebuilding the frame, so use it to build the frame in the first place
         relocalize(resources);
@@ -280,7 +285,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         footer.setForeground(COLOR_WHITE_TEXT);
         footer.setBorder(BorderFactory.createEmptyBorder(4,6,5,12));
 
-        UserWidget userWidget = new UserWidget(resources);
+        userWidget = new UserWidget(resources, skinRepository);
         userWidget.setMaximumSize(userWidget.getPreferredSize());
         footer.add(userWidget);
 
@@ -335,7 +340,9 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     public void userChanged(User user) {
         if (user == null)
             this.setVisible(false);
-        else
+        else {
             this.setVisible(true);
+            userWidget.setUser(user);
+        }
     }
 }

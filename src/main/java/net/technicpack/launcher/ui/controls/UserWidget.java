@@ -20,25 +20,35 @@ package net.technicpack.launcher.ui.controls;
 
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
+import net.technicpack.launchercore.auth.User;
+import net.technicpack.launchercore.image.ISkinListener;
+import net.technicpack.launchercore.image.SkinRepository;
+import net.technicpack.utilslib.ImageUtils;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class UserWidget extends JPanel {
+public class UserWidget extends JPanel implements ISkinListener {
 
-    private ResourceLoader resources;
+    private SkinRepository skinRepository;
 
-    public UserWidget(ResourceLoader resources) {
-        this.resources = resources;
+    private JLabel userName;
+    private JLabel avatar;
+    private User currentUser;
 
-        initComponents();
+    public UserWidget(ResourceLoader resources, SkinRepository skinRepository) {
+        this.skinRepository = skinRepository;
+
+        skinRepository.addListener(this);
+
+        initComponents(resources);
     }
 
-    private void initComponents() {
+    private void initComponents(ResourceLoader resources) {
         setOpaque(false);
 
-        JLabel avatar = new JLabel();
-        avatar.setIcon(resources.getIcon("avatarHead.jpg"));
+        avatar = new JLabel();
+        avatar.setIcon(resources.getIcon("news/authorHelm.png"));
         this.add(avatar);
 
         JLabel staticText = new JLabel("Logged in as");
@@ -46,10 +56,31 @@ public class UserWidget extends JPanel {
         staticText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
         this.add(staticText);
 
-        JLabel userName = new JLabel("sct");
+        userName = new JLabel("sct");
         userName.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         userName.setBackground(Color.white);
         userName.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15, Font.BOLD));
         this.add(userName);
+    }
+
+    public void setUser(User user) {
+        currentUser = user;
+        userName.setText(user.getDisplayName());
+        refreshFace();
+    }
+
+    @Override
+    public void skinReady(User user) {
+        // Don't use skins, just faces
+    }
+
+    @Override
+    public void faceReady(User user) {
+        if (user == currentUser)
+            refreshFace();
+    }
+
+    private void refreshFace() {
+        avatar.setIcon(new ImageIcon(ImageUtils.scaleWithAspectWidth(skinRepository.getFaceImage(currentUser), 32)));
     }
 }
