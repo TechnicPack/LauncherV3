@@ -21,6 +21,7 @@ package net.technicpack.launcher.ui;
 
 import net.technicpack.launcher.lang.IRelocalizableResource;
 import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
 import net.technicpack.launcher.ui.components.discover.DiscoverSelector;
 import net.technicpack.launcher.ui.components.modpacks.ModpackInfoPanel;
@@ -76,6 +77,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private ResourceLoader resources;
     private UserModel userModel;
     private SkinRepository skinRepository;
+    private TechnicSettings settings;
 
     private HeaderTab discoverTab;
     private HeaderTab modpacksTab;
@@ -90,12 +92,13 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     NewsInfoPanel newsInfoPanel;
 
-    public LauncherFrame(ResourceLoader resources, SkinRepository skinRepository, UserModel userModel) {
+    public LauncherFrame(ResourceLoader resources, SkinRepository skinRepository, UserModel userModel, TechnicSettings settings) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         this.userModel = userModel;
         this.skinRepository = skinRepository;
+        this.settings = settings;
 
         //Handles rebuilding the frame, so use it to build the frame in the first place
         relocalize(resources);
@@ -310,7 +313,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
         footer.add(Box.createHorizontalGlue());
 
-        JLabel buildCtrl = new JLabel(resources.getString("launcher.build.text", resources.getLauncherBuild(), resources.getString("launcher.build.stable")));
+        JLabel buildCtrl = new JLabel(resources.getString("launcher.build.text", resources.getLauncherBuild(), resources.getString("launcher.build." + settings.getBuildStream())));
         buildCtrl.setForeground(COLOR_WHITE_TEXT);
         buildCtrl.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 14));
         buildCtrl.setHorizontalTextPosition(SwingConstants.RIGHT);
