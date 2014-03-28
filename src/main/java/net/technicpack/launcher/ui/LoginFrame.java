@@ -73,6 +73,8 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         this.setFocusTraversalPolicy(new SortingFocusTraversalPolicy(new Comparator<Component>() {
             @Override
             public int compare(Component o1, Component o2) {
+                //This long stupid stack of else/ifs enforces a tab order of
+                //Username -> Password -> Remember me -> any buttons -> everything else who cares
                 if (o1 == name || o1 == nameSelect)
                     return -1;
                 else if (o2 == name || o2 == nameSelect)
@@ -85,9 +87,9 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
                     return -1;
                 else if (o2 == rememberAccount)
                     return 1;
-                else if (o1 instanceof RoundedButton)
+                else if (o1 instanceof AbstractButton)
                     return -1;
-                else if (o2 instanceof  RoundedButton)
+                else if (o2 instanceof AbstractButton)
                     return 1;
                 else
                     return 0;
