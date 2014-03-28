@@ -34,6 +34,7 @@ import net.technicpack.launcher.ui.controls.TiledBackground;
 import net.technicpack.launcher.ui.controls.UserWidget;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.User;
+import net.technicpack.launchercore.auth.UserModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -72,6 +73,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     public static final String TAB_NEWS = "news";
 
     private ResourceLoader resources;
+    private UserModel userModel;
 
     private HeaderTab discoverTab;
     private HeaderTab modpacksTab;
@@ -84,9 +86,11 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     NewsInfoPanel newsInfoPanel;
 
-    public LauncherFrame(ResourceLoader resources) {
+    public LauncherFrame(ResourceLoader resources, UserModel userModel) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+        this.userModel = userModel;
 
         //Handles rebuilding the frame, so use it to build the frame in the first place
         relocalize(resources);
@@ -116,6 +120,10 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     protected void closeWindow() {
         this.dispose();
+    }
+
+    protected void logout() {
+        userModel.setCurrentUser(null);
     }
 
     /////////////////////////////////////////////////
@@ -273,7 +281,27 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         footer.setBorder(BorderFactory.createEmptyBorder(4,6,5,12));
 
         UserWidget userWidget = new UserWidget(resources);
+        userWidget.setMaximumSize(userWidget.getPreferredSize());
         footer.add(userWidget);
+
+        JLabel dashText = new JLabel(" | ");
+        dashText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        dashText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
+        footer.add(dashText);
+
+        JButton logout = new JButton("Logout");
+        logout.setBorder(BorderFactory.createEmptyBorder());
+        logout.setContentAreaFilled(false);
+        logout.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        logout.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        logout.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
+        logout.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                logout();
+            }
+        });
+        footer.add(logout);
 
         footer.add(Box.createHorizontalGlue());
 

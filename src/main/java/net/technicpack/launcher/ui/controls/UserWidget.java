@@ -36,7 +36,6 @@ public class UserWidget extends JPanel {
 
     private void initComponents() {
         setOpaque(false);
-        setLayout(new FlowLayout(FlowLayout.LEADING));
 
         JLabel avatar = new JLabel();
         avatar.setIcon(resources.getIcon("avatarHead.jpg"));
@@ -49,17 +48,8 @@ public class UserWidget extends JPanel {
 
         JLabel userName = new JLabel("sct");
         userName.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        userName.setBackground(Color.white);
         userName.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15, Font.BOLD));
         this.add(userName);
-
-        JLabel staticText2 = new JLabel(" | ");
-        staticText2.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        staticText2.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
-        this.add(staticText2);
-
-        JLabel logout = new JLabel("Logout");
-        logout.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        logout.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
-        this.add(logout);
     }
 }

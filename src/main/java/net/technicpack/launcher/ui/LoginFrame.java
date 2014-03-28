@@ -31,7 +31,9 @@ import net.technicpack.launcher.ui.controls.login.UserCellUI;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.User;
 import net.technicpack.launchercore.auth.UserModel;
+import net.technicpack.launchercore.exception.AuthenticationNetworkFailureException;
 import net.technicpack.launchercore.image.SkinRepository;
+import net.technicpack.minecraftcore.mojang.auth.AuthResponse;
 import net.technicpack.utilslib.DesktopUtils;
 
 import javax.swing.*;
@@ -44,6 +46,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Locale;
 
 public class LoginFrame extends DraggableFrame implements IRelocalizableResource, KeyListener, IAuthListener {
@@ -66,6 +69,30 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         getContentPane().setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+
+        this.setFocusTraversalPolicy(new SortingFocusTraversalPolicy(new Comparator<Component>() {
+            @Override
+            public int compare(Component o1, Component o2) {
+                if (o1 == name || o1 == nameSelect)
+                    return -1;
+                else if (o2 == name || o2 == nameSelect)
+                    return 1;
+                else if (o1 == password)
+                    return -1;
+                else if (o2 == password)
+                    return 1;
+                else if (o1 == rememberAccount)
+                    return -1;
+                else if (o2 == rememberAccount)
+                    return 1;
+                else if (o1 instanceof RoundedButton)
+                    return -1;
+                else if (o2 instanceof  RoundedButton)
+                    return 1;
+                else
+                    return 0;
+            }
+        }));
 
         //Handles rebuilding the frame, so use it to build the frame in the first place
         relocalize(resources);
@@ -139,7 +166,84 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     }
 
     protected void attemptLogin() {
+        if (nameSelect.isVisible()) {
+            Object selected = nameSelect.getSelectedItem();
 
+            if (selected instanceof User) {
+                verifyExistingLogin((User) selected);
+            } else {
+                String username = selected.toString();
+
+                User user = userModel.getUser(username);
+
+                if (user == null)
+                    attemptNewLogin(username);
+                else {
+                    setCurrentUser(user);
+                    verifyExistingLogin(user);
+                }
+            }
+        } else {
+            attemptNewLogin(name.getText());
+        }
+    }
+
+    private void verifyExistingLogin(User user) {
+        User loginUser = user;
+        boolean rejected = false;
+
+        try {
+            UserModel.AuthError error = userModel.attemptUserRefresh(user);
+
+            if (error != null) {
+                JOptionPane.showMessageDialog(this, error.getErrorDescription(), error.getError(), JOptionPane.ERROR_MESSAGE);
+                loginUser = null;
+                rejected = true;
+            }
+        } catch (AuthenticationNetworkFailureException ex) {
+            ex.printStackTrace();
+
+            //Couldn't reach auth server- if we're running silently (we just started up and have a user session ready to roll)
+            //Go ahead and just play offline automatically, like the minecraft client does.  If we're running loud (user
+            //is actually at the login UI clicking the login button), give them a choice.
+            if (JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(this,
+                    "The auth servers at Minecraft.net are inaccessible.  Would you like to play offline?",
+                    "Offline Play", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE)) {
+
+                //This is the last time we'll have access to the user's real username, so we should set the last-used
+                //username now
+                userModel.setLastUser(user);
+
+                //Create offline user
+                loginUser = new User(user.getDisplayName());
+            } else {
+                //Use clicked 'no', so just pull the ripcord and get back to the UI
+                loginUser = null;
+            }
+        }
+
+        if (loginUser == null) {
+            //If we actually failed to validate, we should remove the user from the list of saved users
+            //and refresh the user list
+            if (rejected) {
+                userModel.removeUser(user);
+                refreshUsers();
+                setCurrentUser(user.getUsername());
+            }
+        } else {
+            //We have a cleared user, start the launcher up
+            userModel.setCurrentUser(loginUser);
+        }
+    }
+
+    private void attemptNewLogin(String name) {
+        UserModel.AuthError error = userModel.attemptInitialLogin(name, new String(this.password.getPassword()));
+
+        if (error != null) {
+            JOptionPane.showMessageDialog(this, error.getErrorDescription(), error.getError(), JOptionPane.ERROR_MESSAGE);
+        } else if (rememberAccount.isSelected()) {
+            userModel.addUser(userModel.getCurrentUser());
+        }
     }
 
     protected void clearCurrentUser() {
@@ -388,6 +492,11 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         if (user == null) {
             this.setVisible(true);
             refreshUsers();
+
+            if (nameSelect.isVisible())
+                nameSelect.grabFocus();
+            else
+                name.grabFocus();
         } else
             this.setVisible(false);
     }
