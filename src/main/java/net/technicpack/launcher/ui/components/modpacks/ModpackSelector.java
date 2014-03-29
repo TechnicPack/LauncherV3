@@ -35,6 +35,7 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
     private AvailablePackList packList;
 
     private JPanel widgetList;
+    private JScrollPane scrollPane;
 
     private Map<String, ModpackWidget> allModpacks = new HashMap<String, ModpackWidget>();
     private ModpackWidget selectedWidget;
@@ -90,7 +91,7 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
         widgetList.setOpaque(false);
         widgetList.setLayout(new GridBagLayout());
 
-        JScrollPane scrollPane = new JScrollPane(widgetList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane = new JScrollPane(widgetList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setOpaque(false);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getViewport().setOpaque(false);
@@ -111,7 +112,13 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
 
     @Override
     public void addOrReplace(ModpackModel modpack) {
-        allModpacks.put(modpack.getName(), new ModpackWidget(resources, modpack));
+        ModpackWidget widget = new ModpackWidget(resources, modpack);
+
+        if (widget.getModpack().isSelected()) {
+            selectedWidget = widget;
+            widget.setIsSelected(true);
+        }
+        allModpacks.put(modpack.getName(), widget);
         rebuildUI();
     }
 
@@ -148,5 +155,9 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
         constraints.weighty = 1.0;
         widgetList.add(Box.createGlue(), constraints);
         revalidate();
+
+        if (selectedWidget != null && scrollPane != null) {
+            scrollPane.scrollRectToVisible(selectedWidget.getBounds());
+        }
     }
 }
