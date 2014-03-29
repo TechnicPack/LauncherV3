@@ -84,9 +84,16 @@ public class ModpackInstaller {
 		}
 
 		queue.RunAllTasks();
-		Version installedVersion = this.getInstalledVersion(modpack);
 
-		boolean shouldUpdate = installedVersion == null;
+		Version installedVersion = modpack.getInstalledVersion();
+        boolean shouldUpdate = false;
+
+        if (installedVersion == null) {
+            platformApi.incrementPackInstalls(modpack.getName());
+            Utils.sendTracking("installModpack", modpack.getName(), modpack.getBuild(), clientId);
+            shouldUpdate = true;
+        }
+        
 		if (!shouldUpdate && !build.equals(installedVersion.getVersion())) {
 			int result = JOptionPane.showConfirmDialog(parentComponent, "Would you like to update this pack?", "Update Found", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
 
@@ -123,18 +130,6 @@ public class ModpackInstaller {
         finished = true;
         return queue.getCompleteVersion();
     }
-
-	private Version getInstalledVersion(ModpackModel modpack) {
-		Version version = null;
-		File versionFile = new File(modpack.getBinDir(), "version");
-		if (versionFile.exists()) {
-			version = Version.load(versionFile);
-		} else {
-			platformApi.incrementPackInstalls(modpack.getName());
-			Utils.sendTracking("installModpack", modpack.getName(), modpack.getBuild(), clientId);
-		}
-		return version;
-	}
 
 	public boolean isFinished() {
 		return finished;

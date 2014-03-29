@@ -19,9 +19,11 @@
 
 package net.technicpack.launchercore.modpacks;
 
+import net.technicpack.launchercore.install.Version;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.minecraftcore.LauncherDirectories;
 import net.technicpack.rest.io.PackInfo;
+import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -102,11 +104,27 @@ public class ModpackModel {
         }
     }
 
+    public Version getInstalledVersion() {
+        Version version = null;
+        File versionFile = new File(getBinDir(), "version");
+        if (versionFile.exists()) {
+            return Version.load(versionFile);
+        } else {
+            return null;
+        }
+    }
+
     public boolean hasRecommendedUpdate() {
         if (installedPack == null || packInfo == null)
             return false;
 
-        String installedBuild = installedPack.getBuild();
+        Version installedVersion = getInstalledVersion();
+
+        if (installedVersion == null)
+            return false;
+
+        String installedBuild = installedVersion.getVersion();
+
         List<String> allBuilds = packInfo.getBuilds();
 
         if (!allBuilds.contains(installedBuild))
