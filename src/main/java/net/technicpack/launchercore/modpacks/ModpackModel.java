@@ -180,7 +180,16 @@ public class ModpackModel {
             return null;
 
         if (installedDirectory == null) {
-            setInstalledDirectory(new File(installedPack.getDirectory()));
+            String rawDir = installedPack.getDirectory();
+
+            if (rawDir != null && rawDir.startsWith(InstalledPack.LAUNCHER_DIR)) {
+                rawDir = new File(directories.getLauncherDirectory(), rawDir.substring(9)).getAbsolutePath();
+            }
+            if (rawDir != null && rawDir.startsWith(InstalledPack.MODPACKS_DIR)) {
+                rawDir = new File(directories.getModpacksDirectory(), rawDir.substring(11)).getAbsolutePath();
+            }
+
+            setInstalledDirectory(new File(rawDir));
         }
 
         return installedDirectory;
