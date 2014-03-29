@@ -24,6 +24,7 @@ import net.technicpack.launcher.ui.controls.AAJLabel;
 import net.technicpack.launcher.ui.controls.RoundedButton;
 import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
 import net.technicpack.launcher.ui.controls.modpacks.StatBox;
+import net.technicpack.launchercore.modpacks.ModpackModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,6 +33,8 @@ import java.awt.event.AdjustmentListener;
 
 public class ModpackDataDisplay extends JPanel {
     private ResourceLoader resources;
+
+    private JLabel titleLabel;
 
     public ModpackDataDisplay(ResourceLoader resources) {
         this.resources = resources;
@@ -43,6 +46,12 @@ public class ModpackDataDisplay extends JPanel {
     public Dimension getPreferredSize() {
         Dimension size = super.getPreferredSize();
         return new Dimension(size.width, 225);
+    }
+
+    public void setModpack(ModpackModel modpack) {
+        titleLabel.setText(resources.getString("launcher.packstats.title", modpack.getDisplayName()));
+
+        repaint();
     }
 
     private void initComponents() {
@@ -96,13 +105,13 @@ public class ModpackDataDisplay extends JPanel {
 
         packInfoPanel.add(Box.createHorizontalGlue(), new GridBagConstraints(3,2,1,1,1.0,0.0,GridBagConstraints.CENTER,GridBagConstraints.HORIZONTAL, new Insets(5,8,0,0),0,0));
 
-        JLabel title = new AAJLabel(resources.getString("launcher.packstats.title", "Tekkify"));
-        title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 24, Font.BOLD));
-        title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        title.setHorizontalAlignment(SwingConstants.LEFT);
-        title.setHorizontalTextPosition(SwingConstants.LEFT);
-        title.setAlignmentX(LEFT_ALIGNMENT);
-        packInfoPanel.add(title, new GridBagConstraints(0,0,4,1,1.0,0.0,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0));
+        titleLabel = new AAJLabel(resources.getString("launcher.packstats.title", "Modpack"));
+        titleLabel.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 24, Font.BOLD));
+        titleLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        titleLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        titleLabel.setHorizontalTextPosition(SwingConstants.LEFT);
+        titleLabel.setAlignmentX(LEFT_ALIGNMENT);
+        packInfoPanel.add(titleLabel, new GridBagConstraints(0,0,4,1,1.0,0.0,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0));
 
         JTextArea description = new JTextArea("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc facilisis congue dignissim. Aliquam posuere eros vel eros luctus molestie. Duis non massa vel orci sagittis semper. Pellentesque lorem diam, viverra in bibendum in, tincidunt in neque. Curabitur consectetur aliquam sem eget laoreet. Quisque eget turpis a velit semper dictum at ut neque. Nulla placerat odio eget neque commodo posuere. Nam porta lacus elit, a rutrum enim mollis vel.");
         description.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));

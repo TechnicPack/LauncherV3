@@ -57,6 +57,7 @@ public class ModpackInfoPanel extends JPanel {
     public void setModpack(ModpackModel modpack) {
         this.modpack = modpack;
         banner.setModpack(modpack);
+        dataDisplay.setModpack(modpack);
         repaint();
     }
 
