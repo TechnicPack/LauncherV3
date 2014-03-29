@@ -286,7 +286,7 @@ public class ModpackModel {
             selectedIndex = 0;
         }
 
-        String selectedName = installedPackRepository.getPackNames().get(packCount);
+        String selectedName = installedPackRepository.getPackNames().get(selectedIndex);
 
         return (selectedName != null && selectedName.equalsIgnoreCase(getName()));
     }
