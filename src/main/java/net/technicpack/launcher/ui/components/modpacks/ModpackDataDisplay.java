@@ -121,7 +121,7 @@ public class ModpackDataDisplay extends JPanel {
         titleLabel.setAlignmentX(LEFT_ALIGNMENT);
         packInfoPanel.add(titleLabel, new GridBagConstraints(0,0,4,1,1.0,0.0,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0));
 
-        description = new JTextArea("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc facilisis congue dignissim. Aliquam posuere eros vel eros luctus molestie. Duis non massa vel orci sagittis semper. Pellentesque lorem diam, viverra in bibendum in, tincidunt in neque. Curabitur consectetur aliquam sem eget laoreet. Quisque eget turpis a velit semper dictum at ut neque. Nulla placerat odio eget neque commodo posuere. Nam porta lacus elit, a rutrum enim mollis vel.");
+        description = new JTextArea("");
         description.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         description.setLineWrap(true);
         description.setWrapStyleWord(true);
