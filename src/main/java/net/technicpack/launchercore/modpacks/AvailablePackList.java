@@ -150,8 +150,6 @@ public class AvailablePackList implements IAuthListener {
             processedModpacks.put(name, modpack);
         }
 
-        modpack.checkImages();
-
         for(IModpackContainer container : registeredContainers) {
             container.addOrReplace(modpack);
         }

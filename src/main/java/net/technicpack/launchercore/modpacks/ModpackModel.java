@@ -23,6 +23,7 @@ import net.technicpack.launchercore.install.Version;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.minecraftcore.LauncherDirectories;
 import net.technicpack.rest.io.PackInfo;
+import net.technicpack.rest.io.Resource;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 
@@ -90,6 +91,25 @@ public class ModpackModel {
             return installedPack.getBuild();
         } else
             return buildName;
+    }
+
+    public Resource getIcon() {
+        if (packInfo == null)
+            return null;
+        return packInfo.getIcon();
+    }
+
+    public Resource getLogo() {
+        if (packInfo == null)
+            return null;
+        return packInfo.getLogo();
+    }
+
+    public Resource getBackground() {
+        if (packInfo == null)
+            return null;
+
+        return packInfo.getBackground();
     }
 
     public boolean isLocalOnly() {
@@ -303,10 +323,6 @@ public class ModpackModel {
 
         installedPackRepository.put(installedPack);
         installedPackRepository.save();
-    }
-
-    public void checkImages() {
-        //TODO
     }
 
     public boolean isSelected() {
