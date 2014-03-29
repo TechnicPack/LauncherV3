@@ -37,6 +37,7 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
     private JPanel widgetList;
 
     private Map<String, ModpackWidget> allModpacks = new HashMap<String, ModpackWidget>();
+    private ModpackWidget selectedWidget;
 
     public ModpackSelector(ResourceLoader resources, AvailablePackList packList) {
         this.resources = resources;

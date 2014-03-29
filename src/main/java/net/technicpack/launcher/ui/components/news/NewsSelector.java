@@ -27,14 +27,24 @@ import sun.tools.jar.resources.jar;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class NewsSelector extends JPanel {
     private ResourceLoader resources;
+    private NewsWidget selectedItem;
 
     public NewsSelector(ResourceLoader resources) {
         this.resources = resources;
 
         initComponents();
+        selectNewsItem(selectedItem);
+    }
+
+    protected void selectNewsItem(NewsWidget widget) {
+        selectedItem.setIsSelected(false);
+        selectedItem = widget;
+        selectedItem.setIsSelected(true);
     }
 
     private void initComponents() {
@@ -58,9 +68,16 @@ public class NewsSelector extends JPanel {
 
         for (int i = 0; i < 12; i++) {
             NewsWidget widget = new NewsWidget(resources);
+            widget.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (e.getSource() instanceof NewsWidget)
+                        selectNewsItem((NewsWidget)e.getSource());
+                }
+            });
 
             if (i == 2)
-                widget.setIsSelected(true);
+                selectedItem = widget;
             widgetHost.add(widget, constraints);
             constraints.gridy++;
         }
