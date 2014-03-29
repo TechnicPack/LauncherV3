@@ -75,11 +75,12 @@ public class StatBox extends JPanel {
         this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         this.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 3));
 
-        valueLabel = new AAJLabel("0");
+        valueLabel = new AAJLabel("");
         valueLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 22, Font.BOLD));
         valueLabel.setForeground(getForeground());
         valueLabel.setHorizontalAlignment(SwingConstants.CENTER);
         valueLabel.setAlignmentX(CENTER_ALIGNMENT);
+        valueLabel.setBorder(BorderFactory.createEmptyBorder(0,0,0,4));
         this.add(valueLabel);
 
         fieldLabel = new AAJLabel(fieldName);
