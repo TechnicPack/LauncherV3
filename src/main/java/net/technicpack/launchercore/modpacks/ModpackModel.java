@@ -130,18 +130,15 @@ public class ModpackModel {
         if (!allBuilds.contains(installedBuild))
             return true;
 
-        boolean isInstalledBuildPreRec = false;
-
         for(String build : allBuilds) {
             if (build.equalsIgnoreCase(packInfo.getRecommended())) {
-                break;
+                return false;
             } else if (build.equalsIgnoreCase(installedBuild)) {
-                isInstalledBuildPreRec = true;
-                break;
+                return true;
             }
         }
 
-        return isInstalledBuildPreRec;
+        return false;
     }
 
     public void setIsPlatform(boolean isPlatform) {
