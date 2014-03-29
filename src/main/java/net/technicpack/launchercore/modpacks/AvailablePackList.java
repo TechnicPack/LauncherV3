@@ -144,7 +144,7 @@ public class AvailablePackList implements IAuthListener {
         } else {
             modpack = new ModpackModel(pack, packInfo, packStore, directories);
 
-            if (pack == null)
+            if (packInfo == null)
                 modpack.setIsPlatform(false);
 
             processedModpacks.put(name, modpack);

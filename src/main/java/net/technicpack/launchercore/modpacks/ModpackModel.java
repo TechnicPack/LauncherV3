@@ -95,7 +95,7 @@ public class ModpackModel {
     }
 
     public boolean isPlatform() {
-        if (installedPack == null) {
+        if (installedPack != null) {
             return installedPack.isPlatform();
         } else {
             return isPlatform;
