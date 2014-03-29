@@ -37,6 +37,7 @@ import net.technicpack.launchercore.auth.User;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.modpacks.AvailablePackList;
+import net.technicpack.launchercore.modpacks.ModpackModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -79,6 +80,9 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private ImageRepository<User> skinRepository;
     private TechnicSettings settings;
     private AvailablePackList packList;
+    private ImageRepository<ModpackModel> iconRepo;
+    private ImageRepository<ModpackModel> logoRepo;
+    private ImageRepository<ModpackModel> backgroundRepo;
 
     private HeaderTab discoverTab;
     private HeaderTab modpacksTab;
@@ -93,7 +97,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     NewsInfoPanel newsInfoPanel;
 
-    public LauncherFrame(ResourceLoader resources, ImageRepository<User> skinRepository, UserModel userModel, TechnicSettings settings, AvailablePackList packList) {
+    public LauncherFrame(ResourceLoader resources, ImageRepository<User> skinRepository, UserModel userModel, TechnicSettings settings, AvailablePackList packList, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -101,6 +105,9 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.skinRepository = skinRepository;
         this.settings = settings;
         this.packList = packList;
+        this.iconRepo = iconRepo;
+        this.logoRepo = logoRepo;
+        this.backgroundRepo = backgroundRepo;
 
         //Handles rebuilding the frame, so use it to build the frame in the first place
         relocalize(resources);
@@ -252,7 +259,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.add(infoContainer, BorderLayout.CENTER);
         infoContainer.setLayout(new BorderLayout());
 
-        ModpackInfoPanel modpackPanel = new ModpackInfoPanel(resources);
+        ModpackInfoPanel modpackPanel = new ModpackInfoPanel(resources, iconRepo, logoRepo, backgroundRepo);
         DiscoverInfoPanel discoverPanel = new DiscoverInfoPanel(resources);
 
         infoSwap = new JPanel();
@@ -278,7 +285,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.selectorLayout = new CardLayout();
         selectorSwap.setLayout(selectorLayout);
         selectorSwap.add(new DiscoverSelector(resources), "discover");
-        selectorSwap.add(new ModpackSelector(resources, packList, modpackPanel), "modpacks");
+        selectorSwap.add(new ModpackSelector(resources, packList, iconRepo, modpackPanel), "modpacks");
         selectorSwap.add(new NewsSelector(resources), "news");
         selectorContainer.add(selectorSwap, BorderLayout.CENTER);
 

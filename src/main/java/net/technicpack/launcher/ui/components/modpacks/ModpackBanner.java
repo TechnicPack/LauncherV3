@@ -22,6 +22,7 @@ import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.AAJLabel;
 import net.technicpack.launcher.ui.controls.modpacks.ModpackTag;
+import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.install.Version;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.solder.io.SolderPackInfo;
@@ -35,6 +36,7 @@ import java.util.logging.Level;
 
 public class ModpackBanner extends JPanel {
     private ResourceLoader resources;
+    private ImageRepository<ModpackModel> iconRepo;
 
     private JLabel modpackName;
     private JPanel modpackTags;
@@ -42,8 +44,9 @@ public class ModpackBanner extends JPanel {
     private JLabel versionText;
     private JLabel installedVersion;
 
-    public ModpackBanner(ResourceLoader resources) {
+    public ModpackBanner(ResourceLoader resources, ImageRepository<ModpackModel> iconRepo) {
         this.resources = resources;
+        this.iconRepo = iconRepo;
 
         initComponents();
     }

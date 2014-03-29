@@ -22,9 +22,11 @@ import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
 import net.technicpack.launcher.ui.controls.modpacks.ModpackWidget;
+import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.modpacks.AvailablePackList;
 import net.technicpack.launchercore.modpacks.IModpackContainer;
 import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.launchercore.modpacks.resources.resourcetype.IconResourceType;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,6 +37,7 @@ import java.util.*;
 public class ModpackSelector extends JPanel implements IModpackContainer {
     private ResourceLoader resources;
     private AvailablePackList packList;
+    private ImageRepository<ModpackModel> iconRepo;
 
     private JPanel widgetList;
     private JScrollPane scrollPane;
@@ -43,10 +46,11 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
     private Map<String, ModpackWidget> allModpacks = new HashMap<String, ModpackWidget>();
     private ModpackWidget selectedWidget;
 
-    public ModpackSelector(ResourceLoader resources, AvailablePackList packList, ModpackInfoPanel modpackInfoPanel) {
+    public ModpackSelector(ResourceLoader resources, AvailablePackList packList, ImageRepository<ModpackModel> iconRepo, ModpackInfoPanel modpackInfoPanel) {
         this.resources = resources;
         this.packList = packList;
         this.modpackInfoPanel = modpackInfoPanel;
+        this.iconRepo = iconRepo;
 
         initComponents();
 
@@ -116,7 +120,7 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
 
     @Override
     public void addOrReplace(ModpackModel modpack) {
-        final ModpackWidget widget = new ModpackWidget(resources, modpack);
+        final ModpackWidget widget = new ModpackWidget(resources, iconRepo.startImageJob(modpack));
         widget.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

@@ -24,6 +24,7 @@ import net.technicpack.launcher.ui.controls.AAJLabel;
 import net.technicpack.launcher.ui.controls.RoundedButton;
 import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
 import net.technicpack.launcher.ui.controls.modpacks.StatBox;
+import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 
 import javax.swing.*;
@@ -33,6 +34,7 @@ import java.awt.event.AdjustmentListener;
 
 public class ModpackDataDisplay extends JPanel {
     private ResourceLoader resources;
+    private ImageRepository<ModpackModel> logoRepo;
 
     private JLabel titleLabel;
     private JTextArea description;
@@ -41,8 +43,9 @@ public class ModpackDataDisplay extends JPanel {
     private StatBox runs;
     private StatBox downloads;
 
-    public ModpackDataDisplay(ResourceLoader resources) {
+    public ModpackDataDisplay(ResourceLoader resources, ImageRepository<ModpackModel> logoRepo) {
         this.resources = resources;
+        this.logoRepo = logoRepo;
 
         initComponents();
     }

@@ -22,17 +22,24 @@ package net.technicpack.launcher.ui.controls.modpacks;
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.SelectorWidget;
+import net.technicpack.launchercore.image.IImageJobListener;
+import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 
 import javax.swing.*;
 
-public class ModpackWidget extends SelectorWidget {
+public class ModpackWidget extends SelectorWidget implements IImageJobListener<ModpackModel> {
     private ModpackModel modpack;
+    private ImageJob<ModpackModel> imageJob;
 
-    public ModpackWidget(ResourceLoader resources, ModpackModel modpack) {
+    private JLabel icon;
+
+    public ModpackWidget(ResourceLoader resources, ImageJob<ModpackModel> job) {
         super(resources);
 
-        this.modpack = modpack;
+        this.imageJob = job;
+        imageJob.addJobListener(this);
+        this.modpack = job.getJobData();
         initComponents();
     }
 
@@ -44,8 +51,8 @@ public class ModpackWidget extends SelectorWidget {
         super.initComponents();
         setBorder(BorderFactory.createEmptyBorder(4,20,4,8));
 
-        JLabel icon = new JLabel();
-        icon.setIcon(getResources().getIcon("icon.png"));
+        icon = new JLabel();
+        icon.setIcon(new ImageIcon(imageJob.getImage()));
         add(icon);
 
         add(Box.createHorizontalStrut(14));
@@ -62,5 +69,11 @@ public class ModpackWidget extends SelectorWidget {
             updateIcon.setIcon(getResources().getIcon("update_available.png"));
             add(updateIcon);
         }
+    }
+
+    @Override
+    public void jobComplete(ImageJob<ModpackModel> job) {
+        icon.setIcon(new ImageIcon(job.getImage()));
+        revalidate();
     }
 }

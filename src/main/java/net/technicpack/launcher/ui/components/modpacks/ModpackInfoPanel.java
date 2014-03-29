@@ -23,6 +23,7 @@ import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.*;
 import net.technicpack.launcher.ui.controls.feeds.FeedItem;
 import net.technicpack.launcher.ui.controls.feeds.HorizontalGallery;
+import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.utilslib.DesktopUtils;
 
@@ -38,6 +39,7 @@ import java.util.Date;
 
 public class ModpackInfoPanel extends JPanel {
     private ResourceLoader resources;
+    private ImageRepository<ModpackModel> backgroundRepo;
 
     private BufferedImage defaultImage;
 
@@ -48,10 +50,11 @@ public class ModpackInfoPanel extends JPanel {
 
     private ModpackModel modpack;
 
-    public ModpackInfoPanel(ResourceLoader loader) {
+    public ModpackInfoPanel(ResourceLoader loader, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo) {
         this.resources  = loader;
+        this.backgroundRepo = backgroundRepo;
 
-        initComponents();
+        initComponents(iconRepo, logoRepo);
     }
 
     public void setModpack(ModpackModel modpack) {
@@ -76,7 +79,7 @@ public class ModpackInfoPanel extends JPanel {
             feedGallery.selectComponent(item);
     }
 
-    private void initComponents() {
+    private void initComponents(ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo) {
         setLayout(new BorderLayout());
 
         defaultImage = resources.getImage("modpack/background.png");
@@ -94,7 +97,7 @@ public class ModpackInfoPanel extends JPanel {
         layoutPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
         background.add(layoutPanel,BorderLayout.CENTER);
 
-        banner = new ModpackBanner(resources);
+        banner = new ModpackBanner(resources, iconRepo);
         banner.setBackground(LauncherFrame.COLOR_BANNER);
         banner.setBorder(BorderFactory.createEmptyBorder(0,0,4,0));
         layoutPanel.add(banner);
@@ -107,7 +110,7 @@ public class ModpackInfoPanel extends JPanel {
         rootFeedPanel.setBorder(BorderFactory.createEmptyBorder(16, 20, 20, 16));
         layoutPanel.add(rootFeedPanel);
 
-        dataDisplay = new ModpackDataDisplay(resources);
+        dataDisplay = new ModpackDataDisplay(resources, logoRepo);
         rootFeedPanel.add(dataDisplay, BorderLayout.PAGE_START);
 
         JPanel feedBottom = new JPanel();

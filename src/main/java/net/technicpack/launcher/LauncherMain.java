@@ -32,6 +32,13 @@ import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.image.face.MinotarFaceImageStore;
 import net.technicpack.launchercore.modpacks.AvailablePackList;
+import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.launchercore.modpacks.resources.PackImageStore;
+import net.technicpack.launchercore.modpacks.resources.PackResourceMapper;
+import net.technicpack.launchercore.modpacks.resources.resourcetype.BackgroundResourceType;
+import net.technicpack.launchercore.modpacks.resources.resourcetype.IModpackResourceType;
+import net.technicpack.launchercore.modpacks.resources.resourcetype.IconResourceType;
+import net.technicpack.launchercore.modpacks.resources.resourcetype.LogoResourceType;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.launchercore.modpacks.sources.IPackInfoRepository;
 import net.technicpack.launchercore.modpacks.sources.IPackSource;
@@ -64,6 +71,14 @@ public class LauncherMain {
         MirrorStore mirrorStore = new MirrorStore(userModel);
         mirrorStore.addSecureMirror("mirror.technicpack.net", new JsonWebSecureMirror("http://mirror.technicpack.net/", "mirror.technicpack.net"));
 
+        IModpackResourceType iconType = new IconResourceType();
+        IModpackResourceType logoType = new LogoResourceType();
+        IModpackResourceType backgroundType = new BackgroundResourceType();
+
+        ImageRepository<ModpackModel> iconRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, resources.getImage("icon.png"), iconType), new PackImageStore(iconType, mirrorStore, userModel));
+        ImageRepository<ModpackModel> logoRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, resources.getImage("modpack/ModImageFiller.png"), logoType), new PackImageStore(logoType, mirrorStore, userModel));
+        ImageRepository<ModpackModel> backgroundRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, null, backgroundType), new PackImageStore(backgroundType, mirrorStore, userModel));
+
         ImageRepository<User> skinRepo = new ImageRepository<User>(new TechnicFaceMapper(directories, resources), new MinotarFaceImageStore("https://minotar.net/", mirrorStore));
 
         ISolderApi solder = new HttpSolderApi(settings.getClientId(), userModel);
@@ -77,7 +92,7 @@ public class LauncherMain {
         AvailablePackList packList = new AvailablePackList(directories, packStore, packInfoRepository, packSources);
         userModel.addAuthListener(packList);
 
-        LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, packList);
+        LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, packList, iconRepo, logoRepo, backgroundRepo);
         userModel.addAuthListener(frame);
 
         LoginFrame login = new LoginFrame(resources, userModel, skinRepo);
