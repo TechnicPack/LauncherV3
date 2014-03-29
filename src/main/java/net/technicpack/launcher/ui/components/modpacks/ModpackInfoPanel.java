@@ -23,6 +23,8 @@ import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.*;
 import net.technicpack.launcher.ui.controls.feeds.FeedItem;
 import net.technicpack.launcher.ui.controls.feeds.HorizontalGallery;
+import net.technicpack.launchercore.image.IImageJobListener;
+import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.utilslib.DesktopUtils;
@@ -37,7 +39,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
 
-public class ModpackInfoPanel extends JPanel {
+public class ModpackInfoPanel extends JPanel implements IImageJobListener<ModpackModel> {
     private ResourceLoader resources;
     private ImageRepository<ModpackModel> backgroundRepo;
 
@@ -61,6 +63,11 @@ public class ModpackInfoPanel extends JPanel {
         this.modpack = modpack;
         banner.setModpack(modpack);
         dataDisplay.setModpack(modpack);
+
+        ImageJob<ModpackModel> job = backgroundRepo.startImageJob(modpack);
+        job.addJobListener(this);
+        background.setImage(job.getImage());
+
         repaint();
     }
 
@@ -221,5 +228,13 @@ public class ModpackInfoPanel extends JPanel {
         constraints.gridwidth = 1;
         constraints.gridheight = 1;
         feedBottom.add(playButton, constraints);
+    }
+
+    @Override
+    public void jobComplete(ImageJob<ModpackModel> job) {
+        if (job.getJobData() == modpack) {
+            background.setImage(job.getImage());
+            repaint();
+        }
     }
 }

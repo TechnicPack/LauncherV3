@@ -52,7 +52,8 @@ public class TiledBackground extends JPanel {
         int destHeight = getHeight();
 
         if (image == null) {
-            g.setColor(this.getBackground());
+            Color staticColor = new Color(this.getBackground().getRGB());
+            g.setColor(staticColor);
             g.fillRect(0, 0, destWidth, destHeight);
             return;
         }
