@@ -80,6 +80,10 @@ public class ImageJob<T> {
             @Override
             public void run() {
                 File imageLocation = mapper.getImageLocation(jobData);
+
+                if (imageLocation != null && !imageLocation.exists())
+                    imageLocation.mkdirs();
+                
                 BufferedImage existingImage = null;
 
                 if (imageLocation != null && imageLocation.exists()) {
