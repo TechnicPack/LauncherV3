@@ -121,6 +121,15 @@ public class SolderPackInfo extends RestObject implements PackInfo {
         return "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc facilisis congue dignissim. Aliquam posuere eros vel eros luctus molestie. Duis non massa vel orci sagittis semper. Pellentesque lorem diam, viverra in bibendum in, tincidunt in neque. Curabitur consectetur aliquam sem eget laoreet. Quisque eget turpis a velit semper dictum at ut neque. Nulla placerat odio eget neque commodo posuere. Nam porta lacus elit, a rutrum enim mollis vel.";
     }
 
+    @Override
+    public Integer getLikes() { return null; }
+
+    @Override
+    public Integer getDownloads() { return null; }
+
+    @Override
+    public Integer getRuns() { return null; }
+
 	@Override
 	public Modpack getModpack(String build) throws BuildInaccessibleException {
         return solder.getPackBuild(build);

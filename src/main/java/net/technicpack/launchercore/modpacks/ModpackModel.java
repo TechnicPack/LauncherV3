@@ -157,6 +157,27 @@ public class ModpackModel {
         return packInfo.getDescription();
     }
 
+    public Integer getLikes() {
+        if (packInfo == null)
+            return null;
+
+        return packInfo.getLikes();
+    }
+
+    public Integer getRuns() {
+        if (packInfo == null)
+            return null;
+
+        return packInfo.getRuns();
+    }
+
+    public Integer getDownloads() {
+        if (packInfo == null)
+            return null;
+
+        return packInfo.getDownloads();
+    }
+
     public File getInstalledDirectory() {
         if (installedPack == null)
             return null;

@@ -48,5 +48,11 @@ public interface PackInfo {
 
     public String getDescription();
 
+    public Integer getRuns();
+
+    public Integer getDownloads();
+
+    public Integer getLikes();
+
 	public Modpack getModpack(String build) throws BuildInaccessibleException;
 }
