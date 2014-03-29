@@ -23,6 +23,7 @@ import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.*;
 import net.technicpack.launcher.ui.controls.feeds.FeedItem;
 import net.technicpack.launcher.ui.controls.feeds.HorizontalGallery;
+import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.utilslib.DesktopUtils;
 
 import javax.swing.*;
@@ -42,11 +43,21 @@ public class ModpackInfoPanel extends JPanel {
 
     private TiledBackground background;
     private HorizontalGallery feedGallery;
+    private ModpackBanner banner;
+    private ModpackDataDisplay dataDisplay;
+
+    private ModpackModel modpack;
 
     public ModpackInfoPanel(ResourceLoader loader) {
         this.resources  = loader;
 
         initComponents();
+    }
+
+    public void setModpack(ModpackModel modpack) {
+        this.modpack = modpack;
+        banner.setModpack(modpack);
+        repaint();
     }
 
     protected void clickLeftFeedButton() {
@@ -82,10 +93,10 @@ public class ModpackInfoPanel extends JPanel {
         layoutPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
         background.add(layoutPanel,BorderLayout.CENTER);
 
-        ModpackBanner modpackBanner = new ModpackBanner(resources);
-        modpackBanner.setBackground(LauncherFrame.COLOR_BANNER);
-        modpackBanner.setBorder(BorderFactory.createEmptyBorder(0,0,4,0));
-        layoutPanel.add(modpackBanner);
+        banner = new ModpackBanner(resources);
+        banner.setBackground(LauncherFrame.COLOR_BANNER);
+        banner.setBorder(BorderFactory.createEmptyBorder(0,0,4,0));
+        layoutPanel.add(banner);
 
         JPanel rootFeedPanel = new JPanel();
         BorderLayout rootFeedLayout = new BorderLayout();
@@ -95,8 +106,8 @@ public class ModpackInfoPanel extends JPanel {
         rootFeedPanel.setBorder(BorderFactory.createEmptyBorder(16, 20, 20, 16));
         layoutPanel.add(rootFeedPanel);
 
-        ModpackDataDisplay modpackDataDisplay = new ModpackDataDisplay(resources);
-        rootFeedPanel.add(modpackDataDisplay, BorderLayout.PAGE_START);
+        dataDisplay = new ModpackDataDisplay(resources);
+        rootFeedPanel.add(dataDisplay, BorderLayout.PAGE_START);
 
         JPanel feedBottom = new JPanel();
         feedBottom.setOpaque(false);

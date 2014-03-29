@@ -245,6 +245,28 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         header.add(rightHeaderPanel);
 
         /////////////////////////////////////////////////////////////
+        // CENTRAL AREA
+        /////////////////////////////////////////////////////////////
+        JPanel infoContainer = new JPanel();
+        infoContainer.setBackground(COLOR_CHARCOAL);
+        infoContainer.setForeground(COLOR_WHITE_TEXT);
+        this.add(infoContainer, BorderLayout.CENTER);
+        infoContainer.setLayout(new BorderLayout());
+
+        ModpackInfoPanel modpackPanel = new ModpackInfoPanel(resources);
+        DiscoverInfoPanel discoverPanel = new DiscoverInfoPanel(resources);
+
+        infoSwap = new JPanel();
+        infoLayout = new CardLayout();
+        infoSwap.setLayout(infoLayout);
+        infoSwap.setOpaque(false);
+        newsInfoPanel = new NewsInfoPanel(resources);
+        infoSwap.add(discoverPanel,"discover");
+        infoSwap.add(newsInfoPanel, "news");
+        infoSwap.add(modpackPanel, "modpacks");
+        infoContainer.add(infoSwap, BorderLayout.CENTER);
+
+        /////////////////////////////////////////////////////////////
         // LEFT SETUP
         /////////////////////////////////////////////////////////////
         JPanel selectorContainer = new JPanel();
@@ -257,7 +279,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.selectorLayout = new CardLayout();
         selectorSwap.setLayout(selectorLayout);
         selectorSwap.add(new DiscoverSelector(resources), "discover");
-        selectorSwap.add(new ModpackSelector(resources, packList), "modpacks");
+        selectorSwap.add(new ModpackSelector(resources, packList, modpackPanel), "modpacks");
         selectorSwap.add(new NewsSelector(resources), "news");
         selectorContainer.add(selectorSwap, BorderLayout.CENTER);
 
@@ -265,25 +287,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         sidekick.setForeground(COLOR_WHITE_TEXT);
         sidekick.setPreferredSize(new Dimension(SIDEKICK_WIDTH, SIDEKICK_HEIGHT));
         selectorContainer.add(sidekick, BorderLayout.PAGE_END);
-
-        /////////////////////////////////////////////////////////////
-        // CENTRAL AREA
-        /////////////////////////////////////////////////////////////
-        JPanel infoContainer = new JPanel();
-        infoContainer.setBackground(COLOR_CHARCOAL);
-        infoContainer.setForeground(COLOR_WHITE_TEXT);
-        this.add(infoContainer, BorderLayout.CENTER);
-        infoContainer.setLayout(new BorderLayout());
-
-        infoSwap = new JPanel();
-        infoLayout = new CardLayout();
-        infoSwap.setLayout(infoLayout);
-        infoSwap.setOpaque(false);
-        newsInfoPanel = new NewsInfoPanel(resources);
-        infoSwap.add(new DiscoverInfoPanel(resources),"discover");
-        infoSwap.add(newsInfoPanel, "news");
-        infoSwap.add(new ModpackInfoPanel(resources), "modpacks");
-        infoContainer.add(infoSwap, BorderLayout.CENTER);
 
         JPanel footer = new JPanel();
         footer.setBackground(COLOR_SELECTOR_BACK);

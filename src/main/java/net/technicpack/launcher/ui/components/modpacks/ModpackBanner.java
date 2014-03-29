@@ -22,19 +22,58 @@ import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.AAJLabel;
 import net.technicpack.launcher.ui.controls.modpacks.ModpackTag;
+import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.solder.io.SolderPackInfo;
+import net.technicpack.utilslib.Utils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.util.Map;
+import java.util.logging.Level;
 
 public class ModpackBanner extends JPanel {
     private ResourceLoader resources;
+
+    private JLabel modpackName;
+    private JPanel modpackTags;
 
     public ModpackBanner(ResourceLoader resources) {
         this.resources = resources;
 
         initComponents();
+    }
+
+    public void setModpack(ModpackModel modpack) {
+        modpackName.setText(modpack.getDisplayName());
+
+        rebuildTags(modpack);
+    }
+
+    protected void rebuildTags(ModpackModel modpack) {
+        modpackTags.removeAll();
+
+        if (!modpack.isPlatform())
+            addTag("launcher.pack.tag.official", LauncherFrame.COLOR_BLUE);
+
+        if (modpack.getPackInfo() instanceof SolderPackInfo)
+            addTag("launcher.pack.tag.solder", LauncherFrame.COLOR_GREEN);
+
+        if (modpack.isLocalOnly())
+            addTag("launcher.pack.tag.offline", LauncherFrame.COLOR_RED);
+
+        Utils.getLogger().log(Level.WARNING, "pass "+modpackTags.getComponentCount());
+        revalidate();
+    }
+
+    protected void addTag(String textString, Color lineColor) {
+        modpackTags.add(Box.createRigidArea(new Dimension(5,0)));
+
+        ModpackTag tag = new ModpackTag(resources.getString(textString));
+        tag.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        tag.setUnderlineColor(lineColor);
+        tag.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 10));
+        modpackTags.add(tag);
     }
 
     private void initComponents() {
@@ -50,43 +89,21 @@ public class ModpackBanner extends JPanel {
         modpackNamePanel.setLayout(new BoxLayout(modpackNamePanel, BoxLayout.PAGE_AXIS));
         this.add(modpackNamePanel);
 
-        JLabel modpackName = new AAJLabel("Tekkify");
+        modpackName = new AAJLabel("Modpack");
         modpackName.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         modpackName.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
         modpackName.setHorizontalTextPosition(SwingConstants.LEFT);
         modpackName.setAlignmentX(LEFT_ALIGNMENT);
         modpackName.setBorder(BorderFactory.createEmptyBorder(0,5,0,0));
+        modpackName.setOpaque(false);
         modpackNamePanel.add(modpackName);
 
-        JPanel modpackTags = new JPanel();
+        modpackTags = new JPanel();
         modpackTags.setLayout(new BoxLayout(modpackTags,BoxLayout.LINE_AXIS));
         modpackTags.setBorder(BorderFactory.createEmptyBorder(0,2,2,2));
         modpackTags.setOpaque(false);
         modpackTags.setAlignmentX(LEFT_ALIGNMENT);
 
-        modpackTags.add(Box.createRigidArea(new Dimension(2,0)));
-
-        ModpackTag tag = new ModpackTag(resources.getString("launcher.pack.tag.official"));
-        tag.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        tag.setUnderlineColor(LauncherFrame.COLOR_BLUE);
-        tag.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 10));
-        modpackTags.add(tag);
-
-        modpackTags.add(Box.createRigidArea(new Dimension(5,0)));
-
-        tag = new ModpackTag(resources.getString("launcher.pack.tag.solder"));
-        tag.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        tag.setUnderlineColor(LauncherFrame.COLOR_GREEN);
-        tag.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 10));
-        modpackTags.add(tag);
-
-        modpackTags.add(Box.createRigidArea(new Dimension(5,0)));
-
-        tag = new ModpackTag(resources.getString("launcher.pack.tag.offline"));
-        tag.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        tag.setUnderlineColor(LauncherFrame.COLOR_RED);
-        tag.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 10));
-        modpackTags.add(tag);
         modpackNamePanel.add(modpackTags);
 
         this.add(Box.createHorizontalGlue());

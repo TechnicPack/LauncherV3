@@ -38,13 +38,15 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
 
     private JPanel widgetList;
     private JScrollPane scrollPane;
+    private ModpackInfoPanel modpackInfoPanel;
 
     private Map<String, ModpackWidget> allModpacks = new HashMap<String, ModpackWidget>();
     private ModpackWidget selectedWidget;
 
-    public ModpackSelector(ResourceLoader resources, AvailablePackList packList) {
+    public ModpackSelector(ResourceLoader resources, AvailablePackList packList, ModpackInfoPanel modpackInfoPanel) {
         this.resources = resources;
         this.packList = packList;
+        this.modpackInfoPanel = modpackInfoPanel;
 
         initComponents();
 
@@ -114,7 +116,7 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
 
     @Override
     public void addOrReplace(ModpackModel modpack) {
-        ModpackWidget widget = new ModpackWidget(resources, modpack);
+        final ModpackWidget widget = new ModpackWidget(resources, modpack);
         widget.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -128,6 +130,18 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
         }
         allModpacks.put(modpack.getName(), widget);
         rebuildUI();
+
+        if (selectedWidget != null) {
+            EventQueue.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    if (widget == selectedWidget)
+                        selectWidget(widget);
+                    else
+                        selectedWidget.scrollRectToVisible(new Rectangle(selectedWidget.getSize()));
+                }
+            });
+        }
     }
 
     protected void selectWidget(ModpackWidget widget) {
@@ -136,6 +150,7 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
         selectedWidget.setIsSelected(true);
         selectedWidget.getModpack().select();
         selectedWidget.scrollRectToVisible(new Rectangle(selectedWidget.getSize()));
+        modpackInfoPanel.setModpack(widget.getModpack());
     }
 
     protected void rebuildUI() {
@@ -171,14 +186,5 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
         constraints.weighty = 1.0;
         widgetList.add(Box.createGlue(), constraints);
         revalidate();
-
-        if (selectedWidget != null) {
-            EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    selectWidget(selectedWidget);
-                }
-            });
-        }
     }
 }
