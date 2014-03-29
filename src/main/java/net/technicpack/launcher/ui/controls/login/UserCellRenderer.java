@@ -22,28 +22,28 @@ package net.technicpack.launcher.ui.controls.login;
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launchercore.auth.User;
-import net.technicpack.launchercore.image.ISkinListener;
-import net.technicpack.launchercore.image.SkinRepository;
+import net.technicpack.launchercore.image.IImageJobListener;
+import net.technicpack.launchercore.image.ImageJob;
+import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.utilslib.ImageUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 
-public class UserCellRenderer extends JLabel implements ListCellRenderer, ISkinListener {
+public class UserCellRenderer extends JLabel implements ListCellRenderer, IImageJobListener<User> {
     private Font textFont;
     private Icon addUserIcon;
 
-    private SkinRepository mSkinRepo;
+    private ImageRepository<User> mSkinRepo;
 
     private static final int ICON_WIDTH = 32;
     private static final int ICON_HEIGHT = 32;
 
     private HashMap<String, Icon> headMap = new HashMap<String, Icon>();
 
-    public UserCellRenderer(Font font, ResourceLoader resources, SkinRepository skinRepo) {
+    public UserCellRenderer(Font font, ResourceLoader resources, ImageRepository<User> skinRepo) {
         this.mSkinRepo = skinRepo;
-        this.mSkinRepo.addListener(this);
         this.textFont = font;
         setOpaque(true);
         addUserIcon = resources.getIcon("add_user.png");
@@ -68,7 +68,9 @@ public class UserCellRenderer extends JLabel implements ListCellRenderer, ISkinL
             this.setIconTextGap(8);
 
             if (!headMap.containsKey(user.getUsername())) {
-                headMap.put(user.getUsername(), new ImageIcon(ImageUtils.scaleImage(mSkinRepo.getFaceImage(user), ICON_WIDTH, ICON_HEIGHT)));
+                ImageJob<User> job = mSkinRepo.startImageJob(user);
+                job.addJobListener(this);
+                headMap.put(user.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
             }
 
             Icon head = headMap.get(user.getUsername());
@@ -92,15 +94,12 @@ public class UserCellRenderer extends JLabel implements ListCellRenderer, ISkinL
     }
 
     @Override
-    public void skinReady(User user) {
-    }
-
-    @Override
-    public void faceReady(User user) {
+    public void jobComplete(ImageJob<User> job) {
+        User user = job.getJobData();
         if (headMap.containsKey(user.getUsername()))
             headMap.remove(user.getUsername());
 
-        headMap.put(user.getUsername(), new ImageIcon(ImageUtils.scaleImage(mSkinRepo.getFaceImage(user), ICON_WIDTH, ICON_HEIGHT)));
+        headMap.put(user.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
 
         this.invalidate();
     }

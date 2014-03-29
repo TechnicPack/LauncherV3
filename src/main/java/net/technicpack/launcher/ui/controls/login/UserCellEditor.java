@@ -20,10 +20,10 @@
 package net.technicpack.launcher.ui.controls.login;
 
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launcher.ui.controls.borders.RoundBorder;
 import net.technicpack.launchercore.auth.User;
-import net.technicpack.launchercore.image.ISkinListener;
-import net.technicpack.launchercore.image.SkinRepository;
+import net.technicpack.launchercore.image.IImageJobListener;
+import net.technicpack.launchercore.image.ImageJob;
+import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.utilslib.ImageUtils;
 
 import javax.swing.*;
@@ -37,7 +37,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class UserCellEditor implements ComboBoxEditor, DocumentListener, ISkinListener {
+public class UserCellEditor implements ComboBoxEditor, DocumentListener, IImageJobListener<User> {
     private Font textFont;
 
     private static final int ICON_WIDTH=32;
@@ -52,15 +52,14 @@ public class UserCellEditor implements ComboBoxEditor, DocumentListener, ISkinLi
     private HashMap<String, Icon> headMap = new HashMap<String, Icon>();
 
     Collection<ActionListener> actionListeners = new HashSet<ActionListener>();
-    private SkinRepository mSkinRepo;
+    private ImageRepository<User> mSkinRepo;
 
     private static final String USER = "user";
     private static final String STRING = "string";
 
-    public UserCellEditor(Font font, SkinRepository skinRepo) {
+    public UserCellEditor(Font font, ImageRepository<User> skinRepo) {
         this.textFont = font;
         this.mSkinRepo = skinRepo;
-        this.mSkinRepo.addListener(this);
 
         layout = new CardLayout();
 
@@ -100,7 +99,9 @@ public class UserCellEditor implements ComboBoxEditor, DocumentListener, ISkinLi
             userLabel.setIconTextGap(8);
 
             if (!headMap.containsKey(user.getUsername())) {
-                headMap.put(user.getUsername(), new ImageIcon(ImageUtils.scaleImage(mSkinRepo.getFaceImage(user), ICON_WIDTH, ICON_HEIGHT)));
+                ImageJob<User> job = mSkinRepo.startImageJob(user);
+                job.addJobListener(this);
+                headMap.put(user.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
             }
 
             Icon head = headMap.get(user.getUsername());
@@ -174,11 +175,12 @@ public class UserCellEditor implements ComboBoxEditor, DocumentListener, ISkinLi
     }
 
     @Override
-    public void skinReady(User user) {
-    }
+    public void jobComplete(ImageJob<User> job) {
+        User user = job.getJobData();
+        if (headMap.containsKey(user.getUsername()))
+            headMap.remove(user.getUsername());
 
-    @Override
-    public void faceReady(User user) {
-
+        headMap.put(user.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
+        this.parentPanel.revalidate();
     }
 }

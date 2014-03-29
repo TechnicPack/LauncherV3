@@ -21,25 +21,25 @@ package net.technicpack.launcher.ui.controls;
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launchercore.auth.User;
-import net.technicpack.launchercore.image.ISkinListener;
-import net.technicpack.launchercore.image.SkinRepository;
+import net.technicpack.launchercore.image.IImageJobListener;
+import net.technicpack.launchercore.image.ImageJob;
+import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.utilslib.ImageUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
-public class UserWidget extends JPanel implements ISkinListener {
+public class UserWidget extends JPanel implements IImageJobListener<User> {
 
-    private SkinRepository skinRepository;
+    private ImageRepository<User> skinRepository;
 
     private JLabel userName;
     private JLabel avatar;
     private User currentUser;
 
-    public UserWidget(ResourceLoader resources, SkinRepository skinRepository) {
+    public UserWidget(ResourceLoader resources, ImageRepository<User> skinRepository) {
         this.skinRepository = skinRepository;
-
-        skinRepository.addListener(this);
 
         initComponents(resources);
     }
@@ -66,21 +66,19 @@ public class UserWidget extends JPanel implements ISkinListener {
     public void setUser(User user) {
         currentUser = user;
         userName.setText(user.getDisplayName());
-        refreshFace();
+
+        ImageJob<User> job = skinRepository.startImageJob(currentUser);
+        job.addJobListener(this);
+        refreshFace(job.getImage());
+    }
+
+    private void refreshFace(BufferedImage image) {
+        avatar.setIcon(new ImageIcon(ImageUtils.scaleWithAspectWidth(image, 32)));
     }
 
     @Override
-    public void skinReady(User user) {
-        // Don't use skins, just faces
-    }
-
-    @Override
-    public void faceReady(User user) {
-        if (user == currentUser)
-            refreshFace();
-    }
-
-    private void refreshFace() {
-        avatar.setIcon(new ImageIcon(ImageUtils.scaleWithAspectWidth(skinRepository.getFaceImage(currentUser), 32)));
+    public void jobComplete(ImageJob<User> job) {
+        if (job.getJobData() == currentUser)
+            refreshFace(job.getImage());
     }
 }

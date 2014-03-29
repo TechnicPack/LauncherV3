@@ -31,12 +31,11 @@ import net.technicpack.launcher.ui.components.news.NewsSelector;
 import net.technicpack.launcher.ui.controls.DraggableFrame;
 import net.technicpack.launcher.ui.controls.feeds.CountCircle;
 import net.technicpack.launcher.ui.controls.HeaderTab;
-import net.technicpack.launcher.ui.controls.TiledBackground;
 import net.technicpack.launcher.ui.controls.UserWidget;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.User;
 import net.technicpack.launchercore.auth.UserModel;
-import net.technicpack.launchercore.image.SkinRepository;
+import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.modpacks.AvailablePackList;
 
 import javax.swing.*;
@@ -77,7 +76,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     private ResourceLoader resources;
     private UserModel userModel;
-    private SkinRepository skinRepository;
+    private ImageRepository<User> skinRepository;
     private TechnicSettings settings;
     private AvailablePackList packList;
 
@@ -94,7 +93,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     NewsInfoPanel newsInfoPanel;
 
-    public LauncherFrame(ResourceLoader resources, SkinRepository skinRepository, UserModel userModel, TechnicSettings settings, AvailablePackList packList) {
+    public LauncherFrame(ResourceLoader resources, ImageRepository<User> skinRepository, UserModel userModel, TechnicSettings settings, AvailablePackList packList) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 

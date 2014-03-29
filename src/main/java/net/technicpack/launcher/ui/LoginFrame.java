@@ -19,7 +19,6 @@
 
 package net.technicpack.launcher.ui;
 
-import net.technicpack.launcher.io.TechnicLauncherDirectories;
 import net.technicpack.launcher.lang.IRelocalizableResource;
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.controls.AAJLabel;
@@ -33,12 +32,10 @@ import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.User;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.exception.AuthenticationNetworkFailureException;
-import net.technicpack.launchercore.image.SkinRepository;
-import net.technicpack.minecraftcore.mojang.auth.AuthResponse;
+import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.utilslib.DesktopUtils;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.plaf.basic.BasicComboPopup;
 import javax.swing.plaf.metal.MetalComboBoxUI;
 import java.awt.*;
@@ -52,7 +49,7 @@ import java.util.Locale;
 
 public class LoginFrame extends DraggableFrame implements IRelocalizableResource, KeyListener, IAuthListener {
     private ResourceLoader resources;
-    private SkinRepository skinRepository;
+    private ImageRepository<User> skinRepository;
     private UserModel userModel;
 
     private JTextField name;
@@ -63,7 +60,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     private static final int FRAME_WIDTH = 347;
     private static final int FRAME_HEIGHT = 409;
 
-    public LoginFrame(ResourceLoader resources, UserModel userModel, SkinRepository skinRepository) {
+    public LoginFrame(ResourceLoader resources, UserModel userModel, ImageRepository<User> skinRepository) {
         this.skinRepository = skinRepository;
         this.userModel = userModel;
 

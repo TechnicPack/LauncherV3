@@ -21,37 +21,35 @@ package net.technicpack.launcher.io;
 
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launchercore.auth.User;
-import net.technicpack.launchercore.image.ISkinMapper;
+import net.technicpack.launchercore.image.IImageMapper;
 import net.technicpack.minecraftcore.LauncherDirectories;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 
-public class TechnicSkinMapper implements ISkinMapper {
+public class TechnicFaceMapper implements IImageMapper<User> {
     private LauncherDirectories directories;
     private ResourceLoader resources;
+    private BufferedImage defaultImage;
 
-    public TechnicSkinMapper(LauncherDirectories directories) {
+    public TechnicFaceMapper(LauncherDirectories directories, ResourceLoader resources) {
         this.directories = directories;
+        this.resources = resources;
+        defaultImage = resources.getImage("news/authorHelm.png");
     }
 
     @Override
-    public String getSkinFilename(User user) {
-        return directories.getAssetsDirectory() + File.separator + "skins" + File.separator + user.getDisplayName() + ".png";
+    public boolean shouldDownloadImage(User imageKey) {
+        return true;
     }
 
     @Override
-    public String getFaceFilename(User user) {
-        return directories.getAssetsDirectory() + File.separator + "avatars" + File.separator + user.getDisplayName() + ".png";
+    public File getImageLocation(User imageKey) {
+        return new File(directories.getAssetsDirectory(), "avatars" + File.separator + imageKey.getDisplayName() + ".png");
     }
 
     @Override
-    public BufferedImage getDefaultSkinImage() {
-        return null;
-    }
-
-    @Override
-    public BufferedImage getDefaultFaceImage() {
-        return resources.getImage("news/authorHelm.png");
+    public BufferedImage getDefaultImage() {
+        return defaultImage;
     }
 }
