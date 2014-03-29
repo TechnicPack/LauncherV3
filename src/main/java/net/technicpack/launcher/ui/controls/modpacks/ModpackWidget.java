@@ -36,6 +36,10 @@ public class ModpackWidget extends SelectorWidget {
         initComponents();
     }
 
+    public ModpackModel getModpack() {
+        return modpack;
+    }
+
     protected void initComponents() {
         super.initComponents();
         setBorder(BorderFactory.createEmptyBorder(4,20,4,8));

@@ -36,7 +36,7 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
 
     private JPanel widgetList;
 
-    private Map<String, ModpackModel> allModpacks = new HashMap<String, ModpackModel>();
+    private Map<String, ModpackWidget> allModpacks = new HashMap<String, ModpackWidget>();
 
     public ModpackSelector(ResourceLoader resources, AvailablePackList packList) {
         this.resources = resources;
@@ -110,37 +110,37 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
 
     @Override
     public void addOrReplace(ModpackModel modpack) {
-        allModpacks.put(modpack.getName(), modpack);
+        allModpacks.put(modpack.getName(), new ModpackWidget(resources, modpack));
         rebuildUI();
     }
 
     protected void rebuildUI() {
         GridBagConstraints constraints = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0), 0,0);
 
-        java.util.List<ModpackModel> sortedPacks = new LinkedList<ModpackModel>();
+        java.util.List<ModpackWidget> sortedPacks = new LinkedList<ModpackWidget>();
         sortedPacks.addAll(allModpacks.values());
-        Collections.sort(sortedPacks, new Comparator<ModpackModel>() {
+        Collections.sort(sortedPacks, new Comparator<ModpackWidget>() {
             @Override
-            public int compare(ModpackModel o1, ModpackModel o2) {
-                int platformCompare = Boolean.valueOf(o1.isPlatform()).compareTo(Boolean.valueOf(o2.isPlatform()));
+            public int compare(ModpackWidget o1, ModpackWidget o2) {
+                int platformCompare = Boolean.valueOf(o1.getModpack().isPlatform()).compareTo(Boolean.valueOf(o2.getModpack().isPlatform()));
 
                 if (platformCompare != 0)
                     return platformCompare;
-                else if (o1.getDisplayName() == null && o2.getDisplayName() == null)
+                else if (o1.getModpack().getDisplayName() == null && o2.getModpack().getDisplayName() == null)
                     return 0;
-                else if (o1.getDisplayName() == null)
+                else if (o1.getModpack().getDisplayName() == null)
                     return -1;
-                else if (o2.getDisplayName() == null)
+                else if (o2.getModpack().getDisplayName() == null)
                     return 1;
                 else
-                    return o1.getDisplayName().compareTo(o2.getDisplayName());
+                    return o1.getModpack().getDisplayName().compareTo(o2.getModpack().getDisplayName());
             }
         });
 
         widgetList.removeAll();
 
-        for(ModpackModel model : sortedPacks) {
-            widgetList.add(new ModpackWidget(resources, model), constraints);
+        for(ModpackWidget sortedPack : sortedPacks) {
+            widgetList.add(sortedPack, constraints);
             constraints.gridy++;
         }
 
