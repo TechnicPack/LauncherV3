@@ -79,7 +79,10 @@ public class ModpackBanner extends JPanel {
         if (modpack.isLocalOnly())
             addTag("launcher.pack.tag.offline", LauncherFrame.COLOR_RED);
 
-        Utils.getLogger().log(Level.WARNING, "pass "+modpackTags.getComponentCount());
+        if (modpackTags.getComponentCount() == 0) {
+            modpackTags.add(Box.createRigidArea(new Dimension(8,14)));
+        }
+
         revalidate();
     }
 
