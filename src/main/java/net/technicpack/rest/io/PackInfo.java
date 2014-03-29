@@ -46,5 +46,7 @@ public interface PackInfo {
 
 	public boolean shouldForceDirectory();
 
+    public String getDescription();
+
 	public Modpack getModpack(String build) throws BuildInaccessibleException;
 }

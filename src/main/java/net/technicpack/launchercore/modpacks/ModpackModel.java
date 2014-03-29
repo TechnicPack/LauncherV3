@@ -150,6 +150,13 @@ public class ModpackModel {
         }
     }
 
+    public String getDescription() {
+        if (packInfo == null)
+            return "";
+
+        return packInfo.getDescription();
+    }
+
     public File getInstalledDirectory() {
         if (installedPack == null)
             return null;
