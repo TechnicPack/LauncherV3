@@ -28,6 +28,8 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.*;
 
 public class ModpackSelector extends JPanel implements IModpackContainer {
@@ -113,13 +115,27 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
     @Override
     public void addOrReplace(ModpackModel modpack) {
         ModpackWidget widget = new ModpackWidget(resources, modpack);
+        widget.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (e.getSource() instanceof ModpackWidget)
+                    selectWidget((ModpackWidget)e.getSource());
+            }
+        });
 
         if (widget.getModpack().isSelected()) {
             selectedWidget = widget;
-            widget.setIsSelected(true);
         }
         allModpacks.put(modpack.getName(), widget);
         rebuildUI();
+    }
+
+    protected void selectWidget(ModpackWidget widget) {
+        selectedWidget.setIsSelected(false);
+        selectedWidget = widget;
+        selectedWidget.setIsSelected(true);
+        selectedWidget.getModpack().select();
+        selectedWidget.scrollRectToVisible(new Rectangle(selectedWidget.getSize()));
     }
 
     protected void rebuildUI() {
@@ -156,8 +172,13 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
         widgetList.add(Box.createGlue(), constraints);
         revalidate();
 
-        if (selectedWidget != null && scrollPane != null) {
-            scrollPane.scrollRectToVisible(selectedWidget.getBounds());
+        if (selectedWidget != null) {
+            EventQueue.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    selectWidget(selectedWidget);
+                }
+            });
         }
     }
 }
