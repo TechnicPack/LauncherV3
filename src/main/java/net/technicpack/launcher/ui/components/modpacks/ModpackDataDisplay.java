@@ -37,6 +37,10 @@ public class ModpackDataDisplay extends JPanel {
     private JLabel titleLabel;
     private JTextArea description;
 
+    private StatBox ratings;
+    private StatBox runs;
+    private StatBox downloads;
+
     public ModpackDataDisplay(ResourceLoader resources) {
         this.resources = resources;
 
@@ -52,6 +56,9 @@ public class ModpackDataDisplay extends JPanel {
     public void setModpack(ModpackModel modpack) {
         titleLabel.setText(resources.getString("launcher.packstats.title", modpack.getDisplayName()));
         description.setText(modpack.getDescription());
+        ratings.setValue(modpack.getLikes());
+        downloads.setValue(modpack.getDownloads());
+        runs.setValue(modpack.getRuns());
 
         EventQueue.invokeLater(new Runnable() {
             @Override
@@ -94,17 +101,17 @@ public class ModpackDataDisplay extends JPanel {
         statBoxes.setOpaque(false);
         statBoxes.setBorder(BorderFactory.createEmptyBorder(5,0,0,0));
 
-        StatBox ratings = new StatBox(resources, resources.getString("launcher.packstats.ratings"), 1799);
+        ratings = new StatBox(resources, resources.getString("launcher.packstats.ratings"), null);
         ratings.setBackground(LauncherFrame.COLOR_LIKES_BACK);
         ratings.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         statBoxes.add(ratings);
 
-        StatBox runs = new StatBox(resources, resources.getString("launcher.packstats.runs"), 172319);
+        runs = new StatBox(resources, resources.getString("launcher.packstats.runs"), null);
         runs.setBackground(LauncherFrame.COLOR_FEEDITEM_BACK);
         runs.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         statBoxes.add(runs);
 
-        StatBox downloads = new StatBox(resources, resources.getString("launcher.packstats.downloads"), 80429);
+        downloads = new StatBox(resources, resources.getString("launcher.packstats.downloads"), null);
         downloads.setBackground(LauncherFrame.COLOR_FEEDITEM_BACK);
         downloads.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         statBoxes.add(downloads);

@@ -32,7 +32,7 @@ public class StatBox extends JPanel {
     JLabel fieldLabel;
     JLabel valueLabel;
 
-    public StatBox(ResourceLoader resources, String fieldName, int value) {
+    public StatBox(ResourceLoader resources, String fieldName, Integer value) {
         this.resources = resources;
         setOpaque(false);
 
@@ -41,7 +41,7 @@ public class StatBox extends JPanel {
         setValue(value);
     }
 
-    public void setValue(int value) {
+    public void setValue(Integer value) {
         String valueStr = buildValueStr(value);
         valueLabel.setText(valueStr);
     }
@@ -90,9 +90,12 @@ public class StatBox extends JPanel {
         this.add(fieldLabel);
     }
 
-    private String buildValueStr(int value) {
+    private String buildValueStr(Integer value) {
+        if (value == null)
+            return "??";
+
         if (value >= 1000000000) {
-            return buildShortenedStr(value/1000000000,"G");
+            return buildShortenedStr(value/1000000000,"B");
         } else if (value >= 1000000) {
             return buildShortenedStr(value/1000000, "M");
         } else if (value >= 1000) {
