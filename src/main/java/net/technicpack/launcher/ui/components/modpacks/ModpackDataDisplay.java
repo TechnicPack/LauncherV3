@@ -24,24 +24,31 @@ import net.technicpack.launcher.ui.controls.AAJLabel;
 import net.technicpack.launcher.ui.controls.RoundedButton;
 import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
 import net.technicpack.launcher.ui.controls.modpacks.StatBox;
+import net.technicpack.launchercore.image.IImageJobListener;
+import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.rest.io.Modpack;
+import net.technicpack.utilslib.ImageUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 
-public class ModpackDataDisplay extends JPanel {
+public class ModpackDataDisplay extends JPanel implements IImageJobListener<ModpackModel> {
     private ResourceLoader resources;
     private ImageRepository<ModpackModel> logoRepo;
 
     private JLabel titleLabel;
     private JTextArea description;
+    private JLabel packImage;
 
     private StatBox ratings;
     private StatBox runs;
     private StatBox downloads;
+
+    private ModpackModel currentModpack;
 
     public ModpackDataDisplay(ResourceLoader resources, ImageRepository<ModpackModel> logoRepo) {
         this.resources = resources;
@@ -57,11 +64,17 @@ public class ModpackDataDisplay extends JPanel {
     }
 
     public void setModpack(ModpackModel modpack) {
+        this.currentModpack = modpack;
+
         titleLabel.setText(resources.getString("launcher.packstats.title", modpack.getDisplayName()));
         description.setText(modpack.getDescription());
         ratings.setValue(modpack.getLikes());
         downloads.setValue(modpack.getDownloads());
         runs.setValue(modpack.getRuns());
+
+        ImageJob<ModpackModel> job = logoRepo.startImageJob(modpack);
+        job.addJobListener(this);
+        packImage.setIcon(new ImageIcon(ImageUtils.scaleImage(job.getImage(), 370, 220)));
 
         EventQueue.invokeLater(new Runnable() {
             @Override
@@ -86,7 +99,7 @@ public class ModpackDataDisplay extends JPanel {
         imagePanel.setPreferredSize(new Dimension(370, 220));
         this.add(imagePanel, BorderLayout.LINE_START);
 
-        JLabel packImage = new JLabel();
+        packImage = new JLabel();
         packImage.setIcon(resources.getIcon("modpack/ModImageFiller.png"));
         packImage.setAlignmentX(RIGHT_ALIGNMENT);
         packImage.setPreferredSize(new Dimension(370, 220));
@@ -162,5 +175,12 @@ public class ModpackDataDisplay extends JPanel {
         });
 
         packInfoPanel.add(scrollHostPanel, new GridBagConstraints(0,1,4,1,1.0,1.0,GridBagConstraints.NORTH,GridBagConstraints.BOTH, new Insets(5,0,0,0),0,0));
+    }
+
+    @Override
+    public void jobComplete(ImageJob<ModpackModel> job) {
+        if (job.getJobData() == currentModpack) {
+            packImage.setIcon(new ImageIcon(ImageUtils.scaleImage(job.getImage(), 370, 220)));
+        }
     }
 }

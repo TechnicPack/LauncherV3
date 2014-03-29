@@ -73,6 +73,7 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
         }
 
         ImageJob<ModpackModel> job = iconRepo.startImageJob(modpack);
+        job.addJobListener(this);
         modpackIcon.setIcon(new ImageIcon(job.getImage()));
 
         rebuildTags(modpack);
