@@ -41,6 +41,9 @@ public class PlatformPackInfoRepository implements IPackInfoRepository {
 
     @Override
     public PackInfo getPackInfo(InstalledPack pack) {
+        if (!pack.isPlatform())
+            return null;
+
         try {
             PackInfo info = null;
 
