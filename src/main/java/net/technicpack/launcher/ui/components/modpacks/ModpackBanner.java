@@ -22,6 +22,7 @@ import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.AAJLabel;
 import net.technicpack.launcher.ui.controls.modpacks.ModpackTag;
+import net.technicpack.launchercore.install.Version;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.solder.io.SolderPackInfo;
 import net.technicpack.utilslib.Utils;
@@ -37,6 +38,9 @@ public class ModpackBanner extends JPanel {
 
     private JLabel modpackName;
     private JPanel modpackTags;
+    private JLabel updateReady;
+    private JLabel versionText;
+    private JLabel installedVersion;
 
     public ModpackBanner(ResourceLoader resources) {
         this.resources = resources;
@@ -46,6 +50,19 @@ public class ModpackBanner extends JPanel {
 
     public void setModpack(ModpackModel modpack) {
         modpackName.setText(modpack.getDisplayName());
+
+        Version packVersion = modpack.getInstalledVersion();
+
+        if (packVersion == null) {
+            updateReady.setVisible(false);
+            versionText.setVisible(false);
+            installedVersion.setVisible(false);
+        } else {
+            updateReady.setVisible(modpack.hasRecommendedUpdate());
+            versionText.setVisible(true);
+            installedVersion.setVisible(true);
+            installedVersion.setText(packVersion.getVersion());
+        }
 
         rebuildTags(modpack);
     }
@@ -118,27 +135,30 @@ public class ModpackBanner extends JPanel {
         versionPanel.setAlignmentX(RIGHT_ALIGNMENT);
         packDoodads.add(versionPanel);
 
-        JLabel updateReady = new JLabel();
+        updateReady = new JLabel();
         updateReady.setIcon(resources.getIcon("update_available.png"));
         updateReady.setHorizontalTextPosition(SwingConstants.LEADING);
         updateReady.setHorizontalAlignment(SwingConstants.RIGHT);
         updateReady.setAlignmentX(RIGHT_ALIGNMENT);
+        updateReady.setVisible(false);
         versionPanel.add(updateReady);
 
-        JLabel boldText = new JLabel(resources.getString("launcher.packbanner.version"));
-        boldText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 16, Font.BOLD));
-        boldText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        boldText.setHorizontalTextPosition(SwingConstants.LEADING);
-        boldText.setHorizontalAlignment(SwingConstants.RIGHT);
-        boldText.setAlignmentX(RIGHT_ALIGNMENT);
-        versionPanel.add(boldText);
+        versionText = new JLabel(resources.getString("launcher.packbanner.version"));
+        versionText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 16, Font.BOLD));
+        versionText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        versionText.setHorizontalTextPosition(SwingConstants.LEADING);
+        versionText.setHorizontalAlignment(SwingConstants.RIGHT);
+        versionText.setAlignmentX(RIGHT_ALIGNMENT);
+        versionText.setVisible(false);
+        versionPanel.add(versionText);
 
-        JLabel installedVersion = new AAJLabel("1.0.7");
+        installedVersion = new AAJLabel("1.0.7");
         installedVersion.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 16));
         installedVersion.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         installedVersion.setHorizontalTextPosition(SwingConstants.LEADING);
         installedVersion.setHorizontalAlignment(SwingConstants.RIGHT);
         installedVersion.setAlignmentX(RIGHT_ALIGNMENT);
+        installedVersion.setVisible(false);
         versionPanel.add(installedVersion);
 
         packDoodads.add(Box.createRigidArea(new Dimension(0, 5)));
