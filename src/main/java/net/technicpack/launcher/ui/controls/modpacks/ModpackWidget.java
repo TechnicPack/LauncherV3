@@ -22,12 +22,18 @@ package net.technicpack.launcher.ui.controls.modpacks;
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.SelectorWidget;
+import net.technicpack.launchercore.modpacks.ModpackModel;
 
 import javax.swing.*;
 
 public class ModpackWidget extends SelectorWidget {
-    public ModpackWidget(ResourceLoader resources) {
+    private ModpackModel modpack;
+
+    public ModpackWidget(ResourceLoader resources, ModpackModel modpack) {
         super(resources);
+
+        this.modpack = modpack;
+        initComponents();
     }
 
     protected void initComponents() {
@@ -40,15 +46,17 @@ public class ModpackWidget extends SelectorWidget {
 
         add(Box.createHorizontalStrut(14));
 
-        JLabel text = new JLabel("Modpack");
+        JLabel text = new JLabel(modpack.getDisplayName());
         text.setFont(getResources().getFont(ResourceLoader.FONT_OPENSANS, 14));
         text.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         add(text);
 
         add(Box.createHorizontalGlue());
 
-        JLabel updateIcon = new JLabel();
-        updateIcon.setIcon(getResources().getIcon("update_available.png"));
-        add(updateIcon);
+        if (modpack.hasRecommendedUpdate()) {
+            JLabel updateIcon = new JLabel();
+            updateIcon.setIcon(getResources().getIcon("update_available.png"));
+            add(updateIcon);
+        }
     }
 }

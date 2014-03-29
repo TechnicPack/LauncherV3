@@ -28,6 +28,8 @@ public class NewsWidget extends SelectorWidget {
 
     public NewsWidget(ResourceLoader resources) {
         super(resources);
+
+        initComponents();
     }
 
     protected void initComponents() {

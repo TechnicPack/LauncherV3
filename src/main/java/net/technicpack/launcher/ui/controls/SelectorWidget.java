@@ -23,8 +23,9 @@ import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 
 import javax.swing.*;
+import java.awt.*;
 
-public class SelectorWidget extends JPanel {
+public class SelectorWidget extends JButton {
 
     private ResourceLoader resources;
 
@@ -32,21 +33,22 @@ public class SelectorWidget extends JPanel {
 
     public SelectorWidget(ResourceLoader resources) {
         this.resources = resources;
-
-        initComponents();
     }
 
     protected ResourceLoader getResources() { return resources; }
 
     protected void initComponents() {
-        setBackground(LauncherFrame.COLOR_PANEL);
-        setOpaque(false);
+        setBorder(BorderFactory.createEmptyBorder());
+        setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
         setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+        setContentAreaFilled(false);
+        setOpaque(true);
+        setFocusPainted(false);
     }
 
     public boolean isSelected() { return isSelected; }
     public void setIsSelected(boolean isSelected) {
         this.isSelected = isSelected;
-        this.setOpaque(isSelected);
+        setBackground(isSelected?LauncherFrame.COLOR_PANEL:LauncherFrame.COLOR_SELECTOR_BACK);
     }
 }

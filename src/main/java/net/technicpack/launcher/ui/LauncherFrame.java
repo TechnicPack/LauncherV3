@@ -37,6 +37,7 @@ import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.User;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.image.SkinRepository;
+import net.technicpack.launchercore.modpacks.AvailablePackList;
 
 import javax.swing.*;
 import java.awt.*;
@@ -58,7 +59,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     public static final Color COLOR_HEADER_TEXT = new Color(255,255,255);
     public static final Color COLOR_CHARCOAL = new Color(31, 31, 31);
     public static final Color COLOR_BANNER = new Color(0, 0, 0, 160);
-    public static final Color COLOR_PANEL = new Color(45, 45, 45, 160);
+    public static final Color COLOR_PANEL = new Color(36, 38, 39);
     public static final Color COLOR_SCROLL_TRACK = new Color(18, 18, 18);
     public static final Color COLOR_SCROLL_THUMB = new Color(53, 53, 53);
     public static final Color COLOR_SELECTOR_BACK = new Color(22,26,29);
@@ -78,6 +79,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private UserModel userModel;
     private SkinRepository skinRepository;
     private TechnicSettings settings;
+    private AvailablePackList packList;
 
     private HeaderTab discoverTab;
     private HeaderTab modpacksTab;
@@ -92,13 +94,14 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     NewsInfoPanel newsInfoPanel;
 
-    public LauncherFrame(ResourceLoader resources, SkinRepository skinRepository, UserModel userModel, TechnicSettings settings) {
+    public LauncherFrame(ResourceLoader resources, SkinRepository skinRepository, UserModel userModel, TechnicSettings settings, AvailablePackList packList) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         this.userModel = userModel;
         this.skinRepository = skinRepository;
         this.settings = settings;
+        this.packList = packList;
 
         //Handles rebuilding the frame, so use it to build the frame in the first place
         relocalize(resources);
@@ -254,7 +257,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.selectorLayout = new CardLayout();
         selectorSwap.setLayout(selectorLayout);
         selectorSwap.add(new DiscoverSelector(resources), "discover");
-        selectorSwap.add(new ModpackSelector(resources), "modpacks");
+        selectorSwap.add(new ModpackSelector(resources, packList), "modpacks");
         selectorSwap.add(new NewsSelector(resources), "news");
         selectorContainer.add(selectorSwap, BorderLayout.CENTER);
 

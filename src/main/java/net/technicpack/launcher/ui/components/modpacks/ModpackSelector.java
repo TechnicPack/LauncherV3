@@ -22,19 +22,29 @@ import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
 import net.technicpack.launcher.ui.controls.modpacks.ModpackWidget;
-import net.technicpack.launcher.ui.controls.TiledBackground;
-import sun.tools.jar.resources.jar;
+import net.technicpack.launchercore.modpacks.AvailablePackList;
+import net.technicpack.launchercore.modpacks.IModpackContainer;
+import net.technicpack.launchercore.modpacks.ModpackModel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.*;
 
-public class ModpackSelector extends JPanel {
+public class ModpackSelector extends JPanel implements IModpackContainer {
     private ResourceLoader resources;
+    private AvailablePackList packList;
 
-    public ModpackSelector(ResourceLoader resources) {
+    private JPanel widgetList;
+
+    private Map<String, ModpackModel> allModpacks = new HashMap<String, ModpackModel>();
+
+    public ModpackSelector(ResourceLoader resources, AvailablePackList packList) {
         this.resources = resources;
+        this.packList = packList;
 
         initComponents();
+
+        packList.addRegisteredContainer(this);
     }
 
     private void initComponents() {
@@ -75,7 +85,7 @@ public class ModpackSelector extends JPanel {
         constraints.fill = GridBagConstraints.BOTH;
         header.add(filterContents, constraints);
 
-        JPanel widgetList = new JPanel();
+        widgetList = new JPanel();
         widgetList.setOpaque(false);
         widgetList.setLayout(new GridBagLayout());
 
@@ -88,29 +98,54 @@ public class ModpackSelector extends JPanel {
         scrollPane.getVerticalScrollBar().setUnitIncrement(12);
         add(scrollPane, BorderLayout.CENTER);
 
-        constraints = new GridBagConstraints();
-        constraints.gridx = 0;
-        constraints.gridy = 1;
-        constraints.gridwidth = 1;
-        constraints.gridheight = 1;
-        constraints.weightx = 1.0;
-        constraints.weighty = 0.0;
-        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0,0);
+        widgetList.add(Box.createGlue(), constraints);
+    }
 
-        ModpackWidget modpack = null;
+    @Override
+    public void clear() {
+        allModpacks.clear();
+        rebuildUI();
+    }
 
-        for (int i = 0; i < 12; i++) {
-            modpack = new ModpackWidget(resources);
+    @Override
+    public void addOrReplace(ModpackModel modpack) {
+        allModpacks.put(modpack.getName(), modpack);
+        rebuildUI();
+    }
 
-            if (i == 2)
-                modpack.setIsSelected(true);
+    protected void rebuildUI() {
+        GridBagConstraints constraints = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0), 0,0);
 
-            widgetList.add(modpack, constraints);
+        java.util.List<ModpackModel> sortedPacks = new LinkedList<ModpackModel>();
+        sortedPacks.addAll(allModpacks.values());
+        Collections.sort(sortedPacks, new Comparator<ModpackModel>() {
+            @Override
+            public int compare(ModpackModel o1, ModpackModel o2) {
+                int platformCompare = Boolean.valueOf(o1.isPlatform()).compareTo(Boolean.valueOf(o2.isPlatform()));
 
+                if (platformCompare != 0)
+                    return platformCompare;
+                else if (o1.getDisplayName() == null && o2.getDisplayName() == null)
+                    return 0;
+                else if (o1.getDisplayName() == null)
+                    return -1;
+                else if (o2.getDisplayName() == null)
+                    return 1;
+                else
+                    return o1.getDisplayName().compareTo(o2.getDisplayName());
+            }
+        });
+
+        widgetList.removeAll();
+
+        for(ModpackModel model : sortedPacks) {
+            widgetList.add(new ModpackWidget(resources, model), constraints);
             constraints.gridy++;
         }
 
         constraints.weighty = 1.0;
         widgetList.add(Box.createGlue(), constraints);
+        revalidate();
     }
 }
