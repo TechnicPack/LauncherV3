@@ -22,6 +22,8 @@ import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.AAJLabel;
 import net.technicpack.launcher.ui.controls.modpacks.ModpackTag;
+import net.technicpack.launchercore.image.IImageJobListener;
+import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.install.Version;
 import net.technicpack.launchercore.modpacks.ModpackModel;
@@ -34,15 +36,17 @@ import java.awt.font.TextAttribute;
 import java.util.Map;
 import java.util.logging.Level;
 
-public class ModpackBanner extends JPanel {
+public class ModpackBanner extends JPanel implements IImageJobListener<ModpackModel> {
     private ResourceLoader resources;
     private ImageRepository<ModpackModel> iconRepo;
+    private ModpackModel currentModpack;
 
     private JLabel modpackName;
     private JPanel modpackTags;
     private JLabel updateReady;
     private JLabel versionText;
     private JLabel installedVersion;
+    private JLabel modpackIcon;
 
     public ModpackBanner(ResourceLoader resources, ImageRepository<ModpackModel> iconRepo) {
         this.resources = resources;
@@ -52,6 +56,7 @@ public class ModpackBanner extends JPanel {
     }
 
     public void setModpack(ModpackModel modpack) {
+        currentModpack = modpack;
         modpackName.setText(modpack.getDisplayName());
 
         Version packVersion = modpack.getInstalledVersion();
@@ -66,6 +71,9 @@ public class ModpackBanner extends JPanel {
             installedVersion.setVisible(true);
             installedVersion.setText(packVersion.getVersion());
         }
+
+        ImageJob<ModpackModel> job = iconRepo.startImageJob(modpack);
+        modpackIcon.setIcon(new ImageIcon(job.getImage()));
 
         rebuildTags(modpack);
     }
@@ -103,7 +111,7 @@ public class ModpackBanner extends JPanel {
         this.setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
         this.add(Box.createRigidArea(new Dimension(20, 10)));
 
-        JLabel modpackIcon = new JLabel();
+        modpackIcon = new JLabel();
         modpackIcon.setIcon(resources.getIcon("icon.png"));
         this.add(modpackIcon);
 
@@ -184,5 +192,12 @@ public class ModpackBanner extends JPanel {
 
         this.add(packDoodads);
         this.add(Box.createRigidArea(new Dimension(10, 10)));
+    }
+
+    @Override
+    public void jobComplete(ImageJob<ModpackModel> job) {
+        if (currentModpack == job.getJobData()) {
+            modpackIcon.setIcon(new ImageIcon(job.getImage()));
+        }
     }
 }
