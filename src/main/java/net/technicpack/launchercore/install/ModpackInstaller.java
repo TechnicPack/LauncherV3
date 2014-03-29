@@ -93,7 +93,7 @@ public class ModpackInstaller {
             Utils.sendTracking("installModpack", modpack.getName(), modpack.getBuild(), clientId);
             shouldUpdate = true;
         }
-        
+
 		if (!shouldUpdate && !build.equals(installedVersion.getVersion())) {
 			int result = JOptionPane.showConfirmDialog(parentComponent, "Would you like to update this pack?", "Update Found", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
 

@@ -274,4 +274,34 @@ public class ModpackModel {
     public void checkImages() {
         //TODO
     }
+
+    public boolean isSelected() {
+        int packCount = installedPackRepository.getPackNames().size();
+
+        if (packCount == 0)
+            return false;
+
+        int selectedIndex = installedPackRepository.getSelectedIndex();
+        if (selectedIndex < 0 || selectedIndex >= packCount) {
+            selectedIndex = 0;
+        }
+
+        String selectedName = installedPackRepository.getPackNames().get(packCount);
+
+        return (selectedName != null && selectedName.equalsIgnoreCase(getName()));
+    }
+
+    public void select() {
+        String name = getName();
+        List<String> names = installedPackRepository.getPackNames();
+
+        for(int i = 0; i < names.size(); i++) {
+            String packName = names.get(i);
+
+            if (name.equalsIgnoreCase(packName)) {
+                installedPackRepository.setSelectedIndex(i);
+                break;
+            }
+        }
+    }
 }
