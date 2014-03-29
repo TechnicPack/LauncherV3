@@ -69,7 +69,7 @@ public class LauncherMain {
         SkinRepository skinRepo = new SkinRepository(new TechnicSkinMapper(directories), new MinotarSkinStore("https://minotar.net/", mirrorStore));
 
         ISolderApi solder = new HttpSolderApi(settings.getClientId(), userModel);
-        IPlatformApi platform = new HttpPlatformApi("http://www.technicpack.net/api/", mirrorStore);
+        IPlatformApi platform = new HttpPlatformApi("http://technicplatform.gopagoda.com/api/", mirrorStore);
 
         IInstalledPackRepository packStore = TechnicInstalledPackStore.load(new File(directories.getLauncherDirectory(), "installedPacks"));
         IPackInfoRepository packInfoRepository = new PlatformPackInfoRepository(platform, solder);

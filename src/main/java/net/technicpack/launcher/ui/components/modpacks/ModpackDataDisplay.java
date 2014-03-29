@@ -94,14 +94,7 @@ public class ModpackDataDisplay extends JPanel {
 
         packInfoPanel.add(statBoxes, new GridBagConstraints(0,2,3,1,0.0,0.0,GridBagConstraints.SOUTH, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
 
-        RoundedButton platformButton = new RoundedButton(resources.getString("launcher.pack.platform"));
-        platformButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 20, Font.BOLD));
-        platformButton.setBorder(BorderFactory.createEmptyBorder(8, 0, 12, 0));
-        platformButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        platformButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
-        platformButton.setContentAreaFilled(false);
-        platformButton.setAlignmentX(RIGHT_ALIGNMENT);
-        packInfoPanel.add(platformButton, new GridBagConstraints(3,2,1,1,1.0,0.0,GridBagConstraints.CENTER,GridBagConstraints.HORIZONTAL, new Insets(5,8,0,0),0,0));
+        packInfoPanel.add(Box.createHorizontalGlue(), new GridBagConstraints(3,2,1,1,1.0,0.0,GridBagConstraints.CENTER,GridBagConstraints.HORIZONTAL, new Insets(5,8,0,0),0,0));
 
         JLabel title = new AAJLabel(resources.getString("launcher.packstats.title", "Tekkify"));
         title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 24, Font.BOLD));

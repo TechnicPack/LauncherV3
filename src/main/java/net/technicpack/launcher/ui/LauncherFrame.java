@@ -318,7 +318,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
         JLabel buildCtrl = new JLabel(resources.getString("launcher.build.text", resources.getLauncherBuild(), resources.getString("launcher.build." + settings.getBuildStream())));
         buildCtrl.setForeground(COLOR_WHITE_TEXT);
-        buildCtrl.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 14));
+        buildCtrl.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         buildCtrl.setHorizontalTextPosition(SwingConstants.RIGHT);
         buildCtrl.setHorizontalAlignment(SwingConstants.RIGHT);
         footer.add(buildCtrl);

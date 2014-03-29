@@ -157,7 +157,7 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
                 else if (o2.getModpack().getDisplayName() == null)
                     return 1;
                 else
-                    return o1.getModpack().getDisplayName().compareTo(o2.getModpack().getDisplayName());
+                    return o1.getModpack().getDisplayName().compareToIgnoreCase(o2.getModpack().getDisplayName());
             }
         });
 
