@@ -171,7 +171,7 @@ public class ModpackInfoPanel extends JPanel {
         feedBottom.add(feedGallery, constraints);
 
         for (int i = 0; i < 10; i++) {
-            FeedItem item = new FeedItem(resources, "FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND FARTS FARTS FARTS AND ", "http://www.technicpack.net/", "sct", new Date(), resources.getCircleClippedImage("news/AuthorAvatar.jpg"));
+            FeedItem item = new FeedItem(resources, "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc facilisis congue dignissim. Aliquam posuere eros vel eros luctus molestie. Duis non massa vel orci sagittis semper. Pellentesque lorem diam, viverra in bibendum in, tincidunt in neque. Curabitur consectetur aliquam sem eget laoreet. Quisque eget turpis a velit semper dictum at ut neque. Nulla placerat odio eget neque commodo posuere. Nam porta lacus elit, a rutrum enim mollis vel.", "http://www.technicpack.net/", "sct", new Date(), resources.getCircleClippedImage("news/AuthorAvatar.jpg"));
             item.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {

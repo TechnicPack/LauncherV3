@@ -104,7 +104,7 @@ public class ModpackDataDisplay extends JPanel {
         title.setAlignmentX(LEFT_ALIGNMENT);
         packInfoPanel.add(title, new GridBagConstraints(0,0,4,1,1.0,0.0,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0));
 
-        JTextArea description = new JTextArea("Gear up and set forth on a campaign worthy of legend, for Hexxit has been unearthed! Dark dungeons, towering spires, weathered ruins and musty tomes lay before you. Lay claim to riches or create your own artifacts, tame beasts and carve out your own story in endless wonder. Alone or with friends, adventure awaits in Hexxit.  Also this text is too big to fit in this spot so now there's a scrollbar. Farts butts farts butts farts butts.");
+        JTextArea description = new JTextArea("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc facilisis congue dignissim. Aliquam posuere eros vel eros luctus molestie. Duis non massa vel orci sagittis semper. Pellentesque lorem diam, viverra in bibendum in, tincidunt in neque. Curabitur consectetur aliquam sem eget laoreet. Quisque eget turpis a velit semper dictum at ut neque. Nulla placerat odio eget neque commodo posuere. Nam porta lacus elit, a rutrum enim mollis vel.");
         description.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         description.setLineWrap(true);
         description.setWrapStyleWord(true);
