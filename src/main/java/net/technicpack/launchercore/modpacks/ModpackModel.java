@@ -26,6 +26,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public class ModpackModel {
     private InstalledPack installedPack;
@@ -79,7 +80,7 @@ public class ModpackModel {
         } else if (installedPack != null) {
             return installedPack.getName();
         } else
-            return null;
+            return "";
     }
 
     public String getBuild() {
@@ -99,6 +100,30 @@ public class ModpackModel {
         } else {
             return isPlatform;
         }
+    }
+
+    public boolean hasRecommendedUpdate() {
+        if (installedPack == null || packInfo == null)
+            return false;
+
+        String installedBuild = installedPack.getBuild();
+        List<String> allBuilds = packInfo.getBuilds();
+
+        if (!allBuilds.contains(installedBuild))
+            return true;
+
+        boolean isInstalledBuildPreRec = false;
+
+        for(String build : allBuilds) {
+            if (build.equalsIgnoreCase(packInfo.getRecommended())) {
+                break;
+            } else if (build.equalsIgnoreCase(installedBuild)) {
+                isInstalledBuildPreRec = true;
+                break;
+            }
+        }
+
+        return isInstalledBuildPreRec;
     }
 
     public void setIsPlatform(boolean isPlatform) {

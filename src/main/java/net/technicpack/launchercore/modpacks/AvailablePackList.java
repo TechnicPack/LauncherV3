@@ -53,7 +53,8 @@ public class AvailablePackList implements IAuthListener {
 
 	@Override
 	public void userChanged(User user) {
-		reloadAllPacks();
+        if (user != null)
+		    reloadAllPacks();
 	}
 
     public void addRegisteredContainer(IModpackContainer container) {
