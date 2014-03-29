@@ -138,6 +138,8 @@ public class ModpackBanner extends JPanel {
         versionPanel.setAlignmentX(RIGHT_ALIGNMENT);
         packDoodads.add(versionPanel);
 
+        versionPanel.add(Box.createRigidArea(new Dimension(1,20)));
+
         updateReady = new JLabel();
         updateReady.setIcon(resources.getIcon("update_available.png"));
         updateReady.setHorizontalTextPosition(SwingConstants.LEADING);
