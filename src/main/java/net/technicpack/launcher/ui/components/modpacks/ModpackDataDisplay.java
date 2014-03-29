@@ -72,9 +72,13 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         downloads.setValue(modpack.getDownloads());
         runs.setValue(modpack.getRuns());
 
-        ImageJob<ModpackModel> job = logoRepo.startImageJob(modpack);
-        job.addJobListener(this);
-        packImage.setIcon(new ImageIcon(ImageUtils.scaleImage(job.getImage(), 370, 220)));
+        //HACK: for the demo we don't want to show shitty resized pack resources, so just force them to use the default
+        if (modpack.getLikes() != null) {
+            ImageJob<ModpackModel> job = logoRepo.startImageJob(modpack);
+            job.addJobListener(this);
+            packImage.setIcon(new ImageIcon(ImageUtils.scaleImage(job.getImage(), 370, 220)));
+        } else
+            packImage.setIcon(resources.getIcon("modpack/ModImageFiller.png"));
 
         EventQueue.invokeLater(new Runnable() {
             @Override

@@ -43,8 +43,6 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
     private ResourceLoader resources;
     private ImageRepository<ModpackModel> backgroundRepo;
 
-    private BufferedImage defaultImage;
-
     private TiledBackground background;
     private HorizontalGallery feedGallery;
     private ModpackBanner banner;
@@ -64,9 +62,13 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         banner.setModpack(modpack);
         dataDisplay.setModpack(modpack);
 
-        ImageJob<ModpackModel> job = backgroundRepo.startImageJob(modpack);
-        job.addJobListener(this);
-        background.setImage(job.getImage());
+        //HACK: for the demo we don't want to show shitty resized pack resources, so just force them to use the default
+        if (modpack.getLikes() != null) {
+            ImageJob<ModpackModel> job = backgroundRepo.startImageJob(modpack);
+            job.addJobListener(this);
+            background.setImage(job.getImage());
+        } else
+            background.setImage(null);
 
         repaint();
     }
@@ -89,8 +91,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
     private void initComponents(ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo) {
         setLayout(new BorderLayout());
 
-        defaultImage = resources.getImage("modpack/background.png");
-        background = new TiledBackground(defaultImage);
+        background = new TiledBackground(null);
         background.setOpaque(true);
         background.setLayout(new BorderLayout());
         background.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
