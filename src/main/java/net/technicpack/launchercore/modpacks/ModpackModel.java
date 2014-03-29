@@ -300,6 +300,7 @@ public class ModpackModel {
 
             if (name.equalsIgnoreCase(packName)) {
                 installedPackRepository.setSelectedIndex(i);
+                installedPackRepository.save();
                 break;
             }
         }
