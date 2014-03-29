@@ -183,10 +183,10 @@ public class ModpackModel {
             String rawDir = installedPack.getDirectory();
 
             if (rawDir != null && rawDir.startsWith(InstalledPack.LAUNCHER_DIR)) {
-                rawDir = new File(directories.getLauncherDirectory(), rawDir.substring(9)).getAbsolutePath();
+                rawDir = new File(directories.getLauncherDirectory(), rawDir.substring(InstalledPack.LAUNCHER_DIR.length())).getAbsolutePath();
             }
             if (rawDir != null && rawDir.startsWith(InstalledPack.MODPACKS_DIR)) {
-                rawDir = new File(directories.getModpacksDirectory(), rawDir.substring(11)).getAbsolutePath();
+                rawDir = new File(directories.getModpacksDirectory(), rawDir.substring(InstalledPack.MODPACKS_DIR.length())).getAbsolutePath();
             }
 
             setInstalledDirectory(new File(rawDir));
