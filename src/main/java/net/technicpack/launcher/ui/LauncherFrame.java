@@ -33,6 +33,7 @@ import net.technicpack.launcher.ui.controls.TiledBackground;
 import net.technicpack.launcher.ui.controls.feeds.CountCircle;
 import net.technicpack.launcher.ui.controls.HeaderTab;
 import net.technicpack.launcher.ui.controls.UserWidget;
+import net.technicpack.launcher.ui.controls.installation.ProgressBar;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.User;
 import net.technicpack.launchercore.auth.UserModel;
@@ -53,7 +54,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private static final int SIDEKICK_HEIGHT = 250;
 
     public static final Color COLOR_RED = new Color(229,0,0);
-    public static final Color COLOR_GREEN = new Color(49, 143, 12);
+    public static final Color COLOR_GREEN = new Color(90, 184, 96);
     public static final Color COLOR_BLUE = new Color(16, 108, 163);
     public static final Color COLOR_BLUE_DARKER = new Color(12, 94, 145);
     public static final Color COLOR_WHITE_TEXT = new Color(208,208,208);
@@ -324,7 +325,11 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         });
         footer.add(logout);
 
-        footer.add(Box.createHorizontalGlue());
+        ProgressBar bar = new ProgressBar();
+        bar.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        bar.setBackground(LauncherFrame.COLOR_GREEN);
+        bar.setBorder(BorderFactory.createEmptyBorder(4,15,3,15));
+        footer.add(bar);
 
         JLabel buildCtrl = new JLabel(resources.getString("launcher.build.text", resources.getLauncherBuild(), resources.getString("launcher.build." + settings.getBuildStream())));
         buildCtrl.setForeground(COLOR_WHITE_TEXT);
