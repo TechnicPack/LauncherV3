@@ -29,6 +29,7 @@ import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launcher.ui.components.news.NewsInfoPanel;
 import net.technicpack.launcher.ui.components.news.NewsSelector;
 import net.technicpack.launcher.ui.controls.DraggableFrame;
+import net.technicpack.launcher.ui.controls.TiledBackground;
 import net.technicpack.launcher.ui.controls.feeds.CountCircle;
 import net.technicpack.launcher.ui.controls.HeaderTab;
 import net.technicpack.launcher.ui.controls.UserWidget;
@@ -289,7 +290,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         selectorSwap.add(new NewsSelector(resources), "news");
         selectorContainer.add(selectorSwap, BorderLayout.CENTER);
 
-        JPanel sidekick = new JPanel();
+        TiledBackground sidekick = new TiledBackground(resources.getImage("ad_placeholder.png"));
         sidekick.setForeground(COLOR_WHITE_TEXT);
         sidekick.setPreferredSize(new Dimension(SIDEKICK_WIDTH, SIDEKICK_HEIGHT));
         selectorContainer.add(sidekick, BorderLayout.PAGE_END);
