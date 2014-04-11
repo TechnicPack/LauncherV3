@@ -50,27 +50,23 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 public class ModpackInstaller {
-	private final DownloadListener listener;
     private final LauncherDirectories directories;
     private final IPlatformApi platformApi;
     private final String clientId;
-    private final Component parentComponent;
 	private boolean finished = false;
     private MirrorStore mirrorStore;
 
-	public ModpackInstaller(DownloadListener listener, LauncherDirectories directories, MirrorStore mirrorStore, IPlatformApi platformApi, String clientId, Component parentComponent) {
-		this.listener = listener;
+	public ModpackInstaller(LauncherDirectories directories, MirrorStore mirrorStore, IPlatformApi platformApi, String clientId) {
 		this.clientId = clientId;
         this.directories = directories;
         this.mirrorStore = mirrorStore;
         this.platformApi = platformApi;
-        this.parentComponent = parentComponent;
 	}
 
-	public CompleteVersion installPack(ModpackModel modpack, String build) throws IOException {
+	public CompleteVersion installPack(ModpackModel modpack, String build, DownloadListener listener) throws IOException {
         modpack.save();
 
-        InstallTasksQueue queue = new InstallTasksQueue(this.listener, mirrorStore);
+        InstallTasksQueue queue = new InstallTasksQueue(listener, mirrorStore);
 		queue.AddTask(new InitPackDirectoryTask(modpack));
 
 		PackInfo packInfo = modpack.getPackInfo();
@@ -94,15 +90,15 @@ public class ModpackInstaller {
             shouldUpdate = true;
         }
 
-		if (!shouldUpdate && !build.equals(installedVersion.getVersion())) {
-			int result = JOptionPane.showConfirmDialog(parentComponent, "Would you like to update this pack?", "Update Found", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-
-			if (result == JOptionPane.YES_OPTION) {
-				shouldUpdate = true;
-			} else {
-				build = installedVersion.getVersion();
-			}
-		}
+//		if (!shouldUpdate && !build.equals(installedVersion.getVersion())) {
+//			int result = JOptionPane.showConfirmDialog(parentComponent, "Would you like to update this pack?", "Update Found", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+//
+//			if (result == JOptionPane.YES_OPTION) {
+//				shouldUpdate = true;
+//			} else {
+//				build = installedVersion.getVersion();
+//			}
+//		}
 
 		if (shouldUpdate) {
 			//If we're installing a new version of modpack, then we need to get rid of the existing version.json

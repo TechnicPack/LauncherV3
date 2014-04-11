@@ -20,6 +20,7 @@
 package net.technicpack.launchercore.launch;
 
 import net.technicpack.launchercore.auth.User;
+import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.LauncherDirectories;
 import net.technicpack.minecraftcore.mojang.CompleteVersion;
@@ -39,23 +40,23 @@ import java.util.Map;
 
 public class MinecraftLauncher {
     private final LauncherDirectories directories;
-	private final ModpackModel pack;
     private final IPlatformApi platformApi;
     private final String clientId;
+    private final UserModel userModel;
 
-	public MinecraftLauncher(IPlatformApi platformApi, ModpackModel pack, LauncherDirectories directories, String clientId) {
-		this.pack = pack;
+	public MinecraftLauncher(IPlatformApi platformApi, LauncherDirectories directories, UserModel userModel, String clientId) {
         this.directories = directories;
         this.platformApi = platformApi;
         this.clientId = clientId;
+        this.userModel = userModel;
 	}
 
-	public MinecraftProcess launch(int memory, User user, LaunchOptions options, CompleteVersion version) throws IOException {
-		return launch(memory, user, options, null, version);
+	public MinecraftProcess launch(ModpackModel pack, int memory, LaunchOptions options, CompleteVersion version) throws IOException {
+		return launch(pack, memory, options, null, version);
 	}
 
-	public MinecraftProcess launch(int memory, User user, LaunchOptions options, MinecraftExitListener exitListener, CompleteVersion version) throws IOException {
-		List<String> commands = buildCommands(memory, version, user, options);
+	public MinecraftProcess launch(ModpackModel pack, int memory, LaunchOptions options, MinecraftExitListener exitListener, CompleteVersion version) throws IOException {
+		List<String> commands = buildCommands(pack, memory, version, options);
 		StringBuilder full = new StringBuilder();
 		boolean first = true;
 
@@ -75,7 +76,7 @@ public class MinecraftLauncher {
 		return mcProcess;
 	}
 
-	private List<String> buildCommands(int memory, CompleteVersion version, User user, LaunchOptions options) {
+	private List<String> buildCommands(ModpackModel pack, int memory, CompleteVersion version, LaunchOptions options) {
 		List<String> commands = new ArrayList<String>();
 		commands.add(OperatingSystem.getJavaDir());
 
@@ -106,9 +107,9 @@ public class MinecraftLauncher {
         }
 
 		commands.add("-cp");
-		commands.add(buildClassPath(version));
+		commands.add(buildClassPath(pack, version));
 		commands.add(version.getMainClass());
-		commands.addAll(Arrays.asList(getMinecraftArguments(version, pack.getInstalledDirectory(), user)));
+		commands.addAll(Arrays.asList(getMinecraftArguments(version, pack.getInstalledDirectory(), userModel.getCurrentUser())));
 		options.appendToCommands(commands);
 
 		//TODO: Add all the other less important commands
@@ -157,7 +158,7 @@ public class MinecraftLauncher {
 		return split;
 	}
 
-	private String buildClassPath(CompleteVersion version) {
+	private String buildClassPath(ModpackModel pack, CompleteVersion version) {
 		StringBuilder result = new StringBuilder();
 		String separator = System.getProperty("path.separator");
 
