@@ -62,13 +62,9 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         banner.setModpack(modpack);
         dataDisplay.setModpack(modpack);
 
-        //HACK: for the demo we don't want to show shitty resized pack resources, so just force them to use the default
-        if (modpack.getLikes() != null) {
-            ImageJob<ModpackModel> job = backgroundRepo.startImageJob(modpack);
-            job.addJobListener(this);
-            background.setImage(job.getImage());
-        } else
-            background.setImage(null);
+        ImageJob<ModpackModel> job = backgroundRepo.startImageJob(modpack);
+        job.addJobListener(this);
+        background.setImage(job.getImage());
 
         repaint();
     }
