@@ -73,7 +73,7 @@ public class UserWidget extends JPanel implements IImageJobListener<User> {
     }
 
     private void refreshFace(BufferedImage image) {
-        avatar.setIcon(new ImageIcon(ImageUtils.scaleWithAspectWidth(image, 32)));
+        avatar.setIcon(new ImageIcon(ImageUtils.scaleWithAspectWidth(image, 30)));
     }
 
     @Override

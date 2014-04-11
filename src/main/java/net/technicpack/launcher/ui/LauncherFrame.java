@@ -96,6 +96,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private JPanel infoSwap;
 
     private UserWidget userWidget;
+    private ProgressBar installProgress;
+    private Component installProgressPlaceholder;
 
     NewsInfoPanel newsInfoPanel;
 
@@ -300,7 +302,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         footer.setBackground(COLOR_SELECTOR_BACK);
         footer.setLayout(new BoxLayout(footer, BoxLayout.LINE_AXIS));
         footer.setForeground(COLOR_WHITE_TEXT);
-        footer.setBorder(BorderFactory.createEmptyBorder(4,6,5,12));
+        footer.setBorder(BorderFactory.createEmptyBorder(3,6,3,12));
 
         userWidget = new UserWidget(resources, skinRepository);
         userWidget.setMaximumSize(userWidget.getPreferredSize());
@@ -325,11 +327,17 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         });
         footer.add(logout);
 
-        ProgressBar bar = new ProgressBar();
-        bar.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        bar.setBackground(LauncherFrame.COLOR_GREEN);
-        bar.setBorder(BorderFactory.createEmptyBorder(4,15,3,15));
-        footer.add(bar);
+        installProgress = new ProgressBar();
+        installProgress.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        installProgress.setBackground(LauncherFrame.COLOR_GREEN);
+        installProgress.setBorder(BorderFactory.createEmptyBorder(5, 45, 4, 45));
+        installProgress.setIcon(resources.getIcon("download_icon.png"));
+        installProgress.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 12));
+        installProgress.setVisible(false);
+        footer.add(installProgress);
+
+        installProgressPlaceholder = Box.createHorizontalGlue();
+        footer.add(installProgressPlaceholder);
 
         JLabel buildCtrl = new JLabel(resources.getString("launcher.build.text", resources.getLauncherBuild(), resources.getString("launcher.build." + settings.getBuildStream())));
         buildCtrl.setForeground(COLOR_WHITE_TEXT);

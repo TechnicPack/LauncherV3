@@ -23,6 +23,8 @@ import javax.swing.*;
 import java.awt.*;
 
 public class ProgressBar extends JLabel {
+    float progressPct;
+
     public ProgressBar() {
         super("Working...");
     }
@@ -55,16 +57,52 @@ public class ProgressBar extends JLabel {
         height -= (insets.top + insets.bottom);
 
         g2d.setColor(getBackground());
+
+        float clipWidth = progressPct * (float)width;
+        Shape clip = g2d.getClip();
+        g2d.clipRect(x, y, (int)clipWidth, height);
         g2d.fillRoundRect(x, y, width, height, height, height);
+        g2d.setClip(clip);
+
         g2d.setColor(getForeground());
         Stroke stroke = g2d.getStroke();
         g2d.setStroke(new BasicStroke(2));
         g2d.drawRoundRect(x, y, width, height, height, height);
         g2d.setStroke(stroke);
+
+        int iconWidth = 0;
+        if (this.getIcon() != null) {
+            this.getIcon().paintIcon(this, g2d, x+(height/4), y + (height/2 - this.getIcon().getIconHeight()/2));
+            iconWidth = this.getIcon().getIconWidth() + this.getIconTextGap();
+        }
+
+        g2d.setFont(getFont());
+        int textY = y + ((height - g2d.getFontMetrics().getHeight()) / 2) + g2d.getFontMetrics().getAscent();
+        g2d.drawString(getText(), x+(height/4)+iconWidth, textY);
+
+        int pct = (int)(progressPct * 100);
+        String pctText = Integer.toString(pct) + "%";
+
+        int textX = (x+width) - (height/4) - g2d.getFontMetrics().stringWidth(pctText);
+        g2d.drawString(pctText, textX, textY);
     }
 
     @Override
     public Dimension getMaximumSize() {
         return new Dimension(32000,32000);
+    }
+
+    public void setProgressThreadSafe(final String progressText, final float progress) {
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                setProgress(progressText, progress);
+            }
+        });
+    }
+
+    public void setProgress(String progressText, float progress) {
+        setText(progressText);
+        this.progressPct = progress;
     }
 }
