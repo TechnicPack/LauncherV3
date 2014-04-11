@@ -16,14 +16,18 @@
  * as well as a copy of the GNU Lesser General Public License,
  * along with The Technic Launcher.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package net.technicpack.launcher;
 
+import com.beust.jcommander.JCommander;
 import net.technicpack.launcher.io.TechnicFaceMapper;
 import net.technicpack.launcher.io.TechnicInstalledPackStore;
 import net.technicpack.launcher.io.TechnicLauncherDirectories;
 import net.technicpack.launcher.io.TechnicUserStore;
 import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.launcher.launch.Installer;
 import net.technicpack.launcher.settings.SettingsFactory;
+import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.LoginFrame;
@@ -31,6 +35,8 @@ import net.technicpack.launchercore.auth.User;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.image.face.MinotarFaceImageStore;
+import net.technicpack.launchercore.install.ModpackInstaller;
+import net.technicpack.launchercore.launch.MinecraftLauncher;
 import net.technicpack.launchercore.modpacks.AvailablePackList;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.resources.PackImageStore;
@@ -57,11 +63,18 @@ import java.util.ArrayList;
 
 public class LauncherMain {
     public static void main(String[] args) {
+        StartupParameters params = new StartupParameters(args);
+        try {
+            new JCommander(params, args);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
         TechnicSettings settings = SettingsFactory.buildSettingsObject();
-        startLauncher(settings);
+        startLauncher(settings, params);
     }
 
-    private static void startLauncher(TechnicSettings settings) {
+    private static void startLauncher(TechnicSettings settings, StartupParameters startupParameters) {
         LauncherDirectories directories = new TechnicLauncherDirectories(settings.getTechnicRoot());
         ResourceLoader resources = new ResourceLoader("net","technicpack","launcher","resources");
         resources.setLocale("default");
@@ -75,7 +88,8 @@ public class LauncherMain {
         IModpackResourceType logoType = new LogoResourceType();
         IModpackResourceType backgroundType = new BackgroundResourceType();
 
-        ImageRepository<ModpackModel> iconRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, resources.getImage("icon.png"), iconType), new PackImageStore(iconType, mirrorStore, userModel));
+        PackResourceMapper iconMapper = new PackResourceMapper(directories, resources.getImage("icon.png"), iconType);
+        ImageRepository<ModpackModel> iconRepo = new ImageRepository<ModpackModel>(iconMapper, new PackImageStore(iconType, mirrorStore, userModel));
         ImageRepository<ModpackModel> logoRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, resources.getImage("modpack/ModImageFiller.png"), logoType), new PackImageStore(logoType, mirrorStore, userModel));
         ImageRepository<ModpackModel> backgroundRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, null, backgroundType), new PackImageStore(backgroundType, mirrorStore, userModel));
 
@@ -92,7 +106,11 @@ public class LauncherMain {
         AvailablePackList packList = new AvailablePackList(directories, packStore, packInfoRepository, packSources);
         userModel.addAuthListener(packList);
 
-        LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, packList, iconRepo, logoRepo, backgroundRepo);
+        MinecraftLauncher launcher = new MinecraftLauncher(platform, directories, userModel, settings.getClientId());
+        ModpackInstaller modpackInstaller = new ModpackInstaller(directories, mirrorStore, platform, settings.getClientId());
+        Installer installer = new Installer(startupParameters, modpackInstaller, launcher, settings, iconMapper);
+
+        LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, packList, iconRepo, logoRepo, backgroundRepo, installer);
         userModel.addAuthListener(frame);
 
         LoginFrame login = new LoginFrame(resources, userModel, skinRepo);

@@ -19,10 +19,12 @@
 
 package net.technicpack.launcher.ui.controls.installation;
 
+import net.technicpack.launchercore.util.DownloadListener;
+
 import javax.swing.*;
 import java.awt.*;
 
-public class ProgressBar extends JLabel {
+public class ProgressBar extends JLabel implements DownloadListener {
     float progressPct;
 
     public ProgressBar() {
@@ -104,5 +106,10 @@ public class ProgressBar extends JLabel {
     public void setProgress(String progressText, float progress) {
         setText(progressText);
         this.progressPct = progress;
+    }
+
+    @Override
+    public void stateChanged(String fileName, float progress) {
+        setProgressThreadSafe(fileName, progress);
     }
 }

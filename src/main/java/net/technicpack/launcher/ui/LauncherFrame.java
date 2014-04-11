@@ -21,6 +21,7 @@ package net.technicpack.launcher.ui;
 
 import net.technicpack.launcher.lang.IRelocalizableResource;
 import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.launcher.launch.Installer;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
 import net.technicpack.launcher.ui.components.discover.DiscoverSelector;
@@ -78,13 +79,14 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     public static final String TAB_NEWS = "news";
 
     private ResourceLoader resources;
-    private UserModel userModel;
-    private ImageRepository<User> skinRepository;
-    private TechnicSettings settings;
-    private AvailablePackList packList;
-    private ImageRepository<ModpackModel> iconRepo;
-    private ImageRepository<ModpackModel> logoRepo;
-    private ImageRepository<ModpackModel> backgroundRepo;
+    private final UserModel userModel;
+    private final ImageRepository<User> skinRepository;
+    private final TechnicSettings settings;
+    private final AvailablePackList packList;
+    private final ImageRepository<ModpackModel> iconRepo;
+    private final ImageRepository<ModpackModel> logoRepo;
+    private final ImageRepository<ModpackModel> backgroundRepo;
+    private final Installer installer;
 
     private HeaderTab discoverTab;
     private HeaderTab modpacksTab;
@@ -101,7 +103,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     NewsInfoPanel newsInfoPanel;
 
-    public LauncherFrame(ResourceLoader resources, ImageRepository<User> skinRepository, UserModel userModel, TechnicSettings settings, AvailablePackList packList, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo) {
+    public LauncherFrame(ResourceLoader resources, ImageRepository<User> skinRepository, UserModel userModel, TechnicSettings settings, AvailablePackList packList, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, Installer installer) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -112,6 +114,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.iconRepo = iconRepo;
         this.logoRepo = logoRepo;
         this.backgroundRepo = backgroundRepo;
+        this.installer = installer;
 
         //Handles rebuilding the frame, so use it to build the frame in the first place
         relocalize(resources);
