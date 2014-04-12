@@ -185,7 +185,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
             //If the user says yes, update, then force a full install
             if (requestInstall) {
-    			int result = JOptionPane.showConfirmDialog(this, "Would you like to update this pack?", "Update Found", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+    			int result = JOptionPane.showConfirmDialog(this, resources.getString("launcher.install.query"), resources.getString("launcher.install.query.title"), JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
 
     			if (result == JOptionPane.YES_OPTION) {
     				forceInstall = true;

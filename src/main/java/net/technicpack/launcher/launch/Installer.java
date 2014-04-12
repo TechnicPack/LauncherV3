@@ -87,16 +87,16 @@ public class Installer {
                         System.exit(0);
                     }
                 } catch (PackNotAvailableOfflineException e) {
-                    JOptionPane.showMessageDialog(frame, e.getMessage(), "Cannot Start Modpack", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, e.getMessage(), resources.getString("launcher.installerror.unavailable"), JOptionPane.WARNING_MESSAGE);
                 } catch (DownloadException e) {
-                    JOptionPane.showMessageDialog(frame, "Error downloading file for the following pack: " + pack.getDisplayName() + " \n\n" + e.getMessage() + "\n\nPlease consult the modpack author.", "Error", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, resources.getString("launcher.installerror.download", pack.getDisplayName(), e.getMessage()), resources.getString("launcher.installerror.title"), JOptionPane.WARNING_MESSAGE);
                 } catch (ZipException e) {
-                    JOptionPane.showMessageDialog(frame, "Error unzipping a file for the following pack: " + pack.getDisplayName() + " \n\n" + e.getMessage() + "\n\nPlease consult the modpack author.", "Error", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, resources.getString("launcher.installerror.unzip", pack.getDisplayName(), e.getMessage()), resources.getString("launcher.installerror.title"), JOptionPane.WARNING_MESSAGE);
                 } catch (CacheDeleteException e) {
-                    JOptionPane.showMessageDialog(frame, "Error installing the following pack: "+pack.getDisplayName() + " \n\n" + e.getMessage() + "\n\nPlease check your system settings.", "Error", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, resources.getString("launcher.installerror.cache", pack.getDisplayName(), e.getMessage()), resources.getString("launcher.installerror.title"), JOptionPane.WARNING_MESSAGE);
                 } catch (BuildInaccessibleException e) {
                     e.printStackTrace();
-                    JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, e.getMessage(), resources.getString("launcher.installerror.title"), JOptionPane.WARNING_MESSAGE);
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
