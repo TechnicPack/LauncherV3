@@ -24,6 +24,8 @@ import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launchercore.launch.MinecraftExitListener;
 import net.technicpack.launchercore.util.LaunchAction;
 
+import java.awt.*;
+
 public class LauncherUnhider implements MinecraftExitListener {
 
     private final TechnicSettings settings;
@@ -43,6 +45,12 @@ public class LauncherUnhider implements MinecraftExitListener {
         }
 
         hasExited = true;
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                frame.launchCompleted();
+            }
+        });
     }
 
     public boolean hasExited() {

@@ -33,11 +33,13 @@ import net.technicpack.launchercore.launch.LaunchOptions;
 import net.technicpack.launchercore.launch.MinecraftLauncher;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.resources.PackResourceMapper;
+import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.launchercore.util.LaunchAction;
 import net.technicpack.minecraftcore.mojang.CompleteVersion;
 import net.technicpack.utilslib.Memory;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
 import java.util.zip.ZipException;
 
@@ -59,15 +61,14 @@ public class Installer {
         this.startupParameters = startupParameters;
     }
 
-    public void installAndRun(final ResourceLoader resources, final ModpackModel pack, final String build, final boolean doFullInstall, final LauncherFrame frame, final ProgressBar bar) {
+    public void installAndRun(final ResourceLoader resources, final ModpackModel pack, final String build, final boolean doFullInstall, final LauncherFrame frame, final DownloadListener listener) {
         runningThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    bar.setVisible(true);
                     CompleteVersion version = null;
                     if (!pack.isLocalOnly()) {
-                        version = installer.installPack(pack, build, bar);
+                        version = installer.installPack(pack, build, listener);
                     } else {
                         version = installer.prepareOfflinePack(pack);
                     }
@@ -99,7 +100,12 @@ public class Installer {
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
-                    bar.setVisible(false);
+                    EventQueue.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            frame.launchCompleted();
+                        }
+                    });
                 }
             }
         });

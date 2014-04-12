@@ -29,17 +29,16 @@ import net.technicpack.launcher.ui.components.modpacks.ModpackInfoPanel;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launcher.ui.components.news.NewsInfoPanel;
 import net.technicpack.launcher.ui.components.news.NewsSelector;
-import net.technicpack.launcher.ui.controls.DraggableFrame;
-import net.technicpack.launcher.ui.controls.TiledBackground;
+import net.technicpack.launcher.ui.controls.*;
 import net.technicpack.launcher.ui.controls.feeds.CountCircle;
-import net.technicpack.launcher.ui.controls.HeaderTab;
-import net.technicpack.launcher.ui.controls.UserWidget;
 import net.technicpack.launcher.ui.controls.installation.ProgressBar;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.User;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.image.ImageRepository;
+import net.technicpack.launchercore.install.Version;
 import net.technicpack.launchercore.modpacks.AvailablePackList;
+import net.technicpack.launchercore.modpacks.InstalledPack;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 
 import javax.swing.*;
@@ -100,6 +99,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private UserWidget userWidget;
     private ProgressBar installProgress;
     private Component installProgressPlaceholder;
+    private RoundedButton playButton;
+    private ModpackSelector modpackSelector;
 
     NewsInfoPanel newsInfoPanel;
 
@@ -147,7 +148,80 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     }
 
     protected void logout() {
+        if (installer.isCurrentlyRunning())
+            return;
+
         userModel.setCurrentUser(null);
+    }
+
+    protected void launchModpack() {
+        if (installer.isCurrentlyRunning())
+            return;
+
+        ModpackModel pack = modpackSelector.getSelectedPack();
+
+        if (pack == null)
+            return;
+
+        boolean forceInstall = false;
+        Version installedVersion = pack.getInstalledVersion();
+
+        //Force a full install (check cache, redownload, unzip files) if we have no current installation of this modpack
+        if (installedVersion == null)
+            forceInstall = true;
+        else if (pack.getBuild() != null) {
+
+            //Ask the user if they want to update to the newer version if:
+            //1- the pack build is RECOMMENDED & the recommended version is diff from the installed version
+            //2- the pack build is LATEST & the latest version is diff from the installed version
+            //3- the pack build is neither LATEST or RECOMMENDED & the pack build is diff from the installed version
+            boolean requestInstall = false;
+            if (pack.getBuild().equalsIgnoreCase(InstalledPack.RECOMMENDED) && pack.getPackInfo().getRecommended() != null && !pack.getPackInfo().getRecommended().equalsIgnoreCase(installedVersion.getVersion()))
+                requestInstall = true;
+            else if (pack.getBuild().equalsIgnoreCase(InstalledPack.LATEST) && pack.getPackInfo().getLatest() != null && !pack.getPackInfo().getLatest().equalsIgnoreCase(installedVersion.getVersion()))
+                requestInstall = true;
+            else if (!pack.getBuild().equalsIgnoreCase(InstalledPack.RECOMMENDED) && !pack.getBuild().equalsIgnoreCase(InstalledPack.LATEST) && !pack.getBuild().equalsIgnoreCase(installedVersion.getVersion()))
+                requestInstall = true;
+
+            //If the user says yes, update, then force a full install
+            if (requestInstall) {
+    			int result = JOptionPane.showConfirmDialog(this, "Would you like to update this pack?", "Update Found", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+
+    			if (result == JOptionPane.YES_OPTION) {
+    				forceInstall = true;
+    			}
+            }
+        }
+
+        //If we're forcing an install, then derive the installation build from the pack build
+        //otherwise, just use the installed version
+        String installBuild = null;
+        if (forceInstall) {
+            installBuild = pack.getBuild();
+
+            if (installBuild.equalsIgnoreCase(InstalledPack.RECOMMENDED))
+                installBuild = pack.getPackInfo().getRecommended();
+            else if (installBuild.equalsIgnoreCase(InstalledPack.LATEST))
+                installBuild = pack.getPackInfo().getLatest();
+        } else
+            installBuild = installedVersion.getVersion();
+
+        installer.installAndRun(resources, pack, installBuild, forceInstall, this, installProgress);
+
+        installProgress.setVisible(true);
+        installProgressPlaceholder.setVisible(false);
+        userChanged(userModel.getCurrentUser());
+        invalidate();
+    }
+
+    public void launchCompleted() {
+        installProgress.setVisible(false);
+        installProgressPlaceholder.setVisible(true);
+
+        if (!installer.isCurrentlyRunning())
+            userChanged(userModel.getCurrentUser());
+
+        invalidate();
     }
 
     /////////////////////////////////////////////////
@@ -267,6 +341,14 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         infoContainer.setLayout(new BorderLayout());
 
         ModpackInfoPanel modpackPanel = new ModpackInfoPanel(resources, iconRepo, logoRepo, backgroundRepo);
+        playButton = modpackPanel.getPlayButton();
+        playButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                launchModpack();
+            }
+        });
+
         DiscoverInfoPanel discoverPanel = new DiscoverInfoPanel(resources);
 
         infoSwap = new JPanel();
@@ -292,7 +374,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.selectorLayout = new CardLayout();
         selectorSwap.setLayout(selectorLayout);
         selectorSwap.add(new DiscoverSelector(resources), "discover");
-        selectorSwap.add(new ModpackSelector(resources, packList, iconRepo, modpackPanel), "modpacks");
+        modpackSelector = new ModpackSelector(resources, packList, iconRepo, modpackPanel);
+        selectorSwap.add(modpackSelector, "modpacks");
         selectorSwap.add(new NewsSelector(resources), "news");
         selectorContainer.add(selectorSwap, BorderLayout.CENTER);
 
@@ -366,6 +449,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         //Clear references to existing controls
 
         initComponents();
+        userChanged(userModel.getCurrentUser());
     }
 
     @Override
@@ -375,6 +459,14 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         else {
             this.setVisible(true);
             userWidget.setUser(user);
+
+            if (installer.isCurrentlyRunning()) {
+                playButton.setText(resources.getString("launcher.pack.launching"));
+            } else if (user.isOffline()) {
+                playButton.setText(resources.getString("launcher.pack.launch.offline"));
+            } else {
+                playButton.setText(resources.getString("launcher.pack.launch"));
+            }
         }
     }
 }

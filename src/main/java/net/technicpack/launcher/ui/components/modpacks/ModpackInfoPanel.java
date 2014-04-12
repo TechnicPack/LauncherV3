@@ -47,6 +47,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
     private HorizontalGallery feedGallery;
     private ModpackBanner banner;
     private ModpackDataDisplay dataDisplay;
+    private RoundedButton playButton;
 
     private ModpackModel modpack;
 
@@ -67,6 +68,10 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         background.setImage(job.getImage());
 
         repaint();
+    }
+
+    public RoundedButton getPlayButton() {
+        return playButton;
     }
 
     protected void clickLeftFeedButton() {
@@ -209,7 +214,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         Component horizFill = Box.createGlue();
         feedBottom.add(horizFill, constraints);
 
-        RoundedButton playButton = new RoundedButton(resources.getString("launcher.pack.launch"));
+        playButton = new RoundedButton(resources.getString("launcher.pack.launch"));
         playButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 27, Font.BOLD));
         playButton.setBorder(BorderFactory.createEmptyBorder(5, 50, 10, 50));
         playButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);

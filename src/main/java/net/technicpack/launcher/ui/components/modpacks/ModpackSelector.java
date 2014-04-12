@@ -57,6 +57,13 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
         packList.addRegisteredContainer(this);
     }
 
+    public ModpackModel getSelectedPack() {
+        if (selectedWidget == null)
+            return null;
+
+        return selectedWidget.getModpack();
+    }
+
     private void initComponents() {
         setLayout(new BorderLayout());
         setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
