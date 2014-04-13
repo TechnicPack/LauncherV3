@@ -92,7 +92,7 @@ public class ResourceLoader {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "3."+build;
+        return build;
     }
 
     private String getCodeFromLocale(Locale locale) {

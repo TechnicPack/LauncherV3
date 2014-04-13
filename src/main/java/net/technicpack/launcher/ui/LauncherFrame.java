@@ -394,7 +394,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         userWidget.setMaximumSize(userWidget.getPreferredSize());
         footer.add(userWidget);
 
-        JLabel dashText = new JLabel(" | ");
+        JLabel dashText = new JLabel("| ");
         dashText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         dashText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
         footer.add(dashText);

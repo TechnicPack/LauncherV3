@@ -56,7 +56,7 @@ public class UserWidget extends JPanel implements IImageJobListener<User> {
         staticText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
         this.add(staticText);
 
-        userName = new JLabel("sct");
+        userName = new JLabel("");
         userName.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         userName.setBackground(Color.white);
         userName.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15, Font.BOLD));
@@ -73,7 +73,7 @@ public class UserWidget extends JPanel implements IImageJobListener<User> {
     }
 
     private void refreshFace(BufferedImage image) {
-        avatar.setIcon(new ImageIcon(ImageUtils.scaleWithAspectWidth(image, 30)));
+        avatar.setIcon(new ImageIcon(ImageUtils.scaleWithAspectWidth(image, 32)));
     }
 
     @Override
