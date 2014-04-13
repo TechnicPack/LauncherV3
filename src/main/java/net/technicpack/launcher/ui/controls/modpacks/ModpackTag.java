@@ -19,26 +19,48 @@
 
 package net.technicpack.launcher.ui.controls.modpacks;
 
-import net.technicpack.launcher.ui.controls.AAJLabel;
-
+import javax.swing.*;
 import java.awt.*;
 
-public class ModpackTag extends AAJLabel {
-    private Color underlineColor;
-
+public class ModpackTag extends JLabel {
     public ModpackTag(String text) {
         super(text);
-        underlineColor = new Color(0,0,0,0);
     }
 
-    public Color getUnderlineColor() { return underlineColor; }
-    public void setUnderlineColor(Color color) { underlineColor = color; }
+    @Override
+    public Dimension getMinimumSize() { return getPreferredSize(); }
 
     @Override
-    public void paintComponent(Graphics g) {
-        super.paintComponent(g);
+    public Dimension getMaximumSize() { return getPreferredSize(); }
 
-        g.setColor(underlineColor);
-        g.fillRect(0, getHeight()-1, getWidth(), 1);
+    @Override
+    public Dimension getPreferredSize() {
+        int textSize = getFontMetrics(getFont()).getHeight();
+        int textWidth = getFontMetrics(getFont()).stringWidth(getText());
+        return new Dimension(textWidth+8, textSize+4);
+    }
+
+    @Override
+    public void paint(Graphics g) {
+        Graphics2D g2d = (Graphics2D)g;
+
+        g2d.setRenderingHint(
+                RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(
+                RenderingHints.KEY_TEXT_ANTIALIASING,
+                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2d.setRenderingHint(
+                RenderingHints.KEY_FRACTIONALMETRICS,
+                RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+
+        g.setColor(getBackground());
+        g.fillRoundRect(1, 1, getWidth() - 2, getHeight() - 2, 5, 5);
+        g.setColor(getForeground());
+        g.setFont(getFont());
+
+        int textY = 1 + ((getHeight()-2 - g2d.getFontMetrics().getHeight()) / 2) + g2d.getFontMetrics().getAscent();
+
+        g.drawString(getText(), 5, textY);
     }
 }

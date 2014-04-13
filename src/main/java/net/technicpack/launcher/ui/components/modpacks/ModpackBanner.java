@@ -103,8 +103,8 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
 
         ModpackTag tag = new ModpackTag(resources.getString(textString));
         tag.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        tag.setUnderlineColor(lineColor);
-        tag.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 10));
+        tag.setBackground(lineColor);
+        tag.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 11));
         modpackTags.add(tag);
     }
 
