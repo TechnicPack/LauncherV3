@@ -107,8 +107,8 @@ public class LauncherMain {
         userModel.addAuthListener(packList);
 
         MinecraftLauncher launcher = new MinecraftLauncher(platform, directories, userModel, settings.getClientId());
-        ModpackInstaller modpackInstaller = new ModpackInstaller(directories, mirrorStore, platform, settings.getClientId());
-        Installer installer = new Installer(startupParameters, modpackInstaller, launcher, settings, iconMapper);
+        ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());
+        Installer installer = new Installer(startupParameters, mirrorStore, directories, modpackInstaller, launcher, settings, iconMapper);
 
         LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, packList, iconRepo, logoRepo, backgroundRepo, installer);
         userModel.addAuthListener(frame);
