@@ -1,5 +1,6 @@
-package net.technicpack.launchercore.install.tasks;
+package net.technicpack.launchercore.install;
 
+import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.minecraftcore.mojang.CompleteVersion;
 import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.launchercore.util.DownloadListener;
@@ -7,7 +8,7 @@ import net.technicpack.launchercore.util.DownloadListener;
 import java.io.IOException;
 import java.util.LinkedList;
 
-public class InstallTasksQueue {
+public class InstallTasksQueue implements ITasksQueue {
 	private DownloadListener listener;
 	private LinkedList<IInstallTask> tasks;
 	private IInstallTask currentTask;
@@ -21,23 +22,23 @@ public class InstallTasksQueue {
 		this.currentTask = null;
 	}
 
-	public void RefreshProgress() {
+	public void refreshProgress() {
 		listener.stateChanged(currentTask.getTaskDescription(), currentTask.getTaskProgress());
 	}
 
-	public void RunAllTasks() throws IOException {
+	public void runAllTasks() throws IOException {
 		while (!tasks.isEmpty()) {
 			currentTask = tasks.removeFirst();
-			RefreshProgress();
+			refreshProgress();
 			currentTask.runTask(this);
 		}
 	}
 
-	public void AddNextTask(IInstallTask task) {
+	public void addNextTask(IInstallTask task) {
 		tasks.addFirst(task);
 	}
 
-	public void AddTask(IInstallTask task) {
+	public void addTask(IInstallTask task) {
 		tasks.addLast(task);
 	}
 

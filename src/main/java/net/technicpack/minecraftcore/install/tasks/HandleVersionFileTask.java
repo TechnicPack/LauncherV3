@@ -1,7 +1,29 @@
-package net.technicpack.launchercore.install.tasks;
+/*
+ * This file is part of Technic Launcher Core.
+ * Copyright (C) 2013 Syndicate, LLC
+ *
+ * Technic Launcher Core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Technic Launcher Core is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * as well as a copy of the GNU Lesser General Public License,
+ * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package net.technicpack.minecraftcore.install.tasks;
 
 import net.technicpack.launchercore.exception.DownloadException;
-import net.technicpack.launchercore.modpacks.InstalledPack;
+import net.technicpack.launchercore.install.ITasksQueue;
+import net.technicpack.launchercore.install.InstallTasksQueue;
+import net.technicpack.launchercore.install.tasks.EnsureFileTask;
+import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.LauncherDirectories;
 import net.technicpack.minecraftcore.mojang.CompleteVersion;
@@ -18,13 +40,20 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 public class HandleVersionFileTask implements IInstallTask {
-	private ModpackModel pack;
-    private String libraryName;
-    private LauncherDirectories directories;
+	private final ModpackModel pack;
+    private final LauncherDirectories directories;
+    private final ITasksQueue checkLibraryQueue;
+    private final ITasksQueue downloadLibraryQueue;
+    private final ITasksQueue copyLibraryQueue;
 
-	public HandleVersionFileTask(ModpackModel pack, LauncherDirectories directories) {
+    private String libraryName;
+
+	public HandleVersionFileTask(ModpackModel pack, LauncherDirectories directories, ITasksQueue checkLibraryQueue, ITasksQueue downloadLibraryQueue, ITasksQueue copyLibraryQueue) {
 		this.pack = pack;
         this.directories = directories;
+        this.checkLibraryQueue = checkLibraryQueue;
+        this.downloadLibraryQueue = downloadLibraryQueue;
+        this.copyLibraryQueue = copyLibraryQueue;
 	}
 
 	@Override
@@ -61,7 +90,7 @@ public class HandleVersionFileTask implements IInstallTask {
 
             String[] nameBits = library.getName().split(":",3);
             libraryName = nameBits[1]+"-"+nameBits[2]+".jar";
-            queue.RefreshProgress();
+            queue.refreshProgress();
 
 			String natives = null;
 			File extractDirectory = null;
@@ -89,10 +118,9 @@ public class HandleVersionFileTask implements IInstallTask {
                 verifier = new ValidZipFileVerifier();
             }
 
-			queue.AddTask(new EnsureFileTask(cache, verifier, extractDirectory, url, library.getExtract()));
+			checkLibraryQueue.addTask(new EnsureFileTask(cache, verifier, extractDirectory, url, library.getExtract(), downloadLibraryQueue, copyLibraryQueue));
 		}
 
-		queue.AddTask(new GetAssetsIndexTask(directories.getAssetsDirectory()));
 		queue.setCompleteVersion(version);
 	}
 }

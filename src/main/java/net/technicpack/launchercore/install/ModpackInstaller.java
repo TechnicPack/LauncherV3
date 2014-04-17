@@ -20,11 +20,9 @@
 package net.technicpack.launchercore.install;
 
 import net.technicpack.launchercore.exception.PackNotAvailableOfflineException;
-import net.technicpack.launchercore.install.tasks.InstallTasksQueue;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.mojang.CompleteVersion;
 import net.technicpack.platform.IPlatformApi;
-import net.technicpack.launchercore.util.*;
 
 import net.technicpack.utilslib.Utils;
 import net.technicpack.utilslib.ZipUtils;
@@ -53,7 +51,7 @@ public class ModpackInstaller {
             Utils.sendTracking("installModpack", modpack.getName(), modpack.getBuild(), clientId);
         }
 
-        tasksQueue.RunAllTasks();
+        tasksQueue.runAllTasks();
 
         Version versionFile = new Version(build, false);
         versionFile.save(modpack.getBinDir());

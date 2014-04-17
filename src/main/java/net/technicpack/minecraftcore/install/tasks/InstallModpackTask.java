@@ -1,8 +1,31 @@
-package net.technicpack.launchercore.install.tasks;
+/*
+ * This file is part of Technic Launcher Core.
+ * Copyright (C) 2013 Syndicate, LLC
+ *
+ * Technic Launcher Core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Technic Launcher Core is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * as well as a copy of the GNU Lesser General Public License,
+ * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package net.technicpack.minecraftcore.install.tasks;
 
 import net.technicpack.launchercore.exception.CacheDeleteException;
-import net.technicpack.launchercore.modpacks.InstalledPack;
+import net.technicpack.launchercore.install.ITasksQueue;
+import net.technicpack.launchercore.install.InstallTasksQueue;
+import net.technicpack.launchercore.install.tasks.EnsureFileTask;
+import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.minecraftcore.install.tasks.CleanupModpackCacheTask;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.Mod;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
@@ -13,12 +36,18 @@ import java.io.File;
 import java.io.IOException;
 
 public class InstallModpackTask implements IInstallTask {
-	private ModpackModel pack;
-	private Modpack modpack;
+	private final ModpackModel pack;
+	private final Modpack modpack;
+    private final ITasksQueue checkModQueue;
+    private final ITasksQueue downloadModQueue;
+    private final ITasksQueue copyModQueue;
 
-	public InstallModpackTask(ModpackModel pack, Modpack modpack) {
+	public InstallModpackTask(ModpackModel pack, Modpack modpack, ITasksQueue checkModQueue, ITasksQueue downloadModQueue, ITasksQueue copyModQueue) {
 		this.pack = pack;
 		this.modpack = modpack;
+        this.checkModQueue = checkModQueue;
+        this.downloadModQueue = downloadModQueue;
+        this.copyModQueue = copyModQueue;
 	}
 
 	@Override
@@ -67,10 +96,10 @@ public class InstallModpackTask implements IInstallTask {
             else
                 verifier = new ValidZipFileVerifier();
 
-			queue.AddNextTask(new EnsureFileTask(cache, verifier, packOutput, url));
+			checkModQueue.addTask(new EnsureFileTask(cache, verifier, packOutput, url, downloadModQueue, copyModQueue));
 		}
 
-		queue.AddTask(new CleanupModpackCacheTask(this.pack, modpack));
+		copyModQueue.addTask(new CleanupModpackCacheTask(this.pack, modpack));
 	}
 
 	private void deleteMods(File modsDir) throws CacheDeleteException {

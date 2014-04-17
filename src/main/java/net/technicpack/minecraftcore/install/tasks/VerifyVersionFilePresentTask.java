@@ -1,7 +1,28 @@
-package net.technicpack.launchercore.install.tasks;
+/*
+ * This file is part of Technic Launcher Core.
+ * Copyright (C) 2013 Syndicate, LLC
+ *
+ * Technic Launcher Core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Technic Launcher Core is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * as well as a copy of the GNU Lesser General Public License,
+ * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package net.technicpack.minecraftcore.install.tasks;
 
 import net.technicpack.launchercore.exception.PackNotAvailableOfflineException;
-import net.technicpack.launchercore.modpacks.InstalledPack;
+import net.technicpack.launchercore.install.InstallTasksQueue;
+import net.technicpack.launchercore.install.tasks.DownloadFileTask;
+import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.TechnicConstants;
 import net.technicpack.utilslib.ZipUtils;
@@ -47,7 +68,7 @@ public class VerifyVersionFilePresentTask implements IInstallTask {
 			if (this.pack.isLocalOnly()) {
 				throw new PackNotAvailableOfflineException(this.pack.getDisplayName());
 			} else {
-				queue.AddNextTask(new DownloadFileTask(TechnicConstants.getTechnicVersionJson(this.minecraftVersion), versionFile, fileVerifier));
+				queue.addNextTask(new DownloadFileTask(TechnicConstants.getTechnicVersionJson(this.minecraftVersion), versionFile, fileVerifier));
 			}
 		}
 	}
