@@ -19,16 +19,15 @@
 
 package net.technicpack.launcher.launch;
 
-import net.technicpack.launcher.io.TechnicLauncherDirectories;
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launcher.ui.controls.installation.ProgressBar;
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
 import net.technicpack.launchercore.exception.CacheDeleteException;
 import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.exception.PackNotAvailableOfflineException;
+import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.ModpackInstaller;
 import net.technicpack.launchercore.install.Version;
 import net.technicpack.launchercore.install.tasks.*;
@@ -41,11 +40,14 @@ import net.technicpack.launchercore.modpacks.resources.PackResourceMapper;
 import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.launchercore.util.LaunchAction;
 import net.technicpack.minecraftcore.LauncherDirectories;
+import net.technicpack.minecraftcore.install.tasks.EnsureAssetsIndexTask;
+import net.technicpack.minecraftcore.install.tasks.HandleVersionFileTask;
+import net.technicpack.minecraftcore.install.tasks.InstallModpackTask;
+import net.technicpack.minecraftcore.install.tasks.VerifyVersionFilePresentTask;
 import net.technicpack.minecraftcore.mojang.CompleteVersion;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.utilslib.Memory;
-import sun.misc.Cache;
 
 import javax.swing.*;
 import java.awt.*;
@@ -81,7 +83,7 @@ public class Installer {
             public void run() {
                 try {
                     InstallTasksQueue tasksQueue = new InstallTasksQueue(listener, mirrorStore);
-                    buildTasksQueue(tasksQueue, pack, build, doFullInstall);
+                    buildTasksQueue(tasksQueue, resources, pack, build, doFullInstall);
 
                     CompleteVersion version = null;
                     if (!pack.isLocalOnly()) {
@@ -137,16 +139,42 @@ public class Installer {
         return false;
     }
 
-    public void buildTasksQueue(InstallTasksQueue queue, ModpackModel modpack, String build, boolean doFullInstall) throws CacheDeleteException, BuildInaccessibleException {
+    public void buildTasksQueue(InstallTasksQueue queue, ResourceLoader resources, ModpackModel modpack, String build, boolean doFullInstall) throws CacheDeleteException, BuildInaccessibleException {
         PackInfo packInfo = modpack.getPackInfo();
         Modpack modpackData = packInfo.getModpack(build);
         String minecraft = modpackData.getMinecraft();
         Version installedVersion = modpack.getInstalledVersion();
 
+        TaskGroup examineModpackData = new TaskGroup(resources.getString("install.message.examiningmodpack"));
+        TaskGroup checkVersionFile = new TaskGroup(resources.getString("install.message.checkversionfile"));
+        TaskGroup installVersionFile = new TaskGroup(resources.getString("install.message.installversionfile"));
+        TaskGroup examineVersionFile = new TaskGroup(resources.getString("install.message.examiningversionfile"));
+        TaskGroup verifyingFiles = new TaskGroup(resources.getString("install.message.verifyingfiles"));
+        TaskGroup downloadingMods = new TaskGroup(resources.getString("install.message.downloadmods"));
+        TaskGroup installingMods = new TaskGroup(resources.getString("install.message.installmods"));
+        TaskGroup installingLibs = new TaskGroup(resources.getString("install.message.installlibs"));
+        TaskGroup installingMinecraft = new TaskGroup(resources.getString("install.message.installminecraft"));
+        TaskGroup examineIndex = new TaskGroup(resources.getString("install.message.examiningindex"));
+        TaskGroup verifyingAssets = new TaskGroup(resources.getString("install.message.verifyassets"));
+        TaskGroup installingAssets = new TaskGroup(resources.getString("install.message.installassets"));
+
+        queue.addTask(examineModpackData);
+        queue.addTask(checkVersionFile);
+        queue.addTask(installVersionFile);
+        queue.addTask(examineVersionFile);
+        queue.addTask(verifyingFiles);
+        queue.addTask(downloadingMods);
+        queue.addTask(installingMods);
+        queue.addTask(installingLibs);
+        queue.addTask(installingMinecraft);
+        queue.addTask(examineIndex);
+        queue.addTask(verifyingAssets);
+        queue.addTask(installingAssets);
+
         if (minecraft.startsWith("1.5")) {
-            queue.AddTask(new EnsureFileTask(new File(directories.getCacheDirectory(), "fml_libs15.zip"), new ValidZipFileVerifier(), new File(modpack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs15.zip"));
+            verifyingFiles.addTask(new EnsureFileTask(new File(directories.getCacheDirectory(), "fml_libs15.zip"), new ValidZipFileVerifier(), new File(modpack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs15.zip", installingLibs, installingLibs));
         } else if (minecraft.startsWith("1.4")) {
-            queue.AddTask(new EnsureFileTask(new File(directories.getCacheDirectory(), "fml_libs.zip"), new ValidZipFileVerifier(), new File(modpack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs.zip"));
+            verifyingFiles.addTask(new EnsureFileTask(new File(directories.getCacheDirectory(), "fml_libs.zip"), new ValidZipFileVerifier(), new File(modpack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs.zip", installingLibs, installingLibs));
         }
 
         if (doFullInstall) {
@@ -158,13 +186,14 @@ public class Installer {
                 }
             }
 
-            queue.AddTask(new InstallModpackTask(modpack, modpackData));
+            examineModpackData.addTask(new InstallModpackTask(modpack, modpackData, verifyingFiles, downloadingMods, installingMods));
         }
 
-        queue.AddTask(new VerifyVersionFilePresentTask(modpack, minecraft));
-        queue.AddTask(new HandleVersionFileTask(modpack, directories));
+        checkVersionFile.addTask(new VerifyVersionFilePresentTask(modpack, minecraft));
+        examineVersionFile.addTask(new HandleVersionFileTask(modpack, directories, verifyingFiles, installingLibs, installingLibs));
+        verifyingFiles.addTask(new EnsureAssetsIndexTask(directories.getAssetsDirectory(), installingMinecraft, examineIndex, verifyingAssets, installingAssets, installingAssets));
 
         if (doFullInstall || (installedVersion != null && installedVersion.isLegacy()))
-            queue.AddTask(new InstallMinecraftIfNecessaryTask(modpack, minecraft, directories.getCacheDirectory()));
+            installingMinecraft.addTask(new InstallMinecraftIfNecessaryTask(modpack, minecraft, directories.getCacheDirectory()));
     }
 }
