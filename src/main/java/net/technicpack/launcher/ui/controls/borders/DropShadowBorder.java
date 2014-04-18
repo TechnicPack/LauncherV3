@@ -19,10 +19,11 @@
 
 package net.technicpack.launcher.ui.controls.borders;
 
+import net.technicpack.launcher.net.technicpack.contrib.romainguy.FastBlurFilter;
+
 import javax.swing.border.AbstractBorder;
 import java.awt.*;
-import java.awt.geom.Area;
-import java.awt.geom.RoundRectangle2D;
+import java.awt.image.BufferedImage;
 
 public class DropShadowBorder extends AbstractBorder {
     private Color color;
@@ -43,7 +44,7 @@ public class DropShadowBorder extends AbstractBorder {
                 RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
 
-        insets = new Insets(thickness,thickness,thickness,thickness);
+        insets = new Insets(thickness*4,thickness*4,thickness*4,thickness*4);
     }
 
     @Override
@@ -58,14 +59,19 @@ public class DropShadowBorder extends AbstractBorder {
 
     @Override
     public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-        Graphics2D g2 = (Graphics2D) g;
+        BufferedImage shadow = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 
+        Graphics2D g2 = shadow.createGraphics();
         g2.setRenderingHints(hints);
-
         g2.setColor(color);
-        Composite oldComposite = g2.getComposite();
-        g2.setComposite(AlphaComposite.SrcOver.derive(0.5f));
-        g2.fillRoundRect(0, 0, width, height, 8, 8);
-        g2.setComposite(oldComposite);
+        g2.fillRoundRect(thickness * 2, thickness * 2, width - (thickness * 4), height - (thickness * 4), thickness * 4, thickness * 4);
+        g2.dispose();
+
+        FastBlurFilter blur = new FastBlurFilter(thickness);
+        shadow = blur.filter(shadow, null);
+        shadow = blur.filter(shadow, null);
+        shadow = blur.filter(shadow, null);
+
+        g.drawImage(shadow, x, y, width, height, null);
     }
 }

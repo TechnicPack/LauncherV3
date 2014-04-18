@@ -39,7 +39,7 @@ public class DraggableDialog extends JDialog implements MouseListener, MouseMoti
         setUndecorated(true);
         addMouseListener(this);
         addMouseMotionListener(this);
-        getRootPane().setBorder(new DropShadowBorder(Color.black));
+        getRootPane().setBorder(new DropShadowBorder(Color.black, 2));
         AWTUtilities.setWindowOpaque(this, false);
         ((JPanel)getContentPane()).setOpaque(true);
     }

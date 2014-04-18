@@ -31,8 +31,8 @@ import java.awt.event.ActionListener;
 
 public class LauncherOptionsDialog extends DraggableDialog {
 
-    private static final int DIALOG_WIDTH = 986;
-    private static final int DIALOG_HEIGHT = 494;
+    private static final int DIALOG_WIDTH = 994;
+    private static final int DIALOG_HEIGHT = 502;
 
     public LauncherOptionsDialog(Frame owner, ResourceLoader resourceLoader) {
         super(owner);
