@@ -23,6 +23,7 @@ import net.technicpack.launcher.lang.IRelocalizableResource;
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.launch.Installer;
 import net.technicpack.launcher.settings.TechnicSettings;
+import net.technicpack.launcher.ui.components.LauncherOptionsDialog;
 import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
 import net.technicpack.launcher.ui.components.discover.DiscoverSelector;
 import net.technicpack.launcher.ui.components.modpacks.ModpackInfoPanel;
@@ -101,6 +102,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private Component installProgressPlaceholder;
     private RoundedButton playButton;
     private ModpackSelector modpackSelector;
+    private TintablePanel centralPanel;
+    private TintablePanel leftPanel;
 
     NewsInfoPanel newsInfoPanel;
 
@@ -224,6 +227,15 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         invalidate();
     }
 
+    protected void openLauncherOptions() {
+        leftPanel.setTintActive(true);
+        centralPanel.setTintActive(true);
+        LauncherOptionsDialog dialog = new LauncherOptionsDialog(this, resources);
+        dialog.setVisible(true);
+        leftPanel.setTintActive(false);
+        centralPanel.setTintActive(false);
+    }
+
     /////////////////////////////////////////////////
     // End Action responses
     /////////////////////////////////////////////////
@@ -320,13 +332,22 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         rightHeaderPanel.add(windowGadgetPanel);
         rightHeaderPanel.add(Box.createVerticalGlue());
 
-        JLabel launcherOptionsLabel = new JLabel(resources.getString("launcher.title.options"));
+        JButton launcherOptionsLabel = new JButton(resources.getString("launcher.title.options"));
         launcherOptionsLabel.setIcon(resources.getIcon("options_cog.png"));
         launcherOptionsLabel.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 14));
         launcherOptionsLabel.setForeground(COLOR_WHITE_TEXT);
         launcherOptionsLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         launcherOptionsLabel.setHorizontalTextPosition(SwingConstants.LEADING);
         launcherOptionsLabel.setAlignmentX(RIGHT_ALIGNMENT);
+        launcherOptionsLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        launcherOptionsLabel.setBorder(BorderFactory.createEmptyBorder());
+        launcherOptionsLabel.setContentAreaFilled(false);
+        launcherOptionsLabel.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                openLauncherOptions();
+            }
+        });
         rightHeaderPanel.add(launcherOptionsLabel);
 
         header.add(rightHeaderPanel);
@@ -334,11 +355,12 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         /////////////////////////////////////////////////////////////
         // CENTRAL AREA
         /////////////////////////////////////////////////////////////
-        JPanel infoContainer = new JPanel();
-        infoContainer.setBackground(COLOR_CHARCOAL);
-        infoContainer.setForeground(COLOR_WHITE_TEXT);
-        this.add(infoContainer, BorderLayout.CENTER);
-        infoContainer.setLayout(new BorderLayout());
+        centralPanel = new TintablePanel();
+        centralPanel.setBackground(COLOR_CHARCOAL);
+        centralPanel.setForeground(COLOR_WHITE_TEXT);
+        centralPanel.setTintColor(COLOR_CENTRAL_BACK);
+        this.add(centralPanel, BorderLayout.CENTER);
+        centralPanel.setLayout(new BorderLayout());
 
         ModpackInfoPanel modpackPanel = new ModpackInfoPanel(resources, iconRepo, logoRepo, backgroundRepo);
         playButton = modpackPanel.getPlayButton();
@@ -359,15 +381,16 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         infoSwap.add(discoverPanel,"discover");
         infoSwap.add(newsInfoPanel, "news");
         infoSwap.add(modpackPanel, "modpacks");
-        infoContainer.add(infoSwap, BorderLayout.CENTER);
+        centralPanel.add(infoSwap, BorderLayout.CENTER);
 
         /////////////////////////////////////////////////////////////
         // LEFT SETUP
         /////////////////////////////////////////////////////////////
-        JPanel selectorContainer = new JPanel();
-        this.add(selectorContainer, BorderLayout.LINE_START);
+        leftPanel = new TintablePanel();
+        leftPanel.setTintColor(COLOR_CENTRAL_BACK);
+        this.add(leftPanel, BorderLayout.LINE_START);
 
-        selectorContainer.setLayout(new BorderLayout());
+        leftPanel.setLayout(new BorderLayout());
 
         selectorSwap = new JPanel();
         selectorSwap.setOpaque(false);
@@ -377,12 +400,12 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         modpackSelector = new ModpackSelector(resources, packList, iconRepo, modpackPanel);
         selectorSwap.add(modpackSelector, "modpacks");
         selectorSwap.add(new NewsSelector(resources), "news");
-        selectorContainer.add(selectorSwap, BorderLayout.CENTER);
+        leftPanel.add(selectorSwap, BorderLayout.CENTER);
 
         TiledBackground sidekick = new TiledBackground(resources.getImage("ad_placeholder.png"));
         sidekick.setForeground(COLOR_WHITE_TEXT);
         sidekick.setPreferredSize(new Dimension(SIDEKICK_WIDTH, SIDEKICK_HEIGHT));
-        selectorContainer.add(sidekick, BorderLayout.PAGE_END);
+        leftPanel.add(sidekick, BorderLayout.PAGE_END);
 
         JPanel footer = new JPanel();
         footer.setBackground(COLOR_SELECTOR_BACK);
@@ -432,7 +455,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         buildCtrl.setHorizontalAlignment(SwingConstants.RIGHT);
         footer.add(buildCtrl);
 
-        infoContainer.add(footer, BorderLayout.PAGE_END);
+        centralPanel.add(footer, BorderLayout.PAGE_END);
     }
 
     @Override
