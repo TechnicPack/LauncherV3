@@ -44,6 +44,11 @@ public class InstallAssetsTask implements IInstallTask {
     private final ITasksQueue downloadAssetsQueue;
     private final ITasksQueue copyAssetsQueue;
 
+    private final static String virtualField = "virtual";
+    private final static String objectsField = "objects";
+    private final static String sizeField = "size";
+    private final static String hashField = "hash";
+
     public InstallAssetsTask(String assetsDirectory, File assetsIndex, ITasksQueue checkAssetsQueue, ITasksQueue downloadAssetsQueue, ITasksQueue copyAssetsQueue) {
         this.assetsDirectory = assetsDirectory;
         this.assetsIndex = assetsIndex;
@@ -73,12 +78,12 @@ public class InstallAssetsTask implements IInstallTask {
 
         boolean isVirtual = false;
 
-        if (obj.get("virtual") != null)
-            isVirtual = obj.get("virtual").getAsBoolean();
+        if (obj.get(virtualField) != null)
+            isVirtual = obj.get(virtualField).getAsBoolean();
 
         queue.getCompleteVersion().setAreAssetsVirtual(isVirtual);
 
-        JsonObject allObjects = obj.get("objects").getAsJsonObject();
+        JsonObject allObjects = obj.get(objectsField).getAsJsonObject();
 
         if (allObjects == null) {
             throw new DownloadException("The assets json file was invalid.");
@@ -87,8 +92,8 @@ public class InstallAssetsTask implements IInstallTask {
         for(Map.Entry<String, JsonElement> field : allObjects.entrySet()) {
             String friendlyName = field.getKey();
             JsonObject file = field.getValue().getAsJsonObject();
-            String hash = file.get("hash").getAsString();
-            long size = file.get("size").getAsLong();
+            String hash = file.get(hashField).getAsString();
+            long size = file.get(sizeField).getAsLong();
 
             File location = new File(assetsDirectory + File.separator + "objects" + File.separator + hash.substring(0, 2) + File.separator, hash);
             String url = MojangConstants.getResourceUrl(hash);
