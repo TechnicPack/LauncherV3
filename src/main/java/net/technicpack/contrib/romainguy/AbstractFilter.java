@@ -1,4 +1,4 @@
-package net.technicpack.launcher.net.technicpack.contrib.romainguy;
+package net.technicpack.contrib.romainguy;
 
 /*
  * Copyright (c) 2007, Romain Guy

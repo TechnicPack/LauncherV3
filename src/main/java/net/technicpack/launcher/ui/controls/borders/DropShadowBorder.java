@@ -19,7 +19,7 @@
 
 package net.technicpack.launcher.ui.controls.borders;
 
-import net.technicpack.launcher.net.technicpack.contrib.romainguy.FastBlurFilter;
+import net.technicpack.contrib.romainguy.FastBlurFilter;
 
 import javax.swing.border.AbstractBorder;
 import java.awt.*;
