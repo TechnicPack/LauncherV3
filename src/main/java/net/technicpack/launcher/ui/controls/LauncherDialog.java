@@ -37,7 +37,7 @@ public class LauncherDialog extends JDialog {
         super(owner, null, true);
 
         setUndecorated(true);
-        getRootPane().setBorder(new DropShadowBorder(Color.black, 2));
+        getRootPane().setBorder(new DropShadowBorder(Color.black, 4));
         AWTUtilities.setWindowOpaque(this, false);
         ((JPanel)getContentPane()).setOpaque(true);
     }
