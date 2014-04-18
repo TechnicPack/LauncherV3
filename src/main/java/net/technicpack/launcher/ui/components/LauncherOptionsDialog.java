@@ -22,14 +22,14 @@ package net.technicpack.launcher.ui.components;
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.AAJLabel;
-import net.technicpack.launcher.ui.controls.DraggableDialog;
+import net.technicpack.launcher.ui.controls.LauncherDialog;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class LauncherOptionsDialog extends DraggableDialog {
+public class LauncherOptionsDialog extends LauncherDialog {
 
     private static final int DIALOG_WIDTH = 994;
     private static final int DIALOG_HEIGHT = 502;
@@ -46,7 +46,6 @@ public class LauncherOptionsDialog extends DraggableDialog {
 
     private void initComponents(ResourceLoader resources) {
         setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
-        centerOnParent();
         setLayout(new BorderLayout());
 
         JPanel header = new JPanel();

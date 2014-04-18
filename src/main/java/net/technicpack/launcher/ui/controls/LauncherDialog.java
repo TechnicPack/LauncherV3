@@ -29,22 +29,32 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
-public class DraggableDialog extends JDialog implements MouseListener, MouseMotionListener {
+public class LauncherDialog extends JDialog {
     private int dragGripX;
     private int dragGripY;
 
-    public DraggableDialog(Frame owner) {
+    public LauncherDialog(Frame owner) {
         super(owner, null, true);
 
         setUndecorated(true);
-        addMouseListener(this);
-        addMouseMotionListener(this);
         getRootPane().setBorder(new DropShadowBorder(Color.black, 2));
         AWTUtilities.setWindowOpaque(this, false);
         ((JPanel)getContentPane()).setOpaque(true);
     }
 
-    protected void centerOnParent() {
+    @Override
+    public void setSize(int width, int height) {
+        super.setSize(width, height);
+        centerOnParent();
+    }
+
+    @Override
+    public void setSize(Dimension d) {
+        super.setSize(d);
+        centerOnParent();
+    }
+
+    private void centerOnParent() {
         Window frame = getOwner();
 
         if (frame == null)
@@ -54,45 +64,5 @@ public class DraggableDialog extends JDialog implements MouseListener, MouseMoti
         int parentCenterY = frame.getY() + (frame.getHeight()/2);
 
         this.setBounds(parentCenterX - (getWidth()/2), parentCenterY - (getHeight()/2), getWidth(), getHeight());
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-        if (e.getButton() == MouseEvent.BUTTON1) {
-            dragGripX = e.getX();
-            dragGripY = e.getY();
-        }
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseDragged(MouseEvent e) {
-        if ((e.getModifiersEx() & InputEvent.BUTTON1_DOWN_MASK) != 0) {
-            this.setLocation(e.getXOnScreen() - dragGripX, e.getYOnScreen() - dragGripY);
-        }
-    }
-
-    @Override
-    public void mouseMoved(MouseEvent e) {
-
     }
 }
