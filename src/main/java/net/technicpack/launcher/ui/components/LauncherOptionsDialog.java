@@ -51,12 +51,14 @@ public class LauncherOptionsDialog extends LauncherDialog {
         JPanel header = new JPanel();
         header.setBackground(Color.black);
         header.setLayout(new BoxLayout(header, BoxLayout.LINE_AXIS));
+        header.setBorder(BorderFactory.createEmptyBorder(4,8,4,8));
         add(header, BorderLayout.PAGE_START);
 
         AAJLabel title = new AAJLabel(resources.getString("launcher.title.options"));
-        title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 22, Font.BOLD));
+        title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 34));
         title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         title.setOpaque(false);
+        title.setIcon(resources.getIcon("options_cog.png"));
         header.add(title);
 
         header.add(Box.createHorizontalGlue());
