@@ -73,6 +73,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     public static final Color COLOR_LIKES_BACK = new Color(20, 65, 97);
     public static final Color COLOR_BUTTON_BLUE = new Color(43, 128, 195);
     public static final Color COLOR_FORMELEMENT_INTERNAL = new Color(30, 39, 46);
+    public static final Color COLOR_GREY_TEXT = new Color(86, 98, 110);
 
     public static final String TAB_DISCOVER = "discover";
     public static final String TAB_MODPACKS = "modpacks";

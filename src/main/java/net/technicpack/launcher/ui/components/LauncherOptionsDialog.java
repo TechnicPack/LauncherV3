@@ -23,6 +23,8 @@ import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.AAJLabel;
 import net.technicpack.launcher.ui.controls.LauncherDialog;
+import net.technicpack.launcher.ui.controls.tabs.SimpleTabPane;
+import net.technicpack.launcher.ui.controls.tabs.SimpleTabPaneUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -76,8 +78,26 @@ public class LauncherOptionsDialog extends LauncherDialog {
         });
         header.add(closeButton);
 
-        JPanel centerPanel = new JPanel();
-        centerPanel.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        SimpleTabPane centerPanel = new SimpleTabPane();
+        centerPanel.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        centerPanel.setForeground(LauncherFrame.COLOR_GREY_TEXT);
+        centerPanel.setSelectedBackground(LauncherFrame.COLOR_BLUE);
+        centerPanel.setSelectedForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        centerPanel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
+        centerPanel.setOpaque(true);
         add(centerPanel, BorderLayout.CENTER);
+
+        JPanel general = new JPanel();
+        general.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+
+        JPanel javaOptions = new JPanel();
+        javaOptions.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+
+        JPanel about = new JPanel();
+        about.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+
+        centerPanel.addTab(resources.getString("launcheroptions.tab.general").toUpperCase(), general);
+        centerPanel.addTab(resources.getString("launcheroptions.tab.java").toUpperCase(), javaOptions);
+        centerPanel.addTab(resources.getString("launcheroptions.tab.about").toUpperCase(), about);
     }
 }
