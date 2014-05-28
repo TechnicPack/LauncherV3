@@ -23,17 +23,25 @@ import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.AAJLabel;
 import net.technicpack.launcher.ui.controls.LauncherDialog;
+import net.technicpack.launcher.ui.controls.RoundedButton;
+import net.technicpack.launcher.ui.controls.borders.RoundBorder;
+import net.technicpack.launcher.ui.controls.login.UserCellEditor;
+import net.technicpack.launcher.ui.controls.login.UserCellRenderer;
+import net.technicpack.launcher.ui.controls.login.UserCellUI;
 import net.technicpack.launcher.ui.controls.tabs.SimpleTabPane;
 import net.technicpack.launcher.ui.controls.tabs.SimpleTabPaneUI;
 
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicComboPopup;
+import javax.swing.plaf.metal.MetalComboBoxUI;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Locale;
 
 public class LauncherOptionsDialog extends LauncherDialog {
 
-    private static final int DIALOG_WIDTH = 994;
+    private static final int DIALOG_WIDTH = 730;
     private static final int DIALOG_HEIGHT = 502;
 
     public LauncherOptionsDialog(Frame owner, ResourceLoader resourceLoader) {
@@ -90,6 +98,8 @@ public class LauncherOptionsDialog extends LauncherDialog {
         JPanel general = new JPanel();
         general.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
 
+        setupGeneralPanel(general, resources);
+
         JPanel javaOptions = new JPanel();
         javaOptions.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
 
@@ -99,5 +109,152 @@ public class LauncherOptionsDialog extends LauncherDialog {
         centerPanel.addTab(resources.getString("launcheroptions.tab.general").toUpperCase(), general);
         centerPanel.addTab(resources.getString("launcheroptions.tab.java").toUpperCase(), javaOptions);
         centerPanel.addTab(resources.getString("launcheroptions.tab.about").toUpperCase(), about);
+    }
+
+    private void setupGeneralPanel(JPanel panel, ResourceLoader resources) {
+
+        panel.setLayout(new GridBagLayout());
+
+        JLabel streamLabel = new JLabel(resources.getString("launcheroptions.general.build"));
+        streamLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        streamLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        panel.add(streamLabel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
+
+        // Setup stream select box
+        JComboBox streamSelect = new JComboBox();
+
+        if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
+            streamSelect.setUI(new MetalComboBoxUI());
+        }
+
+        streamSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        streamSelect.setEditable(false);
+        streamSelect.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
+        streamSelect.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        streamSelect.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        streamSelect.setUI(new UserCellUI(resources));
+        streamSelect.setFocusable(false);
+
+        Object child = streamSelect.getAccessibleContext().getAccessibleChild(0);
+        BasicComboPopup popup = (BasicComboPopup)child;
+        JList list = popup.getList();
+        list.setSelectionForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        list.setSelectionBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        list.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0));
+
+        panel.add(streamSelect, new GridBagConstraints(1, 0, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
+
+        streamSelect.addItem(resources.getString("launcheroptions.build.stable"));
+        streamSelect.addItem(resources.getString("launcheroptions.build.beta"));
+
+        //Setup on pack launch box
+        JLabel launchLabel = new JLabel(resources.getString("launcheroptions.general.onlaunch"));
+        launchLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        launchLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        panel.add(launchLabel, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
+
+        JComboBox launchSelect = new JComboBox();
+
+        if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
+            launchSelect.setUI(new MetalComboBoxUI());
+        }
+
+        launchSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        launchSelect.setEditable(false);
+        launchSelect.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
+        launchSelect.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        launchSelect.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        launchSelect.setUI(new UserCellUI(resources));
+        launchSelect.setFocusable(false);
+
+        child = launchSelect.getAccessibleContext().getAccessibleChild(0);
+        popup = (BasicComboPopup)child;
+        list = popup.getList();
+        list.setSelectionForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        list.setSelectionBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        list.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0));
+
+        panel.add(launchSelect, new GridBagConstraints(1, 1, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
+
+        launchSelect.addItem(resources.getString("launcheroptions.packlaunch.hide"));
+        launchSelect.addItem(resources.getString("launcheroptions.packlaunch.close"));
+        launchSelect.addItem(resources.getString("launcheroptions.packlaunch.nothing"));
+
+        //Install folder field
+        JLabel installLabel = new JLabel(resources.getString("launcheroptions.general.install"));
+        installLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        installLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        panel.add(installLabel, new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
+
+        JTextField installField = new JTextField("C:\\Farts\\");
+        installField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        installField.setForeground(LauncherFrame.COLOR_BLUE);
+        installField.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        installField.setHighlighter(null);
+        installField.setEditable(false);
+        installField.setCursor(null);
+        installField.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
+        panel.add(installField, new GridBagConstraints(1, 2, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
+
+        RoundedButton reinstallButton = new RoundedButton(resources.getString("launcheroptions.install.change"));
+        reinstallButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        reinstallButton.setContentAreaFilled(false);
+        reinstallButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        reinstallButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        panel.add(reinstallButton, new GridBagConstraints(3, 2, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 0, 8, 0), 0, 0));
+
+        //Client ID field
+        JLabel clientIdField = new JLabel(resources.getString("launcheroptions.general.id"));
+        clientIdField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        clientIdField.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        panel.add(clientIdField, new GridBagConstraints(0, 3, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
+
+        JTextField clientId = new JTextField("abc123");
+        clientId.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        clientId.setForeground(LauncherFrame.COLOR_BLUE);
+        clientId.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        clientId.setHighlighter(null);
+        clientId.setEditable(false);
+        clientId.setCursor(null);
+        clientId.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
+        panel.add(clientId, new GridBagConstraints(1, 3, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
+
+        RoundedButton copyButton = new RoundedButton(resources.getString("launcheroptions.id.copy"));
+        copyButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        copyButton.setContentAreaFilled(false);
+        copyButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        copyButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        panel.add(copyButton, new GridBagConstraints(3, 3, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 0, 8, 0), 0, 0));
+
+        panel.add(Box.createRigidArea(new Dimension(80, 0)), new GridBagConstraints(4, 3, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,0,0,0), 0,0));
+
+        //Add show console field
+        JLabel showConsoleField = new JLabel(resources.getString("launcheroptions.general.console"));
+        showConsoleField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        showConsoleField.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        panel.add(showConsoleField, new GridBagConstraints(0, 4, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(10, 40, 0, 0), 0, 0));
+
+        JCheckBox showConsole = new JCheckBox("", false);
+        showConsole.setOpaque(false);
+        showConsole.setHorizontalAlignment(SwingConstants.RIGHT);
+        showConsole.setBorder(BorderFactory.createEmptyBorder());
+        showConsole.setIconTextGap(0);
+        showConsole.setSelectedIcon(resources.getIcon("checkbox_closed.png"));
+        showConsole.setIcon(resources.getIcon("checkbox_open.png"));
+        showConsole.setFocusPainted(false);
+        panel.add(showConsole, new GridBagConstraints(1, 4, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(16, 16, 0, 0), 0, 0));
+
+        panel.add(Box.createGlue(), new GridBagConstraints(0, 5, 5, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0, 0));
+
+        //Open logs button
+        RoundedButton openLogs = new RoundedButton(resources.getString("launcheroptions.general.logs"));
+        openLogs.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        openLogs.setContentAreaFilled(false);
+        openLogs.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        openLogs.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        openLogs.setBorder(BorderFactory.createEmptyBorder(8, 13, 8, 13));
+        panel.add(openLogs, new GridBagConstraints(0, 6, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 10, 10, 0), 0, 0));
     }
 }

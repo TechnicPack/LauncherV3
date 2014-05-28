@@ -38,6 +38,7 @@ public class UserCellUI extends BasicComboBoxUI {
         button.setContentAreaFilled(false);
         button.setBorder(BorderFactory.createEmptyBorder());
         button.setIcon(resources.getIcon("comboTriangle.png"));
+        button.setFocusPainted(false);
         return button;
     }
 }

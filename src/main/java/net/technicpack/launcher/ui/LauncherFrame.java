@@ -74,6 +74,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     public static final Color COLOR_BUTTON_BLUE = new Color(43, 128, 195);
     public static final Color COLOR_FORMELEMENT_INTERNAL = new Color(30, 39, 46);
     public static final Color COLOR_GREY_TEXT = new Color(86, 98, 110);
+    public static final Color COLOR_FOOTER = new Color(27, 32, 36);
 
     public static final String TAB_DISCOVER = "discover";
     public static final String TAB_MODPACKS = "modpacks";
@@ -105,6 +106,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private ModpackSelector modpackSelector;
     private TintablePanel centralPanel;
     private TintablePanel leftPanel;
+    private TintablePanel footer;
 
     NewsInfoPanel newsInfoPanel;
 
@@ -231,10 +233,12 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     protected void openLauncherOptions() {
         leftPanel.setTintActive(true);
         centralPanel.setTintActive(true);
+        footer.setTintActive(true);
         LauncherOptionsDialog dialog = new LauncherOptionsDialog(this, resources);
         dialog.setVisible(true);
         leftPanel.setTintActive(false);
         centralPanel.setTintActive(false);
+        footer.setTintActive(false);
     }
 
     /////////////////////////////////////////////////
@@ -403,13 +407,9 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         selectorSwap.add(new NewsSelector(resources), "news");
         leftPanel.add(selectorSwap, BorderLayout.CENTER);
 
-        TiledBackground sidekick = new TiledBackground(resources.getImage("ad_placeholder.png"));
-        sidekick.setForeground(COLOR_WHITE_TEXT);
-        sidekick.setPreferredSize(new Dimension(SIDEKICK_WIDTH, SIDEKICK_HEIGHT));
-        leftPanel.add(sidekick, BorderLayout.PAGE_END);
-
-        JPanel footer = new JPanel();
-        footer.setBackground(COLOR_SELECTOR_BACK);
+        footer = new TintablePanel();
+        footer.setTintColor(COLOR_CENTRAL_BACK);
+        footer.setBackground(COLOR_FOOTER);
         footer.setLayout(new BoxLayout(footer, BoxLayout.LINE_AXIS));
         footer.setForeground(COLOR_WHITE_TEXT);
         footer.setBorder(BorderFactory.createEmptyBorder(3,6,3,12));
@@ -456,7 +456,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         buildCtrl.setHorizontalAlignment(SwingConstants.RIGHT);
         footer.add(buildCtrl);
 
-        centralPanel.add(footer, BorderLayout.PAGE_END);
+        this.add(footer, BorderLayout.PAGE_END);
     }
 
     @Override
