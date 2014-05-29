@@ -103,6 +103,8 @@ public class LauncherOptionsDialog extends LauncherDialog {
         JPanel javaOptions = new JPanel();
         javaOptions.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
 
+        setupJavaOptionsPanel(javaOptions, resources);
+
         JPanel about = new JPanel();
         about.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
 
@@ -256,5 +258,68 @@ public class LauncherOptionsDialog extends LauncherDialog {
         openLogs.setHoverForeground(LauncherFrame.COLOR_BLUE);
         openLogs.setBorder(BorderFactory.createEmptyBorder(8, 13, 8, 13));
         panel.add(openLogs, new GridBagConstraints(0, 6, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 10, 10, 0), 0, 0));
+    }
+
+    private void setupJavaOptionsPanel(JPanel panel, ResourceLoader resources) {
+        panel.setLayout(new GridBagLayout());
+
+        JLabel memLabel = new JLabel(resources.getString("launcheroptions.java.memory"));
+        memLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        memLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        panel.add(memLabel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 60, 0, 0), 0, 0));
+
+        JComboBox memSelect = new JComboBox();
+
+        if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
+            memSelect.setUI(new MetalComboBoxUI());
+        }
+
+        memSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        memSelect.setEditable(false);
+        memSelect.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
+        memSelect.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        memSelect.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        memSelect.setUI(new UserCellUI(resources));
+        memSelect.setFocusable(false);
+
+        Object child = memSelect.getAccessibleContext().getAccessibleChild(0);
+        BasicComboPopup popup = (BasicComboPopup)child;
+        JList list = popup.getList();
+        list.setSelectionForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        list.setSelectionBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        list.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0));
+
+        panel.add(memSelect, new GridBagConstraints(1, 0, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 80), 0, 16));
+
+        memSelect.addItem("1GB");
+        memSelect.addItem("1.5GB");
+        memSelect.addItem("2GB");
+        memSelect.addItem("3GB");
+        memSelect.addItem("4GB");
+        memSelect.addItem("5GB");
+        memSelect.addItem("6GB");
+        memSelect.addItem("7GB");
+        memSelect.addItem("8GB");
+
+        JLabel argsLabel = new JLabel(resources.getString("launcheroptions.java.arguments"));
+        argsLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        argsLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        panel.add(argsLabel, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 60, 0, 0), 0, 0));
+
+        JTextArea args = new JTextArea(32, 4);
+        args.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        args.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        args.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        args.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
+        args.setCaretColor(LauncherFrame.COLOR_BUTTON_BLUE);
+        args.setMargin(new Insets(16,4,16,4));
+        args.setLineWrap(true);
+        args.setWrapStyleWord(true);
+        args.setSelectionColor(LauncherFrame.COLOR_BUTTON_BLUE);
+        args.setSelectedTextColor(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        panel.add(args, new GridBagConstraints(1, 1, 1, 2, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 64, 80), 0, 0));
+
+        panel.add(Box.createGlue(), new GridBagConstraints(0, 2, 2, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
     }
 }
