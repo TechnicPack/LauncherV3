@@ -77,7 +77,7 @@ public class LauncherMain {
     private static void startLauncher(TechnicSettings settings, StartupParameters startupParameters) {
         LauncherDirectories directories = new TechnicLauncherDirectories(settings.getTechnicRoot());
         ResourceLoader resources = new ResourceLoader("net","technicpack","launcher","resources");
-        resources.setLocale("default");
+        resources.setLocale(settings.getLanguageCode());
 
         UserModel userModel = new UserModel(TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json")));
 

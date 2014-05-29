@@ -39,7 +39,7 @@ public class ResourceLoader {
     private String dottedResourcePath;
     private String slashResourcePath;
 
-    public static final Locale[] SUPPORTED_LOCALES = { Locale.ENGLISH };
+    public static final Locale[] SUPPORTED_LOCALES = { Locale.ENGLISH, Locale.GERMAN };
     public static final String DEFAULT_LOCALE = "default";
 
     public static final String FONT_OPENSANS_BOLD = "font.opensans.bold";
