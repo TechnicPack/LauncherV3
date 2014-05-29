@@ -43,6 +43,7 @@ public class TechnicSettings {
     private String languageCode = "default";
     private String clientId = UUID.randomUUID().toString();
     private String directory;
+    private String javaArgs;
 
     public void setFilePath(File settingsFile) {
         this.settingsFile = settingsFile;
@@ -90,6 +91,9 @@ public class TechnicSettings {
     }
 
     public String getClientId() { return clientId; }
+
+    public String getJavaArgs() { return javaArgs; }
+    public void setJavaArgs(String args) { javaArgs = args; }
 
     public void save() {
         String json = Utils.getGson().toJson(this);

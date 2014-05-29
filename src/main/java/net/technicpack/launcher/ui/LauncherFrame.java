@@ -234,7 +234,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         leftPanel.setTintActive(true);
         centralPanel.setTintActive(true);
         footer.setTintActive(true);
-        LauncherOptionsDialog dialog = new LauncherOptionsDialog(this, resources);
+        LauncherOptionsDialog dialog = new LauncherOptionsDialog(this, settings, resources);
         dialog.setVisible(true);
         leftPanel.setTintActive(false);
         centralPanel.setTintActive(false);
