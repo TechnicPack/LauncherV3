@@ -242,4 +242,9 @@ public class ResourceLoader {
         if (!resources.contains(resource))
             resources.add(resource);
     }
+
+    public void unregisterResource(IRelocalizableResource resource) {
+        if (resources.contains(resource))
+            resources.remove(resource);
+    }
 }

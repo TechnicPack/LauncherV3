@@ -19,6 +19,7 @@
 
 package net.technicpack.launcher.ui.components;
 
+import net.technicpack.launcher.lang.IRelocalizableResource;
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.LauncherFrame;
@@ -47,7 +48,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Locale;
 
-public class LauncherOptionsDialog extends LauncherDialog {
+public class LauncherOptionsDialog extends LauncherDialog implements IRelocalizableResource {
 
     private static final int DIALOG_WIDTH = 830;
     private static final int DIALOG_HEIGHT = 564;
@@ -87,13 +88,12 @@ public class LauncherOptionsDialog extends LauncherDialog {
         super(owner);
 
         this.settings = settings;
-        this.resources = resourceLoader;
 
-        initComponents();
-        initControlValues();
+        relocalize(resourceLoader);
     }
 
     protected void closeDialog() {
+        resources.unregisterResource(this);
         dispose();
     }
 
@@ -131,6 +131,8 @@ public class LauncherOptionsDialog extends LauncherDialog {
     protected void changeLanguage() {
         settings.setLanguageCode(((LanguageItem)langSelect.getSelectedItem()).getLangCode());
         settings.save();
+
+        resources.setLocale(((LanguageItem)langSelect.getSelectedItem()).getLangCode());
     }
 
     private void initControlValues() {
@@ -516,5 +518,18 @@ public class LauncherOptionsDialog extends LauncherDialog {
         panel.add(javaArgs, new GridBagConstraints(1, 1, 1, 2, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 64, 80), 0, 0));
 
         panel.add(Box.createGlue(), new GridBagConstraints(0, 2, 2, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
+    }
+
+    @Override
+    public void relocalize(ResourceLoader loader) {
+        this.resources = loader;
+        this.resources.registerResource(this);
+
+        //Wipe controls
+        this.getContentPane().removeAll();
+        this.setLayout(null);
+
+        initComponents();
+        initControlValues();
     }
 }

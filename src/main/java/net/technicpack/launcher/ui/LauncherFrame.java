@@ -108,6 +108,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private TintablePanel leftPanel;
     private TintablePanel footer;
 
+    private String currentTabName;
+
     NewsInfoPanel newsInfoPanel;
 
     public LauncherFrame(ResourceLoader resources, ImageRepository<User> skinRepository, UserModel userModel, TechnicSettings settings, AvailablePackList packList, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, Installer installer) {
@@ -147,6 +149,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
         infoLayout.show(infoSwap, tabName);
         selectorLayout.show(selectorSwap, tabName);
+
+        currentTabName = tabName;
     }
 
     protected void closeWindow() {
@@ -474,6 +478,9 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
         initComponents();
         userChanged(userModel.getCurrentUser());
+
+        if (currentTabName != null)
+            selectTab(currentTabName);
     }
 
     @Override
