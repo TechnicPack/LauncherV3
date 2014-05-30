@@ -319,7 +319,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         JLabel instructionText = new AAJLabel("<html><body align=\"center\">"+ resources.getString("login.instructions") +"</body></html>", JLabel.CENTER);
         instructionText.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         instructionText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        add(instructionText, new GridBagConstraints(0, 1, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(9, 0, 0, 0), 0, 0));
+        add(instructionText, new GridBagConstraints(0, 1, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(9, 3, 0, 3), 0, 0));
 
         JLabel userLabel = new AAJLabel(resources.getString("login.username"));
         userLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
