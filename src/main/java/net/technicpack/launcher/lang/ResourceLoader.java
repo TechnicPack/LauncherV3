@@ -95,7 +95,7 @@ public class ResourceLoader {
         return build;
     }
 
-    private String getCodeFromLocale(Locale locale) {
+    public String getCodeFromLocale(Locale locale) {
         if (locale.getLanguage().isEmpty()) {
             return "default";
         } else if (locale.getCountry().isEmpty()) {
@@ -107,7 +107,7 @@ public class ResourceLoader {
         }
     }
 
-    private Locale getLocaleFromCode(String localeCode) {
+    public Locale getLocaleFromCode(String localeCode) {
         if (localeCode == null || localeCode.isEmpty() || localeCode.equals(DEFAULT_LOCALE)) {
             return Locale.getDefault();
         }

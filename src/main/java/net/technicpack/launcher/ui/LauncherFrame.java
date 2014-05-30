@@ -423,7 +423,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         dashText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
         footer.add(dashText);
 
-        JButton logout = new JButton("Logout");
+        JButton logout = new JButton(resources.getString("launcher.user.logout"));
         logout.setBorder(BorderFactory.createEmptyBorder());
         logout.setContentAreaFilled(false);
         logout.setForeground(LauncherFrame.COLOR_WHITE_TEXT);

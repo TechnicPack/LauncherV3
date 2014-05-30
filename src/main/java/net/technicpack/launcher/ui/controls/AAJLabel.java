@@ -24,6 +24,7 @@ import java.awt.*;
 
 public class AAJLabel extends JLabel {
 
+    public AAJLabel(String text, int horizontalAignment) { super(text, horizontalAignment); }
     public AAJLabel(String text) {
         super(text);
     }

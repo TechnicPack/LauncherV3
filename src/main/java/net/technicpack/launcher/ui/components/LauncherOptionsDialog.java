@@ -31,6 +31,7 @@ import net.technicpack.launcher.ui.controls.login.UserCellRenderer;
 import net.technicpack.launcher.ui.controls.login.UserCellUI;
 import net.technicpack.launcher.ui.controls.tabs.SimpleTabPane;
 import net.technicpack.launcher.ui.controls.tabs.SimpleTabPaneUI;
+import net.technicpack.launcher.ui.listitems.LanguageItem;
 import net.technicpack.launcher.ui.listitems.OnLaunchItem;
 import net.technicpack.launcher.ui.listitems.StreamItem;
 import net.technicpack.launchercore.util.LaunchAction;
@@ -49,7 +50,7 @@ import java.util.Locale;
 public class LauncherOptionsDialog extends LauncherDialog {
 
     private static final int DIALOG_WIDTH = 830;
-    private static final int DIALOG_HEIGHT = 502;
+    private static final int DIALOG_HEIGHT = 564;
 
     private TechnicSettings settings;
 
@@ -77,6 +78,7 @@ public class LauncherOptionsDialog extends LauncherDialog {
     JTextArea javaArgs;
     JComboBox streamSelect;
     JComboBox launchSelect;
+    JComboBox langSelect;
     JTextField installField;
     JTextField clientId;
     JCheckBox showConsole;
@@ -123,6 +125,11 @@ public class LauncherOptionsDialog extends LauncherDialog {
 
     protected void changeLaunchAction() {
         settings.setLaunchAction(((OnLaunchItem)launchSelect.getSelectedItem()).getLaunchAction());
+        settings.save();
+    }
+
+    protected void changeLanguage() {
+        settings.setLanguageCode(((LanguageItem)langSelect.getSelectedItem()).getLangCode());
         settings.save();
     }
 
@@ -199,6 +206,30 @@ public class LauncherOptionsDialog extends LauncherDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 changeLaunchAction();
+            }
+        });
+
+        for (ActionListener listener : langSelect.getActionListeners())
+            langSelect.removeActionListener(listener);
+        langSelect.removeAllItems();
+        langSelect.addItem(new LanguageItem(ResourceLoader.DEFAULT_LOCALE, resources.getString("launcheroptions.language.default")));
+        for (int i = 0; i < ResourceLoader.SUPPORTED_LOCALES.length; i++) {
+            langSelect.addItem(new LanguageItem(resources.getCodeFromLocale(ResourceLoader.SUPPORTED_LOCALES[i]), ResourceLoader.SUPPORTED_LOCALES[i].getDisplayName(ResourceLoader.SUPPORTED_LOCALES[i])));
+        }
+        if (!settings.getLanguageCode().equalsIgnoreCase(ResourceLoader.DEFAULT_LOCALE)) {
+            Locale loc = resources.getLocaleFromCode(settings.getLanguageCode());
+
+            for (int i = 0; i < ResourceLoader.SUPPORTED_LOCALES.length; i++) {
+                if (loc.equals(ResourceLoader.SUPPORTED_LOCALES[i])) {
+                    langSelect.setSelectedIndex(i+1);
+                    break;
+                }
+            }
+        }
+        langSelect.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeLanguage();
             }
         });
     }
@@ -296,11 +327,41 @@ public class LauncherOptionsDialog extends LauncherDialog {
 
         panel.add(streamSelect, new GridBagConstraints(1, 0, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
 
+        //Setup language box
+        JLabel langLabel = new JLabel(resources.getString("launcheroptions.general.lang"));
+        langLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        langLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        panel.add(langLabel, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
+
+        langSelect = new JComboBox();
+
+        if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
+            langSelect.setUI(new MetalComboBoxUI());
+        }
+
+        langSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        langSelect.setEditable(false);
+        langSelect.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
+        langSelect.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        langSelect.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        langSelect.setUI(new UserCellUI(resources));
+        langSelect.setFocusable(false);
+
+        child = langSelect.getAccessibleContext().getAccessibleChild(0);
+        popup = (BasicComboPopup)child;
+        list = popup.getList();
+        list.setSelectionForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        list.setSelectionBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        list.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0));
+
+        panel.add(langSelect, new GridBagConstraints(1, 1, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
+
         //Setup on pack launch box
         JLabel launchLabel = new JLabel(resources.getString("launcheroptions.general.onlaunch"));
         launchLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
         launchLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        panel.add(launchLabel, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
+        panel.add(launchLabel, new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
         launchSelect = new JComboBox();
 
@@ -324,13 +385,13 @@ public class LauncherOptionsDialog extends LauncherDialog {
         list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
         list.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0));
 
-        panel.add(launchSelect, new GridBagConstraints(1, 1, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
+        panel.add(launchSelect, new GridBagConstraints(1, 2, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
 
         //Install folder field
         JLabel installLabel = new JLabel(resources.getString("launcheroptions.general.install"));
         installLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
         installLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        panel.add(installLabel, new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
+        panel.add(installLabel, new GridBagConstraints(0, 3, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
         installField = new JTextField("C:\\Farts\\");
         installField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
@@ -340,20 +401,20 @@ public class LauncherOptionsDialog extends LauncherDialog {
         installField.setEditable(false);
         installField.setCursor(null);
         installField.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
-        panel.add(installField, new GridBagConstraints(1, 2, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
+        panel.add(installField, new GridBagConstraints(1, 3, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
 
         RoundedButton reinstallButton = new RoundedButton(resources.getString("launcheroptions.install.change"));
         reinstallButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
         reinstallButton.setContentAreaFilled(false);
         reinstallButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         reinstallButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
-        panel.add(reinstallButton, new GridBagConstraints(3, 2, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 0, 8, 0), 0, 0));
+        panel.add(reinstallButton, new GridBagConstraints(3, 3, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 0, 8, 0), 0, 0));
 
         //Client ID field
         JLabel clientIdField = new JLabel(resources.getString("launcheroptions.general.id"));
         clientIdField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
         clientIdField.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        panel.add(clientIdField, new GridBagConstraints(0, 3, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
+        panel.add(clientIdField, new GridBagConstraints(0, 4, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
         clientId = new JTextField("abc123");
         clientId.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
@@ -363,14 +424,14 @@ public class LauncherOptionsDialog extends LauncherDialog {
         clientId.setEditable(false);
         clientId.setCursor(null);
         clientId.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
-        panel.add(clientId, new GridBagConstraints(1, 3, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
+        panel.add(clientId, new GridBagConstraints(1, 4, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
 
         RoundedButton copyButton = new RoundedButton(resources.getString("launcheroptions.id.copy"));
         copyButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
         copyButton.setContentAreaFilled(false);
         copyButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         copyButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
-        panel.add(copyButton, new GridBagConstraints(3, 3, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 0, 8, 0), 0, 0));
+        panel.add(copyButton, new GridBagConstraints(3, 4, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 0, 8, 0), 0, 0));
 
         panel.add(Box.createRigidArea(new Dimension(60, 0)), new GridBagConstraints(4, 3, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,0,0,0), 0,0));
 
@@ -378,7 +439,7 @@ public class LauncherOptionsDialog extends LauncherDialog {
         JLabel showConsoleField = new JLabel(resources.getString("launcheroptions.general.console"));
         showConsoleField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
         showConsoleField.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        panel.add(showConsoleField, new GridBagConstraints(0, 4, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(10, 40, 0, 0), 0, 0));
+        panel.add(showConsoleField, new GridBagConstraints(0, 5, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(10, 40, 0, 0), 0, 0));
 
         showConsole = new JCheckBox("", false);
         showConsole.setOpaque(false);
@@ -389,9 +450,9 @@ public class LauncherOptionsDialog extends LauncherDialog {
         showConsole.setIcon(resources.getIcon("checkbox_open.png"));
         showConsole.setFocusPainted(false);
 
-        panel.add(showConsole, new GridBagConstraints(1, 4, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(16, 16, 0, 0), 0, 0));
+        panel.add(showConsole, new GridBagConstraints(1, 5, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(16, 16, 0, 0), 0, 0));
 
-        panel.add(Box.createGlue(), new GridBagConstraints(0, 5, 5, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0, 0));
+        panel.add(Box.createGlue(), new GridBagConstraints(0, 6, 5, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0, 0));
 
         //Open logs button
         RoundedButton openLogs = new RoundedButton(resources.getString("launcheroptions.general.logs"));
@@ -400,7 +461,7 @@ public class LauncherOptionsDialog extends LauncherDialog {
         openLogs.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         openLogs.setHoverForeground(LauncherFrame.COLOR_BLUE);
         openLogs.setBorder(BorderFactory.createEmptyBorder(8, 13, 8, 13));
-        panel.add(openLogs, new GridBagConstraints(0, 6, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 10, 10, 0), 0, 0));
+        panel.add(openLogs, new GridBagConstraints(0, 7, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 10, 10, 0), 0, 0));
     }
 
     private void setupJavaOptionsPanel(JPanel panel) {

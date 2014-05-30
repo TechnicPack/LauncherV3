@@ -51,16 +51,48 @@ public class UserWidget extends JPanel implements IImageJobListener<User> {
         avatar.setIcon(resources.getIcon("news/authorHelm.png"));
         this.add(avatar);
 
-        JLabel staticText = new JLabel("Logged in as");
+        String fullText = resources.getString("launcher.user.logged");
+
+        int endPreText = fullText.indexOf("{0}");
+        int startPostText = endPreText + 3;
+        String preText = "";
+        String postText = "";
+
+        if (endPreText < 0) {
+            preText = fullText;
+        } else {
+            if (endPreText == 0) {
+                preText = "";
+            } else {
+                preText = fullText.substring(0, endPreText);
+            }
+
+            if (startPostText >= fullText.length()) {
+                postText = "";
+            } else {
+                postText = fullText.substring(startPostText);
+            }
+        }
+
+        JLabel staticText = new JLabel(preText);
         staticText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         staticText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
-        this.add(staticText);
+
+        if (preText.length() > 0)
+            this.add(staticText);
 
         userName = new JLabel("");
         userName.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         userName.setBackground(Color.white);
         userName.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15, Font.BOLD));
         this.add(userName);
+
+        staticText = new JLabel(postText);
+        staticText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        staticText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
+
+        if (postText.length() > 0)
+            this.add(staticText);
     }
 
     public void setUser(User user) {
