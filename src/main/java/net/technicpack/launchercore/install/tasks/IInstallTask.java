@@ -3,8 +3,9 @@ package net.technicpack.launchercore.install.tasks;
 import java.io.IOException;
 
 public interface IInstallTask {
-	String getTaskDescription();
-	float getTaskProgress();
+    String getTaskDescription();
 
-	void runTask(InstallTasksQueue queue) throws IOException;
+    float getTaskProgress();
+
+    void runTask(InstallTasksQueue queue) throws IOException;
 }

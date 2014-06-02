@@ -23,43 +23,43 @@ import net.technicpack.launchercore.restful.PlatformConstants;
 import net.technicpack.launchercore.restful.Resource;
 
 public class Article {
-	private String title;
-	private String displayTitle;
-	private Resource image;
-	private String category;
-	private String user;
-	private String summary;
-	private String date;
+    private String title;
+    private String displayTitle;
+    private Resource image;
+    private String category;
+    private String user;
+    private String summary;
+    private String date;
 
-	public String getTitle() {
-		return title;
-	}
+    public String getTitle() {
+        return title;
+    }
 
-	public String getDisplayTitle() {
-		return displayTitle;
-	}
+    public String getDisplayTitle() {
+        return displayTitle;
+    }
 
-	public Resource getImage() {
-		return image;
-	}
+    public Resource getImage() {
+        return image;
+    }
 
-	public String getCategory() {
-		return category;
-	}
+    public String getCategory() {
+        return category;
+    }
 
-	public String getUser() {
-		return user;
-	}
+    public String getUser() {
+        return user;
+    }
 
-	public String getSummary() {
-		return summary;
-	}
+    public String getSummary() {
+        return summary;
+    }
 
-	public String getDate() {
-		return date;
-	}
+    public String getDate() {
+        return date;
+    }
 
-	public String getUrl() {
-		return PlatformConstants.PLATFORM + "article/view/" + title;
-	}
+    public String getUrl() {
+        return PlatformConstants.PLATFORM + "article/view/" + title;
+    }
 }

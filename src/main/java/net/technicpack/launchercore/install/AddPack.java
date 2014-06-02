@@ -19,42 +19,41 @@
 
 package net.technicpack.launchercore.install;
 
-import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.launchercore.util.ResourceUtils;
 
 import java.awt.image.BufferedImage;
 
 public class AddPack extends InstalledPack {
-	private final static BufferedImage icon = ResourceUtils.getImage("icon.png", 32, 32);
-	private final static BufferedImage logo = ResourceUtils.getImage("addNewPack.png", 180, 110);
-	private final static BufferedImage background = ResourceUtils.getImage("background.jpg", 880, 520);
+    private final static BufferedImage icon = ResourceUtils.getImage("icon.png", 32, 32);
+    private final static BufferedImage logo = ResourceUtils.getImage("addNewPack.png", 180, 110);
+    private final static BufferedImage background = ResourceUtils.getImage("background.jpg", 880, 520);
 
-	public AddPack() {
-		super();
-	}
+    public AddPack() {
+        super();
+    }
 
-	@Override
-	public synchronized BufferedImage getIcon() {
-		return icon;
-	}
+    @Override
+    public synchronized BufferedImage getIcon() {
+        return icon;
+    }
 
-	@Override
-	public synchronized BufferedImage getBackground() {
-		return background;
-	}
+    @Override
+    public synchronized BufferedImage getBackground() {
+        return background;
+    }
 
-	@Override
-	public synchronized BufferedImage getLogo() {
-		return logo;
-	}
+    @Override
+    public synchronized BufferedImage getLogo() {
+        return logo;
+    }
 
-	@Override
-	public String getName() {
-		return "addpack";
-	}
+    @Override
+    public String getName() {
+        return "addpack";
+    }
 
-	@Override
-	public String getDisplayName() {
-		return "Add Pack";
-	}
+    @Override
+    public String getDisplayName() {
+        return "Add Pack";
+    }
 }

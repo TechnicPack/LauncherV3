@@ -11,44 +11,44 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class CleanupModpackCacheTask implements IInstallTask {
-	private InstalledPack pack;
-	private Modpack modpack;
+    private InstalledPack pack;
+    private Modpack modpack;
 
-	public CleanupModpackCacheTask(InstalledPack pack, Modpack modpack) {
-		this.pack = pack;
-		this.modpack = modpack;
-	}
+    public CleanupModpackCacheTask(InstalledPack pack, Modpack modpack) {
+        this.pack = pack;
+        this.modpack = modpack;
+    }
 
-	@Override
-	public String getTaskDescription() {
-		return "Cleaning Modpack Cache";
-	}
+    @Override
+    public String getTaskDescription() {
+        return "Cleaning Modpack Cache";
+    }
 
-	@Override
-	public float getTaskProgress() {
-		return 0;
-	}
+    @Override
+    public float getTaskProgress() {
+        return 0;
+    }
 
-	@Override
-	public void runTask(InstallTasksQueue queue) throws IOException {
-		File[] files = this.pack.getCacheDir().listFiles();
+    @Override
+    public void runTask(InstallTasksQueue queue) throws IOException {
+        File[] files = this.pack.getCacheDir().listFiles();
 
-		if (files == null) {
-			return;
-		}
+        if (files == null) {
+            return;
+        }
 
-		Set<String> keepFiles = new HashSet<String>(modpack.getMods().size() + 1);
-		for (Mod mod : modpack.getMods()) {
-			keepFiles.add(mod.getName() + "-" + mod.getVersion() + ".zip");
-		}
-		keepFiles.add("minecraft.jar");
+        Set<String> keepFiles = new HashSet<String>(modpack.getMods().size() + 1);
+        for (Mod mod : modpack.getMods()) {
+            keepFiles.add(mod.getName() + "-" + mod.getVersion() + ".zip");
+        }
+        keepFiles.add("minecraft.jar");
 
-		for (File file : files) {
-			String fileName = file.getName();
-			if (keepFiles.contains(fileName)) {
-				continue;
-			}
-			FileUtils.deleteQuietly(file);
-		}
-	}
+        for (File file : files) {
+            String fileName = file.getName();
+            if (keepFiles.contains(fileName)) {
+                continue;
+            }
+            FileUtils.deleteQuietly(file);
+        }
+    }
 }

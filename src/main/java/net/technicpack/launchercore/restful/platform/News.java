@@ -24,9 +24,9 @@ import net.technicpack.launchercore.restful.RestObject;
 import java.util.List;
 
 public class News extends RestObject {
-	private List<Article> news;
+    private List<Article> news;
 
-	public List<Article> getNews() {
-		return news;
-	}
+    public List<Article> getNews() {
+        return news;
+    }
 }

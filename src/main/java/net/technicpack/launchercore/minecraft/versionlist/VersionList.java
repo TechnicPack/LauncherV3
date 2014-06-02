@@ -23,14 +23,14 @@ import java.util.List;
 
 public class VersionList {
 
-	private List<VersionEntry> versions;
-	private LatestEntry latest;
+    private List<VersionEntry> versions;
+    private LatestEntry latest;
 
-	public List<VersionEntry> getVersions() {
-		return versions;
-	}
+    public List<VersionEntry> getVersions() {
+        return versions;
+    }
 
-	public LatestEntry getLatest() {
-		return latest;
-	}
+    public LatestEntry getLatest() {
+        return latest;
+    }
 }

@@ -22,39 +22,39 @@ package net.technicpack.launchercore.minecraft;
 import net.technicpack.launchercore.util.OperatingSystem;
 
 public class Rule {
-	private Action action = Action.ALLOW;
-	private OSRestriction os;
+    private Action action = Action.ALLOW;
+    private OSRestriction os;
 
-	public Action getAction() {
-		if (this.os != null && !this.os.matchesCurrentOperatingSystem()) {
-			return null;
-		}
+    public Action getAction() {
+        if (this.os != null && !this.os.matchesCurrentOperatingSystem()) {
+            return null;
+        }
 
-		return action;
-	}
+        return action;
+    }
 
-	public static enum Action {
-		ALLOW,
-		DISALLOW
-	}
+    public static enum Action {
+        ALLOW,
+        DISALLOW
+    }
 
-	public class OSRestriction {
-		private OperatingSystem name;
-		private String version;
+    public class OSRestriction {
+        private OperatingSystem name;
+        private String version;
 
-		public boolean matchesCurrentOperatingSystem() {
-			if (this.name != null && (this.name != OperatingSystem.getOperatingSystem())) {
-				return false;
-			}
+        public boolean matchesCurrentOperatingSystem() {
+            if (this.name != null && (this.name != OperatingSystem.getOperatingSystem())) {
+                return false;
+            }
 
-			boolean matched = true;
+            boolean matched = true;
 
-			if (this.version != null) {
-				String osVersion = System.getProperty("os.version");
-				matched = osVersion.matches(this.version);
-			}
+            if (this.version != null) {
+                String osVersion = System.getProperty("os.version");
+                matched = osVersion.matches(this.version);
+            }
 
-			return matched;
-		}
-	}
+            return matched;
+        }
+    }
 }

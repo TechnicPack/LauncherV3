@@ -18,17 +18,17 @@ import java.util.Map;
 /**
  * This file is part of Technic Launcher Core.
  * Copyright (C) 2013 Syndicate, LLC
- *
+ * <p/>
  * Technic Launcher Core is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p/>
  * Technic Launcher Core is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * <p/>
  * You should have received a copy of the GNU General Public License,
  * as well as a copy of the GNU Lesser General Public License,
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
@@ -38,8 +38,7 @@ public class MirrorStore {
     Map<String, SecureToken> secureMirrors = new HashMap<String, SecureToken>();
     private UserModel userModel;
 
-    public MirrorStore(UserModel userModel)
-    {
+    public MirrorStore(UserModel userModel) {
         this.userModel = userModel;
     }
 
@@ -55,7 +54,7 @@ public class MirrorStore {
         try {
             urlObject = new URL(url);
         } catch (MalformedURLException ex) {
-            throw new DownloadException("Invalid URL: "+url, ex);
+            throw new DownloadException("Invalid URL: " + url, ex);
         }
 
         String host = urlObject.getHost().toLowerCase();
@@ -165,12 +164,12 @@ public class MirrorStore {
             textUrl += "&";
         }
 
-        textUrl += "t="+downloadKey+"&c="+clientId;
+        textUrl += "t=" + downloadKey + "&c=" + clientId;
 
         try {
             return new URL(textUrl);
         } catch (MalformedURLException ex) {
-            throw new Error("Code error: managed to take valid url "+url.toString() + " and turn it into invalid URL "+textUrl);
+            throw new Error("Code error: managed to take valid url " + url.toString() + " and turn it into invalid URL " + textUrl);
         }
     }
 }

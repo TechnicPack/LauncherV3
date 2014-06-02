@@ -20,9 +20,9 @@
 package net.technicpack.launchercore.auth;
 
 public class ValidateRequest {
-	private String accessToken;
+    private String accessToken;
 
-	public ValidateRequest(String accessToken) {
-		this.accessToken = accessToken;
-	}
+    public ValidateRequest(String accessToken) {
+        this.accessToken = accessToken;
+    }
 }

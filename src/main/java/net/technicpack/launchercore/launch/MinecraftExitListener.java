@@ -21,5 +21,5 @@ package net.technicpack.launchercore.launch;
 
 public interface MinecraftExitListener {
 
-	public void onMinecraftExit();
+    public void onMinecraftExit();
 }

@@ -16,7 +16,7 @@ public class ValidJsonFileVerifier implements IFileVerifier {
 
             return (obj != null);
         } catch (Exception ex) {
-            System.out.println("An exception was raised while verifying "+file.getAbsolutePath()+"- this probably just means the file is invalid, in which case this is not an error:");
+            System.out.println("An exception was raised while verifying " + file.getAbsolutePath() + "- this probably just means the file is invalid, in which case this is not an error:");
             ex.printStackTrace();
         }
 

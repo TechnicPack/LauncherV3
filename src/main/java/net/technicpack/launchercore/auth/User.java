@@ -3,18 +3,18 @@ package net.technicpack.launchercore.auth;
 import com.google.gson.JsonObject;
 
 public class User {
-	private String id;
-	private JsonObject userProperties;
+    private String id;
+    private JsonObject userProperties;
 
-	public User() {
+    public User() {
 
-	}
+    }
 
-	public String getId() {
-		return id;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public JsonObject getUserProperties() {
-		return userProperties;
-	}
+    public JsonObject getUserProperties() {
+        return userProperties;
+    }
 }

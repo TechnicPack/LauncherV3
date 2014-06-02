@@ -24,24 +24,24 @@ import net.technicpack.launchercore.minecraft.ReleaseType;
 import java.util.Date;
 
 public class VersionEntry {
-	private String id;
-	private Date time;
-	private Date releaseTime;
-	private ReleaseType type;
+    private String id;
+    private Date time;
+    private Date releaseTime;
+    private ReleaseType type;
 
-	public String getId() {
-		return id;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public Date getTime() {
-		return time;
-	}
+    public Date getTime() {
+        return time;
+    }
 
-	public Date getReleaseTime() {
-		return releaseTime;
-	}
+    public Date getReleaseTime() {
+        return releaseTime;
+    }
 
-	public ReleaseType getType() {
-		return type;
-	}
+    public ReleaseType getType() {
+        return type;
+    }
 }

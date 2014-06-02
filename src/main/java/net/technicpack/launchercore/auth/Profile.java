@@ -20,9 +20,9 @@
 package net.technicpack.launchercore.auth;
 
 public class Profile {
-	private String id;
-	private String name;
-	private boolean legacy;
+    private String id;
+    private String name;
+    private boolean legacy;
 
     public Profile() {
 
@@ -33,23 +33,23 @@ public class Profile {
         this.name = name;
     }
 
-	public String getId() {
-		return id;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public boolean isLegacy() {
-		return legacy;
-	}
+    public boolean isLegacy() {
+        return legacy;
+    }
 
-	@Override
-	public String toString() {
-		return "Profile{" +
-				"id='" + id + '\'' +
-				", name='" + name + '\'' +
-				'}';
-	}
+    @Override
+    public String toString() {
+        return "Profile{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

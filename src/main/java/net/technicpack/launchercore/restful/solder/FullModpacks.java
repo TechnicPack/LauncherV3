@@ -25,14 +25,14 @@ import java.util.LinkedHashMap;
 
 public class FullModpacks extends RestObject {
 
-	private LinkedHashMap<String, SolderPackInfo> modpacks;
-	private String mirror_url;
+    private LinkedHashMap<String, SolderPackInfo> modpacks;
+    private String mirror_url;
 
-	public LinkedHashMap<String, SolderPackInfo> getModpacks() {
-		return modpacks;
-	}
+    public LinkedHashMap<String, SolderPackInfo> getModpacks() {
+        return modpacks;
+    }
 
-	public String getMirrorUrl() {
-		return mirror_url;
-	}
+    public String getMirrorUrl() {
+        return mirror_url;
+    }
 }

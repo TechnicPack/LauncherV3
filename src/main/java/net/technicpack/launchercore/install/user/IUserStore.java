@@ -3,15 +3,19 @@ package net.technicpack.launchercore.install.user;
 import java.util.Collection;
 
 public interface IUserStore {
-	void addUser(User user);
-	void removeUser(String username);
-	User getUser(String username);
+    void addUser(User user);
 
-	String getClientToken();
+    void removeUser(String username);
 
-	Collection<String> getUsers();
-	Collection<User> getSavedUsers();
+    User getUser(String username);
 
-	void setLastUser(String username);
-	String getLastUser();
+    String getClientToken();
+
+    Collection<String> getUsers();
+
+    Collection<User> getSavedUsers();
+
+    void setLastUser(String username);
+
+    String getLastUser();
 }
