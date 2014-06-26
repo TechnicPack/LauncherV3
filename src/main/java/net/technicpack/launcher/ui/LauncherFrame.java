@@ -154,7 +154,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     }
 
     protected void closeWindow() {
-        this.dispose();
+        System.exit(0);
     }
 
     protected void logout() {

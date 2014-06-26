@@ -102,7 +102,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     }
 
     protected void closeButtonClicked() {
-        this.dispose();
+        System.exit(0);
     }
 
     protected void changeUser() {
