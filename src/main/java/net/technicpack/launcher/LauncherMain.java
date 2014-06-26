@@ -113,7 +113,7 @@ public class LauncherMain {
         LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, packList, iconRepo, logoRepo, backgroundRepo, installer);
         userModel.addAuthListener(frame);
 
-        LoginFrame login = new LoginFrame(resources, userModel, skinRepo);
+        LoginFrame login = new LoginFrame(resources, settings, userModel, skinRepo);
         userModel.addAuthListener(login);
 
         userModel.initAuth();

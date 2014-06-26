@@ -21,13 +21,13 @@ package net.technicpack.launcher.ui;
 
 import net.technicpack.launcher.lang.IRelocalizableResource;
 import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.controls.AAJLabel;
 import net.technicpack.launcher.ui.controls.DraggableFrame;
 import net.technicpack.launcher.ui.controls.RoundedButton;
 import net.technicpack.launcher.ui.controls.borders.RoundBorder;
-import net.technicpack.launcher.ui.controls.login.UserCellEditor;
-import net.technicpack.launcher.ui.controls.login.UserCellRenderer;
-import net.technicpack.launcher.ui.controls.login.UserCellUI;
+import net.technicpack.launcher.ui.controls.login.*;
+import net.technicpack.launcher.ui.listitems.LanguageItem;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.User;
 import net.technicpack.launchercore.auth.UserModel;
@@ -51,18 +51,21 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     private ResourceLoader resources;
     private ImageRepository<User> skinRepository;
     private UserModel userModel;
+    private TechnicSettings settings;
 
     private JTextField name;
     private JComboBox nameSelect;
     private JCheckBox rememberAccount;
     private JPasswordField password;
+    private JComboBox languages;
 
     private static final int FRAME_WIDTH = 347;
     private static final int FRAME_HEIGHT = 409;
 
-    public LoginFrame(ResourceLoader resources, UserModel userModel, ImageRepository<User> skinRepository) {
+    public LoginFrame(ResourceLoader resources, TechnicSettings settings, UserModel userModel, ImageRepository<User> skinRepository) {
         this.skinRepository = skinRepository;
         this.userModel = userModel;
+        this.settings = settings;
 
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -290,6 +293,12 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         refreshUsers();
     }
 
+    protected void languageChanged() {
+        String langCode = ((LanguageItem)languages.getSelectedItem()).getLangCode();
+        settings.setLanguageCode(langCode);
+        resources.setLocale(langCode);
+    }
+
     /**
      * Generate & setup UI components for the frame
      */
@@ -431,6 +440,47 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         JPanel linkPane = new JPanel();
         linkPane.setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
         linkPane.setBorder(BorderFactory.createEmptyBorder(7,0,7,0));
+        linkPane.setLayout(new BoxLayout(linkPane, BoxLayout.LINE_AXIS));
+
+        linkPane.add(Box.createHorizontalStrut(8));
+
+        languages = new JComboBox();
+        String defaultLocaleText = resources.getString("launcheroptions.language.default");
+        if (!resources.isDefaultLocaleSupported()) {
+            defaultLocaleText = defaultLocaleText.concat(" (" + resources.getString("launcheroptions.language.unavailable") + ")");
+        }
+
+        languages.addItem(new LanguageItem(ResourceLoader.DEFAULT_LOCALE, defaultLocaleText));
+        for (int i = 0; i < ResourceLoader.SUPPORTED_LOCALES.length; i++) {
+            languages.addItem(new LanguageItem(resources.getCodeFromLocale(ResourceLoader.SUPPORTED_LOCALES[i]), ResourceLoader.SUPPORTED_LOCALES[i].getDisplayName(ResourceLoader.SUPPORTED_LOCALES[i])));
+        }
+        if (!settings.getLanguageCode().equalsIgnoreCase(ResourceLoader.DEFAULT_LOCALE)) {
+            Locale loc = resources.getLocaleFromCode(settings.getLanguageCode());
+
+            for (int i = 0; i < ResourceLoader.SUPPORTED_LOCALES.length; i++) {
+                if (loc.equals(ResourceLoader.SUPPORTED_LOCALES[i])) {
+                    languages.setSelectedIndex(i+1);
+                    break;
+                }
+            }
+        }
+        languages.setBorder(BorderFactory.createEmptyBorder());
+        languages.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
+        languages.setUI(new LanguageCellUI(resources));
+        languages.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        languages.setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
+        languages.setRenderer(new LanguageCellRenderer(resources));
+        languages.setEditable(false);
+        languages.setFocusable(false);
+        languages.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                languageChanged();
+            }
+        });
+        linkPane.add(languages);
+
+        linkPane.add(Box.createHorizontalGlue());
 
         JButton termsLink = new JButton(resources.getString("login.terms"));
         termsLink.setContentAreaFilled(false);
@@ -445,26 +495,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
             }
         });
         linkPane.add(termsLink);
-
-        JLabel dash = new JLabel("-");
-        dash.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        dash.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        dash.setOpaque(false);
-        linkPane.add(dash);
-
-        JButton privacyLink = new JButton(resources.getString("login.privacy"));
-        privacyLink.setContentAreaFilled(false);
-        privacyLink.setBorder(BorderFactory.createEmptyBorder());
-        privacyLink.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        privacyLink.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        privacyLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        privacyLink.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                visitPrivacy();
-            }
-        });
-        linkPane.add(privacyLink);
+        linkPane.add(Box.createHorizontalStrut(8));
 
         add(linkPane, new GridBagConstraints(0, 9, 3, 1, 1.0, 0.0, GridBagConstraints.SOUTH, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
     }
@@ -488,6 +519,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         initComponents();
 
         refreshUsers();
+        repaint();
     }
 
     @Override

@@ -214,7 +214,13 @@ public class LauncherOptionsDialog extends LauncherDialog implements IRelocaliza
         for (ActionListener listener : langSelect.getActionListeners())
             langSelect.removeActionListener(listener);
         langSelect.removeAllItems();
-        langSelect.addItem(new LanguageItem(ResourceLoader.DEFAULT_LOCALE, resources.getString("launcheroptions.language.default")));
+
+        String defaultLocaleText = resources.getString("launcheroptions.language.default");
+        if (!resources.isDefaultLocaleSupported()) {
+            defaultLocaleText = defaultLocaleText.concat(" (" + resources.getString("launcheroptions.language.unavailable") + ")");
+        }
+
+        langSelect.addItem(new LanguageItem(ResourceLoader.DEFAULT_LOCALE, defaultLocaleText));
         for (int i = 0; i < ResourceLoader.SUPPORTED_LOCALES.length; i++) {
             langSelect.addItem(new LanguageItem(resources.getCodeFromLocale(ResourceLoader.SUPPORTED_LOCALES[i]), ResourceLoader.SUPPORTED_LOCALES[i].getDisplayName(ResourceLoader.SUPPORTED_LOCALES[i])));
         }

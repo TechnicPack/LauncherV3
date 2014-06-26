@@ -38,6 +38,8 @@ public class ResourceLoader {
     private Locale currentLocale;
     private String dottedResourcePath;
     private String slashResourcePath;
+    private boolean isDefaultLocaleSupported = true;
+    private Locale defaultLocale;
 
     public static final Locale[] SUPPORTED_LOCALES = { Locale.ENGLISH, Locale.GERMAN };
     public static final String DEFAULT_LOCALE = "default";
@@ -54,6 +56,16 @@ public class ResourceLoader {
             dottedResourcePath += pathToken + ".";
             slashResourcePath += "/" + pathToken;
         }
+
+        Locale defaultLocale = Locale.getDefault();
+        this.defaultLocale = matchClosestSupportedLocale(defaultLocale);
+
+        if(!this.defaultLocale.getLanguage().equals(defaultLocale.getLanguage()))
+            isDefaultLocaleSupported = false;
+    }
+
+    public boolean isDefaultLocaleSupported() {
+        return this.isDefaultLocaleSupported;
     }
 
     public void setLocale(Locale locale) {
@@ -109,7 +121,7 @@ public class ResourceLoader {
 
     public Locale getLocaleFromCode(String localeCode) {
         if (localeCode == null || localeCode.isEmpty() || localeCode.equals(DEFAULT_LOCALE)) {
-            return Locale.getDefault();
+            return defaultLocale;
         }
 
         String[] results = localeCode.split(",");
