@@ -20,10 +20,7 @@
 package net.technicpack.launcher;
 
 import com.beust.jcommander.JCommander;
-import net.technicpack.launcher.io.TechnicFaceMapper;
-import net.technicpack.launcher.io.TechnicInstalledPackStore;
-import net.technicpack.launcher.io.TechnicLauncherDirectories;
-import net.technicpack.launcher.io.TechnicUserStore;
+import net.technicpack.launcher.io.*;
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.launch.Installer;
 import net.technicpack.launcher.settings.SettingsFactory;
@@ -35,6 +32,7 @@ import net.technicpack.launchercore.auth.User;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.image.face.MinotarFaceImageStore;
+import net.technicpack.launchercore.image.face.WebAvatarImageStore;
 import net.technicpack.launchercore.install.ModpackInstaller;
 import net.technicpack.launchercore.launch.MinecraftLauncher;
 import net.technicpack.launchercore.modpacks.AvailablePackList;
@@ -54,6 +52,8 @@ import net.technicpack.launchercore.mirror.secure.rest.JsonWebSecureMirror;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.PlatformPackInfoRepository;
 import net.technicpack.platform.http.HttpPlatformApi;
+import net.technicpack.platform.io.AuthorshipInfo;
+import net.technicpack.platform.io.FeedItem;
 import net.technicpack.solder.ISolderApi;
 import net.technicpack.solder.SolderPackSource;
 import net.technicpack.solder.http.HttpSolderApi;
@@ -95,6 +95,8 @@ public class LauncherMain {
 
         ImageRepository<User> skinRepo = new ImageRepository<User>(new TechnicFaceMapper(directories, resources), new MinotarFaceImageStore("https://minotar.net/", mirrorStore));
 
+        ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<AuthorshipInfo>(new TechnicAvatarMapper(directories, resources), new WebAvatarImageStore(mirrorStore));
+
         ISolderApi solder = new HttpSolderApi(settings.getClientId(), userModel);
         IPlatformApi platform = new HttpPlatformApi("http://tplatform.gopagoda.com/api/", mirrorStore);
 
@@ -110,7 +112,7 @@ public class LauncherMain {
         ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());
         Installer installer = new Installer(startupParameters, mirrorStore, directories, modpackInstaller, launcher, settings, iconMapper);
 
-        LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, packList, iconRepo, logoRepo, backgroundRepo, installer);
+        LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, packList, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo);
         userModel.addAuthListener(frame);
 
         LoginFrame login = new LoginFrame(resources, settings, userModel, skinRepo);

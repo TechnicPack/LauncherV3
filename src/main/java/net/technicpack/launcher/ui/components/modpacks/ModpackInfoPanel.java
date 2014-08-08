@@ -27,6 +27,7 @@ import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.platform.io.FeedItem;
 import net.technicpack.utilslib.DesktopUtils;
 
@@ -40,6 +41,7 @@ import java.util.Date;
 public class ModpackInfoPanel extends JPanel implements IImageJobListener<ModpackModel> {
     private ResourceLoader resources;
     private ImageRepository<ModpackModel> backgroundRepo;
+    private ImageRepository<AuthorshipInfo> avatarRepo;
 
     private TiledBackground background;
     private HorizontalGallery feedGallery;
@@ -49,9 +51,10 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
 
     private ModpackModel modpack;
 
-    public ModpackInfoPanel(ResourceLoader loader, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo) {
+    public ModpackInfoPanel(ResourceLoader loader, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, ImageRepository<AuthorshipInfo> avatarRepo) {
         this.resources  = loader;
         this.backgroundRepo = backgroundRepo;
+        this.avatarRepo = avatarRepo;
 
         initComponents(iconRepo, logoRepo);
     }
@@ -71,7 +74,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
 
         for (int i = 0; i < feed.size(); i++) {
             FeedItem item = feed.get(i);
-            FeedItemView itemView = new FeedItemView(resources, item.getContent(), item.getUrl(), item.getUser(), item.getDate(), resources.getCircleClippedImage("news/AuthorAvatar.jpg"));
+            FeedItemView itemView = new FeedItemView(resources, item, avatarRepo.startImageJob(item.getAuthorship()));
             itemView.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {

@@ -21,6 +21,9 @@ package net.technicpack.launcher.ui.controls.feeds;
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.components.news.AuthorshipWidget;
+import net.technicpack.launchercore.image.ImageJob;
+import net.technicpack.platform.io.AuthorshipInfo;
+import net.technicpack.platform.io.FeedItem;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,10 +33,9 @@ import java.awt.image.BufferedImage;
 import java.util.Date;
 
 public class FeedItemView extends JButton {
-    private String url;
-    private String text;
+    private FeedItem feedItem;
 
-    public FeedItemView(ResourceLoader loader, String text, String url, String author, Date writtenDate, BufferedImage avatar) {
+    public FeedItemView(ResourceLoader loader, FeedItem feedItem, ImageJob<AuthorshipInfo> avatar) {
         this.setOpaque(false);
         this.setLayout(new GridBagLayout());
         this.setBorder(BorderFactory.createEmptyBorder());
@@ -43,8 +45,7 @@ public class FeedItemView extends JButton {
         this.setForeground(LauncherFrame.COLOR_HEADER_TEXT);
         this.setFont(loader.getFont(ResourceLoader.FONT_OPENSANS, 12));
 
-        this.url = url;
-        this.text = text;
+        this.feedItem = feedItem;
 
         add(Box.createVerticalGlue(), new GridBagConstraints(0,0,3,1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
 
@@ -62,7 +63,7 @@ public class FeedItemView extends JButton {
             }
         });
 
-        AuthorshipWidget authorship = new AuthorshipWidget(loader);
+        AuthorshipWidget authorship = new AuthorshipWidget(loader, feedItem.getAuthorship(), avatar);
         add(authorship, new GridBagConstraints(0,1,1,1,0.0,0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,0,0,0), 0,0));
         authorship.setBounds(0, 0, getWidth(), getHeight());
 
@@ -70,7 +71,7 @@ public class FeedItemView extends JButton {
     }
 
     public String getUrl() {
-        return url;
+        return feedItem.getUrl();
     }
 
     private Dimension getCalcSize() {
@@ -115,7 +116,7 @@ public class FeedItemView extends JButton {
         g2d.setFont(getFont());
         g2d.setColor(getForeground());
 
-        drawTextUgly(text, g2d, 92);
+        drawTextUgly(feedItem.getContent(), g2d, 92);
         g2d.setClip(oldClip);
     }
 

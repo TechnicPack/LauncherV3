@@ -25,18 +25,23 @@ import net.technicpack.launcher.ui.controls.AAJLabel;
 import net.technicpack.launcher.ui.controls.RoundedButton;
 import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
 import net.technicpack.launcher.ui.controls.TiledBackground;
+import net.technicpack.launchercore.image.ImageRepository;
+import net.technicpack.platform.io.AuthorshipInfo;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Date;
 
 public class NewsInfoPanel extends JPanel {
     private ResourceLoader resources;
+    private ImageRepository<AuthorshipInfo> avatarRepo;
 
     JTextArea newsText;
     JScrollPane newsScroller;
-    public NewsInfoPanel(ResourceLoader resources) {
+    public NewsInfoPanel(ResourceLoader resources, ImageRepository<AuthorshipInfo> avatarRepo) {
 
         this.resources = resources;
+        this.avatarRepo = avatarRepo;
 
         initComponents();
     }
@@ -51,7 +56,8 @@ public class NewsInfoPanel extends JPanel {
         title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 36));
         add(title, new GridBagConstraints(0,0,2,1,1.0,0.0,GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0));
 
-        AuthorshipWidget authorshipInfo = new AuthorshipWidget(resources);
+        AuthorshipInfo info = new AuthorshipInfo("sct", "http://www.gravatar.com/avatar/2a29f323eddf3410fb1b531b10f7df6f?s=60&d=retro", new Date());
+        AuthorshipWidget authorshipInfo = new AuthorshipWidget(resources, info, avatarRepo.startImageJob(info));
         add(authorshipInfo, new GridBagConstraints(0,1,2,1,1.0,0.0,GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0,0,8,0),0,0));
 
         newsText = new JTextArea();

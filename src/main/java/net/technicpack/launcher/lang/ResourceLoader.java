@@ -193,7 +193,10 @@ public class ResourceLoader {
 
     public BufferedImage getCircleClippedImage(String imageName) {
         BufferedImage contentImage = getImage(imageName);
+        return getCircleClippedImage(contentImage);
+    }
 
+    public BufferedImage getCircleClippedImage(BufferedImage contentImage) {
         // copy the picture to an image with transparency capabilities
         BufferedImage outputImage = new BufferedImage(contentImage.getWidth(), contentImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = (Graphics2D)outputImage.getGraphics();
