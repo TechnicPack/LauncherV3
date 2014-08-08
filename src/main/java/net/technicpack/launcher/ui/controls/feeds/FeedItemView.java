@@ -29,11 +29,11 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.Date;
 
-public class FeedItem extends JButton {
+public class FeedItemView extends JButton {
     private String url;
     private String text;
 
-    public FeedItem(ResourceLoader loader, String text, String url, String author, Date writtenDate, BufferedImage avatar) {
+    public FeedItemView(ResourceLoader loader, String text, String url, String author, Date writtenDate, BufferedImage avatar) {
         this.setOpaque(false);
         this.setLayout(new GridBagLayout());
         this.setBorder(BorderFactory.createEmptyBorder());
@@ -58,7 +58,7 @@ public class FeedItem extends JButton {
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                fireActionPerformed(new ActionEvent(FeedItem.this, e.getID(), "discuss", e.getWhen(), e.getModifiers()));
+                fireActionPerformed(new ActionEvent(FeedItemView.this, e.getID(), "discuss", e.getWhen(), e.getModifiers()));
             }
         });
 
@@ -140,13 +140,15 @@ public class FeedItem extends JButton {
             int nextEndY = nextStartY + lineSize;
 
             String line = arr[nIndex++];
-            int lineWidth = g2.getFontMetrics().stringWidth(line+" "+arr[nIndex]);
-            if (nextEndY >= maxY)
-                lineWidth += elipsisSize;
+            int lineWidth = g2.getFontMetrics().stringWidth(line);
+
             while ( ( nIndex < arr.length ) && (lineWidth < 243) )
             {
                 line = line + " " + arr[nIndex];
                 nIndex++;
+
+                if (nIndex == arr.length)
+                    break;
 
                 lineWidth = g2.getFontMetrics().stringWidth(line+" "+arr[nIndex]);
                 if (nextEndY >= maxY)

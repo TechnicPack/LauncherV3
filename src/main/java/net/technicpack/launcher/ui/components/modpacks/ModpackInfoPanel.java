@@ -21,22 +21,20 @@ package net.technicpack.launcher.ui.components.modpacks;
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.*;
-import net.technicpack.launcher.ui.controls.feeds.FeedItem;
+import net.technicpack.launcher.ui.controls.feeds.FeedItemView;
 import net.technicpack.launcher.ui.controls.feeds.HorizontalGallery;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.platform.io.FeedItem;
 import net.technicpack.utilslib.DesktopUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class ModpackInfoPanel extends JPanel implements IImageJobListener<ModpackModel> {
@@ -67,6 +65,22 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         job.addJobListener(this);
         background.setImage(job.getImage());
 
+        feedGallery.removeAll();
+
+        ArrayList<FeedItem> feed = modpack.getFeed();
+
+        for (int i = 0; i < feed.size(); i++) {
+            FeedItem item = feed.get(i);
+            FeedItemView itemView = new FeedItemView(resources, item.getContent(), item.getUrl(), item.getUser(), item.getDate(), resources.getCircleClippedImage("news/AuthorAvatar.jpg"));
+            itemView.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    clickFeedItem((FeedItemView)e.getSource(), e.getActionCommand());
+                }
+            });
+            feedGallery.add(itemView);
+        }
+
         repaint();
     }
 
@@ -82,7 +96,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         feedGallery.selectNextComponent();
     }
 
-    protected void clickFeedItem(FeedItem item, String command) {
+    protected void clickFeedItem(FeedItemView item, String command) {
         if (command != null && command.equalsIgnoreCase("discuss")) {
             DesktopUtils.browseUrl(item.getUrl());
         } else
@@ -182,17 +196,6 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         constraints.ipady = 150;
         constraints.fill = GridBagConstraints.BOTH;
         feedBottom.add(feedGallery, constraints);
-
-        for (int i = 0; i < 10; i++) {
-            FeedItem item = new FeedItem(resources, "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc facilisis congue dignissim. Aliquam posuere eros vel eros luctus molestie. Duis non massa vel orci sagittis semper. Pellentesque lorem diam, viverra in bibendum in, tincidunt in neque. Curabitur consectetur aliquam sem eget laoreet. Quisque eget turpis a velit semper dictum at ut neque. Nulla placerat odio eget neque commodo posuere. Nam porta lacus elit, a rutrum enim mollis vel.", "http://www.technicpack.net/", "sct", new Date(), resources.getCircleClippedImage("news/AuthorAvatar.jpg"));
-            item.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    clickFeedItem((FeedItem)e.getSource(), e.getActionCommand());
-                }
-            });
-            feedGallery.add(item);
-        }
 
         constraints = new GridBagConstraints();
         constraints.gridx = 0;

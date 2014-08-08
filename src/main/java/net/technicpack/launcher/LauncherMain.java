@@ -96,7 +96,7 @@ public class LauncherMain {
         ImageRepository<User> skinRepo = new ImageRepository<User>(new TechnicFaceMapper(directories, resources), new MinotarFaceImageStore("https://minotar.net/", mirrorStore));
 
         ISolderApi solder = new HttpSolderApi(settings.getClientId(), userModel);
-        IPlatformApi platform = new HttpPlatformApi("http://technicplatform.gopagoda.com/api/", mirrorStore);
+        IPlatformApi platform = new HttpPlatformApi("http://tplatform.gopagoda.com/api/", mirrorStore);
 
         IInstalledPackRepository packStore = TechnicInstalledPackStore.load(new File(directories.getLauncherDirectory(), "installedPacks"));
         IPackInfoRepository packInfoRepository = new PlatformPackInfoRepository(platform, solder);
