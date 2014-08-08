@@ -27,10 +27,15 @@ public class HorizontalGallery extends JPanel {
     private int pixelPosition = -8;
     private Component selectedComponent;
     private Component lastDisplayedComponent;
+    private Component noComponentsMessage;
 
     public HorizontalGallery() {
         setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
         setOpaque(false);
+    }
+
+    public void setNoComponentsMessage(Component noComponentsMessage) {
+        this.noComponentsMessage = noComponentsMessage;
     }
 
     @Override
@@ -42,17 +47,33 @@ public class HorizontalGallery extends JPanel {
     public void doLayout() {
         super.doLayout();
 
-        int startX = 0 - pixelPosition;
+        boolean hasNoComponents = getComponentCount() == 0 || (getComponentCount() == 1 && getComponent(0) == noComponentsMessage);
 
-        for (Component component : getComponents()) {
-            Rectangle cBounds = component.getBounds();
-            component.setBounds(startX, cBounds.y, cBounds.width, cBounds.height);
-            component.invalidate();
+        if (noComponentsMessage != null) {
+            noComponentsMessage.setVisible(hasNoComponents);
+            remove(noComponentsMessage);
 
-            if (startX >= 2 && (startX + cBounds.width) < getWidth())
-                lastDisplayedComponent = component;
+            if (hasNoComponents)
+                add(noComponentsMessage);
+        }
 
-            startX += cBounds.width + 8;
+        if (!hasNoComponents) {
+            int startX = 0 - pixelPosition;
+
+            for (Component component : getComponents()) {
+                Rectangle cBounds = component.getBounds();
+                component.setBounds(startX, cBounds.y, cBounds.width, cBounds.height);
+                component.invalidate();
+
+                if (startX >= 2 && (startX + cBounds.width) < getWidth())
+                    lastDisplayedComponent = component;
+
+                startX += cBounds.width + 8;
+            }
+        } else if (noComponentsMessage != null) {
+            Dimension messageSize = noComponentsMessage.getSize();
+            Dimension size = getSize();
+            noComponentsMessage.setBounds((size.width - messageSize.width)/2, (size.height-messageSize.height)/2, messageSize.width, messageSize.height);
         }
 
         repaint();
@@ -72,22 +93,26 @@ public class HorizontalGallery extends JPanel {
 
         super.paintChildren(g);
 
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+        boolean hasNoComponents = getComponentCount() == 0 || (getComponentCount() == 1 && getComponent(0) == noComponentsMessage);
 
-        Color background = getBackground();
-        Color flatBackground = new Color(background.getRed(), background.getGreen(), background.getBlue(), 255);
+        if (!hasNoComponents) {
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        if (getComponentCount() != 0) {
-            if (getSelectedComponent() != getComponent(0)) {
-                g2d.setPaint(new GradientPaint(0, 0, flatBackground, 70, 0, new Color(0, 0, 0, 0)));
-                g2d.fillRect(0, 0, getWidth(), getHeight());
+            Color background = getBackground();
+            Color flatBackground = new Color(background.getRed(), background.getGreen(), background.getBlue(), 255);
+
+            if (getComponentCount() != 0) {
+                if (getSelectedComponent() != getComponent(0)) {
+                    g2d.setPaint(new GradientPaint(0, 0, flatBackground, 70, 0, new Color(0, 0, 0, 0)));
+                    g2d.fillRect(0, 0, getWidth(), getHeight());
+                }
+                if (lastDisplayedComponent != getComponents()[getComponentCount() - 1]) {
+                    g2d.setPaint(new GradientPaint(getWidth() - 80, 0, new Color(0, 0, 0, 0), getWidth() - 10, 0, flatBackground));
+                    g2d.fillRect(0, 0, getWidth(), getHeight());
+                }
             }
-            if (lastDisplayedComponent != getComponents()[getComponentCount() - 1]) {
-                g2d.setPaint(new GradientPaint(getWidth() - 80, 0, new Color(0, 0, 0, 0), getWidth() - 10, 0, flatBackground));
-                g2d.fillRect(0, 0, getWidth(), getHeight());
-            }
+            g2d.setPaint(oldPaint);
         }
-        g2d.setPaint(oldPaint);
     }
 
     public Component getSelectedComponent() {

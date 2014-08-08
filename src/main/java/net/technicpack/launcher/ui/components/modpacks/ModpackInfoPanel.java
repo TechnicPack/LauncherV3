@@ -186,7 +186,12 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         });
         topline.add(rightButton);
 
+        AAJLabel label = new AAJLabel(resources.getString("launcher.packfeed.noupdates"));
+        label.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 20));
+        label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+
         feedGallery = new HorizontalGallery();
+        feedGallery.setNoComponentsMessage(label);
         feedGallery.setBackground(LauncherFrame.COLOR_FEED_BACK);
         feedGallery.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         constraints = new GridBagConstraints();
