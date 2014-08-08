@@ -21,7 +21,9 @@ package net.technicpack.rest.io;
 
 
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
+import net.technicpack.platform.io.FeedItem;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public interface PackInfo {
@@ -45,6 +47,8 @@ public interface PackInfo {
 	public List<String> getBuilds();
 
 	public boolean shouldForceDirectory();
+
+    public ArrayList<FeedItem> getFeed();
 
     public String getDescription();
 

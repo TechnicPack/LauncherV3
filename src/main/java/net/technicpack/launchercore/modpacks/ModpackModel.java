@@ -22,6 +22,7 @@ package net.technicpack.launchercore.modpacks;
 import net.technicpack.launchercore.install.Version;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.minecraftcore.LauncherDirectories;
+import net.technicpack.platform.io.FeedItem;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.rest.io.Resource;
 import net.technicpack.utilslib.Utils;
@@ -29,6 +30,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ModpackModel {
@@ -110,6 +112,13 @@ public class ModpackModel {
             return null;
 
         return packInfo.getBackground();
+    }
+
+    public ArrayList<FeedItem> getFeed() {
+        if (packInfo == null)
+            return new ArrayList<FeedItem>();
+
+        return packInfo.getFeed();
     }
 
     public boolean isLocalOnly() {

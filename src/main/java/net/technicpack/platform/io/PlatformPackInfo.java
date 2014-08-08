@@ -44,6 +44,7 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
     private Integer runs;
     private Integer downloads;
 	private boolean forceDir;
+    private ArrayList<FeedItem> feed = new ArrayList<FeedItem>();
 
 	public PlatformPackInfo() {
 
@@ -93,6 +94,9 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 	public boolean shouldForceDirectory() {
 		return forceDir;
 	}
+
+    @Override
+    public ArrayList<FeedItem> getFeed() { return feed; }
 
 	@Override
 	public List<String> getBuilds() {

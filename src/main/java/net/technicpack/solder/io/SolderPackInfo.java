@@ -20,12 +20,14 @@
 package net.technicpack.solder.io;
 
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
+import net.technicpack.platform.io.FeedItem;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.rest.io.Resource;
 import net.technicpack.rest.RestObject;
 import net.technicpack.solder.ISolderPackApi;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SolderPackInfo extends RestObject implements PackInfo {
@@ -115,6 +117,9 @@ public class SolderPackInfo extends RestObject implements PackInfo {
 		//TODO: This is not really implemented properly
 		return false;
 	}
+
+    @Override
+    public ArrayList<FeedItem> getFeed() { return new ArrayList<FeedItem>(); }
 
     @Override
     public String getDescription() {
