@@ -16,4 +16,5 @@ public class FeedItem {
     public String getContent() { return content; }
     public String getAvatar() { return avatar; }
     public String getUrl() { return url; }
+    public AuthorshipInfo getAuthorship() { return new AuthorshipInfo(getUser(), getAvatar(), getDate()); }
 }
