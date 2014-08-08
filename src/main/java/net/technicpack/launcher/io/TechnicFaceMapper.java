@@ -29,12 +29,10 @@ import java.io.File;
 
 public class TechnicFaceMapper implements IImageMapper<User> {
     private LauncherDirectories directories;
-    private ResourceLoader resources;
     private BufferedImage defaultImage;
 
     public TechnicFaceMapper(LauncherDirectories directories, ResourceLoader resources) {
         this.directories = directories;
-        this.resources = resources;
         defaultImage = resources.getImage("news/authorHelm.png");
     }
 
