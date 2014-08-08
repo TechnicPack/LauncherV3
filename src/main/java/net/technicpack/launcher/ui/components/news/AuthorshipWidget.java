@@ -27,8 +27,10 @@ import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.platform.io.FeedItem;
 import net.technicpack.utilslib.ImageUtils;
+import org.joda.time.*;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.Date;
 
 public class AuthorshipWidget extends JPanel implements IImageJobListener<AuthorshipInfo> {
@@ -67,14 +69,44 @@ public class AuthorshipWidget extends JPanel implements IImageJobListener<Author
 
         add(Box.createHorizontalStrut(6));
 
-        AAJLabel postTime = new AAJLabel(resources.getString("launcher.news.posted",getDateText()));
+        AAJLabel postTime = new AAJLabel(resources.getString("launcher.news.posted",getDateText())+" ");
         postTime.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         postTime.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 12));
         add(postTime);
+
+        add(Box.createHorizontalStrut(4));
     }
 
     private String getDateText() {
-        return "3 days ago";
+        LocalDate posted = new LocalDate(authorshipInfo.getDate().getTime());
+        LocalDate now = new LocalDate();
+
+        Years yearsSince = Years.yearsBetween(posted, now);
+        Months monthsSince = Months.monthsBetween(posted, now);
+        Days daysSince = Days.daysBetween(posted, now);
+        Hours hoursSince = Hours.hoursBetween(posted, now);
+        Minutes minutesSince = Minutes.minutesBetween(posted, now);
+
+        if (yearsSince.getYears() > 1)
+            return resources.getString("time.years", Integer.toString(yearsSince.getYears()));
+        else if (yearsSince.getYears() == 1)
+            return resources.getString("time.year");
+        else if (monthsSince.getMonths() > 1)
+            return resources.getString("time.months", Integer.toString(monthsSince.getMonths()));
+        else if (monthsSince.getMonths() == 1)
+            return resources.getString("time.month");
+        else if (daysSince.getDays() > 1)
+            return resources.getString("time.days", Integer.toString(daysSince.getDays()));
+        else if (daysSince.getDays() == 1)
+            return resources.getString("time.day");
+        else if (hoursSince.getHours() > 1)
+            return resources.getString("time.hours", Integer.toString(hoursSince.getHours()));
+        else if (hoursSince.getHours() == 1)
+            return resources.getString("time.hour");
+        else if (minutesSince.getMinutes() > 1)
+            return resources.getString("time.minutes", Integer.toString(minutesSince.getMinutes()));
+        else
+            return resources.getString("time.minute");
     }
 
     @Override
