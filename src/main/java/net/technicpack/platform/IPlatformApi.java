@@ -19,11 +19,16 @@
 
 package net.technicpack.platform;
 
+import net.technicpack.platform.io.NewsArticle;
+import net.technicpack.platform.io.NewsData;
 import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.rest.RestfulAPIException;
+
+import java.util.List;
 
 public interface IPlatformApi {
     PlatformPackInfo getPlatformPackInfo(String packSlug) throws RestfulAPIException;
     void incrementPackRuns(String packSlug);
     void incrementPackInstalls(String packSlug);
+    NewsData getNews() throws RestfulAPIException;
 }

@@ -21,11 +21,16 @@ package net.technicpack.platform.http;
 
 import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.platform.IPlatformApi;
+import net.technicpack.platform.io.NewsArticle;
+import net.technicpack.platform.io.NewsData;
 import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.rest.RestObject;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.utilslib.Utils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class HttpPlatformApi implements IPlatformApi {
     private String platformUrl;
@@ -52,5 +57,11 @@ public class HttpPlatformApi implements IPlatformApi {
     public void incrementPackInstalls(String packSlug) {
         String url = platformUrl + "modpack/" + packSlug + "/download";
         Utils.pingHttpURL(url, mirrorStore);
+    }
+
+    @Override
+    public NewsData getNews() throws RestfulAPIException {
+        String url = platformUrl + "api/news";
+        return RestObject.getRestObject(NewsData.class, url);
     }
 }
