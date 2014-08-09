@@ -34,23 +34,22 @@ import java.awt.*;
 import java.util.Date;
 
 public class AuthorshipWidget extends JPanel implements IImageJobListener<AuthorshipInfo> {
-    private ImageJob<AuthorshipInfo> avatar;
-    private AuthorshipInfo authorshipInfo;
-
     private JLabel avatarView;
     private ResourceLoader resources;
+    private JLabel authorName;
+    private JLabel postTime;
 
-    public AuthorshipWidget(ResourceLoader resources, AuthorshipInfo authorshipInfo, ImageJob<AuthorshipInfo> avatar) {
+    public AuthorshipWidget(ResourceLoader resources) {
         super();
 
         this.resources = resources;
-        this.avatar = avatar;
-        this.authorshipInfo = authorshipInfo;
 
         initComponents(resources);
+    }
 
-        avatar.addJobListener(this);
-        updateAvatar(avatar);
+    public AuthorshipWidget(ResourceLoader resources, AuthorshipInfo authorshipInfo, ImageJob<AuthorshipInfo> avatar) {
+        this(resources);
+        setAuthorshipInfo(authorshipInfo, avatar);
     }
 
     private void initComponents(ResourceLoader resources) {
@@ -62,14 +61,14 @@ public class AuthorshipWidget extends JPanel implements IImageJobListener<Author
 
         add(Box.createHorizontalStrut(6));
 
-        AAJLabel authorName = new AAJLabel(authorshipInfo.getUser());
+        AAJLabel authorName = new AAJLabel("");
         authorName.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS_BOLD, 12));
         authorName.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         add(authorName);
 
         add(Box.createHorizontalStrut(6));
 
-        AAJLabel postTime = new AAJLabel(resources.getString("launcher.news.posted",getDateText())+" ");
+        AAJLabel postTime = new AAJLabel("");
         postTime.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         postTime.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 12));
         add(postTime);
@@ -77,8 +76,8 @@ public class AuthorshipWidget extends JPanel implements IImageJobListener<Author
         add(Box.createHorizontalStrut(4));
     }
 
-    private String getDateText() {
-        LocalDate posted = new LocalDate(authorshipInfo.getDate().getTime());
+    private String getDateText(Date date) {
+        LocalDate posted = new LocalDate(date.getTime());
         LocalDate now = new LocalDate();
 
         Years yearsSince = Years.yearsBetween(posted, now);
@@ -116,5 +115,12 @@ public class AuthorshipWidget extends JPanel implements IImageJobListener<Author
 
     public void updateAvatar(ImageJob<AuthorshipInfo> job) {
         avatarView.setIcon(new ImageIcon(resources.getCircleClippedImage(ImageUtils.scaleWithAspectWidth(job.getImage(), 32))));
+    }
+
+    public void setAuthorshipInfo(AuthorshipInfo info, ImageJob<AuthorshipInfo> avatar) {
+        postTime.setText(resources.getString("launcher.news.posted",getDateText(info.getDate()))+" ");
+        authorName.setText(info.getUser());
+        avatar.addJobListener(this);
+        updateAvatar(avatar);
     }
 }

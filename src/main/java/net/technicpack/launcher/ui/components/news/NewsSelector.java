@@ -38,7 +38,6 @@ public class NewsSelector extends JPanel {
         this.resources = resources;
 
         initComponents();
-        selectNewsItem(selectedItem);
     }
 
     protected void selectNewsItem(NewsWidget widget) {
@@ -66,21 +65,21 @@ public class NewsSelector extends JPanel {
 
         GridBagConstraints constraints = new GridBagConstraints(0,0,1,1,1.0,0.0,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0);
 
-        for (int i = 0; i < 12; i++) {
-            NewsWidget widget = new NewsWidget(resources);
-            widget.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if (e.getSource() instanceof NewsWidget)
-                        selectNewsItem((NewsWidget)e.getSource());
-                }
-            });
-
-            if (i == 2)
-                selectedItem = widget;
-            widgetHost.add(widget, constraints);
-            constraints.gridy++;
-        }
+//        for (int i = 0; i < 12; i++) {
+//            NewsWidget widget = new NewsWidget(resources);
+//            widget.addActionListener(new ActionListener() {
+//                @Override
+//                public void actionPerformed(ActionEvent e) {
+//                    if (e.getSource() instanceof NewsWidget)
+//                        selectNewsItem((NewsWidget)e.getSource());
+//                }
+//            });
+//
+//            if (i == 2)
+//                selectedItem = widget;
+//            widgetHost.add(widget, constraints);
+//            constraints.gridy++;
+//        }
 
         constraints.weighty = 1.0;
         widgetHost.add(Box.createGlue(), constraints);
