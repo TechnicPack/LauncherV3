@@ -23,34 +23,60 @@ import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
 import net.technicpack.launcher.ui.controls.TiledBackground;
 import net.technicpack.launcher.ui.controls.feeds.NewsWidget;
+import net.technicpack.launchercore.image.ImageRepository;
+import net.technicpack.platform.IPlatformApi;
+import net.technicpack.platform.io.AuthorshipInfo;
+import net.technicpack.platform.io.NewsArticle;
+import net.technicpack.platform.io.NewsData;
+import net.technicpack.rest.RestfulAPIException;
+import net.technicpack.utilslib.Utils;
 import sun.tools.jar.resources.jar;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.logging.Level;
 
 public class NewsSelector extends JPanel {
     private ResourceLoader resources;
+    private IPlatformApi platformApi;
     private NewsWidget selectedItem;
+    private JPanel widgetHost;
 
-    public NewsSelector(ResourceLoader resources) {
+    private NewsInfoPanel panel;
+
+    private ImageRepository<AuthorshipInfo> avatarRepo;
+
+    public NewsSelector(ResourceLoader resources, NewsInfoPanel panel, IPlatformApi platformApi, ImageRepository<AuthorshipInfo> avatarRepo) {
         this.resources = resources;
+        this.platformApi = platformApi;
+        this.avatarRepo = avatarRepo;
+        this.panel = panel;
 
         initComponents();
+        downloadItems();
     }
 
     protected void selectNewsItem(NewsWidget widget) {
-        selectedItem.setIsSelected(false);
+        if (selectedItem != null)
+            selectedItem.setIsSelected(false);
         selectedItem = widget;
-        selectedItem.setIsSelected(true);
+
+        if (selectedItem != null)
+            selectedItem.setIsSelected(true);
+
+        panel.setArticle(selectedItem.getArticle());
     }
 
     private void initComponents() {
         setLayout(new BorderLayout());
         setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
 
-        JPanel widgetHost = new JPanel();
+        widgetHost = new JPanel();
         widgetHost.setOpaque(false);
         widgetHost.setLayout(new GridBagLayout());
 
@@ -65,23 +91,60 @@ public class NewsSelector extends JPanel {
 
         GridBagConstraints constraints = new GridBagConstraints(0,0,1,1,1.0,0.0,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0);
 
-//        for (int i = 0; i < 12; i++) {
-//            NewsWidget widget = new NewsWidget(resources);
-//            widget.addActionListener(new ActionListener() {
-//                @Override
-//                public void actionPerformed(ActionEvent e) {
-//                    if (e.getSource() instanceof NewsWidget)
-//                        selectNewsItem((NewsWidget)e.getSource());
-//                }
-//            });
-//
-//            if (i == 2)
-//                selectedItem = widget;
-//            widgetHost.add(widget, constraints);
-//            constraints.gridy++;
-//        }
+        constraints.weighty = 1.0;
+        widgetHost.add(Box.createGlue(), constraints);
+    }
+
+    protected void loadNewsItems(NewsData news) {
+
+        Collections.sort(news.getArticles(), new Comparator<NewsArticle>() {
+            @Override
+            public int compare(NewsArticle o1, NewsArticle o2) {
+                if (o1.getDate().getTime() > o2.getDate().getTime())
+                    return -1;
+                else if (o1.getDate().getTime() < o2.getDate().getTime())
+                    return 1;
+                else
+                    return 0;
+            }
+        });
+
+        widgetHost.removeAll();
+
+        GridBagConstraints constraints = new GridBagConstraints(0,0,1,1,1.0,0.0,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0);
+
+        for (int i = 0; i < news.getArticles().size(); i++) {
+            NewsWidget widget = new NewsWidget(resources, news.getArticles().get(i), avatarRepo.startImageJob(news.getArticles().get(i).getAuthorshipInfo()));
+            widget.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (e.getSource() instanceof NewsWidget)
+                        selectNewsItem((NewsWidget)e.getSource());
+                }
+            });
+            widgetHost.add(widget, constraints);
+            constraints.gridy++;
+
+            if (selectedItem == null)
+                selectNewsItem(widget);
+        }
 
         constraints.weighty = 1.0;
         widgetHost.add(Box.createGlue(), constraints);
+    }
+
+    private void downloadItems() {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    loadNewsItems(platformApi.getNews());
+                } catch (RestfulAPIException ex) {
+                    Utils.getLogger().log(Level.WARNING, "Unable to load news", ex);
+                }
+            }
+        });
+
+        thread.start();
     }
 }

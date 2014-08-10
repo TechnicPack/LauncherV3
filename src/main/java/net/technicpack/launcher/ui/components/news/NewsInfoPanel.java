@@ -27,6 +27,7 @@ import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
 import net.technicpack.launcher.ui.controls.TiledBackground;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.platform.io.AuthorshipInfo;
+import net.technicpack.platform.io.NewsArticle;
 
 import javax.swing.*;
 import java.awt.*;
@@ -38,12 +39,21 @@ public class NewsInfoPanel extends JPanel {
 
     JTextArea newsText;
     JScrollPane newsScroller;
+    AuthorshipWidget authorshipInfo;
+
     public NewsInfoPanel(ResourceLoader resources, ImageRepository<AuthorshipInfo> avatarRepo) {
 
         this.resources = resources;
         this.avatarRepo = avatarRepo;
 
         initComponents();
+    }
+
+    public void setArticle(NewsArticle article) {
+        newsText.setText(article.getContent());
+        authorshipInfo.setAuthorshipInfo(article.getAuthorshipInfo(), avatarRepo.startImageJob(article.getAuthorshipInfo()));
+        invalidate();
+        repaint();
     }
 
     private void initComponents() {
@@ -56,11 +66,11 @@ public class NewsInfoPanel extends JPanel {
         title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 36));
         add(title, new GridBagConstraints(0,0,2,1,1.0,0.0,GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0));
 
-        AuthorshipWidget authorshipInfo = new AuthorshipWidget(resources);
-        add(authorshipInfo, new GridBagConstraints(0,1,2,1,1.0,0.0,GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0,0,8,0),0,0));
+        authorshipInfo = new AuthorshipWidget(resources);
+        add(authorshipInfo, new GridBagConstraints(0, 1, 2, 1, 1.0, 0.0, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 8, 0), 0, 0));
 
         newsText = new JTextArea();
-        newsText.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+        newsText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         newsText.setOpaque(false);
         newsText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         newsText.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));

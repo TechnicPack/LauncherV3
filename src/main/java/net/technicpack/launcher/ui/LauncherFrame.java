@@ -41,6 +41,7 @@ import net.technicpack.launchercore.install.Version;
 import net.technicpack.launchercore.modpacks.AvailablePackList;
 import net.technicpack.launchercore.modpacks.InstalledPack;
 import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.platform.io.FeedItem;
 
@@ -92,6 +93,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private final ImageRepository<ModpackModel> backgroundRepo;
     private final ImageRepository<AuthorshipInfo> avatarRepo;
     private final Installer installer;
+    private final IPlatformApi platformApi;
 
     private HeaderTab discoverTab;
     private HeaderTab modpacksTab;
@@ -115,7 +117,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     NewsInfoPanel newsInfoPanel;
 
-    public LauncherFrame(ResourceLoader resources, ImageRepository<User> skinRepository, UserModel userModel, TechnicSettings settings, AvailablePackList packList, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, Installer installer, ImageRepository<AuthorshipInfo> avatarRepo) {
+    public LauncherFrame(ResourceLoader resources, ImageRepository<User> skinRepository, UserModel userModel, TechnicSettings settings, AvailablePackList packList, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, Installer installer, ImageRepository<AuthorshipInfo> avatarRepo, IPlatformApi platformApi) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -128,6 +130,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.backgroundRepo = backgroundRepo;
         this.installer = installer;
         this.avatarRepo = avatarRepo;
+        this.platformApi = platformApi;
 
         //Handles rebuilding the frame, so use it to build the frame in the first place
         relocalize(resources);
@@ -412,7 +415,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         selectorSwap.add(new DiscoverSelector(resources), "discover");
         modpackSelector = new ModpackSelector(resources, packList, iconRepo, modpackPanel);
         selectorSwap.add(modpackSelector, "modpacks");
-        selectorSwap.add(new NewsSelector(resources), "news");
+        selectorSwap.add(new NewsSelector(resources, newsInfoPanel, platformApi, avatarRepo), "news");
         leftPanel.add(selectorSwap, BorderLayout.CENTER);
 
         footer = new TintablePanel();

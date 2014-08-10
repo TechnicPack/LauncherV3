@@ -112,7 +112,7 @@ public class LauncherMain {
         ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());
         Installer installer = new Installer(startupParameters, mirrorStore, directories, modpackInstaller, launcher, settings, iconMapper);
 
-        LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, packList, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo);
+        LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, packList, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo, platform);
         userModel.addAuthListener(frame);
 
         LoginFrame login = new LoginFrame(resources, settings, userModel, skinRepo);

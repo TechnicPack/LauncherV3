@@ -61,14 +61,14 @@ public class AuthorshipWidget extends JPanel implements IImageJobListener<Author
 
         add(Box.createHorizontalStrut(6));
 
-        AAJLabel authorName = new AAJLabel("");
+        authorName = new AAJLabel("");
         authorName.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS_BOLD, 12));
         authorName.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         add(authorName);
 
         add(Box.createHorizontalStrut(6));
 
-        AAJLabel postTime = new AAJLabel("");
+        postTime = new AAJLabel("");
         postTime.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         postTime.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 12));
         add(postTime);
