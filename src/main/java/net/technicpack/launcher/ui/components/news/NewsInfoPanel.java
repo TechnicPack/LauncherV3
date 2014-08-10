@@ -52,8 +52,13 @@ public class NewsInfoPanel extends JPanel {
     public void setArticle(NewsArticle article) {
         newsText.setText(article.getContent());
         authorshipInfo.setAuthorshipInfo(article.getAuthorshipInfo(), avatarRepo.startImageJob(article.getAuthorshipInfo()));
-        invalidate();
-        repaint();
+
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                newsText.scrollRectToVisible(new Rectangle(0, 0, 1, 1));
+            }
+        });
     }
 
     private void initComponents() {
