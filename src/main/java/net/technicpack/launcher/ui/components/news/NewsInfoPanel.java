@@ -31,6 +31,8 @@ import net.technicpack.platform.io.NewsArticle;
 import net.technicpack.utilslib.DesktopUtils;
 
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
@@ -38,9 +40,15 @@ import javax.swing.text.StyledDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Date;
 
-public class NewsInfoPanel extends JPanel {
+public class NewsInfoPanel extends JPanel implements PropertyChangeListener {
     private ResourceLoader resources;
     private ImageRepository<AuthorshipInfo> avatarRepo;
 
@@ -108,6 +116,34 @@ public class NewsInfoPanel extends JPanel {
         newsText.setHighlighter(null);
         newsText.setAlignmentX(LEFT_ALIGNMENT);
         newsText.setContentType("text/html");
+        newsText.addHyperlinkListener(new HyperlinkListener() {
+            @Override
+            public void hyperlinkUpdate(HyperlinkEvent e) {
+                if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED)
+                    DesktopUtils.browseUrl(e.getURL().toString());
+            }
+        });
+        newsText.addComponentListener(new ComponentListener() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                NewsInfoPanel.this.revalidate();
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+
+            }
+
+            @Override
+            public void componentShown(ComponentEvent e) {
+
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+
+            }
+        });
 
         newsScroller = new JScrollPane(newsText, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         newsScroller.getVerticalScrollBar().setUI(new SimpleScrollbarUI());
@@ -141,5 +177,10 @@ public class NewsInfoPanel extends JPanel {
             }
         });
         add(discussButton, new GridBagConstraints(1, 3, 1, 1, 0.0, 0.0, GridBagConstraints.SOUTHEAST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        invalidate();
     }
 }
