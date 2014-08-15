@@ -9,6 +9,7 @@ public class NewsArticle {
     private String title;
     private String content;
     private long date;
+    private String url;
 
     public NewsArticle() {
 
@@ -21,4 +22,5 @@ public class NewsArticle {
     public String getContent() { return content; }
     public Date getDate() { return new Date(date*1000); }
     public AuthorshipInfo getAuthorshipInfo() { return new AuthorshipInfo(getUsername(), getAvatar(), getDate()); }
+    public String getUrl() { return url; }
 }
