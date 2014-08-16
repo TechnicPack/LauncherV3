@@ -109,6 +109,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private Component installProgressPlaceholder;
     private RoundedButton playButton;
     private ModpackSelector modpackSelector;
+    private NewsSelector newsSelector;
     private TintablePanel centralPanel;
     private TintablePanel leftPanel;
     private TintablePanel footer;
@@ -151,8 +152,10 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             discoverTab.setIsActive(true);
         else if (tabName.equalsIgnoreCase(TAB_MODPACKS))
             modpacksTab.setIsActive(true);
-        else if (tabName.equalsIgnoreCase(TAB_NEWS))
+        else if (tabName.equalsIgnoreCase(TAB_NEWS)) {
             newsTab.setIsActive(true);
+            newsSelector.ping();
+        }
 
         infoLayout.show(infoSwap, tabName);
         selectorLayout.show(selectorSwap, tabName);
@@ -307,7 +310,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         newsCircle.setBackground(COLOR_RED);
         newsCircle.setForeground(COLOR_WHITE_TEXT);
         newsCircle.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS_BOLD, 14));
-        newsCircle.setCount(9);
         newsTab.add(newsCircle);
         newsCircle.setBounds(10,17,25,25);
 
@@ -415,7 +417,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         selectorSwap.add(new DiscoverSelector(resources), "discover");
         modpackSelector = new ModpackSelector(resources, packList, iconRepo, modpackPanel);
         selectorSwap.add(modpackSelector, "modpacks");
-        selectorSwap.add(new NewsSelector(resources, newsInfoPanel, platformApi, avatarRepo), "news");
+        newsSelector = new NewsSelector(resources, newsInfoPanel, platformApi, avatarRepo, newsCircle, settings);
+        selectorSwap.add(newsSelector, "news");
         leftPanel.add(selectorSwap, BorderLayout.CENTER);
 
         footer = new TintablePanel();

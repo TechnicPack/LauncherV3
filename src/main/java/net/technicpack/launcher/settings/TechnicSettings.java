@@ -44,6 +44,7 @@ public class TechnicSettings {
     private String clientId = UUID.randomUUID().toString();
     private String directory;
     private String javaArgs;
+    private int latestNewsArticle;
 
     public void setFilePath(File settingsFile) {
         this.settingsFile = settingsFile;
@@ -87,6 +88,13 @@ public class TechnicSettings {
     public String getLanguageCode() { return languageCode; }
     public void setLanguageCode(String languageCode) {
         this.languageCode = languageCode;
+        save();
+    }
+
+    public int getLatestNewsArticle() { return latestNewsArticle; }
+    public void setLatestNewsArticle(int latestNewsArticle)
+    {
+        this.latestNewsArticle = latestNewsArticle;
         save();
     }
 

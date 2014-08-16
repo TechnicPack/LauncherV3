@@ -19,9 +19,11 @@
 package net.technicpack.launcher.ui.components.news;
 
 import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
 import net.technicpack.launcher.ui.controls.TiledBackground;
+import net.technicpack.launcher.ui.controls.feeds.CountCircle;
 import net.technicpack.launcher.ui.controls.feeds.NewsWidget;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.platform.IPlatformApi;
@@ -46,16 +48,21 @@ public class NewsSelector extends JPanel {
     private IPlatformApi platformApi;
     private NewsWidget selectedItem;
     private JPanel widgetHost;
+    private CountCircle circle;
+    private TechnicSettings settings;
+    private int newLatestNewsArticle;
 
     private NewsInfoPanel panel;
 
     private ImageRepository<AuthorshipInfo> avatarRepo;
 
-    public NewsSelector(ResourceLoader resources, NewsInfoPanel panel, IPlatformApi platformApi, ImageRepository<AuthorshipInfo> avatarRepo) {
+    public NewsSelector(ResourceLoader resources, NewsInfoPanel panel, IPlatformApi platformApi, ImageRepository<AuthorshipInfo> avatarRepo, CountCircle count, TechnicSettings settings) {
         this.resources = resources;
         this.platformApi = platformApi;
         this.avatarRepo = avatarRepo;
         this.panel = panel;
+        this.settings = settings;
+        this.circle = count;
 
         initComponents();
         downloadItems();
@@ -95,7 +102,30 @@ public class NewsSelector extends JPanel {
         widgetHost.add(Box.createGlue(), constraints);
     }
 
+    public void ping() {
+        settings.setLatestNewsArticle(newLatestNewsArticle);
+        circle.setVisible(false);
+    }
+
     protected void loadNewsItems(NewsData news) {
+
+        int count = 0;
+        newLatestNewsArticle = settings.getLatestNewsArticle();
+        for (int i = 0;i < news.getArticles().size(); i++) {
+            if (news.getArticles().get(i).getId() > settings.getLatestNewsArticle()) {
+                count++;
+
+                if (news.getArticles().get(i).getId() > newLatestNewsArticle)
+                    newLatestNewsArticle = news.getArticles().get(i).getId();
+            }
+        }
+
+        if (count > 0) {
+            circle.setVisible(true);
+            circle.setCount(count);
+        } else {
+            circle.setVisible(false);
+        }
 
         Collections.sort(news.getArticles(), new Comparator<NewsArticle>() {
             @Override
