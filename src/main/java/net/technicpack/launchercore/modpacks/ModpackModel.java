@@ -19,13 +19,12 @@
 
 package net.technicpack.launchercore.modpacks;
 
+import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.Version;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
-import net.technicpack.minecraftcore.LauncherDirectories;
 import net.technicpack.platform.io.FeedItem;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.rest.io.Resource;
-import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;

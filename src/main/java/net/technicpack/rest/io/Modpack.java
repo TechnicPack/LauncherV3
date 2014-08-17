@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Modpack extends RestObject {
-	private String minecraft;
+	private String gameVersion;
 	private List<Mod> mods;
 
 	public Modpack() {
@@ -34,14 +34,14 @@ public class Modpack extends RestObject {
 	}
 
 	public Modpack(PlatformPackInfo info) {
-		minecraft = info.getMinecraft();
+        gameVersion = info.getGameVersion();
 		mods = new ArrayList<Mod>();
 		Mod mod = new Mod(info.getName(), info.getRecommended(), info.getUrl(), "");
 		mods.add(mod);
 	}
 
-	public String getMinecraft() {
-		return minecraft;
+	public String getGameVersion() {
+		return gameVersion;
 	}
 
 	public List<Mod> getMods() {

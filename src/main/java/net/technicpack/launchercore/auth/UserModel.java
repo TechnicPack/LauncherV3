@@ -1,7 +1,5 @@
 package net.technicpack.launchercore.auth;
 
-import net.technicpack.minecraftcore.mojang.auth.AuthResponse;
-import net.technicpack.minecraftcore.mojang.auth.AuthenticationService;
 import net.technicpack.launchercore.exception.AuthenticationNetworkFailureException;
 import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.mirror.secure.rest.ISecureMirror;
@@ -12,39 +10,41 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-public class UserModel {
+public class UserModel<UserType extends IUserType> {
 	private static UserModel mInstance = null;
 
-	private User mCurrentUser = null;
+	private UserType mCurrentUser = null;
 	private List<IAuthListener> mAuthListeners = new LinkedList<IAuthListener>();
-	private IUserStore mUserStore;
+	private IUserStore<UserType> mUserStore;
+    private IGameAuthService<UserType> gameAuthService;
 
-	public UserModel(IUserStore userStore) {
+	public UserModel(IUserStore userStore, IGameAuthService<UserType> gameAuthService) {
 		this.mCurrentUser = null;
 		this.mUserStore = userStore;
+        this.gameAuthService = gameAuthService;
 	}
 
-	public User getCurrentUser() {
+	public UserType getCurrentUser() {
 		return this.mCurrentUser;
 	}
 
-	public void setCurrentUser(User user) {
+	public void setCurrentUser(UserType user) {
 		this.mCurrentUser = user;
 		this.triggerAuthListeners();
 	}
 
-	public void addAuthListener(IAuthListener listener) {
+	public void addAuthListener(IAuthListener<UserType> listener) {
 		this.mAuthListeners.add(listener);
 	}
 
 	protected void triggerAuthListeners() {
-		for(IAuthListener listener : mAuthListeners) {
+		for(IAuthListener<UserType> listener : mAuthListeners) {
 			listener.userChanged(this.mCurrentUser);
 		}
 	}
 
-	public AuthError attemptUserRefresh(User user) throws AuthenticationNetworkFailureException {
-		AuthResponse response = AuthenticationService.requestRefresh(user);
+	public AuthError attemptUserRefresh(UserType user) throws AuthenticationNetworkFailureException {
+		IAuthResponse response = gameAuthService.requestRefresh(user);
         if (response == null) {
             mUserStore.removeUser(user.getUsername());
             return new AuthError("Session Error", "Please log in again.");
@@ -53,7 +53,7 @@ public class UserModel {
 			return new AuthError(response.getError(), response.getErrorMessage());
 		} else {
 			//Refresh user from response
-			user = new User(user.getUsername(), response);
+			user = gameAuthService.createClearedUser(user.getUsername(), response);
 			mUserStore.addUser(user);
 			setCurrentUser(user);
 			return null;
@@ -62,7 +62,7 @@ public class UserModel {
 
     public AuthError attemptInitialLogin(String username, String password) {
         try {
-            AuthResponse response = AuthenticationService.requestLogin(username, password, getClientToken());
+            IAuthResponse response = gameAuthService.requestLogin(username, password, getClientToken());
 
             if (response == null) {
                 return new AuthError("Auth Error","Invalid credentials. Invalid username or password.");
@@ -70,31 +70,17 @@ public class UserModel {
                 return new AuthError(response.getError(), response.getErrorMessage());
             } else {
                 //Create an online user with the received data
-                User clearedUser = new User(username, response);
+                UserType clearedUser = gameAuthService.createClearedUser(username, response);
                 setCurrentUser(clearedUser);
                 return null;
             }
         } catch (AuthenticationNetworkFailureException ex) {
-            return new AuthError("Auth Servers Inaccessible", "An error occurred while attempting to reach Minecraft.net");
+            return new AuthError("Auth Servers Inaccessible", "An error occurred while attempting to reach "+ex.getTargetSite());
         }
     }
 
-    public String retrieveDownloadToken(ISecureMirror mirror) throws DownloadException {
-        if (this.getCurrentUser() == null)
-            return null;
-
-        ValidateResponse response = mirror.validate(new ValidateRequest(this.getCurrentUser().getClientToken(), this.getCurrentUser().getAccessToken()));
-
-        if (!response.wasValid())
-            throw new DownloadException(response.getErrorMessage());
-
-        //this.getCurrentUser().rotateAccessToken(response.getAccessToken());
-        //mUserStore.addUser(this.getCurrentUser());
-        return response.getDownloadToken();
-    }
-
     public void initAuth() {
-        User user = getLastUser();
+        UserType user = getLastUser();
 
         if (user != null) {
             try {
@@ -103,34 +89,34 @@ public class UserModel {
                 if (error != null)
                     user = null;
             } catch (AuthenticationNetworkFailureException ex) {
-                user = new User(user.getDisplayName());
+                user = gameAuthService.createOfflineUser(user.getDisplayName());
             }
         }
 
         this.setCurrentUser(user);
     }
 
-	public Collection<User> getUsers() {
+	public Collection<UserType> getUsers() {
 		return mUserStore.getSavedUsers();
 	}
 
-	public User getLastUser() {
+	public UserType getLastUser() {
 		return mUserStore.getUser(mUserStore.getLastUser());
 	}
 
-	public User getUser(String username) {
+	public UserType getUser(String username) {
 		return mUserStore.getUser(username);
 	}
 
-	public void addUser(User user) {
+	public void addUser(UserType user) {
 		mUserStore.addUser(user);
 	}
 
-	public void removeUser(User user) {
+	public void removeUser(UserType user) {
 		mUserStore.removeUser(user.getUsername());
 	}
 
-	public void setLastUser(User user) {
+	public void setLastUser(UserType user) {
 		mUserStore.setLastUser(user.getUsername());
 	}
 

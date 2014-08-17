@@ -21,24 +21,24 @@ package net.technicpack.launchercore.launch;
 
 import java.util.List;
 
-public class MinecraftProcess {
+public class GameProcess {
 	private final List<String> commands;
 	private final Process process;
-	private MinecraftExitListener exitListener;
+	private ProcessExitListener exitListener;
 	private final ProcessMonitorThread monitorThread;
 
-	public MinecraftProcess(List<String> commands, Process process) {
+	public GameProcess(List<String> commands, Process process) {
 		this.commands = commands;
 		this.process = process;
 		this.monitorThread = new ProcessMonitorThread(this);
 		this.monitorThread.start();
 	}
 
-	public MinecraftExitListener getExitListener() {
+	public ProcessExitListener getExitListener() {
 		return exitListener;
 	}
 
-	public void setExitListener(MinecraftExitListener exitListener) {
+	public void setExitListener(ProcessExitListener exitListener) {
 		this.exitListener = exitListener;
 	}
 

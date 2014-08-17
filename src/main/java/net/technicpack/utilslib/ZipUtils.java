@@ -20,8 +20,6 @@ package net.technicpack.utilslib;
 
 
 import net.technicpack.launchercore.util.DownloadListener;
-import net.technicpack.minecraftcore.mojang.ExtractRules;
-import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedInputStream;
@@ -114,18 +112,6 @@ public class ZipUtils {
 	}
 
 	public static void unzipFile(File zip, File output, DownloadListener listener) throws IOException {
-		unzipFile(zip, output, null, listener);
-	}
-
-	/**
-	 * Unzips a file into the specified directory.
-	 *
-	 * @param zip          file to unzip
-	 * @param output       directory to unzip into
-	 * @param extractRules extractRules for this zip file. May be null indicating no rules.
-	 * @param listener     to update progress on - may be null for no progress indicator
-	 */
-	public static void unzipFile(File zip, File output, ExtractRules extractRules, DownloadListener listener) throws IOException {
 		if (!zip.exists()) {
 			Utils.getLogger().log(Level.SEVERE, "File to unzip does not exist: " + zip.getAbsolutePath());
 			return;
@@ -150,7 +136,7 @@ public class ZipUtils {
 					throw new ZipException("IllegalArgumentException while parsing next element.");
 				}
 
-				if ((extractRules == null || extractRules.shouldExtract(entry.getName())) && !entry.getName().contains("../")) {
+				if (!entry.getName().contains("../")) {
 					File outputFile = new File(output, entry.getName());
 
 					if (outputFile.getParentFile() != null) {
@@ -171,53 +157,5 @@ public class ZipUtils {
 		} finally {
 			zipFile.close();
 		}
-	}
-
-	public static void copyMinecraftJar(File minecraft, File output) throws IOException {
-		String[] security = {"MOJANG_C.DSA",
-							"MOJANG_C.SF",
-							"CODESIGN.RSA",
-							"CODESIGN.SF"};
-		JarFile jarFile = new JarFile(minecraft);
-		try {
-			String fileName = jarFile.getName();
-			String fileNameLastPart = fileName.substring(fileName.lastIndexOf(File.separator));
-
-			JarOutputStream jos = new JarOutputStream(new FileOutputStream(output));
-			Enumeration<JarEntry> entries = jarFile.entries();
-
-			while (entries.hasMoreElements()) {
-				JarEntry entry = entries.nextElement();
-				if (containsAny(entry.getName(), security)) {
-					continue;
-				}
-				InputStream is = jarFile.getInputStream(entry);
-
-				//jos.putNextEntry(entry);
-				//create a new entry to avoid ZipException: invalid entry compressed size
-				jos.putNextEntry(new JarEntry(entry.getName()));
-				byte[] buffer = new byte[4096];
-				int bytesRead = 0;
-				while ((bytesRead = is.read(buffer)) != -1) {
-					jos.write(buffer, 0, bytesRead);
-				}
-				is.close();
-				jos.flush();
-				jos.closeEntry();
-			}
-			jos.close();
-		} finally {
-			jarFile.close();
-		}
-
-	}
-
-	private static boolean containsAny(String inputString, String[] contains) {
-		for (String string : contains) {
-			if (inputString.contains(string)) {
-				return true;
-			}
-		}
-		return false;
 	}
 }

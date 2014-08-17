@@ -1,10 +1,8 @@
 package net.technicpack.launchercore.image.face;
 
-import net.technicpack.launchercore.auth.User;
 import net.technicpack.launchercore.image.IImageStore;
 import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.platform.io.AuthorshipInfo;
-import net.technicpack.platform.io.FeedItem;
 import net.technicpack.utilslib.Utils;
 
 import java.io.File;

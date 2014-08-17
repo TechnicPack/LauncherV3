@@ -1,5 +1,5 @@
 package net.technicpack.launchercore.auth;
 
-public interface IAuthListener {
-	void userChanged(User user);
+public interface IAuthListener<UserType> {
+	void userChanged(UserType user);
 }

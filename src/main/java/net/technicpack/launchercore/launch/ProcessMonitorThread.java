@@ -25,9 +25,9 @@ import java.io.InputStreamReader;
 
 public class ProcessMonitorThread extends Thread {
 
-	private final MinecraftProcess process;
+	private final GameProcess process;
 
-	public ProcessMonitorThread(MinecraftProcess process) {
+	public ProcessMonitorThread(GameProcess process) {
 		super("ProcessMonitorThread");
 		this.process = process;
 	}
@@ -62,7 +62,7 @@ public class ProcessMonitorThread extends Thread {
 		}
 
 		if (process.getExitListener() != null) {
-			process.getExitListener().onMinecraftExit();
+			process.getExitListener().onProcessExit();
 		}
 	}
 }

@@ -42,17 +42,17 @@ public class HttpSolderApi implements ISolderApi {
 
     @Override
     public ISolderPackApi getSolderPack(String solderRoot, String modpackSlug) throws RestfulAPIException {
-        return new HttpSolderPackApi(solderRoot, modpackSlug, clientId, userModel.getCurrentUser().getProfile().getName());
+        return new HttpSolderPackApi(solderRoot, modpackSlug, clientId, userModel.getCurrentUser().getDisplayName());
     }
 
     @Override
     public Collection<SolderPackInfo> getPublicSolderPacks(String solderRoot) throws RestfulAPIException {
         LinkedList<SolderPackInfo> allPackApis = new LinkedList<SolderPackInfo>();
-        String allPacksUrl = solderRoot + "modpack/?include=full&cid=" + clientId + "&u=" + userModel.getCurrentUser().getProfile().getName();
+        String allPacksUrl = solderRoot + "modpack/?include=full&cid=" + clientId + "&u=" + userModel.getCurrentUser().getDisplayName();
 
         FullModpacks technic = RestObject.getRestObject(FullModpacks.class, allPacksUrl);
         for (SolderPackInfo info : technic.getModpacks().values()) {
-            ISolderPackApi solder = new HttpSolderPackApi(solderRoot, info.getName(), clientId, userModel.getCurrentUser().getProfile().getName());
+            ISolderPackApi solder = new HttpSolderPackApi(solderRoot, info.getName(), clientId, userModel.getCurrentUser().getDisplayName());
             info.setSolder(solder);
             allPackApis.add(info);
         }

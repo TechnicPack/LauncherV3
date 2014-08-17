@@ -20,9 +20,9 @@
 package net.technicpack.launchercore.modpacks.resources;
 
 import net.technicpack.launchercore.image.IImageMapper;
+import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.resources.resourcetype.IModpackResourceType;
-import net.technicpack.minecraftcore.LauncherDirectories;
 import net.technicpack.rest.io.Resource;
 import net.technicpack.utilslib.MD5Utils;
 

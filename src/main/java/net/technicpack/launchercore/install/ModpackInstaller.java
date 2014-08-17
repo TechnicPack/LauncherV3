@@ -21,7 +21,6 @@ package net.technicpack.launchercore.install;
 
 import net.technicpack.launchercore.exception.PackNotAvailableOfflineException;
 import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.minecraftcore.mojang.CompleteVersion;
 import net.technicpack.platform.IPlatformApi;
 
 import net.technicpack.utilslib.Utils;
@@ -32,7 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-public class ModpackInstaller {
+public class ModpackInstaller<VersionData> {
     private final IPlatformApi platformApi;
     private final String clientId;
 
@@ -41,7 +40,7 @@ public class ModpackInstaller {
         this.platformApi = platformApi;
 	}
 
-	public CompleteVersion installPack(InstallTasksQueue tasksQueue, ModpackModel modpack, String build) throws IOException {
+	public VersionData installPack(InstallTasksQueue<VersionData> tasksQueue, ModpackModel modpack, String build) throws IOException {
         modpack.save();
         modpack.initDirectories();
 
@@ -59,7 +58,7 @@ public class ModpackInstaller {
         return tasksQueue.getCompleteVersion();
     }
 
-	public CompleteVersion prepareOfflinePack(ModpackModel modpack) throws IOException {
+	public VersionData prepareOfflinePack(ModpackModel modpack, IVersionDataParser<VersionData> parser) throws IOException {
         modpack.initDirectories();
 
 		File versionFile = new File(modpack.getBinDir(), "version.json");
@@ -74,6 +73,6 @@ public class ModpackInstaller {
 		}
 
 		String json = FileUtils.readFileToString(versionFile, Charset.forName("UTF-8"));
-		return Utils.getMojangGson().fromJson(json, CompleteVersion.class);
+		return parser.parseVersionData(json);
 	}
 }

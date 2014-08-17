@@ -21,7 +21,6 @@ package net.technicpack.launchercore.install.tasks;
 
 import net.technicpack.launchercore.install.ITasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
-import net.technicpack.minecraftcore.mojang.ExtractRules;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 
 import java.io.File;
@@ -31,30 +30,19 @@ public class EnsureFileTask implements IInstallTask {
 	private final File cacheLocation;
 	private final File zipExtractLocation;
 	private final String sourceUrl;
-	private final ExtractRules rules;
 	private final String friendlyFileName;
     private final IFileVerifier fileVerifier;
     private final ITasksQueue downloadTaskQueue;
     private final ITasksQueue copyTaskQueue;
 
-	public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, String friendlyFileName, ITasksQueue downloadTaskQueue, ITasksQueue copyTaskQueue) {
-		this(fileLocation, fileVerifier, zipExtractLocation, sourceUrl, friendlyFileName, null, downloadTaskQueue, copyTaskQueue);
-	}
-
 	public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, ITasksQueue downloadTaskQueue, ITasksQueue copyTaskQueue) {
-		this(fileLocation, fileVerifier, zipExtractLocation, sourceUrl, fileLocation.getName(), null, downloadTaskQueue, copyTaskQueue);
+		this(fileLocation, fileVerifier, zipExtractLocation, sourceUrl, fileLocation.getName(), downloadTaskQueue, copyTaskQueue);
 	}
-
-	public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, ExtractRules rules, ITasksQueue downloadTaskQueue, ITasksQueue copyTaskQueue) {
-		this(fileLocation, fileVerifier, zipExtractLocation, sourceUrl, fileLocation.getName(), rules, downloadTaskQueue, copyTaskQueue);
-	}
-
-	public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, String friendlyFileName, ExtractRules rules, ITasksQueue downloadTaskQueue, ITasksQueue copyTaskQueue) {
+	public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, String friendlyFileName, ITasksQueue downloadTaskQueue, ITasksQueue copyTaskQueue) {
 		this.cacheLocation = fileLocation;
 		this.zipExtractLocation = zipExtractLocation;
 		this.sourceUrl = sourceUrl;
 		this.fileVerifier = fileVerifier;
-		this.rules = rules;
 		this.friendlyFileName = friendlyFileName;
         this.downloadTaskQueue = downloadTaskQueue;
         this.copyTaskQueue = copyTaskQueue;
@@ -73,7 +61,7 @@ public class EnsureFileTask implements IInstallTask {
 	@Override
 	public void runTask(InstallTasksQueue queue) throws IOException {
 		if (this.zipExtractLocation != null)
-			copyTaskQueue.addNextTask(new UnzipFileTask(this.cacheLocation, this.zipExtractLocation, this.rules));
+			copyTaskQueue.addNextTask(new UnzipFileTask(this.cacheLocation, this.zipExtractLocation));
 
 		if (!this.cacheLocation.exists() || (fileVerifier != null && !fileVerifier.isFileValid(this.cacheLocation)))
 			downloadTaskQueue.addNextTask(new DownloadFileTask(this.sourceUrl, this.cacheLocation, this.fileVerifier, this.friendlyFileName));

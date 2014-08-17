@@ -19,7 +19,7 @@
 
 package net.technicpack.launchercore.launch;
 
-public interface MinecraftExitListener {
+public interface ProcessExitListener {
 
-	public void onMinecraftExit();
+	public void onProcessExit();
 }

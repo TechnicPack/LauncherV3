@@ -1,18 +1,17 @@
 package net.technicpack.launchercore.install;
 
 import net.technicpack.launchercore.install.tasks.IInstallTask;
-import net.technicpack.minecraftcore.mojang.CompleteVersion;
 import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.launchercore.util.DownloadListener;
 
 import java.io.IOException;
 import java.util.LinkedList;
 
-public class InstallTasksQueue implements ITasksQueue {
+public class InstallTasksQueue<VersionData> implements ITasksQueue {
 	private DownloadListener listener;
 	private LinkedList<IInstallTask> tasks;
 	private IInstallTask currentTask;
-	private CompleteVersion completeVersion;
+	private VersionData completeVersion;
     private MirrorStore mirrorStore;
 
 	public InstallTasksQueue(DownloadListener listener, MirrorStore mirrorStore) {
@@ -42,11 +41,11 @@ public class InstallTasksQueue implements ITasksQueue {
 		tasks.addLast(task);
 	}
 
-	public void setCompleteVersion(CompleteVersion version) {
+	public void setCompleteVersion(VersionData version) {
 		this.completeVersion = version;
 	}
 
-	public CompleteVersion getCompleteVersion() {
+	public VersionData getCompleteVersion() {
 		return this.completeVersion;
 	}
     public MirrorStore getMirrorStore() { return this.mirrorStore; }

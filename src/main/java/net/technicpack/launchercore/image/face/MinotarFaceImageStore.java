@@ -19,17 +19,16 @@
 
 package net.technicpack.launchercore.image.face;
 
-import net.technicpack.launchercore.auth.User;
+import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.image.IImageStore;
 import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.utilslib.Utils;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.logging.Level;
 
-public class MinotarFaceImageStore implements IImageStore<User> {
+public class MinotarFaceImageStore implements IImageStore<IUserType> {
 	private String mBaseUrl;
     private MirrorStore mirrorStore;
 
@@ -39,7 +38,7 @@ public class MinotarFaceImageStore implements IImageStore<User> {
 	}
 
     @Override
-    public void downloadImage(User user, File location) {
+    public void downloadImage(IUserType user, File location) {
         try {
             mirrorStore.downloadFile(mBaseUrl+"helm/"+user.getDisplayName()+"/100", user.getDisplayName(), location.getAbsolutePath());
         } catch (IOException e) {
@@ -48,7 +47,7 @@ public class MinotarFaceImageStore implements IImageStore<User> {
     }
 
     @Override
-    public String getJobKey(User key) {
+    public String getJobKey(IUserType key) {
         return "user-face-"+key.getDisplayName();
     }
 }

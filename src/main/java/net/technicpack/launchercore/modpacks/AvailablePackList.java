@@ -19,23 +19,18 @@
 
 package net.technicpack.launchercore.modpacks;
 
+import net.technicpack.launchercore.auth.IUserType;
+import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.launchercore.modpacks.sources.IPackInfoRepository;
 import net.technicpack.launchercore.modpacks.sources.IPackSource;
-import net.technicpack.minecraftcore.LauncherDirectories;
-import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.launchercore.auth.IAuthListener;
-import net.technicpack.launchercore.auth.User;
-import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;
-import net.technicpack.platform.io.PlatformPackInfo;
-import net.technicpack.utilslib.Utils;
 
 import java.awt.EventQueue;
 import java.util.*;
-import java.util.logging.Level;
 
-public class AvailablePackList implements IAuthListener {
+public class AvailablePackList implements IAuthListener<IUserType> {
 	private IInstalledPackRepository packStore;
     private IPackInfoRepository packInfos;
     private Collection<IPackSource> packSources;
@@ -52,7 +47,7 @@ public class AvailablePackList implements IAuthListener {
 	}
 
 	@Override
-	public void userChanged(User user) {
+	public void userChanged(IUserType user) {
         if (user != null)
 		    reloadAllPacks();
 	}

@@ -17,34 +17,16 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.launchercore.exception;
+package net.technicpack.launchercore.install;
 
-import java.io.IOException;
+import java.io.File;
 
-public class AuthenticationNetworkFailureException extends IOException {
-	private Throwable cause;
-    private static final long serialVersionUID = 5887385045789342851L;
+public abstract class LauncherDirectories {
+	public abstract File getLauncherDirectory();
 
-    private String targetSite;
+	public abstract File getCacheDirectory();
 
-	public AuthenticationNetworkFailureException(String targetSite) {
-        this.targetSite = targetSite;
-	}
+	public abstract File getAssetsDirectory();
 
-	public AuthenticationNetworkFailureException(String targetSite, Throwable cause) {
-        this(targetSite);
-		this.cause = cause;
-	}
-
-	@Override
-	public String getMessage() {
-		return "An error was raised while attempting to communicate with " + targetSite +".";
-	}
-
-	@Override
-	public synchronized Throwable getCause() {
-		return cause;
-	}
-
-    public String getTargetSite() { return targetSite; }
+	public abstract File getModpacksDirectory();
 }
