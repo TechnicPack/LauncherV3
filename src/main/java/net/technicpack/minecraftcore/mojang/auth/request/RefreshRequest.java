@@ -17,31 +17,20 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.minecraftcore.mojang.auth;
+package net.technicpack.minecraftcore.mojang.auth.request;
 
-public class Response {
-	private String error;
-	private String errorMessage;
-	private String cause;
+import net.technicpack.minecraftcore.mojang.auth.response.Response;
 
-	public String getError() {
-		return error;
+public class RefreshRequest extends Response {
+	private String accessToken;
+	private String clientToken;
+
+	public RefreshRequest() {
+
 	}
 
-	public String getErrorMessage() {
-		return errorMessage;
-	}
-
-	public String getCause() {
-		return cause;
-	}
-
-	@Override
-	public String toString() {
-		return "Response{" +
-				"error='" + error + '\'' +
-				", errorMessage='" + errorMessage + '\'' +
-				", cause='" + cause + '\'' +
-				'}';
+	public RefreshRequest(String accessToken, String clientToken) {
+		this.accessToken = accessToken;
+		this.clientToken = clientToken;
 	}
 }

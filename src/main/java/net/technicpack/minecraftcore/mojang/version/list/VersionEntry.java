@@ -17,22 +17,31 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.minecraftcore.mojang.auth;
+package net.technicpack.minecraftcore.mojang.version.list;
 
-public class AuthRequest {
-	private Agent agent;
-	private String username;
-	private String password;
-	private String clientToken;
+import net.technicpack.minecraftcore.mojang.version.io.ReleaseType;
 
-	public AuthRequest() {
+import java.util.Date;
 
+public class VersionEntry {
+	private String id;
+	private Date time;
+	private Date releaseTime;
+	private ReleaseType type;
+
+	public String getId() {
+		return id;
 	}
 
-	public AuthRequest(Agent agent, String username, String password, String clientToken) {
-		this.agent = agent;
-		this.username = username;
-		this.password = password;
-		this.clientToken = clientToken;
+	public Date getTime() {
+		return time;
+	}
+
+	public Date getReleaseTime() {
+		return releaseTime;
+	}
+
+	public ReleaseType getType() {
+		return type;
 	}
 }

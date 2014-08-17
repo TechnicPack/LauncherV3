@@ -1,4 +1,4 @@
-package net.technicpack.minecraftcore.mojang.auth;
+package net.technicpack.minecraftcore.mojang.auth.io;
 
 import com.google.gson.JsonObject;
 

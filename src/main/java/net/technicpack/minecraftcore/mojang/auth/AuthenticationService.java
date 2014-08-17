@@ -19,9 +19,14 @@
 
 package net.technicpack.minecraftcore.mojang.auth;
 
+import net.technicpack.launchercore.auth.IAuthResponse;
+import net.technicpack.launchercore.auth.IGameAuthService;
 import net.technicpack.launchercore.exception.AuthenticationNetworkFailureException;
-import net.technicpack.launchercore.auth.User;
-import net.technicpack.utilslib.Utils;
+import net.technicpack.minecraftcore.MojangUtils;
+import net.technicpack.minecraftcore.mojang.auth.io.Agent;
+import net.technicpack.minecraftcore.mojang.auth.request.AuthRequest;
+import net.technicpack.minecraftcore.mojang.auth.request.RefreshRequest;
+import net.technicpack.minecraftcore.mojang.auth.response.AuthResponse;
 import org.apache.commons.io.IOUtils;
 
 import java.io.DataOutputStream;
@@ -30,26 +35,26 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class AuthenticationService {
+public class AuthenticationService implements IGameAuthService<MojangUser> {
 	private static final String AUTH_SERVER = "https://authserver.mojang.com/";
 
-	public static AuthResponse requestRefresh(User user) throws AuthenticationNetworkFailureException {
-		RefreshRequest refreshRequest = new RefreshRequest(user.getAccessToken(), user.getClientToken());
-		String data = Utils.getMojangGson().toJson(refreshRequest);
+	public AuthResponse requestRefresh(MojangUser mojangUser) throws AuthenticationNetworkFailureException {
+		RefreshRequest refreshRequest = new RefreshRequest(mojangUser.getAccessToken(), mojangUser.getClientToken());
+		String data = MojangUtils.getGson().toJson(refreshRequest);
 
 		AuthResponse response;
 		try {
 			String returned = postJson(AUTH_SERVER + "refresh", data);
 			System.out.println(returned);
-			response = Utils.getMojangGson().fromJson(returned, AuthResponse.class);
+			response = MojangUtils.getGson().fromJson(returned, AuthResponse.class);
 		} catch (IOException e) {
-			throw new AuthenticationNetworkFailureException(e);
+			throw new AuthenticationNetworkFailureException("auth.minecraft.net", e);
 		}
 
 		return response;
 	}
 
-	private static String postJson(String url, String data) throws IOException {
+	private String postJson(String url, String data) throws IOException {
 		byte[] rawData = data.getBytes("UTF-8");
 		HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
 		connection.setUseCaches(false);
@@ -88,20 +93,28 @@ public class AuthenticationService {
         return returnable;
 	}
 
-	public static AuthResponse requestLogin(String username, String password, String clientToken) throws AuthenticationNetworkFailureException {
+	public AuthResponse requestLogin(String username, String password, String clientToken) throws AuthenticationNetworkFailureException {
 		Agent agent = new Agent("Minecraft", "1");
 
 		AuthRequest request = new AuthRequest(agent, username, password, clientToken);
-		String data = Utils.getMojangGson().toJson(request);
+		String data = MojangUtils.getGson().toJson(request);
 
 		AuthResponse response;
 		try {
 			String returned = postJson(AUTH_SERVER + "authenticate", data);
 			System.out.println("Auth: " + returned);
-			response = Utils.getMojangGson().fromJson(returned, AuthResponse.class);
+			response = MojangUtils.getGson().fromJson(returned, AuthResponse.class);
 		} catch (IOException e) {
-			throw new AuthenticationNetworkFailureException(e);
+			throw new AuthenticationNetworkFailureException("auth.minecraft.net", e);
 		}
 		return response;
 	}
+
+    public MojangUser createClearedUser(String username, IAuthResponse response) {
+        return new MojangUser(username, (AuthResponse)response);
+    }
+
+    public MojangUser createOfflineUser(String displayName) {
+        return new MojangUser(displayName);
+    }
 }

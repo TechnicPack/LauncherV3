@@ -17,44 +17,12 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.minecraftcore.mojang;
+package net.technicpack.minecraftcore.mojang.auth.request;
 
-import net.technicpack.utilslib.OperatingSystem;
+public class ValidateRequest {
+	private String accessToken;
 
-public class Rule {
-	private Action action = Action.ALLOW;
-	private OSRestriction os;
-
-	public Action getAction() {
-		if (this.os != null && !this.os.matchesCurrentOperatingSystem()) {
-			return null;
-		}
-
-		return action;
-	}
-
-	public static enum Action {
-		ALLOW,
-		DISALLOW
-	}
-
-	public class OSRestriction {
-		private OperatingSystem name;
-		private String version;
-
-		public boolean matchesCurrentOperatingSystem() {
-			if (this.name != null && (this.name != OperatingSystem.getOperatingSystem())) {
-				return false;
-			}
-
-			boolean matched = true;
-
-			if (this.version != null) {
-				String osVersion = System.getProperty("os.version");
-				matched = osVersion.matches(this.version);
-			}
-
-			return matched;
-		}
+	public ValidateRequest(String accessToken) {
+		this.accessToken = accessToken;
 	}
 }

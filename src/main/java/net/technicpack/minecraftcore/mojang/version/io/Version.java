@@ -17,31 +17,25 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.minecraftcore.mojang.versionlist;
+package net.technicpack.minecraftcore.mojang.version.io;
 
-import net.technicpack.minecraftcore.mojang.ReleaseType;
+import net.technicpack.minecraftcore.mojang.version.io.ReleaseType;
 
 import java.util.Date;
 
-public class VersionEntry {
-	private String id;
-	private Date time;
-	private Date releaseTime;
-	private ReleaseType type;
+public interface Version {
 
-	public String getId() {
-		return id;
-	}
+	public String getId();
 
-	public Date getTime() {
-		return time;
-	}
+	public ReleaseType getType();
 
-	public Date getReleaseTime() {
-		return releaseTime;
-	}
+	public void setType(ReleaseType releaseType);
 
-	public ReleaseType getType() {
-		return type;
-	}
+	public Date getUpdatedTime();
+
+	public void setUpdatedTime(Date updatedTime);
+
+	public Date getReleaseTime();
+
+	public void setReleaseTime(Date releaseTime);
 }

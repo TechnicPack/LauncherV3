@@ -23,7 +23,8 @@ import net.technicpack.launchercore.install.ITasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.DownloadFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
-import net.technicpack.minecraftcore.mojang.MojangConstants;
+import net.technicpack.minecraftcore.MojangUtils;
+import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidJsonFileVerifier;
 
@@ -59,7 +60,7 @@ public class EnsureAssetsIndexTask implements IInstallTask {
 
     @Override
 	public void runTask(InstallTasksQueue queue) throws IOException {
-		String assets = queue.getCompleteVersion().getAssetsKey();
+		String assets = ((InstallTasksQueue<CompleteVersion>)queue).getCompleteVersion().getAssetsKey();
 
 		if (assets == null || assets.isEmpty()) {
 			assets = "legacy";
@@ -69,13 +70,13 @@ public class EnsureAssetsIndexTask implements IInstallTask {
 
 		(new File(output.getParent())).mkdirs();
 
-        IFileVerifier fileVerifier = new ValidJsonFileVerifier();
-        String assetsUrl = MojangConstants.getAssetsIndex(assets);
+        IFileVerifier fileVerifier = new ValidJsonFileVerifier(MojangUtils.getGson());
+        String assetsUrl = MojangUtils.getAssetsIndex(assets);
 
 		if (!output.exists() || !fileVerifier.isFileValid(output)) {
             downloadIndexQueue.addTask(new DownloadFileTask(assetsUrl, output, fileVerifier));
 		}
 
-        examineIndexQueue.addTask(new InstallAssetsTask(assetsDirectory.getAbsolutePath(), output, checkAssetsQueue, downloadAssetsQueue, installAssetsQueue));
+        examineIndexQueue.addTask(new InstallMinecraftAssetsTask(assetsDirectory.getAbsolutePath(), output, checkAssetsQueue, downloadAssetsQueue, installAssetsQueue));
 	}
 }

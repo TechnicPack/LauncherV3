@@ -17,11 +17,15 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.minecraftcore.mojang.auth;
+package net.technicpack.minecraftcore.mojang.auth.response;
+
+import net.technicpack.launchercore.auth.IAuthResponse;
+import net.technicpack.minecraftcore.mojang.auth.io.Profile;
+import net.technicpack.minecraftcore.mojang.auth.io.User;
 
 import java.util.Arrays;
 
-public class AuthResponse extends Response {
+public class AuthResponse extends Response implements IAuthResponse {
 	private String accessToken;
 	private String clientToken;
 	private Profile[] availableProfiles;

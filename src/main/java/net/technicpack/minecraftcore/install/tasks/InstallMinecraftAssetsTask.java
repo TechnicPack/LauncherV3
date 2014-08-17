@@ -28,8 +28,8 @@ import net.technicpack.launchercore.install.tasks.CopyFileTask;
 import net.technicpack.launchercore.install.tasks.EnsureFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.install.verifiers.FileSizeVerifier;
-import net.technicpack.minecraftcore.mojang.MojangConstants;
-import net.technicpack.utilslib.Utils;
+import net.technicpack.minecraftcore.MojangUtils;
+import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -37,7 +37,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Map;
 
-public class InstallAssetsTask implements IInstallTask {
+public class InstallMinecraftAssetsTask implements IInstallTask {
     private final String assetsDirectory;
     private final File assetsIndex;
     private final ITasksQueue checkAssetsQueue;
@@ -49,7 +49,7 @@ public class InstallAssetsTask implements IInstallTask {
     private final static String sizeField = "size";
     private final static String hashField = "hash";
 
-    public InstallAssetsTask(String assetsDirectory, File assetsIndex, ITasksQueue checkAssetsQueue, ITasksQueue downloadAssetsQueue, ITasksQueue copyAssetsQueue) {
+    public InstallMinecraftAssetsTask(String assetsDirectory, File assetsIndex, ITasksQueue checkAssetsQueue, ITasksQueue downloadAssetsQueue, ITasksQueue copyAssetsQueue) {
         this.assetsDirectory = assetsDirectory;
         this.assetsIndex = assetsIndex;
         this.checkAssetsQueue = checkAssetsQueue;
@@ -70,7 +70,7 @@ public class InstallAssetsTask implements IInstallTask {
     @Override
     public void runTask(InstallTasksQueue queue) throws IOException {
         String json = FileUtils.readFileToString(assetsIndex, Charset.forName("UTF-8"));
-        JsonObject obj = Utils.getMojangGson().fromJson(json, JsonObject.class);
+        JsonObject obj = MojangUtils.getGson().fromJson(json, JsonObject.class);
 
         if (obj == null) {
             throw new DownloadException("The assets json file was invalid.");
@@ -81,7 +81,7 @@ public class InstallAssetsTask implements IInstallTask {
         if (obj.get(virtualField) != null)
             isVirtual = obj.get(virtualField).getAsBoolean();
 
-        queue.getCompleteVersion().setAreAssetsVirtual(isVirtual);
+        ((InstallTasksQueue<CompleteVersion>)queue).getCompleteVersion().setAreAssetsVirtual(isVirtual);
 
         JsonObject allObjects = obj.get(objectsField).getAsJsonObject();
 
@@ -96,11 +96,11 @@ public class InstallAssetsTask implements IInstallTask {
             long size = file.get(sizeField).getAsLong();
 
             File location = new File(assetsDirectory + File.separator + "objects" + File.separator + hash.substring(0, 2) + File.separator, hash);
-            String url = MojangConstants.getResourceUrl(hash);
+            String url = MojangUtils.getResourceUrl(hash);
 
             (new File(location.getParent())).mkdirs();
 
-            File virtualOut =  new File(assetsDirectory + File.separator + "virtual" + File.separator + queue.getCompleteVersion().getAssetsKey() + File.separator + friendlyName);
+            File virtualOut =  new File(assetsDirectory + File.separator + "virtual" + File.separator + ((InstallTasksQueue<CompleteVersion>)queue).getCompleteVersion().getAssetsKey() + File.separator + friendlyName);
 
             checkAssetsQueue.addTask(new EnsureFileTask(location, new FileSizeVerifier(size), null, url, virtualOut.getName(), downloadAssetsQueue, copyAssetsQueue));
 

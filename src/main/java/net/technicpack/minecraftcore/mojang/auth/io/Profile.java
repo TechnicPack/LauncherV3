@@ -17,12 +17,39 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.minecraftcore.mojang.auth;
+package net.technicpack.minecraftcore.mojang.auth.io;
 
-public class ValidateRequest {
-	private String accessToken;
+public class Profile {
+	private String id;
+	private String name;
+	private boolean legacy;
 
-	public ValidateRequest(String accessToken) {
-		this.accessToken = accessToken;
+    public Profile() {
+
+    }
+
+    public Profile(String id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+	public String getId() {
+		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public boolean isLegacy() {
+		return legacy;
+	}
+
+	@Override
+	public String toString() {
+		return "Profile{" +
+				"id='" + id + '\'' +
+				", name='" + name + '\'' +
+				'}';
 	}
 }

@@ -19,58 +19,56 @@
 
 package net.technicpack.minecraftcore.install.tasks;
 
-import net.technicpack.launchercore.exception.PackNotAvailableOfflineException;
 import net.technicpack.launchercore.install.InstallTasksQueue;
-import net.technicpack.launchercore.install.tasks.DownloadFileTask;
-import net.technicpack.launchercore.install.tasks.IInstallTask;
+import net.technicpack.launchercore.install.tasks.ListenerTask;
 import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.minecraftcore.MojangUtils;
+import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.utilslib.ZipUtils;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
-import net.technicpack.launchercore.install.verifiers.ValidJsonFileVerifier;
+import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
+import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
 
 import java.io.File;
 import java.io.IOException;
 
-public class VerifyVersionFilePresentTask implements IInstallTask {
+public class InstallMinecraftIfNecessaryTask extends ListenerTask {
 	private ModpackModel pack;
 	private String minecraftVersion;
+    private File cacheDirectory;
 
-	public VerifyVersionFilePresentTask(ModpackModel pack, String minecraftVersion) {
+	public InstallMinecraftIfNecessaryTask(ModpackModel pack, String minecraftVersion, File cacheDirectory) {
 		this.pack = pack;
 		this.minecraftVersion = minecraftVersion;
+        this.cacheDirectory = cacheDirectory;
 	}
 
 	@Override
 	public String getTaskDescription() {
-		return "Retrieving Modpack Version";
-	}
-
-	@Override
-	public float getTaskProgress() {
-		return 0;
+		return "Installing Minecraft";
 	}
 
 	@Override
 	public void runTask(InstallTasksQueue queue) throws IOException {
-		File versionFile = new File(this.pack.getBinDir(), "version.json");
-		File modpackJar = new File(this.pack.getBinDir(), "modpack.jar");
+		super.runTask(queue);
 
-		boolean didExtract = false;
+		String url = MojangUtils.getVersionDownload(this.minecraftVersion);
+		String md5 = queue.getMirrorStore().getETag(url);
+		File cache = new File(cacheDirectory, "minecraft_" + this.minecraftVersion + ".jar");
 
-		if (modpackJar.exists()) {
-			didExtract = ZipUtils.extractFile(modpackJar, this.pack.getBinDir(), "version.json");
+        IFileVerifier verifier = null;
+
+        if (md5 != null && !md5.isEmpty()) {
+            verifier = new MD5FileVerifier(md5);
+        } else {
+            verifier = new ValidZipFileVerifier();
+        }
+
+		if (!cache.exists() || !verifier.isFileValid(cache)) {
+			String output = this.pack.getCacheDir() + File.separator + "minecraft.jar";
+			queue.getMirrorStore().downloadFile(url, cache.getName(), output, cache, verifier, this);
 		}
 
-        IFileVerifier fileVerifier = new ValidJsonFileVerifier(MojangUtils.getGson());
-
-		if (!versionFile.exists() || !fileVerifier.isFileValid(versionFile)) {
-			if (this.pack.isLocalOnly()) {
-				throw new PackNotAvailableOfflineException(this.pack.getDisplayName());
-			} else {
-				queue.addNextTask(new DownloadFileTask(TechnicConstants.getTechnicVersionJson(this.minecraftVersion), versionFile, fileVerifier));
-			}
-		}
+		MojangUtils.copyMinecraftJar(cache, new File(this.pack.getBinDir(), "minecraft.jar"));
 	}
 }

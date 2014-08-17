@@ -17,35 +17,31 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.minecraftcore.mojang;
+package net.technicpack.minecraftcore.mojang.auth.response;
 
-import java.util.HashMap;
-import java.util.Map;
+public class Response {
+	private String error;
+	private String errorMessage;
+	private String cause;
 
-public enum ReleaseType {
-	SNAPSHOT("snapshot"),
-	RELEASE("release"),
-	OLD_BETA("old-beta"),
-	OLD_ALPHA("old-alpha");
-
-	private static final Map<String, ReleaseType> lookup = new HashMap<String, ReleaseType>();
-	private final String name;
-
-	private ReleaseType(String name) {
-		this.name = name;
+	public String getError() {
+		return error;
 	}
 
-	public String getName() {
-		return name;
+	public String getErrorMessage() {
+		return errorMessage;
 	}
 
-	public static ReleaseType get(String name) {
-		return lookup.get(name);
+	public String getCause() {
+		return cause;
 	}
 
-	static {
-		for (ReleaseType type : values()) {
-			lookup.put(type.getName(), type);
-		}
+	@Override
+	public String toString() {
+		return "Response{" +
+				"error='" + error + '\'' +
+				", errorMessage='" + errorMessage + '\'' +
+				", cause='" + cause + '\'' +
+				'}';
 	}
 }

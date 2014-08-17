@@ -17,7 +17,7 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.minecraftcore.mojang;
+package net.technicpack.minecraftcore.mojang.version.io;
 
 import java.util.ArrayList;
 import java.util.Date;

@@ -17,39 +17,23 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.minecraftcore.mojang.auth;
+package net.technicpack.minecraftcore.mojang.version.list;
 
-public class Profile {
-	private String id;
-	private String name;
-	private boolean legacy;
+import net.technicpack.minecraftcore.mojang.version.list.LatestEntry;
+import net.technicpack.minecraftcore.mojang.version.list.VersionEntry;
 
-    public Profile() {
+import java.util.List;
 
-    }
+public class VersionList {
 
-    public Profile(String id, String name) {
-        this.id = id;
-        this.name = name;
-    }
+	private List<VersionEntry> versions;
+	private LatestEntry latest;
 
-	public String getId() {
-		return id;
+	public List<VersionEntry> getVersions() {
+		return versions;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public boolean isLegacy() {
-		return legacy;
-	}
-
-	@Override
-	public String toString() {
-		return "Profile{" +
-				"id='" + id + '\'' +
-				", name='" + name + '\'' +
-				'}';
+	public LatestEntry getLatest() {
+		return latest;
 	}
 }

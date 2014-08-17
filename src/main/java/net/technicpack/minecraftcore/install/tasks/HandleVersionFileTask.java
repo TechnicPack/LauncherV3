@@ -25,11 +25,11 @@ import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.EnsureFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.minecraftcore.LauncherDirectories;
-import net.technicpack.minecraftcore.mojang.CompleteVersion;
-import net.technicpack.minecraftcore.mojang.Library;
+import net.technicpack.launchercore.install.LauncherDirectories;
+import net.technicpack.minecraftcore.MojangUtils;
+import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
+import net.technicpack.minecraftcore.mojang.version.io.Library;
 import net.technicpack.utilslib.OperatingSystem;
-import net.technicpack.utilslib.Utils;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
@@ -73,7 +73,7 @@ public class HandleVersionFileTask implements IInstallTask {
 	public void runTask(InstallTasksQueue queue) throws IOException {
 		File versionFile = new File(this.pack.getBinDir(), "version.json");
 		String json = FileUtils.readFileToString(versionFile, Charset.forName("UTF-8"));
-		CompleteVersion version = Utils.getMojangGson().fromJson(json, CompleteVersion.class);
+		CompleteVersion version = MojangUtils.getGson().fromJson(json, CompleteVersion.class);
 
 		if (version == null) {
 			throw new DownloadException("The version.json file was invalid.");
@@ -123,7 +123,7 @@ public class HandleVersionFileTask implements IInstallTask {
                 verifier = zipVerifier;
             }
 
-			checkLibraryQueue.addTask(new EnsureFileTask(cache, verifier, extractDirectory, url, library.getExtract(), downloadLibraryQueue, copyLibraryQueue));
+			checkLibraryQueue.addTask(new EnsureFileTask(cache, verifier, extractDirectory, url, downloadLibraryQueue, copyLibraryQueue));
 		}
 
 		queue.setCompleteVersion(version);

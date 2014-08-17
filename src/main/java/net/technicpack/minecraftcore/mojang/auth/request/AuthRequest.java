@@ -17,18 +17,24 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.minecraftcore.mojang.auth;
+package net.technicpack.minecraftcore.mojang.auth.request;
 
-public class RefreshRequest extends Response {
-	private String accessToken;
+import net.technicpack.minecraftcore.mojang.auth.io.Agent;
+
+public class AuthRequest {
+	private Agent agent;
+	private String username;
+	private String password;
 	private String clientToken;
 
-	public RefreshRequest() {
+	public AuthRequest() {
 
 	}
 
-	public RefreshRequest(String accessToken, String clientToken) {
-		this.accessToken = accessToken;
+	public AuthRequest(Agent agent, String username, String password, String clientToken) {
+		this.agent = agent;
+		this.username = username;
+		this.password = password;
 		this.clientToken = clientToken;
 	}
 }

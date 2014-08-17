@@ -17,20 +17,17 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.minecraftcore.mojang.versionlist;
+package net.technicpack.minecraftcore.mojang.version.list;
 
-import java.util.List;
+public class LatestEntry {
+	private String snapshot;
+	private String release;
 
-public class VersionList {
-
-	private List<VersionEntry> versions;
-	private LatestEntry latest;
-
-	public List<VersionEntry> getVersions() {
-		return versions;
+	public String getSnapshot() {
+		return snapshot;
 	}
 
-	public LatestEntry getLatest() {
-		return latest;
+	public String getRelease() {
+		return release;
 	}
 }

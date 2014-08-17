@@ -17,25 +17,14 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.minecraftcore.mojang;
+package net.technicpack.minecraftcore.mojang.auth.io;
 
-import net.technicpack.minecraftcore.mojang.ReleaseType;
+public class Agent {
+	private String name;
+	private String version;
 
-import java.util.Date;
-
-public interface Version {
-
-	public String getId();
-
-	public ReleaseType getType();
-
-	public void setType(ReleaseType releaseType);
-
-	public Date getUpdatedTime();
-
-	public void setUpdatedTime(Date updatedTime);
-
-	public Date getReleaseTime();
-
-	public void setReleaseTime(Date releaseTime);
+	public Agent(String name, String version) {
+		this.name = name;
+		this.version = version;
+	}
 }
