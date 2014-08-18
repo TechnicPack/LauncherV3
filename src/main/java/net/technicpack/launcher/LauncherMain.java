@@ -28,13 +28,15 @@ import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.LoginFrame;
-import net.technicpack.launchercore.auth.User;
+import net.technicpack.launchercore.auth.IUserType;
+import net.technicpack.minecraftcore.mojang.auth.AuthenticationService;
+import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.image.face.MinotarFaceImageStore;
 import net.technicpack.launchercore.image.face.WebAvatarImageStore;
 import net.technicpack.launchercore.install.ModpackInstaller;
-import net.technicpack.launchercore.launch.MinecraftLauncher;
+import net.technicpack.minecraftcore.launch.MinecraftLauncher;
 import net.technicpack.launchercore.modpacks.AvailablePackList;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.resources.PackImageStore;
@@ -46,14 +48,13 @@ import net.technicpack.launchercore.modpacks.resources.resourcetype.LogoResource
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.launchercore.modpacks.sources.IPackInfoRepository;
 import net.technicpack.launchercore.modpacks.sources.IPackSource;
-import net.technicpack.minecraftcore.LauncherDirectories;
+import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.launchercore.mirror.secure.rest.JsonWebSecureMirror;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.PlatformPackInfoRepository;
 import net.technicpack.platform.http.HttpPlatformApi;
 import net.technicpack.platform.io.AuthorshipInfo;
-import net.technicpack.platform.io.FeedItem;
 import net.technicpack.solder.ISolderApi;
 import net.technicpack.solder.SolderPackSource;
 import net.technicpack.solder.http.HttpSolderApi;
@@ -79,7 +80,7 @@ public class LauncherMain {
         ResourceLoader resources = new ResourceLoader("net","technicpack","launcher","resources");
         resources.setLocale(settings.getLanguageCode());
 
-        UserModel userModel = new UserModel(TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json")));
+        UserModel userModel = new UserModel(TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json")), new AuthenticationService());
 
         MirrorStore mirrorStore = new MirrorStore(userModel);
         mirrorStore.addSecureMirror("mirror.technicpack.net", new JsonWebSecureMirror("http://mirror.technicpack.net/", "mirror.technicpack.net"));
@@ -93,7 +94,7 @@ public class LauncherMain {
         ImageRepository<ModpackModel> logoRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, resources.getImage("modpack/ModImageFiller.png"), logoType), new PackImageStore(logoType, mirrorStore, userModel));
         ImageRepository<ModpackModel> backgroundRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, null, backgroundType), new PackImageStore(backgroundType, mirrorStore, userModel));
 
-        ImageRepository<User> skinRepo = new ImageRepository<User>(new TechnicFaceMapper(directories, resources), new MinotarFaceImageStore("https://minotar.net/", mirrorStore));
+        ImageRepository<IUserType> skinRepo = new ImageRepository<IUserType>(new TechnicFaceMapper(directories, resources), new MinotarFaceImageStore("https://minotar.net/", mirrorStore));
 
         ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<AuthorshipInfo>(new TechnicAvatarMapper(directories, resources), new WebAvatarImageStore(mirrorStore));
 

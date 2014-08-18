@@ -29,7 +29,8 @@ import net.technicpack.launcher.ui.controls.borders.RoundBorder;
 import net.technicpack.launcher.ui.controls.login.*;
 import net.technicpack.launcher.ui.listitems.LanguageItem;
 import net.technicpack.launchercore.auth.IAuthListener;
-import net.technicpack.launchercore.auth.User;
+import net.technicpack.launchercore.auth.IUserType;
+import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.exception.AuthenticationNetworkFailureException;
 import net.technicpack.launchercore.image.ImageRepository;
@@ -47,10 +48,10 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Locale;
 
-public class LoginFrame extends DraggableFrame implements IRelocalizableResource, KeyListener, IAuthListener {
+public class LoginFrame extends DraggableFrame implements IRelocalizableResource, KeyListener, IAuthListener<MojangUser> {
     private ResourceLoader resources;
-    private ImageRepository<User> skinRepository;
-    private UserModel userModel;
+    private ImageRepository<IUserType> skinRepository;
+    private UserModel<MojangUser> userModel;
     private TechnicSettings settings;
 
     private JTextField name;
@@ -62,7 +63,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     private static final int FRAME_WIDTH = 347;
     private static final int FRAME_HEIGHT = 409;
 
-    public LoginFrame(ResourceLoader resources, TechnicSettings settings, UserModel userModel, ImageRepository<User> skinRepository) {
+    public LoginFrame(ResourceLoader resources, TechnicSettings settings, UserModel userModel, ImageRepository<IUserType> skinRepository) {
         this.skinRepository = skinRepository;
         this.userModel = userModel;
         this.settings = settings;
@@ -108,14 +109,14 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     protected void changeUser() {
         if (nameSelect.getSelectedItem() == null || nameSelect.getSelectedItem().equals("")) {
             clearCurrentUser();
-        } else if (nameSelect.getSelectedItem() instanceof User) {
-            setCurrentUser((User)nameSelect.getSelectedItem());
+        } else if (nameSelect.getSelectedItem() instanceof MojangUser) {
+            setCurrentUser((MojangUser)nameSelect.getSelectedItem());
         }
     }
 
     protected void toggleRemember() {
-        if (!rememberAccount.isSelected() && nameSelect.isVisible() && nameSelect.getSelectedItem() instanceof User) {
-            forgetUser((User)nameSelect.getSelectedItem());
+        if (!rememberAccount.isSelected() && nameSelect.isVisible() && nameSelect.getSelectedItem() instanceof MojangUser) {
+            forgetUser((MojangUser)nameSelect.getSelectedItem());
         }
     }
 
@@ -143,10 +144,10 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     }
 
     protected void refreshUsers() {
-        Collection<User> userAccounts = userModel.getUsers();
-        User lastUser = userModel.getLastUser();
+        Collection<MojangUser> mojangUserAccounts = userModel.getUsers();
+        MojangUser lastMojangUser = userModel.getLastUser();
 
-        if (userAccounts.size() == 0) {
+        if (mojangUserAccounts.size() == 0) {
             name.setVisible(true);
             nameSelect.setVisible(false);
             clearCurrentUser();
@@ -155,16 +156,16 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
             nameSelect.setVisible(true);
             nameSelect.removeAllItems();
 
-            for (User account : userAccounts) {
+            for (MojangUser account : mojangUserAccounts) {
                 nameSelect.addItem(account);
             }
 
             nameSelect.addItem(null);
 
-            if (lastUser == null)
-                lastUser = userAccounts.iterator().next();
+            if (lastMojangUser == null)
+                lastMojangUser = mojangUserAccounts.iterator().next();
 
-            setCurrentUser(lastUser);
+            setCurrentUser(lastMojangUser);
         }
     }
 
@@ -172,18 +173,18 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         if (nameSelect.isVisible()) {
             Object selected = nameSelect.getSelectedItem();
 
-            if (selected instanceof User) {
-                verifyExistingLogin((User) selected);
+            if (selected instanceof MojangUser) {
+                verifyExistingLogin((MojangUser) selected);
             } else {
                 String username = selected.toString();
 
-                User user = userModel.getUser(username);
+                MojangUser mojangUser = userModel.getUser(username);
 
-                if (user == null)
+                if (mojangUser == null)
                     attemptNewLogin(username);
                 else {
-                    setCurrentUser(user);
-                    verifyExistingLogin(user);
+                    setCurrentUser(mojangUser);
+                    verifyExistingLogin(mojangUser);
                 }
             }
         } else {
@@ -191,16 +192,16 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         }
     }
 
-    private void verifyExistingLogin(User user) {
-        User loginUser = user;
+    private void verifyExistingLogin(MojangUser mojangUser) {
+        MojangUser loginMojangUser = mojangUser;
         boolean rejected = false;
 
         try {
-            UserModel.AuthError error = userModel.attemptUserRefresh(user);
+            UserModel.AuthError error = userModel.attemptUserRefresh(mojangUser);
 
             if (error != null) {
                 JOptionPane.showMessageDialog(this, error.getErrorDescription(), error.getError(), JOptionPane.ERROR_MESSAGE);
-                loginUser = null;
+                loginMojangUser = null;
                 rejected = true;
             }
         } catch (AuthenticationNetworkFailureException ex) {
@@ -215,27 +216,27 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
 
                 //This is the last time we'll have access to the user's real username, so we should set the last-used
                 //username now
-                userModel.setLastUser(user);
+                userModel.setLastUser(mojangUser);
 
                 //Create offline user
-                loginUser = new User(user.getDisplayName());
+                loginMojangUser = new MojangUser(mojangUser.getDisplayName());
             } else {
                 //Use clicked 'no', so just pull the ripcord and get back to the UI
-                loginUser = null;
+                loginMojangUser = null;
             }
         }
 
-        if (loginUser == null) {
+        if (loginMojangUser == null) {
             //If we actually failed to validate, we should remove the user from the list of saved users
             //and refresh the user list
             if (rejected) {
-                userModel.removeUser(user);
+                userModel.removeUser(mojangUser);
                 refreshUsers();
-                setCurrentUser(user.getUsername());
+                setCurrentUser(mojangUser.getUsername());
             }
         } else {
             //We have a cleared user, start the launcher up
-            userModel.setCurrentUser(loginUser);
+            userModel.setCurrentUser(loginMojangUser);
         }
     }
 
@@ -260,8 +261,8 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         nameSelect.setSelectedItem("");
     }
 
-    protected void setCurrentUser(User user) {
-        if (user == null) {
+    protected void setCurrentUser(MojangUser mojangUser) {
+        if (mojangUser == null) {
             clearCurrentUser();
             return;
         }
@@ -272,7 +273,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         password.setBorder(new RoundBorder(LauncherFrame.COLOR_SCROLL_THUMB, 1, 10));
         rememberAccount.setSelected(true);
 
-        nameSelect.setSelectedItem(user);
+        nameSelect.setSelectedItem(mojangUser);
     }
 
     protected void setCurrentUser(String user) {
@@ -288,8 +289,8 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         rememberAccount.setSelected(true);
     }
 
-    protected void forgetUser(User user) {
-        userModel.removeUser(user);
+    protected void forgetUser(MojangUser mojangUser) {
+        userModel.removeUser(mojangUser);
         refreshUsers();
     }
 
@@ -523,8 +524,8 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     }
 
     @Override
-    public void userChanged(User user) {
-        if (user == null) {
+    public void userChanged(MojangUser mojangUser) {
+        if (mojangUser == null) {
             this.setVisible(true);
             refreshUsers();
 

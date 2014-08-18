@@ -1,11 +1,9 @@
 package net.technicpack.launcher.io;
 
 import net.technicpack.launcher.lang.ResourceLoader;
-import net.technicpack.launchercore.auth.User;
 import net.technicpack.launchercore.image.IImageMapper;
-import net.technicpack.minecraftcore.LauncherDirectories;
+import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.platform.io.AuthorshipInfo;
-import net.technicpack.platform.io.FeedItem;
 
 import java.awt.image.BufferedImage;
 import java.io.File;

@@ -19,7 +19,7 @@
 
 package net.technicpack.launcher.io;
 
-import net.technicpack.minecraftcore.LauncherDirectories;
+import net.technicpack.launchercore.install.LauncherDirectories;
 
 import java.io.File;
 

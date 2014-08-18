@@ -20,7 +20,8 @@ package net.technicpack.launcher.ui.controls;
 
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launchercore.auth.User;
+import net.technicpack.launchercore.auth.IUserType;
+import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.image.ImageRepository;
@@ -30,15 +31,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class UserWidget extends JPanel implements IImageJobListener<User> {
+public class UserWidget extends JPanel implements IImageJobListener<MojangUser> {
 
-    private ImageRepository<User> skinRepository;
+    private ImageRepository<IUserType> skinRepository;
 
     private JLabel userName;
     private JLabel avatar;
-    private User currentUser;
+    private MojangUser currentMojangUser;
 
-    public UserWidget(ResourceLoader resources, ImageRepository<User> skinRepository) {
+    public UserWidget(ResourceLoader resources, ImageRepository<IUserType> skinRepository) {
         this.skinRepository = skinRepository;
 
         initComponents(resources);
@@ -95,11 +96,11 @@ public class UserWidget extends JPanel implements IImageJobListener<User> {
             this.add(staticText);
     }
 
-    public void setUser(User user) {
-        currentUser = user;
-        userName.setText(user.getDisplayName());
+    public void setUser(MojangUser mojangUser) {
+        currentMojangUser = mojangUser;
+        userName.setText(mojangUser.getDisplayName());
 
-        ImageJob<User> job = skinRepository.startImageJob(currentUser);
+        ImageJob<MojangUser> job = skinRepository.startImageJob(currentMojangUser);
         job.addJobListener(this);
         refreshFace(job.getImage());
     }
@@ -109,8 +110,8 @@ public class UserWidget extends JPanel implements IImageJobListener<User> {
     }
 
     @Override
-    public void jobComplete(ImageJob<User> job) {
-        if (job.getJobData() == currentUser)
+    public void jobComplete(ImageJob<MojangUser> job) {
+        if (job.getJobData() == currentMojangUser)
             refreshFace(job.getImage());
     }
 }

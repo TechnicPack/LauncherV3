@@ -33,18 +33,16 @@ import net.technicpack.launchercore.install.Version;
 import net.technicpack.launchercore.install.tasks.*;
 import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
 import net.technicpack.launchercore.launch.LaunchOptions;
-import net.technicpack.launchercore.launch.MinecraftLauncher;
+import net.technicpack.minecraftcore.install.tasks.*;
+import net.technicpack.minecraftcore.launch.MinecraftLauncher;
 import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.resources.PackResourceMapper;
 import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.launchercore.util.LaunchAction;
-import net.technicpack.minecraftcore.LauncherDirectories;
-import net.technicpack.minecraftcore.install.tasks.EnsureAssetsIndexTask;
-import net.technicpack.minecraftcore.install.tasks.HandleVersionFileTask;
-import net.technicpack.minecraftcore.install.tasks.InstallModpackTask;
-import net.technicpack.minecraftcore.install.tasks.VerifyVersionFilePresentTask;
-import net.technicpack.minecraftcore.mojang.CompleteVersion;
+import net.technicpack.launchercore.install.LauncherDirectories;
+import net.technicpack.minecraftcore.mojang.version.CompleteVersionParser;
+import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.utilslib.Memory;
@@ -56,7 +54,7 @@ import java.io.IOException;
 import java.util.zip.ZipException;
 
 public class Installer {
-    protected final ModpackInstaller installer;
+    protected final ModpackInstaller<CompleteVersion> installer;
     protected final MinecraftLauncher launcher;
     protected final TechnicSettings settings;
     protected final PackResourceMapper packIconMapper;
@@ -82,14 +80,14 @@ public class Installer {
             @Override
             public void run() {
                 try {
-                    InstallTasksQueue tasksQueue = new InstallTasksQueue(listener, mirrorStore);
+                    InstallTasksQueue<CompleteVersion> tasksQueue = new InstallTasksQueue<CompleteVersion>(listener, mirrorStore);
                     buildTasksQueue(tasksQueue, resources, pack, build, doFullInstall);
 
                     CompleteVersion version = null;
                     if (!pack.isLocalOnly()) {
                         version = installer.installPack(tasksQueue, pack, build);
                     } else {
-                        version = installer.prepareOfflinePack(pack);
+                        version = installer.prepareOfflinePack(pack, new CompleteVersionParser());
                     }
 
                     int memory = Memory.getMemoryFromId(settings.getMemory()).getMemoryMB();
@@ -142,7 +140,7 @@ public class Installer {
     public void buildTasksQueue(InstallTasksQueue queue, ResourceLoader resources, ModpackModel modpack, String build, boolean doFullInstall) throws CacheDeleteException, BuildInaccessibleException {
         PackInfo packInfo = modpack.getPackInfo();
         Modpack modpackData = packInfo.getModpack(build);
-        String minecraft = modpackData.getMinecraft();
+        String minecraft = modpackData.getGameVersion();
         Version installedVersion = modpack.getInstalledVersion();
 
         TaskGroup examineModpackData = new TaskGroup(resources.getString("install.message.examiningmodpack"));

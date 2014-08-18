@@ -21,12 +21,12 @@ package net.technicpack.launcher.launch;
 
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launchercore.launch.MinecraftExitListener;
+import net.technicpack.launchercore.launch.ProcessExitListener;
 import net.technicpack.launchercore.util.LaunchAction;
 
 import java.awt.*;
 
-public class LauncherUnhider implements MinecraftExitListener {
+public class LauncherUnhider implements ProcessExitListener {
 
     private final TechnicSettings settings;
     private final LauncherFrame frame;
@@ -38,7 +38,7 @@ public class LauncherUnhider implements MinecraftExitListener {
     }
 
     @Override
-    public void onMinecraftExit() {
+    public void onProcessExit() {
         LaunchAction action = settings.getLaunchAction();
         if (action == null || action == LaunchAction.HIDE) {
             frame.setVisible(true);

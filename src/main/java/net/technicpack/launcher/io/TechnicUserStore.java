@@ -21,7 +21,7 @@ package net.technicpack.launcher.io;
 
 import com.google.gson.JsonSyntaxException;
 import net.technicpack.launchercore.auth.IUserStore;
-import net.technicpack.launchercore.auth.User;
+import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 
@@ -34,9 +34,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
-public class TechnicUserStore implements IUserStore {
+public class TechnicUserStore implements IUserStore<MojangUser> {
     private String clientToken = UUID.randomUUID().toString();
-    private Map<String, User> savedUsers = new HashMap<String, User>();
+    private Map<String, MojangUser> savedUsers = new HashMap<String, MojangUser>();
     private String lastUser;
     private transient File usersFile;
 
@@ -81,8 +81,8 @@ public class TechnicUserStore implements IUserStore {
         }
     }
 
-    public void addUser(User user) {
-        savedUsers.put(user.getUsername(), user);
+    public void addUser(MojangUser mojangUser) {
+        savedUsers.put(mojangUser.getUsername(), mojangUser);
         save();
     }
 
@@ -91,7 +91,7 @@ public class TechnicUserStore implements IUserStore {
         save();
     }
 
-    public User getUser(String accountName) {
+    public MojangUser getUser(String accountName) {
         return savedUsers.get(accountName);
     }
 
@@ -103,7 +103,7 @@ public class TechnicUserStore implements IUserStore {
         return savedUsers.keySet();
     }
 
-    public Collection<User> getSavedUsers() {
+    public Collection<MojangUser> getSavedUsers() {
         return savedUsers.values();
     }
 

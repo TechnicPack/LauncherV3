@@ -34,7 +34,8 @@ import net.technicpack.launcher.ui.controls.*;
 import net.technicpack.launcher.ui.controls.feeds.CountCircle;
 import net.technicpack.launcher.ui.controls.installation.ProgressBar;
 import net.technicpack.launchercore.auth.IAuthListener;
-import net.technicpack.launchercore.auth.User;
+import net.technicpack.launchercore.auth.IUserType;
+import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.install.Version;
@@ -43,13 +44,12 @@ import net.technicpack.launchercore.modpacks.InstalledPack;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.AuthorshipInfo;
-import net.technicpack.platform.io.FeedItem;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class LauncherFrame extends DraggableFrame implements IRelocalizableResource, IAuthListener {
+public class LauncherFrame extends DraggableFrame implements IRelocalizableResource, IAuthListener<MojangUser> {
 
     private static final int FRAME_WIDTH = 1200;
     private static final int FRAME_HEIGHT = 720;
@@ -84,8 +84,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     public static final String TAB_NEWS = "news";
 
     private ResourceLoader resources;
-    private final UserModel userModel;
-    private final ImageRepository<User> skinRepository;
+    private final UserModel<MojangUser> userModel;
+    private final ImageRepository<IUserType> skinRepository;
     private final TechnicSettings settings;
     private final AvailablePackList packList;
     private final ImageRepository<ModpackModel> iconRepo;
@@ -118,7 +118,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     NewsInfoPanel newsInfoPanel;
 
-    public LauncherFrame(ResourceLoader resources, ImageRepository<User> skinRepository, UserModel userModel, TechnicSettings settings, AvailablePackList packList, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, Installer installer, ImageRepository<AuthorshipInfo> avatarRepo, IPlatformApi platformApi) {
+    public LauncherFrame(ResourceLoader resources, ImageRepository<IUserType> skinRepository, UserModel userModel, TechnicSettings settings, AvailablePackList packList, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, Installer installer, ImageRepository<AuthorshipInfo> avatarRepo, IPlatformApi platformApi) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -494,16 +494,16 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     }
 
     @Override
-    public void userChanged(User user) {
-        if (user == null)
+    public void userChanged(MojangUser mojangUser) {
+        if (mojangUser == null)
             this.setVisible(false);
         else {
             this.setVisible(true);
-            userWidget.setUser(user);
+            userWidget.setUser(mojangUser);
 
             if (installer.isCurrentlyRunning()) {
                 playButton.setText(resources.getString("launcher.pack.launching"));
-            } else if (user.isOffline()) {
+            } else if (mojangUser.isOffline()) {
                 playButton.setText(resources.getString("launcher.pack.launch.offline"));
             } else {
                 playButton.setText(resources.getString("launcher.pack.launch"));

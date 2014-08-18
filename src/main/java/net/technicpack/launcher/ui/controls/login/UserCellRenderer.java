@@ -21,7 +21,8 @@ package net.technicpack.launcher.ui.controls.login;
 
 import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launchercore.auth.User;
+import net.technicpack.launchercore.auth.IUserType;
+import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.image.ImageRepository;
@@ -31,18 +32,18 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 
-public class UserCellRenderer extends JLabel implements ListCellRenderer, IImageJobListener<User> {
+public class UserCellRenderer extends JLabel implements ListCellRenderer, IImageJobListener<MojangUser> {
     private Font textFont;
     private Icon addUserIcon;
 
-    private ImageRepository<User> mSkinRepo;
+    private ImageRepository<IUserType> mSkinRepo;
 
     private static final int ICON_WIDTH = 32;
     private static final int ICON_HEIGHT = 32;
 
     private HashMap<String, Icon> headMap = new HashMap<String, Icon>();
 
-    public UserCellRenderer(Font font, ResourceLoader resources, ImageRepository<User> skinRepo) {
+    public UserCellRenderer(Font font, ResourceLoader resources, ImageRepository<IUserType> skinRepo) {
         this.mSkinRepo = skinRepo;
         this.textFont = font;
         setOpaque(true);
@@ -62,18 +63,18 @@ public class UserCellRenderer extends JLabel implements ListCellRenderer, IImage
         this.setFont(textFont);
         this.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
 
-        if (value instanceof User) {
-            User user = (User) value;
-            this.setText(user.getDisplayName());
+        if (value instanceof MojangUser) {
+            MojangUser mojangUser = (MojangUser) value;
+            this.setText(mojangUser.getDisplayName());
             this.setIconTextGap(8);
 
-            if (!headMap.containsKey(user.getUsername())) {
-                ImageJob<User> job = mSkinRepo.startImageJob(user);
+            if (!headMap.containsKey(mojangUser.getUsername())) {
+                ImageJob<MojangUser> job = mSkinRepo.startImageJob(mojangUser);
                 job.addJobListener(this);
-                headMap.put(user.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
+                headMap.put(mojangUser.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
             }
 
-            Icon head = headMap.get(user.getUsername());
+            Icon head = headMap.get(mojangUser.getUsername());
 
             if (head != null) {
                 this.setIcon(head);
@@ -94,12 +95,12 @@ public class UserCellRenderer extends JLabel implements ListCellRenderer, IImage
     }
 
     @Override
-    public void jobComplete(ImageJob<User> job) {
-        User user = job.getJobData();
-        if (headMap.containsKey(user.getUsername()))
-            headMap.remove(user.getUsername());
+    public void jobComplete(ImageJob<MojangUser> job) {
+        MojangUser mojangUser = job.getJobData();
+        if (headMap.containsKey(mojangUser.getUsername()))
+            headMap.remove(mojangUser.getUsername());
 
-        headMap.put(user.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
+        headMap.put(mojangUser.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
 
         this.invalidate();
     }

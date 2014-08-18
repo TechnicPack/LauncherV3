@@ -20,14 +20,15 @@
 package net.technicpack.launcher.io;
 
 import net.technicpack.launcher.lang.ResourceLoader;
-import net.technicpack.launchercore.auth.User;
+import net.technicpack.launchercore.auth.IUserType;
+import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.launchercore.image.IImageMapper;
-import net.technicpack.minecraftcore.LauncherDirectories;
+import net.technicpack.launchercore.install.LauncherDirectories;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 
-public class TechnicFaceMapper implements IImageMapper<User> {
+public class TechnicFaceMapper implements IImageMapper<IUserType> {
     private LauncherDirectories directories;
     private BufferedImage defaultImage;
 
@@ -37,12 +38,12 @@ public class TechnicFaceMapper implements IImageMapper<User> {
     }
 
     @Override
-    public boolean shouldDownloadImage(User imageKey) {
+    public boolean shouldDownloadImage(IUserType imageKey) {
         return true;
     }
 
     @Override
-    public File getImageLocation(User imageKey) {
+    public File getImageLocation(IUserType imageKey) {
         return new File(directories.getAssetsDirectory(), "avatars" + File.separator + imageKey.getDisplayName() + ".png");
     }
 

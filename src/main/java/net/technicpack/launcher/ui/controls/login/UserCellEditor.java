@@ -20,7 +20,8 @@
 package net.technicpack.launcher.ui.controls.login;
 
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launchercore.auth.User;
+import net.technicpack.launchercore.auth.IUserType;
+import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.image.ImageRepository;
@@ -37,7 +38,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class UserCellEditor implements ComboBoxEditor, DocumentListener, IImageJobListener<User> {
+public class UserCellEditor implements ComboBoxEditor, DocumentListener, IImageJobListener<MojangUser> {
     private Font textFont;
 
     private static final int ICON_WIDTH=32;
@@ -52,12 +53,12 @@ public class UserCellEditor implements ComboBoxEditor, DocumentListener, IImageJ
     private HashMap<String, Icon> headMap = new HashMap<String, Icon>();
 
     Collection<ActionListener> actionListeners = new HashSet<ActionListener>();
-    private ImageRepository<User> mSkinRepo;
+    private ImageRepository<IUserType> mSkinRepo;
 
     private static final String USER = "user";
     private static final String STRING = "string";
 
-    public UserCellEditor(Font font, ImageRepository<User> skinRepo) {
+    public UserCellEditor(Font font, ImageRepository<IUserType> skinRepo) {
         this.textFont = font;
         this.mSkinRepo = skinRepo;
 
@@ -93,18 +94,18 @@ public class UserCellEditor implements ComboBoxEditor, DocumentListener, IImageJ
     public void setItem(Object anObject) {
         currentObject = anObject;
 
-        if (anObject instanceof User) {
-            User user = (User)anObject;
-            userLabel.setText(user.getDisplayName());
+        if (anObject instanceof MojangUser) {
+            MojangUser mojangUser = (MojangUser)anObject;
+            userLabel.setText(mojangUser.getDisplayName());
             userLabel.setIconTextGap(8);
 
-            if (!headMap.containsKey(user.getUsername())) {
-                ImageJob<User> job = mSkinRepo.startImageJob(user);
+            if (!headMap.containsKey(mojangUser.getUsername())) {
+                ImageJob<MojangUser> job = mSkinRepo.startImageJob(mojangUser);
                 job.addJobListener(this);
-                headMap.put(user.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
+                headMap.put(mojangUser.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
             }
 
-            Icon head = headMap.get(user.getUsername());
+            Icon head = headMap.get(mojangUser.getUsername());
             userLabel.setIcon(head);
 
             layout.show(parentPanel, USER);
@@ -175,12 +176,12 @@ public class UserCellEditor implements ComboBoxEditor, DocumentListener, IImageJ
     }
 
     @Override
-    public void jobComplete(ImageJob<User> job) {
-        User user = job.getJobData();
-        if (headMap.containsKey(user.getUsername()))
-            headMap.remove(user.getUsername());
+    public void jobComplete(ImageJob<MojangUser> job) {
+        MojangUser mojangUser = job.getJobData();
+        if (headMap.containsKey(mojangUser.getUsername()))
+            headMap.remove(mojangUser.getUsername());
 
-        headMap.put(user.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
+        headMap.put(mojangUser.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
         this.parentPanel.revalidate();
     }
 }
