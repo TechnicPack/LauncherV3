@@ -54,9 +54,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private static final int FRAME_WIDTH = 1200;
     private static final int FRAME_HEIGHT = 720;
 
-    private static final int SIDEKICK_WIDTH = 300;
-    private static final int SIDEKICK_HEIGHT = 250;
-
     public static final Color COLOR_RED = new Color(229,0,0);
     public static final Color COLOR_GREEN = new Color(90, 184, 96);
     public static final Color COLOR_BLUE = new Color(16, 108, 163);
@@ -136,7 +133,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         //Handles rebuilding the frame, so use it to build the frame in the first place
         relocalize(resources);
 
-        selectTab("modpacks");
+        selectTab(TAB_MODPACKS);
     }
 
     /////////////////////////////////////////////////
@@ -501,13 +498,12 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             this.setVisible(true);
             userWidget.setUser(user);
 
-            if (installer.isCurrentlyRunning()) {
+            if (installer.isCurrentlyRunning())
                 playButton.setText(resources.getString("launcher.pack.launching"));
-            } else if (user.isOffline()) {
+            else if (user.isOffline())
                 playButton.setText(resources.getString("launcher.pack.launch.offline"));
-            } else {
+            else
                 playButton.setText(resources.getString("launcher.pack.launch"));
-            }
         }
     }
 }
