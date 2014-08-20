@@ -30,8 +30,10 @@ import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
+import net.technicpack.minecraftcore.mojang.version.ExtractRulesFileFilter;
 import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
+import net.technicpack.utilslib.IZipFileFilter;
 import net.technicpack.utilslib.OperatingSystem;
 import org.apache.commons.io.FileUtils;
 
@@ -127,7 +129,12 @@ public class HandleVersionFileTask implements IInstallTask {
                 }
             }
 
-            checkLibraryQueue.addTask(new EnsureFileTask(cache, verifier, extractDirectory, url, downloadLibraryQueue, copyLibraryQueue));
+            IZipFileFilter filter = null;
+
+            if (library.getExtract() != null)
+                filter = new ExtractRulesFileFilter(library.getExtract());
+
+            checkLibraryQueue.addTask(new EnsureFileTask(cache, verifier, extractDirectory, url, downloadLibraryQueue, copyLibraryQueue, filter));
         }
 
         queue.setCompleteVersion(version);
