@@ -111,7 +111,7 @@ public class ZipUtils {
 		}
 	}
 
-	public static void unzipFile(File zip, File output, DownloadListener listener) throws IOException {
+	public static void unzipFile(File zip, File output, IZipFileFilter fileFilter, DownloadListener listener) throws IOException {
 		if (!zip.exists()) {
 			Utils.getLogger().log(Level.SEVERE, "File to unzip does not exist: " + zip.getAbsolutePath());
 			return;
@@ -136,7 +136,7 @@ public class ZipUtils {
 					throw new ZipException("IllegalArgumentException while parsing next element.");
 				}
 
-				if (!entry.getName().contains("../")) {
+				if (!entry.getName().contains("../") && (fileFilter == null || fileFilter.shouldExtract(entry.getName()))) {
 					File outputFile = new File(output, entry.getName());
 
 					if (outputFile.getParentFile() != null) {

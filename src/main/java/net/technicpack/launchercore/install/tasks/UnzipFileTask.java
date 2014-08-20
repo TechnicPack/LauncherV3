@@ -20,6 +20,7 @@
 package net.technicpack.launchercore.install.tasks;
 
 import net.technicpack.launchercore.install.InstallTasksQueue;
+import net.technicpack.utilslib.IZipFileFilter;
 import net.technicpack.utilslib.ZipUtils;
 
 import java.io.File;
@@ -29,10 +30,12 @@ import java.util.zip.ZipException;
 public class UnzipFileTask extends ListenerTask {
 	private File zipFile;
 	private File destination;
+    private IZipFileFilter filter;
 
-	public UnzipFileTask(File zipFile, File destination) {
+	public UnzipFileTask(File zipFile, File destination, IZipFileFilter filter) {
 		this.zipFile = zipFile;
 		this.destination = destination;
+        this.filter = filter;
 	}
 
 	@Override
@@ -52,6 +55,6 @@ public class UnzipFileTask extends ListenerTask {
 			destination.mkdirs();
 		}
 
-		ZipUtils.unzipFile(zipFile, destination, this);
+		ZipUtils.unzipFile(zipFile, destination, filter, this);
 	}
 }
