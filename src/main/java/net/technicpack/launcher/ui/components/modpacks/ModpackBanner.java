@@ -18,9 +18,9 @@
  */
 package net.technicpack.launcher.ui.components.modpacks;
 
-import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launcher.ui.controls.AAJLabel;
+import net.technicpack.ui.controls.AAJLabel;
 import net.technicpack.launcher.ui.controls.modpacks.ModpackTag;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
@@ -28,13 +28,11 @@ import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.install.Version;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.solder.io.SolderPackInfo;
-import net.technicpack.utilslib.Utils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.util.Map;
-import java.util.logging.Level;
 
 public class ModpackBanner extends JPanel implements IImageJobListener<ModpackModel> {
     private ResourceLoader resources;

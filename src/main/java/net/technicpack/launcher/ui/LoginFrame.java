@@ -19,15 +19,17 @@
 
 package net.technicpack.launcher.ui;
 
-import net.technicpack.launcher.lang.IRelocalizableResource;
-import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.ui.controls.lang.LanguageCellRenderer;
+import net.technicpack.ui.controls.lang.LanguageCellUI;
+import net.technicpack.ui.lang.IRelocalizableResource;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.settings.TechnicSettings;
-import net.technicpack.launcher.ui.controls.AAJLabel;
-import net.technicpack.launcher.ui.controls.DraggableFrame;
-import net.technicpack.launcher.ui.controls.RoundedButton;
-import net.technicpack.launcher.ui.controls.borders.RoundBorder;
-import net.technicpack.launcher.ui.controls.login.*;
-import net.technicpack.launcher.ui.listitems.LanguageItem;
+import net.technicpack.ui.controls.AAJLabel;
+import net.technicpack.ui.controls.DraggableFrame;
+import net.technicpack.ui.controls.RoundedButton;
+import net.technicpack.ui.controls.borders.RoundBorder;
+import net.technicpack.ui.controls.login.*;
+import net.technicpack.ui.listitems.LanguageItem;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;
@@ -349,9 +351,9 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         nameSelect.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         nameSelect.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
         nameSelect.setVisible(false);
-        UserCellRenderer userRenderer= new UserCellRenderer(resources.getFont(ResourceLoader.FONT_OPENSANS, 16), resources, this.skinRepository);
+        UserCellRenderer userRenderer= new UserCellRenderer(resources.getFont(ResourceLoader.FONT_OPENSANS, 16), resources, this.skinRepository, LauncherFrame.COLOR_FORMELEMENT_INTERNAL, LauncherFrame.COLOR_BUTTON_BLUE, LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE, LauncherFrame.COLOR_BUTTON_BLUE);
         nameSelect.setRenderer(userRenderer);
-        UserCellEditor userEditor = new UserCellEditor(resources.getFont(ResourceLoader.FONT_OPENSANS, 16), this.skinRepository);
+        UserCellEditor userEditor = new UserCellEditor(resources.getFont(ResourceLoader.FONT_OPENSANS, 16), this.skinRepository, LauncherFrame.COLOR_BUTTON_BLUE);
         nameSelect.setEditor(userEditor);
         userEditor.addKeyListener(this);
         nameSelect.setUI(new UserCellUI(resources));
@@ -470,7 +472,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         languages.setUI(new LanguageCellUI(resources));
         languages.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         languages.setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
-        languages.setRenderer(new LanguageCellRenderer(resources));
+        languages.setRenderer(new LanguageCellRenderer(resources, "globe.png", LauncherFrame.COLOR_SELECTOR_BACK, LauncherFrame.COLOR_WHITE_TEXT));
         languages.setEditable(false);
         languages.setFocusable(false);
         languages.addActionListener(new ActionListener() {

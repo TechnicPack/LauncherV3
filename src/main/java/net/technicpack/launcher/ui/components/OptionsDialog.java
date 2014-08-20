@@ -19,20 +19,17 @@
 
 package net.technicpack.launcher.ui.components;
 
-import net.technicpack.launcher.lang.IRelocalizableResource;
-import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.ui.lang.IRelocalizableResource;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launcher.ui.controls.AAJLabel;
-import net.technicpack.launcher.ui.controls.LauncherDialog;
-import net.technicpack.launcher.ui.controls.RoundedButton;
-import net.technicpack.launcher.ui.controls.borders.RoundBorder;
-import net.technicpack.launcher.ui.controls.login.UserCellEditor;
-import net.technicpack.launcher.ui.controls.login.UserCellRenderer;
-import net.technicpack.launcher.ui.controls.login.UserCellUI;
-import net.technicpack.launcher.ui.controls.tabs.SimpleTabPane;
-import net.technicpack.launcher.ui.controls.tabs.SimpleTabPaneUI;
-import net.technicpack.launcher.ui.listitems.LanguageItem;
+import net.technicpack.ui.controls.AAJLabel;
+import net.technicpack.ui.controls.LauncherDialog;
+import net.technicpack.ui.controls.RoundedButton;
+import net.technicpack.ui.controls.borders.RoundBorder;
+import net.technicpack.ui.controls.login.UserCellUI;
+import net.technicpack.ui.controls.tabs.SimpleTabPane;
+import net.technicpack.ui.listitems.LanguageItem;
 import net.technicpack.launcher.ui.listitems.OnLaunchItem;
 import net.technicpack.launcher.ui.listitems.StreamItem;
 import net.technicpack.launchercore.util.LaunchAction;
@@ -48,7 +45,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Locale;
 
-public class LauncherOptionsDialog extends LauncherDialog implements IRelocalizableResource {
+public class OptionsDialog extends LauncherDialog implements IRelocalizableResource {
 
     private static final int DIALOG_WIDTH = 830;
     private static final int DIALOG_HEIGHT = 564;
@@ -84,7 +81,7 @@ public class LauncherOptionsDialog extends LauncherDialog implements IRelocaliza
     JTextField clientId;
     JCheckBox showConsole;
 
-    public LauncherOptionsDialog(Frame owner, TechnicSettings settings, ResourceLoader resourceLoader) {
+    public OptionsDialog(Frame owner, TechnicSettings settings, ResourceLoader resourceLoader) {
         super(owner);
 
         this.settings = settings;

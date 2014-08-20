@@ -19,7 +19,7 @@
 
 package net.technicpack.launcher.ui.controls.modpacks;
 
-import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.SelectorWidget;
 import net.technicpack.launchercore.image.IImageJobListener;

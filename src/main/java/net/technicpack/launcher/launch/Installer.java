@@ -19,7 +19,7 @@
 
 package net.technicpack.launcher.launch;
 
-import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.LauncherFrame;

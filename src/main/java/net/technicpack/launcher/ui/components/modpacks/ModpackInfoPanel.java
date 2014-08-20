@@ -18,11 +18,13 @@
  */
 package net.technicpack.launcher.ui.components.modpacks;
 
-import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.ui.controls.AAJLabel;
+import net.technicpack.ui.controls.RoundedButton;
+import net.technicpack.ui.controls.TiledBackground;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launcher.ui.controls.*;
 import net.technicpack.launcher.ui.controls.feeds.FeedItemView;
-import net.technicpack.launcher.ui.controls.feeds.HorizontalGallery;
+import net.technicpack.ui.controls.feeds.HorizontalGallery;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.image.ImageRepository;
@@ -36,7 +38,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Date;
 
 public class ModpackInfoPanel extends JPanel implements IImageJobListener<ModpackModel> {
     private ResourceLoader resources;

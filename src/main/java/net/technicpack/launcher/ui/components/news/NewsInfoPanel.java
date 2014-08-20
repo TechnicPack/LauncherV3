@@ -19,12 +19,11 @@
 
 package net.technicpack.launcher.ui.components.news;
 
-import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launcher.ui.controls.AAJLabel;
-import net.technicpack.launcher.ui.controls.RoundedButton;
+import net.technicpack.ui.controls.AAJLabel;
+import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
-import net.technicpack.launcher.ui.controls.TiledBackground;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.platform.io.NewsArticle;
@@ -33,10 +32,6 @@ import net.technicpack.utilslib.DesktopUtils;
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -44,9 +39,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Date;
 
 public class NewsInfoPanel extends JPanel implements PropertyChangeListener {
     private ResourceLoader resources;
@@ -148,7 +140,7 @@ public class NewsInfoPanel extends JPanel implements PropertyChangeListener {
         });
 
         newsScroller = new JScrollPane(newsText, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        newsScroller.getVerticalScrollBar().setUI(new SimpleScrollbarUI());
+        newsScroller.getVerticalScrollBar().setUI(new SimpleScrollbarUI(LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
         newsScroller.getVerticalScrollBar().setPreferredSize(new Dimension(10, 10));
         newsScroller.setBorder(BorderFactory.createEmptyBorder());
         newsScroller.setMaximumSize(new Dimension(32000,900));

@@ -18,7 +18,7 @@
  */
 package net.technicpack.launcher.ui.components.modpacks;
 
-import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
 import net.technicpack.launcher.ui.controls.modpacks.ModpackWidget;
@@ -110,7 +110,7 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
         scrollPane.setOpaque(false);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getViewport().setOpaque(false);
-        scrollPane.getVerticalScrollBar().setUI(new SimpleScrollbarUI());
+        scrollPane.getVerticalScrollBar().setUI(new SimpleScrollbarUI(LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
         scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(10, 10));
         scrollPane.getVerticalScrollBar().setUnitIncrement(12);
         add(scrollPane, BorderLayout.CENTER);

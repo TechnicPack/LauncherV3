@@ -18,13 +18,15 @@
  */
 package net.technicpack.launcher.ui.controls;
 
-import net.technicpack.launcher.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+
+import net.technicpack.ui.controls.AAJLabel;
+import net.technicpack.ui.lang.ResourceLoader;
 
 public class HeaderTab extends AAJLabel implements MouseListener {
     private boolean isActive;

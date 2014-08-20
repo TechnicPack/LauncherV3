@@ -21,7 +21,7 @@ package net.technicpack.launcher;
 
 import com.beust.jcommander.JCommander;
 import net.technicpack.launcher.io.*;
-import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.launch.Installer;
 import net.technicpack.launcher.settings.SettingsFactory;
 import net.technicpack.launcher.settings.StartupParameters;

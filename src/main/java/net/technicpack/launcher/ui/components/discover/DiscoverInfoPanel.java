@@ -18,8 +18,8 @@
  */
 package net.technicpack.launcher.ui.components.discover;
 
-import net.technicpack.launcher.lang.ResourceLoader;
-import net.technicpack.launcher.ui.controls.TiledBackground;
+import net.technicpack.ui.lang.ResourceLoader;
+import net.technicpack.ui.controls.TiledBackground;
 
 public class DiscoverInfoPanel extends TiledBackground {
     public DiscoverInfoPanel(ResourceLoader loader) {

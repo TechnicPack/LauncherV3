@@ -19,23 +19,29 @@
 
 package net.technicpack.launcher.ui.controls;
 
-import net.technicpack.launcher.ui.LauncherFrame;
-import sun.swing.DefaultLookup;
-
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import java.awt.*;
 
 public class SimpleScrollbarUI extends BasicScrollBarUI {
+
+    private Color trackColor;
+    private Color thumbColor;
+
+    public SimpleScrollbarUI(Color trackColor, Color thumbColor) {
+        this.trackColor = trackColor;
+        this.thumbColor = thumbColor;
+    }
+
     @Override
     protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
-        g.setColor(LauncherFrame.COLOR_SCROLL_TRACK);
+        g.setColor(trackColor);
         g.fillRect(trackBounds.x, trackBounds.y, trackBounds.width, trackBounds.height);
     }
 
     @Override
     protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
-        g.setColor(LauncherFrame.COLOR_SCROLL_THUMB);
+        g.setColor(thumbColor);
 
         int x = thumbBounds.x+1;
         int y = thumbBounds.y+1;

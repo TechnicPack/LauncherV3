@@ -18,17 +18,15 @@
  */
 package net.technicpack.launcher.ui.components.modpacks;
 
-import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launcher.ui.controls.AAJLabel;
-import net.technicpack.launcher.ui.controls.RoundedButton;
+import net.technicpack.ui.controls.AAJLabel;
 import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
-import net.technicpack.launcher.ui.controls.modpacks.StatBox;
+import net.technicpack.ui.controls.feeds.StatBox;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.rest.io.Modpack;
 import net.technicpack.utilslib.ImageUtils;
 
 import javax.swing.*;
@@ -159,7 +157,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.setOpaque(false);
         scrollPane.getViewport().setOpaque(false);
-        scrollPane.getVerticalScrollBar().setUI(new SimpleScrollbarUI());
+        scrollPane.getVerticalScrollBar().setUI(new SimpleScrollbarUI(LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
         scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(10,10));
 
         JPanel scrollHostPanel = new JPanel();

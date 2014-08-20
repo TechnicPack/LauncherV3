@@ -18,12 +18,11 @@
  */
 package net.technicpack.launcher.ui.components.news;
 
-import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
-import net.technicpack.launcher.ui.controls.TiledBackground;
-import net.technicpack.launcher.ui.controls.feeds.CountCircle;
+import net.technicpack.ui.controls.feeds.CountCircle;
 import net.technicpack.launcher.ui.controls.feeds.NewsWidget;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.platform.IPlatformApi;
@@ -32,13 +31,11 @@ import net.technicpack.platform.io.NewsArticle;
 import net.technicpack.platform.io.NewsData;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.utilslib.Utils;
-import sun.tools.jar.resources.jar;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.logging.Level;
@@ -91,7 +88,7 @@ public class NewsSelector extends JPanel {
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.setOpaque(false);
         scrollPane.getViewport().setOpaque(false);
-        scrollPane.getVerticalScrollBar().setUI(new SimpleScrollbarUI());
+        scrollPane.getVerticalScrollBar().setUI(new SimpleScrollbarUI(LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
         scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(10,10));
         scrollPane.getVerticalScrollBar().setUnitIncrement(12);
         add(scrollPane, BorderLayout.CENTER);

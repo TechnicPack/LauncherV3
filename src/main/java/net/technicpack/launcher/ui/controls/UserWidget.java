@@ -18,7 +18,7 @@
  */
 package net.technicpack.launcher.ui.controls;
 
-import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;

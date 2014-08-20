@@ -18,7 +18,7 @@
  */
 package net.technicpack.launcher.ui.controls.feeds;
 
-import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.components.news.AuthorshipWidget;
 import net.technicpack.launchercore.image.ImageJob;

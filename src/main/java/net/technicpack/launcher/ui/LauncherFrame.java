@@ -19,11 +19,14 @@
 
 package net.technicpack.launcher.ui;
 
-import net.technicpack.launcher.lang.IRelocalizableResource;
-import net.technicpack.launcher.lang.ResourceLoader;
+import net.technicpack.ui.controls.DraggableFrame;
+import net.technicpack.ui.controls.RoundedButton;
+import net.technicpack.ui.controls.TintablePanel;
+import net.technicpack.ui.lang.IRelocalizableResource;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.launch.Installer;
 import net.technicpack.launcher.settings.TechnicSettings;
-import net.technicpack.launcher.ui.components.LauncherOptionsDialog;
+import net.technicpack.launcher.ui.components.OptionsDialog;
 import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
 import net.technicpack.launcher.ui.components.discover.DiscoverSelector;
 import net.technicpack.launcher.ui.components.modpacks.ModpackInfoPanel;
@@ -31,8 +34,8 @@ import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launcher.ui.components.news.NewsInfoPanel;
 import net.technicpack.launcher.ui.components.news.NewsSelector;
 import net.technicpack.launcher.ui.controls.*;
-import net.technicpack.launcher.ui.controls.feeds.CountCircle;
-import net.technicpack.launcher.ui.controls.installation.ProgressBar;
+import net.technicpack.ui.controls.feeds.CountCircle;
+import net.technicpack.ui.controls.installation.ProgressBar;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;
@@ -248,7 +251,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         leftPanel.setTintActive(true);
         centralPanel.setTintActive(true);
         footer.setTintActive(true);
-        LauncherOptionsDialog dialog = new LauncherOptionsDialog(this, settings, resources);
+        OptionsDialog dialog = new OptionsDialog(this, settings, resources);
         dialog.setVisible(true);
         leftPanel.setTintActive(false);
         centralPanel.setTintActive(false);
