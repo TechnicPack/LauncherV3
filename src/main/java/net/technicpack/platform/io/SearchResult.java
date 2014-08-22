@@ -17,17 +17,14 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.platform;
+package net.technicpack.platform.io;
 
-import net.technicpack.platform.io.*;
-import net.technicpack.rest.RestfulAPIException;
+public class SearchResult {
+    private int id;
+    private String name;
+    private String friendly_name;
 
-import java.util.Collection;
-
-public interface IPlatformApi {
-    PlatformPackInfo getPlatformPackInfo(String packSlug) throws RestfulAPIException;
-    void incrementPackRuns(String packSlug);
-    void incrementPackInstalls(String packSlug);
-    NewsData getNews() throws RestfulAPIException;
-    SearchResultsData getSearchResults(String searchTerm) throws RestfulAPIException;
+    public int getId() { return id; }
+    public String getDisplayName() { return name; }
+    public String getSlug() { return friendly_name; }
 }

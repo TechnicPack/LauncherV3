@@ -21,23 +21,26 @@ package net.technicpack.platform.http;
 
 import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.platform.IPlatformApi;
-import net.technicpack.platform.io.NewsArticle;
-import net.technicpack.platform.io.NewsData;
-import net.technicpack.platform.io.PlatformPackInfo;
+import net.technicpack.platform.io.*;
 import net.technicpack.rest.RestObject;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.utilslib.Utils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class HttpPlatformApi implements IPlatformApi {
+    private String rootUrl;
     private String platformUrl;
     private MirrorStore mirrorStore;
 
-    public HttpPlatformApi(String platformUrl, MirrorStore mirrorStore) {
-        this.platformUrl = platformUrl;
+    public HttpPlatformApi(String rootUrl, MirrorStore mirrorStore) {
+        this.rootUrl = rootUrl;
+        this.platformUrl = rootUrl + "api/";
         this.mirrorStore = mirrorStore;
     }
 
@@ -63,5 +66,15 @@ public class HttpPlatformApi implements IPlatformApi {
     public NewsData getNews() throws RestfulAPIException {
         String url = platformUrl + "news";
         return RestObject.getRestObject(NewsData.class, url);
+    }
+
+    @Override
+    public SearchResultsData getSearchResults(String searchTerm) throws RestfulAPIException {
+        try {
+            String url = rootUrl + "search/modpacks/ta/" + URLEncoder.encode(searchTerm.trim(), "UTF-8");
+            return RestObject.getRestObject(SearchResultsData.class, url);
+        } catch (UnsupportedEncodingException ex) {
+            return new SearchResultsData();
+        }
     }
 }
