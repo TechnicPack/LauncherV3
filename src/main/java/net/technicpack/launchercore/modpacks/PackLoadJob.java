@@ -41,6 +41,8 @@ public class PackLoadJob implements Runnable {
     private boolean doLoadRepository;
     private Map<String, ModpackModel> processedModpacks = new HashMap<String, ModpackModel>();
 
+    private boolean isCancelled = false;
+
     public PackLoadJob(LauncherDirectories directories, IInstalledPackRepository packRepository, IAuthoritativePackSource authoritativeSource, Collection<IPackSource> packSources, IModpackContainer container, IModpackTagBuilder tagBuilder, boolean doLoadRepository) {
         this.packRepository = packRepository;
         this.authoritativeSource = authoritativeSource;
@@ -51,6 +53,26 @@ public class PackLoadJob implements Runnable {
         this.doLoadRepository = doLoadRepository;
         container.clear();
     }
+
+    //Stop adding & updating packs from this job.  Used for instance in the search bar: if the user types out 3 letters
+    //we want to search for what they typed, but if they keep typing we want to cancel the created job and make a new one
+
+    //This method forces the cancel to occur on the dispatch thread, since addPack always takes place on the dispatch thread,
+    //so we don't have to worry about an addPack being halfway through completion if this object is saying it's cancelled
+    public void cancel() {
+        if (EventQueue.isDispatchThread()) {
+            isCancelled = true;
+        } else {
+            EventQueue.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    cancel();
+                }
+            });
+        }
+    }
+
+    public boolean isCancelled() { return isCancelled; }
 
     @Override
     public void run() {
@@ -96,7 +118,7 @@ public class PackLoadJob implements Runnable {
     }
 
     protected void addPack(InstalledPack pack, PackInfo packInfo) {
-        if (pack == null && packInfo == null)
+        if (pack == null && packInfo == null || isCancelled)
             return;
 
         String name = (pack != null)?pack.getName():packInfo.getName();
