@@ -22,5 +22,4 @@ package net.technicpack.launchercore.modpacks;
 public interface IModpackContainer {
     void clear();
     void addOrReplace(ModpackModel modpack);
-    void refreshComplete();
 }

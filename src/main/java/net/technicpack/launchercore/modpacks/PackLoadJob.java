@@ -29,7 +29,6 @@ import net.technicpack.rest.io.PackInfo;
 import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 public class PackLoadJob implements Runnable {
@@ -55,8 +54,6 @@ public class PackLoadJob implements Runnable {
 
     @Override
     public void run() {
-        LinkedList<Thread> allRunningThreads = new LinkedList<Thread>();
-
         if (doLoadRepository) {
             for (final String packName : packRepository.getPackNames()) {
                 final InstalledPack pack = packRepository.getInstalledPacks().get(packName);
@@ -68,7 +65,6 @@ public class PackLoadJob implements Runnable {
                     }
                 };
 
-                allRunningThreads.add(infoLoadThread);
                 infoLoadThread.start();
             }
         }
@@ -84,30 +80,11 @@ public class PackLoadJob implements Runnable {
                     }
                 };
 
-                allRunningThreads.add(packSourceThread);
                 packSourceThread.start();
             }
         }
-
-        for(Thread thread : allRunningThreads) {
-            try {
-                thread.join();
-            } catch (InterruptedException ex) {
-
-            }
-        }
-
-        completeRefreshThreadSafe();
     }
 
-    protected void completeRefreshThreadSafe() {
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                container.refreshComplete();
-            }
-        });
-    }
 
     protected void addPackThreadSafe(final InstalledPack pack, final PackInfo packInfo) {
         EventQueue.invokeLater(new Runnable() {
