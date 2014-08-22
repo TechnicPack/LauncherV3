@@ -22,6 +22,6 @@ package net.technicpack.launchercore.modpacks.sources;
 import net.technicpack.launchercore.modpacks.InstalledPack;
 import net.technicpack.rest.io.PackInfo;
 
-public interface IPackInfoRepository {
+public interface IAuthoritativePackSource {
     PackInfo getPackInfo(InstalledPack pack);
 }

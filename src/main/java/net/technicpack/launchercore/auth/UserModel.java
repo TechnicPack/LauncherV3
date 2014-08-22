@@ -30,8 +30,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class UserModel<UserType extends IUserType> {
-	private static UserModel mInstance = null;
-
 	private UserType mCurrentUser = null;
 	private List<IAuthListener> mAuthListeners = new LinkedList<IAuthListener>();
 	private IUserStore<UserType> mUserStore;

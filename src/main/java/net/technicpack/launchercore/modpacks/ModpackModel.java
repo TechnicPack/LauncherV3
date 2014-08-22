@@ -22,6 +22,7 @@ package net.technicpack.launchercore.modpacks;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.Version;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
+import net.technicpack.launchercore.modpacks.sources.IModpackTagBuilder;
 import net.technicpack.platform.io.FeedItem;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.rest.io.Resource;
@@ -30,6 +31,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class ModpackModel {
@@ -37,6 +39,7 @@ public class ModpackModel {
     private PackInfo packInfo;
     private IInstalledPackRepository installedPackRepository;
     private LauncherDirectories directories;
+    private Collection<String> tags = new ArrayList<String>();
 
     private String buildName;
     private boolean isPlatform;
@@ -360,6 +363,17 @@ public class ModpackModel {
                 installedPackRepository.setSelectedIndex(i);
                 installedPackRepository.save();
                 break;
+            }
+        }
+    }
+
+    public Collection<String> getTags() { return tags; }
+    public void updateTags(IModpackTagBuilder tagBuilder) {
+        this.tags.clear();
+
+        if (tagBuilder != null) {
+            for (String tag : tagBuilder.getModpackTags(this)) {
+                this.tags.add(tag);
             }
         }
     }

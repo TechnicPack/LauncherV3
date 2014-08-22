@@ -20,7 +20,7 @@
 package net.technicpack.platform;
 
 import net.technicpack.launchercore.modpacks.InstalledPack;
-import net.technicpack.launchercore.modpacks.sources.IPackInfoRepository;
+import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
 import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.rest.io.PackInfo;
@@ -30,7 +30,7 @@ import net.technicpack.utilslib.Utils;
 
 import java.util.logging.Level;
 
-public class PlatformPackInfoRepository implements IPackInfoRepository {
+public class PlatformPackInfoRepository implements IAuthoritativePackSource {
     private IPlatformApi platform;
     private ISolderApi solder;
 
