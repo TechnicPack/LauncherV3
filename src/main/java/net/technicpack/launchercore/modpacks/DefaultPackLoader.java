@@ -33,6 +33,8 @@ public class DefaultPackLoader implements IAuthListener<IUserType> {
     private Collection<IPackSource> packSources;
     private IModpackTagBuilder tagBuilder;
 
+    private IUserType currentUser = null;
+
     public DefaultPackLoader(PackLoader loader, Collection<IPackSource> packSources, IModpackTagBuilder tagBuilder) {
         this.loader = loader;
         this.packSources = packSources;
@@ -42,7 +44,8 @@ public class DefaultPackLoader implements IAuthListener<IUserType> {
     public void registerModpackContainer(IModpackContainer container) {
         registeredContainers.add(container);
 
-        loader.createRepositoryLoadJob(container, packSources, tagBuilder, true);
+        if (currentUser != null)
+            loader.createRepositoryLoadJob(container, packSources, tagBuilder, true);
     }
 
     public void removeModpackContainer(IModpackContainer container) {
@@ -57,6 +60,9 @@ public class DefaultPackLoader implements IAuthListener<IUserType> {
 
     @Override
     public void userChanged(IUserType user) {
+        if (user == null)
+            return;
+
         refreshAllContainers();
     }
 }
