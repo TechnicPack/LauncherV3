@@ -18,15 +18,15 @@
 
 package net.technicpack.launcher.ui.components.modpacks;
 
+import net.technicpack.launchercore.modpacks.DefaultPackLoader;
+import net.technicpack.launchercore.modpacks.PackLoader;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
 import net.technicpack.launcher.ui.controls.modpacks.ModpackWidget;
 import net.technicpack.launchercore.image.ImageRepository;
-import net.technicpack.launchercore.modpacks.AvailablePackList;
 import net.technicpack.launchercore.modpacks.IModpackContainer;
 import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.launchercore.modpacks.resources.resourcetype.IconResourceType;
 
 import javax.swing.*;
 import java.awt.*;
@@ -36,7 +36,7 @@ import java.util.*;
 
 public class ModpackSelector extends JPanel implements IModpackContainer {
     private ResourceLoader resources;
-    private AvailablePackList packList;
+    private DefaultPackLoader packList;
     private ImageRepository<ModpackModel> iconRepo;
 
     private JPanel widgetList;
@@ -46,7 +46,7 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
     private Map<String, ModpackWidget> allModpacks = new HashMap<String, ModpackWidget>();
     private ModpackWidget selectedWidget;
 
-    public ModpackSelector(ResourceLoader resources, AvailablePackList packList, ImageRepository<ModpackModel> iconRepo, ModpackInfoPanel modpackInfoPanel) {
+    public ModpackSelector(ResourceLoader resources, DefaultPackLoader packList, ImageRepository<ModpackModel> iconRepo, ModpackInfoPanel modpackInfoPanel) {
         this.resources = resources;
         this.packList = packList;
         this.modpackInfoPanel = modpackInfoPanel;
@@ -54,7 +54,7 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
 
         initComponents();
 
-        packList.addRegisteredContainer(this);
+        packList.registerModpackContainer(this);
     }
 
     public ModpackModel getSelectedPack() {

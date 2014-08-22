@@ -20,6 +20,9 @@ package net.technicpack.launcher;
 
 import com.beust.jcommander.JCommander;
 import net.technicpack.launcher.io.*;
+import net.technicpack.launchercore.modpacks.DefaultPackLoader;
+import net.technicpack.launchercore.modpacks.PackLoader;
+import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.launch.Installer;
 import net.technicpack.launcher.settings.SettingsFactory;
@@ -29,14 +32,12 @@ import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.LoginFrame;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.minecraftcore.mojang.auth.AuthenticationService;
-import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.image.face.MinotarFaceImageStore;
 import net.technicpack.launchercore.image.face.WebAvatarImageStore;
 import net.technicpack.launchercore.install.ModpackInstaller;
 import net.technicpack.minecraftcore.launch.MinecraftLauncher;
-import net.technicpack.launchercore.modpacks.AvailablePackList;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.resources.PackImageStore;
 import net.technicpack.launchercore.modpacks.resources.PackResourceMapper;
@@ -45,7 +46,6 @@ import net.technicpack.launchercore.modpacks.resources.resourcetype.IModpackReso
 import net.technicpack.launchercore.modpacks.resources.resourcetype.IconResourceType;
 import net.technicpack.launchercore.modpacks.resources.resourcetype.LogoResourceType;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
-import net.technicpack.launchercore.modpacks.sources.IPackInfoRepository;
 import net.technicpack.launchercore.modpacks.sources.IPackSource;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.mirror.MirrorStore;
@@ -98,21 +98,22 @@ public class LauncherMain {
         ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<AuthorshipInfo>(new TechnicAvatarMapper(directories, resources), new WebAvatarImageStore(mirrorStore));
 
         ISolderApi solder = new HttpSolderApi(settings.getClientId(), userModel);
-        IPlatformApi platform = new HttpPlatformApi("http://tplatform.gopagoda.com/api/", mirrorStore);
+        IPlatformApi platform = new HttpPlatformApi("http://platformbeta.sctgaming.com/", mirrorStore);
 
         IInstalledPackRepository packStore = TechnicInstalledPackStore.load(new File(directories.getLauncherDirectory(), "installedPacks"));
-        IPackInfoRepository packInfoRepository = new PlatformPackInfoRepository(platform, solder);
+        IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(platform, solder);
         ArrayList<IPackSource> packSources = new ArrayList<IPackSource>();
         packSources.add(new SolderPackSource("http://solder.technicpack.net/api/", solder));
 
-        AvailablePackList packList = new AvailablePackList(directories, packStore, packInfoRepository, packSources);
-        userModel.addAuthListener(packList);
+        PackLoader packList = new PackLoader(directories, packStore, packInfoRepository);
+        DefaultPackLoader defaultLoader = new DefaultPackLoader(packList, packSources, null);
+        userModel.addAuthListener(defaultLoader);
 
         MinecraftLauncher launcher = new MinecraftLauncher(platform, directories, userModel, settings.getClientId());
         ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());
         Installer installer = new Installer(startupParameters, mirrorStore, directories, modpackInstaller, launcher, settings, iconMapper);
 
-        LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, packList, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo, platform);
+        LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, defaultLoader, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo, platform);
         userModel.addAuthListener(frame);
 
         LoginFrame login = new LoginFrame(resources, settings, userModel, skinRepo);

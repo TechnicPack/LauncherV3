@@ -18,6 +18,8 @@
 
 package net.technicpack.launcher.ui;
 
+import net.technicpack.launchercore.modpacks.DefaultPackLoader;
+import net.technicpack.launchercore.modpacks.PackLoader;
 import net.technicpack.ui.controls.DraggableFrame;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.TintablePanel;
@@ -41,7 +43,6 @@ import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.install.Version;
-import net.technicpack.launchercore.modpacks.AvailablePackList;
 import net.technicpack.launchercore.modpacks.InstalledPack;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.platform.IPlatformApi;
@@ -89,7 +90,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private final UserModel<MojangUser> userModel;
     private final ImageRepository<IUserType> skinRepository;
     private final TechnicSettings settings;
-    private final AvailablePackList packList;
+    private final DefaultPackLoader packList;
     private final ImageRepository<ModpackModel> iconRepo;
     private final ImageRepository<ModpackModel> logoRepo;
     private final ImageRepository<ModpackModel> backgroundRepo;
@@ -120,7 +121,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     NewsInfoPanel newsInfoPanel;
 
-    public LauncherFrame(ResourceLoader resources, ImageRepository<IUserType> skinRepository, UserModel userModel, TechnicSettings settings, AvailablePackList packList, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, Installer installer, ImageRepository<AuthorshipInfo> avatarRepo, IPlatformApi platformApi) {
+    public LauncherFrame(ResourceLoader resources, ImageRepository<IUserType> skinRepository, UserModel userModel, TechnicSettings settings, DefaultPackLoader packList, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, Installer installer, ImageRepository<AuthorshipInfo> avatarRepo, IPlatformApi platformApi) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
