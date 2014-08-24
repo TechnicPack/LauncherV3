@@ -24,7 +24,7 @@ import net.technicpack.rest.RestObject;
 import java.util.ArrayList;
 
 public class SearchResultsData extends RestObject {
-    private ArrayList<SearchResult> modpacks = new ArrayList<SearchResult>();
+    private SearchResult[] modpacks;
 
-    public ArrayList<SearchResult> getResults() { return modpacks; }
+    public SearchResult[] getResults() { return modpacks; }
 }

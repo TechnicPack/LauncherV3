@@ -56,12 +56,12 @@ public class SearchResultPackSource implements IPackSource {
         }
 
         //Set up a thread pulling a PlatformPackInfo for each result in the list
-        final ArrayList<PackInfo> resultPacks = new ArrayList<PackInfo>(results.getResults().size());
-        final ArrayList<Thread> hitThreads = new ArrayList<Thread>(results.getResults().size());
+        final ArrayList<PackInfo> resultPacks = new ArrayList<PackInfo>(results.getResults().length);
+        final ArrayList<Thread> hitThreads = new ArrayList<Thread>(results.getResults().length);
         final IPlatformApi api = this.platformApi;
 
         for (final SearchResult result : results.getResults()) {
-            hitThreads.add(new Thread(new Runnable() {
+            Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -70,7 +70,9 @@ public class SearchResultPackSource implements IPackSource {
                         resultPacks.add(null);
                     }
                 }
-            }));
+            });
+            thread.start();
+            hitThreads.add(thread);
         }
 
         //Wait for all result threads to complete
