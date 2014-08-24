@@ -27,6 +27,7 @@ import net.technicpack.launchercore.modpacks.sources.IPackSource;
 import net.technicpack.rest.io.PackInfo;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -76,6 +77,14 @@ public class PackLoadJob implements Runnable {
 
     @Override
     public void run() {
+
+        int threadCount = 0;
+        if (doLoadRepository)
+            threadCount++;
+        if (packSources != null)
+            threadCount += packSources.size();
+        Collection<Thread> threads = new ArrayList<Thread>(threadCount);
+
         if (doLoadRepository) {
             for (final String packName : packRepository.getPackNames()) {
                 final InstalledPack pack = packRepository.getInstalledPacks().get(packName);
@@ -87,6 +96,7 @@ public class PackLoadJob implements Runnable {
                     }
                 };
 
+                threads.add(infoLoadThread);
                 infoLoadThread.start();
             }
         }
@@ -102,9 +112,27 @@ public class PackLoadJob implements Runnable {
                     }
                 };
 
+                threads.add(packSourceThread);
                 packSourceThread.start();
             }
         }
+
+        for(Thread thread : threads) {
+            try {
+                thread.join();
+            } catch (InterruptedException ex) {}
+        }
+
+        refreshCompleteThreadSafe();
+    }
+
+    protected void refreshCompleteThreadSafe() {
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                container.refreshComplete();
+            }
+        });
     }
 
 

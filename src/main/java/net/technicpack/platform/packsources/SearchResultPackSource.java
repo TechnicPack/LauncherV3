@@ -60,20 +60,17 @@ public class SearchResultPackSource implements IPackSource {
         final ArrayList<Thread> hitThreads = new ArrayList<Thread>(results.getResults().size());
         final IPlatformApi api = this.platformApi;
 
-        int i = 0;
         for (final SearchResult result : results.getResults()) {
-            final int index = i;
-            hitThreads.set(i, new Thread(new Runnable() {
+            hitThreads.add(new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        resultPacks.set(index, api.getPlatformPackInfo(result.getSlug()));
+                        resultPacks.add(api.getPlatformPackInfo(result.getSlug()));
                     } catch (RestfulAPIException ex) {
-                        resultPacks.set(index, null);
+                        resultPacks.add(null);
                     }
                 }
             }));
-            i++;
         }
 
         //Wait for all result threads to complete
