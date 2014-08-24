@@ -20,7 +20,7 @@ package net.technicpack.launcher;
 
 import com.beust.jcommander.JCommander;
 import net.technicpack.launcher.io.*;
-import net.technicpack.launchercore.modpacks.DefaultPackLoader;
+import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launchercore.modpacks.PackLoader;
 import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
 import net.technicpack.ui.lang.ResourceLoader;
@@ -106,14 +106,14 @@ public class LauncherMain {
         packSources.add(new SolderPackSource("http://solder.technicpack.net/api/", solder));
 
         PackLoader packList = new PackLoader(directories, packStore, packInfoRepository);
-        DefaultPackLoader defaultLoader = new DefaultPackLoader(packList, packSources, null);
-        userModel.addAuthListener(defaultLoader);
+        ModpackSelector selector = new ModpackSelector(resources, packList, new SolderPackSource("http://solder.technicpack.net/api/", solder), platform, iconRepo);
+        userModel.addAuthListener(selector);
 
         MinecraftLauncher launcher = new MinecraftLauncher(platform, directories, userModel, settings.getClientId());
         ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());
         Installer installer = new Installer(startupParameters, mirrorStore, directories, modpackInstaller, launcher, settings, iconMapper);
 
-        LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, defaultLoader, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo, platform);
+        LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, selector, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo, platform);
         userModel.addAuthListener(frame);
 
         LoginFrame login = new LoginFrame(resources, settings, userModel, skinRepo);

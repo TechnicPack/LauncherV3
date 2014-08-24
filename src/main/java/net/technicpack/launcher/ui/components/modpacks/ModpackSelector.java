@@ -18,43 +18,60 @@
 
 package net.technicpack.launcher.ui.components.modpacks;
 
-import net.technicpack.launchercore.modpacks.DefaultPackLoader;
-import net.technicpack.launchercore.modpacks.PackLoader;
+import net.technicpack.launchercore.auth.IAuthListener;
+import net.technicpack.launchercore.auth.IUserType;
+import net.technicpack.launchercore.modpacks.*;
+import net.technicpack.launchercore.modpacks.sources.IPackSource;
+import net.technicpack.launchercore.modpacks.sources.NameFilterPackSource;
+import net.technicpack.platform.IPlatformApi;
+import net.technicpack.platform.packsources.SearchResultPackSource;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
 import net.technicpack.launcher.ui.controls.modpacks.ModpackWidget;
 import net.technicpack.launchercore.image.ImageRepository;
-import net.technicpack.launchercore.modpacks.IModpackContainer;
-import net.technicpack.launchercore.modpacks.ModpackModel;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
 
-public class ModpackSelector extends JPanel implements IModpackContainer {
+public class ModpackSelector extends JPanel implements IModpackContainer, IAuthListener<IUserType> {
     private ResourceLoader resources;
-    private DefaultPackLoader packList;
+    private PackLoader packLoader;
+    private IPackSource technicSolder;
     private ImageRepository<ModpackModel> iconRepo;
+    private IPlatformApi platformApi;
 
     private JPanel widgetList;
     private JScrollPane scrollPane;
     private ModpackInfoPanel modpackInfoPanel;
+    private JTextField filterContents;
 
+    private Map<String, ModpackModel> defaultPacks = null;
     private Map<String, ModpackWidget> allModpacks = new HashMap<String, ModpackWidget>();
     private ModpackWidget selectedWidget;
+    private PackLoadJob currentLoadJob;
 
-    public ModpackSelector(ResourceLoader resources, DefaultPackLoader packList, ImageRepository<ModpackModel> iconRepo, ModpackInfoPanel modpackInfoPanel) {
+    private String lastFilterContents = "";
+    private boolean showingFiltered;
+    private boolean completedInitialLoad;
+
+    public ModpackSelector(ResourceLoader resources, PackLoader packLoader, IPackSource techicSolder, IPlatformApi platformApi, ImageRepository<ModpackModel> iconRepo) {
         this.resources = resources;
-        this.packList = packList;
-        this.modpackInfoPanel = modpackInfoPanel;
+        this.packLoader = packLoader;
         this.iconRepo = iconRepo;
+        this.technicSolder = techicSolder;
+        this.platformApi = platformApi;
 
         initComponents();
+    }
 
-        packList.registerModpackContainer(this);
+    public void setInfoPanel(ModpackInfoPanel modpackInfoPanel) {
+        this.modpackInfoPanel = modpackInfoPanel;
     }
 
     public ModpackModel getSelectedPack() {
@@ -87,9 +104,25 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
         constraints.weighty = 0.0;
         header.add(filterLabel, constraints);
 
-        JTextField filterContents = new JTextField();
+        filterContents = new JTextField();
         filterContents.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         filterContents.setBorder(BorderFactory.createEmptyBorder());
+        filterContents.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                detectFilterChanges();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                detectFilterChanges();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                detectFilterChanges();
+            }
+        });
 
         constraints = new GridBagConstraints();
         constraints.gridx = 1;
@@ -140,6 +173,10 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
             selectedWidget = widget;
         }
         allModpacks.put(modpack.getName(), widget);
+
+        if (!showingFiltered) {
+            defaultPacks.put(modpack.getName(), modpack);
+        }
         rebuildUI();
 
         if (selectedWidget != null) {
@@ -155,13 +192,25 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
         }
     }
 
+    @Override
+    public void refreshComplete() {
+        if (!completedInitialLoad) {
+            completedInitialLoad = true;
+
+            if (filterContents.getText().length() >= 3)
+                detectFilterChanges();
+        }
+    }
+
     protected void selectWidget(ModpackWidget widget) {
         selectedWidget.setIsSelected(false);
         selectedWidget = widget;
         selectedWidget.setIsSelected(true);
         selectedWidget.getModpack().select();
         selectedWidget.scrollRectToVisible(new Rectangle(selectedWidget.getSize()));
-        modpackInfoPanel.setModpack(widget.getModpack());
+
+        if (modpackInfoPanel != null)
+            modpackInfoPanel.setModpack(widget.getModpack());
     }
 
     protected void rebuildUI() {
@@ -174,8 +223,16 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
             public int compare(ModpackWidget o1, ModpackWidget o2) {
                 int platformCompare = Boolean.valueOf(o1.getModpack().isPlatform()).compareTo(Boolean.valueOf(o2.getModpack().isPlatform()));
 
+                int installCompare = 0;
+
+                if (showingFiltered) {
+                    installCompare = Boolean.valueOf(o1.getModpack().getInstalledPack() == null).compareTo(Boolean.valueOf(o2.getModpack().isPlatform()));
+                }
+
                 if (platformCompare != 0)
                     return platformCompare;
+                else if (installCompare != 0)
+                    return installCompare;
                 else if (o1.getModpack().getDisplayName() == null && o2.getModpack().getDisplayName() == null)
                     return 0;
                 else if (o1.getModpack().getDisplayName() == null)
@@ -197,5 +254,74 @@ public class ModpackSelector extends JPanel implements IModpackContainer {
         constraints.weighty = 1.0;
         widgetList.add(Box.createGlue(), constraints);
         revalidate();
+    }
+
+    @Override
+    public void userChanged(IUserType user) {
+        if (filterContents.getText().length() > 0)
+            filterContents.setText("");
+        else
+            detectFilterChanges(true);
+    }
+
+    protected void detectFilterChanges() {
+        detectFilterChanges(false);
+    }
+
+    protected void detectFilterChanges(final boolean clearDefaultPacks) {
+        if (!completedInitialLoad && currentLoadJob != null)
+            return;
+
+        if (!clearDefaultPacks) {
+            if (filterContents.getText().equals(lastFilterContents))
+                return;
+
+            if (filterContents.getText().length() < 3 && !showingFiltered && defaultPacks != null)
+                return;
+        }
+
+        showingFiltered = filterContents.getText().length() >= 3;
+
+        if (currentLoadJob != null) {
+            currentLoadJob.cancel();
+        }
+
+        if (currentLoadJob == null || currentLoadJob.isCancelled()) {
+            loadNewJob(clearDefaultPacks);
+        } else {
+            EventQueue.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    loadNewJob(clearDefaultPacks);
+                }
+            });
+        }
+
+        lastFilterContents = filterContents.getText();
+    }
+
+    private void loadNewJob(boolean clearDefaultPacks) {
+        if (clearDefaultPacks) {
+            defaultPacks = null;
+            completedInitialLoad = false;
+        }
+
+        ArrayList<IPackSource> sources = new ArrayList<IPackSource>(3);
+        if (!showingFiltered) {
+            if (defaultPacks != null) {
+                clear();
+                for(ModpackModel modpack : defaultPacks.values()) {
+                    addOrReplace(modpack);
+                }
+            } else {
+                defaultPacks = new HashMap<String, ModpackModel>();
+                sources.add(technicSolder);
+                currentLoadJob = packLoader.createRepositoryLoadJob(this, sources, null, true);
+            }
+        } else {
+            sources.add(new NameFilterPackSource(defaultPacks.values(), filterContents.getText()));
+            sources.add(new SearchResultPackSource(platformApi, filterContents.getText()));
+            currentLoadJob = packLoader.createRepositoryLoadJob(this, sources, null, false);
+        }
     }
 }

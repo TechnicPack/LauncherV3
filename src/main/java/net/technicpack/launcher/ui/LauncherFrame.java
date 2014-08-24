@@ -18,7 +18,6 @@
 
 package net.technicpack.launcher.ui;
 
-import net.technicpack.launchercore.modpacks.DefaultPackLoader;
 import net.technicpack.launchercore.modpacks.PackLoader;
 import net.technicpack.ui.controls.DraggableFrame;
 import net.technicpack.ui.controls.RoundedButton;
@@ -90,7 +89,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private final UserModel<MojangUser> userModel;
     private final ImageRepository<IUserType> skinRepository;
     private final TechnicSettings settings;
-    private final DefaultPackLoader packList;
     private final ImageRepository<ModpackModel> iconRepo;
     private final ImageRepository<ModpackModel> logoRepo;
     private final ImageRepository<ModpackModel> backgroundRepo;
@@ -121,14 +119,14 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     NewsInfoPanel newsInfoPanel;
 
-    public LauncherFrame(ResourceLoader resources, ImageRepository<IUserType> skinRepository, UserModel userModel, TechnicSettings settings, DefaultPackLoader packList, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, Installer installer, ImageRepository<AuthorshipInfo> avatarRepo, IPlatformApi platformApi) {
+    public LauncherFrame(ResourceLoader resources, ImageRepository<IUserType> skinRepository, UserModel userModel, TechnicSettings settings, ModpackSelector modpackSelector, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, Installer installer, ImageRepository<AuthorshipInfo> avatarRepo, IPlatformApi platformApi) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         this.userModel = userModel;
         this.skinRepository = skinRepository;
         this.settings = settings;
-        this.packList = packList;
+        this.modpackSelector = modpackSelector;
         this.iconRepo = iconRepo;
         this.logoRepo = logoRepo;
         this.backgroundRepo = backgroundRepo;
@@ -384,6 +382,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         centralPanel.setLayout(new BorderLayout());
 
         ModpackInfoPanel modpackPanel = new ModpackInfoPanel(resources, iconRepo, logoRepo, backgroundRepo, avatarRepo);
+        modpackSelector.setInfoPanel(modpackPanel);
         playButton = modpackPanel.getPlayButton();
         playButton.addActionListener(new ActionListener() {
             @Override
@@ -418,7 +417,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.selectorLayout = new CardLayout();
         selectorSwap.setLayout(selectorLayout);
         selectorSwap.add(new DiscoverSelector(resources), "discover");
-        modpackSelector = new ModpackSelector(resources, packList, iconRepo, modpackPanel);
+
         selectorSwap.add(modpackSelector, "modpacks");
         newsSelector = new NewsSelector(resources, newsInfoPanel, platformApi, avatarRepo, newsCircle, settings);
         selectorSwap.add(newsSelector, "news");
