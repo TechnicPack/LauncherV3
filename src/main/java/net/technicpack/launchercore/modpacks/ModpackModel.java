@@ -337,34 +337,17 @@ public class ModpackModel {
     }
 
     public boolean isSelected() {
-        int packCount = installedPackRepository.getPackNames().size();
+        String selectedSlug = installedPackRepository.getSelectedSlug();
 
-        if (packCount == 0)
-            return false;
+        if (selectedSlug == null)
+            select();
 
-        int selectedIndex = installedPackRepository.getSelectedIndex();
-        if (selectedIndex < 0 || selectedIndex >= packCount) {
-            selectedIndex = 0;
-        }
-
-        String selectedName = installedPackRepository.getPackNames().get(selectedIndex);
-
-        return (selectedName != null && selectedName.equalsIgnoreCase(getName()));
+        return (selectedSlug == null || selectedSlug.equalsIgnoreCase(getName()));
     }
 
     public void select() {
-        String name = getName();
-        List<String> names = installedPackRepository.getPackNames();
-
-        for(int i = 0; i < names.size(); i++) {
-            String packName = names.get(i);
-
-            if (name.equalsIgnoreCase(packName)) {
-                installedPackRepository.setSelectedIndex(i);
-                installedPackRepository.save();
-                break;
-            }
-        }
+        installedPackRepository.setSelectedSlug(getName());
+        installedPackRepository.save();
     }
 
     public Collection<String> getTags() { return tags; }

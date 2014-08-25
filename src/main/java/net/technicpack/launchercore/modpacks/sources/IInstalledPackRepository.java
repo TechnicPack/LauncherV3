@@ -27,8 +27,8 @@ import java.util.Map;
 public interface IInstalledPackRepository {
 	Map<String, InstalledPack> getInstalledPacks();
 	List<String> getPackNames();
-	int getSelectedIndex();
-	void setSelectedIndex(int index);
+	String getSelectedSlug();
+	void setSelectedSlug(String slug);
 	InstalledPack put(InstalledPack installedPack);
 	InstalledPack remove(String name);
 	void save();
