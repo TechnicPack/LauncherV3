@@ -39,7 +39,15 @@ public class SettingsFactory {
 
         File installedSettingsDir = getTechnicHomeDir();
 
-        return tryGetSettings(installedSettingsDir);
+        TechnicSettings settings = tryGetSettings(installedSettingsDir);
+
+        if (settings == null) {
+            settings = new TechnicSettings();
+            settings.setFilePath(new File(installedSettingsDir, "settings.json"));
+            settings.getTechnicRoot();
+        }
+
+        return settings;
     }
 
     private static TechnicSettings tryGetSettings(File rootDir) {
