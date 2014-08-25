@@ -137,52 +137,6 @@
         <buildNumber>${env.BUILD_NUMBER}</buildNumber>
       </properties>
     </profile>
-    <profile>
-      <id>package-win</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.bluestemsoftware.open.maven.plugin</groupId>
-            <artifactId>launch4j-plugin</artifactId>
-            <version>1.5.0.0</version>
-            <executions>
-              <execution>
-                <phase>package</phase>
-                <goals>
-                  <goal>launch4j</goal>
-                </goals>
-                <configuration>
-                  <headerType>gui</headerType>
-                  <stayAlive>false</stayAlive>
-                  <jar>D:\LauncherV3\target/launcher-4.0-${env.BUILD_NUMBER}.jar</jar>
-                  <outfile>D:\LauncherV3\target/launcher-4.0-${env.BUILD_NUMBER}.exe</outfile>
-                  <classPath>
-                    <mainClass>net.technicpack.launcher.LauncherMain</mainClass>
-                    <addDependencies>false</addDependencies>
-                    <preCp>anything</preCp>
-                  </classPath>
-                  <jre>
-                    <minVersion>1.6.0</minVersion>
-                  </jre>
-                  <icon>D:\LauncherV3/src/main/resources/icon.ico</icon>
-                  <versionInfo>
-                    <fileVersion>4.0.0.${env.BUILD_NUMBER}</fileVersion>
-                    <txtFileVersion>4.0.0.${env.BUILD_NUMBER}</txtFileVersion>
-                    <productVersion>4.0.0.${env.BUILD_NUMBER}</productVersion>
-                    <txtProductVersion>4.0.0.${env.BUILD_NUMBER}</txtProductVersion>
-                    <fileDescription>Technic Launcher</fileDescription>
-                    <productName>Technic Launcher</productName>
-                    <copyright>Syndicate, LLC, http://www.technicpack.net</copyright>
-                    <internalName>launcher</internalName>
-                    <originalFilename>launcher.exe</originalFilename>
-                  </versionInfo>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
   </profiles>
   <properties>
     <buildNumber>0</buildNumber>

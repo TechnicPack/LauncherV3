@@ -67,7 +67,7 @@ public class NewsInfoPanel extends JPanel implements PropertyChangeListener {
 
         title.setText(article.getTitle());
         url = article.getUrl();
-        newsText.setText("<html><head><link rel=\"stylesheet\" type=\"text/css\" href=\"http://tplatform.gopagoda.com/assets/css/launcher.css\" /></head><body style=\"font-family: "+newsText.getFont().getFamily()+";color:#D0D0D0\">"+
+        newsText.setText("<html><head><link rel=\"stylesheet\" type=\"text/css\" href=\"http://beta.technicpack.net/assets/css/launcher.css\" /></head><body style=\"font-family: "+newsText.getFont().getFamily()+";color:#D0D0D0\">"+
             article.getContent() +
             "</body></html>");
 
