@@ -47,6 +47,9 @@ public class UserModel<UserType extends IUserType> {
 
 	public void setCurrentUser(UserType user) {
 		this.mCurrentUser = user;
+
+        if (user != null)
+            setLastUser(user);
 		this.triggerAuthListeners();
 	}
 
