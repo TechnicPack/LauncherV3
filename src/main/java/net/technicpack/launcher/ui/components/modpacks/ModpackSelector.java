@@ -51,14 +51,12 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
     private ModpackInfoPanel modpackInfoPanel;
     private JTextField filterContents;
 
-    private Map<String, ModpackModel> defaultPacks = null;
+    private MemoryModpackContainer defaultPacks = new MemoryModpackContainer();
     private Map<String, ModpackWidget> allModpacks = new HashMap<String, ModpackWidget>();
     private ModpackWidget selectedWidget;
     private PackLoadJob currentLoadJob;
 
     private String lastFilterContents = "";
-    private boolean showingFiltered;
-    private boolean completedInitialLoad;
 
     public ModpackSelector(ResourceLoader resources, PackLoader packLoader, IPackSource techicSolder, IPlatformApi platformApi, ImageRepository<ModpackModel> iconRepo) {
         this.resources = resources;
@@ -159,7 +157,13 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
     }
 
     @Override
-    public void addOrReplace(ModpackModel modpack) {
+    public void replaceModpackInContainer(ModpackModel modpack) {
+        if (allModpacks.containsKey(modpack.getName()))
+            addModpackToContainer(modpack);
+    }
+
+    @Override
+    public void addModpackToContainer(ModpackModel modpack) {
         final ModpackWidget widget = new ModpackWidget(resources, iconRepo.startImageJob(modpack));
         widget.addActionListener(new ActionListener() {
             @Override
@@ -174,9 +178,6 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
         }
         allModpacks.put(modpack.getName(), widget);
 
-        if (!showingFiltered) {
-            defaultPacks.put(modpack.getName(), modpack);
-        }
         rebuildUI();
 
         if (selectedWidget != null) {
@@ -194,12 +195,6 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
 
     @Override
     public void refreshComplete() {
-        if (!completedInitialLoad) {
-            completedInitialLoad = true;
-
-            if (filterContents.getText().length() >= 3)
-                detectFilterChanges();
-        }
     }
 
     protected void selectWidget(ModpackWidget widget) {
@@ -225,14 +220,16 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
 
                 int installCompare = 0;
 
-                if (showingFiltered) {
-                    installCompare = Boolean.valueOf(o1.getModpack().getInstalledPack() == null).compareTo(Boolean.valueOf(o2.getModpack().isPlatform()));
-                }
+//                if (showingFiltered) {
+//                    installCompare = Boolean.valueOf(o1.getModpack().getInstalledPack() == null).compareTo(Boolean.valueOf(o2.getModpack().isPlatform()));
+//                }
 
                 if (platformCompare != 0)
                     return platformCompare;
                 else if (installCompare != 0)
                     return installCompare;
+                else if (o1.getModpack().isPlatform() && o1.getModpack().getInstalledPack() == null)
+                    return -1;
                 else if (o1.getModpack().getDisplayName() == null && o2.getModpack().getDisplayName() == null)
                     return 0;
                 else if (o1.getModpack().getDisplayName() == null)
@@ -261,67 +258,49 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
         if (filterContents.getText().length() > 0)
             filterContents.setText("");
         else
-            detectFilterChanges(true);
+            detectFilterChanges();
+
+        if (user != null) {
+            ArrayList<IPackSource> sources = new ArrayList<IPackSource>(1);
+            sources.add(technicSolder);
+            defaultPacks.addPassthroughContainer(this);
+            packLoader.createRepositoryLoadJob(defaultPacks, sources, null, true);
+        }
     }
 
     protected void detectFilterChanges() {
-        detectFilterChanges(false);
-    }
-
-    protected void detectFilterChanges(final boolean clearDefaultPacks) {
-        if (!completedInitialLoad && currentLoadJob != null)
-            return;
-
-        if (!clearDefaultPacks) {
-            if (filterContents.getText().equals(lastFilterContents))
-                return;
-
-            if (filterContents.getText().length() < 3 && !showingFiltered && defaultPacks != null)
-                return;
-        }
-
-        showingFiltered = filterContents.getText().length() >= 3;
-
         if (currentLoadJob != null) {
             currentLoadJob.cancel();
         }
 
-        if (currentLoadJob == null || currentLoadJob.isCancelled()) {
-            loadNewJob(clearDefaultPacks);
-        } else {
-            EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    loadNewJob(clearDefaultPacks);
-                }
-            });
+        if (filterContents.getText().length() >= 3) {
+            if (currentLoadJob == null || currentLoadJob.isCancelled()) {
+                loadNewJob();
+            } else {
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        loadNewJob();
+                    }
+                });
+            }
+        } else if (lastFilterContents.length() >= 3) {
+            clear();
+            defaultPacks.addPassthroughContainer(this);
+            for(ModpackModel modpack : defaultPacks.getModpacks()) {
+                addModpackToContainer(modpack);
+            }
         }
 
         lastFilterContents = filterContents.getText();
     }
 
-    private void loadNewJob(boolean clearDefaultPacks) {
-        if (clearDefaultPacks) {
-            defaultPacks = null;
-            completedInitialLoad = false;
-        }
+    private void loadNewJob() {
+        defaultPacks.removePassthroughContainer(this);
 
-        ArrayList<IPackSource> sources = new ArrayList<IPackSource>(3);
-        if (!showingFiltered) {
-            if (defaultPacks != null) {
-                clear();
-                for(ModpackModel modpack : defaultPacks.values()) {
-                    addOrReplace(modpack);
-                }
-            } else {
-                defaultPacks = new HashMap<String, ModpackModel>();
-                sources.add(technicSolder);
-                currentLoadJob = packLoader.createRepositoryLoadJob(this, sources, null, true);
-            }
-        } else {
-            sources.add(new NameFilterPackSource(defaultPacks.values(), filterContents.getText()));
-            sources.add(new SearchResultPackSource(platformApi, filterContents.getText()));
-            currentLoadJob = packLoader.createRepositoryLoadJob(this, sources, null, false);
-        }
+        ArrayList<IPackSource> sources = new ArrayList<IPackSource>(2);
+        sources.add(new NameFilterPackSource(defaultPacks, filterContents.getText()));
+        sources.add(new SearchResultPackSource(platformApi, filterContents.getText()));
+        currentLoadJob = packLoader.createRepositoryLoadJob(this, sources, null, false);
     }
 }

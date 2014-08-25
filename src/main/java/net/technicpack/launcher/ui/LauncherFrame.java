@@ -181,7 +181,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
         ModpackModel pack = modpackSelector.getSelectedPack();
 
-        if (pack == null)
+        if (pack == null || (pack.getInstalledPack() == null && (pack.getPackInfo() == null || !pack.getPackInfo().isComplete())))
             return;
 
         boolean forceInstall = false;
