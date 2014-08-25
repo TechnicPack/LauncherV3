@@ -1,5 +1,6 @@
 package net.technicpack.launchercore.modpacks.sources;
 
+import net.technicpack.launchercore.modpacks.MemoryModpackContainer;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.rest.io.PackInfo;
 
@@ -7,10 +8,10 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 public class NameFilterPackSource implements IPackSource {
-    private Collection<ModpackModel> baseModpacks;
+    private MemoryModpackContainer baseModpacks;
     private String filterTerms;
 
-    public NameFilterPackSource(Collection<ModpackModel> modpacks, String filter) {
+    public NameFilterPackSource(MemoryModpackContainer modpacks, String filter) {
         this.baseModpacks = modpacks;
         this.filterTerms = filter.toUpperCase();
     }
@@ -24,7 +25,7 @@ public class NameFilterPackSource implements IPackSource {
     public Collection<PackInfo> getPublicPacks() {
         LinkedList<PackInfo> info = new LinkedList<PackInfo>();
 
-        for (ModpackModel modpack : baseModpacks) {
+        for (ModpackModel modpack : baseModpacks.getModpacks()) {
             if (modpack.getDisplayName().toUpperCase().contains(filterTerms)) {
                 info.add(modpack.getPackInfo());
             }

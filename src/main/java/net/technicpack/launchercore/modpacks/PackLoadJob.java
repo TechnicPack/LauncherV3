@@ -73,7 +73,9 @@ public class PackLoadJob implements Runnable {
         }
     }
 
-    public boolean isCancelled() { return isCancelled; }
+    public boolean isCancelled() {
+        return isCancelled;
+    }
 
     @Override
     public void run() {
@@ -87,17 +89,8 @@ public class PackLoadJob implements Runnable {
 
         if (doLoadRepository) {
             for (final String packName : packRepository.getPackNames()) {
-                final InstalledPack pack = packRepository.getInstalledPacks().get(packName);
-                Thread infoLoadThread = new Thread(pack.getName() + " Info Loading Thread") {
-                    @Override
-                    public void run() {
-                        PackInfo info = authoritativeSource.getPackInfo(pack);
-                        addPackThreadSafe(pack, info);
-                    }
-                };
-
-                threads.add(infoLoadThread);
-                infoLoadThread.start();
+                InstalledPack pack = packRepository.getInstalledPacks().get(packName);
+                addPackThreadSafe(pack, null);
             }
         }
 
@@ -117,10 +110,11 @@ public class PackLoadJob implements Runnable {
             }
         }
 
-        for(Thread thread : threads) {
+        for (Thread thread : threads) {
             try {
                 thread.join();
-            } catch (InterruptedException ex) {}
+            } catch (InterruptedException ex) {
+            }
         }
 
         refreshCompleteThreadSafe();
@@ -145,15 +139,17 @@ public class PackLoadJob implements Runnable {
         });
     }
 
-    protected void addPack(InstalledPack pack, PackInfo packInfo) {
+    protected void addPack(final InstalledPack pack, final PackInfo packInfo) {
         if (pack == null && packInfo == null || isCancelled)
             return;
 
-        String name = (pack != null)?pack.getName():packInfo.getName();
+        String name = (pack != null) ? pack.getName() : packInfo.getName();
 
         ModpackModel modpack = null;
+        boolean newModpackModel = true;
         if (processedModpacks.containsKey(name)) {
             modpack = processedModpacks.get(name);
+            newModpackModel = false;
             if (modpack.getInstalledPack() == null && pack != null) {
                 modpack.setInstalledPack(pack, packRepository);
             }
@@ -170,9 +166,40 @@ public class PackLoadJob implements Runnable {
             processedModpacks.put(name, modpack);
         }
 
+        Runnable fillDataMethod = null;
+        if (modpack.getPackInfo() == null) {
+            fillDataMethod = new Runnable() {
+                @Override
+                public void run() {
+                    PackInfo completeInfo = authoritativeSource.getPackInfo(pack);
+                    if (completeInfo != null) {
+                        addPackThreadSafe(null, completeInfo);
+                    }
+                }
+            };
+        } else if (!modpack.getPackInfo().isComplete()) {
+            fillDataMethod = new Runnable() {
+                @Override
+                public void run() {
+                    PackInfo completeInfo = authoritativeSource.getCompletePackInfo(packInfo);
+                    if (completeInfo != null) {
+                        addPackThreadSafe(null, completeInfo);
+                    }
+                }
+            };
+        }
+
+        if (fillDataMethod != null) {
+            Thread thread = new Thread(fillDataMethod);
+            thread.start();
+        }
+
         if (modpack != null && tagBuilder != null)
             modpack.updateTags(tagBuilder);
 
-        container.addOrReplace(modpack);
+        if (newModpackModel)
+            container.addModpackToContainer(modpack);
+        else
+            container.replaceModpackInContainer(modpack);
     }
 }

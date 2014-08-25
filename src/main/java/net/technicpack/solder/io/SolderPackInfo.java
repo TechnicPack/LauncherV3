@@ -140,6 +140,9 @@ public class SolderPackInfo extends RestObject implements PackInfo {
         return solder.getPackBuild(build);
 	}
 
+    @Override
+    public boolean isComplete() { return true; }
+
 	@Override
 	public String toString() {
 		return "SolderPackInfo{" +

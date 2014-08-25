@@ -44,10 +44,19 @@ public class PlatformPackInfoRepository implements IAuthoritativePackSource {
         if (!pack.isPlatform())
             return null;
 
+        return getPlatformPackInfo(pack.getName());
+    }
+
+    @Override
+    public PackInfo getCompletePackInfo(PackInfo pack) {
+        return getPlatformPackInfo(pack.getName());
+    }
+
+    protected PackInfo getPlatformPackInfo(String slug) {
         try {
             PackInfo info = null;
 
-            PlatformPackInfo platformInfo = platform.getPlatformPackInfo(pack.getName());
+            PlatformPackInfo platformInfo = platform.getPlatformPackInfo(slug);
 
             if (platformInfo != null && platformInfo.hasSolder()) {
                 ISolderPackApi solderPack = solder.getSolderPack(platformInfo.getSolder(), platformInfo.getName());
@@ -58,7 +67,7 @@ public class PlatformPackInfoRepository implements IAuthoritativePackSource {
 
             return info;
         } catch (RestfulAPIException ex) {
-            Utils.getLogger().log(Level.WARNING, "Unable to load platform pack " + pack.getName(), ex);
+            Utils.getLogger().log(Level.WARNING, "Unable to load platform pack " + slug, ex);
             return null;
         }
     }

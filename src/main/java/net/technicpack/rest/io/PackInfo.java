@@ -59,4 +59,6 @@ public interface PackInfo {
     public Integer getLikes();
 
 	public Modpack getModpack(String build) throws BuildInaccessibleException;
+
+    public boolean isComplete();
 }

@@ -145,6 +145,9 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 		return new Modpack(this);
 	}
 
+    @Override
+    public boolean isComplete() { return true; }
+
 	@Override
 	public String toString() {
 		return "PlatformPackInfo{" +
