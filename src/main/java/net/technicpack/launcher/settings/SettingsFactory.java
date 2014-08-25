@@ -44,7 +44,7 @@ public class SettingsFactory {
         if (settings == null) {
             settings = new TechnicSettings();
             settings.setFilePath(new File(installedSettingsDir, "settings.json"));
-            settings.getTechnicRoot();
+            settings.save();
         }
 
         return settings;

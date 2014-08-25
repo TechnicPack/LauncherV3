@@ -40,7 +40,6 @@ public class TechnicInstalledPackStore implements IInstalledPackRepository {
     private final Map<String, InstalledPack> installedPacks = new HashMap<String, InstalledPack>();
     private final List<String> byIndex = new ArrayList<String>();
     private String selected = null;
-    private int selectedIndex = 0;
 
     public TechnicInstalledPackStore(File jsonFile) {
         setLoadedFile(jsonFile);
@@ -93,13 +92,13 @@ public class TechnicInstalledPackStore implements IInstalledPackRepository {
     }
 
     @Override
-    public int getSelectedIndex() {
-        return selectedIndex;
+    public String getSelectedSlug() {
+        return selected;
     }
 
     @Override
-    public void setSelectedIndex(int index) {
-        selectedIndex = index;
+    public void setSelectedSlug(String slug) {
+        selected = slug;
     }
 
     @Override

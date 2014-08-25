@@ -173,7 +173,7 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
             }
         });
 
-        if (selectedWidget == null || widget.getModpack().isSelected()) {
+        if (widget.getModpack().isSelected()) {
             selectedWidget = widget;
         }
 
