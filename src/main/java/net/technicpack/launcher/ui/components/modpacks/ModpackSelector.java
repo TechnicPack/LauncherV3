@@ -213,6 +213,16 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
     }
 
     protected void rebuildUI() {
+        if (!EventQueue.isDispatchThread()) {
+            EventQueue.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    rebuildUI();
+                }
+            });
+            return;
+        }
+
         GridBagConstraints constraints = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0), 0,0);
 
         java.util.List<ModpackWidget> sortedPacks = new LinkedList<ModpackWidget>();
@@ -255,6 +265,7 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
         constraints.weighty = 1.0;
         widgetList.add(Box.createGlue(), constraints);
         revalidate();
+        repaint();
     }
 
     @Override
