@@ -24,4 +24,5 @@ import java.io.File;
 public interface IImageStore<T> {
     void downloadImage(T key, File target);
     String getJobKey(T key);
+    boolean canRetry(T key);
 }

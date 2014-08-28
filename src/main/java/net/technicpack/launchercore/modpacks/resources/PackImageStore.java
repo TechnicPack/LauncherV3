@@ -46,7 +46,7 @@ public class PackImageStore implements IImageStore<ModpackModel> {
     public void downloadImage(ModpackModel key, File target) {
         Resource res = resourceType.getResource(key);
 
-        if (res == null || res.getUrl() == null || res.getUrl().isEmpty() || (key.getPackInfo() != null &&!key.getPackInfo().isComplete()))
+        if (res == null || res.getUrl() == null || res.getUrl().isEmpty())
             return;
 
         try {
@@ -58,9 +58,11 @@ public class PackImageStore implements IImageStore<ModpackModel> {
 
     @Override
     public String getJobKey(ModpackModel key) {
-        if (key.getPackInfo() == null || key.getPackInfo().isComplete())
-            return "pack-resource-"+key.getName()+"-"+resourceType.getImageName();
-        else
-            return "null-image";
+        return "pack-resource-"+key.getName()+"-"+resourceType.getImageName();
+    }
+
+    @Override
+    public boolean canRetry(ModpackModel key) {
+        return (key.getPackInfo() != null && !key.getPackInfo().isComplete());
     }
 }

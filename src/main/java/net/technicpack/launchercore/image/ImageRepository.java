@@ -35,12 +35,16 @@ public class ImageRepository<T> {
     public ImageJob startImageJob(T key) {
         String jobKey = store.getJobKey(key);
 
+        ImageJob<T> job = null;
         if (allJobs.containsKey(jobKey))
-            return allJobs.get(jobKey);
+            job = allJobs.get(jobKey);
+        else {
+            job = new ImageJob<T>(mapper, store, key);
+            allJobs.put(jobKey, job);
+        }
 
-        ImageJob<T> job = new ImageJob<T>(mapper, store, key);
-        allJobs.put(jobKey, job);
-        job.start();
+        if (job.canRetry())
+            job.start();
 
         return job;
     }

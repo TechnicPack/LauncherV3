@@ -50,4 +50,7 @@ public class MinotarFaceImageStore implements IImageStore<IUserType> {
     public String getJobKey(IUserType key) {
         return "user-face-"+key.getDisplayName();
     }
+
+    @Override
+    public boolean canRetry(IUserType key) { return false; }
 }
