@@ -199,10 +199,34 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
 
     @Override
     public void refreshComplete() {
+        if (selectedWidget == null) {
+            java.util.List<ModpackWidget> sortedPacks = new LinkedList<ModpackWidget>();
+            sortedPacks.addAll(allModpacks.values());
+            Collections.sort(sortedPacks, new Comparator<ModpackWidget>() {
+                @Override
+                public int compare(ModpackWidget o1, ModpackWidget o2) {
+                    int priorityCompare = (new Integer(o2.getModpack().getPriority())).compareTo(new Integer(o1.getModpack().getPriority()));
+                    if (priorityCompare != 0)
+                        return priorityCompare;
+                    else if (o1.getModpack().getDisplayName() == null && o2.getModpack().getDisplayName() == null)
+                        return 0;
+                    else if (o1.getModpack().getDisplayName() == null)
+                        return -1;
+                    else if (o2.getModpack().getDisplayName() == null)
+                        return 1;
+                    else
+                        return o1.getModpack().getDisplayName().compareToIgnoreCase(o2.getModpack().getDisplayName());
+                }
+            });
+            if (sortedPacks.size() > 0) {
+                selectWidget(sortedPacks.get(0));
+            }
+        }
     }
 
     protected void selectWidget(ModpackWidget widget) {
-        selectedWidget.setIsSelected(false);
+        if (selectedWidget != null)
+            selectedWidget.setIsSelected(false);
         selectedWidget = widget;
         selectedWidget.setIsSelected(true);
         selectedWidget.getModpack().select();
