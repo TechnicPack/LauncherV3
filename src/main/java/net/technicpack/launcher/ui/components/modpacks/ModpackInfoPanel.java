@@ -73,16 +73,18 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
 
         ArrayList<FeedItem> feed = modpack.getFeed();
 
-        for (int i = 0; i < feed.size(); i++) {
-            FeedItem item = feed.get(i);
-            FeedItemView itemView = new FeedItemView(resources, item, avatarRepo.startImageJob(item.getAuthorship()));
-            itemView.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    clickFeedItem((FeedItemView)e.getSource(), e.getActionCommand());
-                }
-            });
-            feedGallery.add(itemView);
+        if (feed != null) {
+            for (int i = 0; i < feed.size(); i++) {
+                FeedItem item = feed.get(i);
+                FeedItemView itemView = new FeedItemView(resources, item, avatarRepo.startImageJob(item.getAuthorship()));
+                itemView.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        clickFeedItem((FeedItemView) e.getSource(), e.getActionCommand());
+                    }
+                });
+                feedGallery.add(itemView);
+            }
         }
 
         repaint();
