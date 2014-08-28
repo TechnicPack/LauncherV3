@@ -43,6 +43,9 @@ public class PackResourceMapper implements IImageMapper<ModpackModel> {
 
     @Override
     public boolean shouldDownloadImage(ModpackModel imageKey) {
+        if (imageKey.getPackInfo() != null && !imageKey.getPackInfo().isComplete())
+            return false;
+
         Resource res = resourceType.getResource(imageKey);
 
         if (res == null)
