@@ -35,7 +35,7 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 	private Resource icon;
 	private Resource logo;
 	private Resource background;
-	private String gameVersion;
+	private String minecraft;
 	private String forge;
 	private String version;
 	private String solder;
@@ -106,7 +106,7 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 	}
 
 	public String getGameVersion() {
-		return gameVersion;
+		return minecraft;
 	}
 
 	public String getForge() {
@@ -157,7 +157,7 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 				", icon=" + icon +
 				", logo=" + logo +
 				", background=" + background +
-				", gameVersion='" + gameVersion + '\'' +
+				", gameVersion='" + minecraft + '\'' +
 				", forge='" + forge + '\'' +
 				", version='" + version + '\'' +
 				", solder='" + solder + '\'' +

@@ -20,6 +20,7 @@
 package net.technicpack.platform;
 
 import net.technicpack.launchercore.modpacks.InstalledPack;
+import net.technicpack.launchercore.modpacks.packinfo.CombinedPackInfo;
 import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
 import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.rest.RestfulAPIException;
@@ -60,7 +61,7 @@ public class PlatformPackInfoRepository implements IAuthoritativePackSource {
 
             if (platformInfo != null && platformInfo.hasSolder()) {
                 ISolderPackApi solderPack = solder.getSolderPack(platformInfo.getSolder(), platformInfo.getName());
-                info = solderPack.getPackInfo();
+                info = new CombinedPackInfo(solderPack.getPackInfo(), platformInfo);
             } else {
                 info = platformInfo;
             }

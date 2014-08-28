@@ -20,6 +20,7 @@
 package net.technicpack.launchercore.image;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -30,24 +31,20 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ImageJob<T> {
     protected IImageMapper<T> mapper;
     protected IImageStore<T> store;
-    protected T jobData;
+
+    private T lastJobData;
 
     protected boolean canRetry = true;
     private AtomicReference<BufferedImage> imageReference;
 
     private Collection<IImageJobListener<T>> jobListeners = new LinkedList<IImageJobListener<T>>();
 
-    public ImageJob(IImageMapper<T> mapper, IImageStore<T> store, T jobData) {
+    public ImageJob(IImageMapper<T> mapper, IImageStore<T> store) {
         this.mapper = mapper;
         this.store = store;
-        this.jobData = jobData;
 
         imageReference = new AtomicReference<BufferedImage>();
         imageReference.set(mapper.getDefaultImage());
-    }
-
-    public T getJobData() {
-        return jobData;
     }
 
     public BufferedImage getImage() {
@@ -68,18 +65,35 @@ public class ImageJob<T> {
 
     public boolean canRetry() { return canRetry; }
 
+    public T getJobData() { return lastJobData; }
+
     protected void setImage(BufferedImage image) {
         canRetry = false;
         imageReference.set(image);
 
-        synchronized (jobListeners) {
-            for(IImageJobListener listener : jobListeners) {
-                listener.jobComplete(this);
+        notifyComplete();
+    }
+
+    protected void notifyComplete() {
+        if (EventQueue.isDispatchThread()) {
+            synchronized (jobListeners) {
+                for (IImageJobListener listener : jobListeners) {
+                    listener.jobComplete(this);
+                }
             }
+        } else {
+            EventQueue.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    notifyComplete();
+                }
+            });
         }
     }
 
-    public void start() {
+    public void start(final T jobData) {
+        lastJobData = jobData;
+
         Thread imageThread = new Thread("Image Download: "+store.getJobKey(jobData)) {
             @Override
             public void run() {

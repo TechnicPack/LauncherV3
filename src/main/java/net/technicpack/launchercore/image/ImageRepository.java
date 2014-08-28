@@ -39,12 +39,12 @@ public class ImageRepository<T> {
         if (allJobs.containsKey(jobKey))
             job = allJobs.get(jobKey);
         else {
-            job = new ImageJob<T>(mapper, store, key);
+            job = new ImageJob<T>(mapper, store);
             allJobs.put(jobKey, job);
         }
 
         if (job.canRetry())
-            job.start();
+            job.start(key);
 
         return job;
     }
