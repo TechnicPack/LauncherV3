@@ -26,13 +26,12 @@ import net.technicpack.platform.io.SearchResultsData;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.rest.io.PackInfo;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 
 public class SearchResultPackSource implements IPackSource {
     private IPlatformApi platformApi;
     private String searchTerms;
+    private Map<String, Integer> resultPriorities = new HashMap<String, Integer>();
 
     public SearchResultPackSource(IPlatformApi platformApi, String searchTerms) {
         this.platformApi = platformApi;
@@ -47,6 +46,7 @@ public class SearchResultPackSource implements IPackSource {
     @Override
     //Get PlatformPackInfo objects for every result from the given search terms.
     public Collection<PackInfo> getPublicPacks() {
+        resultPriorities.clear();
         //Get results from server
         SearchResultsData results = null;
         try {
@@ -57,10 +57,19 @@ public class SearchResultPackSource implements IPackSource {
 
         ArrayList<PackInfo> resultPacks = new ArrayList<PackInfo>(results.getResults().length);
 
+        int priority = 10;
         for(SearchResult result : results.getResults()) {
             resultPacks.add(new SearchResultPackInfo(result));
+            resultPriorities.put(result.getSlug(), priority--);
         }
 
         return resultPacks;
+    }
+
+    @Override
+    public int getPriority(PackInfo info) {
+        if (resultPriorities.containsKey(info.getName()))
+            return resultPriorities.get(info.getName());
+        return 0;
     }
 }

@@ -33,4 +33,14 @@ public class NameFilterPackSource implements IPackSource {
 
         return info;
     }
+
+    @Override
+    public int getPriority(PackInfo info) {
+        for (ModpackModel modpack : baseModpacks.getModpacks()) {
+            if (modpack.getName().equals(info.getName()))
+                return modpack.getPriority();
+        }
+
+        return 0;
+    }
 }

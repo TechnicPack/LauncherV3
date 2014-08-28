@@ -90,7 +90,7 @@ public class PackLoadJob implements Runnable {
         if (doLoadRepository) {
             for (final String packName : packRepository.getPackNames()) {
                 InstalledPack pack = packRepository.getInstalledPacks().get(packName);
-                addPackThreadSafe(pack, null);
+                addPackThreadSafe(pack, null, 1000);
             }
         }
 
@@ -100,7 +100,7 @@ public class PackLoadJob implements Runnable {
                     @Override
                     public void run() {
                         for (PackInfo info : packSource.getPublicPacks()) {
-                            addPackThreadSafe(null, info);
+                            addPackThreadSafe(null, info, packSource.getPriority(info));
                         }
                     }
                 };
@@ -130,16 +130,16 @@ public class PackLoadJob implements Runnable {
     }
 
 
-    protected void addPackThreadSafe(final InstalledPack pack, final PackInfo packInfo) {
+    protected void addPackThreadSafe(final InstalledPack pack, final PackInfo packInfo, final int priority) {
         EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                addPack(pack, packInfo);
+                addPack(pack, packInfo, priority);
             }
         });
     }
 
-    protected void addPack(final InstalledPack pack, final PackInfo packInfo) {
+    protected void addPack(final InstalledPack pack, final PackInfo packInfo, final int priority) {
         if (pack == null && packInfo == null || isCancelled)
             return;
 
@@ -156,9 +156,11 @@ public class PackLoadJob implements Runnable {
 
             if (packInfo != null) {
                 modpack.setPackInfo(packInfo);
+                modpack.updatePriority(priority);
             }
         } else {
             modpack = new ModpackModel(pack, packInfo, packRepository, directories);
+            modpack.updatePriority(priority);
 
             if (packInfo == null)
                 modpack.setIsPlatform(false);
@@ -173,7 +175,7 @@ public class PackLoadJob implements Runnable {
                 public void run() {
                     PackInfo completeInfo = authoritativeSource.getPackInfo(pack);
                     if (completeInfo != null) {
-                        addPackThreadSafe(null, completeInfo);
+                        addPackThreadSafe(null, completeInfo, priority);
                     }
                 }
             };
@@ -183,7 +185,7 @@ public class PackLoadJob implements Runnable {
                 public void run() {
                     PackInfo completeInfo = authoritativeSource.getCompletePackInfo(packInfo);
                     if (completeInfo != null) {
-                        addPackThreadSafe(null, completeInfo);
+                        addPackThreadSafe(null, completeInfo, priority);
                     }
                 }
             };
