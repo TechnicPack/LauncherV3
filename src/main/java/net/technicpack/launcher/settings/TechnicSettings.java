@@ -36,7 +36,7 @@ public class TechnicSettings {
     private transient File settingsFile;
     private transient File technicRoot;
     private int memory;
-    private LaunchAction launchAction;
+    private LaunchAction launchAction = LaunchAction.HIDE;
     private String buildStream = STABLE;
     private boolean showConsole;
     private String languageCode = "default";
