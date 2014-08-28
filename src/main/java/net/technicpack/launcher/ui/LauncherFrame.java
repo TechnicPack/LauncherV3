@@ -240,7 +240,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         installProgressPlaceholder.setVisible(true);
 
         if (!installer.isCurrentlyRunning())
-            userChanged(userModel.getCurrentUser());
+            userModel.setCurrentUser(userModel.getCurrentUser());
 
         invalidate();
     }
