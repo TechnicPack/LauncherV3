@@ -164,7 +164,7 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
 
     @Override
     public void addModpackToContainer(ModpackModel modpack) {
-        final ModpackWidget widget = new ModpackWidget(resources, modpack, iconRepo.startImageJob(modpack));
+        final ModpackWidget widget = new ModpackWidget(resources, iconRepo.startImageJob(modpack));
         widget.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

@@ -33,12 +33,12 @@ public class ModpackWidget extends SelectorWidget implements IImageJobListener<M
 
     private JLabel icon;
 
-    public ModpackWidget(ResourceLoader resources, ModpackModel pack, ImageJob<ModpackModel> job) {
+    public ModpackWidget(ResourceLoader resources, ImageJob<ModpackModel> job) {
         super(resources);
 
         this.imageJob = job;
         imageJob.addJobListener(this);
-        this.modpack = pack;
+        this.modpack = job.getJobData();
         initComponents();
     }
 
