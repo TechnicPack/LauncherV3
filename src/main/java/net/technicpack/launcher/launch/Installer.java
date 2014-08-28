@@ -156,12 +156,12 @@ public class Installer {
         TaskGroup installingAssets = new TaskGroup(resources.getString("install.message.installassets"));
 
         queue.addTask(examineModpackData);
-        queue.addTask(checkVersionFile);
-        queue.addTask(installVersionFile);
-        queue.addTask(examineVersionFile);
         queue.addTask(verifyingFiles);
         queue.addTask(downloadingMods);
         queue.addTask(installingMods);
+        queue.addTask(checkVersionFile);
+        queue.addTask(installVersionFile);
+        queue.addTask(examineVersionFile);
         queue.addTask(installingLibs);
         queue.addTask(installingMinecraft);
         queue.addTask(examineIndex);
@@ -187,8 +187,8 @@ public class Installer {
         }
 
         checkVersionFile.addTask(new VerifyVersionFilePresentTask(modpack, minecraft));
-        examineVersionFile.addTask(new HandleVersionFileTask(modpack, directories, verifyingFiles, installingLibs, installingLibs));
-        verifyingFiles.addTask(new EnsureAssetsIndexTask(directories.getAssetsDirectory(), installingMinecraft, examineIndex, verifyingAssets, installingAssets, installingAssets));
+        examineVersionFile.addTask(new HandleVersionFileTask(modpack, directories, examineVersionFile, installingLibs, installingLibs));
+        examineVersionFile.addTask(new EnsureAssetsIndexTask(directories.getAssetsDirectory(), installingMinecraft, examineIndex, verifyingAssets, installingAssets, installingAssets));
 
         if (doFullInstall || (installedVersion != null && installedVersion.isLegacy()))
             installingMinecraft.addTask(new InstallMinecraftIfNecessaryTask(modpack, minecraft, directories.getCacheDirectory()));
