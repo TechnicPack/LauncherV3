@@ -230,20 +230,9 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
         Collections.sort(sortedPacks, new Comparator<ModpackWidget>() {
             @Override
             public int compare(ModpackWidget o1, ModpackWidget o2) {
-                int platformCompare = Boolean.valueOf(o1.getModpack().isPlatform()).compareTo(Boolean.valueOf(o2.getModpack().isPlatform()));
-
-                int installCompare = 0;
-
-//                if (showingFiltered) {
-//                    installCompare = Boolean.valueOf(o1.getModpack().getInstalledPack() == null).compareTo(Boolean.valueOf(o2.getModpack().isPlatform()));
-//                }
-
-                if (platformCompare != 0)
-                    return platformCompare;
-                else if (installCompare != 0)
-                    return installCompare;
-                else if (o1.getModpack().isPlatform() && o1.getModpack().getInstalledPack() == null)
-                    return -1;
+                int priorityCompare = (new Integer(o2.getModpack().getPriority())).compareTo(new Integer(o1.getModpack().getPriority()));
+                if (priorityCompare != 0)
+                    return priorityCompare;
                 else if (o1.getModpack().getDisplayName() == null && o2.getModpack().getDisplayName() == null)
                     return 0;
                 else if (o1.getModpack().getDisplayName() == null)
