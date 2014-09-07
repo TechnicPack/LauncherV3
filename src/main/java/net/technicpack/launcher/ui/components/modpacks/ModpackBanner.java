@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.ui.components.modpacks;
 
+import net.technicpack.launchercore.modpacks.packinfo.CombinedPackInfo;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.ui.controls.AAJLabel;
@@ -83,7 +84,7 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
         if (!modpack.isPlatform())
             addTag("launcher.pack.tag.official", LauncherFrame.COLOR_BLUE);
 
-        if (modpack.getPackInfo() instanceof SolderPackInfo)
+        if (modpack.getPackInfo() instanceof SolderPackInfo || modpack.getPackInfo() instanceof CombinedPackInfo)
             addTag("launcher.pack.tag.solder", LauncherFrame.COLOR_GREEN);
 
         if (modpack.isLocalOnly())
