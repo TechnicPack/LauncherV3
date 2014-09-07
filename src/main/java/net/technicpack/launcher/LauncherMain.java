@@ -21,6 +21,8 @@ package net.technicpack.launcher;
 import com.beust.jcommander.JCommander;
 import net.technicpack.launcher.io.*;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
+import net.technicpack.launchercore.logging.BuildLogFormatter;
+import net.technicpack.launchercore.logging.RotatingFileHandler;
 import net.technicpack.launchercore.modpacks.PackLoader;
 import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
 import net.technicpack.ui.lang.ResourceLoader;
@@ -57,9 +59,14 @@ import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.solder.ISolderApi;
 import net.technicpack.solder.SolderPackSource;
 import net.technicpack.solder.http.HttpSolderApi;
+import net.technicpack.utilslib.Utils;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class LauncherMain {
     public static void main(String[] args) {
@@ -74,10 +81,56 @@ public class LauncherMain {
         startLauncher(settings, params);
     }
 
+    private static void setupLogging(LauncherDirectories directories, ResourceLoader resources) {
+        final Logger logger = Utils.getLogger();
+        File logDirectory = new File(directories.getLauncherDirectory(), "logs");
+        if (!logDirectory.exists()) {
+            logDirectory.mkdir();
+        }
+        File logs = new File(logDirectory, "techniclauncher_%D.log");
+        RotatingFileHandler fileHandler = new RotatingFileHandler(logs.getPath());
+
+        fileHandler.setFormatter(new BuildLogFormatter(resources.getLauncherBuild()));
+
+        for (Handler h : logger.getHandlers()) {
+            logger.removeHandler(h);
+        }
+        logger.addHandler(fileHandler);
+
+//        if (params != null && !params.isDebugMode()) {
+//            logger.setUseParentHandlers(false);
+//
+////            System.setOut(new PrintStream(new LoggerOutputStream(console, Level.INFO, logger), true));
+////            System.setErr(new PrintStream(new LoggerOutputStream(console, Level.SEVERE, logger), true));
+//        }
+
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                logger.log(Level.SEVERE, "Unhandled Exception in " + t, e);
+
+//                if (errorDialog == null) {
+//                    LauncherFrame frame = null;
+//
+//                    try {
+//                        frame = Launcher.getFrame();
+//                    } catch (Exception ex) {
+//                        //This can happen if we have a very early crash- before Launcher initializes
+//                    }
+//
+//                    errorDialog = new ErrorDialog(frame, e);
+//                    errorDialog.setVisible(true);
+//                }
+            }
+        });
+    }
+
     private static void startLauncher(TechnicSettings settings, StartupParameters startupParameters) {
         LauncherDirectories directories = new TechnicLauncherDirectories(settings.getTechnicRoot());
         ResourceLoader resources = new ResourceLoader("net","technicpack","launcher","resources");
         resources.setLocale(settings.getLanguageCode());
+
+        setupLogging(directories, resources);
 
         UserModel userModel = new UserModel(TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json")), new AuthenticationService());
 
