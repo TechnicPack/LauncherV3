@@ -121,12 +121,19 @@ public class CombinedPackInfo implements PackInfo {
 
     @Override
     public List<String> getBuilds() {
+        List<String> builds = new LinkedList<String>();
+
         for (PackInfo component : componentInfos) {
-            if (component.getBuilds() != null)
-                return component.getBuilds();
+            List<String> subBuilds = component.getBuilds();
+            if (subBuilds != null) {
+                for(String build : subBuilds) {
+                    if (!builds.contains(build))
+                        builds.add(build);
+                }
+            }
         }
 
-        return null;
+        return builds;
     }
 
     @Override
