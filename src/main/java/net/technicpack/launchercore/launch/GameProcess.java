@@ -19,6 +19,8 @@
 
 package net.technicpack.launchercore.launch;
 
+import net.technicpack.utilslib.Utils;
+
 import java.util.List;
 
 public class GameProcess {
@@ -30,6 +32,14 @@ public class GameProcess {
 	public GameProcess(List<String> commands, Process process) {
 		this.commands = commands;
 		this.process = process;
+
+        String commandText = "";
+
+        for (String command : commands) {
+            commandText += command + " ";
+        }
+        Utils.getLogger().info(commandText);
+
 		this.monitorThread = new ProcessMonitorThread(this);
 		this.monitorThread.start();
 	}
