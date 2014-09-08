@@ -100,8 +100,8 @@ public class ImageJob<T> {
                 try {
                     File imageLocation = mapper.getImageLocation(jobData);
 
-                    if (imageLocation != null && !imageLocation.exists())
-                        imageLocation.mkdirs();
+                    if (imageLocation != null && !imageLocation.getParentFile().exists())
+                        imageLocation.getParentFile().mkdirs();
 
                     BufferedImage existingImage = null;
 
