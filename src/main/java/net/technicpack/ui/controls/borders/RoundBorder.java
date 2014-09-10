@@ -52,8 +52,10 @@ public class RoundBorder extends AbstractBorder {
                     RenderingHints.VALUE_ANTIALIAS_ON);
 
             int pad = strokePad;
-            int bottomPad = pad + strokePad;
-            insets = new Insets(pad, pad + radii/2, bottomPad, pad + radii/2);
+            int bottomPad = Math.max(pad + strokePad, 1);
+
+            int radiusBounds = Math.max(pad + radii/2, 1);
+            insets = new Insets(pad, radiusBounds, bottomPad, radiusBounds);
         }
 
         @Override
@@ -96,7 +98,9 @@ public class RoundBorder extends AbstractBorder {
                 Rectangle rect = new Rectangle(0,0,width, height);
                 Area borderRegion = new Area(rect);
                 borderRegion.subtract(area);
-                g2.setClip(borderRegion);
+
+                Shape oldClip = g2.getClip();
+                g2.clip(borderRegion);
                 g2.setColor(bg);
                 g2.fillRect(0, 0, width, height);
                 g2.setClip(null);

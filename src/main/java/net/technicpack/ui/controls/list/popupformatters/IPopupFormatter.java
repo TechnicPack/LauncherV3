@@ -16,29 +16,10 @@
  * as well as a copy of the GNU Lesser General Public License,
  * along with Technic UI Core.  If not, see <http://www.gnu.org/licenses/>.
  */
+package net.technicpack.ui.controls.list.popupformatters;
 
-package net.technicpack.ui.controls.login;
+import javax.swing.plaf.basic.BasicComboPopup;
 
-import net.technicpack.ui.lang.ResourceLoader;
-
-import javax.swing.*;
-import javax.swing.plaf.basic.BasicComboBoxUI;
-
-public class UserCellUI extends BasicComboBoxUI {
-
-    private ResourceLoader resources;
-
-    public UserCellUI(ResourceLoader loader) {
-        this.resources = loader;
-    }
-
-    @Override protected JButton createArrowButton() {
-        JButton button = new JButton();
-        button.setOpaque(false);
-        button.setContentAreaFilled(false);
-        button.setBorder(BorderFactory.createEmptyBorder());
-        button.setIcon(resources.getIcon("comboTriangle.png"));
-        button.setFocusPainted(false);
-        return button;
-    }
+public interface IPopupFormatter {
+    public void formatPopup(BasicComboPopup popup);
 }
