@@ -19,6 +19,9 @@
 
 package net.technicpack.utilslib;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
+
 public class Memory {
     public static final Memory[] memoryOptions = {
             (new Memory(512, "512 MB", 1)),
@@ -44,7 +47,45 @@ public class Memory {
     public static final Memory DEFAULT_MEM = memoryOptions[2];
     public static final int MAX_32_BIT_MEMORY = 1024;
 
-    int memory;
+    public static boolean is64Bit() {
+        String architecture = System.getProperty("sun.arch.data.model", "32");
+        return architecture.equals("64");
+    }
+
+    public static long getPhysicalMemory() {
+        long maxMemory = 0;
+        try {
+            OperatingSystemMXBean osInfo = ManagementFactory.getOperatingSystemMXBean();
+            if (osInfo instanceof com.sun.management.OperatingSystemMXBean) {
+                maxMemory = ((com.sun.management.OperatingSystemMXBean) osInfo).getTotalPhysicalMemorySize() / 1024 / 1024;
+            }
+        } catch (Throwable t) {
+        }
+        return Math.max(512, maxMemory);
+    }
+
+    public static long getAvailableMemory() {
+        long physical = getPhysicalMemory();
+        if (!is64Bit() && physical > MAX_32_BIT_MEMORY)
+            return MAX_32_BIT_MEMORY;
+        return physical;
+    }
+
+    public static Memory getClosesAvailableMemory(Memory memory) {
+        long available = getAvailableMemory();
+        if (memory.getMemoryMB() <= available)
+            return memory;
+
+        Memory bestMemory = Memory.memoryOptions[0];
+        for (Memory option : Memory.memoryOptions) {
+            if (option.getMemoryMB() <= available && option.getMemoryMB() > bestMemory.getMemoryMB())
+                bestMemory = option;
+        }
+
+        return bestMemory;
+    }
+
+    long memory;
     String text;
     int option;
 
@@ -54,7 +95,7 @@ public class Memory {
         this.option = option;
     }
 
-    public int getMemoryMB() {
+    public long getMemoryMB() {
         return memory;
     }
 
