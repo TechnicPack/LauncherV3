@@ -45,7 +45,7 @@ public enum OperatingSystem {
 			return "javaw.exe";
 		}
 
-		return "java.exe";
+		return "java";
 	}
 
 	public static OperatingSystem getOperatingSystem() {
