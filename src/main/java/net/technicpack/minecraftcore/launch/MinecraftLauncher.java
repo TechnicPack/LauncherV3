@@ -58,7 +58,7 @@ public class MinecraftLauncher {
 		return launch(pack, memory, options, null, version);
 	}
 
-	public GameProcess launch(ModpackModel pack, int memory, LaunchOptions options, ProcessExitListener exitListener, CompleteVersion version) throws IOException {
+	public GameProcess launch(ModpackModel pack, long memory, LaunchOptions options, ProcessExitListener exitListener, CompleteVersion version) throws IOException {
 		List<String> commands = buildCommands(pack, memory, version, options);
 		StringBuilder full = new StringBuilder();
 		boolean first = true;
@@ -79,7 +79,7 @@ public class MinecraftLauncher {
 		return mcProcess;
 	}
 
-	private List<String> buildCommands(ModpackModel pack, int memory, CompleteVersion version, LaunchOptions options) {
+	private List<String> buildCommands(ModpackModel pack, long memory, CompleteVersion version, LaunchOptions options) {
 		List<String> commands = new ArrayList<String>();
 		commands.add(OperatingSystem.getJavaDir());
 
