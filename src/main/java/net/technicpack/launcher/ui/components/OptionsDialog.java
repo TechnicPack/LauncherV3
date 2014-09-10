@@ -156,11 +156,20 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             memSelect.removeActionListener(listener);
 
         memSelect.removeAllItems();
+        long maxMemory = Memory.getAvailableMemory();
         for (int i = 0; i < Memory.memoryOptions.length; i++) {
-            memSelect.addItem(Memory.memoryOptions[i]);
+            if (Memory.memoryOptions[i].getMemoryMB() <= maxMemory)
+                memSelect.addItem(Memory.memoryOptions[i]);
         }
 
-        memSelect.setSelectedItem(Memory.getMemoryFromId(settings.getMemory()));
+        Memory currentMem = Memory.getMemoryFromId(settings.getMemory());
+        Memory availableMem = Memory.getClosesAvailableMemory(currentMem);
+
+        if (currentMem.getMemoryMB() != availableMem.getMemoryMB()) {
+            settings.setMemory(currentMem.getSettingsId());
+            settings.save();
+        }
+        memSelect.setSelectedItem(availableMem);
         memSelect.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

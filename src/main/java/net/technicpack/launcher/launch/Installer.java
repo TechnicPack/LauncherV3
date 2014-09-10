@@ -89,7 +89,7 @@ public class Installer {
                         version = installer.prepareOfflinePack(pack, new CompleteVersionParser());
                     }
 
-                    int memory = Memory.getMemoryFromId(settings.getMemory()).getMemoryMB();
+                    long memory = Memory.getMemoryFromId(settings.getMemory()).getMemoryMB();
 
                     LaunchOptions options = new LaunchOptions( pack.getDisplayName(), packIconMapper.getImageLocation(pack).getAbsolutePath(), startupParameters.getWidth(), startupParameters.getHeight(), startupParameters.getFullscreen());
                     launcherUnhider = new LauncherUnhider(settings, frame);
