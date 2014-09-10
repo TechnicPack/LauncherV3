@@ -166,7 +166,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         Memory availableMem = Memory.getClosesAvailableMemory(currentMem);
 
         if (currentMem.getMemoryMB() != availableMem.getMemoryMB()) {
-            settings.setMemory(currentMem.getSettingsId());
+            settings.setMemory(availableMem.getSettingsId());
             settings.save();
         }
         memSelect.setSelectedItem(availableMem);
