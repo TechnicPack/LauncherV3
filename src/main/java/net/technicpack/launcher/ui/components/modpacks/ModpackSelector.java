@@ -27,7 +27,7 @@ import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.packsources.SearchResultPackSource;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
+import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 import net.technicpack.launcher.ui.controls.modpacks.ModpackWidget;
 import net.technicpack.launchercore.image.ImageRepository;
 

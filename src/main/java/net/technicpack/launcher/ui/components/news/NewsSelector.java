@@ -21,7 +21,7 @@ package net.technicpack.launcher.ui.components.news;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
+import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 import net.technicpack.ui.controls.feeds.CountCircle;
 import net.technicpack.launcher.ui.controls.feeds.NewsWidget;
 import net.technicpack.launchercore.image.ImageRepository;

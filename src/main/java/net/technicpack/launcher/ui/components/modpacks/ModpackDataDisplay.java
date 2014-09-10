@@ -21,7 +21,7 @@ package net.technicpack.launcher.ui.components.modpacks;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.ui.controls.AAJLabel;
-import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
+import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 import net.technicpack.ui.controls.feeds.StatBox;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;

@@ -18,8 +18,10 @@
 
 package net.technicpack.launcher.ui;
 
+import net.technicpack.launcher.ui.controls.popupformatter.RoundedBorderFormatter;
 import net.technicpack.ui.controls.lang.LanguageCellRenderer;
 import net.technicpack.ui.controls.lang.LanguageCellUI;
+import net.technicpack.ui.controls.list.SimpleButtonComboUI;
 import net.technicpack.ui.lang.IRelocalizableResource;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.settings.TechnicSettings;
@@ -355,18 +357,13 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         UserCellEditor userEditor = new UserCellEditor(resources.getFont(ResourceLoader.FONT_OPENSANS, 16), this.skinRepository, LauncherFrame.COLOR_BUTTON_BLUE);
         nameSelect.setEditor(userEditor);
         userEditor.addKeyListener(this);
-        nameSelect.setUI(new UserCellUI(resources));
+        nameSelect.setUI(new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0)), resources, LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
         nameSelect.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 changeUser();
             }
         });
-
-        Object child = nameSelect.getAccessibleContext().getAccessibleChild(0);
-        BasicComboPopup popup = (BasicComboPopup)child;
-        JList list = popup.getList();
-        list.setBorder( new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0) );
 
         add(nameSelect, new GridBagConstraints(0, 3, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(3, 20, 0, 20), 4, 4));
 

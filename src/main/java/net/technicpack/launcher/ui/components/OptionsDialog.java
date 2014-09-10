@@ -18,6 +18,8 @@
 
 package net.technicpack.launcher.ui.components;
 
+import net.technicpack.launcher.ui.controls.popupformatter.RoundedBorderFormatter;
+import net.technicpack.ui.controls.list.SimpleButtonComboUI;
 import net.technicpack.ui.lang.IRelocalizableResource;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.settings.TechnicSettings;
@@ -26,7 +28,6 @@ import net.technicpack.ui.controls.AAJLabel;
 import net.technicpack.ui.controls.LauncherDialog;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.borders.RoundBorder;
-import net.technicpack.ui.controls.login.UserCellUI;
 import net.technicpack.ui.controls.tabs.SimpleTabPane;
 import net.technicpack.ui.listitems.LanguageItem;
 import net.technicpack.launcher.ui.listitems.OnLaunchItem;
@@ -35,6 +36,7 @@ import net.technicpack.launchercore.util.LaunchAction;
 import net.technicpack.utilslib.Memory;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicComboPopup;
@@ -318,7 +320,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         streamSelect.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
         streamSelect.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         streamSelect.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
-        streamSelect.setUI(new UserCellUI(resources));
+        streamSelect.setUI(new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0)), resources, LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
         streamSelect.setFocusable(false);
 
         Object child = streamSelect.getAccessibleContext().getAccessibleChild(0);
@@ -327,7 +329,6 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         list.setSelectionForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         list.setSelectionBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
         list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
-        list.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0));
 
         panel.add(streamSelect, new GridBagConstraints(1, 0, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
 
@@ -348,7 +349,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         langSelect.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
         langSelect.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         langSelect.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
-        langSelect.setUI(new UserCellUI(resources));
+        langSelect.setUI(new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0)), resources, LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
         langSelect.setFocusable(false);
 
         child = langSelect.getAccessibleContext().getAccessibleChild(0);
@@ -357,7 +358,6 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         list.setSelectionForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         list.setSelectionBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
         list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
-        list.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0));
 
         panel.add(langSelect, new GridBagConstraints(1, 1, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
 
@@ -378,7 +378,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         launchSelect.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
         launchSelect.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         launchSelect.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
-        launchSelect.setUI(new UserCellUI(resources));
+        launchSelect.setUI(new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0)), resources, LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
         launchSelect.setFocusable(false);
 
         child = launchSelect.getAccessibleContext().getAccessibleChild(0);
@@ -387,7 +387,6 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         list.setSelectionForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         list.setSelectionBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
         list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
-        list.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0));
 
         panel.add(launchSelect, new GridBagConstraints(1, 2, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
 
@@ -487,7 +486,8 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         memSelect.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
         memSelect.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         memSelect.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
-        memSelect.setUI(new UserCellUI(resources));
+        SimpleButtonComboUI ui = new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0)), resources, LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB);
+        memSelect.setUI(ui);
         memSelect.setFocusable(false);
 
         Object child = memSelect.getAccessibleContext().getAccessibleChild(0);
@@ -496,7 +496,6 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         list.setSelectionForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         list.setSelectionBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
         list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
-        list.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0));
 
         panel.add(memSelect, new GridBagConstraints(1, 0, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 80), 0, 16));
 

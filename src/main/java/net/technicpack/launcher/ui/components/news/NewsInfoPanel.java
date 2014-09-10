@@ -22,7 +22,7 @@ import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.ui.controls.AAJLabel;
 import net.technicpack.ui.controls.RoundedButton;
-import net.technicpack.launcher.ui.controls.SimpleScrollbarUI;
+import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.platform.io.NewsArticle;
