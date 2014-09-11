@@ -213,6 +213,9 @@
         <executions>
           <execution>
             <id>sign</id>
+	    <configuration>
+	      <verbose>true</verbose>
+	    </configuration>
             <goals>
               <goal>sign</goal>
             </goals>
