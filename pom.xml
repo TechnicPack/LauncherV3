@@ -6,7 +6,7 @@
 	<name>Technic Launcher UI Core</name>
 	<groupId>net.technicpack</groupId>
 	<artifactId>launcheruicore</artifactId>
-	<version>1.0-0</version>
+	<version>1.0-SNAPSHOT</version>
 	<url>http://www.technicpack.net</url>
 	<inceptionYear>2014</inceptionYear>
 	<description>Technic's game-agnostic UI Lib.</description>
