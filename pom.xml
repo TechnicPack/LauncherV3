@@ -214,6 +214,11 @@
           <execution>
             <id>sign</id>
 	    <configuration>
+	    	<storetype>pkcs12</storetype>
+		<keystore>${env.CERT_KEYSTORE}</keystore>
+		<alias>${env.CERT_ALIAS}</alias>
+		<storepass>${env.CERT_STOREPASS}</storepass>
+		<keypass>${env.CERT_KEYPASS}</keypass>
 	      <verbose>true</verbose>
 	    </configuration>
             <goals>
