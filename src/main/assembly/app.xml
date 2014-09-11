@@ -16,7 +16,7 @@
             <unpack>false</unpack>
             <useTransitiveDependencies>false</useTransitiveDependencies>
             <includes>
-                <include>org.spoutcraft:launcher</include>
+                <include>net.technicpack:launcher</include>
             </includes>
         </dependencySet>
     </dependencySets>
