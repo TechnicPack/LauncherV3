@@ -206,6 +206,27 @@
 					</execution>
 				</executions>
 			</plugin>
+			
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.2.1</version>
+        <executions>
+          <execution>
+            <id>osx.app</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>${basedir}/src/main/assembly/app.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>			
+			
 		</plugins>
 	</build>
 
@@ -233,7 +254,58 @@
 	            <buildNumber>${env.BUILD_NUMBER}</buildNumber>
 	        </properties>
 	    </profile>
-
+		<!-- Package for Windows -->
+		<profile>
+			<id>package-win</id>
+			<activation>
+				<os>
+					<family>windows</family>
+				</os>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.bluestemsoftware.open.maven.plugin</groupId>
+						<artifactId>launch4j-plugin</artifactId>
+						<version>1.5.0.0</version>
+						<executions>
+							<execution>
+								<configuration>
+									<headerType>gui</headerType>
+									<stayAlive>false</stayAlive>
+									<jar>${project.build.directory}/${project.artifactId}-${project.version}.jar</jar>
+									<outfile>${project.build.directory}/${project.artifactId}-${project.version}.exe</outfile>
+									<classPath>
+										<mainClass>${mainClass}</mainClass>
+										<addDependencies>false</addDependencies>
+										<preCp>anything</preCp>
+									</classPath>
+									<jre>
+										<minVersion>1.5.0</minVersion>
+									</jre>
+									<icon>${basedir}/src/main/resources/exe/icon.ico</icon>
+									<versionInfo>
+										<fileVersion>4.0.0.${buildNumber}</fileVersion>
+										<txtFileVersion>4.0.0.${buildNumber}</txtFileVersion>
+										<productVersion>4.0.0.${buildNumber}</productVersion>
+										<txtProductVersion>4.0.0.${buildNumber}</txtProductVersion>
+										<fileDescription>${project.name}</fileDescription>
+										<productName>${project.name}</productName>
+										<copyright>${project.organization.name}, ${project.organization.url}</copyright>
+										<internalName>${project.artifactId}</internalName>
+										<originalFilename>${project.artifactId}.exe</originalFilename>
+									</versionInfo>
+								</configuration>
+								<phase>package</phase>
+								<goals>
+									<goal>launch4j</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
 
 </project>
