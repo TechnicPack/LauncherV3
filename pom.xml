@@ -321,6 +321,7 @@
 										<internalName>${project.artifactId}</internalName>
 										<originalFilename>${project.artifactId}.exe</originalFilename>
 									</versionInfo>
+									<cmdLine>-Djava.net.preferIPv4Stack=true</cmdLine>
 								</configuration>
 								<phase>package</phase>
 								<goals>
