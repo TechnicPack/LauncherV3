@@ -19,6 +19,8 @@
 package net.technicpack.launcher;
 
 import com.beust.jcommander.JCommander;
+import net.technicpack.autoupdate.Relauncher;
+import net.technicpack.autoupdate.http.HttpUpdateStream;
 import net.technicpack.launcher.io.*;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launchercore.logging.BuildLogFormatter;
@@ -63,6 +65,7 @@ import net.technicpack.utilslib.Utils;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -78,7 +81,21 @@ public class LauncherMain {
         }
 
         TechnicSettings settings = SettingsFactory.buildSettingsObject();
-        startLauncher(settings, params);
+
+        LauncherDirectories directories = new TechnicLauncherDirectories(settings.getTechnicRoot());
+        ResourceLoader resources = new ResourceLoader("net","technicpack","launcher","resources");
+        resources.setLocale(settings.getLanguageCode());
+
+        setupLogging(directories, resources);
+
+        Relauncher launcher = new Relauncher(new HttpUpdateStream("http://beta.technicpack.net/api/launcher/version/"));
+
+        if (params.isLauncher())
+            startLauncher(settings, params, directories, resources);
+        else if (params.isMover())
+            startMover(params, launcher);
+        else
+            updateAndRelaunch(params, directories, resources, settings, launcher);
     }
 
     private static void setupLogging(LauncherDirectories directories, ResourceLoader resources) {
@@ -125,13 +142,7 @@ public class LauncherMain {
         });
     }
 
-    private static void startLauncher(TechnicSettings settings, StartupParameters startupParameters) {
-        LauncherDirectories directories = new TechnicLauncherDirectories(settings.getTechnicRoot());
-        ResourceLoader resources = new ResourceLoader("net","technicpack","launcher","resources");
-        resources.setLocale(settings.getLanguageCode());
-
-        setupLogging(directories, resources);
-
+    private static void startLauncher(TechnicSettings settings, StartupParameters startupParameters, LauncherDirectories directories, ResourceLoader resources) {
         UserModel userModel = new UserModel(TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json")), new AuthenticationService());
 
         MirrorStore mirrorStore = new MirrorStore(userModel);
@@ -173,5 +184,49 @@ public class LauncherMain {
         userModel.addAuthListener(login);
 
         userModel.initAuth();
+    }
+
+    private static void startMover(StartupParameters params, Relauncher relauncher) {
+        try {
+            relauncher.replacePackage(LauncherMain.class, params.getMoveTarget());
+        } catch (UnsupportedEncodingException ex) {
+            Utils.getLogger().severe("Error attempting to copy downloaded package: ");
+            ex.printStackTrace();
+            return;
+        }
+
+        String[] args = relauncher.buildLauncherArgs(relauncher.buildLauncherArgs((String[])params.getParameters().toArray()));
+        relauncher.launch(params.getMoveTarget(), LauncherMain.class, args);
+    }
+
+    private static void updateAndRelaunch(StartupParameters params, LauncherDirectories directories, ResourceLoader resources, TechnicSettings settings, Relauncher relauncher) {
+        String launcherBuild = resources.getLauncherBuild();
+        int build = Integer.parseInt(launcherBuild);
+
+        if (build < 1) {
+            //We're in debug mode do not relaunch
+            startLauncher(settings, params, directories, resources);
+            return;
+        }
+
+        String url = relauncher.getUpdateUrl(settings.getBuildStream(), build, LauncherMain.class);
+
+        String[] args;
+        if (url == null) {
+            args = relauncher.buildLauncherArgs((String[])params.getParameters().toArray());
+            relauncher.launch(null, LauncherMain.class, args);
+            return;
+        }
+
+        String tempPath = relauncher.downloadUpdate(url, directories);
+
+        try {
+            args = relauncher.buildMoverArgs(LauncherMain.class, (String[]) params.getParameters().toArray());
+        } catch (UnsupportedEncodingException ex) {
+            Utils.getLogger().severe("Error attempting to launch mover mode: ");
+            ex.printStackTrace();
+            return;
+        }
+        relauncher.launch(tempPath, LauncherMain.class, args);
     }
 }

@@ -31,6 +31,12 @@ public final class StartupParameters {
     private List<String> parameters = Lists.newArrayList();
     @Parameter(names = {"-console"}, description = "Shows the console window")
     private boolean console = false;
+    @Parameter(names = {"-launcher"}, description = "Starts in launcher mode (rather than update/mover)")
+    private boolean launcher = false;
+    @Parameter(names = {"-mover"}, description = "Starts in mover mode (copies recently-downloaded update to originally-run package)")
+    private boolean mover = false;
+    @Parameter(names = {"-movetarget"}, description = "The path of the originally-run package to copy to")
+    private String moveTarget = null;
     @Parameter(names = {"-width"}, description = "Sets the width of the minecraft window to be fixed to this.")
     private int width = -1;
     @Parameter(names = {"-height"}, description = "Sets the height of the minecraft window to be fixed to this.")
@@ -75,4 +81,10 @@ public final class StartupParameters {
     public boolean getFullscreen() {
         return fullscreen;
     }
+
+    public boolean isLauncher() { return launcher; }
+
+    public boolean isMover() { return mover; }
+
+    public String getMoveTarget() { return moveTarget; }
 }
