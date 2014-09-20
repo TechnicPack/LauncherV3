@@ -220,11 +220,11 @@ public class LauncherMain {
             //This is probably a debug build or something, build number is invalid
         }
 
-//        if (build < 1) {
-//            //We're in debug mode do not relaunch
-//            startLauncher(settings, params, directories, resources);
-//            return;
-//        }
+        if (build < 1) {
+            //We're in debug mode do not relaunch
+            startLauncher(settings, params, directories, resources);
+            return;
+        }
 
         //In order to allow the old launcher to update & maintain backward compatibility we're keeping the old
         //stream pages live, and appending a "4" to the new streams.  So "stable" in the settings file means we
