@@ -64,6 +64,7 @@ import net.technicpack.solder.ISolderApi;
 import net.technicpack.solder.SolderPackSource;
 import net.technicpack.solder.http.HttpSolderApi;
 import net.technicpack.utilslib.Utils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -99,8 +100,12 @@ public class LauncherMain {
         else if (params.isMover())
             startMover(params, launcher);
         else if (!Boolean.parseBoolean(System.getProperty("java.net.preferIPv4Stack"))) {
-            launcher.launch(null, LauncherMain.class, params.getParameters().toArray(new String[params.getParameters().size()]));
-            return;
+            //The debugger can't really relaunch so double check the build number to make sure we're operating in a valid environment
+            if (StringUtils.isNumeric(resources.getLauncherBuild())) {
+                launcher.launch(null, LauncherMain.class, params.getParameters().toArray(new String[params.getParameters().size()]));
+                return;
+            } else
+                updateAndRelaunch(params, directories, resources, settings, launcher);
         } else {
             updateAndRelaunch(params, directories, resources, settings, launcher);
         }
