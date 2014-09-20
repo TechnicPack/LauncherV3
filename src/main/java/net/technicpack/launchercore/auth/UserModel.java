@@ -107,13 +107,11 @@ public class UserModel<UserType extends IUserType> {
                 AuthError error = this.attemptUserRefresh(user);
 
                 if (error != null)
-                    user = null;
+                    setCurrentUser(null);
             } catch (AuthenticationNetworkFailureException ex) {
-                user = gameAuthService.createOfflineUser(user.getDisplayName());
+                setCurrentUser(gameAuthService.createOfflineUser(user.getDisplayName()));
             }
         }
-
-        this.setCurrentUser(user);
     }
 
 	public Collection<UserType> getUsers() {
