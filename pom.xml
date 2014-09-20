@@ -308,7 +308,7 @@
 									</classPath>
 									<jre>
 										<minVersion>1.5.0</minVersion>
-										<opt>-Djava.net.preferIPv4Stack=true</opt>
+										<opts>-Djava.net.preferIPv4Stack=true</opts>
 									</jre>
 									<icon>${basedir}/src/main/resources/exe/icon.ico</icon>
 									<versionInfo>
