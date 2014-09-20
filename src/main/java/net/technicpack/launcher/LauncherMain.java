@@ -206,7 +206,7 @@ public class LauncherMain {
             return;
         }
 
-        String[] args = relauncher.buildLauncherArgs(relauncher.buildLauncherArgs((String[])params.getParameters().toArray()));
+        String[] args = relauncher.buildLauncherArgs(relauncher.buildLauncherArgs(params.getParameters().toArray(new String[params.getParameters().size()])));
         relauncher.launch(params.getMoveTarget(), LauncherMain.class, args);
     }
 
@@ -220,36 +220,43 @@ public class LauncherMain {
             //This is probably a debug build or something, build number is invalid
         }
 
-        if (build < 1) {
-            //We're in debug mode do not relaunch
-            //startLauncher(settings, params, directories, resources);
+//        if (build < 1) {
+//            //We're in debug mode do not relaunch
+//            startLauncher(settings, params, directories, resources);
+//            return;
+//        }
 
-            SplashScreen screen = new SplashScreen(resources.getImage("launch_splash.png"), 30);
-            screen.getProgressBar().setText("Downloading Update...");
-            screen.getProgressBar().setForeground(Color.white);
-            screen.getProgressBar().setBackground(LauncherFrame.COLOR_GREEN);
-            screen.getProgressBar().setBackFill(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
-            screen.getProgressBar().setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 12));
-            screen.getProgressBar().setProgress("Downloading Update...", 0.5f);
-            screen.pack();
-            screen.setLocationRelativeTo(null);
-            screen.setVisible(true);
-            return;
-        }
-
-        String url = relauncher.getUpdateUrl(settings.getBuildStream(), build, LauncherMain.class);
+        //In order to allow the old launcher to update & maintain backward compatibility we're keeping the old
+        //stream pages live, and appending a "4" to the new streams.  So "stable" in the settings file means we
+        //pull from "stable4"
+        String url = relauncher.getUpdateUrl(settings.getBuildStream()+"4", build, LauncherMain.class);
 
         String[] args;
         if (url == null) {
-            args = relauncher.buildLauncherArgs((String[])params.getParameters().toArray());
-            relauncher.launch(null, LauncherMain.class, args);
+            startLauncher(settings, params, directories, resources);
             return;
         }
 
-        String tempPath = relauncher.downloadUpdate(url, directories);
+        SplashScreen screen = new SplashScreen(resources.getImage("launch_splash.png"), 30);
+        screen.getProgressBar().setForeground(Color.white);
+        screen.getProgressBar().setBackground(LauncherFrame.COLOR_GREEN);
+        screen.getProgressBar().setBackFill(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        screen.getProgressBar().setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 12));
+        screen.pack();
+        screen.setLocationRelativeTo(null);
+        screen.setVisible(true);
+
+        String tempPath = relauncher.downloadUpdate(url, directories, resources.getString("updater.downloading"), screen.getProgressBar());
+
+        if (tempPath == null) {
+            Utils.getLogger().severe("The launcher update failed to download.");
+            screen.dispose();
+            startLauncher(settings, params, directories, resources);
+            return;
+        }
 
         try {
-            args = relauncher.buildMoverArgs(LauncherMain.class, (String[]) params.getParameters().toArray());
+            args = relauncher.buildMoverArgs(LauncherMain.class, params.getParameters().toArray(new String[params.getParameters().size()]));
         } catch (UnsupportedEncodingException ex) {
             Utils.getLogger().severe("Error attempting to launch mover mode: ");
             ex.printStackTrace();
