@@ -99,13 +99,11 @@ public class LauncherMain {
             startLauncher(settings, params, directories, resources);
         else if (params.isMover())
             startMover(params, launcher);
-        else if (!Boolean.parseBoolean(System.getProperty("java.net.preferIPv4Stack"))) {
+        else if (!Boolean.parseBoolean(System.getProperty("java.net.preferIPv4Stack")) && StringUtils.isNumeric(resources.getLauncherBuild())) {
+            // ^^^^^
             //The debugger can't really relaunch so double check the build number to make sure we're operating in a valid environment
-            if (StringUtils.isNumeric(resources.getLauncherBuild())) {
-                launcher.launch(null, LauncherMain.class, params.getParameters().toArray(new String[params.getParameters().size()]));
-                return;
-            } else
-                updateAndRelaunch(params, directories, resources, settings, launcher);
+            launcher.launch(null, LauncherMain.class, params.getParameters().toArray(new String[params.getParameters().size()]));
+            return;
         } else {
             updateAndRelaunch(params, directories, resources, settings, launcher);
         }
