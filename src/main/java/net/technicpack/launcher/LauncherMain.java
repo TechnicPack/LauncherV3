@@ -99,11 +99,9 @@ public class LauncherMain {
         else if (params.isMover())
             startMover(params, launcher);
         else if (!Boolean.parseBoolean(System.getProperty("java.net.preferIPv4Stack"))) {
-            JOptionPane.showMessageDialog(null, "IPV4 OFF");
             launcher.launch(null, LauncherMain.class, params.getParameters().toArray(new String[params.getParameters().size()]));
             return;
         } else {
-            JOptionPane.showMessageDialog(null, "IPV4 ON");
             updateAndRelaunch(params, directories, resources, settings, launcher);
         }
     }
