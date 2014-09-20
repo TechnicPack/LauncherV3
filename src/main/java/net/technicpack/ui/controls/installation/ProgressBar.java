@@ -26,10 +26,14 @@ import java.awt.*;
 
 public class ProgressBar extends JLabel implements DownloadListener {
     float progressPct;
+    private Color backFillColor = null;
 
     public ProgressBar() {
         super("Working...");
     }
+
+    public Color getBackFill() { return backFillColor; }
+    public void setBackFill(Color backFill) { backFillColor = backFill; }
 
     @Override
     public void paint(Graphics g) {
@@ -50,7 +54,10 @@ public class ProgressBar extends JLabel implements DownloadListener {
         int x = 1;
         int y = 1;
 
-        Insets insets = getBorder().getBorderInsets(this);
+        Insets insets = new Insets(0,0,0,0);
+
+        if (getBorder() != null)
+            insets = getBorder().getBorderInsets(this);
 
         x += insets.left;
         y += insets.top;
@@ -58,10 +65,17 @@ public class ProgressBar extends JLabel implements DownloadListener {
         width -= (insets.left + insets.right);
         height -= (insets.top + insets.bottom);
 
+        Shape clip = g2d.getClip();
+
+        if (getBackFill() != null) {
+            g2d.setColor(getBackFill());
+            g2d.clipRect(x, y, width, height);
+            g2d.fillRoundRect(x, y, width, height, height, height);
+        }
+
         g2d.setColor(getBackground());
 
         float clipWidth = progressPct * (float)width;
-        Shape clip = g2d.getClip();
         g2d.clipRect(x, y, (int)clipWidth, height);
         g2d.fillRoundRect(x, y, width, height, height, height);
         g2d.setClip(clip);
