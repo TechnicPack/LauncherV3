@@ -332,6 +332,12 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         minimizeButton.setContentAreaFilled(false);
         minimizeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         minimizeButton.setFocusable(false);
+        minimizeButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                setState(1);
+            }
+        });
         windowGadgetPanel.add(minimizeButton);
 
         ImageIcon closeIcon = resources.getIcon("close.png");
