@@ -454,7 +454,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         footer.add(logout);
 
         installProgress = new ProgressBar();
-        installProgress.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        installProgress.setForeground(Color.white);
         installProgress.setBackground(LauncherFrame.COLOR_GREEN);
         installProgress.setBorder(BorderFactory.createEmptyBorder(5, 45, 4, 45));
         installProgress.setIcon(resources.getIcon("download_icon.png"));

@@ -27,6 +27,8 @@ import net.technicpack.launchercore.logging.BuildLogFormatter;
 import net.technicpack.launchercore.logging.RotatingFileHandler;
 import net.technicpack.launchercore.modpacks.PackLoader;
 import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
+import net.technicpack.ui.controls.installation.ProgressBar;
+import net.technicpack.ui.controls.installation.SplashScreen;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.launch.Installer;
 import net.technicpack.launcher.settings.SettingsFactory;
@@ -63,6 +65,8 @@ import net.technicpack.solder.SolderPackSource;
 import net.technicpack.solder.http.HttpSolderApi;
 import net.technicpack.utilslib.Utils;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
@@ -94,8 +98,14 @@ public class LauncherMain {
             startLauncher(settings, params, directories, resources);
         else if (params.isMover())
             startMover(params, launcher);
-        else
+        else if (!Boolean.parseBoolean(System.getProperty("java.net.preferIPv4Stack"))) {
+            JOptionPane.showMessageDialog(null, "IPV4 OFF");
+            launcher.launch(null, LauncherMain.class, params.getParameters().toArray(new String[params.getParameters().size()]));
+            return;
+        } else {
+            JOptionPane.showMessageDialog(null, "IPV4 ON");
             updateAndRelaunch(params, directories, resources, settings, launcher);
+        }
     }
 
     private static void setupLogging(LauncherDirectories directories, ResourceLoader resources) {
@@ -201,11 +211,28 @@ public class LauncherMain {
 
     private static void updateAndRelaunch(StartupParameters params, LauncherDirectories directories, ResourceLoader resources, TechnicSettings settings, Relauncher relauncher) {
         String launcherBuild = resources.getLauncherBuild();
-        int build = Integer.parseInt(launcherBuild);
+        int build = -1;
+
+        try {
+            build = Integer.parseInt(launcherBuild);
+        } catch (NumberFormatException ex) {
+            //This is probably a debug build or something, build number is invalid
+        }
 
         if (build < 1) {
             //We're in debug mode do not relaunch
-            startLauncher(settings, params, directories, resources);
+            //startLauncher(settings, params, directories, resources);
+
+            SplashScreen screen = new SplashScreen(resources.getImage("launch_splash.png"), 30);
+            screen.getProgressBar().setText("Downloading Update...");
+            screen.getProgressBar().setForeground(Color.white);
+            screen.getProgressBar().setBackground(LauncherFrame.COLOR_GREEN);
+            screen.getProgressBar().setBackFill(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+            screen.getProgressBar().setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 12));
+            screen.getProgressBar().setProgress("Downloading Update...", 0.5f);
+            screen.pack();
+            screen.setLocationRelativeTo(null);
+            screen.setVisible(true);
             return;
         }
 
