@@ -81,11 +81,11 @@ public class Relauncher {
             else
                 commands.add("java");
             commands.add("-Xmx256m");
+            commands.add("-Djava.net.preferIPv4Stack=true");
             commands.add("-cp");
         }
 
         commands.add(launchPath);
-        commands.add("-Djava.net.preferIPv4Stack=true");
         commands.addAll(Arrays.asList(args));
         processBuilder.command(commands);
 
