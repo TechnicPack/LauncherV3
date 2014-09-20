@@ -308,6 +308,7 @@
 									</classPath>
 									<jre>
 										<minVersion>1.5.0</minVersion>
+										<opt>-Djava.net.preferIPv4Stack=true</opt>
 									</jre>
 									<icon>${basedir}/src/main/resources/exe/icon.ico</icon>
 									<versionInfo>
@@ -321,7 +322,6 @@
 										<internalName>${project.artifactId}</internalName>
 										<originalFilename>${project.artifactId}.exe</originalFilename>
 									</versionInfo>
-									<cmdLine>-Djava.net.preferIPv4Stack=true</cmdLine>
 								</configuration>
 								<phase>package</phase>
 								<goals>
