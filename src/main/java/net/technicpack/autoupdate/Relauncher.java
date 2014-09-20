@@ -22,6 +22,7 @@ package net.technicpack.autoupdate;
 import net.technicpack.autoupdate.io.StreamVersion;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.mirror.download.Download;
+import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.utilslib.OperatingSystem;
 
@@ -104,14 +105,14 @@ public class Relauncher {
         outArgs.add(getRunningPath(mainClass));
         outArgs.add("-mover");
         outArgs.addAll(Arrays.asList(args));
-        return (String[])outArgs.toArray();
+        return outArgs.toArray(new String[outArgs.size()]);
     }
 
     public String[] buildLauncherArgs(String[] args) {
         List<String> outArgs = new ArrayList<String>();
         outArgs.add("-launcher");
         outArgs.addAll(Arrays.asList(args));
-        return (String[])outArgs.toArray();
+        return outArgs.toArray(new String[outArgs.size()]);
     }
 
     private String getRunningPath(Class mainClass) throws UnsupportedEncodingException {
@@ -141,7 +142,7 @@ public class Relauncher {
         dest.setExecutable(true, true);
     }
 
-    public String downloadUpdate(String url, LauncherDirectories directories) {
+    public String downloadUpdate(String url, LauncherDirectories directories, String progressText, DownloadListener listener) {
         File dest;
         if (url.endsWith(".exe"))
             dest = new File(directories.getLauncherDirectory(), "temp.exe");
@@ -149,8 +150,16 @@ public class Relauncher {
             dest = new File(directories.getLauncherDirectory(), "temp.jar");
 
         try {
-            Download download = new Download(new URL(url), dest.getName(), dest.getPath());
+            Utils.getLogger().info("Downloading update from "+url+" to "+dest.getAbsolutePath());
+            Download download = new Download(new URL(url), progressText, dest.getPath());
+            download.setListener(listener);
             download.run();
+
+            if (download.getResult() != Download.Result.SUCCESS) {
+                if (download.getException() != null)
+                    download.getException().printStackTrace();
+                return null;
+            }
         } catch (MalformedURLException ex) {
             Utils.getLogger().severe("Received bad url from build stream: "+url);
             ex.printStackTrace();
