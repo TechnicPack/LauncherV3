@@ -83,9 +83,10 @@ public class Relauncher {
             commands.add("-Xmx256m");
             commands.add("-Djava.net.preferIPv4Stack=true");
             commands.add("-cp");
-        }
-
-        commands.add(launchPath);
+            commands.add(launchPath);
+            commands.add(mainClass.getName());
+        } else
+            commands.add(launchPath);
         commands.addAll(Arrays.asList(args));
         processBuilder.command(commands);
 
