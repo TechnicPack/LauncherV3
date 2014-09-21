@@ -168,6 +168,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         System.exit(0);
     }
 
+    protected void minimizeWindow() { this.setState(Frame.ICONIFIED); }
+
     protected void logout() {
         if (installer.isCurrentlyRunning())
             return;
@@ -332,6 +334,12 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         minimizeButton.setContentAreaFilled(false);
         minimizeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         minimizeButton.setFocusable(false);
+        minimizeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                minimizeWindow();
+            }
+        });
         windowGadgetPanel.add(minimizeButton);
 
         ImageIcon closeIcon = resources.getIcon("close.png");
