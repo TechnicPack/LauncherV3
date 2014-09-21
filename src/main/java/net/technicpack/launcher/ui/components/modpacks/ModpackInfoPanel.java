@@ -52,12 +52,12 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
 
     private ModpackModel modpack;
 
-    public ModpackInfoPanel(ResourceLoader loader, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, ImageRepository<AuthorshipInfo> avatarRepo) {
+    public ModpackInfoPanel(ResourceLoader loader, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, ImageRepository<AuthorshipInfo> avatarRepo, ActionListener modpackOptionsListener) {
         this.resources  = loader;
         this.backgroundRepo = backgroundRepo;
         this.avatarRepo = avatarRepo;
 
-        initComponents(iconRepo, logoRepo);
+        initComponents(iconRepo, logoRepo, modpackOptionsListener);
     }
 
     public void setModpack(ModpackModel modpack) {
@@ -109,7 +109,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
             feedGallery.selectComponent(item);
     }
 
-    private void initComponents(ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo) {
+    private void initComponents(ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ActionListener modpackOptionsListener) {
         setLayout(new BorderLayout());
 
         background = new TiledBackground(null);
@@ -126,7 +126,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         layoutPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
         background.add(layoutPanel,BorderLayout.CENTER);
 
-        banner = new ModpackBanner(resources, iconRepo);
+        banner = new ModpackBanner(resources, iconRepo, modpackOptionsListener);
         banner.setBackground(LauncherFrame.COLOR_BANNER);
         banner.setBorder(BorderFactory.createEmptyBorder(0,0,4,0));
         layoutPanel.add(banner);

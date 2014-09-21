@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.ui;
 
+import net.technicpack.launcher.ui.components.ModpackOptionsDialog;
 import net.technicpack.launchercore.modpacks.PackLoader;
 import net.technicpack.ui.controls.DraggableFrame;
 import net.technicpack.ui.controls.RoundedButton;
@@ -247,6 +248,17 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         invalidate();
     }
 
+    protected void openModpackOptions(ModpackModel model) {
+        leftPanel.setTintActive(true);
+        centralPanel.setTintActive(true);
+        footer.setTintActive(true);
+        ModpackOptionsDialog dialog = new ModpackOptionsDialog(this, model, resources);
+        dialog.setVisible(true);
+        leftPanel.setTintActive(false);
+        centralPanel.setTintActive(false);
+        footer.setTintActive(false);
+    }
+
     protected void openLauncherOptions() {
         leftPanel.setTintActive(true);
         centralPanel.setTintActive(true);
@@ -389,7 +401,12 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.add(centralPanel, BorderLayout.CENTER);
         centralPanel.setLayout(new BorderLayout());
 
-        ModpackInfoPanel modpackPanel = new ModpackInfoPanel(resources, iconRepo, logoRepo, backgroundRepo, avatarRepo);
+        ModpackInfoPanel modpackPanel = new ModpackInfoPanel(resources, iconRepo, logoRepo, backgroundRepo, avatarRepo, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                openModpackOptions((ModpackModel)e.getSource());
+            }
+        });
         modpackSelector.setInfoPanel(modpackPanel);
         playButton = modpackPanel.getPlayButton();
         playButton.addActionListener(new ActionListener() {

@@ -32,6 +32,10 @@ import net.technicpack.solder.io.SolderPackInfo;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.font.TextAttribute;
 import java.util.Map;
 
@@ -39,6 +43,7 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
     private ResourceLoader resources;
     private ImageRepository<ModpackModel> iconRepo;
     private ModpackModel currentModpack;
+    private ActionListener modpackOptionsListener;
 
     private JLabel modpackName;
     private JPanel modpackTags;
@@ -47,9 +52,10 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
     private JLabel installedVersion;
     private JLabel modpackIcon;
 
-    public ModpackBanner(ResourceLoader resources, ImageRepository<ModpackModel> iconRepo) {
+    public ModpackBanner(ResourceLoader resources, ImageRepository<ModpackModel> iconRepo, ActionListener modpackOptionsListener) {
         this.resources = resources;
         this.iconRepo = iconRepo;
+        this.modpackOptionsListener = modpackOptionsListener;
 
         initComponents();
     }
@@ -105,6 +111,10 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
         tag.setBackground(lineColor);
         tag.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 11));
         modpackTags.add(tag);
+    }
+
+    protected void openModpackOptions() {
+        modpackOptionsListener.actionPerformed(new ActionEvent(currentModpack, 0, ""));
     }
 
     private void initComponents() {
@@ -180,6 +190,7 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
         packDoodads.add(Box.createRigidArea(new Dimension(0, 5)));
 
         JLabel modpackOptions = new JLabel(resources.getString("launcher.packbanner.options"));
+        modpackOptions.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         Font font = resources.getFont(ResourceLoader.FONT_RALEWAY, 15, Font.BOLD);
         Map attributes = font.getAttributes();
         attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
@@ -188,6 +199,34 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
         modpackOptions.setHorizontalTextPosition(SwingConstants.RIGHT);
         modpackOptions.setHorizontalAlignment(SwingConstants.RIGHT);
         modpackOptions.setAlignmentX(RIGHT_ALIGNMENT);
+
+        modpackOptions.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                openModpackOptions();
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
+
         packDoodads.add(modpackOptions);
 
         this.add(packDoodads);
