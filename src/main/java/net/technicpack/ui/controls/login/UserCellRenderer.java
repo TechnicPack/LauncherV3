@@ -19,6 +19,7 @@
 
 package net.technicpack.ui.controls.login;
 
+import net.technicpack.ui.controls.list.AdvancedCellRenderer;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.image.IImageJobListener;
@@ -30,8 +31,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 
-public class UserCellRenderer extends JLabel implements ListCellRenderer, IImageJobListener<IUserType> {
-    private Font textFont;
+public class UserCellRenderer extends AdvancedCellRenderer implements ListCellRenderer, IImageJobListener<IUserType> {
     private Icon addUserIcon;
 
     private ImageRepository<IUserType> mSkinRepo;
@@ -39,36 +39,16 @@ public class UserCellRenderer extends JLabel implements ListCellRenderer, IImage
     private static final int ICON_WIDTH = 32;
     private static final int ICON_HEIGHT = 32;
 
-    private Color selectedBackground;
-    private Color selectedForeground;
-    private Color unselectedBackground;
-    private Color unselectedForeground;
-
     private HashMap<String, Icon> headMap = new HashMap<String, Icon>();
 
-    public UserCellRenderer(Font font, ResourceLoader resources, ImageRepository<IUserType> skinRepo, Color selectedBackground, Color selectedForeground, Color unselectedBackground, Color unselectedForeground) {
+    public UserCellRenderer(ResourceLoader resources, ImageRepository<IUserType> skinRepo) {
         this.mSkinRepo = skinRepo;
-        this.textFont = font;
-        this.selectedBackground = selectedBackground;
-        this.selectedForeground = selectedForeground;
-        this.unselectedBackground = unselectedBackground;
-        this.unselectedForeground = unselectedForeground;
-        setOpaque(true);
         addUserIcon = resources.getIcon("add_user.png");
     }
 
     @Override
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-        if (isSelected) {
-            setBackground(selectedBackground); //.COLOR_FORMELEMENT_INTERNAL);
-            setForeground(selectedForeground); //LauncherFrame.COLOR_BUTTON_BLUE);
-        } else {
-            setBackground(unselectedBackground); //LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
-            setForeground(unselectedForeground); //LauncherFrame.COLOR_BUTTON_BLUE);
-        }
-
-        this.setFont(textFont);
-        this.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
+        super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 
         if (value instanceof IUserType) {
             IUserType mojangUser = (IUserType) value;
