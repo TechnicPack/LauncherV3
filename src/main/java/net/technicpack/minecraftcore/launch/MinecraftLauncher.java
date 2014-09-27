@@ -70,7 +70,7 @@ public class MinecraftLauncher {
 		}
 		System.out.println("Running " + full.toString());
         platformApi.incrementPackRuns(pack.getName());
-		if (!Utils.sendTracking("runModpack", pack.getName(), pack.getBuild(), clientId)) {
+		if (!Utils.sendTracking("runModpack", pack.getName(), pack.getInstalledVersion().getVersion(), clientId)) {
 			System.out.println("Failed to record event");
 		}
 		Process process = new ProcessBuilder(commands).directory(pack.getInstalledDirectory()).redirectErrorStream(true).start();
