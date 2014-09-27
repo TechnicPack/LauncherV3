@@ -19,8 +19,10 @@
 package net.technicpack.launcher.ui;
 
 import net.technicpack.launcher.ui.components.ModpackOptionsDialog;
+import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.modpacks.PackLoader;
 import net.technicpack.ui.controls.DraggableFrame;
+import net.technicpack.ui.controls.LauncherDialog;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.lang.IRelocalizableResource;
@@ -96,6 +98,9 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private final ImageRepository<AuthorshipInfo> avatarRepo;
     private final Installer installer;
     private final IPlatformApi platformApi;
+    private final LauncherDirectories directories;
+
+    private ModpackOptionsDialog modpackOptionsDialog = null;
 
     private HeaderTab discoverTab;
     private HeaderTab modpacksTab;
@@ -119,8 +124,9 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private String currentTabName;
 
     NewsInfoPanel newsInfoPanel;
+    ModpackInfoPanel modpackPanel;
 
-    public LauncherFrame(ResourceLoader resources, ImageRepository<IUserType> skinRepository, UserModel userModel, TechnicSettings settings, ModpackSelector modpackSelector, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, Installer installer, ImageRepository<AuthorshipInfo> avatarRepo, IPlatformApi platformApi) {
+    public LauncherFrame(ResourceLoader resources, ImageRepository<IUserType> skinRepository, UserModel userModel, TechnicSettings settings, ModpackSelector modpackSelector, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, Installer installer, ImageRepository<AuthorshipInfo> avatarRepo, IPlatformApi platformApi, LauncherDirectories directories) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -134,6 +140,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.installer = installer;
         this.avatarRepo = avatarRepo;
         this.platformApi = platformApi;
+        this.directories = directories;
 
         //Handles rebuilding the frame, so use it to build the frame in the first place
         relocalize(resources);
@@ -249,14 +256,25 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     }
 
     protected void openModpackOptions(ModpackModel model) {
-        leftPanel.setTintActive(true);
-        centralPanel.setTintActive(true);
-        footer.setTintActive(true);
-        ModpackOptionsDialog dialog = new ModpackOptionsDialog(this, model, resources);
-        dialog.setVisible(true);
-        leftPanel.setTintActive(false);
-        centralPanel.setTintActive(false);
-        footer.setTintActive(false);
+
+        if (modpackOptionsDialog == null) {
+            leftPanel.setTintActive(true);
+            centralPanel.setTintActive(true);
+            footer.setTintActive(true);
+            modpackOptionsDialog = new ModpackOptionsDialog(this, directories, model, resources);
+            modpackOptionsDialog.setVisible(true);
+            modpackOptionsDialog = null;
+            leftPanel.setTintActive(false);
+            centralPanel.setTintActive(false);
+            footer.setTintActive(false);
+            modpackPanel.setModpack(model);
+            modpackSelector.forceRefresh();
+        }
+    }
+
+    protected void refreshModpackOptions(ModpackModel model) {
+        if (modpackOptionsDialog != null)
+            modpackOptionsDialog.refresh(model);
     }
 
     protected void openLauncherOptions() {
@@ -401,12 +419,19 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.add(centralPanel, BorderLayout.CENTER);
         centralPanel.setLayout(new BorderLayout());
 
-        ModpackInfoPanel modpackPanel = new ModpackInfoPanel(resources, iconRepo, logoRepo, backgroundRepo, avatarRepo, new ActionListener() {
+        modpackPanel = new ModpackInfoPanel(resources, iconRepo, logoRepo, backgroundRepo, avatarRepo, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 openModpackOptions((ModpackModel)e.getSource());
             }
-        });
+        },
+        new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                refreshModpackOptions((ModpackModel)e.getSource());
+            }
+        }
+        );
         modpackSelector.setInfoPanel(modpackPanel);
         playButton = modpackPanel.getPlayButton();
         playButton.addActionListener(new ActionListener() {

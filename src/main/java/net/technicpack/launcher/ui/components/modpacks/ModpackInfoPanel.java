@@ -43,6 +43,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
     private ResourceLoader resources;
     private ImageRepository<ModpackModel> backgroundRepo;
     private ImageRepository<AuthorshipInfo> avatarRepo;
+    private ActionListener modpackRefreshListener;
 
     private TiledBackground background;
     private HorizontalGallery feedGallery;
@@ -52,15 +53,17 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
 
     private ModpackModel modpack;
 
-    public ModpackInfoPanel(ResourceLoader loader, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, ImageRepository<AuthorshipInfo> avatarRepo, ActionListener modpackOptionsListener) {
+    public ModpackInfoPanel(ResourceLoader loader, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, ImageRepository<AuthorshipInfo> avatarRepo, ActionListener modpackOptionsListener, ActionListener modpackRefreshListener) {
         this.resources  = loader;
         this.backgroundRepo = backgroundRepo;
         this.avatarRepo = avatarRepo;
+        this.modpackRefreshListener = modpackRefreshListener;
 
         initComponents(iconRepo, logoRepo, modpackOptionsListener);
     }
 
     public void setModpack(ModpackModel modpack) {
+        modpackRefreshListener.actionPerformed(new ActionEvent(modpack, 0, ""));
         this.modpack = modpack;
         banner.setModpack(modpack);
         dataDisplay.setModpack(modpack);

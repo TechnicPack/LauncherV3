@@ -405,7 +405,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         installLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(installLabel, new GridBagConstraints(0, 3, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
-        installField = new JTextField("C:\\Farts\\");
+        installField = new JTextField("");
         installField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
         installField.setForeground(LauncherFrame.COLOR_BLUE);
         installField.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);

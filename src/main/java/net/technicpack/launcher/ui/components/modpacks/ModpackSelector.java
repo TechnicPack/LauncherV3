@@ -296,6 +296,15 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
         }
     }
 
+    public void forceRefresh() {
+        lastFilterContents = "THIS IS A TERRIBLE HACK I'M BASICALLY FORCING A REFRESH BUT WITHOUT DOING ANY WORK";
+        defaultPacks.clear();
+        detectFilterChanges();
+        ArrayList<IPackSource> sources = new ArrayList<IPackSource>(1);
+        sources.add(technicSolder);
+        packLoader.createRepositoryLoadJob(defaultPacks, sources, null, true);
+    }
+
     protected void detectFilterChanges() {
         if (currentLoadJob != null) {
             currentLoadJob.cancel();

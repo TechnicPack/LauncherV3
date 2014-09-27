@@ -352,7 +352,12 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         nameSelect.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         nameSelect.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
         nameSelect.setVisible(false);
-        UserCellRenderer userRenderer= new UserCellRenderer(resources.getFont(ResourceLoader.FONT_OPENSANS, 16), resources, this.skinRepository, LauncherFrame.COLOR_FORMELEMENT_INTERNAL, LauncherFrame.COLOR_BUTTON_BLUE, LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE, LauncherFrame.COLOR_BUTTON_BLUE);
+        UserCellRenderer userRenderer= new UserCellRenderer(resources, this.skinRepository);
+        userRenderer.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+        userRenderer.setSelectedBackgroundColor(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        userRenderer.setSelectedForegroundColor(LauncherFrame.COLOR_BUTTON_BLUE);
+        userRenderer.setUnselectedBackgroundColor(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        userRenderer.setUnselectedForegroundColor(LauncherFrame.COLOR_BUTTON_BLUE);
         nameSelect.setRenderer(userRenderer);
         UserCellEditor userEditor = new UserCellEditor(resources.getFont(ResourceLoader.FONT_OPENSANS, 16), this.skinRepository, LauncherFrame.COLOR_BUTTON_BLUE);
         nameSelect.setEditor(userEditor);

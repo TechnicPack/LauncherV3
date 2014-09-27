@@ -51,6 +51,7 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
     private JLabel versionText;
     private JLabel installedVersion;
     private JLabel modpackIcon;
+    private JLabel modpackOptions;
 
     public ModpackBanner(ResourceLoader resources, ImageRepository<ModpackModel> iconRepo, ActionListener modpackOptionsListener) {
         this.resources = resources;
@@ -63,6 +64,8 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
     public void setModpack(ModpackModel modpack) {
         currentModpack = modpack;
         modpackName.setText(modpack.getDisplayName());
+
+        modpackOptions.setVisible(modpack.getPackInfo() != null || modpack.getInstalledVersion() != null);
 
         Version packVersion = modpack.getInstalledVersion();
 
@@ -189,7 +192,7 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
 
         packDoodads.add(Box.createRigidArea(new Dimension(0, 5)));
 
-        JLabel modpackOptions = new JLabel(resources.getString("launcher.packbanner.options"));
+        modpackOptions = new JLabel(resources.getString("launcher.packbanner.options"));
         modpackOptions.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         Font font = resources.getFont(ResourceLoader.FONT_RALEWAY, 15, Font.BOLD);
         Map attributes = font.getAttributes();
