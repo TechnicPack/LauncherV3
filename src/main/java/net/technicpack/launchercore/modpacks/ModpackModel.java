@@ -91,11 +91,49 @@ public class ModpackModel {
             return "";
     }
 
+    public void setBuild(String build) {
+        if (installedPack != null) {
+            installedPack.setBuild(build);
+            save();
+        } else
+            buildName = build;
+    }
+
     public String getBuild() {
         if (installedPack != null) {
             return installedPack.getBuild();
         } else
             return buildName;
+    }
+
+    public List<String> getBuilds() {
+        if (packInfo != null && packInfo.getBuilds() != null)
+            return packInfo.getBuilds();
+
+        List<String> oneBuild = new ArrayList<String>(1);
+
+        Version version = getInstalledVersion();
+
+        if (version != null)
+            oneBuild.add(version.getVersion());
+        else
+            oneBuild.add(getBuild());
+
+        return oneBuild;
+    }
+
+    public String getRecommendedBuild() {
+        if (packInfo != null && packInfo.getRecommended() != null)
+            return packInfo.getRecommended();
+        else
+            return getBuild();
+    }
+
+    public String getLatestBuild() {
+        if (packInfo != null && packInfo.getLatest() != null)
+            return packInfo.getLatest();
+        else
+            return getBuild();
     }
 
     public Resource getIcon() {
@@ -366,5 +404,37 @@ public class ModpackModel {
     public void updatePriority(int priority) {
         if (this.priority < priority)
             this.priority = priority;
+    }
+
+    public void resetPack() {
+        if (installedPack != null && getBinDir() != null) {
+            File version = new File(getBinDir(), "version");
+
+            if (version.exists())
+                version.delete();
+        }
+    }
+
+    public void delete() {
+        if (getInstalledDirectory() != null && getInstalledDirectory().exists()) {
+            try {
+                FileUtils.deleteDirectory(getInstalledDirectory());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        File assets = new File(directories.getAssetsDirectory(), getName());
+        if (assets.exists()) {
+            try {
+                FileUtils.deleteDirectory(assets);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        installedPack = null;
+        installedDirectory = null;
+        installedPackRepository.remove(getName());
     }
 }
