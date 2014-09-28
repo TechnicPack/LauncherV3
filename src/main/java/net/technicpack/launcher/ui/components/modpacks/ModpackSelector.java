@@ -270,7 +270,7 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
 
     @Override
     public void refreshComplete() {
-        if (selectedWidget == null) {
+        if (selectedWidget == null || selectedWidget.getModpack() == null || !allModpacks.containsKey(selectedWidget.getModpack().getName())) {
             java.util.List<ModpackWidget> sortedPacks = new LinkedList<ModpackWidget>();
             sortedPacks.addAll(allModpacks.values());
             Collections.sort(sortedPacks, new Comparator<ModpackWidget>() {
