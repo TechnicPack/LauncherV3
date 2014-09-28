@@ -70,7 +70,7 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
 
     private String lastFilterContents = "";
 
-    private PasteWatcher watcher;
+    private PasteWatcher watcher = null;
 
     public ModpackSelector(ResourceLoader resources, PackLoader packLoader, IPackSource techicSolder, IPlatformApi platformApi, ImageRepository<ModpackModel> iconRepo, IInstalledPackRepository packRepo) {
         this.resources = resources;
@@ -79,13 +79,6 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
         this.technicSolder = techicSolder;
         this.platformApi = platformApi;
         this.packRepo = packRepo;
-
-        watcher = new PasteWatcher(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                pasteUpdated((Transferable)e.getSource());
-            }
-        });
 
         initComponents();
     }
@@ -371,6 +364,15 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
             sources.add(technicSolder);
             defaultPacks.addPassthroughContainer(this);
             packLoader.createRepositoryLoadJob(defaultPacks, sources, null, true);
+
+            if (watcher == null) {
+                watcher = new PasteWatcher(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        pasteUpdated((Transferable)e.getSource());
+                    }
+                });
+            }
         }
     }
 
