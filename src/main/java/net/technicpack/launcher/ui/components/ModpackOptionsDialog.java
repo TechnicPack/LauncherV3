@@ -115,7 +115,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         int result = JOptionPane.showConfirmDialog(this, resources.getString("modpackoptions.delete.confirmtext"), resources.getString("modpackoptions.delete.confirmtitle"), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         if (result == JOptionPane.YES_OPTION) {
             modpack.delete();
-            refresh(modpack);
+            dispose();
         }
     }
 
