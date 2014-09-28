@@ -208,7 +208,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         openFolder.setContentAreaFilled(false);
         openFolder.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         openFolder.setHoverForeground(LauncherFrame.COLOR_BLUE);
-        openFolder.setEnabled(modpack.getInstalledDirectory() != null);
+        openFolder.setEnabled(modpack.getInstalledDirectory() != null && modpack.getInstalledDirectory().exists());
         if (modpack.getInstalledDirectory() != null && modpack.getInstalledDirectory().exists()) {
             openFolder.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
             openFolder.setHoverForeground(LauncherFrame.COLOR_BLUE);
@@ -228,7 +228,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         moveFolder.setContentAreaFilled(false);
         moveFolder.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         moveFolder.setHoverForeground(LauncherFrame.COLOR_BLUE);
-        moveFolder.setEnabled(modpack.getInstalledDirectory() != null);
+        moveFolder.setEnabled(modpack.getInstalledDirectory() != null && modpack.getInstalledDirectory().exists());
         if (modpack.getInstalledDirectory() != null && modpack.getInstalledDirectory().exists()) {
             moveFolder.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
             moveFolder.setHoverForeground(LauncherFrame.COLOR_BLUE);
