@@ -26,6 +26,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.logging.Level;
 
 public class ValidJsonFileVerifier implements IFileVerifier {
     private Gson validatingGson;
@@ -42,8 +43,7 @@ public class ValidJsonFileVerifier implements IFileVerifier {
 
             return (obj != null);
         } catch (Exception ex) {
-            System.out.println("An exception was raised while verifying "+file.getAbsolutePath()+"- this probably just means the file is invalid, in which case this is not an error:");
-            ex.printStackTrace();
+            Utils.getLogger().log(Level.SEVERE, "An exception was raised while verifying "+file.getAbsolutePath()+"- this probably just means the file is invalid, in which case this is not an error:", ex);
         }
 
         return false;

@@ -26,6 +26,7 @@ import net.technicpack.launchercore.modpacks.sources.IModpackTagBuilder;
 import net.technicpack.platform.io.FeedItem;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.rest.io.Resource;
+import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
 
 public class ModpackModel {
     private InstalledPack installedPack;
@@ -344,7 +346,7 @@ public class ModpackModel {
                 FileUtils.copyDirectory(installedDirectory, targetDirectory);
                 FileUtils.cleanDirectory(installedDirectory);
             } catch (IOException ex) {
-                ex.printStackTrace();
+                Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
                 return;
             }
         }
@@ -420,7 +422,7 @@ public class ModpackModel {
             try {
                 FileUtils.deleteDirectory(getInstalledDirectory());
             } catch (IOException ex) {
-                ex.printStackTrace();
+                Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
             }
         }
 
@@ -429,7 +431,7 @@ public class ModpackModel {
             try {
                 FileUtils.deleteDirectory(assets);
             } catch (IOException ex) {
-                ex.printStackTrace();
+                Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
             }
         }
 

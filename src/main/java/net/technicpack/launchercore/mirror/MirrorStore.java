@@ -26,6 +26,7 @@ import net.technicpack.launchercore.mirror.secure.SecureToken;
 import net.technicpack.launchercore.mirror.secure.rest.ISecureMirror;
 import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
+import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -109,7 +110,7 @@ public class MirrorStore {
         File outputFile = null;
         Download download = null;
         while (tries > 0) {
-            System.out.println("Starting download of " + url + ", with " + tries + " tries remaining");
+            Utils.getLogger().info("Starting download of " + url + ", with " + tries + " tries remaining");
             tries--;
             download = new Download(getFullUrl(url), name, output);
             download.setListener(listener);

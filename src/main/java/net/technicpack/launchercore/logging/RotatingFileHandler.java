@@ -19,10 +19,14 @@
 
 package net.technicpack.launchercore.logging;
 
+import net.technicpack.utilslib.Utils;
+
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
 
 public class RotatingFileHandler extends StreamHandler {
@@ -37,7 +41,7 @@ public class RotatingFileHandler extends StreamHandler {
         try {
             setOutputStream(new FileOutputStream(filename, true));
         } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
+            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 
@@ -53,9 +57,15 @@ public class RotatingFileHandler extends StreamHandler {
                 this.close();
                 setOutputStream(new FileOutputStream(filename, true));
             } catch (FileNotFoundException ex) {
-                ex.printStackTrace();
+                Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
             }
         }
         super.flush();
+    }
+
+    @Override
+    public synchronized void publish(LogRecord record) {
+        super.publish(record);
+        flush();
     }
 }

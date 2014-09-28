@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.logging.Level;
 
 public class DesktopUtils {
     public static void browseUrl(String url) {
@@ -32,14 +33,14 @@ public class DesktopUtils {
             Desktop.getDesktop().browse(new URI(url));
         } catch (IOException ex) {
             //Thrown by Desktop.browse() - just log & ignore
-            ex.printStackTrace();
+            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
         } catch (URISyntaxException ex) {
             //If we got a bogus URL from the internet, then this will throw.  Log & Ignore
-            ex.printStackTrace();
+            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
         } catch (RuntimeException ex) {
             //browse() throws a bunch of runtime exceptions if you give it bad input
             //WHICH IS AWESOME
-            ex.printStackTrace();
+            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 

@@ -119,7 +119,7 @@ public class Utils {
 			wr.close();
 	 
 			int responseCode = con.getResponseCode();
-			System.out.println("Analytics Response [" + category + "]: " + responseCode);
+			Utils.getLogger().info("Analytics Response [" + category + "]: " + responseCode);
 	 
 			BufferedReader in = new BufferedReader(
 			        new InputStreamReader(con.getInputStream()));

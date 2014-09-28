@@ -21,6 +21,9 @@ package net.technicpack.launchercore.mirror.secure.rest;
 
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.rest.RestObject;
+import net.technicpack.utilslib.Utils;
+
+import java.util.logging.Level;
 
 public class JsonWebSecureMirror implements ISecureMirror {
     private String baseUrl;
@@ -43,7 +46,7 @@ public class JsonWebSecureMirror implements ISecureMirror {
         try {
             return RestObject.getRestObject(ValidateResponse.class, constructedUrl);
         } catch (RestfulAPIException ex) {
-            ex.printStackTrace();
+            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
             return new ValidateResponse(ex.getMessage());
         }
     }

@@ -33,6 +33,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.IOUtils;
@@ -89,6 +90,15 @@ public class Relauncher {
         } else
             commands.add(launchPath);
         commands.addAll(Arrays.asList(args));
+
+        String command = "";
+
+        for(String token : commands) {
+            command += token + " ";
+        }
+
+        Utils.getLogger().info("Launching command: '"+command+"'");
+
         processBuilder.command(commands);
 
         try {
@@ -132,8 +142,7 @@ public class Relauncher {
             destStream = new FileOutputStream(dest);
             IOUtils.copy(sourceStream, destStream);
         } catch (IOException ex) {
-            Utils.getLogger().severe("Error attempting to copy download package:");
-            ex.printStackTrace();
+            Utils.getLogger().log(Level.SEVERE, "Error attempting to copy download package:", ex);
         } finally {
             IOUtils.closeQuietly(sourceStream);
             IOUtils.closeQuietly(destStream);
@@ -161,8 +170,7 @@ public class Relauncher {
                 return null;
             }
         } catch (MalformedURLException ex) {
-            Utils.getLogger().severe("Received bad url from build stream: "+url);
-            ex.printStackTrace();
+            Utils.getLogger().log(Level.SEVERE, "Received bad url from build stream: "+url, ex);
         }
 
         return dest.getAbsolutePath();
