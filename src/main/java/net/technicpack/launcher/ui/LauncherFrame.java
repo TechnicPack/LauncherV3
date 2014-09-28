@@ -21,6 +21,9 @@ package net.technicpack.launcher.ui;
 import net.technicpack.launcher.ui.components.ModpackOptionsDialog;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.modpacks.PackLoader;
+import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
+import net.technicpack.platform.io.PlatformPackInfo;
+import net.technicpack.rest.RestObject;
 import net.technicpack.ui.controls.DraggableFrame;
 import net.technicpack.ui.controls.LauncherDialog;
 import net.technicpack.ui.controls.RoundedButton;
@@ -49,10 +52,18 @@ import net.technicpack.launchercore.modpacks.InstalledPack;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.AuthorshipInfo;
+import net.technicpack.utilslib.PasteWatcher;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.*;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.concurrent.ExecutionException;
 
 public class LauncherFrame extends DraggableFrame implements IRelocalizableResource, IAuthListener<MojangUser> {
 
@@ -99,6 +110,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private final Installer installer;
     private final IPlatformApi platformApi;
     private final LauncherDirectories directories;
+    private final IInstalledPackRepository packRepo;
 
     private ModpackOptionsDialog modpackOptionsDialog = null;
 
@@ -126,7 +138,9 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     NewsInfoPanel newsInfoPanel;
     ModpackInfoPanel modpackPanel;
 
-    public LauncherFrame(ResourceLoader resources, ImageRepository<IUserType> skinRepository, UserModel userModel, TechnicSettings settings, ModpackSelector modpackSelector, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, Installer installer, ImageRepository<AuthorshipInfo> avatarRepo, IPlatformApi platformApi, LauncherDirectories directories) {
+    private PasteWatcher pasteWatcher = null;
+
+    public LauncherFrame(ResourceLoader resources, ImageRepository<IUserType> skinRepository, UserModel userModel, TechnicSettings settings, ModpackSelector modpackSelector, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, Installer installer, ImageRepository<AuthorshipInfo> avatarRepo, IPlatformApi platformApi, LauncherDirectories directories, IInstalledPackRepository packRepository) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -141,6 +155,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.avatarRepo = avatarRepo;
         this.platformApi = platformApi;
         this.directories = directories;
+        this.packRepo = packRepository;
 
         //Handles rebuilding the frame, so use it to build the frame in the first place
         relocalize(resources);
@@ -560,6 +575,79 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             } else {
                 playButton.setText(resources.getString("launcher.pack.launch"));
             }
+
+            if (pasteWatcher == null) {
+                pasteWatcher = new PasteWatcher(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        pasteUpdated((Transferable)e.getSource());
+                    }
+                });
+            }
+        }
+    }
+
+    protected void pasteUpdated(Transferable transferable) {
+        String text;
+
+        if (!transferable.isDataFlavorSupported(DataFlavor.stringFlavor))
+            return;
+
+        try {
+            text = transferable.getTransferData(DataFlavor.stringFlavor).toString();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return;
+        } catch (UnsupportedFlavorException ex) {
+            ex.printStackTrace();
+            return;
+        }
+
+        try {
+            final URL platformUrl = new URL(text);
+            new SwingWorker<PlatformPackInfo, Void>() {
+                @Override
+                protected PlatformPackInfo doInBackground() throws Exception {
+                    PlatformPackInfo info = RestObject.getRestObject(PlatformPackInfo.class, platformUrl.toString());
+
+                    //Don't let people jerk us around with non-platform sites- make sure this is a real pack
+                    //on the technic platform
+                    return platformApi.getPlatformPackInfo(info.getName());
+                }
+
+                @Override
+                public void done() {
+                    PlatformPackInfo result;
+                    try {
+                        result = get();
+
+                        if (result == null)
+                            return;
+                    } catch (ExecutionException ex) {
+                        //We eat these two exceptions because they are almost certainly caused by
+                        //the pasted text not being relevant to this program
+                        return;
+                    } catch (InterruptedException ex) {
+                        return;
+                    }
+
+                    if (!packRepo.getInstalledPacks().containsKey(result.getName())) {
+                        packRepo.put(new InstalledPack(result.getName(), true, InstalledPack.RECOMMENDED));
+                        packRepo.setSelectedSlug(result.getName());
+                        modpackSelector.forceRefresh();
+                        LauncherFrame.this.setExtendedState(JFrame.ICONIFIED);
+
+                        EventQueue.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                LauncherFrame.this.setExtendedState(JFrame.NORMAL);
+                            }
+                        });
+                    }
+                }
+            }.execute();
+        } catch (MalformedURLException ex) {
+            return;
         }
     }
 }

@@ -56,7 +56,6 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
     private IPackSource technicSolder;
     private ImageRepository<ModpackModel> iconRepo;
     private final IPlatformApi platformApi;
-    private final IInstalledPackRepository packRepo;
 
     private JPanel widgetList;
     private JScrollPane scrollPane;
@@ -70,15 +69,12 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
 
     private String lastFilterContents = "";
 
-    private PasteWatcher watcher = null;
-
-    public ModpackSelector(ResourceLoader resources, PackLoader packLoader, IPackSource techicSolder, IPlatformApi platformApi, ImageRepository<ModpackModel> iconRepo, IInstalledPackRepository packRepo) {
+    public ModpackSelector(ResourceLoader resources, PackLoader packLoader, IPackSource techicSolder, IPlatformApi platformApi, ImageRepository<ModpackModel> iconRepo) {
         this.resources = resources;
         this.packLoader = packLoader;
         this.iconRepo = iconRepo;
         this.technicSolder = techicSolder;
         this.platformApi = platformApi;
-        this.packRepo = packRepo;
 
         initComponents();
     }
@@ -92,62 +88,6 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
             return null;
 
         return selectedWidget.getModpack();
-    }
-
-    protected void pasteUpdated(Transferable transferable) {
-        String text;
-
-        if (!transferable.isDataFlavorSupported(DataFlavor.stringFlavor))
-            return;
-
-        try {
-            text = transferable.getTransferData(DataFlavor.stringFlavor).toString();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return;
-        } catch (UnsupportedFlavorException ex) {
-            ex.printStackTrace();
-            return;
-        }
-
-        try {
-            final URL platformUrl = new URL(text);
-            new SwingWorker<PlatformPackInfo, Void>() {
-                @Override
-                protected PlatformPackInfo doInBackground() throws Exception {
-                    PlatformPackInfo info = RestObject.getRestObject(PlatformPackInfo.class, platformUrl.toString());
-
-                    //Don't let people jerk us around with non-platform sites- make sure this is a real pack
-                    //on the technic platform
-                    return platformApi.getPlatformPackInfo(info.getName());
-                }
-
-                @Override
-                public void done() {
-                    PlatformPackInfo result;
-                    try {
-                        result = get();
-
-                        if (result == null)
-                            return;
-                    } catch (ExecutionException ex) {
-                        //We eat these two exceptions because they are almost certainly caused by
-                        //the pasted text not being relevant to this program
-                        return;
-                    } catch (InterruptedException ex) {
-                        return;
-                    }
-
-                    if (!packRepo.getInstalledPacks().containsKey(result.getName())) {
-                        packRepo.put(new InstalledPack(result.getName(), true, InstalledPack.RECOMMENDED));
-                        packRepo.setSelectedSlug(result.getName());
-                        forceRefresh();
-                    }
-                }
-            }.execute();
-        } catch (MalformedURLException ex) {
-            return;
-        }
     }
 
     private void initComponents() {
@@ -364,15 +304,6 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
             sources.add(technicSolder);
             defaultPacks.addPassthroughContainer(this);
             packLoader.createRepositoryLoadJob(defaultPacks, sources, null, true);
-
-            if (watcher == null) {
-                watcher = new PasteWatcher(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        pasteUpdated((Transferable)e.getSource());
-                    }
-                });
-            }
         }
     }
 
