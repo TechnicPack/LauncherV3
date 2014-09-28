@@ -185,7 +185,7 @@ public class LauncherMain {
         packSources.add(new SolderPackSource("http://solder.technicpack.net/api/", solder));
 
         PackLoader packList = new PackLoader(directories, packStore, packInfoRepository);
-        ModpackSelector selector = new ModpackSelector(resources, packList, new SolderPackSource("http://solder.technicpack.net/api/", solder), platform, iconRepo);
+        ModpackSelector selector = new ModpackSelector(resources, packList, new SolderPackSource("http://solder.technicpack.net/api/", solder), platform, iconRepo, packStore);
         userModel.addAuthListener(selector);
 
         MinecraftLauncher launcher = new MinecraftLauncher(platform, directories, userModel, settings.getClientId());

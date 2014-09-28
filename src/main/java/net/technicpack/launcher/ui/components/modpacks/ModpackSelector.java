@@ -21,30 +21,42 @@ package net.technicpack.launcher.ui.components.modpacks;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.modpacks.*;
+import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.launchercore.modpacks.sources.IPackSource;
 import net.technicpack.launchercore.modpacks.sources.NameFilterPackSource;
 import net.technicpack.platform.IPlatformApi;
+import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.platform.packsources.SearchResultPackSource;
+import net.technicpack.rest.RestObject;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 import net.technicpack.launcher.ui.controls.modpacks.ModpackWidget;
 import net.technicpack.launchercore.image.ImageRepository;
+import net.technicpack.utilslib.PasteWatcher;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 public class ModpackSelector extends JPanel implements IModpackContainer, IAuthListener<IUserType> {
     private ResourceLoader resources;
     private PackLoader packLoader;
     private IPackSource technicSolder;
     private ImageRepository<ModpackModel> iconRepo;
-    private IPlatformApi platformApi;
+    private final IPlatformApi platformApi;
+    private final IInstalledPackRepository packRepo;
 
     private JPanel widgetList;
     private JScrollPane scrollPane;
@@ -58,12 +70,22 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
 
     private String lastFilterContents = "";
 
-    public ModpackSelector(ResourceLoader resources, PackLoader packLoader, IPackSource techicSolder, IPlatformApi platformApi, ImageRepository<ModpackModel> iconRepo) {
+    private PasteWatcher watcher;
+
+    public ModpackSelector(ResourceLoader resources, PackLoader packLoader, IPackSource techicSolder, IPlatformApi platformApi, ImageRepository<ModpackModel> iconRepo, IInstalledPackRepository packRepo) {
         this.resources = resources;
         this.packLoader = packLoader;
         this.iconRepo = iconRepo;
         this.technicSolder = techicSolder;
         this.platformApi = platformApi;
+        this.packRepo = packRepo;
+
+        watcher = new PasteWatcher(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                pasteUpdated((Transferable)e.getSource());
+            }
+        });
 
         initComponents();
     }
@@ -77,6 +99,62 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
             return null;
 
         return selectedWidget.getModpack();
+    }
+
+    protected void pasteUpdated(Transferable transferable) {
+        String text;
+
+        if (!transferable.isDataFlavorSupported(DataFlavor.stringFlavor))
+            return;
+
+        try {
+            text = transferable.getTransferData(DataFlavor.stringFlavor).toString();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return;
+        } catch (UnsupportedFlavorException ex) {
+            ex.printStackTrace();
+            return;
+        }
+
+        try {
+            final URL platformUrl = new URL(text);
+            new SwingWorker<PlatformPackInfo, Void>() {
+                @Override
+                protected PlatformPackInfo doInBackground() throws Exception {
+                    PlatformPackInfo info = RestObject.getRestObject(PlatformPackInfo.class, platformUrl.toString());
+
+                    //Don't let people jerk us around with non-platform sites- make sure this is a real pack
+                    //on the technic platform
+                    return platformApi.getPlatformPackInfo(info.getName());
+                }
+
+                @Override
+                public void done() {
+                    PlatformPackInfo result;
+                    try {
+                        result = get();
+
+                        if (result == null)
+                            return;
+                    } catch (ExecutionException ex) {
+                        //We eat these two exceptions because they are almost certainly caused by
+                        //the pasted text not being relevant to this program
+                        return;
+                    } catch (InterruptedException ex) {
+                        return;
+                    }
+
+                    if (!packRepo.getInstalledPacks().containsKey(result.getName())) {
+                        packRepo.put(new InstalledPack(result.getName(), true, InstalledPack.RECOMMENDED));
+                        packRepo.setSelectedSlug(result.getName());
+                        forceRefresh();
+                    }
+                }
+            }.execute();
+        } catch (MalformedURLException ex) {
+            return;
+        }
     }
 
     private void initComponents() {
