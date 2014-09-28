@@ -53,6 +53,7 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.utilslib.PasteWatcher;
+import net.technicpack.utilslib.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -64,6 +65,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 
 public class LauncherFrame extends DraggableFrame implements IRelocalizableResource, IAuthListener<MojangUser> {
 
@@ -596,10 +598,10 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         try {
             text = transferable.getTransferData(DataFlavor.stringFlavor).toString();
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
             return;
         } catch (UnsupportedFlavorException ex) {
-            ex.printStackTrace();
+            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
             return;
         }
 

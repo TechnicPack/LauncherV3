@@ -38,6 +38,7 @@ import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.exception.AuthenticationNetworkFailureException;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.utilslib.DesktopUtils;
+import net.technicpack.utilslib.Utils;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboPopup;
@@ -50,6 +51,7 @@ import java.awt.event.KeyListener;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Locale;
+import java.util.logging.Level;
 
 public class LoginFrame extends DraggableFrame implements IRelocalizableResource, KeyListener, IAuthListener<MojangUser> {
     private ResourceLoader resources;
@@ -208,7 +210,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
                 rejected = true;
             }
         } catch (AuthenticationNetworkFailureException ex) {
-            ex.printStackTrace();
+            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
 
             //Couldn't reach auth server- if we're running silently (we just started up and have a user session ready to roll)
             //Go ahead and just play offline automatically, like the minecraft client does.  If we're running loud (user

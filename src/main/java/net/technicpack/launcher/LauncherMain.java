@@ -158,7 +158,7 @@ public class LauncherMain {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
         }
 
         UIManager.put( "ComboBox.disabledBackground", LauncherFrame.COLOR_FORMELEMENT_INTERNAL );
@@ -211,8 +211,7 @@ public class LauncherMain {
         try {
             relauncher.replacePackage(LauncherMain.class, params.getMoveTarget());
         } catch (UnsupportedEncodingException ex) {
-            Utils.getLogger().severe("Error attempting to copy downloaded package: ");
-            ex.printStackTrace();
+            Utils.getLogger().log(Level.SEVERE, "Error attempting to copy downloaded package: ", ex);
             return;
         }
 
@@ -268,8 +267,7 @@ public class LauncherMain {
         try {
             args = relauncher.buildMoverArgs(LauncherMain.class, params.getParameters().toArray(new String[params.getParameters().size()]));
         } catch (UnsupportedEncodingException ex) {
-            Utils.getLogger().severe("Error attempting to launch mover mode: ");
-            ex.printStackTrace();
+            Utils.getLogger().log(Level.SEVERE, "Error attempting to launch mover mode: ", ex);
             return;
         }
         relauncher.launch(tempPath, LauncherMain.class, args);
