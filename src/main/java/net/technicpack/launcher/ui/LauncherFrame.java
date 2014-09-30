@@ -54,6 +54,9 @@ import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.utilslib.PasteWatcher;
 import net.technicpack.utilslib.Utils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -61,6 +64,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.*;
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -210,6 +214,35 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
         if (pack == null || (pack.getInstalledPack() == null && (pack.getPackInfo() == null || !pack.getPackInfo().isComplete())))
             return;
+
+        if (pack.getInstalledDirectory() == null) {
+            pack.save();
+        }
+
+        try {
+            if (pack.getPackInfo().shouldForceDirectory() && FilenameUtils.directoryContains(directories.getLauncherDirectory().getCanonicalPath(), pack.getInstalledDirectory().getCanonicalPath())) {
+                JFileChooser chooser = new JFileChooser(directories.getLauncherDirectory());
+                chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                chooser.setCurrentDirectory(directories.getLauncherDirectory());
+                int result = chooser.showOpenDialog(this);
+
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    File file = chooser.getSelectedFile();
+
+                    if (file.list().length > 0) {
+                        JOptionPane.showMessageDialog(this, resources.getString("modpackoptions.move.errortext"), resources.getString("modpackoptions.move.errortitle"), JOptionPane.WARNING_MESSAGE);
+                        return;
+                    } else if (FileUtils.directoryContains(directories.getLauncherDirectory(), file)) {
+                        JOptionPane.showMessageDialog(this, resources.getString("launcher.launch.requiresmove"), resources.getString("launcher.launch.requiretitle"), JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+
+                    pack.setInstalledDirectory(file);
+                }
+            }
+        } catch (IOException ex) {
+            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+        }
 
         boolean forceInstall = false;
         Version installedVersion = pack.getInstalledVersion();
