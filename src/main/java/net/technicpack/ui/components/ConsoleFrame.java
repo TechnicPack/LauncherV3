@@ -23,6 +23,7 @@ import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.jar.Attributes;
 
 /**
  * Console dialog for showing console messages.
@@ -76,6 +77,9 @@ public class ConsoleFrame extends JFrame implements MouseListener {
     public Document getDocument() { return document; }
     public AttributeSet getHighlightedAttributes() { return highlightedAttributes; }
     public AttributeSet getDefaultAttributes() { return defaultAttributes; }
+    public AttributeSet getErrorAttributes() { return errorAttributes; }
+    public AttributeSet getInfoAttributes() { return infoAttributes; }
+    public AttributeSet getDebugAttributes() { return debugAttributes; }
     public void setCaretPosition(int position) { textComponent.setCaretPosition(position); }
 
     /**

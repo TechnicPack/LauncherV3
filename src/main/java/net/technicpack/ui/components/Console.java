@@ -6,6 +6,7 @@ import net.technicpack.utilslib.Utils;
 import javax.swing.*;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
+import java.util.logging.Level;
 
 public class Console {
     private ConsoleFrame frame = null;
@@ -44,20 +45,27 @@ public class Console {
      * @param line line
      */
     public void log(String line) {
-        log(line, null);
+        log(line, Level.INFO);
     }
 
     /**
      * Log a message given the {@link AttributeSet}.
      *
      * @param line       line
-     * @param attributes attribute set, or null for none
      */
-    public void log(String line, AttributeSet attributes) {
+    public void log(String line, Level level) {
         line = "[B#" + build + "] " + line;
+
+        AttributeSet attributes = consoleFrame.getDefaultAttributes();
 
         if (line.startsWith("(!!)")) {
             attributes = consoleFrame.getHighlightedAttributes();
+        } else if (level == Level.SEVERE) {
+            attributes = consoleFrame.getErrorAttributes();
+        } else if (level == Level.WARNING) {
+            attributes = consoleFrame.getInfoAttributes();
+        } else if (level.intValue() < Level.INFO.intValue()) {
+            attributes = consoleFrame.getDebugAttributes();
         }
 
         final String writeText = line.replace("\n\n", "\n");
