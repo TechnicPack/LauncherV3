@@ -19,6 +19,7 @@
 
 package net.technicpack.ui.lang;
 
+import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.IOUtils;
 
 import javax.imageio.ImageIO;
@@ -32,6 +33,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 
 public class ResourceLoader {
     private Collection<IRelocalizableResource> resources = new LinkedList<IRelocalizableResource>();
@@ -187,7 +189,7 @@ public class ResourceLoader {
         try {
             return ImageIO.read(ResourceLoader.class.getResourceAsStream(getResourcePath("/" + imageName)));
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
             return null;
         }
     }
