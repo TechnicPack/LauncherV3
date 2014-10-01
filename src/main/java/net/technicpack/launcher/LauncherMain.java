@@ -29,6 +29,7 @@ import net.technicpack.launchercore.modpacks.PackLoader;
 import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
 import net.technicpack.ui.components.Console;
 import net.technicpack.ui.components.ConsoleFrame;
+import net.technicpack.ui.components.ConsoleHandler;
 import net.technicpack.ui.components.LoggerOutputStream;
 import net.technicpack.ui.controls.installation.ProgressBar;
 import net.technicpack.ui.controls.installation.SplashScreen;
@@ -134,6 +135,9 @@ public class LauncherMain {
 
         LauncherMain.consoleFrame = new ConsoleFrame(2500, resources.getImage("icon.png"));
         Console console = new Console(LauncherMain.consoleFrame, resources.getLauncherBuild());
+
+        logger.addHandler(new ConsoleHandler(console));
+
         System.setOut(new PrintStream(new LoggerOutputStream(console, Level.INFO, logger), true));
         System.setErr(new PrintStream(new LoggerOutputStream(console, Level.SEVERE, logger), true));
 
