@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.ui.components;
 
+import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.ui.controls.popupformatter.RoundedBorderFormatter;
 import net.technicpack.ui.controls.list.SimpleButtonComboUI;
 import net.technicpack.ui.lang.IRelocalizableResource;
@@ -102,6 +103,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
     protected void changeShowConsole() {
         settings.setShowConsole(showConsole.isSelected());
+        LauncherMain.consoleFrame.setVisible(showConsole.isSelected());
         settings.save();
     }
 

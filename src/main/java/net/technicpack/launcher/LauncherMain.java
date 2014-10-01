@@ -27,6 +27,9 @@ import net.technicpack.launchercore.logging.BuildLogFormatter;
 import net.technicpack.launchercore.logging.RotatingFileHandler;
 import net.technicpack.launchercore.modpacks.PackLoader;
 import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
+import net.technicpack.ui.components.Console;
+import net.technicpack.ui.components.ConsoleFrame;
+import net.technicpack.ui.components.LoggerOutputStream;
 import net.technicpack.ui.controls.installation.ProgressBar;
 import net.technicpack.ui.controls.installation.SplashScreen;
 import net.technicpack.ui.lang.ResourceLoader;
@@ -77,6 +80,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class LauncherMain {
+
+    public static ConsoleFrame consoleFrame;
+
     public static void main(String[] args) {
         StartupParameters params = new StartupParameters(args);
         try {
@@ -124,13 +130,12 @@ public class LauncherMain {
             logger.removeHandler(h);
         }
         logger.addHandler(fileHandler);
+        logger.setUseParentHandlers(false);
 
-//        if (params != null && !params.isDebugMode()) {
-//            logger.setUseParentHandlers(false);
-//
-////            System.setOut(new PrintStream(new LoggerOutputStream(console, Level.INFO, logger), true));
-////            System.setErr(new PrintStream(new LoggerOutputStream(console, Level.SEVERE, logger), true));
-//        }
+        LauncherMain.consoleFrame = new ConsoleFrame(2500, resources.getImage("icon.png"));
+        Console console = new Console(LauncherMain.consoleFrame, resources.getLauncherBuild());
+        System.setOut(new PrintStream(new LoggerOutputStream(console, Level.INFO, logger), true));
+        System.setErr(new PrintStream(new LoggerOutputStream(console, Level.SEVERE, logger), true));
 
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override

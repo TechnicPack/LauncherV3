@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.ui;
 
+import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.ui.components.ModpackOptionsDialog;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.modpacks.PackLoader;
@@ -167,6 +168,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         relocalize(resources);
 
         selectTab("modpacks");
+
+        LauncherMain.consoleFrame.setVisible(settings.getShowConsole());
     }
 
     /////////////////////////////////////////////////
