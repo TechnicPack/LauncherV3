@@ -74,8 +74,8 @@ import java.util.logging.Level;
 
 public class LauncherFrame extends DraggableFrame implements IRelocalizableResource, IAuthListener<MojangUser> {
 
-    private static final int FRAME_WIDTH = 1200;
-    private static final int FRAME_HEIGHT = 720;
+    private static final int FRAME_WIDTH = 1194;
+    private static final int FRAME_HEIGHT = 718;
 
     private static final int SIDEKICK_WIDTH = 300;
     private static final int SIDEKICK_HEIGHT = 250;
