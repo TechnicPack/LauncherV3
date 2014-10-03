@@ -41,12 +41,6 @@ public class SettingsFactory {
 
         TechnicSettings settings = tryGetSettings(installedSettingsDir);
 
-        if (settings == null) {
-            settings = new TechnicSettings();
-            settings.setFilePath(new File(installedSettingsDir, "settings.json"));
-            settings.save();
-        }
-
         return settings;
     }
 
@@ -79,7 +73,7 @@ public class SettingsFactory {
         return new File("."+File.separator+"technic");
     }
 
-    private static File getTechnicHomeDir() {
+    public static File getTechnicHomeDir() {
         String userHome = System.getProperty("user.home", ".");
 
         OperatingSystem os = OperatingSystem.getOperatingSystem();

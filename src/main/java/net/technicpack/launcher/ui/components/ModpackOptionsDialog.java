@@ -66,9 +66,8 @@ public class ModpackOptionsDialog extends LauncherDialog {
         this.modpack = modpack;
         this.resources = resources;
 
-        chooser = new JFileChooser(directories.getLauncherDirectory());
+        chooser = new JFileChooser(directories.getModpacksDirectory());
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        chooser.setCurrentDirectory(directories.getModpacksDirectory());
 
         initComponents();
         initValues();

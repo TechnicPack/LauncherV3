@@ -22,6 +22,7 @@ import com.beust.jcommander.JCommander;
 import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.autoupdate.http.HttpUpdateStream;
 import net.technicpack.launcher.io.*;
+import net.technicpack.launcher.ui.InstallerFrame;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launchercore.logging.BuildLogFormatter;
 import net.technicpack.launchercore.logging.RotatingFileHandler;
@@ -31,7 +32,6 @@ import net.technicpack.ui.components.Console;
 import net.technicpack.ui.components.ConsoleFrame;
 import net.technicpack.ui.components.ConsoleHandler;
 import net.technicpack.ui.components.LoggerOutputStream;
-import net.technicpack.ui.controls.installation.ProgressBar;
 import net.technicpack.ui.controls.installation.SplashScreen;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.launch.Installer;
@@ -85,6 +85,12 @@ public class LauncherMain {
     public static ConsoleFrame consoleFrame;
 
     public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception ex) {
+            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+        }
+
         StartupParameters params = new StartupParameters(args);
         try {
             new JCommander(params, args);
@@ -93,6 +99,14 @@ public class LauncherMain {
         }
 
         TechnicSettings settings = SettingsFactory.buildSettingsObject();
+
+        if (settings == null) {
+            ResourceLoader installerResources = new ResourceLoader("net","technicpack","launcher","resources");
+            installerResources.setLocale(ResourceLoader.DEFAULT_LOCALE);
+            InstallerFrame dialog = new InstallerFrame(installerResources, params);
+            dialog.setVisible(true);
+            return;
+        }
 
         LauncherDirectories directories = new TechnicLauncherDirectories(settings.getTechnicRoot());
         ResourceLoader resources = new ResourceLoader("net","technicpack","launcher","resources");
@@ -163,13 +177,6 @@ public class LauncherMain {
     }
 
     private static void startLauncher(TechnicSettings settings, StartupParameters startupParameters, LauncherDirectories directories, ResourceLoader resources) {
-
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ex) {
-            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
-        }
-
         UIManager.put( "ComboBox.disabledBackground", LauncherFrame.COLOR_FORMELEMENT_INTERNAL );
         UIManager.put( "ComboBox.disabledForeground", LauncherFrame.COLOR_GREY_TEXT );
 
