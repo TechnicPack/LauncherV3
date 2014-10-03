@@ -80,7 +80,7 @@ public class SettingsFactory {
     }
 
     private static File getPortableSettingsDir(String runningDir) {
-        return new File(runningDir,"technic");
+        return new File(new File(runningDir).getParentFile().getAbsolutePath(),"technic");
     }
 
     public static File getTechnicHomeDir() {
