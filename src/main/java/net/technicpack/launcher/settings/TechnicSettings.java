@@ -64,6 +64,10 @@ public class TechnicSettings {
         directory = "portable";
     }
 
+    public void installTo(String directory) {
+        this.directory = directory;
+    }
+
     public int getMemory() { return memory; }
     public void setMemory(int memory) {
         this.memory = memory;
