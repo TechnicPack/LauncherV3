@@ -125,7 +125,7 @@ public class Relauncher {
         return outArgs.toArray(new String[outArgs.size()]);
     }
 
-    private String getRunningPath(Class mainClass) throws UnsupportedEncodingException {
+    public String getRunningPath(Class mainClass) throws UnsupportedEncodingException {
         return URLDecoder.decode(mainClass.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8");
     }
 
