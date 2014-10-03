@@ -111,7 +111,8 @@ public class UserModel<UserType extends IUserType> {
             } catch (AuthenticationNetworkFailureException ex) {
                 setCurrentUser(gameAuthService.createOfflineUser(user.getDisplayName()));
             }
-        }
+        } else
+            setCurrentUser(null);
     }
 
 	public Collection<UserType> getUsers() {
