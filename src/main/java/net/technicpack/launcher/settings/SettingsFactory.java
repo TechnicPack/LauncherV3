@@ -29,8 +29,8 @@ import java.nio.charset.Charset;
 import java.util.logging.Level;
 
 public class SettingsFactory {
-    public static TechnicSettings buildSettingsObject() {
-        File portableSettingsDir = getPortableSettingsDir();
+    public static TechnicSettings buildSettingsObject(String runningDir) {
+        File portableSettingsDir = getPortableSettingsDir(runningDir);
 
         TechnicSettings portableSettings = tryGetSettings(portableSettingsDir);
 
@@ -69,8 +69,8 @@ public class SettingsFactory {
         }
     }
 
-    private static File getPortableSettingsDir() {
-        return new File("."+File.separator+"technic");
+    private static File getPortableSettingsDir(String runningDir) {
+        return new File(runningDir,"technic");
     }
 
     public static File getTechnicHomeDir() {

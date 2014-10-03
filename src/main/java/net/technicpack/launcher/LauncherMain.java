@@ -98,7 +98,14 @@ public class LauncherMain {
             ex.printStackTrace();
         }
 
-        TechnicSettings settings = SettingsFactory.buildSettingsObject();
+        Relauncher launcher = new Relauncher(new HttpUpdateStream("http://beta.technicpack.net/api/launcher/version/"));
+        TechnicSettings settings = null;
+
+        try {
+            SettingsFactory.buildSettingsObject(launcher.getRunningPath(LauncherMain.class));
+        } catch (UnsupportedEncodingException ex) {
+            ex.printStackTrace();
+        }
 
         if (settings == null) {
             ResourceLoader installerResources = new ResourceLoader("net","technicpack","launcher","resources");
@@ -113,8 +120,6 @@ public class LauncherMain {
         resources.setLocale(settings.getLanguageCode());
 
         setupLogging(directories, resources);
-
-        Relauncher launcher = new Relauncher(new HttpUpdateStream("http://beta.technicpack.net/api/launcher/version/"));
 
         if (params.isLauncher())
             startLauncher(settings, params, directories, resources);
