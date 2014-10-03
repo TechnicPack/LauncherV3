@@ -30,12 +30,22 @@ import java.util.logging.Level;
 
 public class SettingsFactory {
     public static TechnicSettings buildSettingsObject(String runningDir) {
+
+        System.out.println("Settings for exe: "+runningDir);
+
         File portableSettingsDir = getPortableSettingsDir(runningDir);
+
+        if (portableSettingsDir == null)
+            System.out.println("Portable settings dir has broken terribly");
+        else
+            System.out.println("Portable settings dir: "+portableSettingsDir.getAbsolutePath());
 
         TechnicSettings portableSettings = tryGetSettings(portableSettingsDir);
 
-        if (portableSettings != null && portableSettings.isPortable())
+        if (portableSettings != null && portableSettings.isPortable()) {
+            System.out.println("Portable settings file found.");
             return portableSettings;
+        }
 
         File installedSettingsDir = getTechnicHomeDir();
 
