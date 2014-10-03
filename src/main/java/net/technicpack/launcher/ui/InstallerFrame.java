@@ -81,6 +81,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
     protected void portableInstall() {
         TechnicSettings settings = new TechnicSettings();
+        settings.setPortable();
         settings.setFilePath(new File(new File(portableInstallDir.getText(), "technic"), "settings.json"));
         settings.getTechnicRoot();
         settings.save();

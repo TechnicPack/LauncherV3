@@ -60,6 +60,10 @@ public class TechnicSettings {
         return (directory != null && !directory.isEmpty() && directory.equalsIgnoreCase("portable"));
     }
 
+    public void setPortable() {
+        directory = "portable";
+    }
+
     public int getMemory() { return memory; }
     public void setMemory(int memory) {
         this.memory = memory;
