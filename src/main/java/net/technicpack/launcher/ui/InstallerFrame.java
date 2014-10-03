@@ -27,9 +27,12 @@ import net.technicpack.ui.controls.AAJLabel;
 import net.technicpack.ui.controls.DraggableFrame;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.borders.RoundBorder;
+import net.technicpack.ui.controls.lang.LanguageCellRenderer;
+import net.technicpack.ui.controls.lang.LanguageCellUI;
 import net.technicpack.ui.controls.tabs.SimpleTabPane;
 import net.technicpack.ui.lang.IRelocalizableResource;
 import net.technicpack.ui.lang.ResourceLoader;
+import net.technicpack.ui.listitems.LanguageItem;
 import net.technicpack.utilslib.Utils;
 
 import javax.swing.*;
@@ -38,12 +41,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.util.Locale;
 import java.util.logging.Level;
 
 public class InstallerFrame extends DraggableFrame implements IRelocalizableResource {
 
     private static final int DIALOG_WIDTH = 610;
     private static final int DIALOG_HEIGHT = 320;
+
+    private String locale = ResourceLoader.DEFAULT_LOCALE;
 
     private ResourceLoader resources;
 
@@ -54,11 +60,26 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
     private RoundedButton portableInstallButton;
     private StartupParameters params;
 
+    private JComboBox standardLanguages;
+    private JComboBox portableLanguages;
+
     public InstallerFrame(ResourceLoader resources, StartupParameters params) {
         this.resources = resources;
         this.params = params;
 
-        initComponents();
+        relocalize(resources);
+    }
+
+    protected void standardLanguageChanged() {
+        String langCode = ((LanguageItem)standardLanguages.getSelectedItem()).getLangCode();
+        locale = langCode;
+        resources.setLocale(langCode);
+    }
+
+    protected void portableLanguageChanged() {
+        String langCode = ((LanguageItem)portableLanguages.getSelectedItem()).getLangCode();
+        locale = langCode;
+        resources.setLocale(langCode);
     }
 
     protected void standardInstall() {
@@ -67,6 +88,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         if (!standardInstallDir.getText().equals(SettingsFactory.getTechnicHomeDir().getAbsolutePath()))
             settings.installTo(standardInstallDir.getText());
         settings.getTechnicRoot();
+        settings.setLanguageCode(((LanguageItem)standardLanguages.getSelectedItem()).getLangCode());
         settings.save();
 
         Relauncher relauncher = new Relauncher(null);
@@ -86,6 +108,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         settings.setPortable();
         settings.setFilePath(new File(new File(portableInstallDir.getText(), "technic"), "settings.json"));
         settings.getTechnicRoot();
+        settings.setLanguageCode(((LanguageItem)portableLanguages.getSelectedItem()).getLangCode());
         settings.save();
 
         Relauncher relauncher = new Relauncher(null);
@@ -275,6 +298,42 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
         panel.add(Box.createGlue(), new GridBagConstraints(0, 4, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
 
+        String defaultLocaleText = resources.getString("launcheroptions.language.default");
+        if (!resources.isDefaultLocaleSupported()) {
+            defaultLocaleText = defaultLocaleText.concat(" (" + resources.getString("launcheroptions.language.unavailable") + ")");
+        }
+
+        standardLanguages = new JComboBox();
+        standardLanguages.addItem(new LanguageItem(ResourceLoader.DEFAULT_LOCALE, defaultLocaleText));
+        for (int i = 0; i < ResourceLoader.SUPPORTED_LOCALES.length; i++) {
+            standardLanguages.addItem(new LanguageItem(resources.getCodeFromLocale(ResourceLoader.SUPPORTED_LOCALES[i]), ResourceLoader.SUPPORTED_LOCALES[i].getDisplayName(ResourceLoader.SUPPORTED_LOCALES[i])));
+        }
+        if (!locale.equalsIgnoreCase(ResourceLoader.DEFAULT_LOCALE)) {
+            Locale loc = resources.getLocaleFromCode(locale);
+
+            for (int i = 0; i < ResourceLoader.SUPPORTED_LOCALES.length; i++) {
+                if (loc.equals(ResourceLoader.SUPPORTED_LOCALES[i])) {
+                    standardLanguages.setSelectedIndex(i+1);
+                    break;
+                }
+            }
+        }
+        standardLanguages.setBorder(new RoundBorder(LauncherFrame.COLOR_SCROLL_THUMB, 1, 10));
+        standardLanguages.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
+        standardLanguages.setUI(new LanguageCellUI(resources));
+        standardLanguages.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        standardLanguages.setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
+        standardLanguages.setRenderer(new LanguageCellRenderer(resources, "globe.png", LauncherFrame.COLOR_SELECTOR_BACK, LauncherFrame.COLOR_WHITE_TEXT));
+        standardLanguages.setEditable(false);
+        standardLanguages.setFocusable(false);
+        standardLanguages.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                standardLanguageChanged();
+            }
+        });
+        panel.add(standardLanguages, new GridBagConstraints(0, 5, 1, 0, 0, 0, GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE, new Insets(0,8,8,0), 0,0));
+
         RoundedButton install = new RoundedButton(resources.getString("launcher.installer.install"));
         install.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
         install.setContentAreaFilled(false);
@@ -287,7 +346,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
                 standardInstall();
             }
         });
-        panel.add(install, new GridBagConstraints(0, 5, 3, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.VERTICAL, new Insets(0, 0, 8, 8), 0, 0));
+        panel.add(install, new GridBagConstraints(1, 5, 2, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.VERTICAL, new Insets(0, 0, 8, 8), 0, 0));
 
     }
 
@@ -332,6 +391,42 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
         panel.add(Box.createGlue(), new GridBagConstraints(0, 3, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
 
+        String defaultLocaleText = resources.getString("launcheroptions.language.default");
+        if (!resources.isDefaultLocaleSupported()) {
+            defaultLocaleText = defaultLocaleText.concat(" (" + resources.getString("launcheroptions.language.unavailable") + ")");
+        }
+
+        portableLanguages = new JComboBox();
+        portableLanguages.addItem(new LanguageItem(ResourceLoader.DEFAULT_LOCALE, defaultLocaleText));
+        for (int i = 0; i < ResourceLoader.SUPPORTED_LOCALES.length; i++) {
+            portableLanguages.addItem(new LanguageItem(resources.getCodeFromLocale(ResourceLoader.SUPPORTED_LOCALES[i]), ResourceLoader.SUPPORTED_LOCALES[i].getDisplayName(ResourceLoader.SUPPORTED_LOCALES[i])));
+        }
+        if (!locale.equalsIgnoreCase(ResourceLoader.DEFAULT_LOCALE)) {
+            Locale loc = resources.getLocaleFromCode(locale);
+
+            for (int i = 0; i < ResourceLoader.SUPPORTED_LOCALES.length; i++) {
+                if (loc.equals(ResourceLoader.SUPPORTED_LOCALES[i])) {
+                    portableLanguages.setSelectedIndex(i+1);
+                    break;
+                }
+            }
+        }
+        portableLanguages.setBorder(new RoundBorder(LauncherFrame.COLOR_SCROLL_THUMB, 1, 10));
+        portableLanguages.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
+        portableLanguages.setUI(new LanguageCellUI(resources));
+        portableLanguages.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        portableLanguages.setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
+        portableLanguages.setRenderer(new LanguageCellRenderer(resources, "globe.png", LauncherFrame.COLOR_SELECTOR_BACK, LauncherFrame.COLOR_WHITE_TEXT));
+        portableLanguages.setEditable(false);
+        portableLanguages.setFocusable(false);
+        portableLanguages.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                portableLanguageChanged();
+            }
+        });
+        panel.add(portableLanguages, new GridBagConstraints(0, 4, 1, 0, 0, 0, GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE, new Insets(0,8,8,0), 0,0));
+
         portableInstallButton = new RoundedButton(resources.getString("launcher.installer.install"));
         portableInstallButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
         portableInstallButton.setContentAreaFilled(false);
@@ -345,7 +440,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
             }
         });
         portableInstallButton.setEnabled(false);
-        panel.add(portableInstallButton, new GridBagConstraints(0, 4, 3, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.VERTICAL, new Insets(0,0,8,8), 0,0));
+        panel.add(portableInstallButton, new GridBagConstraints(1, 4, 2, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.VERTICAL, new Insets(0,0,8,8), 0,0));
     }
 
     @Override
