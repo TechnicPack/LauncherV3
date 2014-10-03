@@ -34,6 +34,7 @@ import net.technicpack.ui.listitems.LanguageItem;
 import net.technicpack.launcher.ui.listitems.OnLaunchItem;
 import net.technicpack.launcher.ui.listitems.StreamItem;
 import net.technicpack.launchercore.util.LaunchAction;
+import net.technicpack.utilslib.DesktopUtils;
 import net.technicpack.utilslib.Memory;
 
 import javax.swing.*;
@@ -45,6 +46,7 @@ import javax.swing.plaf.metal.MetalComboBoxUI;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.Locale;
 
 public class OptionsDialog extends LauncherDialog implements IRelocalizableResource {
@@ -133,6 +135,10 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         settings.save();
 
         resources.setLocale(((LanguageItem)langSelect.getSelectedItem()).getLangCode());
+    }
+
+    protected void openLogs() {
+        DesktopUtils.open(new File(settings.getTechnicRoot().getAbsolutePath(), "logs"));
     }
 
     private void initControlValues() {
@@ -475,6 +481,12 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         openLogs.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         openLogs.setHoverForeground(LauncherFrame.COLOR_BLUE);
         openLogs.setBorder(BorderFactory.createEmptyBorder(8, 13, 8, 13));
+        openLogs.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                openLogs();
+            }
+        });
         panel.add(openLogs, new GridBagConstraints(0, 7, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 10, 10, 0), 0, 0));
     }
 
