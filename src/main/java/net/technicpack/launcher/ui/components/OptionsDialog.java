@@ -280,6 +280,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         closeButton.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         closeButton.setContentAreaFilled(false);
         closeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        closeButton.setFocusPainted(false);
         closeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

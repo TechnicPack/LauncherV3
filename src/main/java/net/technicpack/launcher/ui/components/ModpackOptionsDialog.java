@@ -177,6 +177,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
                 closeDialog();
             }
         });
+        closeButton.setFocusPainted(false);
         header.add(closeButton);
 
         JPanel centerPanel = new JPanel();

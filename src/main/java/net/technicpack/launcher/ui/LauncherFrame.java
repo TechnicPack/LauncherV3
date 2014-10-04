@@ -452,6 +452,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         launcherOptionsLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         launcherOptionsLabel.setBorder(BorderFactory.createEmptyBorder());
         launcherOptionsLabel.setContentAreaFilled(false);
+        launcherOptionsLabel.setFocusPainted(false);
         launcherOptionsLabel.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
