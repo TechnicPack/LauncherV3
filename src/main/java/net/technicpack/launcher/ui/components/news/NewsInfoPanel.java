@@ -20,7 +20,6 @@ package net.technicpack.launcher.ui.components.news;
 
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.ui.controls.AAJLabel;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 import net.technicpack.launchercore.image.ImageRepository;
@@ -92,7 +91,7 @@ public class NewsInfoPanel extends JPanel implements PropertyChangeListener {
         setBorder(BorderFactory.createEmptyBorder(20,20,18,16));
         setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
 
-        title = new AAJLabel("");
+        title = new JLabel("");
         title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 36));
         add(title, new GridBagConstraints(0,0,2,1,1.0,0.0,GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0));

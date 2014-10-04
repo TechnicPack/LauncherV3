@@ -20,7 +20,6 @@ package net.technicpack.launcher.ui.components.news;
 
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.ui.controls.AAJLabel;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.platform.io.AuthorshipInfo;
@@ -58,14 +57,14 @@ public class AuthorshipWidget extends JPanel implements IImageJobListener<Author
 
         add(Box.createHorizontalStrut(6));
 
-        authorName = new AAJLabel("");
+        authorName = new JLabel("");
         authorName.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS_BOLD, 12));
         authorName.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         add(authorName);
 
         add(Box.createHorizontalStrut(6));
 
-        postTime = new AAJLabel("");
+        postTime = new JLabel("");
         postTime.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         postTime.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 12));
         add(postTime);

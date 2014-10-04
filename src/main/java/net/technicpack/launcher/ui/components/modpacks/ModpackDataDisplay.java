@@ -20,7 +20,6 @@ package net.technicpack.launcher.ui.components.modpacks;
 
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.ui.controls.AAJLabel;
 import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 import net.technicpack.ui.controls.feeds.StatBox;
 import net.technicpack.launchercore.image.IImageJobListener;
@@ -134,7 +133,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
 
         packInfoPanel.add(Box.createHorizontalGlue(), new GridBagConstraints(3,2,1,1,1.0,0.0,GridBagConstraints.CENTER,GridBagConstraints.HORIZONTAL, new Insets(5,8,0,0),0,0));
 
-        titleLabel = new AAJLabel(resources.getString("launcher.packstats.title", "Modpack"));
+        titleLabel = new JLabel(resources.getString("launcher.packstats.title", "Modpack"));
         titleLabel.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 24, Font.BOLD));
         titleLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         titleLabel.setHorizontalAlignment(SwingConstants.LEFT);

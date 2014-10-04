@@ -121,11 +121,18 @@ public class LauncherMain {
 
         setupLogging(directories, resources);
 
+        boolean needsReboot = false;
+
+        if (System.getProperty("awt.useSystemAAFontSettings") == null || !System.getProperty("awt.useSystemAAFontSettings").equals("on"))
+            needsReboot = true;
+        else if (!Boolean.parseBoolean(System.getProperty("java.net.preferIPv4Stack")))
+            needsReboot = true;
+
         if (params.isLauncher())
             startLauncher(settings, params, directories, resources);
         else if (params.isMover())
             startMover(params, launcher);
-        else if (!Boolean.parseBoolean(System.getProperty("java.net.preferIPv4Stack")) && StringUtils.isNumeric(resources.getLauncherBuild())) {
+        else if (needsReboot && StringUtils.isNumeric(resources.getLauncherBuild())) {
             // ^^^^^
             //The debugger can't really relaunch so double check the build number to make sure we're operating in a valid environment
             launcher.launch(null, LauncherMain.class, params.getParameters().toArray(new String[params.getParameters().size()]));
@@ -163,6 +170,7 @@ public class LauncherMain {
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread t, Throwable e) {
+                e.printStackTrace();
                 logger.log(Level.SEVERE, "Unhandled Exception in " + t, e);
 
 //                if (errorDialog == null) {

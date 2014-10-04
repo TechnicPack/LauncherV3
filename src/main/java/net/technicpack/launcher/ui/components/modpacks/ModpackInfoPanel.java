@@ -18,7 +18,6 @@
 
 package net.technicpack.launcher.ui.components.modpacks;
 
-import net.technicpack.ui.controls.AAJLabel;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.TiledBackground;
 import net.technicpack.ui.lang.ResourceLoader;
@@ -164,7 +163,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         constraints.fill = GridBagConstraints.HORIZONTAL;
         feedBottom.add(topline, constraints);
 
-        JLabel toplineLabel = new AAJLabel(resources.getString("launcher.packfeed.title"));
+        JLabel toplineLabel = new JLabel(resources.getString("launcher.packfeed.title"));
         toplineLabel.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 28));
         toplineLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         topline.add(toplineLabel);
@@ -192,7 +191,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         });
         topline.add(rightButton);
 
-        AAJLabel label = new AAJLabel(resources.getString("launcher.packfeed.noupdates"));
+        JLabel label = new JLabel(resources.getString("launcher.packfeed.noupdates"));
         label.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 20));
         label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 

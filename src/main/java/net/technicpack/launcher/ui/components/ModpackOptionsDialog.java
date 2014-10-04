@@ -26,7 +26,6 @@ import net.technicpack.launchercore.modpacks.InstalledPack;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.packinfo.CombinedPackInfo;
 import net.technicpack.solder.io.SolderPackInfo;
-import net.technicpack.ui.controls.AAJLabel;
 import net.technicpack.ui.controls.LauncherDialog;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.borders.RoundBorder;
@@ -158,7 +157,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         header.setBorder(BorderFactory.createEmptyBorder(4,8,4,8));
         add(header, BorderLayout.PAGE_START);
 
-        AAJLabel title = new AAJLabel(resources.getString("launcher.title.modpackoptions"));
+        JLabel title = new JLabel(resources.getString("launcher.title.modpackoptions"));
         title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 34));
         title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         title.setOpaque(false);

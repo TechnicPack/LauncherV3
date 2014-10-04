@@ -21,7 +21,6 @@ package net.technicpack.launcher.ui.components.modpacks;
 import net.technicpack.launchercore.modpacks.packinfo.CombinedPackInfo;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.ui.controls.AAJLabel;
 import net.technicpack.launcher.ui.controls.modpacks.ModpackTag;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
@@ -133,7 +132,7 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
         modpackNamePanel.setLayout(new BoxLayout(modpackNamePanel, BoxLayout.PAGE_AXIS));
         this.add(modpackNamePanel);
 
-        modpackName = new AAJLabel("Modpack");
+        modpackName = new JLabel("Modpack");
         modpackName.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         modpackName.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
         modpackName.setHorizontalTextPosition(SwingConstants.LEFT);
@@ -181,7 +180,7 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
         versionText.setVisible(false);
         versionPanel.add(versionText);
 
-        installedVersion = new AAJLabel("1.0.7");
+        installedVersion = new JLabel("1.0.7");
         installedVersion.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 16));
         installedVersion.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         installedVersion.setHorizontalTextPosition(SwingConstants.LEADING);

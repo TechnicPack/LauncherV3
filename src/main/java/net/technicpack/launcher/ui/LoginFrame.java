@@ -25,7 +25,6 @@ import net.technicpack.ui.controls.list.SimpleButtonComboUI;
 import net.technicpack.ui.lang.IRelocalizableResource;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.settings.TechnicSettings;
-import net.technicpack.ui.controls.AAJLabel;
 import net.technicpack.ui.controls.DraggableFrame;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.borders.RoundBorder;
@@ -331,12 +330,12 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         platformImage.setIcon(resources.getIcon("platform_logo.png"));
         add(platformImage, new GridBagConstraints(0,0,3,1,0.0,0.0,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(30,0,0,0),0,0));
 
-        JLabel instructionText = new AAJLabel("<html><body align=\"center\">"+ resources.getString("login.instructions") +"</body></html>", JLabel.CENTER);
+        JLabel instructionText = new JLabel("<html><body align=\"center\">"+ resources.getString("login.instructions") +"</body></html>", JLabel.CENTER);
         instructionText.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         instructionText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         add(instructionText, new GridBagConstraints(0, 1, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(9, 3, 0, 3), 0, 0));
 
-        JLabel userLabel = new AAJLabel(resources.getString("login.username"));
+        JLabel userLabel = new JLabel(resources.getString("login.username"));
         userLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
         userLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         add(userLabel, new GridBagConstraints(0, 2, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10,20,0,20), 0,0));
@@ -383,7 +382,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         name.addKeyListener(this);
         add(name, new GridBagConstraints(0, 3, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(3,20,0,20),4,17));
 
-        AAJLabel passLabel = new AAJLabel(resources.getString("login.password"));
+        JLabel passLabel = new JLabel(resources.getString("login.password"));
         passLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
         passLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         add(passLabel, new GridBagConstraints(0, 4, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(12,20,0,20),0,0));

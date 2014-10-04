@@ -25,10 +25,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import net.technicpack.ui.controls.AAJLabel;
 import net.technicpack.ui.lang.ResourceLoader;
 
-public class HeaderTab extends AAJLabel implements MouseListener {
+public class HeaderTab extends JLabel implements MouseListener {
     private boolean isActive;
     private DefaultButtonModel model;
 

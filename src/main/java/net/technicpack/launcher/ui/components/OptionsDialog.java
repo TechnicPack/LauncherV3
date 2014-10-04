@@ -25,7 +25,6 @@ import net.technicpack.ui.lang.IRelocalizableResource;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.ui.controls.AAJLabel;
 import net.technicpack.ui.controls.LauncherDialog;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.borders.RoundBorder;
@@ -267,7 +266,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         header.setBorder(BorderFactory.createEmptyBorder(4,8,4,8));
         add(header, BorderLayout.PAGE_START);
 
-        AAJLabel title = new AAJLabel(resources.getString("launcher.title.options"));
+        JLabel title = new JLabel(resources.getString("launcher.title.options"));
         title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 34));
         title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         title.setOpaque(false);

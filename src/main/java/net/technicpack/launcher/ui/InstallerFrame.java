@@ -23,7 +23,6 @@ import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.settings.SettingsFactory;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
-import net.technicpack.ui.controls.AAJLabel;
 import net.technicpack.ui.controls.DraggableFrame;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.borders.RoundBorder;
@@ -188,7 +187,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         header.setBorder(BorderFactory.createEmptyBorder(4,8,4,8));
         add(header, BorderLayout.PAGE_START);
 
-        AAJLabel title = new AAJLabel(resources.getString("launcher.installer.title"));
+        JLabel title = new JLabel(resources.getString("launcher.installer.title"));
         title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 34));
         title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         title.setOpaque(false);
@@ -239,7 +238,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
     private void setupStandardInstall(JPanel panel) {
         panel.setLayout(new GridBagLayout());
 
-        JLabel standardSpiel = new AAJLabel("<html><body align=\"left\" style='margin-right:10px;'>"+resources.getString("launcher.installer.standardspiel")+"</body></html>");
+        JLabel standardSpiel = new JLabel("<html><body align=\"left\" style='margin-right:10px;'>"+resources.getString("launcher.installer.standardspiel")+"</body></html>");
         standardSpiel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         standardSpiel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         standardSpiel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
@@ -267,7 +266,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         });
         panel.add(standardDefaultDirectory, new GridBagConstraints(0, 2, 3, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,24,12,0),0,0));
 
-        JLabel installFolderLabel = new AAJLabel(resources.getString("launcher.installer.folder"));
+        JLabel installFolderLabel = new JLabel(resources.getString("launcher.installer.folder"));
         installFolderLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
         installFolderLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(installFolderLabel, new GridBagConstraints(0, 3, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,24,0,8), 0,0));
@@ -353,7 +352,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
     private void setupPortableMode(JPanel panel) {
         panel.setLayout(new GridBagLayout());
 
-        JLabel portableSpiel = new AAJLabel("<html><body align=\"left\" style='margin-right:10px;'>"+resources.getString("launcher.installer.portablespiel")+"</body></html>");
+        JLabel portableSpiel = new JLabel("<html><body align=\"left\" style='margin-right:10px;'>"+resources.getString("launcher.installer.portablespiel")+"</body></html>");
         portableSpiel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         portableSpiel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         portableSpiel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
@@ -361,7 +360,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
         panel.add(Box.createGlue(), new GridBagConstraints(0, 1, 3, 1, 1.0, 0.7, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
 
-        JLabel installFolderLabel = new AAJLabel(resources.getString("launcher.installer.folder"));
+        JLabel installFolderLabel = new JLabel(resources.getString("launcher.installer.folder"));
         installFolderLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
         installFolderLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(installFolderLabel, new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,24,0,8), 0,0));
