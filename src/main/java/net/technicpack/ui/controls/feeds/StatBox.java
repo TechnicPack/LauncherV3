@@ -20,7 +20,6 @@
 package net.technicpack.ui.controls.feeds;
 
 import net.technicpack.ui.lang.ResourceLoader;
-import net.technicpack.ui.controls.AAJLabel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -75,7 +74,7 @@ public class StatBox extends JPanel {
         this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         this.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 3));
 
-        valueLabel = new AAJLabel("");
+        valueLabel = new JLabel("");
         valueLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 22, Font.BOLD));
         valueLabel.setForeground(getForeground());
         valueLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -83,7 +82,7 @@ public class StatBox extends JPanel {
         valueLabel.setBorder(BorderFactory.createEmptyBorder(0,0,0,4));
         this.add(valueLabel);
 
-        fieldLabel = new AAJLabel(fieldName);
+        fieldLabel = new JLabel(fieldName);
         fieldLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 12));
         fieldLabel.setForeground(getForeground());
         fieldLabel.setHorizontalAlignment(SwingConstants.CENTER);
