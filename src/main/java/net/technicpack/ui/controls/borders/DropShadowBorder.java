@@ -66,7 +66,8 @@ public class DropShadowBorder extends AbstractBorder {
         g2.setColor(new Color(0,0,0,0));
         g2.fillRect(0,0,width,height);
         g2.setColor(color);
-        g2.fillRect(thickness * 4, thickness * 4, width - (thickness * 8), height - (thickness * 8));
+        g2.fillRect(0,0,width,height);
+        //g2.fillRect(thickness * 4, thickness * 4, width - (thickness * 8), height - (thickness * 8));
         g2.dispose();
 
 //        FastBlurFilter blur = new FastBlurFilter(thickness);
