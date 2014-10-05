@@ -214,10 +214,10 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         constraints.gridx = 0;
         constraints.gridy = 2;
         constraints.weightx = 1.0;
-        constraints.weighty = 1.0;
+        constraints.weighty = 0.0;
         constraints.gridwidth = 1;
         constraints.gridheight = 1;
-        Component vertFill = Box.createGlue();
+        Component vertFill = Box.createVerticalStrut(4);
         feedBottom.add(vertFill, constraints);
 
         constraints = new GridBagConstraints();
@@ -247,6 +247,8 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         constraints.gridwidth = 1;
         constraints.gridheight = 1;
         feedBottom.add(playButton, constraints);
+
+        feedBottom.add(Box.createVerticalGlue(), new GridBagConstraints(0, 4, 2, 1, 1.0,1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
     }
 
     @Override
