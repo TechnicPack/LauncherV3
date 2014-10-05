@@ -65,18 +65,21 @@ public class DropShadowBorder extends AbstractBorder {
 
         Graphics2D g2 = shadow.createGraphics();
         g2.setRenderingHints(hints);
+        Composite oldComposite = g2.getComposite();
+        AlphaComposite composite = AlphaComposite.getInstance(AlphaComposite.CLEAR, 0.0f);
+        g2.setComposite(composite);
         g2.setColor(new Color(0, 0, 0, 0));
         g2.fillRect(0, 0, width, height);
+        g2.setComposite(oldComposite);
         g2.setColor(color);
-        g2.fillRect(0,0,width,height);
-        //g2.fillRect(thickness * 4, thickness * 4, width - (thickness * 8), height - (thickness * 8));
+        g2.fillRect(thickness * 4, thickness * 4, width - (thickness * 8), height - (thickness * 8));
         g2.dispose();
 
-//        FastBlurFilter blur = new FastBlurFilter(thickness);
-//        shadow = blur.filter(shadow, null);
-//        shadow = blur.filter(shadow, null);
-//        shadow = blur.filter(shadow, null);
-//        shadow = blur.filter(shadow, null);
+        FastBlurFilter blur = new FastBlurFilter(thickness);
+        shadow = blur.filter(shadow, null);
+        shadow = blur.filter(shadow, null);
+        shadow = blur.filter(shadow, null);
+        shadow = blur.filter(shadow, null);
 
         g.drawImage(shadow, x, y, width, height, null);
     }
