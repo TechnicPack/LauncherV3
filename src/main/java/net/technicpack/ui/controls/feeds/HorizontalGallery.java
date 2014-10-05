@@ -80,7 +80,7 @@ public class HorizontalGallery extends JPanel {
                 startX += cBounds.width + 8;
             }
         } else if (noComponentsMessage != null) {
-            Dimension messageSize = noComponentsMessage.getSize();
+            Dimension messageSize = noComponentsMessage.getPreferredSize();
             Dimension size = getSize();
             noComponentsMessage.setBounds((size.width - messageSize.width)/2, (size.height-messageSize.height)/2, messageSize.width, messageSize.height);
         }
