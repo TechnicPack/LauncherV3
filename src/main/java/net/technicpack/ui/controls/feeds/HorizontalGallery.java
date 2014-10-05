@@ -39,7 +39,17 @@ public class HorizontalGallery extends JPanel {
 
     @Override
     public Dimension getMinimumSize() {
-        return new Dimension(0,0);
+        return new Dimension(16,16);
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return super.getPreferredSize();
+    }
+
+    @Override
+    public void setBounds(int x, int y, int w, int h) {
+        super.setBounds(x,y,w,h);
     }
 
     @Override
@@ -80,6 +90,7 @@ public class HorizontalGallery extends JPanel {
 
     @Override
     public void paintComponent(Graphics g) {
+        super.paintComponent(g);
         g.setColor(getBackground());
         ((Graphics2D)g).setPaint(getBackground());
         g.fillRect(0,0,getWidth(),getHeight());
