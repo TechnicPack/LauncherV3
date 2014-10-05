@@ -69,11 +69,11 @@ public class DropShadowBorder extends AbstractBorder {
         g2.fillRect(thickness * 4, thickness * 4, width - (thickness * 8), height - (thickness * 8));
         g2.dispose();
 
-        FastBlurFilter blur = new FastBlurFilter(thickness);
-        shadow = blur.filter(shadow, null);
-        shadow = blur.filter(shadow, null);
-        shadow = blur.filter(shadow, null);
-        shadow = blur.filter(shadow, null);
+//        FastBlurFilter blur = new FastBlurFilter(thickness);
+//        shadow = blur.filter(shadow, null);
+//        shadow = blur.filter(shadow, null);
+//        shadow = blur.filter(shadow, null);
+//        shadow = blur.filter(shadow, null);
 
         g.drawImage(shadow, x, y, width, height, null);
     }
