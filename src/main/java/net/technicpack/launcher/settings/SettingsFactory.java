@@ -29,11 +29,11 @@ import java.nio.charset.Charset;
 import java.util.logging.Level;
 
 public class SettingsFactory {
-    public static TechnicSettings buildSettingsObject(String runningDir) {
+    public static TechnicSettings buildSettingsObject(String runningDir, boolean isMover) {
 
         System.out.println("Settings for exe: "+runningDir);
 
-        File portableSettingsDir = getPortableSettingsDir(runningDir);
+        File portableSettingsDir = getPortableSettingsDir(runningDir, isMover);
 
         if (portableSettingsDir == null)
             System.out.println("Portable settings dir has broken terribly");
@@ -79,8 +79,13 @@ public class SettingsFactory {
         }
     }
 
-    private static File getPortableSettingsDir(String runningDir) {
-        return new File(new File(runningDir).getParentFile().getAbsolutePath(),"technic");
+    private static File getPortableSettingsDir(String runningDir, boolean isMover) {
+        File runningFolder = new File(runningDir).getParentFile();
+
+        if (isMover)
+            return runningFolder;
+        else
+            return new File(runningFolder,"technic");
     }
 
     public static File getTechnicHomeDir() {

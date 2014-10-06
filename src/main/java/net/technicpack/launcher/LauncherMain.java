@@ -102,7 +102,7 @@ public class LauncherMain {
         TechnicSettings settings = null;
 
         try {
-            settings = SettingsFactory.buildSettingsObject(launcher.getRunningPath(LauncherMain.class));
+            settings = SettingsFactory.buildSettingsObject(launcher.getRunningPath(LauncherMain.class), params.isMover());
         } catch (UnsupportedEncodingException ex) {
             ex.printStackTrace();
         }
