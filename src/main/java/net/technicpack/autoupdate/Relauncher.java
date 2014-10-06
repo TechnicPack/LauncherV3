@@ -132,10 +132,15 @@ public class Relauncher {
 
     public void replacePackage(Class mainClass, String targetPath) throws UnsupportedEncodingException {
         String currentPath = getRunningPath(mainClass);
+        Utils.getLogger().log(Level.INFO, "Moving running package from "+currentPath+" to "+targetPath);
+        
         File source = new File(currentPath);
         File dest = new File(targetPath);
 
-        dest.delete();
+        if (dest.exists()) {
+            if (!dest.delete())
+                Utils.getLogger().log(Level.SEVERE, "Deletion of existing package failed!");
+        }
         FileInputStream sourceStream = null;
         FileOutputStream destStream = null;
         try {
