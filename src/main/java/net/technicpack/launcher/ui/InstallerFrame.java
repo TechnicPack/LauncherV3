@@ -33,12 +33,14 @@ import net.technicpack.ui.lang.IRelocalizableResource;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.ui.listitems.LanguageItem;
 import net.technicpack.utilslib.Utils;
+import org.apache.commons.io.FileUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -47,8 +49,6 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
     private static final int DIALOG_WIDTH = 610;
     private static final int DIALOG_HEIGHT = 320;
-
-    private String locale = ResourceLoader.DEFAULT_LOCALE;
 
     private ResourceLoader resources;
 
@@ -62,7 +62,20 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
     private JComboBox standardLanguages;
     private JComboBox portableLanguages;
 
+    private TechnicSettings settings;
+
     public InstallerFrame(ResourceLoader resources, StartupParameters params) {
+        this.resources = resources;
+        this.params = params;
+        this.settings = new TechnicSettings();
+        this.settings.setFilePath(new File(SettingsFactory.getTechnicHomeDir(), "settings.json"));
+        this.settings.getTechnicRoot();
+
+        relocalize(resources);
+    }
+
+    public InstallerFrame(ResourceLoader resources, StartupParameters params, TechnicSettings settings) {
+        this.settings = settings;
         this.resources = resources;
         this.params = params;
 
@@ -71,20 +84,44 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
     protected void standardLanguageChanged() {
         String langCode = ((LanguageItem)standardLanguages.getSelectedItem()).getLangCode();
-        locale = langCode;
+        settings.setLanguageCode(langCode);
         resources.setLocale(langCode);
     }
 
     protected void portableLanguageChanged() {
         String langCode = ((LanguageItem)portableLanguages.getSelectedItem()).getLangCode();
-        locale = langCode;
+        settings.setLanguageCode(langCode);
         resources.setLocale(langCode);
     }
 
     protected void standardInstall() {
-        TechnicSettings settings = new TechnicSettings();
-        settings.setFilePath(new File(SettingsFactory.getTechnicHomeDir(), "settings.json"));
-        if (!standardInstallDir.getText().equals(SettingsFactory.getTechnicHomeDir().getAbsolutePath()))
+        File oldSettings = settings.getFilePath();
+        File newSettings = new File(SettingsFactory.getTechnicHomeDir(), "settings.json");
+
+        if (oldSettings.exists() && !oldSettings.getAbsolutePath().equals(newSettings.getAbsolutePath())) {
+            oldSettings.delete();
+        }
+
+        File oldRoot = settings.getTechnicRoot();
+        File newRoot = new File(standardInstallDir.getText());
+        boolean rootHasChanged = false;
+
+        if (oldRoot.exists() && !oldRoot.getAbsolutePath().equals(newRoot.getAbsolutePath())) {
+            rootHasChanged = true;
+            try {
+                if (!newRoot.exists())
+                    newRoot.mkdirs();
+
+                FileUtils.copyDirectory(oldRoot, newRoot);
+                FileUtils.deleteDirectory(oldRoot);
+            } catch (IOException ex) {
+                Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ",ex);
+            }
+        }
+
+        settings.setFilePath(newSettings);
+
+        if (settings.isPortable() || rootHasChanged || !standardInstallDir.getText().equals(SettingsFactory.getTechnicHomeDir().getAbsolutePath()))
             settings.installTo(standardInstallDir.getText());
         settings.getTechnicRoot();
         settings.setLanguageCode(((LanguageItem)standardLanguages.getSelectedItem()).getLangCode());
@@ -103,9 +140,33 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
     }
 
     protected void portableInstall() {
-        TechnicSettings settings = new TechnicSettings();
+
+        File oldRoot = settings.getTechnicRoot();
+        File newRoot = new File(portableInstallDir.getText(), "technic");
+
+        File oldSettingsFile = settings.getFilePath();
+        File newSettingsFile = new File(newRoot, "settings.json");
+
+        if (oldSettingsFile.exists() && !oldSettingsFile.getAbsolutePath().equals(newSettingsFile.getAbsolutePath()))
+            oldSettingsFile.delete();
+
+        boolean rootHasChanged = false;
+
+        if (oldRoot.exists() && !oldRoot.getAbsolutePath().equals(newRoot.getAbsolutePath())) {
+            rootHasChanged = true;
+            try {
+                if (!newRoot.exists())
+                    newRoot.mkdirs();
+
+                FileUtils.copyDirectory(oldRoot, newRoot);
+                FileUtils.deleteDirectory(oldRoot);
+            } catch (IOException ex) {
+                Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ",ex);
+            }
+        }
+
         settings.setPortable();
-        settings.setFilePath(new File(new File(portableInstallDir.getText(), "technic"), "settings.json"));
+        settings.setFilePath(newSettingsFile);
         settings.getTechnicRoot();
         settings.setLanguageCode(((LanguageItem)portableLanguages.getSelectedItem()).getLangCode());
         settings.save();
@@ -232,6 +293,11 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         centerPanel.addTab(resources.getString("launcher.installer.standard").toUpperCase(), standardInstallPanel);
         centerPanel.addTab(resources.getString("launcher.installer.portable").toUpperCase(), portableModePanel);
 
+        if (settings.isPortable()) {
+            centerPanel.setSelectedIndex(1);
+        } else
+            centerPanel.setSelectedIndex(0);
+
         setLocationRelativeTo(null);
     }
 
@@ -257,7 +323,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         standardDefaultDirectory.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         standardDefaultDirectory.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         standardDefaultDirectory.setIconTextGap(6);
-        standardDefaultDirectory.setSelected(true);
+        standardDefaultDirectory.setSelected(settings.isPortable() || settings.getTechnicRoot().getAbsolutePath().equals(SettingsFactory.getTechnicHomeDir().getAbsolutePath()));
         standardDefaultDirectory.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -271,10 +337,13 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         installFolderLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(installFolderLabel, new GridBagConstraints(0, 3, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,24,0,8), 0,0));
 
-        standardInstallDir = new JTextField(SettingsFactory.getTechnicHomeDir().getAbsolutePath());
+        String installDir = SettingsFactory.getTechnicHomeDir().getAbsolutePath();
+
+        if (!settings.isPortable())
+            installDir = settings.getTechnicRoot().getAbsolutePath();
+
+        standardInstallDir = new JTextField(installDir);
         standardInstallDir.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
-        standardInstallDir.setForeground(LauncherFrame.COLOR_SCROLL_THUMB);
-        standardInstallDir.setBorder(new RoundBorder(LauncherFrame.COLOR_SCROLL_THUMB, 1, 10));
         standardInstallDir.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
         standardInstallDir.setHighlighter(null);
         standardInstallDir.setEditable(false);
@@ -284,9 +353,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         standardSelectButton = new RoundedButton(resources.getString("launcher.installer.select"));
         standardSelectButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
         standardSelectButton.setContentAreaFilled(false);
-        standardSelectButton.setForeground(LauncherFrame.COLOR_GREY_TEXT);
         standardSelectButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
-        standardSelectButton.setEnabled(false);
         standardSelectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -294,6 +361,8 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
             }
         });
         panel.add(standardSelectButton, new GridBagConstraints(2, 3, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,5,0,16), 0,0));
+
+        useDefaultDirectoryChanged();
 
         panel.add(Box.createGlue(), new GridBagConstraints(0, 4, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
 
@@ -307,8 +376,8 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         for (int i = 0; i < ResourceLoader.SUPPORTED_LOCALES.length; i++) {
             standardLanguages.addItem(new LanguageItem(resources.getCodeFromLocale(ResourceLoader.SUPPORTED_LOCALES[i]), ResourceLoader.SUPPORTED_LOCALES[i].getDisplayName(ResourceLoader.SUPPORTED_LOCALES[i])));
         }
-        if (!locale.equalsIgnoreCase(ResourceLoader.DEFAULT_LOCALE)) {
-            Locale loc = resources.getLocaleFromCode(locale);
+        if (!settings.getLanguageCode().equalsIgnoreCase(ResourceLoader.DEFAULT_LOCALE)) {
+            Locale loc = resources.getLocaleFromCode(settings.getLanguageCode());
 
             for (int i = 0; i < ResourceLoader.SUPPORTED_LOCALES.length; i++) {
                 if (loc.equals(ResourceLoader.SUPPORTED_LOCALES[i])) {
@@ -365,7 +434,11 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         installFolderLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(installFolderLabel, new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,24,0,8), 0,0));
 
-        portableInstallDir = new JTextField("");
+        String installDir = "";
+        if (settings.isPortable())
+            installDir = settings.getTechnicRoot().getAbsolutePath();
+
+        portableInstallDir = new JTextField(installDir);
         portableInstallDir.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
         portableInstallDir.setForeground(LauncherFrame.COLOR_BLUE);
         portableInstallDir.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
@@ -374,6 +447,11 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         portableInstallDir.setCursor(null);
         portableInstallDir.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
         panel.add(portableInstallDir, new GridBagConstraints(1, 2, 1, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,5,0,5),0,0));
+
+        if (!installDir.equals("")) {
+            portableInstallButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+            portableInstallButton.setEnabled(true);
+        }
 
         RoundedButton selectInstall = new RoundedButton(resources.getString("launcher.installer.select"));
         selectInstall.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
@@ -400,8 +478,8 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         for (int i = 0; i < ResourceLoader.SUPPORTED_LOCALES.length; i++) {
             portableLanguages.addItem(new LanguageItem(resources.getCodeFromLocale(ResourceLoader.SUPPORTED_LOCALES[i]), ResourceLoader.SUPPORTED_LOCALES[i].getDisplayName(ResourceLoader.SUPPORTED_LOCALES[i])));
         }
-        if (!locale.equalsIgnoreCase(ResourceLoader.DEFAULT_LOCALE)) {
-            Locale loc = resources.getLocaleFromCode(locale);
+        if (!settings.getLanguageCode().equalsIgnoreCase(ResourceLoader.DEFAULT_LOCALE)) {
+            Locale loc = resources.getLocaleFromCode(settings.getLanguageCode());
 
             for (int i = 0; i < ResourceLoader.SUPPORTED_LOCALES.length; i++) {
                 if (loc.equals(ResourceLoader.SUPPORTED_LOCALES[i])) {

@@ -19,6 +19,7 @@
 package net.technicpack.launcher.ui;
 
 import net.technicpack.launcher.LauncherMain;
+import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.ui.components.ModpackOptionsDialog;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.modpacks.PackLoader;
@@ -118,6 +119,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private final IPlatformApi platformApi;
     private final LauncherDirectories directories;
     private final IInstalledPackRepository packRepo;
+    private final StartupParameters params;
 
     private ModpackOptionsDialog modpackOptionsDialog = null;
 
@@ -147,7 +149,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     private PasteWatcher pasteWatcher = null;
 
-    public LauncherFrame(ResourceLoader resources, ImageRepository<IUserType> skinRepository, UserModel userModel, TechnicSettings settings, ModpackSelector modpackSelector, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, Installer installer, ImageRepository<AuthorshipInfo> avatarRepo, IPlatformApi platformApi, LauncherDirectories directories, IInstalledPackRepository packRepository) {
+    public LauncherFrame(ResourceLoader resources, ImageRepository<IUserType> skinRepository, UserModel userModel, TechnicSettings settings, ModpackSelector modpackSelector, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, Installer installer, ImageRepository<AuthorshipInfo> avatarRepo, IPlatformApi platformApi, LauncherDirectories directories, IInstalledPackRepository packRepository, StartupParameters params) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -163,6 +165,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.platformApi = platformApi;
         this.directories = directories;
         this.packRepo = packRepository;
+        this.params = params;
 
         //Handles rebuilding the frame, so use it to build the frame in the first place
         relocalize(resources);
@@ -334,7 +337,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         leftPanel.setTintActive(true);
         centralPanel.setTintActive(true);
         footer.setTintActive(true);
-        OptionsDialog dialog = new OptionsDialog(this, settings, resources);
+        OptionsDialog dialog = new OptionsDialog(this, settings, resources, params);
         dialog.setVisible(true);
         leftPanel.setTintActive(false);
         centralPanel.setTintActive(false);

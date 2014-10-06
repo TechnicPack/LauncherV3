@@ -19,6 +19,8 @@
 package net.technicpack.launcher.ui.components;
 
 import net.technicpack.launcher.LauncherMain;
+import net.technicpack.launcher.settings.StartupParameters;
+import net.technicpack.launcher.ui.InstallerFrame;
 import net.technicpack.launcher.ui.controls.popupformatter.RoundedBorderFormatter;
 import net.technicpack.ui.controls.list.SimpleButtonComboUI;
 import net.technicpack.ui.lang.IRelocalizableResource;
@@ -83,11 +85,13 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     JTextField installField;
     JTextField clientId;
     JCheckBox showConsole;
+    StartupParameters params;
 
-    public OptionsDialog(Frame owner, TechnicSettings settings, ResourceLoader resourceLoader) {
+    public OptionsDialog(Frame owner, TechnicSettings settings, ResourceLoader resourceLoader, StartupParameters params) {
         super(owner);
 
         this.settings = settings;
+        this.params = params;
 
         relocalize(resourceLoader);
     }
@@ -134,6 +138,20 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         settings.save();
 
         resources.setLocale(((LanguageItem)langSelect.getSelectedItem()).getLangCode());
+    }
+
+    protected void reinstall() {
+        final InstallerFrame frame = new InstallerFrame(resources, params, settings);
+        frame.setVisible(true);
+
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                frame.requestFocus();
+            }
+        });
+
+        this.dispose();
     }
 
     protected void openLogs() {
@@ -428,6 +446,12 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         reinstallButton.setContentAreaFilled(false);
         reinstallButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         reinstallButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        reinstallButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                reinstall();
+            }
+        });
         panel.add(reinstallButton, new GridBagConstraints(3, 3, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 0, 8, 0), 0, 0));
 
         //Client ID field

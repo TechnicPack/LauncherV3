@@ -45,6 +45,7 @@ public class TechnicSettings {
     private String javaArgs;
     private int latestNewsArticle;
 
+    public File getFilePath() { return this.settingsFile; }
     public void setFilePath(File settingsFile) {
         this.settingsFile = settingsFile;
     }
