@@ -140,6 +140,25 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
     }
 
     protected void portableInstall() {
+        Relauncher relauncher = new Relauncher(null);
+        String targetPath = null;
+        try {
+            String currentPath = relauncher.getRunningPath(LauncherMain.class);
+            String launcher = (currentPath.endsWith(".exe"))?"TechnicLauncher.exe":"TechnicLauncher.jar";
+
+            targetPath = new File(portableInstallDir.getText(), launcher).getAbsolutePath();
+
+            File targetExe = new File(portableInstallDir.getText(), launcher);
+
+            if (targetExe.exists() && !targetExe.delete()) {
+                JOptionPane.showMessageDialog(this, resources.getString("installer.portable.replacefailed"), resources.getString("installer.portable.replacefailtitle"), JOptionPane.ERROR);
+            }
+
+            relauncher.replacePackage(LauncherMain.class, targetExe.getAbsolutePath());
+        } catch (UnsupportedEncodingException ex) {
+            ex.printStackTrace();
+            return;
+        }
 
         File oldRoot = settings.getTechnicRoot();
         File newRoot = new File(portableInstallDir.getText(), "technic");
@@ -171,20 +190,8 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         settings.setLanguageCode(((LanguageItem)portableLanguages.getSelectedItem()).getLangCode());
         settings.save();
 
-        Relauncher relauncher = new Relauncher(null);
-        try {
-            String currentPath = relauncher.getRunningPath(LauncherMain.class);
-            String launcher = (currentPath.endsWith(".exe"))?"TechnicLauncher.exe":"TechnicLauncher.jar";
-
-            String targetPath = new File(portableInstallDir.getText(), launcher).getAbsolutePath();
-            relauncher.replacePackage(LauncherMain.class, new File(portableInstallDir.getText(), launcher).getAbsolutePath());
-            relauncher.launch(targetPath, LauncherMain.class, params.getParameters().toArray(new String[params.getParameters().size()]));
-            System.exit(0);
-            return;
-        } catch (UnsupportedEncodingException ex) {
-            ex.printStackTrace();
-            return;
-        }
+        relauncher.launch(targetPath, LauncherMain.class, params.getParameters().toArray(new String[params.getParameters().size()]));
+        System.exit(0);
     }
 
     protected void selectPortable() {
