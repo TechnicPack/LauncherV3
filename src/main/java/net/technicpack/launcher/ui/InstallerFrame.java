@@ -448,11 +448,6 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         portableInstallDir.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
         panel.add(portableInstallDir, new GridBagConstraints(1, 2, 1, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,5,0,5),0,0));
 
-        if (!installDir.equals("")) {
-            portableInstallButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-            portableInstallButton.setEnabled(true);
-        }
-
         RoundedButton selectInstall = new RoundedButton(resources.getString("launcher.installer.select"));
         selectInstall.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
         selectInstall.setContentAreaFilled(false);
@@ -517,6 +512,12 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
             }
         });
         portableInstallButton.setEnabled(false);
+
+        if (!installDir.equals("")) {
+            portableInstallButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+            portableInstallButton.setEnabled(true);
+        }
+
         panel.add(portableInstallButton, new GridBagConstraints(1, 4, 2, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.VERTICAL, new Insets(0,0,8,8), 0,0));
     }
 
