@@ -233,9 +233,9 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         playButton = new RoundedButton(resources.getString("launcher.pack.launch"));
         playButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 27, Font.BOLD));
         playButton.setBorder(BorderFactory.createEmptyBorder(5, 50, 10, 50));
+        playButton.setBackground(LauncherFrame.COLOR_FOOTER);
         playButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         playButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
-        playButton.setContentAreaFilled(false);
         playButton.setAlignmentX(RIGHT_ALIGNMENT);
         playButton.setFocusable(false);
 

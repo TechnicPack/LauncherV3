@@ -149,7 +149,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     public LauncherFrame(ResourceLoader resources, ImageRepository<IUserType> skinRepository, UserModel userModel, TechnicSettings settings, ModpackSelector modpackSelector, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, Installer installer, ImageRepository<AuthorshipInfo> avatarRepo, IPlatformApi platformApi, LauncherDirectories directories, IInstalledPackRepository packRepository, StartupParameters params, DiscoverInfoPanel discoverInfoPanel) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         this.userModel = userModel;
         this.skinRepository = skinRepository;

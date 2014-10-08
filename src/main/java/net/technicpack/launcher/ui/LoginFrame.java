@@ -73,7 +73,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         this.settings = settings;
 
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
-        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
 
         this.setFocusTraversalPolicy(new SortingFocusTraversalPolicy(new Comparator<Component>() {
