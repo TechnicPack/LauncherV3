@@ -45,6 +45,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicComboPopup;
 import javax.swing.plaf.metal.MetalComboBoxUI;
 import java.awt.*;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -104,6 +105,11 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     protected void changeJavaArgs() {
         settings.setJavaArgs(javaArgs.getText());
         settings.save();
+    }
+
+    protected void copyCid() {
+        StringSelection selection = new StringSelection(clientId.getText());
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
     }
 
     protected void changeShowConsole() {
@@ -475,6 +481,12 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         copyButton.setContentAreaFilled(false);
         copyButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         copyButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        copyButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                copyCid();
+            }
+        });
         panel.add(copyButton, new GridBagConstraints(3, 4, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 0, 8, 0), 0, 0));
 
         panel.add(Box.createRigidArea(new Dimension(60, 0)), new GridBagConstraints(4, 3, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,0,0,0), 0,0));
