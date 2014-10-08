@@ -20,15 +20,21 @@ package net.technicpack.launcher.ui.components.discover;
 
 import net.technicpack.platform.http.HttpPlatformApi;
 import net.technicpack.utilslib.DesktopUtils;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xhtmlrenderer.render.Box;
 import org.xhtmlrenderer.swing.BasicPanel;
 import org.xhtmlrenderer.swing.LinkListener;
 
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
+import java.util.LinkedList;
+import java.util.List;
 
 public class DiscoverLinkListener extends LinkListener {
 
     private HttpPlatformApi platform;
+    private List<Box> mousedLinks = new LinkedList<Box>();
 
     public DiscoverLinkListener(HttpPlatformApi platform ) {
         this.platform = platform;
@@ -50,5 +56,46 @@ public class DiscoverLinkListener extends LinkListener {
             }
         } else
             DesktopUtils.browseUrl(uri);
+    }
+
+    @Override
+    public void onMouseOver(org.xhtmlrenderer.swing.BasicPanel panel, org.xhtmlrenderer.render.Box box) {
+        if (isLink(panel, box)) {
+            mousedLinks.add(box);
+            panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        }
+    }
+
+    @Override
+    public void onMouseOut(org.xhtmlrenderer.swing.BasicPanel panel, org.xhtmlrenderer.render.Box box) {
+        if (mousedLinks.contains(box)) {
+            mousedLinks.remove(box);
+
+            if (mousedLinks.size() == 0) {
+                panel.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+            }
+        }
+    }
+
+    protected boolean isLink(BasicPanel panel, Box box) {
+        if (box == null || box.getElement() == null) {
+            return false;
+        }
+
+        return findLink(panel, box.getElement());
+    }
+
+    private boolean findLink(BasicPanel panel, Element e) {
+        String uri = null;
+
+        for (Node node = e; node.getNodeType() == Node.ELEMENT_NODE; node = node.getParentNode()) {
+            uri = panel.getSharedContext().getNamespaceHandler().getLinkUri((Element) node);
+
+            if (uri != null) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
