@@ -130,7 +130,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         Relauncher relauncher = new Relauncher(null);
         try {
             String currentPath = relauncher.getRunningPath(LauncherMain.class);
-            relauncher.launch(currentPath, LauncherMain.class, params.getParameters().toArray(new String[params.getParameters().size()]));
+            relauncher.launch(currentPath, LauncherMain.class, params.getArgs());
             System.exit(0);
             return;
         } catch (UnsupportedEncodingException ex) {
@@ -191,7 +191,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         settings.setLanguageCode(((LanguageItem)portableLanguages.getSelectedItem()).getLangCode());
         settings.save();
 
-        relauncher.launch(targetPath, LauncherMain.class, params.getParameters().toArray(new String[params.getParameters().size()]));
+        relauncher.launch(targetPath, LauncherMain.class, params.getArgs());
         System.exit(0);
     }
 

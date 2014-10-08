@@ -136,7 +136,7 @@ public class LauncherMain {
         else if (needsReboot && StringUtils.isNumeric(resources.getLauncherBuild())) {
             // ^^^^^
             //The debugger can't really relaunch so double check the build number to make sure we're operating in a valid environment
-            launcher.launch(null, LauncherMain.class, params.getParameters().toArray(new String[params.getParameters().size()]));
+            launcher.launch(null, LauncherMain.class, params.getArgs());
             return;
         } else {
             updateAndRelaunch(params, directories, resources, settings, launcher);
@@ -249,7 +249,7 @@ public class LauncherMain {
             return;
         }
 
-        String[] args = relauncher.buildLauncherArgs(relauncher.buildLauncherArgs(params.getParameters().toArray(new String[params.getParameters().size()])));
+        String[] args = relauncher.buildLauncherArgs(relauncher.buildLauncherArgs(params.getArgs()));
         relauncher.launch(params.getMoveTarget(), LauncherMain.class, args);
     }
 
@@ -299,7 +299,7 @@ public class LauncherMain {
         }
 
         try {
-            args = relauncher.buildMoverArgs(LauncherMain.class, params.getParameters().toArray(new String[params.getParameters().size()]));
+            args = relauncher.buildMoverArgs(LauncherMain.class, params.getArgs());
         } catch (UnsupportedEncodingException ex) {
             Utils.getLogger().log(Level.SEVERE, "Error attempting to launch mover mode: ", ex);
             return;

@@ -53,6 +53,7 @@ public final class StartupParameters {
     public List<String> getParameters() {
         return parameters;
     }
+    public String[] getArgs() { return args; }
 
     public void logParameters(Logger log) {
         log.info("------------ Startup Parameters ------------");
