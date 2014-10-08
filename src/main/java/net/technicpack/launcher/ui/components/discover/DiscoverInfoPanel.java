@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.ui.components.discover;
 
+import net.technicpack.platform.http.HttpPlatformApi;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.ui.controls.TiledBackground;
 import org.w3c.dom.Document;
@@ -25,6 +26,7 @@ import org.xhtmlrenderer.event.DocumentListener;
 import org.xhtmlrenderer.resource.ImageResource;
 import org.xhtmlrenderer.simple.XHTMLPanel;
 import org.xhtmlrenderer.swing.DelegatingUserAgent;
+import org.xhtmlrenderer.swing.FSMouseListener;
 import org.xhtmlrenderer.swing.ImageResourceLoader;
 import org.xhtmlrenderer.swing.SwingReplacedElementFactory;
 
@@ -38,7 +40,7 @@ public class DiscoverInfoPanel extends TiledBackground {
     private boolean completedFirstLoad = false;
     private ActionListener completedFirstLoadListener = null;
 
-    public DiscoverInfoPanel(ResourceLoader loader, String discoverUrl) {
+    public DiscoverInfoPanel(ResourceLoader loader, String discoverUrl, HttpPlatformApi platform) {
         super(loader.getImage("background_repeat2.png"));
 
         if (discoverUrl == null)
@@ -50,6 +52,11 @@ public class DiscoverInfoPanel extends TiledBackground {
         this.panel = new XHTMLPanel();
         panel.setFont(loader.getFont(ResourceLoader.FONT_OPENSANS, 16));
         panel.setDefaultFontFromComponent(true);
+
+        for (Object listener : panel.getMouseTrackingListeners()) {
+            panel.removeMouseTrackingListener((FSMouseListener)listener);
+        }
+        panel.addMouseTrackingListener(new DiscoverLinkListener(platform));
 
         DelegatingUserAgent uac = new DelegatingUserAgent();
         ImageResourceLoader imageLoader = new ImageResourceLoader();

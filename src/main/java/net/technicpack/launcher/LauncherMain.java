@@ -215,7 +215,7 @@ public class LauncherMain {
         ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<AuthorshipInfo>(new TechnicAvatarMapper(directories, resources), new WebAvatarImageStore(mirrorStore));
 
         ISolderApi solder = new HttpSolderApi(settings.getClientId(), userModel);
-        IPlatformApi platform = new HttpPlatformApi("http://platformbeta.sctgaming.com/", mirrorStore);
+        HttpPlatformApi platform = new HttpPlatformApi("http://platformbeta.sctgaming.com/", mirrorStore);
 
         IInstalledPackRepository packStore = TechnicInstalledPackStore.load(new File(directories.getLauncherDirectory(), "installedPacks"));
         IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(platform, solder);
@@ -226,7 +226,7 @@ public class LauncherMain {
         ModpackSelector selector = new ModpackSelector(resources, packList, new SolderPackSource("http://solder.technicpack.net/api/", solder), platform, iconRepo);
         userModel.addAuthListener(selector);
 
-        DiscoverInfoPanel discoverInfoPanel = new DiscoverInfoPanel(resources, startupParameters.getDiscoverUrl());
+        DiscoverInfoPanel discoverInfoPanel = new DiscoverInfoPanel(resources, startupParameters.getDiscoverUrl(), platform);
 
         MinecraftLauncher launcher = new MinecraftLauncher(platform, directories, userModel, settings.getClientId());
         ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());

@@ -666,17 +666,25 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
                     if (!packRepo.getInstalledPacks().containsKey(result.getName())) {
                         packRepo.put(new InstalledPack(result.getName(), true, InstalledPack.RECOMMENDED));
-                        packRepo.setSelectedSlug(result.getName());
-                        modpackSelector.forceRefresh();
-                        LauncherFrame.this.setExtendedState(JFrame.ICONIFIED);
-
-                        EventQueue.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                LauncherFrame.this.setExtendedState(JFrame.NORMAL);
-                            }
-                        });
                     }
+
+                    packRepo.setSelectedSlug(result.getName());
+                    modpackSelector.forceRefresh();
+
+                    LauncherFrame.this.setExtendedState(JFrame.ICONIFIED);
+
+                    EventQueue.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            LauncherFrame.this.setExtendedState(JFrame.NORMAL);
+                            EventQueue.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    LauncherFrame.this.selectTab("modpacks");
+                                }
+                            });
+                        }
+                    });
                 }
             }.execute();
         } catch (MalformedURLException ex) {
