@@ -238,6 +238,8 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         playButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
         playButton.setAlignmentX(RIGHT_ALIGNMENT);
         playButton.setFocusable(false);
+        playButton.setContentAreaFilled(false);
+        playButton.setShouldShowBackground(true);
 
         constraints = new GridBagConstraints();
         constraints.gridx = 1;
