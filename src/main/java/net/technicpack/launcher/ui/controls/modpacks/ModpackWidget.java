@@ -27,6 +27,7 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.utilslib.ImageUtils;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class ModpackWidget extends SelectorWidget implements IImageJobListener<ModpackModel> {
     private ModpackModel modpack;
@@ -60,6 +61,7 @@ public class ModpackWidget extends SelectorWidget implements IImageJobListener<M
         JLabel text = new JLabel(modpack.getDisplayName());
         text.setFont(getResources().getFont(ResourceLoader.FONT_OPENSANS, 14));
         text.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        text.setPreferredSize(new Dimension(210, text.getPreferredSize().height));
         add(text);
 
         add(Box.createHorizontalGlue());
