@@ -19,6 +19,7 @@
 package net.technicpack.launcher.ui.components.discover;
 
 import net.technicpack.platform.http.HttpPlatformApi;
+import net.technicpack.utilslib.DesktopUtils;
 import org.xhtmlrenderer.swing.BasicPanel;
 import org.xhtmlrenderer.swing.LinkListener;
 
@@ -41,8 +42,13 @@ public class DiscoverLinkListener extends LinkListener {
             String slug = uri.substring(11);
 
             String platformUri = this.platform.getPlatformUri(slug);
-            StringSelection selection = new StringSelection(platformUri);
-            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
-        }
+            try {
+                StringSelection selection = new StringSelection(platformUri);
+                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
+            } catch (Exception ex) {
+                //The clipboard is really temperamental if we mess with it too much, just ignore it
+            }
+        } else
+            DesktopUtils.browseUrl(uri);
     }
 }
