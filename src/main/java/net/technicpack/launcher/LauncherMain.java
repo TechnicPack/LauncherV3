@@ -143,6 +143,7 @@ public class LauncherMain {
     }
 
     private static void setupLogging(LauncherDirectories directories, ResourceLoader resources) {
+        System.out.println("Setting up logging");
         final Logger logger = Utils.getLogger();
         File logDirectory = new File(directories.getLauncherDirectory(), "logs");
         if (!logDirectory.exists()) {
