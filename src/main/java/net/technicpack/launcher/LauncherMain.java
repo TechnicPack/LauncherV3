@@ -192,6 +192,7 @@ public class LauncherMain {
     private static void startLauncher(TechnicSettings settings, StartupParameters startupParameters, LauncherDirectories directories, ResourceLoader resources) {
         UIManager.put( "ComboBox.disabledBackground", LauncherFrame.COLOR_FORMELEMENT_INTERNAL );
         UIManager.put( "ComboBox.disabledForeground", LauncherFrame.COLOR_GREY_TEXT );
+        System.setProperty("xr.load.xml-reader",  "org.ccil.cowan.tagsoup.Parser");
 
         UserModel userModel = new UserModel(TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json")), new AuthenticationService());
 

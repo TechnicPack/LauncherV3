@@ -36,7 +36,6 @@ import net.technicpack.launcher.launch.Installer;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.components.OptionsDialog;
 import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
-import net.technicpack.launcher.ui.components.discover.DiscoverSelector;
 import net.technicpack.launcher.ui.components.modpacks.ModpackInfoPanel;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launcher.ui.components.news.NewsInfoPanel;
@@ -61,6 +60,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -127,8 +127,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private HeaderTab modpacksTab;
     private HeaderTab newsTab;
 
-    private CardLayout selectorLayout;
-    private JPanel selectorSwap;
     private CardLayout infoLayout;
     private JPanel infoSwap;
 
@@ -139,7 +137,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private ModpackSelector modpackSelector;
     private NewsSelector newsSelector;
     private TintablePanel centralPanel;
-    private TintablePanel leftPanel;
     private TintablePanel footer;
 
     private String currentTabName;
@@ -194,7 +191,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         }
 
         infoLayout.show(infoSwap, tabName);
-        selectorLayout.show(selectorSwap, tabName);
 
         currentTabName = tabName;
     }
@@ -314,13 +310,11 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     protected void openModpackOptions(ModpackModel model) {
 
         if (modpackOptionsDialog == null) {
-            leftPanel.setTintActive(true);
             centralPanel.setTintActive(true);
             footer.setTintActive(true);
             modpackOptionsDialog = new ModpackOptionsDialog(this, directories, model, resources);
             modpackOptionsDialog.setVisible(true);
             modpackOptionsDialog = null;
-            leftPanel.setTintActive(false);
             centralPanel.setTintActive(false);
             footer.setTintActive(false);
             modpackPanel.setModpack(model);
@@ -334,12 +328,10 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     }
 
     protected void openLauncherOptions() {
-        leftPanel.setTintActive(true);
         centralPanel.setTintActive(true);
         footer.setTintActive(true);
         OptionsDialog dialog = new OptionsDialog(this, settings, resources, params);
         dialog.setVisible(true);
-        leftPanel.setTintActive(false);
         centralPanel.setTintActive(false);
         footer.setTintActive(false);
     }
@@ -506,29 +498,21 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         infoSwap.setOpaque(false);
         newsInfoPanel = new NewsInfoPanel(resources, avatarRepo);
         infoSwap.add(discoverPanel,"discover");
-        infoSwap.add(newsInfoPanel, "news");
-        infoSwap.add(modpackPanel, "modpacks");
+
+        JPanel newsHost = new JPanel();
+        infoSwap.add(newsHost, "news");
+        JPanel modpackHost = new JPanel();
+        infoSwap.add(modpackHost, "modpacks");
         centralPanel.add(infoSwap, BorderLayout.CENTER);
 
-        /////////////////////////////////////////////////////////////
-        // LEFT SETUP
-        /////////////////////////////////////////////////////////////
-        leftPanel = new TintablePanel();
-        leftPanel.setTintColor(COLOR_CENTRAL_BACK);
-        this.add(leftPanel, BorderLayout.LINE_START);
-
-        leftPanel.setLayout(new BorderLayout());
-
-        selectorSwap = new JPanel();
-        selectorSwap.setOpaque(false);
-        this.selectorLayout = new CardLayout();
-        selectorSwap.setLayout(selectorLayout);
-        selectorSwap.add(new DiscoverSelector(resources), "discover");
-
-        selectorSwap.add(modpackSelector, "modpacks");
         newsSelector = new NewsSelector(resources, newsInfoPanel, platformApi, avatarRepo, newsCircle, settings);
-        selectorSwap.add(newsSelector, "news");
-        leftPanel.add(selectorSwap, BorderLayout.CENTER);
+        newsHost.setLayout(new BorderLayout());
+        newsHost.add(newsInfoPanel, BorderLayout.CENTER);
+        newsHost.add(newsSelector, BorderLayout.WEST);
+
+        modpackHost.setLayout(new BorderLayout());
+        modpackHost.add(modpackPanel, BorderLayout.CENTER);
+        modpackHost.add(modpackSelector, BorderLayout.WEST);
 
         footer = new TintablePanel();
         footer.setTintColor(COLOR_CENTRAL_BACK);

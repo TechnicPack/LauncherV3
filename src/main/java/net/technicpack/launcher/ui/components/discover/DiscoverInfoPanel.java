@@ -20,9 +20,37 @@ package net.technicpack.launcher.ui.components.discover;
 
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.ui.controls.TiledBackground;
+import org.w3c.dom.Document;
+import org.xhtmlrenderer.resource.ImageResource;
+import org.xhtmlrenderer.simple.XHTMLPanel;
+import org.xhtmlrenderer.swing.DelegatingUserAgent;
+import org.xhtmlrenderer.swing.ImageResourceLoader;
+import org.xhtmlrenderer.swing.SwingReplacedElementFactory;
+
+import java.awt.*;
 
 public class DiscoverInfoPanel extends TiledBackground {
     public DiscoverInfoPanel(ResourceLoader loader) {
         super(loader.getImage("background_repeat2.png"));
+
+        setLayout(new BorderLayout());
+        final XHTMLPanel panel = new XHTMLPanel();
+
+        DelegatingUserAgent uac = new DelegatingUserAgent();
+        ImageResourceLoader imageLoader = new ImageResourceLoader();
+        imageLoader.setRepaintListener(panel);
+        uac.setImageResourceLoader(imageLoader);
+        panel.getSharedContext().setUserAgentCallback(uac);
+        panel.getSharedContext().setReplacedElementFactory(new SwingReplacedElementFactory(panel, imageLoader));
+
+        final Document doc = uac.getXMLResource("http://www.google.com/").getDocument();
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                panel.setDocument(doc, "http://www.google.com/");
+            }
+        });
+
+        add(panel, BorderLayout.CENTER);
     }
 }
