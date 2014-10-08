@@ -52,13 +52,13 @@ public class HttpPlatformApi implements IPlatformApi {
 
     @Override
     public void incrementPackRuns(String packSlug) {
-        String url = platformUrl + "modpack/" + packSlug + "/run";
+        String url = platformUrl + "modpack/" + packSlug + "/stat/run";
         Utils.pingHttpURL(url, mirrorStore);
     }
 
     @Override
     public void incrementPackInstalls(String packSlug) {
-        String url = platformUrl + "modpack/" + packSlug + "/download";
+        String url = platformUrl + "modpack/" + packSlug + "/stat/install";
         Utils.pingHttpURL(url, mirrorStore);
     }
 
