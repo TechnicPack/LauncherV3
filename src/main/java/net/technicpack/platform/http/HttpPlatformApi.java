@@ -44,9 +44,13 @@ public class HttpPlatformApi implements IPlatformApi {
         this.mirrorStore = mirrorStore;
     }
 
+    public String getPlatformUri(String packSlug) {
+        return platformUrl + "modpack/" + packSlug;
+    }
+
     @Override
     public PlatformPackInfo getPlatformPackInfo(String packSlug) throws RestfulAPIException {
-        String url = platformUrl + "modpack/" + packSlug;
+        String url = getPlatformUri(packSlug);
         return RestObject.getRestObject(PlatformPackInfo.class,  url);
     }
 
