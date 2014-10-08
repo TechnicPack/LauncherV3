@@ -35,19 +35,22 @@ public class DiscoverInfoPanel extends TiledBackground {
 
         setLayout(new BorderLayout());
         final XHTMLPanel panel = new XHTMLPanel();
+        panel.setFont(loader.getFont(ResourceLoader.FONT_OPENSANS, 16));
+        panel.setDefaultFontFromComponent(true);
 
         DelegatingUserAgent uac = new DelegatingUserAgent();
         ImageResourceLoader imageLoader = new ImageResourceLoader();
         imageLoader.setRepaintListener(panel);
         uac.setImageResourceLoader(imageLoader);
         panel.getSharedContext().setUserAgentCallback(uac);
+        panel.getSharedContext().getTextRenderer().setSmoothingThreshold(6.0f);
         panel.getSharedContext().setReplacedElementFactory(new SwingReplacedElementFactory(panel, imageLoader));
+        panel.getSharedContext().setFontMapping("Raleway", loader.getFont(ResourceLoader.FONT_RALEWAY, 12));
 
-        final Document doc = uac.getXMLResource("http://www.google.com/").getDocument();
         EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                panel.setDocument(doc, "http://www.google.com/");
+                panel.setDocument("http://beta.technicpack.net/api/discover/");
             }
         });
 
