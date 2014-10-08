@@ -169,7 +169,14 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         //Handles rebuilding the frame, so use it to build the frame in the first place
         relocalize(resources);
 
-        selectTab("modpacks");
+        selectTab("discover");
+
+        discoverInfoPanel.setFirstLoadListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectTab("modpacks");
+            }
+        });
 
         LauncherMain.consoleFrame.setVisible(settings.getShowConsole());
     }

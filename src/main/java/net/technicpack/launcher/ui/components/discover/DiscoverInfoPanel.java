@@ -21,6 +21,7 @@ package net.technicpack.launcher.ui.components.discover;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.ui.controls.TiledBackground;
 import org.w3c.dom.Document;
+import org.xhtmlrenderer.event.DocumentListener;
 import org.xhtmlrenderer.resource.ImageResource;
 import org.xhtmlrenderer.simple.XHTMLPanel;
 import org.xhtmlrenderer.swing.DelegatingUserAgent;
@@ -28,8 +29,15 @@ import org.xhtmlrenderer.swing.ImageResourceLoader;
 import org.xhtmlrenderer.swing.SwingReplacedElementFactory;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class DiscoverInfoPanel extends TiledBackground {
+
+    final private XHTMLPanel panel;
+    private boolean completedFirstLoad = false;
+    private ActionListener completedFirstLoadListener = null;
+
     public DiscoverInfoPanel(ResourceLoader loader, String discoverUrl) {
         super(loader.getImage("background_repeat2.png"));
 
@@ -39,7 +47,7 @@ public class DiscoverInfoPanel extends TiledBackground {
         final String runnableAccessDiscover = discoverUrl;
 
         setLayout(new BorderLayout());
-        final XHTMLPanel panel = new XHTMLPanel();
+        this.panel = new XHTMLPanel();
         panel.setFont(loader.getFont(ResourceLoader.FONT_OPENSANS, 16));
         panel.setDefaultFontFromComponent(true);
 
@@ -49,8 +57,36 @@ public class DiscoverInfoPanel extends TiledBackground {
         uac.setImageResourceLoader(imageLoader);
         panel.getSharedContext().setUserAgentCallback(uac);
         panel.getSharedContext().getTextRenderer().setSmoothingThreshold(6.0f);
-        panel.getSharedContext().setReplacedElementFactory(new SwingReplacedElementFactory(panel, imageLoader));
+
+        SwingReplacedElementFactory factory = new SwingReplacedElementFactory(panel, imageLoader);
+        factory.reset();
+        panel.getSharedContext().setReplacedElementFactory(factory);
         panel.getSharedContext().setFontMapping("Raleway", loader.getFont(ResourceLoader.FONT_RALEWAY, 12));
+
+        panel.addDocumentListener(new DocumentListener() {
+            @Override
+            public void documentStarted() {
+
+            }
+
+            @Override
+            public void documentLoaded() {
+                if (!completedFirstLoad) {
+                    completedFirstLoad = true;
+                    completedFirstLoadListener.actionPerformed(new ActionEvent(DiscoverInfoPanel.this, 0, ""));
+                }
+            }
+
+            @Override
+            public void onLayoutException(Throwable throwable) {
+
+            }
+
+            @Override
+            public void onRenderException(Throwable throwable) {
+
+            }
+        });
 
         EventQueue.invokeLater(new Runnable() {
             @Override
@@ -60,5 +96,9 @@ public class DiscoverInfoPanel extends TiledBackground {
         });
 
         add(panel, BorderLayout.CENTER);
+    }
+
+    public void setFirstLoadListener(ActionListener completedFirstLoadListener) {
+        this.completedFirstLoadListener = completedFirstLoadListener;
     }
 }
