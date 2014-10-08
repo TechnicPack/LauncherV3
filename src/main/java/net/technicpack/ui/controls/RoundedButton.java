@@ -37,6 +37,7 @@ public class RoundedButton extends JButton implements MouseListener {
 
     private boolean isHovered = false;
     private boolean isClicked = false;
+    private boolean shouldShowBackground = false;
 
     private Collection<ActionListener> actionListeners = new LinkedList<ActionListener>();
 
@@ -56,6 +57,12 @@ public class RoundedButton extends JButton implements MouseListener {
     public void setHoverForeground(Color color) { hoverForeground = color; }
     public void setClickForeground(Color color) { clickForeground = color; }
 
+    public boolean shouldShowBackground() { return shouldShowBackground; }
+    public void setShouldShowBackground(boolean shouldShowBackground) { this.shouldShowBackground = shouldShowBackground; }
+
+    @Override
+    public void paintComponent(Graphics g) {}
+
     @Override
     public void paint(Graphics g) {
         Graphics2D g2d = (Graphics2D)g;
@@ -70,7 +77,7 @@ public class RoundedButton extends JButton implements MouseListener {
                 RenderingHints.KEY_FRACTIONALMETRICS,
                 RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
-        if (isContentAreaFilled()) {
+        if (shouldShowBackground()) {
             if (isClicked) g2d.setColor(getClickBackground());
             else if (isHovered) g2d.setColor(getHoverBackground());
             else g2d.setColor(getBackground());
