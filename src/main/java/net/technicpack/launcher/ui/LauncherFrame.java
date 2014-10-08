@@ -143,10 +143,11 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     NewsInfoPanel newsInfoPanel;
     ModpackInfoPanel modpackPanel;
+    DiscoverInfoPanel discoverInfoPanel;
 
     private PasteWatcher pasteWatcher = null;
 
-    public LauncherFrame(ResourceLoader resources, ImageRepository<IUserType> skinRepository, UserModel userModel, TechnicSettings settings, ModpackSelector modpackSelector, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, Installer installer, ImageRepository<AuthorshipInfo> avatarRepo, IPlatformApi platformApi, LauncherDirectories directories, IInstalledPackRepository packRepository, StartupParameters params) {
+    public LauncherFrame(ResourceLoader resources, ImageRepository<IUserType> skinRepository, UserModel userModel, TechnicSettings settings, ModpackSelector modpackSelector, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, Installer installer, ImageRepository<AuthorshipInfo> avatarRepo, IPlatformApi platformApi, LauncherDirectories directories, IInstalledPackRepository packRepository, StartupParameters params, DiscoverInfoPanel discoverInfoPanel) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -163,6 +164,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.directories = directories;
         this.packRepo = packRepository;
         this.params = params;
+        this.discoverInfoPanel = discoverInfoPanel;
 
         //Handles rebuilding the frame, so use it to build the frame in the first place
         relocalize(resources);
@@ -490,14 +492,12 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             }
         });
 
-        DiscoverInfoPanel discoverPanel = new DiscoverInfoPanel(resources);
-
         infoSwap = new JPanel();
         infoLayout = new CardLayout();
         infoSwap.setLayout(infoLayout);
         infoSwap.setOpaque(false);
         newsInfoPanel = new NewsInfoPanel(resources, avatarRepo);
-        infoSwap.add(discoverPanel,"discover");
+        infoSwap.add(discoverInfoPanel,"discover");
 
         JPanel newsHost = new JPanel();
         infoSwap.add(newsHost, "news");

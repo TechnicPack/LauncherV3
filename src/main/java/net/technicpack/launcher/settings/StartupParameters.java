@@ -43,6 +43,8 @@ public final class StartupParameters {
     private int height = -1;
     @Parameter(names = {"-fullscreen"}, description = "Whether to launch minecraft in fullscreen mode.")
     private boolean fullscreen = false;
+    @Parameter(names = {"-discover"}, description = "An override param for the discover URL")
+    private String discover = null;
 
     public StartupParameters(String[] args) {
         this.args = args;
@@ -87,4 +89,6 @@ public final class StartupParameters {
     public boolean isMover() { return mover; }
 
     public String getMoveTarget() { return moveTarget; }
+
+    public String getDiscoverUrl() { return discover; }
 }

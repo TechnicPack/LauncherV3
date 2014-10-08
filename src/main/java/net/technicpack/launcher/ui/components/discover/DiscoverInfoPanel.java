@@ -30,8 +30,13 @@ import org.xhtmlrenderer.swing.SwingReplacedElementFactory;
 import java.awt.*;
 
 public class DiscoverInfoPanel extends TiledBackground {
-    public DiscoverInfoPanel(ResourceLoader loader) {
+    public DiscoverInfoPanel(ResourceLoader loader, String discoverUrl) {
         super(loader.getImage("background_repeat2.png"));
+
+        if (discoverUrl == null)
+            discoverUrl = "http://beta.technicpack.net/api/discover/";
+
+        final String runnableAccessDiscover = discoverUrl;
 
         setLayout(new BorderLayout());
         final XHTMLPanel panel = new XHTMLPanel();
@@ -50,7 +55,7 @@ public class DiscoverInfoPanel extends TiledBackground {
         EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                panel.setDocument("http://beta.technicpack.net/api/discover/");
+                panel.setDocument(runnableAccessDiscover);
             }
         });
 
