@@ -157,7 +157,8 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
         scrollPane.getVerticalScrollBar().setUnitIncrement(12);
         add(scrollPane, BorderLayout.CENTER);
 
-        constraints = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0,0);
+        widgetList.add(Box.createHorizontalStrut(287), new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,0,0,0),0,0));
+        constraints = new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0,0);
         widgetList.add(Box.createGlue(), constraints);
     }
 
@@ -285,6 +286,9 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
             widgetList.add(sortedPack, constraints);
             constraints.gridy++;
         }
+
+        widgetList.add(Box.createHorizontalStrut(287), constraints);
+        constraints.gridy++;
 
         constraints.weighty = 1.0;
         widgetList.add(Box.createGlue(), constraints);
