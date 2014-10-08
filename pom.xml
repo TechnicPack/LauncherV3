@@ -205,6 +205,12 @@
 						<configuration>
 							<minimizeJar>true</minimizeJar>
 							<filters>
+                                <filter>
+                                    <artifact>org.ccil.cowan.tagsoup:*</artifact>
+                                    <includes>
+                                        <include>**</include>
+                                    </includes>
+                                </filter>
 								<filter>
 									<artifact>net.technicpack:*</artifact>
 									<includes>
