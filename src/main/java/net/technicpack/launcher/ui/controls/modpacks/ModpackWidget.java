@@ -24,6 +24,7 @@ import net.technicpack.launcher.ui.controls.SelectorWidget;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.utilslib.ImageUtils;
 
 import javax.swing.*;
 
@@ -51,7 +52,7 @@ public class ModpackWidget extends SelectorWidget implements IImageJobListener<M
         setBorder(BorderFactory.createEmptyBorder(4,20,4,8));
 
         icon = new JLabel();
-        icon.setIcon(new ImageIcon(imageJob.getImage()));
+        icon.setIcon(new ImageIcon(ImageUtils.scaleWithAspectWidth(imageJob.getImage(), 32)));
         add(icon);
 
         add(Box.createHorizontalStrut(14));
@@ -72,7 +73,7 @@ public class ModpackWidget extends SelectorWidget implements IImageJobListener<M
 
     @Override
     public void jobComplete(ImageJob<ModpackModel> job) {
-        icon.setIcon(new ImageIcon(job.getImage()));
+        icon.setIcon(new ImageIcon(ImageUtils.scaleWithAspectWidth(job.getImage(), 32)));
         revalidate();
     }
 }
