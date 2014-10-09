@@ -384,7 +384,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
         modpacksTab = new HeaderTab(resources.getString("launcher.title.modpacks"), resources);
         modpacksTab.setIsActive(true);
-        modpacksTab.setIcon(resources.getIcon("downTriangle.png"));
         modpacksTab.setHorizontalTextPosition(SwingConstants.LEADING);
         modpacksTab.addActionListener(tabListener);
         modpacksTab.setActionCommand(TAB_MODPACKS);
