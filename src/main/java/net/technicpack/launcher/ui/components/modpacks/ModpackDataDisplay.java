@@ -119,15 +119,15 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         ratings.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         statBoxes.add(ratings);
 
-        runs = new StatBox(resources, resources.getString("launcher.packstats.runs"), null);
-        runs.setBackground(LauncherFrame.COLOR_FEEDITEM_BACK);
-        runs.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        statBoxes.add(runs);
-
         downloads = new StatBox(resources, resources.getString("launcher.packstats.downloads"), null);
         downloads.setBackground(LauncherFrame.COLOR_FEEDITEM_BACK);
         downloads.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         statBoxes.add(downloads);
+
+        runs = new StatBox(resources, resources.getString("launcher.packstats.runs"), null);
+        runs.setBackground(LauncherFrame.COLOR_FEEDITEM_BACK);
+        runs.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        statBoxes.add(runs);
 
         packInfoPanel.add(statBoxes, new GridBagConstraints(0,2,3,1,0.0,0.0,GridBagConstraints.SOUTH, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
 
