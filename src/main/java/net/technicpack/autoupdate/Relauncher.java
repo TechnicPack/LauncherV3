@@ -38,6 +38,8 @@ import java.util.logging.Level;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.IOUtils;
 
+import javax.swing.*;
+
 public class Relauncher {
     private IUpdateStream updateStream;
 
@@ -104,6 +106,9 @@ public class Relauncher {
 
         try {
             processBuilder.start();
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "Your OS has prevented this relaunch from completing.  You may need to add an exception in your security software.", "Relaunch Failed", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
