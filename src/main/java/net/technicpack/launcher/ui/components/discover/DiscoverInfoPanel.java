@@ -59,10 +59,10 @@ public class DiscoverInfoPanel extends TiledBackground {
         panel.addMouseTrackingListener(new DiscoverLinkListener(platform));
 
         DelegatingUserAgent uac = new DelegatingUserAgent();
-        ImageResourceLoader imageLoader = new ImageResourceLoader();
+        ImageResourceLoader imageLoader = new DiscoverResourceLoader();
         imageLoader.setRepaintListener(panel);
+        imageLoader.clear();
         uac.setImageResourceLoader(imageLoader);
-        panel.getSharedContext().setUserAgentCallback(uac);
         panel.getSharedContext().getTextRenderer().setSmoothingThreshold(6.0f);
 
         SwingReplacedElementFactory factory = new SwingReplacedElementFactory(panel, imageLoader);
