@@ -49,25 +49,13 @@ public class FeedItemView extends JButton {
 
         add(Box.createVerticalGlue(), new GridBagConstraints(0,0,3,1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
 
-        JButton button = new JButton();
-        button.setBorder(BorderFactory.createEmptyBorder());
-        button.setContentAreaFilled(false);
-        Icon image = loader.getIcon("comment_icon.png");
-        button.setIcon(image);
-        add(button, new GridBagConstraints(2, 1, 1, 1, 0.0,0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,0,0,0), 0,0));
-        button.setBounds(250-image.getIconWidth(), 102 + (15 - image.getIconHeight()/2), image.getIconWidth(), image.getIconHeight());
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                fireActionPerformed(new ActionEvent(FeedItemView.this, e.getID(), "discuss", e.getWhen(), e.getModifiers()));
-            }
-        });
-
         AuthorshipWidget authorship = new AuthorshipWidget(loader, feedItem.getAuthorship(), avatar);
         add(authorship, new GridBagConstraints(0,1,1,1,0.0,0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,0,0,0), 0,0));
         authorship.setBounds(0, 0, getWidth(), getHeight());
 
         add(Box.createHorizontalGlue(), new GridBagConstraints(1,1,1,1,1.0,0.0,GridBagConstraints.CENTER,GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
+
+        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 
     public String getUrl() {

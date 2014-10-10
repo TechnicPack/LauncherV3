@@ -105,9 +105,11 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
     }
 
     protected void clickFeedItem(FeedItemView item, String command) {
-        if (command != null && command.equalsIgnoreCase("discuss")) {
+        Rectangle r = item.getVisibleRect();
+
+        if (r.getSize().equals(item.getSize()))
             DesktopUtils.browseUrl(item.getUrl());
-        } else
+        else
             feedGallery.selectComponent(item);
     }
 
