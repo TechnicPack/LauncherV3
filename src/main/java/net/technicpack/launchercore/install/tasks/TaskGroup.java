@@ -30,6 +30,7 @@ public class TaskGroup implements ITasksQueue, IInstallTask {
     private final LinkedList<IInstallTask> taskList = new LinkedList<IInstallTask>();
 
     private int taskProgress = 0;
+    private String fileName = "";
 
     public TaskGroup(String name) {
         this.groupName = name;
@@ -37,7 +38,7 @@ public class TaskGroup implements ITasksQueue, IInstallTask {
 
     @Override
     public String getTaskDescription() {
-        return groupName;
+        return groupName.replace("%s", fileName);
     }
 
     @Override
@@ -57,6 +58,7 @@ public class TaskGroup implements ITasksQueue, IInstallTask {
     public void runTask(InstallTasksQueue queue) throws IOException {
         while (taskProgress < taskList.size()) {
             IInstallTask currentTask = taskList.get(taskProgress);
+            fileName = currentTask.getTaskDescription();
             currentTask.runTask(queue);
             queue.refreshProgress();
             taskProgress++;
