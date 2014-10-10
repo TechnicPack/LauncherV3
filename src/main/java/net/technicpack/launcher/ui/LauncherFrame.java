@@ -53,6 +53,7 @@ import net.technicpack.launchercore.modpacks.InstalledPack;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.AuthorshipInfo;
+import net.technicpack.utilslib.DesktopUtils;
 import net.technicpack.utilslib.PasteWatcher;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
@@ -357,8 +358,17 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.add(header, BorderLayout.PAGE_START);
 
         ImageIcon headerIcon = resources.getIcon("platform_icon_title.png");
-        JLabel headerLabel = new JLabel(headerIcon);
+        JButton headerLabel = new JButton(headerIcon);
         headerLabel.setBorder(BorderFactory.createEmptyBorder(5,8,5,0));
+        headerLabel.setContentAreaFilled(false);
+        headerLabel.setFocusPainted(false);
+        headerLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        headerLabel.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DesktopUtils.browseUrl("http://beta.technicpack.net/");
+            }
+        });
         header.add(headerLabel);
 
         header.add(Box.createRigidArea(new Dimension(6, 0)));
