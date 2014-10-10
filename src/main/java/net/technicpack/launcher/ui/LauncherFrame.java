@@ -171,13 +171,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
         selectTab("discover");
 
-        discoverInfoPanel.setFirstLoadListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                selectTab("modpacks");
-            }
-        });
-
         LauncherMain.consoleFrame.setVisible(settings.getShowConsole());
     }
 

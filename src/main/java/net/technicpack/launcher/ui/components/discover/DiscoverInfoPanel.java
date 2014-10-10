@@ -37,8 +37,6 @@ import java.awt.event.ActionListener;
 public class DiscoverInfoPanel extends TiledBackground {
 
     final private XHTMLPanel panel;
-    private boolean completedFirstLoad = false;
-    private ActionListener completedFirstLoadListener = null;
 
     public DiscoverInfoPanel(ResourceLoader loader, String discoverUrl, HttpPlatformApi platform) {
         super(loader.getImage("background_repeat2.png"));
@@ -70,31 +68,6 @@ public class DiscoverInfoPanel extends TiledBackground {
         panel.getSharedContext().setReplacedElementFactory(factory);
         panel.getSharedContext().setFontMapping("Raleway", loader.getFont(ResourceLoader.FONT_RALEWAY, 12));
 
-        panel.addDocumentListener(new DocumentListener() {
-            @Override
-            public void documentStarted() {
-
-            }
-
-            @Override
-            public void documentLoaded() {
-                if (!completedFirstLoad) {
-                    completedFirstLoad = true;
-                    completedFirstLoadListener.actionPerformed(new ActionEvent(DiscoverInfoPanel.this, 0, ""));
-                }
-            }
-
-            @Override
-            public void onLayoutException(Throwable throwable) {
-
-            }
-
-            @Override
-            public void onRenderException(Throwable throwable) {
-
-            }
-        });
-
         EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -103,9 +76,5 @@ public class DiscoverInfoPanel extends TiledBackground {
         });
 
         add(panel, BorderLayout.CENTER);
-    }
-
-    public void setFirstLoadListener(ActionListener completedFirstLoadListener) {
-        this.completedFirstLoadListener = completedFirstLoadListener;
     }
 }
