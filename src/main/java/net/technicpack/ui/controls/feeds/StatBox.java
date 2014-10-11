@@ -25,7 +25,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.text.NumberFormat;
 
-public class StatBox extends JPanel {
+public class StatBox extends JButton {
     private ResourceLoader resources;
 
     JLabel fieldLabel;
@@ -71,6 +71,9 @@ public class StatBox extends JPanel {
     }
 
     private void initComponents(String fieldName) {
+        this.setContentAreaFilled(false);
+        this.setFocusPainted(false);
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         this.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 3));
 
