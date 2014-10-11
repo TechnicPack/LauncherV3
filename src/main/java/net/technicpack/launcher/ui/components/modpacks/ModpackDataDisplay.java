@@ -31,10 +31,7 @@ import net.technicpack.utilslib.ImageUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
+import java.awt.event.*;
 
 public class ModpackDataDisplay extends JPanel implements IImageJobListener<ModpackModel> {
     private ResourceLoader resources;
@@ -133,19 +130,29 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         statBoxes.setOpaque(false);
         statBoxes.setBorder(BorderFactory.createEmptyBorder(5,0,0,0));
 
+        ActionListener listener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DesktopUtils.browseUrl(packSiteUrl);
+            }
+        };
+
         ratings = new StatBox(resources, resources.getString("launcher.packstats.ratings"), null);
         ratings.setBackground(LauncherFrame.COLOR_LIKES_BACK);
         ratings.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        ratings.addActionListener(listener);
         statBoxes.add(ratings);
 
         downloads = new StatBox(resources, resources.getString("launcher.packstats.downloads"), null);
         downloads.setBackground(LauncherFrame.COLOR_FEEDITEM_BACK);
         downloads.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        downloads.addActionListener(listener);
         statBoxes.add(downloads);
 
         runs = new StatBox(resources, resources.getString("launcher.packstats.runs"), null);
         runs.setBackground(LauncherFrame.COLOR_FEEDITEM_BACK);
         runs.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        runs.addActionListener(listener);
         statBoxes.add(runs);
 
         packInfoPanel.add(statBoxes, new GridBagConstraints(0,2,3,1,0.0,0.0,GridBagConstraints.SOUTH, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
@@ -158,6 +165,33 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         titleLabel.setHorizontalAlignment(SwingConstants.LEFT);
         titleLabel.setHorizontalTextPosition(SwingConstants.LEFT);
         titleLabel.setAlignmentX(LEFT_ALIGNMENT);
+        titleLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        titleLabel.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                DesktopUtils.browseUrl(packSiteUrl);
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
         packInfoPanel.add(titleLabel, new GridBagConstraints(0,0,4,1,1.0,0.0,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0));
 
         description = new JTextArea("");
@@ -169,6 +203,33 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         description.setHighlighter(null);
         description.setAlignmentX(LEFT_ALIGNMENT);
         description.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        description.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        description.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                DesktopUtils.browseUrl(packSiteUrl);
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
         description.setBorder(BorderFactory.createEmptyBorder(3,5,5,3));
 
         JScrollPane scrollPane = new JScrollPane(description, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
