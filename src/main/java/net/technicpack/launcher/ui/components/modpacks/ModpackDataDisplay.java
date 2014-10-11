@@ -26,10 +26,13 @@ import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.utilslib.DesktopUtils;
 import net.technicpack.utilslib.ImageUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 
@@ -39,11 +42,13 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
 
     private JLabel titleLabel;
     private JTextArea description;
-    private JLabel packImage;
+    private JButton packImage;
 
     private StatBox ratings;
     private StatBox runs;
     private StatBox downloads;
+
+    private String packSiteUrl;
 
     private ModpackModel currentModpack;
 
@@ -62,6 +67,10 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
 
     public void setModpack(ModpackModel modpack) {
         this.currentModpack = modpack;
+        this.packSiteUrl = modpack.getWebSite();
+
+        if (this.packSiteUrl == null)
+            this.packSiteUrl = "http://beta.technicpack.net/";
 
         titleLabel.setText(resources.getString("launcher.packstats.title", modpack.getDisplayName()));
         description.setText(modpack.getDescription());
@@ -96,10 +105,20 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         imagePanel.setPreferredSize(new Dimension(370, 220));
         this.add(imagePanel, BorderLayout.LINE_START);
 
-        packImage = new JLabel();
+        packImage = new JButton(resources.getIcon("modpack/ModImageFiller.png"));
         packImage.setIcon(resources.getIcon("modpack/ModImageFiller.png"));
         packImage.setAlignmentX(RIGHT_ALIGNMENT);
         packImage.setPreferredSize(new Dimension(370, 220));
+        packImage.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        packImage.setBorder(BorderFactory.createEmptyBorder());
+        packImage.setContentAreaFilled(false);
+        packImage.setFocusPainted(false);
+        packImage.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DesktopUtils.browseUrl(packSiteUrl);
+            }
+        });
         imagePanel.add(packImage);
 
         JPanel packInfoPanel = new JPanel();
