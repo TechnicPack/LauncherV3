@@ -34,6 +34,8 @@ public interface PackInfo {
 
 	public String getUrl();
 
+    public String getWebSite();
+
 	public Resource getIcon();
 
 	public Resource getBackground();

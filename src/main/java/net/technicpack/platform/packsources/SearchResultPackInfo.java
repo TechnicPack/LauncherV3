@@ -53,6 +53,9 @@ public class SearchResultPackInfo implements PackInfo {
     }
 
     @Override
+    public String getWebSite() { return null; }
+
+    @Override
     public Resource getIcon() {
         return null;
     }

@@ -70,6 +70,16 @@ public class CombinedPackInfo implements PackInfo {
     }
 
     @Override
+    public String getWebSite() {
+        for (PackInfo component: componentInfos) {
+            if (component.getWebSite() != null)
+                return component.getWebSite();
+        }
+
+        return null;
+    }
+
+    @Override
     public Resource getIcon() {
         for (PackInfo component : componentInfos) {
             if (component.getIcon() != null)

@@ -73,6 +73,9 @@ public class SolderPackInfo extends RestObject implements PackInfo {
 		return url;
 	}
 
+    @Override
+    public String getWebSite() { return null; }
+
 	@Override
 	public Resource getIcon() {
 		if (icon == null) {

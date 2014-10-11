@@ -32,6 +32,7 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 	private String name;
 	private String displayName;
 	private String url;
+    private String platformUrl;
 	private Resource icon;
 	private Resource logo;
 	private Resource background;
@@ -64,6 +65,9 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 	public String getUrl() {
 		return url;
 	}
+
+    @Override
+    public String getWebSite() { return platformUrl; }
 
 	@Override
 	public Resource getIcon() {
