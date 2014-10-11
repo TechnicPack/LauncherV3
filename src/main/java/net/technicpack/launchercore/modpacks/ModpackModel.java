@@ -138,6 +138,13 @@ public class ModpackModel {
             return getBuild();
     }
 
+    public String getWebSite() {
+        if (getPackInfo() == null)
+            return null;
+
+        return getPackInfo().getWebSite();
+    }
+
     public Resource getIcon() {
         if (packInfo == null)
             return null;
