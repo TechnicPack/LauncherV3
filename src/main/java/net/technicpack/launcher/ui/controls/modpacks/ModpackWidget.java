@@ -51,25 +51,21 @@ public class ModpackWidget extends SelectorWidget implements IImageJobListener<M
     protected void initComponents() {
         super.initComponents();
         setBorder(BorderFactory.createEmptyBorder(4,20,4,8));
+        setLayout(new GridBagLayout());
 
         icon = new JLabel();
         icon.setIcon(new ImageIcon(ImageUtils.scaleWithAspectWidth(imageJob.getImage(), 32)));
-        add(icon);
-
-        add(Box.createHorizontalStrut(14));
+        add(icon, new GridBagConstraints(0,0,1,1,0,0,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,0,0,14),0,0));
 
         JLabel text = new JLabel(modpack.getDisplayName());
         text.setFont(getResources().getFont(ResourceLoader.FONT_OPENSANS, 14));
         text.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        text.setPreferredSize(new Dimension(210, text.getPreferredSize().height));
-        add(text);
-
-        add(Box.createHorizontalGlue());
-
+        text.setMaximumSize(new Dimension(210, text.getPreferredSize().height));
+        add(text, new GridBagConstraints(1,0,1,1,1,0,GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
         if (modpack.hasRecommendedUpdate()) {
             JLabel updateIcon = new JLabel();
             updateIcon.setIcon(getResources().getIcon("update_available.png"));
-            add(updateIcon);
+            add(updateIcon, new GridBagConstraints(2,0,1,1,0,0,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,0,0,0),0,0));
         }
     }
 
