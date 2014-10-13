@@ -133,7 +133,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         ActionListener listener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                DesktopUtils.browseUrl(packSiteUrl);
+                DesktopUtils.browseUrl(packSiteUrl+"/about");
             }
         };
 
@@ -169,7 +169,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         titleLabel.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                DesktopUtils.browseUrl(packSiteUrl);
+                DesktopUtils.browseUrl(packSiteUrl+"/about");
             }
 
             @Override
@@ -207,7 +207,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         description.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                DesktopUtils.browseUrl(packSiteUrl);
+                DesktopUtils.browseUrl(packSiteUrl+"/about");
             }
 
             @Override
