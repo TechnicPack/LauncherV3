@@ -133,7 +133,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         ActionListener listener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                DesktopUtils.browseUrl(packSiteUrl+"/about");
+                DesktopUtils.browseUrl(packSiteUrl);
             }
         };
 
