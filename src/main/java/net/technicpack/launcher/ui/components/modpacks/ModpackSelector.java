@@ -38,6 +38,7 @@ import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.utilslib.PasteWatcher;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
@@ -68,6 +69,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
     private Map<String, ModpackWidget> allModpacks = new HashMap<String, ModpackWidget>();
     private ModpackWidget selectedWidget;
     private PackLoadJob currentLoadJob;
+    private Timer currentSearchTimer;
 
     private String lastFilterContents = "";
 
@@ -333,9 +335,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
     }
 
     protected void detectFilterChanges() {
-        if (currentLoadJob != null) {
-            currentLoadJob.cancel();
-        }
+        cancelJob();
 
         if (filterContents.getText().length() >= 3) {
             if (currentLoadJob == null || currentLoadJob.isCancelled()) {
@@ -364,9 +364,25 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         setTintActive(true);
         defaultPacks.removePassthroughContainer(this);
 
-        ArrayList<IPackSource> sources = new ArrayList<IPackSource>(2);
-        sources.add(new NameFilterPackSource(defaultPacks, filterContents.getText()));
-        sources.add(new SearchResultPackSource(platformApi, filterContents.getText()));
-        currentLoadJob = packLoader.createRepositoryLoadJob(this, sources, null, false);
+        currentSearchTimer = new Timer(500, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ArrayList<IPackSource> sources = new ArrayList<IPackSource>(2);
+                sources.add(new NameFilterPackSource(defaultPacks, filterContents.getText()));
+                sources.add(new SearchResultPackSource(platformApi, filterContents.getText()));
+                currentLoadJob = packLoader.createRepositoryLoadJob(ModpackSelector.this, sources, null, false);
+            }
+        });
+        currentSearchTimer.setRepeats(false);
+        currentSearchTimer.start();
+    }
+
+    private void cancelJob() {
+        if (currentLoadJob != null)
+            currentLoadJob.cancel();
+
+        if (currentSearchTimer != null) {
+            currentSearchTimer.stop();
+        }
     }
 }
