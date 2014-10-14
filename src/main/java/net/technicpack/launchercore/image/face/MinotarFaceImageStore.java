@@ -38,6 +38,11 @@ public class MinotarFaceImageStore implements IImageStore<IUserType> {
 	}
 
     @Override
+    public boolean canDownloadImage(IUserType user, File location) {
+        return true;
+    }
+
+    @Override
     public void downloadImage(IUserType user, File location) {
         try {
             mirrorStore.downloadFile(mBaseUrl+"helm/"+user.getDisplayName()+"/100", user.getDisplayName(), location.getAbsolutePath());

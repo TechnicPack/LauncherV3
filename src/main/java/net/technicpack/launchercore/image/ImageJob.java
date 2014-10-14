@@ -100,9 +100,6 @@ public class ImageJob<T> {
                 try {
                     File imageLocation = mapper.getImageLocation(jobData);
 
-                    if (imageLocation != null && !imageLocation.getParentFile().exists())
-                        imageLocation.getParentFile().mkdirs();
-
                     BufferedImage existingImage = null;
 
                     if (imageLocation != null && imageLocation.exists()) {
@@ -116,7 +113,10 @@ public class ImageJob<T> {
                     if (existingImage != null)
                         setImage(existingImage);
 
-                    if (existingImage == null || mapper.shouldDownloadImage(jobData)) {
+                    if (store.canDownloadImage(jobData, imageLocation) && (existingImage == null || mapper.shouldDownloadImage(jobData))) {
+                        if (imageLocation != null && !imageLocation.getParentFile().exists())
+                            imageLocation.getParentFile().mkdirs();
+
                         store.downloadImage(jobData, imageLocation);
 
                         try {

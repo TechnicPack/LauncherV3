@@ -43,6 +43,14 @@ public class PackImageStore implements IImageStore<ModpackModel> {
     }
 
     @Override
+    public boolean canDownloadImage(ModpackModel key, File target) {
+        Resource res = resourceType.getResource(key);
+        if (res == null || res.getUrl() == null || res.getUrl().isEmpty())
+            return false;
+        return true;
+    }
+
+    @Override
     public void downloadImage(ModpackModel key, File target) {
         Resource res = resourceType.getResource(key);
 

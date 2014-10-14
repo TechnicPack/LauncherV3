@@ -36,6 +36,11 @@ public class WebAvatarImageStore implements IImageStore<AuthorshipInfo> {
     }
 
     @Override
+    public boolean canDownloadImage(AuthorshipInfo key, File target) {
+        return true;
+    }
+
+    @Override
     public void downloadImage(AuthorshipInfo key, File target) {
         try {
             mirrorStore.downloadFile(key.getAvatar(), key.getUser(), target.getAbsolutePath());
