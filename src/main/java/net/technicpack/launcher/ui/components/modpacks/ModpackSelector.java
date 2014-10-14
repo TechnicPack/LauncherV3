@@ -28,6 +28,8 @@ import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.platform.packsources.SearchResultPackSource;
 import net.technicpack.rest.RestObject;
+import net.technicpack.rest.io.Modpack;
+import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.ui.controls.list.SimpleScrollbarUI;
@@ -50,7 +52,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
-public class ModpackSelector extends JPanel implements IModpackContainer, IAuthListener<IUserType> {
+public class ModpackSelector extends TintablePanel implements IModpackContainer, IAuthListener<IUserType> {
     private ResourceLoader resources;
     private PackLoader packLoader;
     private IPackSource technicSolder;
@@ -75,6 +77,9 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
         this.iconRepo = iconRepo;
         this.technicSolder = techicSolder;
         this.platformApi = platformApi;
+
+        this.setOverIcon(resources.getIcon("loader.gif"));
+        this.setTintActive(true);
 
         initComponents();
     }
@@ -171,11 +176,16 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
     @Override
     public void replaceModpackInContainer(ModpackModel modpack) {
         if (allModpacks.containsKey(modpack.getName()))
-            addModpackToContainer(modpack);
+            addModpackInternal(modpack);
     }
 
     @Override
     public void addModpackToContainer(ModpackModel modpack) {
+        setTintActive(true);
+        addModpackInternal(modpack);
+    }
+
+    protected void addModpackInternal(ModpackModel modpack) {
         final ModpackWidget widget = new ModpackWidget(resources, modpack, iconRepo.startImageJob(modpack));
         widget.addActionListener(new ActionListener() {
             @Override
@@ -211,6 +221,8 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
 
     @Override
     public void refreshComplete() {
+        setTintActive(false);
+
         if (selectedWidget == null || selectedWidget.getModpack() == null || !allModpacks.containsKey(selectedWidget.getModpack().getName())) {
             java.util.List<ModpackWidget> sortedPacks = new LinkedList<ModpackWidget>();
             sortedPacks.addAll(allModpacks.values());
@@ -342,12 +354,14 @@ public class ModpackSelector extends JPanel implements IModpackContainer, IAuthL
             for(ModpackModel modpack : defaultPacks.getModpacks()) {
                 addModpackToContainer(modpack);
             }
+            refreshComplete();
         }
 
         lastFilterContents = filterContents.getText();
     }
 
     private void loadNewJob() {
+        setTintActive(true);
         defaultPacks.removePassthroughContainer(this);
 
         ArrayList<IPackSource> sources = new ArrayList<IPackSource>(2);
