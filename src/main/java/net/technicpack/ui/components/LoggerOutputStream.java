@@ -45,9 +45,6 @@ public class LoggerOutputStream extends ByteArrayOutputStream {
 
         if (record.length() > 0 && !record.equals(separator)) {
             log.logp(level, "LoggerOutputStream", "log" + level, record);
-            if (console != null) {
-                console.log(record + "\n");
-            }
         }
     }
 }
