@@ -25,6 +25,7 @@ import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.ui.controls.DraggableFrame;
 import net.technicpack.ui.controls.RoundedButton;
+import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.controls.borders.RoundBorder;
 import net.technicpack.ui.controls.lang.LanguageCellRenderer;
 import net.technicpack.ui.controls.lang.LanguageCellUI;
@@ -39,6 +40,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -64,12 +67,16 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
     private TechnicSettings settings;
 
+    private JPanel glassPane;
+
     public InstallerFrame(ResourceLoader resources, StartupParameters params) {
         this.resources = resources;
         this.params = params;
         this.settings = new TechnicSettings();
         this.settings.setFilePath(new File(SettingsFactory.getTechnicHomeDir(), "settings.json"));
         this.settings.getTechnicRoot();
+
+        addGlassPane();
 
         relocalize(resources);
     }
@@ -79,7 +86,52 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         this.resources = resources;
         this.params = params;
 
+        addGlassPane();
+
         relocalize(resources);
+    }
+
+    private void addGlassPane() {
+        glassPane = new JPanel() {
+            @Override
+            public void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.setColor(LauncherFrame.COLOR_CENTRAL_BACK);
+                g.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+        glassPane.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                e.consume();
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                e.consume();
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                e.consume();
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                e.consume();
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                e.consume();
+            }
+        });
+        glassPane.setOpaque(false);
+        glassPane.setLayout(new GridBagLayout());
+
+        JLabel spinner = new JLabel(resources.getIcon("loader.gif"));
+        glassPane.add(spinner);
+        setGlassPane(glassPane);
     }
 
     protected void standardLanguageChanged() {
@@ -95,52 +147,60 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
     }
 
     protected void standardInstall() {
-        File oldSettings = settings.getFilePath();
-        File newSettings = new File(SettingsFactory.getTechnicHomeDir(), "settings.json");
+        glassPane.setVisible(true);
 
-        if (oldSettings.exists() && !oldSettings.getAbsolutePath().equals(newSettings.getAbsolutePath())) {
-            oldSettings.delete();
-        }
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                File oldSettings = settings.getFilePath();
+                File newSettings = new File(SettingsFactory.getTechnicHomeDir(), "settings.json");
 
-        File oldRoot = settings.getTechnicRoot();
-        File newRoot = new File(standardInstallDir.getText());
-        boolean rootHasChanged = false;
+                if (oldSettings.exists() && !oldSettings.getAbsolutePath().equals(newSettings.getAbsolutePath())) {
+                    oldSettings.delete();
+                }
 
-        if (oldRoot.exists() && !oldRoot.getAbsolutePath().equals(newRoot.getAbsolutePath())) {
-            rootHasChanged = true;
-            try {
-                if (!newRoot.exists())
-                    newRoot.mkdirs();
+                File oldRoot = settings.getTechnicRoot();
+                File newRoot = new File(standardInstallDir.getText());
+                boolean rootHasChanged = false;
 
-                FileUtils.copyDirectory(oldRoot, newRoot);
-                FileUtils.deleteDirectory(oldRoot);
-            } catch (IOException ex) {
-                Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ",ex);
+                if (oldRoot.exists() && !oldRoot.getAbsolutePath().equals(newRoot.getAbsolutePath())) {
+                    rootHasChanged = true;
+                    try {
+                        if (!newRoot.exists())
+                            newRoot.mkdirs();
+
+                        FileUtils.copyDirectory(oldRoot, newRoot);
+                        FileUtils.deleteDirectory(oldRoot);
+                    } catch (IOException ex) {
+                        Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ",ex);
+                    }
+                }
+
+                settings.setFilePath(newSettings);
+
+                if (settings.isPortable() || rootHasChanged || !standardInstallDir.getText().equals(SettingsFactory.getTechnicHomeDir().getAbsolutePath()))
+                    settings.installTo(standardInstallDir.getText());
+                settings.getTechnicRoot();
+                settings.setLanguageCode(((LanguageItem)standardLanguages.getSelectedItem()).getLangCode());
+                settings.save();
+
+                Relauncher relauncher = new Relauncher(null);
+                try {
+                    String currentPath = relauncher.getRunningPath(LauncherMain.class);
+                    relauncher.launch(currentPath, LauncherMain.class, params.getArgs());
+                    System.exit(0);
+                    return;
+                } catch (UnsupportedEncodingException ex) {
+                    ex.printStackTrace();
+                    return;
+                }
             }
-        }
-
-        settings.setFilePath(newSettings);
-
-        if (settings.isPortable() || rootHasChanged || !standardInstallDir.getText().equals(SettingsFactory.getTechnicHomeDir().getAbsolutePath()))
-            settings.installTo(standardInstallDir.getText());
-        settings.getTechnicRoot();
-        settings.setLanguageCode(((LanguageItem)standardLanguages.getSelectedItem()).getLangCode());
-        settings.save();
-
-        Relauncher relauncher = new Relauncher(null);
-        try {
-            String currentPath = relauncher.getRunningPath(LauncherMain.class);
-            relauncher.launch(currentPath, LauncherMain.class, params.getArgs());
-            System.exit(0);
-            return;
-        } catch (UnsupportedEncodingException ex) {
-            ex.printStackTrace();
-            return;
-        }
+        });
+        thread.start();
     }
 
     protected void portableInstall() {
-        Relauncher relauncher = new Relauncher(null);
+        final Relauncher relauncher = new Relauncher(null);
         String targetPath = null;
         try {
             String currentPath = relauncher.getRunningPath(LauncherMain.class);
@@ -161,38 +221,47 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
             return;
         }
 
-        File oldRoot = settings.getTechnicRoot();
-        File newRoot = new File(portableInstallDir.getText(), "technic");
+        glassPane.setVisible(true);
 
-        File oldSettingsFile = settings.getFilePath();
-        File newSettingsFile = new File(newRoot, "settings.json");
+        final String threadTargetPath = targetPath;
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                File oldRoot = settings.getTechnicRoot();
+                File newRoot = new File(portableInstallDir.getText(), "technic");
 
-        if (oldSettingsFile.exists() && !oldSettingsFile.getAbsolutePath().equals(newSettingsFile.getAbsolutePath()))
-            oldSettingsFile.delete();
+                File oldSettingsFile = settings.getFilePath();
+                File newSettingsFile = new File(newRoot, "settings.json");
 
-        boolean rootHasChanged = false;
+                if (oldSettingsFile.exists() && !oldSettingsFile.getAbsolutePath().equals(newSettingsFile.getAbsolutePath()))
+                    oldSettingsFile.delete();
 
-        if (oldRoot.exists() && !oldRoot.getAbsolutePath().equals(newRoot.getAbsolutePath())) {
-            rootHasChanged = true;
-            try {
-                if (!newRoot.exists())
-                    newRoot.mkdirs();
+                boolean rootHasChanged = false;
 
-                FileUtils.copyDirectory(oldRoot, newRoot);
-                FileUtils.deleteDirectory(oldRoot);
-            } catch (IOException ex) {
-                Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ",ex);
+                if (oldRoot.exists() && !oldRoot.getAbsolutePath().equals(newRoot.getAbsolutePath())) {
+                    rootHasChanged = true;
+                    try {
+                        if (!newRoot.exists())
+                            newRoot.mkdirs();
+
+                        FileUtils.copyDirectory(oldRoot, newRoot);
+                        FileUtils.deleteDirectory(oldRoot);
+                    } catch (IOException ex) {
+                        Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ",ex);
+                    }
+                }
+
+                settings.setPortable();
+                settings.setFilePath(newSettingsFile);
+                settings.getTechnicRoot();
+                settings.setLanguageCode(((LanguageItem)portableLanguages.getSelectedItem()).getLangCode());
+                settings.save();
+
+                relauncher.launch(threadTargetPath, LauncherMain.class, params.getArgs());
+                System.exit(0);
             }
-        }
-
-        settings.setPortable();
-        settings.setFilePath(newSettingsFile);
-        settings.getTechnicRoot();
-        settings.setLanguageCode(((LanguageItem)portableLanguages.getSelectedItem()).getLangCode());
-        settings.save();
-
-        relauncher.launch(targetPath, LauncherMain.class, params.getArgs());
-        System.exit(0);
+        });
+        thread.start();
     }
 
     protected void selectPortable() {
