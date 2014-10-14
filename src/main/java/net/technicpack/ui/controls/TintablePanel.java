@@ -50,8 +50,11 @@ public class TintablePanel extends JPanel {
     public boolean isTintActive() { return tintActive; }
     public void setTintActive(boolean tintActive) {
         this.tintActive = tintActive;
-        overIcon.setVisible(tintActive);
-        revalidate();
+
+        if (overIcon != null) {
+            overIcon.setVisible(tintActive);
+            revalidate();
+        }
         repaint();
     }
 
