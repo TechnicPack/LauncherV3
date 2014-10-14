@@ -147,7 +147,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     }
 
     protected void reinstall() {
-        final InstallerFrame frame = new InstallerFrame(resources, params, settings);
+        final InstallerFrame frame = new InstallerFrame(resources, params, settings, getOwner());
         frame.setVisible(true);
 
         EventQueue.invokeLater(new Runnable() {

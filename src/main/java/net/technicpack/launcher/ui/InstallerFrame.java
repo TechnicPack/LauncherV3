@@ -55,6 +55,8 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
     private ResourceLoader resources;
 
+    private Window mainFrame;
+
     private JCheckBox standardDefaultDirectory;
     private JTextField standardInstallDir;
     private RoundedButton standardSelectButton;
@@ -81,10 +83,13 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         relocalize(resources);
     }
 
-    public InstallerFrame(ResourceLoader resources, StartupParameters params, TechnicSettings settings) {
+    public InstallerFrame(ResourceLoader resources, StartupParameters params, TechnicSettings settings, Window mainFrame) {
         this.settings = settings;
         this.resources = resources;
         this.params = params;
+        this.mainFrame = mainFrame;
+
+        mainFrame.setVisible(false);
 
         addGlassPane();
 
@@ -343,6 +348,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         closeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                mainFrame.setVisible(true);
                 dispose();
             }
         });
