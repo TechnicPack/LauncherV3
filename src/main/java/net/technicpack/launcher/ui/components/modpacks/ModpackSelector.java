@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.ui.components.modpacks;
 
+import net.technicpack.launcher.ui.controls.modpacks.FindMoreWidget;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.modpacks.*;
@@ -35,6 +36,7 @@ import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 import net.technicpack.launcher.ui.controls.modpacks.ModpackWidget;
 import net.technicpack.launchercore.image.ImageRepository;
+import net.technicpack.utilslib.DesktopUtils;
 import net.technicpack.utilslib.PasteWatcher;
 
 import javax.swing.*;
@@ -299,6 +301,17 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         for(ModpackWidget sortedPack : sortedPacks) {
             widgetList.add(sortedPack, constraints);
             constraints.gridy++;
+        }
+
+        if (filterContents.getText().length() >= 3) {
+            FindMoreWidget widget = new FindMoreWidget(resources);
+            widgetList.add(widget, constraints);
+            widget.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    DesktopUtils.browseUrl("http://beta.technicpack.net/modpacks");
+                }
+            });
         }
 
         widgetList.add(Box.createHorizontalStrut(287), constraints);
