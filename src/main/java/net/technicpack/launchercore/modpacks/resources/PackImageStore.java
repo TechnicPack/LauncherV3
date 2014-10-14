@@ -63,6 +63,6 @@ public class PackImageStore implements IImageStore<ModpackModel> {
 
     @Override
     public boolean canRetry(ModpackModel key) {
-        return (key.getPackInfo() != null && !key.getPackInfo().isComplete());
+        return (key.getPackInfo() == null || !key.getPackInfo().isComplete());
     }
 }
