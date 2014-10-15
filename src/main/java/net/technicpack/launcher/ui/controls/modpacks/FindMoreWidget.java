@@ -24,28 +24,22 @@ import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.ImageUtils;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class FindMoreWidget extends SelectorWidget {
     public FindMoreWidget(ResourceLoader resources) {
         super(resources);
 
-        setBorder(BorderFactory.createEmptyBorder(4, 20, 4, 8));
-        setOpaque(false);
-        setContentAreaFilled(false);
-        setFocusPainted(false);
-        setBackground(LauncherFrame.COLOR_CENTRAL_BACK);
+        initComponents();
+        setIsSelected(true);
+
         setLayout(new GridBagLayout());
-
-        JLabel icon = new JLabel();
-        icon.setIcon(new ImageIcon(ImageUtils.scaleWithAspectWidth(resources.getImage("icon.png"), 32)));
-        add(icon, new GridBagConstraints(0,0,1,1,0,0,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,0,0,14),0,0));
-
-        JLabel text = new JLabel(resources.getString("launcher.packselector.more"));
+        setBorder(new EmptyBorder(5,0,5,0));
+        JLabel text = new JLabel(resources.getString("launcher.packselector.more"), JLabel.CENTER);
         text.setFont(getResources().getFont(ResourceLoader.FONT_OPENSANS, 14));
-        text.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        text.setMaximumSize(new Dimension(210, text.getPreferredSize().height));
+        text.setForeground(LauncherFrame.COLOR_DIM_TEXT);
         text.setOpaque(false);
-        add(text, new GridBagConstraints(1,0,1,1,1,0,GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
+        add(text, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
     }
 }

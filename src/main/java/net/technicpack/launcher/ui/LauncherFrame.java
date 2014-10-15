@@ -87,6 +87,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     public static final Color COLOR_BLUE = new Color(16, 108, 163);
     public static final Color COLOR_BLUE_DARKER = new Color(12, 94, 145);
     public static final Color COLOR_WHITE_TEXT = new Color(208,208,208);
+    public static final Color COLOR_DIM_TEXT = new Color(160,160,160);
     public static final Color COLOR_HEADER_TEXT = new Color(255,255,255);
     public static final Color COLOR_CHARCOAL = new Color(31, 31, 31);
     public static final Color COLOR_BANNER = new Color(0, 0, 0, 160);
