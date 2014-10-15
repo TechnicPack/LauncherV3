@@ -50,8 +50,10 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -309,7 +311,12 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
             widget.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    DesktopUtils.browseUrl("http://beta.technicpack.net/modpacks");
+                    String encodedSearch = filterContents.getText();
+                    try {
+                        encodedSearch = URLEncoder.encode(encodedSearch, "UTF-8");
+                    } catch (UnsupportedEncodingException ex) {}
+
+                    DesktopUtils.browseUrl("http://beta.technicpack.net/search/modpacks?q="+encodedSearch);
                 }
             });
         }
