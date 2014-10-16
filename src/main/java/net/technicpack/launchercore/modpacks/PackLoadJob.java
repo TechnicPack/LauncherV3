@@ -185,6 +185,10 @@ public class PackLoadJob implements Runnable {
             processedModpacks.put(name, modpack);
         }
 
+        if (modpack.getInstalledPack() == null && !doLoadRepository && packRepository.getInstalledPacks().containsKey(modpack.getName())) {
+            modpack.setInstalledPack(packRepository.getInstalledPacks().get(modpack.getName()), packRepository);
+        }
+
         Runnable fillDataMethod = null;
         if (modpack.getPackInfo() == null) {
             fillDataMethod = new Runnable() {
