@@ -53,7 +53,7 @@ public class VerifyVersionFilePresentTask implements IInstallTask {
 	}
 
 	@Override
-	public void runTask(InstallTasksQueue queue) throws IOException {
+	public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
 		File versionFile = new File(this.pack.getBinDir(), "version.json");
 		File modpackJar = new File(this.pack.getBinDir(), "modpack.jar");
 

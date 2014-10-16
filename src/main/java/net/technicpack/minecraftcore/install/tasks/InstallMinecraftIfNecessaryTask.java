@@ -49,7 +49,7 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask {
 	}
 
 	@Override
-	public void runTask(InstallTasksQueue queue) throws IOException {
+	public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
 		super.runTask(queue);
 
 		String url = MojangUtils.getVersionDownload(this.minecraftVersion);
