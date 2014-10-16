@@ -72,4 +72,7 @@ public class SearchResultPackSource implements IPackSource {
             return resultPriorities.get(info.getName());
         return 0;
     }
+
+    @Override
+    public boolean isOfficialPack(String slug) { return false; }
 }

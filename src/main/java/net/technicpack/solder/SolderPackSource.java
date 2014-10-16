@@ -32,10 +32,12 @@ import java.util.logging.Level;
 public class SolderPackSource implements IPackSource {
     private String baseUrl;
     private ISolderApi solder;
+    private boolean isOfficialSource;
 
-    public SolderPackSource(String baseUrl, ISolderApi solder) {
+    public SolderPackSource(String baseUrl, ISolderApi solder, boolean isOfficialSource) {
         this.baseUrl = baseUrl;
         this.solder = solder;
+        this.isOfficialSource = isOfficialSource;
     }
 
     @Override
@@ -64,4 +66,7 @@ public class SolderPackSource implements IPackSource {
     public int getPriority(PackInfo pack) {
         return 5000;
     }
+
+    @Override
+    public boolean isOfficialPack(String slug) { return isOfficialSource; }
 }

@@ -41,11 +41,10 @@ public class PackLoadJob implements Runnable {
     private IModpackContainer container;
     private boolean doLoadRepository;
     private Map<String, ModpackModel> processedModpacks = new HashMap<String, ModpackModel>();
-    private boolean officialPackSources;
 
     private boolean isCancelled = false;
 
-    public PackLoadJob(LauncherDirectories directories, IInstalledPackRepository packRepository, IAuthoritativePackSource authoritativeSource, Collection<IPackSource> packSources, IModpackContainer container, IModpackTagBuilder tagBuilder, boolean doLoadRepository, boolean officialPackSources) {
+    public PackLoadJob(LauncherDirectories directories, IInstalledPackRepository packRepository, IAuthoritativePackSource authoritativeSource, Collection<IPackSource> packSources, IModpackContainer container, IModpackTagBuilder tagBuilder, boolean doLoadRepository) {
         this.packRepository = packRepository;
         this.authoritativeSource = authoritativeSource;
         this.packSources = packSources;
@@ -53,7 +52,6 @@ public class PackLoadJob implements Runnable {
         this.tagBuilder = tagBuilder;
         this.directories = directories;
         this.doLoadRepository = doLoadRepository;
-        this.officialPackSources = officialPackSources;
         container.clear();
     }
 
@@ -102,7 +100,7 @@ public class PackLoadJob implements Runnable {
                     @Override
                     public void run() {
                         for (PackInfo info : packSource.getPublicPacks()) {
-                            addPackThreadSafe(null, info, packSource.getPriority(info), officialPackSources);
+                            addPackThreadSafe(null, info, packSource.getPriority(info), packSource.isOfficialPack(info.getName()));
                         }
                     }
                 };
