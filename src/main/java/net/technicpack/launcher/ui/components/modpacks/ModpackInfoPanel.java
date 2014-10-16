@@ -62,6 +62,9 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
     }
 
     public void setModpack(ModpackModel modpack) {
+        for (ActionListener listener : playButton.getActionListeners()) {
+            listener.actionPerformed(new ActionEvent(modpack, 0, ""));
+        }
         modpackRefreshListener.actionPerformed(new ActionEvent(modpack, 0, ""));
         this.modpack = modpack;
         banner.setModpack(modpack);

@@ -498,7 +498,11 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         playButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                launchModpack();
+                if (e.getSource() instanceof ModpackModel) {
+                    setupPlayButtonText((ModpackModel)e.getSource(), userModel.getCurrentUser());
+                } else {
+                    launchModpack();
+                }
             }
         });
 
@@ -604,13 +608,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             this.setVisible(true);
             userWidget.setUser(mojangUser);
 
-            if (installer.isCurrentlyRunning()) {
-                playButton.setText(resources.getString("launcher.pack.launching"));
-            } else if (mojangUser.isOffline()) {
-                playButton.setText(resources.getString("launcher.pack.launch.offline"));
-            } else {
-                playButton.setText(resources.getString("launcher.pack.launch"));
-            }
+            if (modpackSelector.getSelectedPack() != null)
+                setupPlayButtonText(modpackSelector.getSelectedPack(), mojangUser);
 
             if (pasteWatcher == null) {
                 pasteWatcher = new PasteWatcher(new ActionListener() {
@@ -619,6 +618,29 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
                         pasteUpdated((Transferable)e.getSource());
                     }
                 });
+            }
+        }
+    }
+
+    public void setupPlayButtonText(ModpackModel modpack, MojangUser user) {
+        playButton.setEnabled(true);
+        playButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+
+        if (installer.isCurrentlyRunning()) {
+            playButton.setText(resources.getString("launcher.pack.cancel"));
+        } else if (modpack.getInstalledPack() != null && modpack.getInstalledDirectory() != null && modpack.getInstalledDirectory().exists()) {
+            if (userModel.getCurrentUser().isOffline()) {
+                playButton.setText(resources.getString("launcher.pack.launch.offline"));
+            } else {
+                playButton.setText(resources.getString("launcher.pack.launch"));
+            }
+        } else {
+            if (userModel.getCurrentUser().isOffline()) {
+                playButton.setEnabled(false);
+                playButton.setForeground(LauncherFrame.COLOR_GREY_TEXT);
+                playButton.setText(resources.getString("launcher.pack.cannotinstall"));
+            } else {
+                playButton.setText(resources.getString("launcher.pack.install"));
             }
         }
     }
