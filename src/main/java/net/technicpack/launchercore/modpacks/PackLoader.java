@@ -40,8 +40,8 @@ public class PackLoader {
         this.directories = directories;
 	}
 
-    public PackLoadJob createRepositoryLoadJob(IModpackContainer container, Collection<IPackSource> packSources, IModpackTagBuilder tagBuilder, boolean doLoadRepository) {
-        PackLoadJob job = new PackLoadJob(directories, packRepository, authoritativeSource, packSources, container, tagBuilder, doLoadRepository);
+    public PackLoadJob createRepositoryLoadJob(IModpackContainer container, Collection<IPackSource> packSources, IModpackTagBuilder tagBuilder, boolean doLoadRepository, boolean officialPackSources) {
+        PackLoadJob job = new PackLoadJob(directories, packRepository, authoritativeSource, packSources, container, tagBuilder, doLoadRepository, officialPackSources);
         Thread thread = new Thread(job);
         thread.start();
         return job;

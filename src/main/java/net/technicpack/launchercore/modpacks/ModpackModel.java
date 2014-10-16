@@ -46,6 +46,8 @@ public class ModpackModel {
     private String buildName;
     private boolean isPlatform;
 
+    private boolean isOfficial = false;
+
     private File installedDirectory;
     private int priority = 0;
 
@@ -62,6 +64,9 @@ public class ModpackModel {
         buildName = InstalledPack.RECOMMENDED;
         isPlatform = true;
     }
+
+    public boolean isOfficial() { return isOfficial; }
+    public void setOfficial() { isOfficial = true; }
 
     public InstalledPack getInstalledPack() { return installedPack; }
     public PackInfo getPackInfo() { return packInfo; }
