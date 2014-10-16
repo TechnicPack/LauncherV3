@@ -213,9 +213,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     }
 
     protected void launchModpack() {
-        if (installer.isCurrentlyRunning())
-            return;
-
         ModpackModel pack = modpackSelector.getSelectedPack();
 
         if (pack == null || (pack.getInstalledPack() == null && (pack.getPackInfo() == null || !pack.getPackInfo().isComplete())))
@@ -499,7 +496,10 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (e.getSource() instanceof ModpackModel) {
-                    setupPlayButtonText((ModpackModel)e.getSource(), userModel.getCurrentUser());
+                    setupPlayButtonText((ModpackModel) e.getSource(), userModel.getCurrentUser());
+                } else if (installer.isCurrentlyRunning()) {
+                    installer.cancel();
+                    setupPlayButtonText(modpackSelector.getSelectedPack(), userModel.getCurrentUser());
                 } else {
                     launchModpack();
                 }
@@ -628,7 +628,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
         if (installer.isCurrentlyRunning()) {
             playButton.setText(resources.getString("launcher.pack.cancel"));
-        } else if (modpack.getInstalledPack() != null && modpack.getInstalledDirectory() != null && modpack.getInstalledDirectory().exists()) {
+        } else if (modpack.getInstalledVersion() != null) {
             if (userModel.getCurrentUser().isOffline()) {
                 playButton.setText(resources.getString("launcher.pack.launch.offline"));
             } else {

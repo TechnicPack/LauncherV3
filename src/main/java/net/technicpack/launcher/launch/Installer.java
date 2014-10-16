@@ -74,6 +74,10 @@ public class Installer {
         this.directories = directories;
     }
 
+    public void cancel() {
+        runningThread.interrupt();
+    }
+
     public void installAndRun(final ResourceLoader resources, final ModpackModel pack, final String build, final boolean doFullInstall, final LauncherFrame frame, final DownloadListener listener) {
         runningThread = new Thread(new Runnable() {
             @Override
