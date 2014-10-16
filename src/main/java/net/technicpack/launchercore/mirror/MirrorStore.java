@@ -109,7 +109,7 @@ public class MirrorStore {
         int tries = DOWNLOAD_RETRIES;
         File outputFile = null;
         Download download = null;
-        while (tries > 0 && !Thread.interrupted()) {
+        while (tries > 0) {
             Utils.getLogger().info("Starting download of " + url + ", with " + tries + " tries remaining");
             tries--;
             download = new Download(getFullUrl(url), name, output);

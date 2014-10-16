@@ -54,7 +54,7 @@ public class DownloadFileTask extends ListenerTask {
 
 		queue.getMirrorStore().downloadFile(url, this.destination.getName(), this.destination.getAbsolutePath(), null, fileVerifier, this);
 
-		if (!Thread.interrupted() && !this.destination.exists()) {
+		if (!this.destination.exists()) {
 			throw new DownloadException("Failed to download "+this.destination.getName()+".");
 		}
 	}
