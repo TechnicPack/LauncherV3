@@ -44,7 +44,7 @@ public class UnzipFileTask extends ListenerTask {
 	}
 
 	@Override
-	public void runTask(InstallTasksQueue queue) throws IOException {
+	public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
 		super.runTask(queue);
 
 		if (!zipFile.exists()) {

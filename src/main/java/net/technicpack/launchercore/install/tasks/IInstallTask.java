@@ -27,5 +27,5 @@ public interface IInstallTask {
 	String getTaskDescription();
 	float getTaskProgress();
 
-	void runTask(InstallTasksQueue queue) throws IOException;
+	void runTask(InstallTasksQueue queue) throws IOException, InterruptedException;
 }

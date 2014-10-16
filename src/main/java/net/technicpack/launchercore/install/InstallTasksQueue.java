@@ -44,7 +44,7 @@ public class InstallTasksQueue<VersionData> implements ITasksQueue {
 		listener.stateChanged(currentTask.getTaskDescription(), currentTask.getTaskProgress());
 	}
 
-	public void runAllTasks() throws IOException {
+	public void runAllTasks() throws IOException, InterruptedException {
 		while (!tasks.isEmpty()) {
 			currentTask = tasks.removeFirst();
 			refreshProgress();

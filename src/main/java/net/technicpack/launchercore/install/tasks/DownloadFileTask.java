@@ -49,12 +49,12 @@ public class DownloadFileTask extends ListenerTask {
 	}
 
 	@Override
-	public void runTask(InstallTasksQueue queue) throws IOException {
+	public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
 		super.runTask(queue);
 
 		queue.getMirrorStore().downloadFile(url, this.destination.getName(), this.destination.getAbsolutePath(), null, fileVerifier, this);
 
-		if (!this.destination.exists()) {
+		if (!Thread.interrupted() && !this.destination.exists()) {
 			throw new DownloadException("Failed to download "+this.destination.getName()+".");
 		}
 	}

@@ -44,6 +44,8 @@ public class WebAvatarImageStore implements IImageStore<AuthorshipInfo> {
     public void downloadImage(AuthorshipInfo key, File target) {
         try {
             mirrorStore.downloadFile(key.getAvatar(), key.getUser(), target.getAbsolutePath());
+        } catch (InterruptedException ex) {
+            //User cancel
         } catch (IOException e) {
             Utils.getLogger().log(Level.INFO, "Error downloading user avatar: " + key.getUser(), e);
         }

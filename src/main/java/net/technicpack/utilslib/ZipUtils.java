@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.channels.ClosedByInterruptException;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -68,7 +69,7 @@ public class ZipUtils {
 
 	}
 
-	public static boolean extractFile(File zip, File output, String fileName) throws IOException {
+	public static boolean extractFile(File zip, File output, String fileName) throws IOException, InterruptedException {
 		if (!zip.exists() || fileName == null) {
 			return false;
 		}
@@ -96,22 +97,24 @@ public class ZipUtils {
 		}
 	}
 
-	private static void unzipEntry(ZipFile zipFile, ZipEntry entry, File outputFile) throws IOException {
+	private static void unzipEntry(ZipFile zipFile, ZipEntry entry, File outputFile) throws IOException, InterruptedException {
 		byte[] buffer = new byte[2048];
 		BufferedInputStream inputStream = new BufferedInputStream(zipFile.getInputStream(entry));
 		BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(outputFile));
 		try {
-			int length;
-			while ((length = inputStream.read(buffer, 0, buffer.length)) != -1) {
-				outputStream.write(buffer, 0, length);
-			}
+            int length;
+            while ((length = inputStream.read(buffer, 0, buffer.length)) != -1) {
+                outputStream.write(buffer, 0, length);
+            }
+        } catch (ClosedByInterruptException ex) {
+            throw new InterruptedException();
 		} finally {
 			IOUtils.closeQuietly(outputStream);
 			IOUtils.closeQuietly(inputStream);
 		}
 	}
 
-	public static void unzipFile(File zip, File output, IZipFileFilter fileFilter, DownloadListener listener) throws IOException {
+	public static void unzipFile(File zip, File output, IZipFileFilter fileFilter, DownloadListener listener) throws IOException, InterruptedException {
 		if (!zip.exists()) {
 			Utils.getLogger().log(Level.SEVERE, "File to unzip does not exist: " + zip.getAbsolutePath());
 			return;
@@ -126,6 +129,9 @@ public class ZipUtils {
 		try {
 			Enumeration<? extends ZipEntry> entries = zipFile.entries();
 			while (entries.hasMoreElements()) {
+                if (Thread.interrupted())
+                    throw new InterruptedException();
+
 				ZipEntry entry = null;
 
 				try {

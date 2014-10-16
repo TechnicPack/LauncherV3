@@ -45,7 +45,9 @@ public class MinotarFaceImageStore implements IImageStore<IUserType> {
     @Override
     public void downloadImage(IUserType user, File location) {
         try {
-            mirrorStore.downloadFile(mBaseUrl+"helm/"+user.getDisplayName()+"/100", user.getDisplayName(), location.getAbsolutePath());
+            mirrorStore.downloadFile(mBaseUrl + "helm/" + user.getDisplayName() + "/100", user.getDisplayName(), location.getAbsolutePath());
+        } catch (InterruptedException ex) {
+            //User cancelled
         } catch (IOException e) {
             Utils.getLogger().log(Level.INFO, "Error downloading user face image: " + user.getDisplayName(), e);
         }

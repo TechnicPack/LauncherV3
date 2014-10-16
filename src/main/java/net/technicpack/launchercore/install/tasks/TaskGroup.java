@@ -55,8 +55,10 @@ public class TaskGroup implements ITasksQueue, IInstallTask {
     }
 
     @Override
-    public void runTask(InstallTasksQueue queue) throws IOException {
+    public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
         while (taskProgress < taskList.size()) {
+            if (Thread.interrupted())
+                throw new InterruptedException();
             IInstallTask currentTask = taskList.get(taskProgress);
             fileName = currentTask.getTaskDescription();
             currentTask.runTask(queue);

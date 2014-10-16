@@ -105,11 +105,11 @@ public class MirrorStore {
         return md5;
     }
 
-    public Download downloadFile(String url, String name, String output, File cache, IFileVerifier verifier, DownloadListener listener) throws IOException {
+    public Download downloadFile(String url, String name, String output, File cache, IFileVerifier verifier, DownloadListener listener) throws IOException, InterruptedException {
         int tries = DOWNLOAD_RETRIES;
         File outputFile = null;
         Download download = null;
-        while (tries > 0) {
+        while (tries > 0 && !Thread.interrupted()) {
             Utils.getLogger().info("Starting download of " + url + ", with " + tries + " tries remaining");
             tries--;
             download = new Download(getFullUrl(url), name, output);
@@ -119,6 +119,10 @@ public class MirrorStore {
                 if (download.getOutFile() != null) {
                     download.getOutFile().delete();
                 }
+
+                if (Thread.interrupted())
+                    throw new InterruptedException();
+
                 System.err.println("Download of " + url + " Failed!");
                 if (listener != null) {
                     listener.stateChanged("Download failed, retries remaining: " + tries, 0F);
@@ -139,11 +143,11 @@ public class MirrorStore {
         return download;
     }
 
-    public Download downloadFile(String url, String name, String output, File cache) throws IOException {
+    public Download downloadFile(String url, String name, String output, File cache) throws IOException, InterruptedException {
         return downloadFile(url, name, output, cache, null, null);
     }
 
-    public Download downloadFile(String url, String name, String output) throws IOException {
+    public Download downloadFile(String url, String name, String output) throws IOException, InterruptedException {
         return downloadFile(url, name, output, null);
     }
 

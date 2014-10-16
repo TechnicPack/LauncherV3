@@ -59,6 +59,9 @@ public class PackImageStore implements IImageStore<ModpackModel> {
 
         try {
             mirrorStore.downloadFile(res.getUrl(), userModel.getCurrentUser().getDisplayName(), target.getAbsolutePath());
+        } catch (InterruptedException ex) {
+            //user cancel
+            return;
         } catch (IOException e) {
             Utils.getLogger().log(Level.INFO, "Error downloading pack resource "+res.getUrl()+" for pack "+key.getName(), e);
         }

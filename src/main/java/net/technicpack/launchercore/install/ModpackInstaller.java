@@ -40,7 +40,7 @@ public class ModpackInstaller<VersionData> {
         this.platformApi = platformApi;
 	}
 
-	public VersionData installPack(InstallTasksQueue<VersionData> tasksQueue, ModpackModel modpack, String build) throws IOException {
+	public VersionData installPack(InstallTasksQueue<VersionData> tasksQueue, ModpackModel modpack, String build) throws IOException, InterruptedException {
         modpack.save();
         modpack.initDirectories();
 
@@ -58,7 +58,7 @@ public class ModpackInstaller<VersionData> {
         return tasksQueue.getCompleteVersion();
     }
 
-	public VersionData prepareOfflinePack(ModpackModel modpack, IVersionDataParser<VersionData> parser) throws IOException {
+	public VersionData prepareOfflinePack(ModpackModel modpack, IVersionDataParser<VersionData> parser) throws IOException, InterruptedException {
         modpack.initDirectories();
 
 		File versionFile = new File(modpack.getBinDir(), "version.json");

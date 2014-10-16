@@ -22,6 +22,7 @@ package net.technicpack.launchercore.mirror.download;
 import java.io.*;
 import java.net.*;
 import java.nio.channels.Channels;
+import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.ReadableByteChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -66,41 +67,44 @@ public class Download implements Runnable {
 		ReadableByteChannel rbc = null;
 		FileOutputStream fos = null;
 		try {
-			HttpURLConnection conn = Utils.openHttpConnection(url);
-			int response = conn.getResponseCode();
-			int responseFamily = response/100;
+            HttpURLConnection conn = Utils.openHttpConnection(url);
+            int response = conn.getResponseCode();
+            int responseFamily = response / 100;
 
-			if (responseFamily == 3) {
-				throw new DownloadException("The server issued a redirect response which Technic failed to follow.");
-			} else if (responseFamily != 2) {
-				throw new DownloadException("The server issued a "+response+" response code.");
-			}
+            if (responseFamily == 3) {
+                throw new DownloadException("The server issued a redirect response which Technic failed to follow.");
+            } else if (responseFamily != 2) {
+                throw new DownloadException("The server issued a " + response + " response code.");
+            }
 
-			InputStream in = getConnectionInputStream(conn);
+            InputStream in = getConnectionInputStream(conn);
 
-			size = conn.getContentLength();
-			outFile = new File(outPath);
-			outFile.delete();
+            size = conn.getContentLength();
+            outFile = new File(outPath);
+            outFile.delete();
 
-			rbc = Channels.newChannel(in);
-			fos = new FileOutputStream(outFile);
+            rbc = Channels.newChannel(in);
+            fos = new FileOutputStream(outFile);
 
-			stateChanged();
+            stateChanged();
 
-			Thread progress = new MonitorThread(Thread.currentThread(), rbc);
-			progress.start();
+            Thread progress = new MonitorThread(Thread.currentThread(), rbc);
+            progress.start();
 
-			fos.getChannel().transferFrom(rbc, 0, size > 0 ? size : Integer.MAX_VALUE);
-			in.close();
-			rbc.close();
-			progress.interrupt();
-			if (size > 0) {
-				if (size == outFile.length()) {
-					result = Result.SUCCESS;
-				}
-			} else {
-				result = Result.SUCCESS;
-			}
+            fos.getChannel().transferFrom(rbc, 0, size > 0 ? size : Integer.MAX_VALUE);
+            in.close();
+            rbc.close();
+            progress.interrupt();
+            if (size > 0) {
+                if (size == outFile.length()) {
+                    result = Result.SUCCESS;
+                }
+            } else {
+                result = Result.SUCCESS;
+            }
+        } catch (ClosedByInterruptException ex) {
+            result = Result.FAILURE;
+            return;
 		} catch (PermissionDeniedException e) {
 			exception = e;
 			result = Result.PERMISSION_DENIED;
