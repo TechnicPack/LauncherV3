@@ -39,6 +39,9 @@ public class FindMoreWidget extends SelectorWidget {
         JLabel text = new JLabel(resources.getString("launcher.packselector.more"), JLabel.CENTER);
         text.setFont(getResources().getFont(ResourceLoader.FONT_OPENSANS, 14));
         text.setForeground(LauncherFrame.COLOR_DIM_TEXT);
+        text.setIcon(resources.getIcon("arrow_right.png"));
+        text.setHorizontalTextPosition(SwingConstants.LEADING);
+        text.setIconTextGap(8);
         text.setOpaque(false);
         add(text, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
     }
