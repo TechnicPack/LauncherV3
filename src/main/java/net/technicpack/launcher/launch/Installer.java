@@ -95,7 +95,7 @@ public class Installer {
 
                     long memory = Memory.getClosesAvailableMemory(Memory.getMemoryFromId(settings.getMemory())).getMemoryMB();
 
-                    LaunchOptions options = new LaunchOptions( pack.getDisplayName(), packIconMapper.getImageLocation(pack).getAbsolutePath(), startupParameters.getWidth(), startupParameters.getHeight(), startupParameters.getFullscreen());
+                    LaunchOptions options = new LaunchOptions(pack.getDisplayName(), packIconMapper.getImageLocation(pack).getAbsolutePath(), startupParameters.getWidth(), startupParameters.getHeight(), startupParameters.getFullscreen());
                     launcherUnhider = new LauncherUnhider(settings, frame);
                     launcher.launch(pack, memory, options, launcherUnhider, version);
 
@@ -106,6 +106,8 @@ public class Installer {
                     } else if (launchAction == LaunchAction.CLOSE) {
                         System.exit(0);
                     }
+                } catch (InterruptedException e) {
+                    //Canceled by user
                 } catch (PackNotAvailableOfflineException e) {
                     JOptionPane.showMessageDialog(frame, e.getMessage(), resources.getString("launcher.installerror.unavailable"), JOptionPane.WARNING_MESSAGE);
                 } catch (DownloadException e) {
