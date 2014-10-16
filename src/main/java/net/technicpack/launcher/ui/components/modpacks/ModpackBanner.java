@@ -89,7 +89,7 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
     protected void rebuildTags(ModpackModel modpack) {
         modpackTags.removeAll();
 
-        if (!modpack.isPlatform())
+        if (modpack.isOfficial())
             addTag("launcher.pack.tag.official", LauncherFrame.COLOR_BLUE);
 
         if (modpack.getPackInfo() instanceof SolderPackInfo || modpack.getPackInfo() instanceof CombinedPackInfo)

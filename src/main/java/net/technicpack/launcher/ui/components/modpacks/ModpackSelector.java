@@ -341,7 +341,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
             ArrayList<IPackSource> sources = new ArrayList<IPackSource>(1);
             sources.add(technicSolder);
             defaultPacks.addPassthroughContainer(this);
-            packLoader.createRepositoryLoadJob(defaultPacks, sources, null, true);
+            packLoader.createRepositoryLoadJob(defaultPacks, sources, null, true, true);
         }
     }
 
@@ -351,7 +351,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         detectFilterChanges();
         ArrayList<IPackSource> sources = new ArrayList<IPackSource>(1);
         sources.add(technicSolder);
-        packLoader.createRepositoryLoadJob(defaultPacks, sources, null, true);
+        packLoader.createRepositoryLoadJob(defaultPacks, sources, null, true, true);
     }
 
     protected void detectFilterChanges() {
@@ -390,7 +390,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
                 ArrayList<IPackSource> sources = new ArrayList<IPackSource>(2);
                 sources.add(new NameFilterPackSource(defaultPacks, filterContents.getText()));
                 sources.add(new SearchResultPackSource(platformApi, filterContents.getText()));
-                currentLoadJob = packLoader.createRepositoryLoadJob(ModpackSelector.this, sources, null, false);
+                currentLoadJob = packLoader.createRepositoryLoadJob(ModpackSelector.this, sources, null, false, false);
             }
         });
         currentSearchTimer.setRepeats(false);
