@@ -104,6 +104,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
     private void initComponents() {
         setLayout(new BorderLayout());
         setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
+        setMaximumSize(new Dimension(287, getMaximumSize().height));
 
         JPanel header = new JPanel();
         header.setLayout(new GridBagLayout());
@@ -127,6 +128,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         filterContents = new JTextField();
         filterContents.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         filterContents.setBorder(BorderFactory.createEmptyBorder());
+        filterContents.setColumns(17);
         filterContents.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -152,7 +154,8 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         constraints.weightx = 1.0;
         constraints.weighty = 0.0;
         constraints.insets = new Insets(0, 8, 0, 0);
-        constraints.fill = GridBagConstraints.BOTH;
+        constraints.fill = GridBagConstraints.VERTICAL;
+        constraints.anchor = GridBagConstraints.WEST;
         header.add(filterContents, constraints);
 
         widgetList = new JPanel();
