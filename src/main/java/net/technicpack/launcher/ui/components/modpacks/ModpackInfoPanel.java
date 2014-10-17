@@ -49,6 +49,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
     private ModpackBanner banner;
     private ModpackDataDisplay dataDisplay;
     private RoundedButton playButton;
+    private RoundedButton deleteButton;
 
     private ModpackModel modpack;
 
@@ -69,6 +70,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         this.modpack = modpack;
         banner.setModpack(modpack);
         dataDisplay.setModpack(modpack);
+        deleteButton.setVisible(modpack.getInstalledPack() != null);
 
         ImageJob<ModpackModel> job = backgroundRepo.startImageJob(modpack);
         job.addJobListener(this);
@@ -98,6 +100,8 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
     public RoundedButton getPlayButton() {
         return playButton;
     }
+
+    public RoundedButton getDeleteButton() { return deleteButton; }
 
     protected void clickLeftFeedButton() {
         feedGallery.selectPreviousComponent();
@@ -163,7 +167,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         constraints.gridy = 0;
         constraints.weightx = 1.0;
         constraints.weighty = 0.0;
-        constraints.gridwidth = 2;
+        constraints.gridwidth = 3;
         constraints.gridheight = 1;
         constraints.fill = GridBagConstraints.HORIZONTAL;
         feedBottom.add(topline, constraints);
@@ -209,7 +213,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         constraints.gridy = 1;
         constraints.weightx = 1.0;
         constraints.weighty = 0.0;
-        constraints.gridwidth = 2;
+        constraints.gridwidth = 3;
         constraints.gridheight = 1;
         constraints.ipady = 150;
         constraints.fill = GridBagConstraints.BOTH;
@@ -225,8 +229,20 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         Component vertFill = Box.createVerticalStrut(4);
         feedBottom.add(vertFill, constraints);
 
+        deleteButton = new RoundedButton(resources.getString("modpackoptions.delete.text"));
+        deleteButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 18, Font.BOLD));
+        deleteButton.setBorder(BorderFactory.createEmptyBorder(5, 25, 10, 25));
+        deleteButton.setBackground(LauncherFrame.COLOR_FOOTER);
+        deleteButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        deleteButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        deleteButton.setAlignmentX(RIGHT_ALIGNMENT);
+        deleteButton.setFocusable(false);
+        deleteButton.setContentAreaFilled(false);
+        deleteButton.setShouldShowBackground(true);
+        feedBottom.add(deleteButton, new GridBagConstraints(0, 3, 1,1,1,0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,0,0,0),0,0));
+
         constraints = new GridBagConstraints();
-        constraints.gridx = 0;
+        constraints.gridx = 1;
         constraints.gridy = 3;
         constraints.weightx = 1.0;
         constraints.weighty = 0.0;
@@ -247,7 +263,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         playButton.setShouldShowBackground(true);
 
         constraints = new GridBagConstraints();
-        constraints.gridx = 1;
+        constraints.gridx = 2;
         constraints.gridy = 3;
         constraints.weightx = 0.0;
         constraints.weighty = 0.0;

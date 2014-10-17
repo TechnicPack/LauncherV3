@@ -506,6 +506,16 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             }
         });
 
+        modpackPanel.getDeleteButton().addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (JOptionPane.showConfirmDialog(LauncherFrame.this, resources.getString("modpackoptions.delete.confirmtext"), resources.getString("modpackoptions.delete.confirmtitle"), JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                    modpackSelector.getSelectedPack().delete();
+                    modpackSelector.forceRefresh();
+                }
+            }
+        });
+
         infoSwap = new JPanel();
         infoLayout = new CardLayout();
         infoSwap.setLayout(infoLayout);
