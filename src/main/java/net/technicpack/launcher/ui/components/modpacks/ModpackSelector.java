@@ -28,6 +28,7 @@ import net.technicpack.launchercore.modpacks.sources.NameFilterPackSource;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.platform.packsources.SearchResultPackSource;
+import net.technicpack.platform.packsources.SinglePlatformSource;
 import net.technicpack.rest.RestObject;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.ui.controls.TintablePanel;
@@ -51,11 +52,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ModpackSelector extends TintablePanel implements IModpackContainer, IAuthListener<IUserType> {
     private ResourceLoader resources;
@@ -68,6 +73,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
     private JScrollPane scrollPane;
     private ModpackInfoPanel modpackInfoPanel;
     private JTextField filterContents;
+    private FindMoreWidget findMoreWidget;
 
     private MemoryModpackContainer defaultPacks = new MemoryModpackContainer();
     private Map<String, ModpackWidget> allModpacks = new HashMap<String, ModpackWidget>();
@@ -75,7 +81,11 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
     private PackLoadJob currentLoadJob;
     private Timer currentSearchTimer;
 
+    private Pattern platformRegexPattern;
+
     private String lastFilterContents = "";
+
+    private String findMoreUrl;
 
     public ModpackSelector(ResourceLoader resources, PackLoader packLoader, IPackSource techicSolder, IPlatformApi platformApi, ImageRepository<ModpackModel> iconRepo) {
         this.resources = resources;
@@ -86,6 +96,16 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
 
         this.setOverIcon(resources.getIcon("loader.gif"));
         this.setTintActive(true);
+
+        platformRegexPattern = Pattern.compile("^https?\\:\\/\\/beta\\.technicpack\\.net\\/modpack\\/([^.]+)\\.\\d+$");
+
+        findMoreWidget = new FindMoreWidget(resources);
+        findMoreWidget.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DesktopUtils.browseUrl(findMoreUrl);
+            }
+        });
 
         initComponents();
     }
@@ -232,6 +252,18 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
     public void refreshComplete() {
         setTintActive(false);
 
+        if (findMoreWidget.getWidgetData().equals(resources.getString("launcher.packselector.api"))) {
+            if (allModpacks.size() == 0) {
+                findMoreWidget.setWidgetData(resources.getString("launcher.packselector.badapi"));
+                findMoreUrl = "http://beta.technicpack.net/";
+            } else {
+                for(ModpackWidget widget : allModpacks.values()) {
+                    findMoreUrl = widget.getModpack().getWebSite();
+                    break;
+                }
+            }
+        }
+
         if (selectedWidget == null || selectedWidget.getModpack() == null || !allModpacks.containsKey(selectedWidget.getModpack().getName())) {
             java.util.List<ModpackWidget> sortedPacks = new LinkedList<ModpackWidget>();
             sortedPacks.addAll(allModpacks.values());
@@ -309,19 +341,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         }
 
         if (filterContents.getText().length() >= 3) {
-            FindMoreWidget widget = new FindMoreWidget(resources);
-            widgetList.add(widget, constraints);
-            widget.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    String encodedSearch = filterContents.getText();
-                    try {
-                        encodedSearch = URLEncoder.encode(encodedSearch, "UTF-8");
-                    } catch (UnsupportedEncodingException ex) {}
-
-                    DesktopUtils.browseUrl("http://beta.technicpack.net/search/modpacks?q="+encodedSearch);
-                }
-            });
+            widgetList.add(findMoreWidget, constraints);
         }
 
         widgetList.add(Box.createHorizontalStrut(287), constraints);
@@ -361,16 +381,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         cancelJob();
 
         if (filterContents.getText().length() >= 3) {
-            if (currentLoadJob == null || currentLoadJob.isCancelled()) {
-                loadNewJob();
-            } else {
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        loadNewJob();
-                    }
-                });
-            }
+            loadNewJob(filterContents.getText());
         } else if (lastFilterContents.length() >= 3) {
             clear();
             defaultPacks.addPassthroughContainer(this);
@@ -383,17 +394,96 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         lastFilterContents = filterContents.getText();
     }
 
-    private void loadNewJob() {
+    protected boolean isEncodedSlug(String slug) {
+        try {
+            URLEncoder.encode(URLDecoder.decode(slug, "UTF-8"), "UTF-8").equals(slug);
+            return true;
+        } catch (UnsupportedEncodingException ex) {
+            return false;
+        } catch (RuntimeException ex) {
+            //Apparently the encoder/decoder indicate bad input by THROWING RUNTIME EXCEPTIONS
+            //<3 java
+            return false;
+        }
+    }
+
+    protected String getApiLinkSlugWithUrl(String searchText, String url) {
+        if (searchText.startsWith(url) && searchText.length() > url.length()) {
+            String slug = searchText.substring(url.length());
+
+            if (slug.endsWith("/"))
+                slug = slug.substring(0, slug.length()-1);
+
+            if (isEncodedSlug(slug))
+                return slug;
+        }
+
+        return null;
+    }
+
+    protected String getApiLinkSlug(String searchText) {
+        String slug = getApiLinkSlugWithUrl(searchText, "http://beta.technicpack.net/api/modpack/");
+        if (slug != null)
+            return slug;
+        slug = getApiLinkSlugWithUrl(searchText, "beta.technicpack.net/api/modpack/");
+        if (slug != null)
+            return slug;
+        return getApiLinkSlugWithUrl(searchText, "https://beta.technicpack.net/api/modpack/");
+    }
+
+    protected String getSiteSlug(String searchText) {
+        Matcher match = platformRegexPattern.matcher(searchText);
+
+        if (match.find()) {
+            String slug = match.group(0);
+            if (isEncodedSlug(slug))
+                return slug;
+        }
+
+        return null;
+    }
+
+    protected boolean isSiteLink(String searchText) {
+        return getSiteSlug(searchText) != null;
+    }
+
+    private void loadNewJob(final String searchText) {
         setTintActive(true);
         defaultPacks.removePassthroughContainer(this);
 
         currentSearchTimer = new Timer(500, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ArrayList<IPackSource> sources = new ArrayList<IPackSource>(2);
-                sources.add(new NameFilterPackSource(defaultPacks, filterContents.getText()));
-                sources.add(new SearchResultPackSource(platformApi, filterContents.getText()));
-                currentLoadJob = packLoader.createRepositoryLoadJob(ModpackSelector.this, sources, null, false);
+                String localSearchTag = searchText;
+                if (localSearchTag.startsWith("beta.technicpack.net/"))
+                    localSearchTag = "http://" + searchText;
+
+                String apiSlug = getApiLinkSlug(localSearchTag);
+                if (apiSlug != null) {
+                    findMoreUrl = localSearchTag;
+                    findMoreWidget.setWidgetData(resources.getString("launcher.packselector.api"));
+                    ArrayList<IPackSource> source = new ArrayList<IPackSource>(1);
+                    source.add(new SinglePlatformSource(platformApi, localSearchTag));
+                    currentLoadJob = packLoader.createRepositoryLoadJob(ModpackSelector.this, source, null, false);
+                } else if (isSiteLink(localSearchTag)) {
+                    findMoreUrl = localSearchTag;
+                    findMoreWidget.setWidgetData(resources.getString("launcher.packselector.website"));
+                    ArrayList<IPackSource> source = new ArrayList<IPackSource>(0);
+                    currentLoadJob = packLoader.createRepositoryLoadJob(ModpackSelector.this, source, null, false);
+                } else {
+                    String encodedSearch = filterContents.getText();
+                    try {
+                        encodedSearch = URLEncoder.encode(encodedSearch, "UTF-8");
+                    } catch (UnsupportedEncodingException ex) {}
+                    findMoreUrl = "http://beta.technicpack.net/search/modpacks?q="+encodedSearch;
+                    findMoreWidget.setWidgetData(resources.getString("launcher.packselector.more"));
+
+                    ArrayList<IPackSource> sources = new ArrayList<IPackSource>(2);
+                    sources.add(new NameFilterPackSource(defaultPacks, localSearchTag));
+                    sources.add(new SearchResultPackSource(platformApi, localSearchTag));
+                    currentLoadJob = packLoader.createRepositoryLoadJob(ModpackSelector.this, sources, null, false);
+
+                }
             }
         });
         currentSearchTimer.setRepeats(false);
