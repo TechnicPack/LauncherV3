@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.ui.controls.modpacks;
 
+import net.technicpack.ui.controls.borders.DropShadowBorder;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.SelectorWidget;
@@ -27,17 +28,20 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.utilslib.ImageUtils;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 
 public class ModpackWidget extends SelectorWidget implements IImageJobListener<ModpackModel> {
     private ModpackModel modpack;
     private ImageJob<ModpackModel> imageJob;
+    private ResourceLoader resources;
 
     private JLabel icon;
 
     public ModpackWidget(ResourceLoader resources, ModpackModel modpack, ImageJob<ModpackModel> job) {
         super(resources);
 
+        this.resources = resources;
         this.imageJob = job;
         imageJob.addJobListener(this);
         this.modpack = modpack;
@@ -73,5 +77,16 @@ public class ModpackWidget extends SelectorWidget implements IImageJobListener<M
     public void jobComplete(ImageJob<ModpackModel> job) {
         icon.setIcon(new ImageIcon(ImageUtils.scaleWithAspectWidth(job.getImage(), 32)));
         revalidate();
+    }
+
+    @Override
+    public JToolTip createToolTip() {
+        JToolTip toolTip = new JToolTip();
+        toolTip.setBackground(LauncherFrame.COLOR_FOOTER);
+        toolTip.setForeground(LauncherFrame.COLOR_GREY_TEXT);
+        toolTip.setBorder(BorderFactory.createCompoundBorder(new LineBorder(LauncherFrame.COLOR_GREY_TEXT), BorderFactory.createEmptyBorder(5,5,5,5)));
+        toolTip.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
+
+        return toolTip;
     }
 }

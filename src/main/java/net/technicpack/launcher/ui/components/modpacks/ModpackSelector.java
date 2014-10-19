@@ -216,6 +216,10 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
 
     protected void addModpackInternal(ModpackModel modpack) {
         final ModpackWidget widget = new ModpackWidget(resources, modpack, iconRepo.startImageJob(modpack));
+
+        if (modpack.hasRecommendedUpdate()) {
+            widget.setToolTipText(resources.getString("launcher.packselector.updatetip"));
+        }
         widget.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
