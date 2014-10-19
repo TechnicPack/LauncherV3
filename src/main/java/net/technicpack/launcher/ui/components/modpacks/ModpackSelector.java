@@ -32,6 +32,7 @@ import net.technicpack.platform.packsources.SinglePlatformSource;
 import net.technicpack.rest.RestObject;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.ui.controls.TintablePanel;
+import net.technicpack.ui.controls.WatermarkTextField;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.ui.controls.list.SimpleScrollbarUI;
@@ -132,23 +133,10 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         header.setBackground(LauncherFrame.COLOR_PANEL);
         add(header, BorderLayout.PAGE_START);
 
-        JLabel filterLabel = new JLabel(resources.getString("launcher.packselector.filter"));
-        filterLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS,16));
-        filterLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.gridx = 0;
-        constraints.gridy = 0;
-        constraints.gridwidth = 1;
-        constraints.gridheight = 1;
-        constraints.weightx = 0.0;
-        constraints.weighty = 0.0;
-        header.add(filterLabel, constraints);
-
-        filterContents = new JTextField();
+        filterContents = new WatermarkTextField(resources.getString("launcher.packselector.filter"), LauncherFrame.COLOR_DIM_TEXT);
         filterContents.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         filterContents.setBorder(BorderFactory.createEmptyBorder());
-        filterContents.setColumns(17);
+        filterContents.setColumns(20);
         filterContents.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -166,10 +154,10 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
             }
         });
 
-        constraints = new GridBagConstraints();
-        constraints.gridx = 1;
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridx = 0;
         constraints.gridy = 0;
-        constraints.gridwidth = 1;
+        constraints.gridwidth = 2;
         constraints.gridheight = 1;
         constraints.weightx = 1.0;
         constraints.weighty = 0.0;
