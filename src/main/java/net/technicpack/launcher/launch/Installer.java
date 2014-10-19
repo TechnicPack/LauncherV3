@@ -78,7 +78,15 @@ public class Installer {
         runningThread.interrupt();
     }
 
+    public void justInstall(final ResourceLoader resources, final ModpackModel pack, final String build, final boolean doFullInstall, final LauncherFrame frame, final DownloadListener listener) {
+        internalInstallAndRun(resources, pack, build, doFullInstall, frame, listener, false);
+    }
+
     public void installAndRun(final ResourceLoader resources, final ModpackModel pack, final String build, final boolean doFullInstall, final LauncherFrame frame, final DownloadListener listener) {
+        internalInstallAndRun(resources, pack, build, doFullInstall, frame, listener, true);
+    }
+
+    protected void internalInstallAndRun(final ResourceLoader resources, final ModpackModel pack, final String build, final boolean doFullInstall, final LauncherFrame frame, final DownloadListener listener, final boolean doLaunch) {
         runningThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -93,18 +101,20 @@ public class Installer {
                         version = installer.prepareOfflinePack(pack, new CompleteVersionParser());
                     }
 
-                    long memory = Memory.getClosesAvailableMemory(Memory.getMemoryFromId(settings.getMemory())).getMemoryMB();
+                    if (doLaunch) {
+                        long memory = Memory.getClosesAvailableMemory(Memory.getMemoryFromId(settings.getMemory())).getMemoryMB();
 
-                    LaunchOptions options = new LaunchOptions(pack.getDisplayName(), packIconMapper.getImageLocation(pack).getAbsolutePath(), startupParameters.getWidth(), startupParameters.getHeight(), startupParameters.getFullscreen());
-                    launcherUnhider = new LauncherUnhider(settings, frame);
-                    launcher.launch(pack, memory, options, launcherUnhider, version);
+                        LaunchOptions options = new LaunchOptions(pack.getDisplayName(), packIconMapper.getImageLocation(pack).getAbsolutePath(), startupParameters.getWidth(), startupParameters.getHeight(), startupParameters.getFullscreen());
+                        launcherUnhider = new LauncherUnhider(settings, frame);
+                        launcher.launch(pack, memory, options, launcherUnhider, version);
 
-                    LaunchAction launchAction = settings.getLaunchAction();
+                        LaunchAction launchAction = settings.getLaunchAction();
 
-                    if (launchAction == null || launchAction == LaunchAction.HIDE) {
-                        frame.setVisible(false);
-                    } else if (launchAction == LaunchAction.CLOSE) {
-                        System.exit(0);
+                        if (launchAction == null || launchAction == LaunchAction.HIDE) {
+                            frame.setVisible(false);
+                        } else if (launchAction == LaunchAction.CLOSE) {
+                            System.exit(0);
+                        }
                     }
                 } catch (InterruptedException e) {
                     //Canceled by user

@@ -214,11 +214,13 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     protected void launchModpack() {
         ModpackModel pack = modpackSelector.getSelectedPack();
+        boolean requiresInstall = false;
 
         if (pack == null || (pack.getInstalledPack() == null && (pack.getPackInfo() == null || !pack.getPackInfo().isComplete())))
             return;
 
         if (pack.getInstalledDirectory() == null) {
+            requiresInstall = true;
             pack.save();
             modpackSelector.forceRefresh();
         }
@@ -291,7 +293,11 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         } else
             installBuild = installedVersion.getVersion();
 
-        installer.installAndRun(resources, pack, installBuild, forceInstall, this, installProgress);
+        if (requiresInstall) {
+            installer.justInstall(resources, pack, installBuild, forceInstall, this, installProgress);
+        } else {
+            installer.installAndRun(resources, pack, installBuild, forceInstall, this, installProgress);
+        }
 
         installProgress.setVisible(true);
         installProgressPlaceholder.setVisible(false);
