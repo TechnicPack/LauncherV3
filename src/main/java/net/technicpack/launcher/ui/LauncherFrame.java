@@ -220,6 +220,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
         if (pack.getInstalledDirectory() == null) {
             pack.save();
+            modpackSelector.forceRefresh();
         }
 
         try {
