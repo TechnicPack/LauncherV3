@@ -306,11 +306,21 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     }
 
     public void launchCompleted() {
+        if (installer.isCurrentlyRunning()) {
+            EventQueue.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    launchCompleted();
+                }
+            });
+            return;
+        }
+
         installProgress.setVisible(false);
         installProgressPlaceholder.setVisible(true);
 
-        if (!installer.isCurrentlyRunning())
-            userModel.setCurrentUser(userModel.getCurrentUser());
+
+        userModel.setCurrentUser(userModel.getCurrentUser());
 
         invalidate();
     }
