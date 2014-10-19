@@ -104,6 +104,8 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
 
         //Handles rebuilding the frame, so use it to build the frame in the first place
         relocalize(resources);
+
+        setLocationRelativeTo(null);
     }
 
     protected void closeButtonClicked() {

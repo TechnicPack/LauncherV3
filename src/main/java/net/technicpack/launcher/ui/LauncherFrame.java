@@ -174,6 +174,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         selectTab("discover");
 
         LauncherMain.consoleFrame.setVisible(settings.getShowConsole());
+        setLocationRelativeTo(null);
     }
 
     /////////////////////////////////////////////////
