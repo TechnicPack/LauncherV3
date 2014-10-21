@@ -221,7 +221,7 @@ public class LauncherMain {
         IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(platform, solder);
 
         PackLoader packList = new PackLoader(directories, packStore, packInfoRepository);
-        ModpackSelector selector = new ModpackSelector(resources, packList, new SolderPackSource("http://solder.technicpack.net/api/", solder, true), platform, iconRepo);
+        ModpackSelector selector = new ModpackSelector(resources, packList, new SolderPackSource("http://solder.technicpack.net/api/", solder, true), solder, platform, iconRepo);
         userModel.addAuthListener(selector);
 
         DiscoverInfoPanel discoverInfoPanel = new DiscoverInfoPanel(resources, startupParameters.getDiscoverUrl(), platform);

@@ -31,6 +31,7 @@ import net.technicpack.platform.packsources.SearchResultPackSource;
 import net.technicpack.platform.packsources.SinglePlatformSource;
 import net.technicpack.rest.RestObject;
 import net.technicpack.rest.io.Modpack;
+import net.technicpack.solder.ISolderApi;
 import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.controls.WatermarkTextField;
 import net.technicpack.ui.lang.ResourceLoader;
@@ -69,6 +70,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
     private IPackSource technicSolder;
     private ImageRepository<ModpackModel> iconRepo;
     private final IPlatformApi platformApi;
+    private final ISolderApi solderApi;
 
     private JPanel widgetList;
     private JScrollPane scrollPane;
@@ -88,12 +90,13 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
 
     private String findMoreUrl;
 
-    public ModpackSelector(ResourceLoader resources, PackLoader packLoader, IPackSource techicSolder, IPlatformApi platformApi, ImageRepository<ModpackModel> iconRepo) {
+    public ModpackSelector(ResourceLoader resources, PackLoader packLoader, IPackSource techicSolder, ISolderApi solderApi, IPlatformApi platformApi, ImageRepository<ModpackModel> iconRepo) {
         this.resources = resources;
         this.packLoader = packLoader;
         this.iconRepo = iconRepo;
         this.technicSolder = techicSolder;
         this.platformApi = platformApi;
+        this.solderApi = solderApi;
 
         this.setOverIcon(resources.getIcon("loader.gif"));
         this.setTintActive(true);
@@ -455,7 +458,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
                     findMoreUrl = localSearchTag;
                     findMoreWidget.setWidgetData(resources.getString("launcher.packselector.api"));
                     ArrayList<IPackSource> source = new ArrayList<IPackSource>(1);
-                    source.add(new SinglePlatformSource(platformApi, localSearchTag));
+                    source.add(new SinglePlatformSource(platformApi, solderApi, localSearchTag));
                     currentLoadJob = packLoader.createRepositoryLoadJob(ModpackSelector.this, source, null, false);
                 } else if (isSiteLink(localSearchTag)) {
                     findMoreUrl = localSearchTag;
