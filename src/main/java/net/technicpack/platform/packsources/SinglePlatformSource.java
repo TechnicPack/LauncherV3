@@ -21,20 +21,21 @@ package net.technicpack.platform.packsources;
 
 import net.technicpack.launchercore.modpacks.sources.IPackSource;
 import net.technicpack.platform.IPlatformApi;
+import net.technicpack.platform.PlatformPackInfoRepository;
 import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.rest.RestObject;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.rest.io.PackInfo;
+import net.technicpack.solder.ISolderApi;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class SinglePlatformSource implements IPackSource {
-    private IPlatformApi platformApi;
+public class SinglePlatformSource extends PlatformPackInfoRepository implements IPackSource {
     private String platformUrl;
 
-    public SinglePlatformSource(IPlatformApi platformApi, String platformUrl) {
-        this.platformApi = platformApi;
+    public SinglePlatformSource(IPlatformApi platformApi, ISolderApi solderApi, String platformUrl) {
+        super(platformApi, solderApi);
         this.platformUrl = platformUrl;
     }
 
@@ -50,7 +51,7 @@ public class SinglePlatformSource implements IPackSource {
             PlatformPackInfo info = RestObject.getRestObject(PlatformPackInfo.class, platformUrl.toString());
 
             if (info != null) {
-                packs.add(info);
+                packs.add(getInfoFromPlatformInfo(info));
             }
         } catch (RestfulAPIException ex) {
             //The url was garbage for whatever reason so just don't return anything
