@@ -215,7 +215,7 @@ public class LauncherMain {
         ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<AuthorshipInfo>(new TechnicAvatarMapper(directories, resources), new WebAvatarImageStore(mirrorStore));
 
         ISolderApi solder = new HttpSolderApi(settings.getClientId(), userModel);
-        HttpPlatformApi platform = new HttpPlatformApi("http://platformbeta.sctgaming.com/", mirrorStore);
+        HttpPlatformApi platform = new HttpPlatformApi("http://beta.technicpack.net/", mirrorStore);
 
         IInstalledPackRepository packStore = TechnicInstalledPackStore.load(new File(directories.getLauncherDirectory(), "installedPacks"));
         IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(platform, solder);
