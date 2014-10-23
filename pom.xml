@@ -275,6 +275,29 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+	<groupId>org.codehaus.mojo</groupId>
+		<artifactId>exec-maven-plugin</artifactId>
+		<executions>
+			<!-- chmod executable ... while japp plugin produces the correct 
+				permissions, jar/unjar operation resets 'x' flag, so the app becomes non-executable. 
+				Must fix that manually -->
+			<execution>
+				<id>chmod-modeler</id>
+				<phase>package</phase>
+				<goals>
+					<goal>exec</goal>
+				</goals>
+				<configuration>
+					<executable>/bin/chmod</executable>
+					<arguments>
+						<argument>755</argument>
+						<argument>${basedir}/src/main/app/Contents/MacOS/JavaAppLauncher</argument>
+					</arguments>
+				</configuration>
+			</execution>
+		</executions>
+	</plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -294,9 +317,7 @@
             </configuration>
           </execution>
         </executions>
-      </plugin>						
-		</plugins>
-	</build>
+      </plugin>	
 
 	<!-- Build profiles -->
 	<profiles>
