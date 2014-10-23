@@ -318,7 +318,7 @@
           </execution>
         </executions>
       </plugin>	
-
+</plugins>
 	<!-- Build profiles -->
 	<profiles>
 		    <profile>
