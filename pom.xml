@@ -319,6 +319,7 @@
         </executions>
       </plugin>	
 </plugins>
+</build>
 	<!-- Build profiles -->
 	<profiles>
 		    <profile>
