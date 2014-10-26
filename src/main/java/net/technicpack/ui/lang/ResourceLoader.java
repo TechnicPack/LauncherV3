@@ -29,6 +29,7 @@ import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Locale;
@@ -87,17 +88,23 @@ public class ResourceLoader {
 
     public String getString(String stringKey, String... replacements) {
         String outString = stringData.getString(stringKey);
+        try {
+            outString = new String(outString.getBytes("ISO-8859-1"), "UTF-8");
 
-        for (int i = 0; i < replacements.length; i++) {
-            String find = String.format("{%d}", i);
-            String replace = replacements[i];
+            for (int i = 0; i < replacements.length; i++) {
+                String find = String.format("{%d}", i);
+                String replace = replacements[i];
 
-            if (outString.contains(find)) {
-                outString = outString.replace(find, replace);
+                if (outString.contains(find)) {
+                    outString = outString.replace(find, replace);
+                }
             }
-        }
 
-        return outString;
+            return outString;
+        } catch (UnsupportedEncodingException ex) {
+            ex.printStackTrace();
+            return null;
+        }
     }
 
     public String getLauncherBuild() {
