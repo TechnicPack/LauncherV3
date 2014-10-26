@@ -29,7 +29,7 @@ public class ProgressBar extends JLabel implements DownloadListener {
     private Color backFillColor = null;
 
     public ProgressBar() {
-        super("Working...");
+        super("");
     }
 
     public Color getBackFill() { return backFillColor; }
