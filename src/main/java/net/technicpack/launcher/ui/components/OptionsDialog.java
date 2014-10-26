@@ -42,12 +42,16 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import javax.swing.plaf.basic.BasicComboPopup;
 import javax.swing.plaf.metal.MetalComboBoxUI;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.io.File;
 import java.util.Locale;
 
@@ -334,6 +338,33 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         JPanel about = new JPanel();
         about.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+
+        String linkText = "<a href=\"https://github.com/TechnicPack/\">"+resources.getString("launcheroptions.about.linktext")+"</a>";
+        String aboutText = "<html><head><link rel=\"stylesheet\" type=\"text/css\" href=\"http://beta.technicpack.net/assets/css/launcher.css\" /></head><body style=\"font-family: "+resources.getFont(ResourceLoader.FONT_OPENSANS, 12).getFamily()+";color:#D0D0D0\">";
+        aboutText += "<p>" + resources.getString("launcheroptions.about.copyright", resources.getLauncherBuild(), linkText) + "</p>";
+        aboutText += "<p>" + resources.getString("launcheroptions.about.romainguy") + "</p>";
+        aboutText += "<p>" + resources.getString("launcheroptions.about.summary") + "</p>";
+
+        about.setLayout(new BorderLayout());
+        JTextPane textPane = new JTextPane();
+        textPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        textPane.setOpaque(false);
+        textPane.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        textPane.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+        textPane.setEditable(false);
+        textPane.setHighlighter(null);
+        textPane.setAlignmentX(LEFT_ALIGNMENT);
+        textPane.setContentType("text/html");
+        textPane.addHyperlinkListener(new HyperlinkListener() {
+            @Override
+            public void hyperlinkUpdate(HyperlinkEvent e) {
+                if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED)
+                    DesktopUtils.browseUrl(e.getURL().toString());
+            }
+        });
+
+        textPane.setText(aboutText);
+        about.add(textPane, BorderLayout.CENTER);
 
         centerPanel.addTab(resources.getString("launcheroptions.tab.general").toUpperCase(), general);
         centerPanel.addTab(resources.getString("launcheroptions.tab.java").toUpperCase(), javaOptions);
