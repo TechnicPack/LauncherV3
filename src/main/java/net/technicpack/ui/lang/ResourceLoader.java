@@ -68,6 +68,15 @@ public class ResourceLoader {
             isDefaultLocaleSupported = false;
     }
 
+    public ResourceLoader(ResourceLoader resourceLoader) {
+        this.dottedResourcePath = resourceLoader.dottedResourcePath;
+        this.slashResourcePath = resourceLoader.slashResourcePath;
+        this.defaultLocale = resourceLoader.defaultLocale;
+        this.isDefaultLocaleSupported = resourceLoader.isDefaultLocaleSupported;
+        this.stringData = resourceLoader.stringData;
+        this.currentLocale = resourceLoader.currentLocale;
+    }
+
     public boolean isDefaultLocaleSupported() {
         return this.isDefaultLocaleSupported;
     }
@@ -80,6 +89,12 @@ public class ResourceLoader {
 
     public void setLocale(String locale) {
         setLocale(getLocaleFromCode(locale));
+    }
+
+    public ResourceLoader getVariant(Locale locale) {
+        ResourceLoader variant = new ResourceLoader(this);
+        variant.setLocale(locale);
+        return variant;
     }
 
     public String getCurrentLocaleCode() {

@@ -20,6 +20,7 @@
 package net.technicpack.ui.controls.lang;
 
 import net.technicpack.ui.lang.ResourceLoader;
+import net.technicpack.ui.listitems.LanguageItem;
 
 import javax.swing.*;
 import java.awt.*;
@@ -34,7 +35,9 @@ public class LanguageCellRenderer  extends JLabel implements ListCellRenderer {
 
     public LanguageCellRenderer(ResourceLoader resourceLoader, String langIcon, Color background, Color foreground) {
         resources = resourceLoader;
-        globe = resourceLoader.getIcon(langIcon);
+
+        if (langIcon != null)
+            globe = resourceLoader.getIcon(langIcon);
         this.background = background;
         this.foreground = foreground;
 
@@ -48,10 +51,11 @@ public class LanguageCellRenderer  extends JLabel implements ListCellRenderer {
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         setForeground(this.foreground);
         setBackground(this.background);
-        setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
+        setFont(((LanguageItem)value).getLanguageResources().getFont(ResourceLoader.FONT_OPENSANS, list.getFont().getSize()));
         setText(value.toString());
 
-        setIcon((!isSelected && list.getSelectedValue().equals(value))?globe:null);
+        if (globe != null)
+            setIcon((!isSelected && list.getSelectedValue().equals(value))?globe:null);
 
         return this;
     }
