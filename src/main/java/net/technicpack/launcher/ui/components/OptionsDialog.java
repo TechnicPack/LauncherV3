@@ -22,6 +22,7 @@ import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.ui.InstallerFrame;
 import net.technicpack.launcher.ui.controls.popupformatter.RoundedBorderFormatter;
+import net.technicpack.ui.controls.lang.LanguageCellRenderer;
 import net.technicpack.ui.controls.list.SimpleButtonComboUI;
 import net.technicpack.ui.lang.IRelocalizableResource;
 import net.technicpack.ui.lang.ResourceLoader;
@@ -262,9 +263,10 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             defaultLocaleText = defaultLocaleText.concat(" (" + resources.getString("launcheroptions.language.unavailable") + ")");
         }
 
-        langSelect.addItem(new LanguageItem(ResourceLoader.DEFAULT_LOCALE, defaultLocaleText));
+        langSelect.setRenderer(new LanguageCellRenderer(resources, null, langSelect.getBackground(), langSelect.getForeground()));
+        langSelect.addItem(new LanguageItem(ResourceLoader.DEFAULT_LOCALE, defaultLocaleText, resources));
         for (int i = 0; i < ResourceLoader.SUPPORTED_LOCALES.length; i++) {
-            langSelect.addItem(new LanguageItem(resources.getCodeFromLocale(ResourceLoader.SUPPORTED_LOCALES[i]), ResourceLoader.SUPPORTED_LOCALES[i].getDisplayName(ResourceLoader.SUPPORTED_LOCALES[i])));
+            langSelect.addItem(new LanguageItem(resources.getCodeFromLocale(ResourceLoader.SUPPORTED_LOCALES[i]), ResourceLoader.SUPPORTED_LOCALES[i].getDisplayName(ResourceLoader.SUPPORTED_LOCALES[i]), resources.getVariant(ResourceLoader.SUPPORTED_LOCALES[i])));
         }
         if (!settings.getLanguageCode().equalsIgnoreCase(ResourceLoader.DEFAULT_LOCALE)) {
             Locale loc = resources.getLocaleFromCode(settings.getLanguageCode());

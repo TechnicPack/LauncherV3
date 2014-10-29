@@ -457,9 +457,9 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
             defaultLocaleText = defaultLocaleText.concat(" (" + resources.getString("launcheroptions.language.unavailable") + ")");
         }
 
-        languages.addItem(new LanguageItem(ResourceLoader.DEFAULT_LOCALE, defaultLocaleText));
+        languages.addItem(new LanguageItem(ResourceLoader.DEFAULT_LOCALE, defaultLocaleText, resources));
         for (int i = 0; i < ResourceLoader.SUPPORTED_LOCALES.length; i++) {
-            languages.addItem(new LanguageItem(resources.getCodeFromLocale(ResourceLoader.SUPPORTED_LOCALES[i]), ResourceLoader.SUPPORTED_LOCALES[i].getDisplayName(ResourceLoader.SUPPORTED_LOCALES[i])));
+            languages.addItem(new LanguageItem(resources.getCodeFromLocale(ResourceLoader.SUPPORTED_LOCALES[i]), ResourceLoader.SUPPORTED_LOCALES[i].getDisplayName(ResourceLoader.SUPPORTED_LOCALES[i]), resources.getVariant(ResourceLoader.SUPPORTED_LOCALES[i])));
         }
         if (!settings.getLanguageCode().equalsIgnoreCase(ResourceLoader.DEFAULT_LOCALE)) {
             Locale loc = resources.getLocaleFromCode(settings.getLanguageCode());
