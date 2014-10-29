@@ -45,7 +45,7 @@ public class ResourceLoader {
     private boolean isDefaultLocaleSupported = true;
     private Locale defaultLocale;
 
-    public static final Locale[] SUPPORTED_LOCALES = { Locale.ENGLISH, Locale.GERMAN };
+    public static final Locale[] SUPPORTED_LOCALES = { Locale.ENGLISH, Locale.GERMAN, Locale.CHINA, Locale.TAIWAN };
     public static final String DEFAULT_LOCALE = "default";
 
     public static final String FONT_OPENSANS_BOLD = "font.opensans.bold";
@@ -240,7 +240,11 @@ public class ResourceLoader {
     public Font getFont(String name, float size, int style) {
         Font font;
         try {
-            font = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.class.getResourceAsStream(getResourcePath("/fonts/"+getString(name)))).deriveFont(size).deriveFont(style);
+            String fullName = getString(name);
+            if (fullName.contains(".ttf"))
+                font = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.class.getResourceAsStream(getResourcePath("/fonts/"+fullName))).deriveFont(size).deriveFont(style);
+            else
+                font = new Font(fullName, style, (int)size);
         } catch (Exception e) {
             e.printStackTrace();
             // Fallback
