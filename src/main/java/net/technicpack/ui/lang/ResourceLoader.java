@@ -29,6 +29,7 @@ import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -254,16 +255,18 @@ public class ResourceLoader {
 
     public Font getFont(String name, float size, int style) {
         Font font;
+        InputStream fontStream = null;
         try {
             String fullName = getString(name);
-            if (fullName.contains(".ttf"))
-                font = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.class.getResourceAsStream(getResourcePath("/fonts/"+fullName))).deriveFont(size).deriveFont(style);
-            else
-                font = new Font(fullName, style, (int)size);
+            fontStream = ResourceLoader.class.getResourceAsStream(getResourcePath("/fonts/"+fullName));
+            font = Font.createFont(Font.TRUETYPE_FONT, fontStream).deriveFont(size).deriveFont(style);
         } catch (Exception e) {
             e.printStackTrace();
             // Fallback
             font = new Font("Arial", Font.PLAIN, 12);
+        } finally {
+            if (fontStream != null)
+                IOUtils.closeQuietly(fontStream);
         }
         return font;
     }
