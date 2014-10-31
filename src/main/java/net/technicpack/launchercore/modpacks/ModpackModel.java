@@ -447,8 +447,8 @@ public class ModpackModel {
             }
         }
 
+        installedPackRepository.remove(getName());
         installedPack = null;
         installedDirectory = null;
-        installedPackRepository.remove(getName());
     }
 }
