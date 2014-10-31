@@ -22,13 +22,17 @@ import com.beust.jcommander.JCommander;
 import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.autoupdate.http.HttpUpdateStream;
 import net.technicpack.launcher.io.*;
+import net.technicpack.launcher.settings.migration.IMigrator;
+import net.technicpack.launcher.settings.migration.InitialV3Migrator;
 import net.technicpack.launcher.ui.InstallerFrame;
 import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
+import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.logging.BuildLogFormatter;
 import net.technicpack.launchercore.logging.RotatingFileHandler;
 import net.technicpack.launchercore.modpacks.PackLoader;
 import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
+import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.ui.components.Console;
 import net.technicpack.ui.components.ConsoleFrame;
 import net.technicpack.ui.components.ConsoleHandler;
@@ -76,6 +80,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -196,7 +201,8 @@ public class LauncherMain {
         UIManager.put( "ComboBox.disabledForeground", LauncherFrame.COLOR_GREY_TEXT );
         System.setProperty("xr.load.xml-reader",  "org.ccil.cowan.tagsoup.Parser");
 
-        UserModel userModel = new UserModel(TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json")), new AuthenticationService());
+        IUserStore<MojangUser> users = TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json"));
+        UserModel userModel = new UserModel(users, new AuthenticationService());
 
         MirrorStore mirrorStore = new MirrorStore(userModel);
         mirrorStore.addSecureMirror("mirror.technicpack.net", new JsonWebSecureMirror("http://mirror.technicpack.net/", "mirror.technicpack.net"));
@@ -219,6 +225,10 @@ public class LauncherMain {
 
         IInstalledPackRepository packStore = TechnicInstalledPackStore.load(new File(directories.getLauncherDirectory(), "installedPacks"));
         IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(platform, solder);
+
+        ArrayList<IMigrator> migrators = new ArrayList<IMigrator>(1);
+        migrators.add(new InitialV3Migrator(platform));
+        SettingsFactory.migrateSettings(settings, packStore, directories, users, migrators);
 
         PackLoader packList = new PackLoader(directories, packStore, packInfoRepository);
         ModpackSelector selector = new ModpackSelector(resources, packList, new SolderPackSource("http://solder.technicpack.net/api/", solder, true), solder, platform, iconRepo);

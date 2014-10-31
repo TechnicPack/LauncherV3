@@ -624,5 +624,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         initComponents();
         initControlValues();
+        invalidate();
+        repaint();
     }
 }

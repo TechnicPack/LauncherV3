@@ -45,6 +45,8 @@ public class TechnicSettings {
     private String javaArgs;
     private int latestNewsArticle;
 
+    private String launcherSettingsVersion = "0";
+
     public File getFilePath() { return this.settingsFile; }
     public void setFilePath(File settingsFile) {
         this.settingsFile = settingsFile;
@@ -56,6 +58,9 @@ public class TechnicSettings {
 
         return technicRoot;
     }
+
+    public String getLauncherSettingsVersion() { return launcherSettingsVersion; }
+    public void setLauncherSettingsVersion(String version) { this.launcherSettingsVersion = version; }
 
     public boolean isPortable() {
         return (directory != null && !directory.isEmpty() && directory.equalsIgnoreCase("portable"));

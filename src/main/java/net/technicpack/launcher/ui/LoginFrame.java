@@ -526,6 +526,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         initComponents();
 
         refreshUsers();
+        invalidate();
         repaint();
     }
 

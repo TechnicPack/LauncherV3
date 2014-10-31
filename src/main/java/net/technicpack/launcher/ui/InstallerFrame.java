@@ -618,5 +618,6 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         //Clear references to existing controls
 
         initComponents();
+        invalidate();
     }
 }

@@ -116,7 +116,8 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
     }
 
     protected void openModpackOptions() {
-        modpackOptionsListener.actionPerformed(new ActionEvent(currentModpack, 0, ""));
+        if (currentModpack != null)
+            modpackOptionsListener.actionPerformed(new ActionEvent(currentModpack, 0, ""));
     }
 
     private void initComponents() {

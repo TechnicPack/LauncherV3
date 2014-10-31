@@ -149,7 +149,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     private PasteWatcher pasteWatcher = null;
 
-    public LauncherFrame(ResourceLoader resources, ImageRepository<IUserType> skinRepository, UserModel userModel, TechnicSettings settings, ModpackSelector modpackSelector, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, Installer installer, ImageRepository<AuthorshipInfo> avatarRepo, IPlatformApi platformApi, LauncherDirectories directories, IInstalledPackRepository packRepository, StartupParameters params, DiscoverInfoPanel discoverInfoPanel) {
+    public LauncherFrame(final ResourceLoader resources, final ImageRepository<IUserType> skinRepository, final UserModel userModel, final TechnicSettings settings, final ModpackSelector modpackSelector, final ImageRepository<ModpackModel> iconRepo, final ImageRepository<ModpackModel> logoRepo, final ImageRepository<ModpackModel> backgroundRepo, final Installer installer, final ImageRepository<AuthorshipInfo> avatarRepo, final IPlatformApi platformApi, final LauncherDirectories directories, final IInstalledPackRepository packRepository, final StartupParameters params, final DiscoverInfoPanel discoverInfoPanel) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -173,7 +173,13 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
         selectTab("discover");
 
-        LauncherMain.consoleFrame.setVisible(settings.getShowConsole());
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                LauncherMain.consoleFrame.setVisible(settings.getShowConsole());
+            }
+        });
+
         setLocationRelativeTo(null);
     }
 
@@ -626,6 +632,9 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
         if (currentTabName != null)
             selectTab(currentTabName);
+
+        invalidate();
+        repaint();
     }
 
     @Override
@@ -647,6 +656,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
                     }
                 });
             }
+            modpackSelector.forceRefresh();
         }
     }
 
