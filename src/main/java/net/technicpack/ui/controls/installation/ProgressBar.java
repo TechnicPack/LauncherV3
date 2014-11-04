@@ -132,7 +132,13 @@ public class ProgressBar extends JLabel implements DownloadListener {
     public void setProgress(String progressText, float progress) {
         setText(progressText);
         this.progressPct = progress;
-        repaint();
+
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                repaint();
+            }
+        });
     }
 
     @Override
