@@ -633,8 +633,13 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         if (currentTabName != null)
             selectTab(currentTabName);
 
-        invalidate();
-        repaint();
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                invalidate();
+                repaint();
+            }
+        });
     }
 
     @Override

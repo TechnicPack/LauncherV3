@@ -526,8 +526,14 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         initComponents();
 
         refreshUsers();
-        invalidate();
-        repaint();
+
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                invalidate();
+                repaint();
+            }
+        });
     }
 
     @Override
