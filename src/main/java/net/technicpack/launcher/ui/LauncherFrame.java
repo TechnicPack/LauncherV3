@@ -662,6 +662,12 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
                 });
             }
             modpackSelector.forceRefresh();
+            EventQueue.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    repaint();
+                }
+            });
         }
     }
 
