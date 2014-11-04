@@ -94,7 +94,12 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
             }
         }
 
-        repaint();
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                repaint();
+            }
+        });
     }
 
     public RoundedButton getPlayButton() {
@@ -278,7 +283,13 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
     public void jobComplete(ImageJob<ModpackModel> job) {
         if (job.getJobData() == modpack) {
             background.setImage(job.getImage());
-            repaint();
+
+            EventQueue.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    repaint();
+                }
+            });
         }
     }
 }

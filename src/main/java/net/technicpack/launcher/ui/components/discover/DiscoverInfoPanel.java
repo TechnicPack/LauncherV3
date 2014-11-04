@@ -71,7 +71,12 @@ public class DiscoverInfoPanel extends TiledBackground {
         EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                panel.setDocument(runnableAccessDiscover);
+                try {
+                    panel.setDocument(runnableAccessDiscover);
+                } catch (Exception ex) {
+                    //Can't load document from internet- don't beef
+                    ex.printStackTrace();
+                }
             }
         });
 

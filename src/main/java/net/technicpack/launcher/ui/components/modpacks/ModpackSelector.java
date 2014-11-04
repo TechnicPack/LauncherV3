@@ -344,8 +344,14 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
 
         constraints.weighty = 1.0;
         widgetList.add(Box.createGlue(), constraints);
-        revalidate();
-        repaint();
+
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                revalidate();
+                repaint();
+            }
+        });
     }
 
     @Override

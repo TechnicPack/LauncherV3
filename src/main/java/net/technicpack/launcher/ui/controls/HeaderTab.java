@@ -21,6 +21,7 @@ package net.technicpack.launcher.ui.controls;
 import net.technicpack.launcher.ui.LauncherFrame;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -49,7 +50,13 @@ public class HeaderTab extends JLabel implements MouseListener {
     public void setIsActive(boolean isActive) {
         this.isActive = isActive;
         this.setOpaque(isActive);
-        repaint();
+
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                repaint();
+            }
+        });
     }
 
     public void addActionListener(ActionListener listener) {
