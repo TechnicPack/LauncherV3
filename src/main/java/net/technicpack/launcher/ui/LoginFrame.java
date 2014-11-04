@@ -546,6 +546,14 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
                 nameSelect.grabFocus();
             else
                 name.grabFocus();
+
+            EventQueue.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    invalidate();
+                    repaint();
+                }
+            });
         } else
             this.setVisible(false);
     }
