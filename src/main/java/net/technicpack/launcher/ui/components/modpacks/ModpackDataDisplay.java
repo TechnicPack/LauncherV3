@@ -204,6 +204,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         description.setAlignmentX(LEFT_ALIGNMENT);
         description.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         description.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        description.setBorder(BorderFactory.createEmptyBorder());
         description.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
