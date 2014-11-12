@@ -348,7 +348,7 @@
 									</classPath>
 									<jre>
 										<minVersion>1.5.0</minVersion>
-										<opts><opt>-Djava.net.preferIPv4Stack=true</opt><opt>-Dawt.useSystemAAFontSettings=on</opt></opts>
+										<opts><opt>-Djava.net.preferIPv4Stack=true</opt><opt>-Dawt.useSystemAAFontSettings=lcd</opt><opt>-Dswing.aatext=true</opt></opts>
 									</jre>
 									<icon>${basedir}/src/main/resources/exe/icon.ico</icon>
 									<versionInfo>
