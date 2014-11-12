@@ -91,11 +91,12 @@ public class Installer {
             @Override
             public void run() {
                 try {
-                    InstallTasksQueue<CompleteVersion> tasksQueue = new InstallTasksQueue<CompleteVersion>(listener, mirrorStore);
-                    buildTasksQueue(tasksQueue, resources, pack, build, doFullInstall);
-
                     CompleteVersion version = null;
+
                     if (!pack.isLocalOnly()) {
+                        InstallTasksQueue<CompleteVersion> tasksQueue = new InstallTasksQueue<CompleteVersion>(listener, mirrorStore);
+                        buildTasksQueue(tasksQueue, resources, pack, build, doFullInstall);
+
                         version = installer.installPack(tasksQueue, pack, build);
                     } else {
                         version = installer.prepareOfflinePack(pack, new CompleteVersionParser());

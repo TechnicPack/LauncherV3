@@ -64,7 +64,7 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
         currentModpack = modpack;
         modpackName.setText(modpack.getDisplayName());
 
-        modpackOptions.setVisible(modpack.getPackInfo() != null || modpack.getInstalledVersion() != null);
+        modpackOptions.setVisible(!modpack.isLocalOnly() || modpack.getInstalledVersion() != null);
 
         Version packVersion = modpack.getInstalledVersion();
 
