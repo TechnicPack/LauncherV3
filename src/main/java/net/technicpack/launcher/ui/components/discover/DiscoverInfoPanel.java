@@ -19,6 +19,7 @@
 package net.technicpack.launcher.ui.components.discover;
 
 import net.technicpack.platform.http.HttpPlatformApi;
+import net.technicpack.ui.controls.installation.*;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.ui.controls.TiledBackground;
 import org.w3c.dom.Document;
@@ -38,7 +39,7 @@ public class DiscoverInfoPanel extends TiledBackground {
 
     final private XHTMLPanel panel;
 
-    public DiscoverInfoPanel(ResourceLoader loader, String discoverUrl, HttpPlatformApi platform) {
+    public DiscoverInfoPanel(ResourceLoader loader, String discoverUrl, HttpPlatformApi platform, final net.technicpack.ui.controls.installation.SplashScreen splash) {
         super(loader.getImage("background_repeat2.png"));
 
         if (discoverUrl == null)
@@ -50,6 +51,27 @@ public class DiscoverInfoPanel extends TiledBackground {
         this.panel = new XHTMLPanel();
         panel.setFont(loader.getFont(ResourceLoader.FONT_OPENSANS, 16));
         panel.setDefaultFontFromComponent(true);
+        panel.addDocumentListener(new DocumentListener() {
+            @Override
+            public void documentStarted() {
+
+            }
+
+            @Override
+            public void documentLoaded() {
+                splash.dispose();
+            }
+
+            @Override
+            public void onLayoutException(Throwable throwable) {
+                throwable.printStackTrace();
+            }
+
+            @Override
+            public void onRenderException(Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        });
 
         for (Object listener : panel.getMouseTrackingListeners()) {
             panel.removeMouseTrackingListener((FSMouseListener)listener);
