@@ -86,7 +86,8 @@ public class Relauncher {
                 commands.add("java");
             commands.add("-Xmx256m");
             commands.add("-Djava.net.preferIPv4Stack=true");
-            commands.add("-Dawt.useSystemAAFontSettings=on");
+            commands.add("-Dawt.useSystemAAFontSettings=lcd");
+            commands.add("-Dswing.aatext=true");
             commands.add("-cp");
             commands.add(launchPath);
             commands.add(mainClass.getName());
