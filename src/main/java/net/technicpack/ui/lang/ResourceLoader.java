@@ -31,10 +31,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.logging.Level;
 
 public class ResourceLoader {
@@ -52,6 +49,32 @@ public class ResourceLoader {
     public static final String FONT_OPENSANS_BOLD = "font.opensans.bold";
     public static final String FONT_OPENSANS = "font.opensans.regular";
     public static final String FONT_RALEWAY = "font.raleway.light";
+
+    public static final Map<String, Font> fontCache = new HashMap<String, Font>();
+
+    public Font getFontByName(String fontName) {
+        Font font;
+
+        if (fontCache.containsKey(fontName))
+            return fontCache.get(fontName);
+
+        InputStream fontStream = null;
+        try {
+            String fullName = getString(fontName);
+            fontStream = ResourceLoader.class.getResourceAsStream(getResourcePath("/fonts/"+fullName));
+            font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Fallback
+            font = new Font("Arial", Font.PLAIN, 12);
+        } finally {
+            if (fontStream != null)
+                IOUtils.closeQuietly(fontStream);
+        }
+        fontCache.put(fontName, font);
+        
+        return font;
+    }
 
     public ResourceLoader(String... resourcesPath) {
         dottedResourcePath = "";
@@ -254,21 +277,7 @@ public class ResourceLoader {
     }
 
     public Font getFont(String name, float size, int style) {
-        Font font;
-        InputStream fontStream = null;
-        try {
-            String fullName = getString(name);
-            fontStream = ResourceLoader.class.getResourceAsStream(getResourcePath("/fonts/"+fullName));
-            font = Font.createFont(Font.TRUETYPE_FONT, fontStream).deriveFont(size).deriveFont(style);
-        } catch (Exception e) {
-            e.printStackTrace();
-            // Fallback
-            font = new Font("Arial", Font.PLAIN, 12);
-        } finally {
-            if (fontStream != null)
-                IOUtils.closeQuietly(fontStream);
-        }
-        return font;
+        return getFontByName(name).deriveFont(style, size);
     }
 
     private void relocalizeResources() {
