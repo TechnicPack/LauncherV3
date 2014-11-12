@@ -235,7 +235,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         feedBottom.add(vertFill, constraints);
 
         deleteButton = new RoundedButton(resources.getString("modpackoptions.delete.text"));
-        deleteButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 18, Font.BOLD));
+        deleteButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 20, Font.BOLD));
         deleteButton.setBorder(BorderFactory.createEmptyBorder(5, 25, 10, 25));
         deleteButton.setBackground(LauncherFrame.COLOR_FOOTER);
         deleteButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
