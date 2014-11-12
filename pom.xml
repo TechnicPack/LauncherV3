@@ -199,7 +199,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>2.0</version>
+				<version>2.1</version>
 				<executions>
 					<execution>
 						<configuration>
@@ -275,30 +275,6 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-	<groupId>org.codehaus.mojo</groupId>
-		<artifactId>exec-maven-plugin</artifactId>
-		<executions>
-			<!-- chmod executable ... while japp plugin produces the correct 
-				permissions, jar/unjar operation resets 'x' flag, so the app becomes non-executable. 
-				Must fix that manually -->
-			<execution>
-				<id>chmod-modeler</id>
-				<phase>package</phase>
-				<goals>
-					<goal>exec</goal>
-				</goals>
-				<configuration>
-					<executable>/bin/chmod</executable>
-					<arguments>
-						<argument>755</argument>
-						<argument>${basedir}/src/main/app/Contents/MacOS/JavaAppLauncher</argument>
-					</arguments>
-				</configuration>
-			</execution>
-		</executions>
-	</plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -394,6 +370,43 @@
 							</execution>
 						</executions>
 					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<!-- Package for OS X -->
+		<profile>
+			<id>package-osx</id>
+			<activation>
+				<os>
+					<family>mac</family>
+				</os>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<executions>
+							<!-- chmod executable ... while japp plugin produces the correct
+                                permissions, jar/unjar operation resets 'x' flag, so the app becomes non-executable.
+                                Must fix that manually -->
+							<execution>
+								<id>chmod-modeler</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>/bin/chmod</executable>
+									<arguments>
+										<argument>755</argument>
+										<argument>${basedir}/src/main/app/Contents/MacOS/JavaAppLauncher</argument>
+									</arguments>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
 				</plugins>
 			</build>
 		</profile>
