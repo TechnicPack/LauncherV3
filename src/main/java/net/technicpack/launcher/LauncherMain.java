@@ -130,7 +130,7 @@ public class LauncherMain {
 
         boolean needsReboot = false;
 
-        if (System.getProperty("awt.useSystemAAFontSettings") == null || !System.getProperty("awt.useSystemAAFontSettings").equals("on"))
+        if (System.getProperty("awt.useSystemAAFontSettings") == null || !System.getProperty("awt.useSystemAAFontSettings").equals("lcd"))
             needsReboot = true;
         else if (!Boolean.parseBoolean(System.getProperty("java.net.preferIPv4Stack")))
             needsReboot = true;
