@@ -27,6 +27,7 @@ import net.technicpack.launcher.settings.migration.InitialV3Migrator;
 import net.technicpack.launcher.ui.InstallerFrame;
 import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
+import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.logging.BuildLogFormatter;
 import net.technicpack.launchercore.logging.RotatingFileHandler;
@@ -201,7 +202,7 @@ public class LauncherMain {
         UIManager.put( "ComboBox.disabledForeground", LauncherFrame.COLOR_GREY_TEXT );
         System.setProperty("xr.load.xml-reader",  "org.ccil.cowan.tagsoup.Parser");
 
-        SplashScreen splash = new SplashScreen(resources.getImage("launch_splash.png"), 0);
+        final SplashScreen splash = new SplashScreen(resources.getImage("launch_splash.png"), 0);
         splash.pack();
         splash.setLocationRelativeTo(null);
         splash.setVisible(true);
@@ -251,6 +252,13 @@ public class LauncherMain {
 
         LoginFrame login = new LoginFrame(resources, settings, userModel, skinRepo);
         userModel.addAuthListener(login);
+        userModel.addAuthListener(new IAuthListener() {
+            @Override
+            public void userChanged(Object user) {
+                if (user == null)
+                    splash.dispose();
+            }
+        });
 
         userModel.initAuth();
     }

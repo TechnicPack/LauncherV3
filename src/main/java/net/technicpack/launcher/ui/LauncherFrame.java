@@ -680,13 +680,13 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         if (installer.isCurrentlyRunning()) {
             playButton.setText(resources.getString("launcher.pack.cancel"));
         } else if (modpack.getInstalledVersion() != null) {
-            if (userModel.getCurrentUser().isOffline()) {
+            if (userModel.getCurrentUser() == null || userModel.getCurrentUser().isOffline()) {
                 playButton.setText(resources.getString("launcher.pack.launch.offline"));
             } else {
                 playButton.setText(resources.getString("launcher.pack.launch"));
             }
         } else {
-            if (userModel.getCurrentUser().isOffline()) {
+            if (userModel.getCurrentUser() == null || userModel.getCurrentUser().isOffline()) {
                 playButton.setEnabled(false);
                 playButton.setForeground(LauncherFrame.COLOR_GREY_TEXT);
                 playButton.setText(resources.getString("launcher.pack.cannotinstall"));
