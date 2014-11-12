@@ -44,7 +44,7 @@ public class ProgressBar extends JLabel implements DownloadListener {
                 RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(
                 RenderingHints.KEY_TEXT_ANTIALIASING,
-                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
         g2d.setRenderingHint(
                 RenderingHints.KEY_FRACTIONALMETRICS,
                 RenderingHints.VALUE_FRACTIONALMETRICS_ON);

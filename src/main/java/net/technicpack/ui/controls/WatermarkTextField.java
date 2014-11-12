@@ -46,7 +46,19 @@ public class WatermarkTextField extends JTextField {
             g.setColor(watermarkColor);
 
             double height = g.getFontMetrics().getStringBounds(watermarkText, g).getHeight();
-            g.drawString(watermarkText, 0,g.getFontMetrics ().getAscent() + (int)((getHeight() - height)/2));
+
+            Graphics2D g2d = (Graphics2D)g;
+
+            g2d.setRenderingHint(
+                    RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+            g2d.setRenderingHint(
+                    RenderingHints.KEY_TEXT_ANTIALIASING,
+                    RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+            g2d.setRenderingHint(
+                    RenderingHints.KEY_FRACTIONALMETRICS,
+                    RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+            g.drawString(watermarkText, 6,g.getFontMetrics ().getAscent() + (int)((getHeight() - height)/2));
         }
     }
 }
