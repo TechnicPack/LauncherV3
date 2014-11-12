@@ -583,6 +583,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         JButton logout = new JButton(resources.getString("launcher.user.logout"));
         logout.setBorder(BorderFactory.createEmptyBorder());
         logout.setContentAreaFilled(false);
+        logout.setFocusable(false);
         logout.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         logout.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         logout.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
