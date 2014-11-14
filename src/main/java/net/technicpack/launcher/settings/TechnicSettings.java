@@ -19,7 +19,6 @@
 package net.technicpack.launcher.settings;
 
 import net.technicpack.launchercore.util.LaunchAction;
-import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 
@@ -43,9 +42,13 @@ public class TechnicSettings {
     private String clientId = UUID.randomUUID().toString();
     private String directory;
     private String javaArgs;
+    private String currentTab;
     private int latestNewsArticle;
 
     private String launcherSettingsVersion = "0";
+
+    public String getCurrentTab() { return this.currentTab; }
+    public void setCurrentTab(String currentTab) { this.currentTab = currentTab; }
 
     public File getFilePath() { return this.settingsFile; }
     public void setFilePath(File settingsFile) {

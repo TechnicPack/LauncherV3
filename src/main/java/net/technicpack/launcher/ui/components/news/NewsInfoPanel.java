@@ -18,6 +18,8 @@
 
 package net.technicpack.launcher.ui.components.news;
 
+import net.technicpack.launcher.ui.components.IInfoPanelListener;
+import net.technicpack.launcher.ui.components.InfoPanelReadyDetector;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.ui.controls.RoundedButton;
@@ -46,12 +48,13 @@ public class NewsInfoPanel extends JPanel implements PropertyChangeListener {
 
     private String url = "";
 
-    public NewsInfoPanel(ResourceLoader resources, ImageRepository<AuthorshipInfo> avatarRepo) {
+    public NewsInfoPanel(ResourceLoader resources, ImageRepository<AuthorshipInfo> avatarRepo, IInfoPanelListener listener) {
 
         this.resources = resources;
         this.avatarRepo = avatarRepo;
 
         initComponents();
+        this.addHierarchyListener(new InfoPanelReadyDetector(listener));
     }
 
     public void setArticle(NewsArticle article) {

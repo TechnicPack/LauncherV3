@@ -18,13 +18,11 @@
 
 package net.technicpack.launcher.ui.components.discover;
 
+import net.technicpack.launcher.ui.components.IInfoPanelListener;
 import net.technicpack.platform.http.HttpPlatformApi;
-import net.technicpack.ui.controls.installation.*;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.ui.controls.TiledBackground;
-import org.w3c.dom.Document;
 import org.xhtmlrenderer.event.DocumentListener;
-import org.xhtmlrenderer.resource.ImageResource;
 import org.xhtmlrenderer.simple.XHTMLPanel;
 import org.xhtmlrenderer.swing.DelegatingUserAgent;
 import org.xhtmlrenderer.swing.FSMouseListener;
@@ -32,14 +30,12 @@ import org.xhtmlrenderer.swing.ImageResourceLoader;
 import org.xhtmlrenderer.swing.SwingReplacedElementFactory;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
-public class DiscoverInfoPanel extends TiledBackground {
+public class DiscoverInfoPanel extends TiledBackground  {
 
     final private XHTMLPanel panel;
 
-    public DiscoverInfoPanel(ResourceLoader loader, String discoverUrl, HttpPlatformApi platform, final net.technicpack.ui.controls.installation.SplashScreen splash) {
+    public DiscoverInfoPanel(ResourceLoader loader, String discoverUrl, HttpPlatformApi platform, final IInfoPanelListener infoPanelListener) {
         super(loader.getImage("background_repeat2.png"));
 
         if (discoverUrl == null)
@@ -51,6 +47,7 @@ public class DiscoverInfoPanel extends TiledBackground {
         this.panel = new XHTMLPanel();
         panel.setFont(loader.getFont(ResourceLoader.FONT_OPENSANS, 16));
         panel.setDefaultFontFromComponent(true);
+        final DiscoverInfoPanel infopanel = this;
         panel.addDocumentListener(new DocumentListener() {
             @Override
             public void documentStarted() {
@@ -58,9 +55,7 @@ public class DiscoverInfoPanel extends TiledBackground {
             }
 
             @Override
-            public void documentLoaded() {
-                splash.dispose();
-            }
+            public void documentLoaded() { infoPanelListener.panelReady(infopanel); }
 
             @Override
             public void onLayoutException(Throwable throwable) {

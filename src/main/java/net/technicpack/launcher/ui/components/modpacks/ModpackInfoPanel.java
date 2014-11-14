@@ -18,6 +18,8 @@
 
 package net.technicpack.launcher.ui.components.modpacks;
 
+import net.technicpack.launcher.ui.components.IInfoPanelListener;
+import net.technicpack.launcher.ui.components.InfoPanelReadyDetector;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.TiledBackground;
 import net.technicpack.ui.lang.ResourceLoader;
@@ -53,13 +55,14 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
 
     private ModpackModel modpack;
 
-    public ModpackInfoPanel(ResourceLoader loader, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, ImageRepository<AuthorshipInfo> avatarRepo, ActionListener modpackOptionsListener, ActionListener modpackRefreshListener) {
+    public ModpackInfoPanel(ResourceLoader loader, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, ImageRepository<AuthorshipInfo> avatarRepo, ActionListener modpackOptionsListener, ActionListener modpackRefreshListener, IInfoPanelListener listener) {
         this.resources  = loader;
         this.backgroundRepo = backgroundRepo;
         this.avatarRepo = avatarRepo;
         this.modpackRefreshListener = modpackRefreshListener;
 
         initComponents(iconRepo, logoRepo, modpackOptionsListener);
+        this.addHierarchyListener(new InfoPanelReadyDetector(listener));
     }
 
     public void setModpack(ModpackModel modpack) {

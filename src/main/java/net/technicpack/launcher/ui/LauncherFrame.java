@@ -20,14 +20,13 @@ package net.technicpack.launcher.ui;
 
 import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.settings.StartupParameters;
+import net.technicpack.launcher.ui.components.IInfoPanelListener;
 import net.technicpack.launcher.ui.components.ModpackOptionsDialog;
 import net.technicpack.launchercore.install.LauncherDirectories;
-import net.technicpack.launchercore.modpacks.PackLoader;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.rest.RestObject;
 import net.technicpack.ui.controls.DraggableFrame;
-import net.technicpack.ui.controls.LauncherDialog;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.lang.IRelocalizableResource;
@@ -58,10 +57,8 @@ import net.technicpack.utilslib.PasteWatcher;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -141,15 +138,14 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private TintablePanel centralPanel;
     private TintablePanel footer;
 
-    private String currentTabName;
-
     NewsInfoPanel newsInfoPanel;
     ModpackInfoPanel modpackPanel;
     DiscoverInfoPanel discoverInfoPanel;
+    private IInfoPanelListener infoPanelListener;
 
     private PasteWatcher pasteWatcher = null;
 
-    public LauncherFrame(final ResourceLoader resources, final ImageRepository<IUserType> skinRepository, final UserModel userModel, final TechnicSettings settings, final ModpackSelector modpackSelector, final ImageRepository<ModpackModel> iconRepo, final ImageRepository<ModpackModel> logoRepo, final ImageRepository<ModpackModel> backgroundRepo, final Installer installer, final ImageRepository<AuthorshipInfo> avatarRepo, final IPlatformApi platformApi, final LauncherDirectories directories, final IInstalledPackRepository packRepository, final StartupParameters params, final DiscoverInfoPanel discoverInfoPanel) {
+    public LauncherFrame(final ResourceLoader resources, final ImageRepository<IUserType> skinRepository, final UserModel userModel, final TechnicSettings settings, final ModpackSelector modpackSelector, final ImageRepository<ModpackModel> iconRepo, final ImageRepository<ModpackModel> logoRepo, final ImageRepository<ModpackModel> backgroundRepo, final Installer installer, final ImageRepository<AuthorshipInfo> avatarRepo, final IPlatformApi platformApi, final LauncherDirectories directories, final IInstalledPackRepository packRepository, final StartupParameters params, final DiscoverInfoPanel discoverInfoPanel, IInfoPanelListener listener) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -167,11 +163,12 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.packRepo = packRepository;
         this.params = params;
         this.discoverInfoPanel = discoverInfoPanel;
+        this.infoPanelListener = listener;
 
         //Handles rebuilding the frame, so use it to build the frame in the first place
         relocalize(resources);
 
-        selectTab("discover");
+        selectTab(settings.getCurrentTab());
 
         EventQueue.invokeLater(new Runnable() {
             @Override
@@ -188,6 +185,10 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     /////////////////////////////////////////////////
 
     protected void selectTab(String tabName) {
+        if (null == tabName || 0 == tabName.length()) {
+            tabName = this.TAB_DISCOVER;
+        }
+
         discoverTab.setIsActive(false);
         modpacksTab.setIsActive(false);
         newsTab.setIsActive(false);
@@ -199,11 +200,19 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         else if (tabName.equalsIgnoreCase(TAB_NEWS)) {
             newsTab.setIsActive(true);
             newsSelector.ping();
+        } else {
+            selectTab(TAB_DISCOVER);
+            return;
         }
 
         infoLayout.show(infoSwap, tabName);
 
-        currentTabName = tabName;
+        boolean doSave = tabName != settings.getCurrentTab();
+        settings.setCurrentTab(tabName);
+        if (doSave) {
+            settings.save();
+
+        }
     }
 
     protected void closeWindow() {
@@ -503,6 +512,13 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.add(centralPanel, BorderLayout.CENTER);
         centralPanel.setLayout(new BorderLayout());
 
+        final LauncherFrame frame = this;
+        IInfoPanelListener infopanellistener = new IInfoPanelListener() {
+            @Override
+            public void panelReady(JPanel panel) {
+                frame.infoPanelListener.panelReady(panel);
+            }
+        };
         modpackPanel = new ModpackInfoPanel(resources, iconRepo, logoRepo, backgroundRepo, avatarRepo, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -514,7 +530,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             public void actionPerformed(ActionEvent e) {
                 refreshModpackOptions((ModpackModel)e.getSource());
             }
-        }
+        },
+                infopanellistener
         );
         modpackSelector.setInfoPanel(modpackPanel);
         playButton = modpackPanel.getPlayButton();
@@ -546,7 +563,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         infoLayout = new CardLayout();
         infoSwap.setLayout(infoLayout);
         infoSwap.setOpaque(false);
-        newsInfoPanel = new NewsInfoPanel(resources, avatarRepo);
+        newsInfoPanel = new NewsInfoPanel(resources, avatarRepo, infopanellistener);
         infoSwap.add(discoverInfoPanel,"discover");
 
         JPanel newsHost = new JPanel();
@@ -633,8 +650,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         initComponents();
         userChanged(userModel.getCurrentUser());
 
-        if (currentTabName != null)
-            selectTab(currentTabName);
+        if (settings.getCurrentTab() != null)
+            selectTab(settings.getCurrentTab());
 
         EventQueue.invokeLater(new Runnable() {
             @Override
