@@ -407,14 +407,15 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         add(password, new GridBagConstraints(0, 5, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(3, 20, 0, 20), 4, 17));
 
         // "Remember this account"
-        rememberAccount = new JCheckBox(resources.getString("login.remember"), false);
-        rememberAccount.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 12));
+        Font rememberFont = resources.getFont(ResourceLoader.FONT_OPENSANS, 14);
+        rememberAccount = new JCheckBox("<html><body style=\"color:#D0D0D0\">"+resources.getString("login.remember")+"</body></html>", false);
+        rememberAccount.setFont(rememberFont);
         rememberAccount.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         rememberAccount.setOpaque(false);
         rememberAccount.setHorizontalTextPosition(SwingConstants.LEFT);
         rememberAccount.setHorizontalAlignment(SwingConstants.RIGHT);
         rememberAccount.setBorder(BorderFactory.createEmptyBorder());
-        rememberAccount.setIconTextGap(12);
+        rememberAccount.setIconTextGap(6);
         rememberAccount.addKeyListener(this);
         rememberAccount.setSelectedIcon(resources.getIcon("checkbox_closed.png"));
         rememberAccount.setIcon(resources.getIcon("checkbox_open.png"));
@@ -425,7 +426,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
             }
         });
         rememberAccount.setFocusPainted(false);
-        add(rememberAccount, new GridBagConstraints(1,6,2,1,0.0,0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(24,20,0,20),0,0));
+        add(rememberAccount, new GridBagConstraints(1,6,2,1,1.0,0.0, GridBagConstraints.EAST, GridBagConstraints.BOTH, new Insets(24,20,0,20),0,0));
 
         //Login button
         RoundedButton button = new RoundedButton(resources.getString("login.button"));
