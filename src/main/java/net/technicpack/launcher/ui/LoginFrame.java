@@ -408,7 +408,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
 
         // "Remember this account"
         rememberAccount = new JCheckBox(resources.getString("login.remember"), false);
-        rememberAccount.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
+        rememberAccount.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 12));
         rememberAccount.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         rememberAccount.setOpaque(false);
         rememberAccount.setHorizontalTextPosition(SwingConstants.LEFT);
