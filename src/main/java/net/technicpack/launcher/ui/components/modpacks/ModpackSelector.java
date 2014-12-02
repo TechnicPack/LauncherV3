@@ -34,6 +34,7 @@ import net.technicpack.rest.io.Modpack;
 import net.technicpack.solder.ISolderApi;
 import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.controls.WatermarkTextField;
+import net.technicpack.ui.lang.IRelocalizableResource;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.ui.controls.list.SimpleScrollbarUI;
@@ -64,7 +65,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ModpackSelector extends TintablePanel implements IModpackContainer, IAuthListener<IUserType> {
+public class ModpackSelector extends TintablePanel implements IModpackContainer, IAuthListener<IUserType>, IRelocalizableResource {
     private ResourceLoader resources;
     private PackLoader packLoader;
     private IPackSource technicSolder;
@@ -98,9 +99,6 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         this.platformApi = platformApi;
         this.solderApi = solderApi;
 
-        this.setOverIcon(resources.getIcon("loader.gif"));
-        this.setTintActive(true);
-
         platformRegexPattern = Pattern.compile("^https?\\:\\/\\/beta\\.technicpack\\.net\\/modpack\\/([^.]+)\\.\\d+$");
 
         findMoreWidget = new FindMoreWidget(resources);
@@ -111,7 +109,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
             }
         });
 
-        initComponents();
+        relocalize(resources);
     }
 
     public void setInfoPanel(ModpackInfoPanel modpackInfoPanel) {
@@ -498,5 +496,28 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         if (currentSearchTimer != null) {
             currentSearchTimer.stop();
         }
+    }
+
+    @Override
+    public void relocalize(ResourceLoader loader) {
+        this.resources = loader;
+        this.resources.registerResource(this);
+
+        this.setOverIcon(resources.getIcon("loader.gif"));
+        this.setTintActive(true);
+
+        //Wipe controls
+        removeAll();
+        this.setLayout(null);
+
+        initComponents();
+
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                invalidate();
+                repaint();
+            }
+        });
     }
 }
