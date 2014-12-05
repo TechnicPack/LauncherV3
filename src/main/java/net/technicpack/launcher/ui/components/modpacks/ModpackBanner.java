@@ -173,7 +173,7 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
         versionPanel.add(updateReady);
 
         versionText = new JLabel(resources.getString("launcher.packbanner.version"));
-        versionText.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16, Font.BOLD));
+        versionText.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         versionText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         versionText.setHorizontalTextPosition(SwingConstants.LEADING);
         versionText.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -182,7 +182,7 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
         versionPanel.add(versionText);
 
         installedVersion = new JLabel("1.0.7");
-        installedVersion.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+        installedVersion.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         installedVersion.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         installedVersion.setHorizontalTextPosition(SwingConstants.LEADING);
         installedVersion.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -195,7 +195,7 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
         modpackOptions = new JLabel(resources.getString("launcher.packbanner.options"));
         modpackOptions.setIcon(new ImageIcon(resources.colorImage(resources.getImage("options_cog.png"), LauncherFrame.COLOR_BUTTON_BLUE)));
         modpackOptions.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        Font font = resources.getFont(ResourceLoader.FONT_OPENSANS, 16);
+        Font font = resources.getFont(ResourceLoader.FONT_OPENSANS, 14);
         modpackOptions.setFont(font);
         modpackOptions.setForeground(LauncherFrame.COLOR_BLUE);
         modpackOptions.setHorizontalTextPosition(SwingConstants.LEADING);
