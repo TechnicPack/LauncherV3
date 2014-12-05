@@ -231,12 +231,12 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         constraints.weighty = 0.0;
         constraints.gridwidth = 1;
         constraints.gridheight = 1;
-        Component vertFill = Box.createVerticalStrut(4);
+        Component vertFill = Box.createVerticalStrut(12);
         feedBottom.add(vertFill, constraints);
 
         deleteButton = new RoundedButton(resources.getString("modpackoptions.delete.text"));
-        deleteButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 20, Font.BOLD));
-        deleteButton.setBorder(BorderFactory.createEmptyBorder(5, 25, 10, 25));
+        deleteButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+        deleteButton.setBorder(BorderFactory.createEmptyBorder(8, 25, 13, 25));
         deleteButton.setBackground(LauncherFrame.COLOR_FOOTER);
         deleteButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         deleteButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
@@ -244,12 +244,12 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         deleteButton.setFocusable(false);
         deleteButton.setContentAreaFilled(false);
         deleteButton.setShouldShowBackground(true);
-        feedBottom.add(deleteButton, new GridBagConstraints(0, 3, 1,1,1,0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,0,0,0),0,0));
+        feedBottom.add(deleteButton, new GridBagConstraints(0, 3, 1,1,1,0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0,0,0,0),0,0));
 
         constraints = new GridBagConstraints();
         constraints.gridx = 1;
         constraints.gridy = 3;
-        constraints.weightx = 1.0;
+        constraints.weightx = 0.02;
         constraints.weighty = 0.0;
         constraints.gridwidth = 1;
         constraints.gridheight = 1;
@@ -257,8 +257,8 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         feedBottom.add(horizFill, constraints);
 
         playButton = new RoundedButton(resources.getString("launcher.pack.launch"));
-        playButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 27, Font.BOLD));
-        playButton.setBorder(BorderFactory.createEmptyBorder(5, 50, 10, 50));
+        playButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+        playButton.setBorder(BorderFactory.createEmptyBorder(8, 25, 13, 25));
         playButton.setBackground(LauncherFrame.COLOR_FOOTER);
         playButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         playButton.setHoverForeground(LauncherFrame.COLOR_BLUE);

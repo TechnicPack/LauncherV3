@@ -378,7 +378,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         panel.setLayout(new GridBagLayout());
 
         JLabel streamLabel = new JLabel(resources.getString("launcheroptions.general.build"));
-        streamLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        streamLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         streamLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(streamLabel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
@@ -389,7 +389,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             streamSelect.setUI(new MetalComboBoxUI());
         }
 
-        streamSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        streamSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         streamSelect.setEditable(false);
         streamSelect.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
         streamSelect.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
@@ -408,7 +408,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         //Setup language box
         JLabel langLabel = new JLabel(resources.getString("launcheroptions.general.lang"));
-        langLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        langLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         langLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(langLabel, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
@@ -418,7 +418,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             langSelect.setUI(new MetalComboBoxUI());
         }
 
-        langSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        langSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         langSelect.setEditable(false);
         langSelect.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
         langSelect.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
@@ -437,7 +437,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         //Setup on pack launch box
         JLabel launchLabel = new JLabel(resources.getString("launcheroptions.general.onlaunch"));
-        launchLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        launchLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         launchLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(launchLabel, new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
@@ -447,7 +447,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             launchSelect.setUI(new MetalComboBoxUI());
         }
 
-        launchSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        launchSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         launchSelect.setEditable(false);
         launchSelect.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
         launchSelect.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
@@ -466,12 +466,12 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         //Install folder field
         JLabel installLabel = new JLabel(resources.getString("launcheroptions.general.install"));
-        installLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        installLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         installLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(installLabel, new GridBagConstraints(0, 3, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
         installField = new JTextField("");
-        installField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        installField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         installField.setForeground(LauncherFrame.COLOR_BLUE);
         installField.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
         installField.setHighlighter(null);
@@ -481,7 +481,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         panel.add(installField, new GridBagConstraints(1, 3, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
 
         RoundedButton reinstallButton = new RoundedButton(resources.getString("launcheroptions.install.change"));
-        reinstallButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        reinstallButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         reinstallButton.setContentAreaFilled(false);
         reinstallButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         reinstallButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
@@ -495,12 +495,12 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         //Client ID field
         JLabel clientIdField = new JLabel(resources.getString("launcheroptions.general.id"));
-        clientIdField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        clientIdField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         clientIdField.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(clientIdField, new GridBagConstraints(0, 4, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
         clientId = new JTextField("abc123");
-        clientId.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        clientId.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         clientId.setForeground(LauncherFrame.COLOR_BLUE);
         clientId.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
         clientId.setHighlighter(null);
@@ -510,7 +510,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         panel.add(clientId, new GridBagConstraints(1, 4, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
 
         RoundedButton copyButton = new RoundedButton(resources.getString("launcheroptions.id.copy"));
-        copyButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        copyButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         copyButton.setContentAreaFilled(false);
         copyButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         copyButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
@@ -526,7 +526,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         //Add show console field
         JLabel showConsoleField = new JLabel(resources.getString("launcheroptions.general.console"));
-        showConsoleField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        showConsoleField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         showConsoleField.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(showConsoleField, new GridBagConstraints(0, 5, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(10, 40, 0, 0), 0, 0));
 
@@ -545,11 +545,11 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         //Open logs button
         RoundedButton openLogs = new RoundedButton(resources.getString("launcheroptions.general.logs"));
-        openLogs.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        openLogs.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         openLogs.setContentAreaFilled(false);
         openLogs.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         openLogs.setHoverForeground(LauncherFrame.COLOR_BLUE);
-        openLogs.setBorder(BorderFactory.createEmptyBorder(8, 13, 8, 13));
+        openLogs.setBorder(BorderFactory.createEmptyBorder(8, 25, 13, 25));
         openLogs.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -563,7 +563,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         panel.setLayout(new GridBagLayout());
 
         JLabel memLabel = new JLabel(resources.getString("launcheroptions.java.memory"));
-        memLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        memLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         memLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(memLabel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 60, 0, 0), 0, 0));
 
@@ -573,7 +573,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             memSelect.setUI(new MetalComboBoxUI());
         }
 
-        memSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        memSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         memSelect.setEditable(false);
         memSelect.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
         memSelect.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
@@ -592,12 +592,12 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         panel.add(memSelect, new GridBagConstraints(1, 0, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 80), 0, 16));
 
         JLabel argsLabel = new JLabel(resources.getString("launcheroptions.java.arguments"));
-        argsLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        argsLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         argsLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(argsLabel, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 60, 0, 0), 0, 0));
 
         javaArgs = new JTextArea(32, 4);
-        javaArgs.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        javaArgs.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         javaArgs.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         javaArgs.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
         javaArgs.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));

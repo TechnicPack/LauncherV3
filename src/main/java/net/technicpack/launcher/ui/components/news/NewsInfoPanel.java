@@ -182,8 +182,8 @@ public class NewsInfoPanel extends JPanel implements PropertyChangeListener {
         add(Box.createGlue(), new GridBagConstraints(0, 3, 1, 1, 1.0, 0.0, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
         RoundedButton discussButton = new RoundedButton(resources.getString("launcher.news.discuss"));
-        discussButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 24));
-        discussButton.setBorder(BorderFactory.createEmptyBorder(2, 25, 5, 25));
+        discussButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+        discussButton.setBorder(BorderFactory.createEmptyBorder(8, 25, 13, 25));
         discussButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         discussButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
         discussButton.setAlignmentX(RIGHT_ALIGNMENT);
