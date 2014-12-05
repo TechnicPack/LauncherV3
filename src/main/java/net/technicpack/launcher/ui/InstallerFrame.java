@@ -416,7 +416,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         panel.add(standardDefaultDirectory, new GridBagConstraints(0, 2, 3, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,24,12,0),0,0));
 
         JLabel installFolderLabel = new JLabel(resources.getString("launcher.installer.folder"));
-        installFolderLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        installFolderLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         installFolderLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(installFolderLabel, new GridBagConstraints(0, 3, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,24,0,8), 0,0));
 
@@ -426,7 +426,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
             installDir = settings.getTechnicRoot().getAbsolutePath();
 
         standardInstallDir = new JTextField(installDir);
-        standardInstallDir.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        standardInstallDir.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         standardInstallDir.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
         standardInstallDir.setHighlighter(null);
         standardInstallDir.setEditable(false);
@@ -434,7 +434,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         panel.add(standardInstallDir, new GridBagConstraints(1, 3, 1, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,5,0,5),0,0));
 
         standardSelectButton = new RoundedButton(resources.getString("launcher.installer.select"));
-        standardSelectButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        standardSelectButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         standardSelectButton.setContentAreaFilled(false);
         standardSelectButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
         standardSelectButton.addActionListener(new ActionListener() {
@@ -486,11 +486,11 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         panel.add(standardLanguages, new GridBagConstraints(0, 5, 1, 0, 0, 0, GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE, new Insets(0,8,8,0), 0,0));
 
         RoundedButton install = new RoundedButton(resources.getString("launcher.installer.install"));
-        install.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        install.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         install.setContentAreaFilled(false);
         install.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         install.setHoverForeground(LauncherFrame.COLOR_BLUE);
-        install.setBorder(BorderFactory.createEmptyBorder(8, 56, 8, 56));
+        install.setBorder(BorderFactory.createEmptyBorder(8, 25, 13, 25));
         install.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -513,7 +513,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         panel.add(Box.createGlue(), new GridBagConstraints(0, 1, 3, 1, 1.0, 0.7, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
 
         JLabel installFolderLabel = new JLabel(resources.getString("launcher.installer.folder"));
-        installFolderLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        installFolderLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         installFolderLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(installFolderLabel, new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,24,0,8), 0,0));
 
@@ -522,7 +522,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
             installDir = settings.getTechnicRoot().getAbsolutePath();
 
         portableInstallDir = new JTextField(installDir);
-        portableInstallDir.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        portableInstallDir.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         portableInstallDir.setForeground(LauncherFrame.COLOR_BLUE);
         portableInstallDir.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
         portableInstallDir.setHighlighter(null);
@@ -532,7 +532,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         panel.add(portableInstallDir, new GridBagConstraints(1, 2, 1, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,5,0,5),0,0));
 
         RoundedButton selectInstall = new RoundedButton(resources.getString("launcher.installer.select"));
-        selectInstall.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        selectInstall.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         selectInstall.setContentAreaFilled(false);
         selectInstall.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         selectInstall.setHoverForeground(LauncherFrame.COLOR_BLUE);
@@ -583,11 +583,11 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         panel.add(portableLanguages, new GridBagConstraints(0, 4, 1, 0, 0, 0, GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE, new Insets(0,8,8,0), 0,0));
 
         portableInstallButton = new RoundedButton(resources.getString("launcher.installer.install"));
-        portableInstallButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        portableInstallButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         portableInstallButton.setContentAreaFilled(false);
         portableInstallButton.setForeground(LauncherFrame.COLOR_GREY_TEXT);
         portableInstallButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
-        portableInstallButton.setBorder(BorderFactory.createEmptyBorder(8, 56, 8, 56));
+        portableInstallButton.setBorder(BorderFactory.createEmptyBorder(8, 25, 13, 25));
         portableInstallButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

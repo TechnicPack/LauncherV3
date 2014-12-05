@@ -189,12 +189,12 @@ public class ModpackOptionsDialog extends LauncherDialog {
         centerPanel.setLayout(new GridBagLayout());
 
         JLabel installFolderLabel = new JLabel(resources.getString("modpackoptions.installfolder.text"));
-        installFolderLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        installFolderLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         installFolderLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         centerPanel.add(installFolderLabel, new GridBagConstraints(0, 0, 3, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
 
         installField = new JTextField("");
-        installField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        installField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         installField.setForeground(LauncherFrame.COLOR_BLUE);
         installField.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
         installField.setHighlighter(null);
@@ -204,7 +204,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         centerPanel.add(installField, new GridBagConstraints(3, 0, 1, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,5,0,5),0,0));
 
         RoundedButton openFolder = new RoundedButton(resources.getString("modpackoptions.installfolder.open"));
-        openFolder.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        openFolder.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         openFolder.setContentAreaFilled(false);
         openFolder.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         openFolder.setHoverForeground(LauncherFrame.COLOR_BLUE);
@@ -224,7 +224,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         centerPanel.add(openFolder, new GridBagConstraints(4, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,5,0,5), 0,0));
 
         RoundedButton moveFolder = new RoundedButton(resources.getString("modpackoptions.installfolder.move"));
-        moveFolder.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        moveFolder.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         moveFolder.setContentAreaFilled(false);
         moveFolder.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         moveFolder.setHoverForeground(LauncherFrame.COLOR_BLUE);
@@ -246,7 +246,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         centerPanel.add(Box.createVerticalStrut(15), new GridBagConstraints(0, 1, 6, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
 
         JLabel buildSelectLabel = new JLabel(resources.getString("modpackoptions.version.text"));
-        buildSelectLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        buildSelectLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         buildSelectLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         centerPanel.add(buildSelectLabel, new GridBagConstraints(0, 2, 6, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0,0,0,0),0,0));
 
@@ -315,7 +315,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         renderer.setSelectedForegroundColor(LauncherFrame.COLOR_BUTTON_BLUE);
         renderer.setSelectedBackgroundColor(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
 
-        manualBuildList.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        manualBuildList.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         manualBuildList.setEditable(false);
         manualBuildList.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         manualBuildList.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
@@ -345,7 +345,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         bottomButtons.setLayout(new BoxLayout(bottomButtons, BoxLayout.LINE_AXIS));
 
         RoundedButton deletePack = new RoundedButton(resources.getString("modpackoptions.delete.text"));
-        deletePack.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        deletePack.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         deletePack.setContentAreaFilled(false);
         if (modpack.getInstalledDirectory() != null) {
             deletePack.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
@@ -365,7 +365,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         bottomButtons.add(Box.createHorizontalGlue());
 
         RoundedButton resetPack = new RoundedButton(resources.getString("modpackoptions.reinstall.text"));
-        resetPack.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
+        resetPack.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         resetPack.setContentAreaFilled(false);
         if (modpack.getInstalledDirectory() != null) {
             resetPack.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
