@@ -30,6 +30,9 @@ import net.technicpack.utilslib.DesktopUtils;
 import net.technicpack.utilslib.ImageUtils;
 
 import javax.swing.*;
+import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -38,7 +41,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
     private ImageRepository<ModpackModel> logoRepo;
 
     private JLabel titleLabel;
-    private JTextArea description;
+    private JTextPane description;
     private JButton packImage;
 
     private StatBox ratings;
@@ -194,17 +197,18 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         });
         packInfoPanel.add(titleLabel, new GridBagConstraints(0,0,4,1,1.0,0.0,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0));
 
-        description = new JTextArea("");
+        description = new JTextPane();
         description.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        description.setLineWrap(true);
-        description.setWrapStyleWord(true);
         description.setOpaque(false);
         description.setEditable(false);
         description.setHighlighter(null);
         description.setAlignmentX(LEFT_ALIGNMENT);
         description.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         description.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        description.setBorder(BorderFactory.createEmptyBorder());
+        MutableAttributeSet attributes = new SimpleAttributeSet(description.getParagraphAttributes());
+        StyleConstants.setLineSpacing(attributes, StyleConstants.getLineSpacing(attributes)*1.3f);
+        description.setParagraphAttributes(attributes, true);
+
         description.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -231,7 +235,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
 
             }
         });
-        description.setBorder(BorderFactory.createEmptyBorder(3,5,5,3));
+        description.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
 
         JScrollPane scrollPane = new JScrollPane(description, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());

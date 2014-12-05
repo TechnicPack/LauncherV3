@@ -47,6 +47,9 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.plaf.basic.BasicComboPopup;
 import javax.swing.plaf.metal.MetalComboBoxUI;
+import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
@@ -350,7 +353,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         about.setLayout(new BorderLayout());
         JTextPane textPane = new JTextPane();
-        textPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        textPane.setBorder(BorderFactory.createEmptyBorder(0, 24, 9, 24));
         textPane.setOpaque(false);
         textPane.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         textPane.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
@@ -365,6 +368,9 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
                     DesktopUtils.browseUrl(e.getURL().toString());
             }
         });
+        MutableAttributeSet attributes = new SimpleAttributeSet(textPane.getParagraphAttributes());
+        StyleConstants.setLineSpacing(attributes, StyleConstants.getLineSpacing(attributes) * 1.3f);
+        textPane.setParagraphAttributes(attributes, true);
 
         textPane.setText(aboutText);
         about.add(textPane, BorderLayout.CENTER);
