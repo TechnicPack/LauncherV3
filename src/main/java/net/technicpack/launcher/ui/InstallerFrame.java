@@ -331,7 +331,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         add(header, BorderLayout.PAGE_START);
 
         JLabel title = new JLabel(resources.getString("launcher.installer.title"));
-        title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 34));
+        title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
         title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         title.setOpaque(false);
         title.setIcon(resources.getIcon("options_cog.png"));

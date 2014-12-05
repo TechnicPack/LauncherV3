@@ -90,7 +90,7 @@ public class NewsInfoPanel extends JPanel implements PropertyChangeListener {
 
         title = new JLabel("");
         title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 36));
+        title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
         title.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         title.addMouseListener(new MouseListener() {
