@@ -245,6 +245,20 @@ public class ResourceLoader {
         return getCircleClippedImage(contentImage);
     }
 
+    public BufferedImage colorImage(BufferedImage loadImg, Color color) {
+        BufferedImage img = new BufferedImage(loadImg.getWidth(), loadImg.getHeight(),
+                BufferedImage.TRANSLUCENT);
+        Graphics2D graphics = img.createGraphics();
+
+        graphics.setColor(color);
+        graphics.drawImage(loadImg, null, 0, 0);
+        graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_IN, 0.5f));
+        graphics.fillRect(0, 0, loadImg.getWidth(), loadImg.getHeight());
+
+        graphics.dispose();
+        return img;
+    }
+
     public BufferedImage getCircleClippedImage(BufferedImage contentImage) {
         // copy the picture to an image with transparency capabilities
         BufferedImage outputImage = new BufferedImage(contentImage.getWidth(), contentImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
