@@ -64,6 +64,11 @@ public class DiscoverLinkListener extends LinkListener {
 
     @Override
     public void onMouseOver(org.xhtmlrenderer.swing.BasicPanel panel, org.xhtmlrenderer.render.Box box) {
+        if (isLink(panel, box)) {
+            mousedLinks.add(box);
+            panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        }
+        
         LayoutContext c = panel.getLayoutContext();
 
         if (c == null) {
@@ -127,11 +132,6 @@ public class DiscoverLinkListener extends LinkListener {
             } else {
                 panel.repaint();
             }
-        }
-
-        if (isLink(panel, box)) {
-            mousedLinks.add(box);
-            panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         }
     }
 
