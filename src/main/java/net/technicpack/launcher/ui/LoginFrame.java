@@ -430,7 +430,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
 
         //Login button
         RoundedButton button = new RoundedButton(resources.getString("login.button"));
-        button.setBorder(BorderFactory.createEmptyBorder(8,25,13,25));
+        button.setBorder(BorderFactory.createEmptyBorder(5,17,10,17));
         button.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         button.setContentAreaFilled(false);
         button.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);

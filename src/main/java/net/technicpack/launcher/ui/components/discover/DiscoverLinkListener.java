@@ -68,7 +68,7 @@ public class DiscoverLinkListener extends LinkListener {
             mousedLinks.add(box);
             panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         }
-        
+
         LayoutContext c = panel.getLayoutContext();
 
         if (c == null) {

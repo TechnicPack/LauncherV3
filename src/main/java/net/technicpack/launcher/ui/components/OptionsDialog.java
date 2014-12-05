@@ -549,7 +549,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         openLogs.setContentAreaFilled(false);
         openLogs.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         openLogs.setHoverForeground(LauncherFrame.COLOR_BLUE);
-        openLogs.setBorder(BorderFactory.createEmptyBorder(8, 25, 13, 25));
+        openLogs.setBorder(BorderFactory.createEmptyBorder(5, 17, 10, 17));
         openLogs.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

@@ -236,7 +236,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
 
         deleteButton = new RoundedButton(resources.getString("modpackoptions.delete.text"));
         deleteButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        deleteButton.setBorder(BorderFactory.createEmptyBorder(8, 25, 13, 25));
+        deleteButton.setBorder(BorderFactory.createEmptyBorder(5, 17, 10, 17));
         deleteButton.setBackground(LauncherFrame.COLOR_FOOTER);
         deleteButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         deleteButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
@@ -258,7 +258,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
 
         playButton = new RoundedButton(resources.getString("launcher.pack.launch"));
         playButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        playButton.setBorder(BorderFactory.createEmptyBorder(8, 25, 13, 25));
+        playButton.setBorder(BorderFactory.createEmptyBorder(5, 17, 10, 17));
         playButton.setBackground(LauncherFrame.COLOR_FOOTER);
         playButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         playButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
