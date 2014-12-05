@@ -159,6 +159,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
 
         JLabel title = new JLabel(resources.getString("launcher.title.modpackoptions"));
         title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
+        title.setBorder(BorderFactory.createEmptyBorder(5,0,5,0));
         title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         title.setOpaque(false);
         title.setIcon(resources.getIcon("options_cog.png"));

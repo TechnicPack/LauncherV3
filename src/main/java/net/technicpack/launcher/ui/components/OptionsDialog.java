@@ -301,6 +301,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         title.setOpaque(false);
         title.setIcon(resources.getIcon("options_cog.png"));
+        title.setBorder(BorderFactory.createEmptyBorder(5,0,5,0));
         header.add(title);
 
         header.add(Box.createHorizontalGlue());
