@@ -82,7 +82,7 @@ public class RoundedButton extends JButton implements MouseListener {
             else if (isHovered) g2d.setColor(getHoverBackground());
             else g2d.setColor(getBackground());
 
-            g2d.fillRoundRect(1, 0, getWidth()-3, getHeight()-2, getHeight(), getHeight());
+            g2d.fillRoundRect(1, 1, getWidth()-3, getHeight()-2, getHeight(), getHeight());
         }
 
         if (isClicked) g2d.setColor(getClickForeground());
@@ -90,14 +90,14 @@ public class RoundedButton extends JButton implements MouseListener {
         else g2d.setColor(getForeground());
 
         Stroke oldStroke = g2d.getStroke();
-        g2d.setStroke(new BasicStroke(2));
+        g2d.setStroke(new BasicStroke(1));
         g2d.drawRoundRect(1, 1, getWidth()-3, getHeight()-3, getHeight(), getHeight());
         g2d.setStroke(oldStroke);
 
         g2d.setFont(getFont());
 
         int width = g2d.getFontMetrics().stringWidth(getText());
-        int height = ((getHeight() - g2d.getFontMetrics().getHeight()) / 2) + g2d.getFontMetrics().getAscent();
+        int height = ((getHeight() - g2d.getFontMetrics().getHeight()) / 2) + g2d.getFontMetrics().getAscent() - 1;
 
         g.drawString(getText(), (getWidth() - width) / 2, height);
     }

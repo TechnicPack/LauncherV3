@@ -62,7 +62,7 @@ public class SplashScreen extends JWindow {
             panel.setLayout(new BorderLayout());
             progressBar = new ProgressBar();
             panel.add(progressBar, BorderLayout.CENTER);
-            panel.add(Box.createVerticalStrut(barHeight), BorderLayout.EAST);
+            panel.add(Box.createVerticalStrut(barHeight+barHeight-5), BorderLayout.EAST);
         }
 
         // Finalize
