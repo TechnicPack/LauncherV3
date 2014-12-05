@@ -22,6 +22,9 @@ import net.technicpack.platform.http.HttpPlatformApi;
 import net.technicpack.utilslib.DesktopUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.xhtmlrenderer.context.StyleReference;
+import org.xhtmlrenderer.layout.LayoutContext;
+import org.xhtmlrenderer.layout.PaintingInfo;
 import org.xhtmlrenderer.render.Box;
 import org.xhtmlrenderer.swing.BasicPanel;
 import org.xhtmlrenderer.swing.LinkListener;
@@ -35,6 +38,7 @@ public class DiscoverLinkListener extends LinkListener {
 
     private HttpPlatformApi platform;
     private List<Box> mousedLinks = new LinkedList<Box>();
+    private Box _previouslyHovered;
 
     public DiscoverLinkListener(HttpPlatformApi platform ) {
         this.platform = platform;
@@ -60,10 +64,95 @@ public class DiscoverLinkListener extends LinkListener {
 
     @Override
     public void onMouseOver(org.xhtmlrenderer.swing.BasicPanel panel, org.xhtmlrenderer.render.Box box) {
+        LayoutContext c = panel.getLayoutContext();
+
+        if (c == null) {
+            return;
+        }
+
+        boolean needRepaint = false;
+
+        Element currentlyHovered = getHoveredElement(c.getCss(), box);
+
+        if (currentlyHovered == panel.hovered_element) {
+            return;
+        }
+
+        panel.hovered_element = currentlyHovered;
+
+        boolean targetedRepaint = true;
+        Rectangle repaintRegion = null;
+
+        // If we moved out of the old block then unstyle it
+        if (_previouslyHovered != null) {
+            needRepaint = true;
+            _previouslyHovered.restyle(c);
+
+            PaintingInfo paintInfo = _previouslyHovered.getPaintingInfo();
+
+            if (paintInfo == null) {
+                targetedRepaint = false;
+            } else {
+                repaintRegion = new Rectangle(paintInfo.getAggregateBounds());
+            }
+
+            _previouslyHovered = null;
+        }
+
+        if (currentlyHovered != null) {
+            needRepaint = true;
+            Box target = box.getRestyleTarget();
+            target.restyle(c);
+
+            if (targetedRepaint) {
+                PaintingInfo paintInfo = target.getPaintingInfo();
+
+                if (paintInfo == null) {
+                    targetedRepaint = false;
+                } else {
+                    if (repaintRegion == null) {
+                        repaintRegion = new Rectangle(paintInfo.getAggregateBounds());
+                    } else {
+                        repaintRegion.add(paintInfo.getAggregateBounds());
+                    }
+                }
+            }
+
+            _previouslyHovered = target;
+        }
+
+        if (needRepaint) {
+            if (targetedRepaint) {
+                panel.repaint(repaintRegion);
+            } else {
+                panel.repaint();
+            }
+        }
+
         if (isLink(panel, box)) {
             mousedLinks.add(box);
             panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         }
+    }
+
+    // look up the Element that corresponds to the Box we are hovering over
+    private Element getHoveredElement(StyleReference style, Box ib) {
+        if (ib == null) {
+            return null;
+        }
+
+        Element element = ib.getElement();
+
+        while (element != null && !style.isHoverStyled(element)) {
+            Node node = element.getParentNode();
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                element = (Element) node;
+            } else {
+                element = null;
+            }
+        }
+
+        return element;
     }
 
     @Override
