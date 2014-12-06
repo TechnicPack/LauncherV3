@@ -23,6 +23,7 @@ import net.technicpack.utilslib.DesktopUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xhtmlrenderer.context.StyleReference;
+import org.xhtmlrenderer.layout.Layer;
 import org.xhtmlrenderer.layout.LayoutContext;
 import org.xhtmlrenderer.layout.PaintingInfo;
 import org.xhtmlrenderer.render.Box;
@@ -84,6 +85,7 @@ public class DiscoverLinkListener extends LinkListener {
         }
 
         panel.hovered_element = currentlyHovered;
+        Box hoverBox = findBoxForElement(currentlyHovered, panel.getRootLayer());
 
         boolean targetedRepaint = true;
         Rectangle repaintRegion = null;
@@ -106,7 +108,7 @@ public class DiscoverLinkListener extends LinkListener {
 
         if (currentlyHovered != null) {
             needRepaint = true;
-            Box target = box.getRestyleTarget();
+            Box target = hoverBox.getRestyleTarget();
             target.restyle(c);
 
             if (targetedRepaint) {
@@ -172,6 +174,36 @@ public class DiscoverLinkListener extends LinkListener {
         }
 
         return findLink(panel, box.getElement());
+    }
+
+    private Box findBoxForElement(Element e, Layer layer) {
+        Box find = findBoxForElement(e, layer.getMaster());
+
+        if (find != null)
+            return find;
+
+        for (Object l : layer.getChildren()) {
+            find = findBoxForElement(e, (Layer)l);
+
+            if (find != null)
+                return find;
+        }
+
+        return null;
+    }
+
+    private Box findBoxForElement(Element e, Box box) {
+        if (box.getElement() == e)
+            return box;
+
+        for(Object b : box.getChildren()) {
+            Box find = findBoxForElement(e,(Box)b);
+
+            if (find != null)
+                return find;
+        }
+
+        return null;
     }
 
     private boolean findLink(BasicPanel panel, Element e) {
