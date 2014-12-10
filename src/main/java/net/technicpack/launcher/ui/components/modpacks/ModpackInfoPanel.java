@@ -244,6 +244,8 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         deleteButton.setFocusable(false);
         deleteButton.setContentAreaFilled(false);
         deleteButton.setShouldShowBackground(true);
+        deleteButton.setIconTextGap(8);
+        deleteButton.setIcon(resources.getIcon("delete_button.png"));
         feedBottom.add(deleteButton, new GridBagConstraints(0, 3, 1,1,1,0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0,0,0,0),0,0));
 
         constraints = new GridBagConstraints();
@@ -266,6 +268,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         playButton.setFocusable(false);
         playButton.setContentAreaFilled(false);
         playButton.setShouldShowBackground(true);
+        playButton.setIconTextGap(8);
 
         constraints = new GridBagConstraints();
         constraints.gridx = 2;

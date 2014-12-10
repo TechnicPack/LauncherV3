@@ -686,6 +686,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             } else {
                 playButton.setText(resources.getString("launcher.pack.launch"));
             }
+            playButton.setIcon(resources.getIcon("play_button.png"));
         } else {
             if (userModel.getCurrentUser() == null || userModel.getCurrentUser().isOffline()) {
                 playButton.setEnabled(false);
@@ -694,6 +695,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             } else {
                 playButton.setText(resources.getString("launcher.pack.install"));
             }
+            playButton.setIcon(resources.getIcon("download_button.png"));
         }
     }
 
