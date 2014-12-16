@@ -252,7 +252,7 @@ public class ResourceLoader {
 
         graphics.setColor(color);
         graphics.drawImage(loadImg, null, 0, 0);
-        graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_IN, 0.5f));
+        graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_IN, 1.0f));
         graphics.fillRect(0, 0, loadImg.getWidth(), loadImg.getHeight());
 
         graphics.dispose();

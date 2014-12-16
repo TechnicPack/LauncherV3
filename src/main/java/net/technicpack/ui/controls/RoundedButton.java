@@ -34,6 +34,7 @@ public class RoundedButton extends JButton implements MouseListener {
 
     private Color hoverForeground;
     private Color clickForeground;
+    private Icon hoverIcon = null;
 
     private boolean isHovered = false;
     private boolean isClicked = false;
@@ -47,11 +48,13 @@ public class RoundedButton extends JButton implements MouseListener {
         addMouseListener(this);
     }
 
+    public Icon getHoverIcon() { return hoverIcon; }
     public Color getHoverBackground() { return (hoverBackground != null) ? hoverBackground : this.getBackground(); }
     public Color getClickBackground() { return (clickBackground != null) ? clickBackground : this.getBackground(); }
     public Color getHoverForeground() { return (hoverForeground != null) ? hoverForeground : this.getForeground(); }
     public Color getClickForeground() { return (clickForeground != null) ? clickForeground : this.getForeground(); }
 
+    public void setHoverIcon(Icon icon) { hoverIcon = icon; }
     public void setHoverBackground(Color color) { hoverBackground = color; }
     public void setClickBackground(Color color) { clickBackground = color; }
     public void setHoverForeground(Color color) { hoverForeground = color; }
@@ -105,12 +108,17 @@ public class RoundedButton extends JButton implements MouseListener {
 
         int textX = (getWidth() - width) / 2;
 
-        if (getIcon() != null)
-            textX += (getIconTextGap() + getIcon().getIconWidth());
+        Icon currentIcon = getIcon();
+
+        if (isHovered && getHoverIcon() != null)
+            currentIcon = getHoverIcon();
+
+        if (currentIcon != null)
+            textX += (getIconTextGap() + currentIcon.getIconWidth());
         g.drawString(getText(), textX, height);
 
-        if (getIcon() != null) {
-            getIcon().paintIcon(this, g2d, (getWidth() - width) / 2,(getHeight() - getIcon().getIconHeight())/2);
+        if (currentIcon != null) {
+            currentIcon.paintIcon(this, g2d, (getWidth() - width) / 2,(getHeight() - currentIcon.getIconHeight())/2);
         }
     }
 
