@@ -245,7 +245,8 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         deleteButton.setContentAreaFilled(false);
         deleteButton.setShouldShowBackground(true);
         deleteButton.setIconTextGap(8);
-        deleteButton.setIcon(resources.getIcon("delete_button.png"));
+        deleteButton.setHoverIcon(new ImageIcon(resources.colorImage(resources.getImage("delete_button.png"), LauncherFrame.COLOR_BLUE)));
+        deleteButton.setIcon(new ImageIcon(resources.colorImage(resources.getImage("delete_button.png"), LauncherFrame.COLOR_BUTTON_BLUE)));
         feedBottom.add(deleteButton, new GridBagConstraints(0, 3, 1,1,1,0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0,0,0,0),0,0));
 
         constraints = new GridBagConstraints();

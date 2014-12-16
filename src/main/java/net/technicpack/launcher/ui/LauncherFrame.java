@@ -686,7 +686,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             } else {
                 playButton.setText(resources.getString("launcher.pack.launch"));
             }
-            playButton.setIcon(resources.getIcon("play_button.png"));
+            playButton.setIcon(new ImageIcon(resources.colorImage(resources.getImage("play_button.png"), LauncherFrame.COLOR_BUTTON_BLUE)));
+            playButton.setHoverIcon(new ImageIcon(resources.colorImage(resources.getImage("play_button.png"), LauncherFrame.COLOR_BLUE)));
         } else {
             if (userModel.getCurrentUser() == null || userModel.getCurrentUser().isOffline()) {
                 playButton.setEnabled(false);
@@ -695,7 +696,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             } else {
                 playButton.setText(resources.getString("launcher.pack.install"));
             }
-            playButton.setIcon(resources.getIcon("download_button.png"));
+            playButton.setIcon(new ImageIcon(resources.colorImage(resources.getImage("download_button.png"), LauncherFrame.COLOR_BUTTON_BLUE)));
+            playButton.setHoverIcon(new ImageIcon(resources.colorImage(resources.getImage("download_button.png"), LauncherFrame.COLOR_BLUE)));
         }
     }
 
