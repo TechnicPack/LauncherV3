@@ -40,6 +40,7 @@ public class CompleteVersion implements MojangVersion {
 	private List<Rule> rules;
 	private String assets;
     private String jar;
+    private String inheritsFrom;
 	private transient boolean areAssetsVirtual;
 
 	@Override
@@ -128,6 +129,9 @@ public class CompleteVersion implements MojangVersion {
 
     @Override
     public String getJarKey() { return jar; }
+
+    @Override
+    public String getParentVersion() { return inheritsFrom; }
 
     @Override
 	public boolean getAreAssetsVirtual() {

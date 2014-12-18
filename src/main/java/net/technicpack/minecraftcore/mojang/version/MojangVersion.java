@@ -62,6 +62,8 @@ public interface MojangVersion {
 
     public String getJarKey();
 
+    public String getParentVersion();
+
     public boolean getAreAssetsVirtual();
 
     public void setAreAssetsVirtual(boolean areAssetsVirtual);
