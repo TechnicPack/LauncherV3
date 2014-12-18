@@ -18,6 +18,8 @@
 
 package net.technicpack.launcher.launch;
 
+import net.technicpack.minecraftcore.mojang.version.CompleteVersionParser;
+import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
@@ -40,7 +42,6 @@ import net.technicpack.launchercore.modpacks.resources.PackResourceMapper;
 import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.launchercore.util.LaunchAction;
 import net.technicpack.launchercore.install.LauncherDirectories;
-import net.technicpack.minecraftcore.mojang.version.CompleteVersionParser;
 import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;
@@ -53,7 +54,7 @@ import java.io.IOException;
 import java.util.zip.ZipException;
 
 public class Installer {
-    protected final ModpackInstaller<CompleteVersion> installer;
+    protected final ModpackInstaller<MojangVersion> installer;
     protected final MinecraftLauncher launcher;
     protected final TechnicSettings settings;
     protected final PackResourceMapper packIconMapper;
@@ -91,10 +92,10 @@ public class Installer {
             @Override
             public void run() {
                 try {
-                    CompleteVersion version = null;
+                    MojangVersion version = null;
 
                     if (!pack.isLocalOnly()) {
-                        InstallTasksQueue<CompleteVersion> tasksQueue = new InstallTasksQueue<CompleteVersion>(listener, mirrorStore);
+                        InstallTasksQueue<MojangVersion> tasksQueue = new InstallTasksQueue<MojangVersion>(listener, mirrorStore);
                         buildTasksQueue(tasksQueue, resources, pack, build, doFullInstall);
 
                         version = installer.installPack(tasksQueue, pack, build);
