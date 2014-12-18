@@ -17,13 +17,16 @@
  * along with Technic Minecraft Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.minecraftcore.mojang.version.io;
+package net.technicpack.minecraftcore.mojang.version;
 
+import net.technicpack.minecraftcore.mojang.version.io.Library;
 import net.technicpack.minecraftcore.mojang.version.io.ReleaseType;
+import net.technicpack.minecraftcore.mojang.version.io.Rule;
 
 import java.util.Date;
+import java.util.List;
 
-public interface Version {
+public interface MojangVersion {
 
 	public String getId();
 
@@ -38,4 +41,26 @@ public interface Version {
 	public Date getReleaseTime();
 
 	public void setReleaseTime(Date releaseTime);
+
+    public String getMinecraftArguments();
+
+    public String getJavaArguments();
+
+    public List<Library> getLibraries();
+
+    public List<Library> getLibrariesForOS();
+
+    public String getMainClass();
+
+    public int getMinimumLauncherVersion();
+
+    public String getIncompatibilityReason();
+
+    public List<Rule> getRules();
+
+    public String getAssetsKey();
+
+    public boolean getAreAssetsVirtual();
+
+    public void setAreAssetsVirtual(boolean areAssetsVirtual);
 }

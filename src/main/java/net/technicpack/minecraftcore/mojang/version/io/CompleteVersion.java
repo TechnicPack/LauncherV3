@@ -19,11 +19,13 @@
 
 package net.technicpack.minecraftcore.mojang.version.io;
 
+import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class CompleteVersion implements Version {
+public class CompleteVersion implements MojangVersion {
 
 	private String id;
 	private Date time;
@@ -74,16 +76,20 @@ public class CompleteVersion implements Version {
 		this.releaseTime = releaseTime;
 	}
 
+    @Override
 	public String getMinecraftArguments() {
 		return minecraftArguments;
 	}
 
+    @Override
     public String getJavaArguments() { return javaArguments; }
 
+    @Override
 	public List<Library> getLibraries() {
 		return libraries;
 	}
 
+    @Override
 	public List<Library> getLibrariesForOS() {
 		List<Library> libraryList = new ArrayList<Library>(libraries.size());
 		for (Library library : libraries) {
@@ -94,30 +100,37 @@ public class CompleteVersion implements Version {
 		return libraryList;
 	}
 
+    @Override
 	public String getMainClass() {
 		return mainClass;
 	}
 
+    @Override
 	public int getMinimumLauncherVersion() {
 		return minimumLauncherVersion;
 	}
 
+    @Override
 	public String getIncompatibilityReason() {
 		return incompatibilityReason;
 	}
 
+    @Override
 	public List<Rule> getRules() {
 		return rules;
 	}
 
+    @Override
 	public String getAssetsKey() {
 		return assets;
 	}
 
+    @Override
 	public boolean getAreAssetsVirtual() {
 		return areAssetsVirtual;
 	}
 
+    @Override
 	public void setAreAssetsVirtual(boolean areAssetsVirtual) {
 		this.areAssetsVirtual = areAssetsVirtual;
 	}

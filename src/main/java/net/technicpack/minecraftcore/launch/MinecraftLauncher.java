@@ -26,6 +26,7 @@ import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.launch.LaunchOptions;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.install.LauncherDirectories;
+import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
 import net.technicpack.platform.IPlatformApi;
@@ -58,7 +59,7 @@ public class MinecraftLauncher {
 		return launch(pack, memory, options, null, version);
 	}
 
-	public GameProcess launch(ModpackModel pack, long memory, LaunchOptions options, ProcessExitListener exitListener, CompleteVersion version) throws IOException {
+	public GameProcess launch(ModpackModel pack, long memory, LaunchOptions options, ProcessExitListener exitListener, MojangVersion version) throws IOException {
 		List<String> commands = buildCommands(pack, memory, version, options);
 		StringBuilder full = new StringBuilder();
 		boolean first = true;
@@ -79,7 +80,7 @@ public class MinecraftLauncher {
 		return mcProcess;
 	}
 
-	private List<String> buildCommands(ModpackModel pack, long memory, CompleteVersion version, LaunchOptions options) {
+	private List<String> buildCommands(ModpackModel pack, long memory, MojangVersion version, LaunchOptions options) {
 		List<String> commands = new ArrayList<String>();
 		commands.add(OperatingSystem.getJavaDir());
 
@@ -119,7 +120,7 @@ public class MinecraftLauncher {
 		return commands;
 	}
 
-	private String[] getMinecraftArguments(CompleteVersion version, File gameDirectory, MojangUser mojangUser) {
+	private String[] getMinecraftArguments(MojangVersion version, File gameDirectory, MojangUser mojangUser) {
 		Map<String, String> map = new HashMap<String, String>();
 		StrSubstitutor substitutor = new StrSubstitutor(map);
 		String[] split = version.getMinecraftArguments().split(" ");
@@ -161,7 +162,7 @@ public class MinecraftLauncher {
 		return split;
 	}
 
-	private String buildClassPath(ModpackModel pack, CompleteVersion version) {
+	private String buildClassPath(ModpackModel pack, MojangVersion version) {
 		StringBuilder result = new StringBuilder();
 		String separator = System.getProperty("path.separator");
 
