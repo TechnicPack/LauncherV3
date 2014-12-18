@@ -39,6 +39,7 @@ public class CompleteVersion implements MojangVersion {
 	private String incompatibilityReason;
 	private List<Rule> rules;
 	private String assets;
+    private String jar;
 	private transient boolean areAssetsVirtual;
 
 	@Override
@@ -124,6 +125,9 @@ public class CompleteVersion implements MojangVersion {
 	public String getAssetsKey() {
 		return assets;
 	}
+
+    @Override
+    public String getJarKey() { return jar; }
 
     @Override
 	public boolean getAreAssetsVirtual() {
