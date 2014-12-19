@@ -28,6 +28,7 @@ import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.install.Version;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.solder.io.SolderPackInfo;
+import net.technicpack.utilslib.ImageUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -36,6 +37,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.font.TextAttribute;
+import java.awt.image.BufferedImage;
 import java.util.Map;
 
 public class ModpackBanner extends JPanel implements IImageJobListener<ModpackModel> {
@@ -81,7 +83,12 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
 
         ImageJob<ModpackModel> job = iconRepo.startImageJob(modpack);
         job.addJobListener(this);
-        modpackIcon.setIcon(new ImageIcon(job.getImage()));
+
+        BufferedImage icon = job.getImage();
+        if (icon.getWidth() > 50 || icon.getHeight() > 50)
+            icon = ImageUtils.scaleImage(icon, 50, 50);
+
+        modpackIcon.setIcon(new ImageIcon(icon));
 
         rebuildTags(modpack);
     }
@@ -238,7 +245,11 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
     @Override
     public void jobComplete(ImageJob<ModpackModel> job) {
         if (currentModpack == job.getJobData()) {
-            modpackIcon.setIcon(new ImageIcon(job.getImage()));
+            BufferedImage icon = job.getImage();
+            if (icon.getWidth() > 50 || icon.getHeight() > 50)
+                icon = ImageUtils.scaleImage(icon, 50, 50);
+
+            modpackIcon.setIcon(new ImageIcon(icon));
         }
     }
 }
