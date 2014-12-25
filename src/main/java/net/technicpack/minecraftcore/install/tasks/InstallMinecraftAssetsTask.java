@@ -29,7 +29,7 @@ import net.technicpack.launchercore.install.tasks.EnsureFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.install.verifiers.FileSizeVerifier;
 import net.technicpack.minecraftcore.MojangUtils;
-import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
+import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -81,7 +81,7 @@ public class InstallMinecraftAssetsTask implements IInstallTask {
         if (obj.get(virtualField) != null)
             isVirtual = obj.get(virtualField).getAsBoolean();
 
-        ((InstallTasksQueue<CompleteVersion>)queue).getCompleteVersion().setAreAssetsVirtual(isVirtual);
+        ((InstallTasksQueue<MojangVersion>)queue).getCompleteVersion().setAreAssetsVirtual(isVirtual);
 
         JsonObject allObjects = obj.get(objectsField).getAsJsonObject();
 
@@ -100,7 +100,7 @@ public class InstallMinecraftAssetsTask implements IInstallTask {
 
             (new File(location.getParent())).mkdirs();
 
-            File virtualOut =  new File(assetsDirectory + File.separator + "virtual" + File.separator + ((InstallTasksQueue<CompleteVersion>)queue).getCompleteVersion().getAssetsKey() + File.separator + friendlyName);
+            File virtualOut =  new File(assetsDirectory + File.separator + "virtual" + File.separator + ((InstallTasksQueue<MojangVersion>)queue).getCompleteVersion().getAssetsKey() + File.separator + friendlyName);
 
             checkAssetsQueue.addTask(new EnsureFileTask(location, new FileSizeVerifier(size), null, url, virtualOut.getName(), downloadAssetsQueue, copyAssetsQueue));
 

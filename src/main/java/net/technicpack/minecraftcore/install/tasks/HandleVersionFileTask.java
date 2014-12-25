@@ -31,6 +31,8 @@ import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.ExtractRulesFileFilter;
+import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
 import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
 import net.technicpack.utilslib.IZipFileFilter;
@@ -47,15 +49,17 @@ public class HandleVersionFileTask implements IInstallTask {
     private final ITasksQueue checkLibraryQueue;
     private final ITasksQueue downloadLibraryQueue;
     private final ITasksQueue copyLibraryQueue;
+    private final MojangVersionBuilder versionBuilder;
 
     private String libraryName;
 
-    public HandleVersionFileTask(ModpackModel pack, LauncherDirectories directories, ITasksQueue checkLibraryQueue, ITasksQueue downloadLibraryQueue, ITasksQueue copyLibraryQueue) {
+    public HandleVersionFileTask(ModpackModel pack, LauncherDirectories directories, ITasksQueue checkLibraryQueue, ITasksQueue downloadLibraryQueue, ITasksQueue copyLibraryQueue, MojangVersionBuilder versionBuilder) {
         this.pack = pack;
         this.directories = directories;
         this.checkLibraryQueue = checkLibraryQueue;
         this.downloadLibraryQueue = downloadLibraryQueue;
         this.copyLibraryQueue = copyLibraryQueue;
+        this.versionBuilder = versionBuilder;
     }
 
     @Override
@@ -72,10 +76,8 @@ public class HandleVersionFileTask implements IInstallTask {
     }
 
     @Override
-    public void runTask(InstallTasksQueue queue) throws IOException {
-        File versionFile = new File(this.pack.getBinDir(), "version.json");
-        String json = FileUtils.readFileToString(versionFile, Charset.forName("UTF-8"));
-        CompleteVersion version = MojangUtils.getGson().fromJson(json, CompleteVersion.class);
+    public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
+        MojangVersion version = versionBuilder.buildVersionFromKey(null);
 
         if (version == null) {
             throw new DownloadException("The version.json file was invalid.");

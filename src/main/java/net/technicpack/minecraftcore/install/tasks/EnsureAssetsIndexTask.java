@@ -24,9 +24,9 @@ import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.DownloadFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.minecraftcore.MojangUtils;
-import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidJsonFileVerifier;
+import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,7 +60,7 @@ public class EnsureAssetsIndexTask implements IInstallTask {
 
     @Override
 	public void runTask(InstallTasksQueue queue) throws IOException {
-		String assets = ((InstallTasksQueue<CompleteVersion>)queue).getCompleteVersion().getAssetsKey();
+		String assets = ((InstallTasksQueue<MojangVersion>)queue).getCompleteVersion().getAssetsKey();
 
 		if (assets == null || assets.isEmpty()) {
 			assets = "legacy";

@@ -46,20 +46,22 @@ public class FileVersionBuilder implements MojangVersionBuilder {
     public MojangVersion buildVersionFromKey(String key) throws InterruptedException, IOException {
         File target = version;
 
-        if (version.isDirectory()) {
-            String targetFile = key + ".json";
-            target = new File(version, targetFile);
-        }
+        if (key != null) {
+            if (version.isDirectory()) {
+                String targetFile = key + ".json";
+                target = new File(version, targetFile);
+            }
 
-        if (retriever != null)
-            retriever.retrieveVersion(target, key);
+            if (retriever != null)
+                retriever.retrieveVersion(target, key);
 
-        if (fallbackRetrievers != null) {
-            for(MojangVersionRetriever fallbackRetriever : fallbackRetrievers) {
-                if (target.exists())
-                    break;
+            if (fallbackRetrievers != null) {
+                for (MojangVersionRetriever fallbackRetriever : fallbackRetrievers) {
+                    if (target.exists())
+                        break;
 
-                fallbackRetriever.retrieveVersion(target, key);
+                    fallbackRetriever.retrieveVersion(target, key);
+                }
             }
         }
 
