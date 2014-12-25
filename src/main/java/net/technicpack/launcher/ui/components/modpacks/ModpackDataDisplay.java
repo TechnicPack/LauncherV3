@@ -40,6 +40,8 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
     private ResourceLoader resources;
     private ImageRepository<ModpackModel> logoRepo;
 
+    private JPanel statBoxes;
+
     private JLabel titleLabel;
     private JTextPane description;
     private JButton packImage;
@@ -74,6 +76,16 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
 
         titleLabel.setText(resources.getString("launcher.packstats.title", modpack.getDisplayName()));
         description.setText(modpack.getDescription());
+
+        boolean wasVisible = ratings.isVisible();
+        ratings.setVisible(!modpack.isOfficial());
+
+        if (wasVisible == modpack.isOfficial()) {
+            if (wasVisible)
+                statBoxes.remove(ratings);
+            else
+                statBoxes.add(ratings, 0);
+        }
         ratings.setValue(modpack.getLikes());
         downloads.setValue(modpack.getDownloads());
         runs.setValue(modpack.getRuns());
@@ -128,7 +140,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         packInfoPanel.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
         this.add(packInfoPanel, BorderLayout.CENTER);
 
-        JPanel statBoxes = new JPanel();
+        statBoxes = new JPanel();
         statBoxes.setLayout(new GridLayout(1,3,5,0));
         statBoxes.setOpaque(false);
         statBoxes.setBorder(BorderFactory.createEmptyBorder(5,0,0,0));
