@@ -49,7 +49,6 @@ import net.technicpack.launchercore.modpacks.resources.PackResourceMapper;
 import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.launchercore.util.LaunchAction;
 import net.technicpack.launchercore.install.LauncherDirectories;
-import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.utilslib.Memory;
@@ -214,7 +213,7 @@ public class Installer {
 
         MojangVersionBuilder versionBuilder = createVersionBuilder(modpack, queue);
         checkVersionFile.addTask(new VerifyVersionFilePresentTask(modpack, minecraft, versionBuilder));
-        examineVersionFile.addTask(new HandleVersionFileTask(modpack, directories, examineVersionFile, installingLibs, installingLibs));
+        examineVersionFile.addTask(new HandleVersionFileTask(modpack, directories, examineVersionFile, installingLibs, installingLibs, versionBuilder));
         examineVersionFile.addTask(new EnsureAssetsIndexTask(directories.getAssetsDirectory(), installingMinecraft, examineIndex, verifyingAssets, installingAssets, installingAssets));
 
         if (doFullInstall || (installedVersion != null && installedVersion.isLegacy()))
