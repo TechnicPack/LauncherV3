@@ -57,22 +57,4 @@ public class ModpackInstaller<VersionData> {
 
         return tasksQueue.getCompleteVersion();
     }
-
-	public VersionData prepareOfflinePack(ModpackModel modpack, IVersionDataParser<VersionData> parser) throws IOException, InterruptedException {
-        modpack.initDirectories();
-
-		File versionFile = new File(modpack.getBinDir(), "version.json");
-		File modpackJar = new File(modpack.getBinDir(), "modpack.jar");
-
-		if (modpackJar.exists()) {
-			ZipUtils.extractFile(modpackJar, modpack.getBinDir(), "version.json");
-		}
-
-		if (!versionFile.exists()) {
-			throw new PackNotAvailableOfflineException(modpack.getDisplayName());
-		}
-
-		String json = FileUtils.readFileToString(versionFile, Charset.forName("UTF-8"));
-		return parser.parseVersionData(json);
-	}
 }
