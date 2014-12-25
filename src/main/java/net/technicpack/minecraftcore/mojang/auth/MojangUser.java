@@ -64,6 +64,8 @@ public class MojangUser implements IUserType {
 		}
 	}
 
+    public String getId() { return profile.getId(); }
+
 	public String getUsername() {
 		return username;
 	}
