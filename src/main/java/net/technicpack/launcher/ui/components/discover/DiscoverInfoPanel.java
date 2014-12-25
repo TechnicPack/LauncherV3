@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.ui.components.discover;
 
+import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.http.HttpPlatformApi;
 import net.technicpack.ui.controls.installation.*;
 import net.technicpack.ui.lang.ResourceLoader;
@@ -39,7 +40,7 @@ public class DiscoverInfoPanel extends TiledBackground {
 
     final private XHTMLPanel panel;
 
-    public DiscoverInfoPanel(ResourceLoader loader, String discoverUrl, HttpPlatformApi platform, final net.technicpack.ui.controls.installation.SplashScreen splash) {
+    public DiscoverInfoPanel(ResourceLoader loader, String discoverUrl, IPlatformApi platform, final net.technicpack.ui.controls.installation.SplashScreen splash) {
         super(loader.getImage("background_repeat2.png"));
 
         if (discoverUrl == null)

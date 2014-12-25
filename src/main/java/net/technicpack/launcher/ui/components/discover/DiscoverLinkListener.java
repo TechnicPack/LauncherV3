@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.ui.components.discover;
 
+import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.http.HttpPlatformApi;
 import net.technicpack.utilslib.DesktopUtils;
 import org.w3c.dom.Element;
@@ -37,11 +38,11 @@ import java.util.List;
 
 public class DiscoverLinkListener extends LinkListener {
 
-    private HttpPlatformApi platform;
+    private IPlatformApi platform;
     private List<Box> mousedLinks = new LinkedList<Box>();
     private Box _previouslyHovered;
 
-    public DiscoverLinkListener(HttpPlatformApi platform ) {
+    public DiscoverLinkListener(IPlatformApi platform ) {
         this.platform = platform;
     }
 
