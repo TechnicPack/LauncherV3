@@ -106,7 +106,7 @@ public class LauncherMain {
             ex.printStackTrace();
         }
 
-        Relauncher launcher = new Relauncher(new HttpUpdateStream("http://beta.technicpack.net/api/launcher/version/"));
+        Relauncher launcher = new Relauncher(new HttpUpdateStream("http://www.technicpack.net/api/launcher/version/"));
         TechnicSettings settings = null;
 
         try {
@@ -228,7 +228,7 @@ public class LauncherMain {
         ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<AuthorshipInfo>(new TechnicAvatarMapper(directories, resources), new WebAvatarImageStore(mirrorStore));
 
         ISolderApi solder = new HttpSolderApi(settings.getClientId(), userModel);
-        HttpPlatformApi platform = new HttpPlatformApi("http://beta.technicpack.net/", mirrorStore);
+        HttpPlatformApi platform = new HttpPlatformApi("http://www.technicpack.net/", mirrorStore);
 
         IInstalledPackRepository packStore = TechnicInstalledPackStore.load(new File(directories.getLauncherDirectory(), "installedPacks"));
         IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(platform, solder);
