@@ -121,7 +121,7 @@ public class DiscoverResourceLoader extends ImageResourceLoader {
     }
 
     public ImageResource get(final String uri) {
-        return get(uri, -1, -1);
+        return get(uri, 255, 151);
     }
 
     public synchronized ImageResource get(final String uri, final int width, final int height) {
