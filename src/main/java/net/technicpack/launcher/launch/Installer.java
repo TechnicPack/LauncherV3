@@ -101,13 +101,16 @@ public class Installer {
                 try {
                     MojangVersion version = null;
 
+                    InstallTasksQueue<MojangVersion> tasksQueue = new InstallTasksQueue<MojangVersion>(listener, mirrorStore);
+                    MojangVersionBuilder versionBuilder = createVersionBuilder(pack, tasksQueue);
+
                     if (!pack.isLocalOnly()) {
-                        InstallTasksQueue<MojangVersion> tasksQueue = new InstallTasksQueue<MojangVersion>(listener, mirrorStore);
-                        buildTasksQueue(tasksQueue, resources, pack, build, doFullInstall);
+                        buildTasksQueue(tasksQueue, resources, pack, build, doFullInstall, versionBuilder);
 
                         version = installer.installPack(tasksQueue, pack, build);
                     } else {
-                        version = installer.prepareOfflinePack(pack, new CompleteVersionParser());
+                        pack.initDirectories();
+                        version = versionBuilder.buildVersionFromKey(null);
                     }
 
                     if (doLaunch) {
@@ -161,7 +164,7 @@ public class Installer {
         return false;
     }
 
-    public void buildTasksQueue(InstallTasksQueue queue, ResourceLoader resources, ModpackModel modpack, String build, boolean doFullInstall) throws CacheDeleteException, BuildInaccessibleException {
+    public void buildTasksQueue(InstallTasksQueue queue, ResourceLoader resources, ModpackModel modpack, String build, boolean doFullInstall, MojangVersionBuilder versionBuilder) throws CacheDeleteException, BuildInaccessibleException {
         PackInfo packInfo = modpack.getPackInfo();
         Modpack modpackData = packInfo.getModpack(build);
         String minecraft = modpackData.getGameVersion();
@@ -211,7 +214,6 @@ public class Installer {
             examineModpackData.addTask(new InstallModpackTask(modpack, modpackData, verifyingFiles, downloadingMods, installingMods));
         }
 
-        MojangVersionBuilder versionBuilder = createVersionBuilder(modpack, queue);
         checkVersionFile.addTask(new VerifyVersionFilePresentTask(modpack, minecraft, versionBuilder));
         examineVersionFile.addTask(new HandleVersionFileTask(modpack, directories, examineVersionFile, installingLibs, installingLibs, versionBuilder));
         examineVersionFile.addTask(new EnsureAssetsIndexTask(directories.getAssetsDirectory(), installingMinecraft, examineIndex, verifyingAssets, installingAssets, installingAssets));
