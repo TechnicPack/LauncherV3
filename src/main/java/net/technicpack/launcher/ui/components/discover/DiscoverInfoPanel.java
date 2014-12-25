@@ -99,6 +99,8 @@ public class DiscoverInfoPanel extends TiledBackground {
                 } catch (Exception ex) {
                     //Can't load document from internet- don't beef
                     ex.printStackTrace();
+
+                    splash.dispose();
                 }
             }
         });
