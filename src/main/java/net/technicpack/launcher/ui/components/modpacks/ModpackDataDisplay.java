@@ -79,6 +79,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
 
         boolean wasVisible = ratings.isVisible();
         ratings.setVisible(!modpack.isOfficial());
+        statBoxes.setVisible(!modpack.isOfficial());
 
         if (wasVisible == modpack.isOfficial()) {
             if (wasVisible)
