@@ -34,6 +34,7 @@ public class ModpackCachePlatformApi implements IPlatformApi {
 
     private IPlatformApi innerApi;
     Cache<String, PlatformPackInfo> cache;
+    Cache<String, Boolean> deadPacks;
 
     public ModpackCachePlatformApi(IPlatformApi innerApi, int cacheInSeconds) {
         this.innerApi = innerApi;
@@ -42,15 +43,30 @@ public class ModpackCachePlatformApi implements IPlatformApi {
                 .maximumSize(300)
                 .expireAfterWrite(cacheInSeconds, TimeUnit.SECONDS)
                 .build();
+
+        deadPacks = CacheBuilder.newBuilder()
+                .concurrencyLevel(4)
+                .maximumSize(300)
+                .expireAfterWrite(cacheInSeconds/10, TimeUnit.SECONDS)
+                .build();
     }
 
     @Override
     public PlatformPackInfo getPlatformPackInfo(String packSlug) throws RestfulAPIException {
+        Boolean isDead = deadPacks.getIfPresent(packSlug);
+
+        if (isDead != null && isDead.booleanValue())
+            return null;
+
         PlatformPackInfo info = cache.getIfPresent(packSlug);
 
-        if (info == null) {
-            info = innerApi.getPlatformPackInfo(packSlug);
-            cache.put(packSlug, info);
+        try {
+            if (info == null) {
+                info = innerApi.getPlatformPackInfo(packSlug);
+                cache.put(packSlug, info);
+            }
+        } finally {
+            deadPacks.put(packSlug, info == null);
         }
 
         return info;
