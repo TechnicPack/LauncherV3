@@ -69,7 +69,7 @@ public class ModpackWidget extends SelectorWidget implements IImageJobListener<M
         if (modpack.hasRecommendedUpdate()) {
             JLabel updateIcon = new JLabel();
             updateIcon.setIcon(getResources().getIcon("update_available.png"));
-            add(updateIcon, new GridBagConstraints(2,0,1,1,0,0,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,0,0,0),0,0));
+            add(updateIcon, new GridBagConstraints(2,0,1,1,0,0,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,0,0,5),0,0));
         }
     }
 
