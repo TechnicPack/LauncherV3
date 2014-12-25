@@ -21,9 +21,11 @@ package net.technicpack.launchercore.modpacks.packinfo;
 
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
 import net.technicpack.platform.io.FeedItem;
+import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.rest.io.Resource;
+import net.technicpack.solder.io.SolderPackInfo;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -220,11 +222,19 @@ public class CombinedPackInfo implements PackInfo {
 
     @Override
     public boolean isComplete() {
+        boolean hasPlatform = false;
+        boolean hasSolder = false;
+
         for (PackInfo component : componentInfos) {
             if (component.isComplete())
                 return true;
+
+            if (component instanceof SolderPackInfo)
+                hasSolder = true;
+            if (component instanceof PlatformPackInfo)
+                hasPlatform = true;
         }
 
-        return false;
+        return (hasSolder && hasPlatform);
     }
 }

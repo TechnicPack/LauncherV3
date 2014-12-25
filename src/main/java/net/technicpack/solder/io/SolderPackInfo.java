@@ -144,7 +144,7 @@ public class SolderPackInfo extends RestObject implements PackInfo {
 	}
 
     @Override
-    public boolean isComplete() { return true; }
+    public boolean isComplete() { return false; }
 
 	@Override
 	public String toString() {
