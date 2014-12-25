@@ -68,4 +68,5 @@ public class InstallTasksQueue<VersionData> implements ITasksQueue {
 		return this.completeVersion;
 	}
     public MirrorStore getMirrorStore() { return this.mirrorStore; }
+    public DownloadListener getDownloadListener() { return this.listener; }
 }
