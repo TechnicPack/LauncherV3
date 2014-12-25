@@ -30,4 +30,5 @@ public interface IPlatformApi {
     void incrementPackInstalls(String packSlug);
     NewsData getNews() throws RestfulAPIException;
     SearchResultsData getSearchResults(String searchTerm) throws RestfulAPIException;
+    String getPlatformUri(String slug);
 }
