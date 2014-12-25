@@ -185,4 +185,6 @@ public class VersionChain implements MojangVersion {
 
     @Override
     public String getParentVersion() { return null; }
+
+    public void addVersionToChain(MojangVersion version) { chain.add(version); }
 }

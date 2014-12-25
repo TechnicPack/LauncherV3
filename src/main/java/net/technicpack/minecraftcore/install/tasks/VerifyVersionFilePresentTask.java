@@ -26,6 +26,8 @@ import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.minecraftcore.MojangUtils;
+import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
 import net.technicpack.utilslib.ZipUtils;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidJsonFileVerifier;
@@ -34,12 +36,14 @@ import java.io.File;
 import java.io.IOException;
 
 public class VerifyVersionFilePresentTask implements IInstallTask {
-	private ModpackModel pack;
-	private String minecraftVersion;
+	private MojangVersionBuilder builder;
+    private String minecraftVersion;
+    private ModpackModel modpack;
 
-	public VerifyVersionFilePresentTask(ModpackModel pack, String minecraftVersion) {
-		this.pack = pack;
-		this.minecraftVersion = minecraftVersion;
+	public VerifyVersionFilePresentTask(ModpackModel modpack, String minecraftVersion, MojangVersionBuilder builder) {
+		this.builder = builder;
+        this.minecraftVersion = minecraftVersion;
+        this.modpack = modpack;
 	}
 
 	@Override
@@ -54,23 +58,9 @@ public class VerifyVersionFilePresentTask implements IInstallTask {
 
 	@Override
 	public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
-		File versionFile = new File(this.pack.getBinDir(), "version.json");
-		File modpackJar = new File(this.pack.getBinDir(), "modpack.jar");
+        MojangVersion version = builder.buildVersionFromKey(minecraftVersion);
 
-		boolean didExtract = false;
-
-		if (modpackJar.exists()) {
-			didExtract = ZipUtils.extractFile(modpackJar, this.pack.getBinDir(), "version.json");
-		}
-
-        IFileVerifier fileVerifier = new ValidJsonFileVerifier(MojangUtils.getGson());
-
-		if (!versionFile.exists() || !fileVerifier.isFileValid(versionFile)) {
-			if (this.pack.isLocalOnly()) {
-				throw new PackNotAvailableOfflineException(this.pack.getDisplayName());
-			} else {
-				queue.addNextTask(new DownloadFileTask(TechnicConstants.getTechnicVersionJson(this.minecraftVersion), versionFile, fileVerifier));
-			}
-		}
+        if (version == null && modpack.isLocalOnly())
+            throw new PackNotAvailableOfflineException(modpack.getDisplayName());
 	}
 }
