@@ -29,6 +29,7 @@ import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserStore;
+import net.technicpack.launchercore.image.face.CrafatarFaceImageStore;
 import net.technicpack.launchercore.logging.BuildLogFormatter;
 import net.technicpack.launchercore.logging.RotatingFileHandler;
 import net.technicpack.launchercore.modpacks.PackLoader;
@@ -222,7 +223,7 @@ public class LauncherMain {
         ImageRepository<ModpackModel> logoRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, resources.getImage("modpack/ModImageFiller.png"), logoType), new PackImageStore(logoType, mirrorStore, userModel));
         ImageRepository<ModpackModel> backgroundRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, null, backgroundType), new PackImageStore(backgroundType, mirrorStore, userModel));
 
-        ImageRepository<IUserType> skinRepo = new ImageRepository<IUserType>(new TechnicFaceMapper(directories, resources), new MinotarFaceImageStore("https://minotar.net/", mirrorStore));
+        ImageRepository<IUserType> skinRepo = new ImageRepository<IUserType>(new TechnicFaceMapper(directories, resources), new CrafatarFaceImageStore("http://crafatar.com/", mirrorStore));
 
         ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<AuthorshipInfo>(new TechnicAvatarMapper(directories, resources), new WebAvatarImageStore(mirrorStore));
 
