@@ -84,6 +84,7 @@ public class DiscoverInfoPanel extends TiledBackground {
         imageLoader.clear();
         uac.setImageResourceLoader(imageLoader);
         panel.getSharedContext().getTextRenderer().setSmoothingThreshold(6.0f);
+        panel.getSharedContext().setUserAgentCallback(uac);
 
         SwingReplacedElementFactory factory = new SwingReplacedElementFactory(panel, imageLoader);
         factory.reset();

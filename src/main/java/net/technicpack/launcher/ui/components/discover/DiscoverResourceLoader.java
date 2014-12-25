@@ -127,8 +127,8 @@ public class DiscoverResourceLoader extends ImageResourceLoader {
     public synchronized ImageResource get(final String uri, final int width, final int height) {
         if (ImageUtil.isEmbeddedBase64Image(uri)) {
             ImageResource resource = loadEmbeddedBase64ImageResource(uri);
-            resource.getImage().scale(width, height);
-            return resource;
+            BufferedImage newImg = ((AWTFSImage) resource.getImage()).getImage();
+            return new ImageResource(resource.getImageUri(), AWTFSImage.createImage(ImageUtils.scaleImage(newImg, width, height)));
         } else {
             CacheKey key = new CacheKey(uri, width, height);
             ImageResource ir = (ImageResource) _imageCache.get(key);
