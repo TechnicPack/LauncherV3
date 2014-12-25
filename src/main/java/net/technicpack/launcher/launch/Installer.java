@@ -18,8 +18,15 @@
 
 package net.technicpack.launcher.launch;
 
+import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.minecraftcore.mojang.version.CompleteVersionParser;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
+import net.technicpack.minecraftcore.mojang.version.builder.FileVersionBuilder;
+import net.technicpack.minecraftcore.mojang.version.builder.MojangVersionRetriever;
+import net.technicpack.minecraftcore.mojang.version.builder.retrievers.HttpFileRetriever;
+import net.technicpack.minecraftcore.mojang.version.builder.retrievers.ZipFileRetriever;
+import net.technicpack.minecraftcore.mojang.version.chain.ChainVersionBuilder;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
@@ -51,6 +58,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.zip.ZipException;
 
 public class Installer {
@@ -204,11 +212,27 @@ public class Installer {
             examineModpackData.addTask(new InstallModpackTask(modpack, modpackData, verifyingFiles, downloadingMods, installingMods));
         }
 
-        checkVersionFile.addTask(new VerifyVersionFilePresentTask(modpack, minecraft));
+        MojangVersionBuilder versionBuilder = createVersionBuilder(modpack, queue);
+        checkVersionFile.addTask(new VerifyVersionFilePresentTask(modpack, minecraft, versionBuilder));
         examineVersionFile.addTask(new HandleVersionFileTask(modpack, directories, examineVersionFile, installingLibs, installingLibs));
         examineVersionFile.addTask(new EnsureAssetsIndexTask(directories.getAssetsDirectory(), installingMinecraft, examineIndex, verifyingAssets, installingAssets, installingAssets));
 
         if (doFullInstall || (installedVersion != null && installedVersion.isLegacy()))
             installingMinecraft.addTask(new InstallMinecraftIfNecessaryTask(modpack, minecraft, directories.getCacheDirectory()));
+    }
+
+    private MojangVersionBuilder createVersionBuilder(ModpackModel modpack, InstallTasksQueue tasksQueue) {
+
+        ZipFileRetriever zipVersionRetriever = new ZipFileRetriever(new File(modpack.getBinDir(), "modpack.jar"));
+        HttpFileRetriever fallbackVersionRetriever = new HttpFileRetriever(mirrorStore, TechnicConstants.technicVersions, tasksQueue.getDownloadListener());
+
+        ArrayList<MojangVersionRetriever> fallbackRetrievers = new ArrayList<MojangVersionRetriever>(1);
+        fallbackRetrievers.add(fallbackVersionRetriever);
+
+        File versionJson = new File(modpack.getBinDir(), "version.json");
+        FileVersionBuilder zipVersionBuilder = new FileVersionBuilder(versionJson, zipVersionRetriever, fallbackRetrievers);
+        FileVersionBuilder webVersionBuilder = new FileVersionBuilder(modpack.getBinDir(), null, fallbackRetrievers);
+
+        return new ChainVersionBuilder(zipVersionBuilder, webVersionBuilder);
     }
 }
