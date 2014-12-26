@@ -69,14 +69,14 @@ public class ModpackCachePlatformApi implements IPlatformApi {
     @Override
     public PlatformPackInfo getPlatformPackInfoForBulk(String packSlug) throws RestfulAPIException {
 
-        if (isDead(packSlug))
-            return null;
-
         PlatformPackInfo info = foreverCache.getIfPresent(packSlug);
 
         if (info == null) {
             info = loadForeverCache(packSlug);
         }
+
+        if (info == null && isDead(packSlug))
+            return null;
 
         if (info == null) {
             info = pullAndCache(packSlug);
@@ -87,14 +87,20 @@ public class ModpackCachePlatformApi implements IPlatformApi {
 
     @Override
     public PlatformPackInfo getPlatformPackInfo(String packSlug) throws RestfulAPIException {
-
-        if (isDead(packSlug))
-            return null;
-
         PlatformPackInfo info = cache.getIfPresent(packSlug);
 
-        if (info == null) {
-            info = pullAndCache(packSlug);
+        if (info == null && isDead(packSlug))
+            return getPlatformPackInfoForBulk(packSlug);
+
+        try {
+            if (info == null) {
+                info = pullAndCache(packSlug);
+            }
+        } catch (RestfulAPIException ex) {
+            ex.printStackTrace();
+
+            deadPacks.put(packSlug, true);
+            return getPlatformPackInfoForBulk(packSlug);
         }
 
         return info;
@@ -133,7 +139,13 @@ public class ModpackCachePlatformApi implements IPlatformApi {
 
         try {
             String packCache = FileUtils.readFileToString(cacheFile, Charset.forName("UTF-8"));
-            return Utils.getGson().fromJson(packCache, PlatformPackInfo.class);
+            PlatformPackInfo info = Utils.getGson().fromJson(packCache, PlatformPackInfo.class);
+
+            if (info != null) {
+                foreverCache.put(packSlug, info);
+            }
+
+            return info;
         } catch (IOException ex) {
             return null;
         } catch (JsonSyntaxException ex) {
