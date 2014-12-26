@@ -230,7 +230,7 @@ public class LauncherMain {
         ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<AuthorshipInfo>(new TechnicAvatarMapper(directories, resources), new WebAvatarImageStore(mirrorStore));
 
         HttpSolderApi httpSolder = new HttpSolderApi(settings.getClientId(), userModel);
-        ISolderApi solder = new CachedSolderApi(httpSolder, 60 * 60);
+        ISolderApi solder = new CachedSolderApi(directories, httpSolder, 60 * 60);
         HttpPlatformApi httpPlatform = new HttpPlatformApi("http://www.technicpack.net/", mirrorStore);
 
         IPlatformApi platform = new ModpackCachePlatformApi(httpPlatform, 60 * 60, directories);
