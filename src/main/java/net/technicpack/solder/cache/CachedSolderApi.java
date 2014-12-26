@@ -52,6 +52,11 @@ public class CachedSolderApi implements ISolderApi {
 
     @Override
     public Collection<SolderPackInfo> getPublicSolderPacks(String solderRoot) throws RestfulAPIException {
+        return internalGetPublicSolderPacks(solderRoot, this);
+    }
+
+    @Override
+    public Collection<SolderPackInfo> internalGetPublicSolderPacks(String solderRoot, ISolderApi packFactory) throws RestfulAPIException {
         if (Seconds.secondsBetween(DateTime.now(), lastSolderPull).isLessThan(Seconds.seconds(cacheInSeconds))) {
             if (cachedPublicPacks != null)
                 return cachedPublicPacks;
@@ -61,7 +66,7 @@ public class CachedSolderApi implements ISolderApi {
             return new ArrayList<SolderPackInfo>(0);
 
         try {
-            cachedPublicPacks = innerApi.getPublicSolderPacks(solderRoot);
+            cachedPublicPacks = innerApi.internalGetPublicSolderPacks(solderRoot, this);
             return cachedPublicPacks;
         } finally {
             lastSolderPull = DateTime.now();
