@@ -26,29 +26,24 @@ public class InstalledPack {
 	public static final String MODPACKS_DIR = "%MODPACKS%\\";
 
 	private String name;
-	private boolean platform;
 	private String build;
 	private String directory;
 
-	public InstalledPack(String name, boolean platform, String build, String directory) {
+	public InstalledPack(String name, String build, String directory) {
 		this();
 		this.name = name;
-		this.platform = platform;
 		this.build = build;
 		this.directory = directory;
 	}
 
-	public InstalledPack(String name, boolean platform, String build) {
-		this(name, platform, build, MODPACKS_DIR + name);
+	public InstalledPack(String name, String build) {
+		this(name, build, MODPACKS_DIR + name);
 	}
 
 	public InstalledPack() {
 		build = RECOMMENDED;
 	}
 
-	public boolean isPlatform() {
-		return platform;
-	}
 	public String getBuild() {
 		return build;
 	}
@@ -68,7 +63,6 @@ public class InstalledPack {
 	public String toString() {
 		return "InstalledPack{" +
 				", name='" + name + '\'' +
-				", platform=" + platform +
 				", build='" + build + '\'' +
 				", directory='" + directory + '\'' +
 				'}';

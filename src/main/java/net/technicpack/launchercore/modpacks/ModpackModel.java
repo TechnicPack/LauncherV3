@@ -180,14 +180,6 @@ public class ModpackModel {
         return (packInfo == null);
     }
 
-    public boolean isPlatform() {
-        if (installedPack != null) {
-            return installedPack.isPlatform();
-        } else {
-            return isPlatform;
-        }
-    }
-
     public Version getInstalledVersion() {
         Version version = null;
         File versionFile = new File(getBinDir(), "version");
@@ -382,7 +374,7 @@ public class ModpackModel {
 
     public void save() {
         if (installedPack == null) {
-            installedPack = new InstalledPack(getName(), isPlatform(), getBuild());
+            installedPack = new InstalledPack(getName(), getBuild());
         }
 
         installedPackRepository.put(installedPack);
