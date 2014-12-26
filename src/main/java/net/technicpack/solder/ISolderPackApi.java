@@ -26,6 +26,7 @@ import net.technicpack.solder.io.SolderPackInfo;
 
 public interface ISolderPackApi {
     String getMirrorUrl();
+    SolderPackInfo getPackInfoForBulk() throws RestfulAPIException;
     SolderPackInfo getPackInfo() throws RestfulAPIException;
     Modpack getPackBuild(String build) throws BuildInaccessibleException;
 }
