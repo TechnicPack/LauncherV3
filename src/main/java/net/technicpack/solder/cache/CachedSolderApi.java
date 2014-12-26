@@ -19,31 +19,35 @@
 
 package net.technicpack.solder.cache;
 
+import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.solder.ISolderApi;
 import net.technicpack.solder.ISolderPackApi;
 import net.technicpack.solder.io.SolderPackInfo;
 import org.joda.time.DateTime;
 import org.joda.time.Seconds;
+import sun.misc.Launcher;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 public class CachedSolderApi implements ISolderApi {
 
+    private LauncherDirectories directories;
     private ISolderApi innerApi;
     private Collection<SolderPackInfo> cachedPublicPacks = null;
     private DateTime lastSolderPull = new DateTime(0);
     private int cacheInSeconds;
 
-    public CachedSolderApi(ISolderApi innerApi, int cacheInSeconds) {
+    public CachedSolderApi(LauncherDirectories directories, ISolderApi innerApi, int cacheInSeconds) {
+        this.directories = directories;
         this.innerApi = innerApi;
         this.cacheInSeconds = cacheInSeconds;
     }
 
     @Override
     public ISolderPackApi getSolderPack(String solderRoot, String modpackSlug) throws RestfulAPIException {
-        return new CachedSolderPackApi(innerApi.getSolderPack(solderRoot, modpackSlug), cacheInSeconds);
+        return new CachedSolderPackApi(directories, innerApi.getSolderPack(solderRoot, modpackSlug), cacheInSeconds, modpackSlug);
     }
 
     @Override

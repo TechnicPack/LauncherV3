@@ -21,20 +21,31 @@ package net.technicpack.solder.cache;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.gson.JsonSyntaxException;
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
+import net.technicpack.launchercore.install.LauncherDirectories;
+import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.solder.ISolderPackApi;
 import net.technicpack.solder.io.SolderPackInfo;
+import net.technicpack.utilslib.Utils;
+import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Seconds;
+import sun.misc.Launcher;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 
 public class CachedSolderPackApi implements ISolderPackApi {
 
+    private LauncherDirectories directories;
     private ISolderPackApi innerApi;
     private int cacheInSeconds;
+    private String packSlug;
 
     private SolderPackInfo rootInfoCache = null;
     private DateTime lastInfoAccess = new DateTime(0);
@@ -42,9 +53,11 @@ public class CachedSolderPackApi implements ISolderPackApi {
     private Cache<String, Modpack> buildCache;
     private Cache<String, Boolean> deadBuildCache;
 
-    public CachedSolderPackApi(ISolderPackApi innerApi, int cacheInSeconds) {
+    public CachedSolderPackApi(LauncherDirectories directories, ISolderPackApi innerApi, int cacheInSeconds, String packSlug) {
+        this.directories = directories;
         this.innerApi = innerApi;
         this.cacheInSeconds = cacheInSeconds;
+        this.packSlug = packSlug;
 
         buildCache = CacheBuilder.newBuilder()
                 .concurrencyLevel(4)
@@ -55,7 +68,7 @@ public class CachedSolderPackApi implements ISolderPackApi {
         deadBuildCache = CacheBuilder.newBuilder()
                 .concurrencyLevel(4)
                 .maximumSize(300)
-                .expireAfterWrite(cacheInSeconds/10, TimeUnit.SECONDS)
+                .expireAfterWrite(cacheInSeconds / 10, TimeUnit.SECONDS)
                 .build();
     }
 
@@ -66,7 +79,15 @@ public class CachedSolderPackApi implements ISolderPackApi {
 
     @Override
     public SolderPackInfo getPackInfoForBulk() throws RestfulAPIException {
-        return getPackInfo();
+        if (rootInfoCache != null)
+            return rootInfoCache;
+
+        loadForeverCache();
+
+        if (rootInfoCache != null)
+            return rootInfoCache;
+
+        return pullAndCache();
     }
 
     @Override
@@ -79,13 +100,44 @@ public class CachedSolderPackApi implements ISolderPackApi {
         if (Seconds.secondsBetween(DateTime.now(), lastInfoAccess).isGreaterThan(Seconds.seconds(cacheInSeconds/10)))
             return rootInfoCache;
 
+        return pullAndCache();
+    }
+
+    private SolderPackInfo pullAndCache() throws RestfulAPIException {
         try {
             rootInfoCache = innerApi.getPackInfoForBulk();
+            saveForeverCache(rootInfoCache);
             return rootInfoCache;
         } finally {
             lastInfoAccess = DateTime.now();
         }
     }
+
+    private void loadForeverCache() {
+        File cacheFile = new File(new File(new File(directories.getAssetsDirectory(), "packs"), packSlug), "soldercache.json");
+        if (!cacheFile.exists())
+            return;
+
+        try {
+            String packCache = FileUtils.readFileToString(cacheFile, Charset.forName("UTF-8"));
+            rootInfoCache = Utils.getGson().fromJson(packCache, SolderPackInfo.class);
+        } catch (IOException ex) {
+        } catch (JsonSyntaxException ex) {
+        }
+    }
+
+    private void saveForeverCache(SolderPackInfo info) {
+        File cacheFile = new File(new File(new File(directories.getAssetsDirectory(), "packs"), info.getName()), "soldercache.json");
+
+        String packCache = Utils.getGson().toJson(info);
+
+        try {
+            FileUtils.writeStringToFile(cacheFile, packCache, Charset.forName("UTF-8"));
+        } catch (IOException e) {
+            return;
+        }
+    }
+
 
     @Override
     public Modpack getPackBuild(String build) throws BuildInaccessibleException {
