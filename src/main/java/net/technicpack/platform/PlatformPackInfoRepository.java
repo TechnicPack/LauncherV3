@@ -42,9 +42,6 @@ public class PlatformPackInfoRepository implements IAuthoritativePackSource {
 
     @Override
     public PackInfo getPackInfo(InstalledPack pack) {
-        if (!pack.isPlatform())
-            return null;
-
         return getPlatformPackInfo(pack.getName());
     }
 
