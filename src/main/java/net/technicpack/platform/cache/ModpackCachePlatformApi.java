@@ -21,26 +21,42 @@ package net.technicpack.platform.cache;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.gson.JsonSyntaxException;
+import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.NewsData;
 import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.platform.io.SearchResultsData;
 import net.technicpack.rest.RestfulAPIException;
+import net.technicpack.utilslib.Utils;
+import org.apache.commons.io.FileUtils;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 public class ModpackCachePlatformApi implements IPlatformApi {
 
     private IPlatformApi innerApi;
-    Cache<String, PlatformPackInfo> cache;
-    Cache<String, Boolean> deadPacks;
+    private Cache<String, PlatformPackInfo> cache;
+    private Cache<String, Boolean> deadPacks;
+    private Cache<String, PlatformPackInfo> foreverCache;
+    private LauncherDirectories directories;
 
-    public ModpackCachePlatformApi(IPlatformApi innerApi, int cacheInSeconds) {
+    public ModpackCachePlatformApi(IPlatformApi innerApi, int cacheInSeconds, LauncherDirectories directories) {
         this.innerApi = innerApi;
+        this.directories = directories;
         cache = CacheBuilder.newBuilder()
                 .concurrencyLevel(4)
                 .maximumSize(300)
                 .expireAfterWrite(cacheInSeconds, TimeUnit.SECONDS)
+                .build();
+
+        foreverCache = CacheBuilder.newBuilder()
+                .concurrencyLevel(4)
+                .maximumSize(300)
                 .build();
 
         deadPacks = CacheBuilder.newBuilder()
@@ -52,28 +68,89 @@ public class ModpackCachePlatformApi implements IPlatformApi {
 
     @Override
     public PlatformPackInfo getPlatformPackInfoForBulk(String packSlug) throws RestfulAPIException {
-        return getPlatformPackInfo(packSlug);
+
+        if (isDead(packSlug))
+            return null;
+
+        PlatformPackInfo info = foreverCache.getIfPresent(packSlug);
+
+        if (info == null) {
+            info = loadForeverCache(packSlug);
+        }
+
+        if (info == null) {
+            info = pullAndCache(packSlug);
+        }
+
+        return info;
     }
 
     @Override
     public PlatformPackInfo getPlatformPackInfo(String packSlug) throws RestfulAPIException {
-        Boolean isDead = deadPacks.getIfPresent(packSlug);
 
-        if (isDead != null && isDead.booleanValue())
+        if (isDead(packSlug))
             return null;
 
         PlatformPackInfo info = cache.getIfPresent(packSlug);
 
+        if (info == null) {
+            info = pullAndCache(packSlug);
+        }
+
+        return info;
+    }
+
+    private boolean isDead(String packSlug) {
+        Boolean isDead = deadPacks.getIfPresent(packSlug);
+
+        if (isDead != null && isDead.booleanValue())
+            return true;
+
+        return false;
+    }
+
+    private PlatformPackInfo pullAndCache(String packSlug) throws RestfulAPIException {
+        PlatformPackInfo info = null;
         try {
-            if (info == null) {
-                info = innerApi.getPlatformPackInfoForBulk(packSlug);
+            info = innerApi.getPlatformPackInfoForBulk(packSlug);
+
+            if (info != null) {
                 cache.put(packSlug, info);
+                foreverCache.put(packSlug, info);
+                saveForeverCache(info);
             }
         } finally {
             deadPacks.put(packSlug, info == null);
         }
 
         return info;
+    }
+
+    private PlatformPackInfo loadForeverCache(String packSlug) {
+        File cacheFile = new File(new File(new File(directories.getAssetsDirectory(), "packs"), packSlug), "cache.json");
+        if (!cacheFile.exists())
+            return null;
+
+        try {
+            String packCache = FileUtils.readFileToString(cacheFile, Charset.forName("UTF-8"));
+            return Utils.getGson().fromJson(packCache, PlatformPackInfo.class);
+        } catch (IOException ex) {
+            return null;
+        } catch (JsonSyntaxException ex) {
+            return null;
+        }
+    }
+
+    private void saveForeverCache(PlatformPackInfo info) {
+        File cacheFile = new File(new File(new File(directories.getAssetsDirectory(), "packs"), info.getName()), "cache.json");
+
+        String packCache = Utils.getGson().toJson(info);
+
+        try {
+            FileUtils.writeStringToFile(cacheFile, packCache, Charset.forName("UTF-8"));
+        } catch (IOException e) {
+            return;
+        }
     }
 
     @Override
