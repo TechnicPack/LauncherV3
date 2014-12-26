@@ -231,7 +231,7 @@ public class LauncherMain {
         ISolderApi solder = new HttpSolderApi(settings.getClientId(), userModel);
         HttpPlatformApi httpPlatform = new HttpPlatformApi("http://www.technicpack.net/", mirrorStore);
 
-        IPlatformApi platform = new ModpackCachePlatformApi(httpPlatform, 60 * 60);
+        IPlatformApi platform = new ModpackCachePlatformApi(httpPlatform, 60 * 60, directories);
 
         IInstalledPackRepository packStore = TechnicInstalledPackStore.load(new File(directories.getLauncherDirectory(), "installedPacks"));
         IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(platform, solder);
