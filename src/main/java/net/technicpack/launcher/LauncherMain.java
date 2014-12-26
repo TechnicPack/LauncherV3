@@ -36,6 +36,7 @@ import net.technicpack.launchercore.modpacks.PackLoader;
 import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.platform.cache.ModpackCachePlatformApi;
+import net.technicpack.solder.cache.CachedSolderApi;
 import net.technicpack.ui.components.Console;
 import net.technicpack.ui.components.ConsoleFrame;
 import net.technicpack.ui.components.ConsoleHandler;
@@ -228,7 +229,8 @@ public class LauncherMain {
 
         ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<AuthorshipInfo>(new TechnicAvatarMapper(directories, resources), new WebAvatarImageStore(mirrorStore));
 
-        ISolderApi solder = new HttpSolderApi(settings.getClientId(), userModel);
+        HttpSolderApi httpSolder = new HttpSolderApi(settings.getClientId(), userModel);
+        ISolderApi solder = new CachedSolderApi(httpSolder, 60 * 60);
         HttpPlatformApi httpPlatform = new HttpPlatformApi("http://www.technicpack.net/", mirrorStore);
 
         IPlatformApi platform = new ModpackCachePlatformApi(httpPlatform, 60 * 60, directories);
