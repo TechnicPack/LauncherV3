@@ -49,6 +49,11 @@ public class HttpPlatformApi implements IPlatformApi {
     }
 
     @Override
+    public PlatformPackInfo getPlatformPackInfoForBulk(String packSlug) throws RestfulAPIException {
+        return getPlatformPackInfo(packSlug);
+    }
+
+    @Override
     public PlatformPackInfo getPlatformPackInfo(String packSlug) throws RestfulAPIException {
         String url = getPlatformUri(packSlug);
         return RestObject.getRestObject(PlatformPackInfo.class,  url);

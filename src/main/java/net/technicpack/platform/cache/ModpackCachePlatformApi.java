@@ -27,7 +27,6 @@ import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.platform.io.SearchResultsData;
 import net.technicpack.rest.RestfulAPIException;
 
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class ModpackCachePlatformApi implements IPlatformApi {
@@ -52,6 +51,11 @@ public class ModpackCachePlatformApi implements IPlatformApi {
     }
 
     @Override
+    public PlatformPackInfo getPlatformPackInfoForBulk(String packSlug) throws RestfulAPIException {
+        return getPlatformPackInfo(packSlug);
+    }
+
+    @Override
     public PlatformPackInfo getPlatformPackInfo(String packSlug) throws RestfulAPIException {
         Boolean isDead = deadPacks.getIfPresent(packSlug);
 
@@ -62,7 +66,7 @@ public class ModpackCachePlatformApi implements IPlatformApi {
 
         try {
             if (info == null) {
-                info = innerApi.getPlatformPackInfo(packSlug);
+                info = innerApi.getPlatformPackInfoForBulk(packSlug);
                 cache.put(packSlug, info);
             }
         } finally {

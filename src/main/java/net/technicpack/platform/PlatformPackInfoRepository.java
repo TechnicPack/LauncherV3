@@ -57,7 +57,7 @@ public class PlatformPackInfoRepository implements IAuthoritativePackSource {
         try {
             PackInfo info = null;
 
-            PlatformPackInfo platformInfo = platform.getPlatformPackInfo(slug);
+            PlatformPackInfo platformInfo = platform.getPlatformPackInfoForBulk(slug);
 
             info = getInfoFromPlatformInfo(platformInfo);
 

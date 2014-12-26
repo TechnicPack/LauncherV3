@@ -25,6 +25,7 @@ import net.technicpack.rest.RestfulAPIException;
 import java.util.Collection;
 
 public interface IPlatformApi {
+    PlatformPackInfo getPlatformPackInfoForBulk(String packSlug) throws RestfulAPIException;
     PlatformPackInfo getPlatformPackInfo(String packSlug) throws RestfulAPIException;
     void incrementPackRuns(String packSlug);
     void incrementPackInstalls(String packSlug);
