@@ -742,7 +742,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
                     }
 
                     if (!packRepo.getInstalledPacks().containsKey(result.getName())) {
-                        packRepo.put(new InstalledPack(result.getName(), true, InstalledPack.RECOMMENDED));
+                        packRepo.put(new InstalledPack(result.getName(), InstalledPack.RECOMMENDED));
                     }
 
                     packRepo.setSelectedSlug(result.getName());

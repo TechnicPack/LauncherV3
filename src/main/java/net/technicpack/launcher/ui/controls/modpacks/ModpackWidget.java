@@ -37,6 +37,8 @@ public class ModpackWidget extends SelectorWidget implements IImageJobListener<M
     private ResourceLoader resources;
 
     private JLabel icon;
+    private JLabel displayName;
+    private JLabel updateIcon;
 
     public ModpackWidget(ResourceLoader resources, ModpackModel modpack, ImageJob<ModpackModel> job) {
         super(resources);
@@ -61,16 +63,20 @@ public class ModpackWidget extends SelectorWidget implements IImageJobListener<M
         icon.setIcon(new ImageIcon(ImageUtils.scaleWithAspectWidth(imageJob.getImage(), 32)));
         add(icon, new GridBagConstraints(0,0,1,1,0,0,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,0,0,14),0,0));
 
-        JLabel text = new JLabel(modpack.getDisplayName());
-        text.setFont(getResources().getFont(ResourceLoader.FONT_OPENSANS, 14));
-        text.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        text.setMaximumSize(new Dimension(210, text.getPreferredSize().height));
-        add(text, new GridBagConstraints(1,0,1,1,1,0,GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
-        if (modpack.hasRecommendedUpdate()) {
-            JLabel updateIcon = new JLabel();
-            updateIcon.setIcon(getResources().getIcon("update_available.png"));
-            add(updateIcon, new GridBagConstraints(2,0,1,1,0,0,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,0,0,5),0,0));
-        }
+        displayName = new JLabel(modpack.getDisplayName());
+        displayName.setFont(getResources().getFont(ResourceLoader.FONT_OPENSANS, 14));
+        displayName.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        displayName.setMaximumSize(new Dimension(210, displayName.getPreferredSize().height));
+        add(displayName, new GridBagConstraints(1,0,1,1,1,0,GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
+        updateIcon = new JLabel();
+        updateIcon.setIcon(getResources().getIcon("update_available.png"));
+        add(updateIcon, new GridBagConstraints(2,0,1,1,0,0,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,0,0,5),0,0));
+        updateIcon.setVisible(modpack.hasRecommendedUpdate());
+    }
+
+    public void updateFromPack() {
+        displayName.setText(modpack.getDisplayName());
+        updateIcon.setVisible(modpack.hasRecommendedUpdate());
     }
 
     @Override

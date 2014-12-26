@@ -62,6 +62,11 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         initComponents(iconRepo, logoRepo, modpackOptionsListener);
     }
 
+    public void setModpackIfSame(ModpackModel modpack) {
+        if (modpack == this.modpack)
+            setModpack(modpack);
+    }
+
     public void setModpack(ModpackModel modpack) {
         for (ActionListener listener : playButton.getActionListeners()) {
             listener.actionPerformed(new ActionEvent(modpack, 0, ""));

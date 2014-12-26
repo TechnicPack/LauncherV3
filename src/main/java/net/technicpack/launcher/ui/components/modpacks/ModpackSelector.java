@@ -302,8 +302,31 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
                     PlatformPackInfo updatedInfo = platformApi.getPlatformPackInfo(refreshWidget.getModpack().getName());
                     refreshWidget.getModpack().setPackInfo(updatedInfo);
 
-                    if (modpackInfoPanel != null)
-                        modpackInfoPanel.setModpack(refreshWidget.getModpack());
+                    EventQueue.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (modpackInfoPanel != null )
+                                modpackInfoPanel.setModpackIfSame(refreshWidget.getModpack());
+
+                            if (refreshWidget.getModpack().hasRecommendedUpdate()) {
+                                refreshWidget.setToolTipText(resources.getString("launcher.packselector.updatetip"));
+                            } else {
+                                refreshWidget.setToolTipText(null);
+                            }
+
+
+                            refreshWidget.updateFromPack();
+                            iconRepo.startImageJob(refreshWidget.getModpack()).addJobListener(refreshWidget);
+
+                            EventQueue.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    revalidate();
+                                    repaint();
+                                }
+                            });
+                        }
+                    });
 
                 } catch (RestfulAPIException ex) {
                     ex.printStackTrace();
