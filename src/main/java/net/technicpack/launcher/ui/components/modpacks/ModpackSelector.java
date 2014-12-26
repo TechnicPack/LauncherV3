@@ -22,17 +22,17 @@ import net.technicpack.launcher.ui.controls.modpacks.FindMoreWidget;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.modpacks.*;
-import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
+import net.technicpack.launchercore.modpacks.packinfo.CombinedPackInfo;
 import net.technicpack.launchercore.modpacks.sources.IPackSource;
 import net.technicpack.launchercore.modpacks.sources.NameFilterPackSource;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.platform.packsources.SearchResultPackSource;
 import net.technicpack.platform.packsources.SinglePlatformSource;
-import net.technicpack.rest.RestObject;
 import net.technicpack.rest.RestfulAPIException;
-import net.technicpack.rest.io.Modpack;
+import net.technicpack.rest.io.PackInfo;
 import net.technicpack.solder.ISolderApi;
+import net.technicpack.solder.ISolderPackApi;
 import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.controls.WatermarkTextField;
 import net.technicpack.ui.lang.IRelocalizableResource;
@@ -42,27 +42,18 @@ import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 import net.technicpack.launcher.ui.controls.modpacks.ModpackWidget;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.utilslib.DesktopUtils;
-import net.technicpack.utilslib.PasteWatcher;
 
 import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Array;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -300,7 +291,17 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
             public void run() {
                 try {
                     PlatformPackInfo updatedInfo = platformApi.getPlatformPackInfo(refreshWidget.getModpack().getName());
-                    refreshWidget.getModpack().setPackInfo(updatedInfo);
+                    PackInfo infoToUse = updatedInfo;
+
+                    if (updatedInfo != null && updatedInfo.hasSolder()) {
+                        try {
+                            ISolderPackApi solderPack = solderApi.getSolderPack(updatedInfo.getSolder(), updatedInfo.getName());
+                            infoToUse = new CombinedPackInfo(solderPack.getPackInfo(), updatedInfo);
+                        } catch (RestfulAPIException ex) {
+                        }
+                    }
+
+                    refreshWidget.getModpack().setPackInfo(infoToUse);
 
                     EventQueue.invokeLater(new Runnable() {
                         @Override
