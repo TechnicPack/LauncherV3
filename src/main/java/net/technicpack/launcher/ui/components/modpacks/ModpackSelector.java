@@ -30,6 +30,7 @@ import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.platform.packsources.SearchResultPackSource;
 import net.technicpack.platform.packsources.SinglePlatformSource;
 import net.technicpack.rest.RestObject;
+import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.solder.ISolderApi;
 import net.technicpack.ui.controls.TintablePanel;
@@ -292,6 +293,25 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
 
         if (modpackInfoPanel != null)
             modpackInfoPanel.setModpack(widget.getModpack());
+
+        final ModpackWidget refreshWidget = selectedWidget;
+        Thread thread = new Thread("Modpack redownload "+selectedWidget.getModpack().getDisplayName()) {
+            @Override
+            public void run() {
+                try {
+                    PlatformPackInfo updatedInfo = platformApi.getPlatformPackInfo(refreshWidget.getModpack().getName());
+                    refreshWidget.getModpack().setPackInfo(updatedInfo);
+
+                    if (modpackInfoPanel != null)
+                        modpackInfoPanel.setModpack(refreshWidget.getModpack());
+
+                } catch (RestfulAPIException ex) {
+                    ex.printStackTrace();
+                    return;
+                }
+            }
+        };
+        thread.start();
     }
 
     protected void rebuildUI() {

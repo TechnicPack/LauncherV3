@@ -22,12 +22,10 @@ import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.ui.components.ModpackOptionsDialog;
 import net.technicpack.launchercore.install.LauncherDirectories;
-import net.technicpack.launchercore.modpacks.PackLoader;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.rest.RestObject;
 import net.technicpack.ui.controls.DraggableFrame;
-import net.technicpack.ui.controls.LauncherDialog;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.lang.IRelocalizableResource;
@@ -58,10 +56,8 @@ import net.technicpack.utilslib.PasteWatcher;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -726,7 +722,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
                     //Don't let people jerk us around with non-platform sites- make sure this is a real pack
                     //on the technic platform
-                    return platformApi.getPlatformPackInfo(info.getName());
+                    return platformApi.getPlatformPackInfoForBulk(info.getName());
                 }
 
                 @Override
