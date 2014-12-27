@@ -295,7 +295,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
 
                     if (updatedInfo != null && updatedInfo.hasSolder()) {
                         try {
-                            ISolderPackApi solderPack = solderApi.getSolderPack(updatedInfo.getSolder(), updatedInfo.getName());
+                            ISolderPackApi solderPack = solderApi.getSolderPack(updatedInfo.getSolder(), updatedInfo.getName(), solderApi.getMirrorUrl(updatedInfo.getSolder()));
                             infoToUse = new CombinedPackInfo(solderPack.getPackInfo(), updatedInfo);
                         } catch (RestfulAPIException ex) {
                         }
