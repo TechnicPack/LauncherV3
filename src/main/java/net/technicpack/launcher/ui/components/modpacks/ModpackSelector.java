@@ -172,7 +172,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         scrollPane.getVerticalScrollBar().setUnitIncrement(12);
         add(scrollPane, BorderLayout.CENTER);
 
-        widgetList.add(Box.createHorizontalStrut(287), new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,0,0,0),0,0));
+        widgetList.add(Box.createHorizontalStrut(294), new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,0,0,0),0,0));
         constraints = new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0,0);
         widgetList.add(Box.createGlue(), constraints);
     }
@@ -381,7 +381,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
             widgetList.add(findMoreWidget, constraints);
         }
 
-        widgetList.add(Box.createHorizontalStrut(287), constraints);
+        widgetList.add(Box.createHorizontalStrut(294), constraints);
         constraints.gridy++;
 
         constraints.weighty = 1.0;
