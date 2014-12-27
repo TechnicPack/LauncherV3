@@ -26,14 +26,18 @@ import net.technicpack.rest.RestObject;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.solder.ISolderApi;
 import net.technicpack.solder.ISolderPackApi;
+import net.technicpack.solder.io.Solder;
 import net.technicpack.solder.io.SolderPackInfo;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 public class HttpSolderApi implements ISolderApi {
     private String clientId;
     private UserModel userModel;
+    private Map<String, String> mirrorUrls = new HashMap<String, String>();
 
     public HttpSolderApi(String clientId, UserModel userModel) {
         this.clientId = clientId;
@@ -41,13 +45,23 @@ public class HttpSolderApi implements ISolderApi {
     }
 
     @Override
-    public ISolderPackApi getSolderPack(String solderRoot, String modpackSlug) throws RestfulAPIException {
-        return new HttpSolderPackApi(solderRoot, modpackSlug, clientId, userModel.getCurrentUser().getDisplayName());
+    public ISolderPackApi getSolderPack(String solderRoot, String modpackSlug, String mirrorUrl) throws RestfulAPIException {
+        return new HttpSolderPackApi(solderRoot, modpackSlug, clientId, userModel.getCurrentUser().getDisplayName(), mirrorUrl);
     }
 
     @Override
     public Collection<SolderPackInfo> getPublicSolderPacks(String solderRoot) throws RestfulAPIException {
         return internalGetPublicSolderPacks(solderRoot, this);
+    }
+
+    public String getMirrorUrl(String solderRoot) throws RestfulAPIException {
+        if (!mirrorUrls.containsKey(solderRoot)) {
+            String allPacksUrl = solderRoot + "modpack/";
+            Solder solder = RestObject.getRestObject(Solder.class, allPacksUrl);
+            mirrorUrls.put(solderRoot, solder.getMirrorUrl());
+        }
+
+        return mirrorUrls.get(solderRoot);
     }
 
     @Override
@@ -57,7 +71,7 @@ public class HttpSolderApi implements ISolderApi {
 
         FullModpacks technic = RestObject.getRestObject(FullModpacks.class, allPacksUrl);
         for (SolderPackInfo info : technic.getModpacks().values()) {
-            ISolderPackApi solder = packFactory.getSolderPack(solderRoot, info.getName());
+            ISolderPackApi solder = packFactory.getSolderPack(solderRoot, info.getName(), technic.getMirrorUrl());
             info.setSolder(solder);
             allPackApis.add(info);
         }

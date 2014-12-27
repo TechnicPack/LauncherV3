@@ -36,18 +36,15 @@ public class HttpSolderPackApi implements ISolderPackApi {
     private String userDisplayName;
     private String mirrorUrl;
 
-    protected HttpSolderPackApi(String baseUrl, String modpackSlug, String clientId, String userDisplayName) throws RestfulAPIException {
+    protected HttpSolderPackApi(String baseUrl, String modpackSlug, String clientId, String userDisplayName, String mirrorUrl) throws RestfulAPIException {
         this.baseUrl = baseUrl;
         this.modpackSlug = modpackSlug;
         this.clientId = clientId;
         this.userDisplayName = userDisplayName;
+        this.mirrorUrl = mirrorUrl;
 
-        Solder solder = RestObject.getRestObject(Solder.class, baseUrl + "modpack/");
-
-        if (solder == null || solder.getMirrorUrl() == null)
+        if (mirrorUrl == null)
             throw new RestfulAPIException("A mirror URL could not be retrieved from '"+baseUrl+"modpack/'");
-
-        mirrorUrl = solder.getMirrorUrl();
     }
 
     @Override

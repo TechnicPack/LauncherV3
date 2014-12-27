@@ -68,7 +68,7 @@ public class PlatformPackInfoRepository implements IAuthoritativePackSource {
     protected PackInfo getInfoFromPlatformInfo(PlatformPackInfo platformInfo) throws RestfulAPIException {
         if (platformInfo != null && platformInfo.hasSolder()) {
             try {
-                ISolderPackApi solderPack = solder.getSolderPack(platformInfo.getSolder(), platformInfo.getName());
+                ISolderPackApi solderPack = solder.getSolderPack(platformInfo.getSolder(), platformInfo.getName(), solder.getMirrorUrl(platformInfo.getSolder()));
                 return new CombinedPackInfo(solderPack.getPackInfoForBulk(), platformInfo);
             } catch (RestfulAPIException ex) {
                 return platformInfo;

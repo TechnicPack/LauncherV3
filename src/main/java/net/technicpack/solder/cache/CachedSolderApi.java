@@ -46,8 +46,8 @@ public class CachedSolderApi implements ISolderApi {
     }
 
     @Override
-    public ISolderPackApi getSolderPack(String solderRoot, String modpackSlug) throws RestfulAPIException {
-        return new CachedSolderPackApi(directories, innerApi.getSolderPack(solderRoot, modpackSlug), cacheInSeconds, modpackSlug);
+    public ISolderPackApi getSolderPack(String solderRoot, String modpackSlug, String mirrorUrl) throws RestfulAPIException {
+        return new CachedSolderPackApi(directories, innerApi.getSolderPack(solderRoot, modpackSlug, mirrorUrl), cacheInSeconds, modpackSlug);
     }
 
     @Override
@@ -57,12 +57,12 @@ public class CachedSolderApi implements ISolderApi {
 
     @Override
     public Collection<SolderPackInfo> internalGetPublicSolderPacks(String solderRoot, ISolderApi packFactory) throws RestfulAPIException {
-        if (Seconds.secondsBetween(DateTime.now(), lastSolderPull).isLessThan(Seconds.seconds(cacheInSeconds))) {
+        if (Seconds.secondsBetween(lastSolderPull, DateTime.now()).isLessThan(Seconds.seconds(cacheInSeconds))) {
             if (cachedPublicPacks != null)
                 return cachedPublicPacks;
         }
 
-        if (Seconds.secondsBetween(DateTime.now(), lastSolderPull).isLessThan(Seconds.seconds(cacheInSeconds/10)))
+        if (Seconds.secondsBetween(lastSolderPull, DateTime.now()).isLessThan(Seconds.seconds(cacheInSeconds/10)))
             return new ArrayList<SolderPackInfo>(0);
 
         try {
@@ -71,5 +71,10 @@ public class CachedSolderApi implements ISolderApi {
         } finally {
             lastSolderPull = DateTime.now();
         }
+    }
+
+    @Override
+    public String getMirrorUrl(String solderRoot) throws RestfulAPIException {
+        return innerApi.getMirrorUrl(solderRoot);
     }
 }
