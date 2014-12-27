@@ -61,11 +61,6 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 		return displayName;
 	}
 
-	@Override
-	public String getUrl() {
-		return url;
-	}
-
     @Override
     public String getWebSite() { return platformUrl; }
 
@@ -151,6 +146,8 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 
     @Override
     public boolean isComplete() { return true; }
+
+    public String getUrl() { return url; }
 
 	@Override
 	public String toString() {

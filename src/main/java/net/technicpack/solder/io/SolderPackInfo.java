@@ -68,11 +68,6 @@ public class SolderPackInfo extends RestObject implements PackInfo {
 		return display_name;
 	}
 
-	@Override
-	public String getUrl() {
-		return url;
-	}
-
     @Override
     public String getWebSite() { return null; }
 

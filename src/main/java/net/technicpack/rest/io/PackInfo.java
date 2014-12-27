@@ -32,8 +32,6 @@ public interface PackInfo {
 
 	public String getDisplayName();
 
-	public String getUrl();
-
     public String getWebSite();
 
 	public Resource getIcon();

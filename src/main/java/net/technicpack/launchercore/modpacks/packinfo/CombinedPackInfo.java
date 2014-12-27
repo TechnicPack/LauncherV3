@@ -33,208 +33,156 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class CombinedPackInfo implements PackInfo {
-    List<PackInfo> componentInfos = new LinkedList<PackInfo>();
+    private PackInfo solderPackInfo;
+    private PackInfo platformPackInfo;
 
-    public CombinedPackInfo(PackInfo... infos) {
-        for(PackInfo component : infos) {
-            componentInfos.add(component);
-        }
+    public CombinedPackInfo(PackInfo solderPackInfo, PackInfo platformPackInfo) {
+        this.solderPackInfo = solderPackInfo;
+        this.platformPackInfo = platformPackInfo;
     }
 
     @Override
     public String getName() {
-        for (PackInfo component : componentInfos) {
-            if (component.getName() != null)
-                return component.getName();
-        }
+        if (platformPackInfo != null)
+            return platformPackInfo.getName();
+        if (solderPackInfo != null)
+            return solderPackInfo.getName();
 
         return null;
     }
 
     @Override
     public String getDisplayName() {
-        for (PackInfo component : componentInfos) {
-            if (component.getDisplayName() != null)
-                return component.getDisplayName();
-        }
-
-        return null;
-    }
-
-    @Override
-    public String getUrl() {
-        for (PackInfo component : componentInfos) {
-            if (component.getUrl() != null)
-                return component.getUrl();
-        }
+        if (platformPackInfo != null)
+            return platformPackInfo.getDisplayName();
+        if (solderPackInfo != null)
+            return solderPackInfo.getDisplayName();
 
         return null;
     }
 
     @Override
     public String getWebSite() {
-        for (PackInfo component: componentInfos) {
-            if (component.getWebSite() != null)
-                return component.getWebSite();
-        }
+        if (platformPackInfo != null)
+            return platformPackInfo.getWebSite();
+        if (solderPackInfo != null)
+            return solderPackInfo.getWebSite();
 
         return null;
     }
 
     @Override
     public Resource getIcon() {
-        for (PackInfo component : componentInfos) {
-            if (component.getIcon() != null)
-                return component.getIcon();
-        }
+        if (platformPackInfo != null)
+            return platformPackInfo.getIcon();
 
         return null;
     }
 
     @Override
     public Resource getBackground() {
-        for (PackInfo component : componentInfos) {
-            if (component.getBackground() != null)
-                return component.getBackground();
-        }
-
+        if (platformPackInfo != null)
+            return platformPackInfo.getBackground();
         return null;
     }
 
     @Override
     public Resource getLogo() {
-        for (PackInfo component : componentInfos) {
-            if (component.getLogo() != null)
-                return component.getLogo();
-        }
+        if (platformPackInfo != null)
+            return platformPackInfo.getLogo();
 
         return null;
     }
 
     @Override
     public String getRecommended() {
-        for (PackInfo component : componentInfos) {
-            if (component.getRecommended() != null)
-                return component.getRecommended();
-        }
+        if (solderPackInfo != null)
+            return solderPackInfo.getRecommended();
+        if (platformPackInfo != null)
+            return platformPackInfo.getRecommended();
 
         return null;
     }
 
     @Override
     public String getLatest() {
-        for (PackInfo component : componentInfos) {
-            if (component.getLatest() != null)
-                return component.getLatest();
-        }
+        if (solderPackInfo != null)
+            return solderPackInfo.getLatest();
+        if (platformPackInfo != null)
+            return platformPackInfo.getRecommended();
 
         return null;
     }
 
     @Override
     public List<String> getBuilds() {
-        List<String> builds = new LinkedList<String>();
+        if (solderPackInfo != null)
+            return solderPackInfo.getBuilds();
+        if (platformPackInfo != null)
+            return platformPackInfo.getBuilds();
 
-        for (PackInfo component : componentInfos) {
-            List<String> subBuilds = component.getBuilds();
-            if (subBuilds != null) {
-                for(String build : subBuilds) {
-                    if (!builds.contains(build))
-                        builds.add(build);
-                }
-            }
-        }
-
-        return builds;
+        return new ArrayList<String>(0);
     }
 
     @Override
     public boolean shouldForceDirectory() {
-        for (PackInfo component : componentInfos) {
-            if (component.shouldForceDirectory())
-                return true;
-        }
+        if (platformPackInfo != null)
+            return platformPackInfo.shouldForceDirectory();
 
         return false;
     }
 
     @Override
     public ArrayList<FeedItem> getFeed() {
-        for (PackInfo component : componentInfos) {
-            if (component.getFeed() != null)
-                return component.getFeed();
-        }
+        if (platformPackInfo != null)
+            return platformPackInfo.getFeed();
 
         return null;
     }
 
     @Override
     public String getDescription() {
-        for (PackInfo component : componentInfos) {
-            if (component.getDescription() != null)
-                return component.getDescription();
-        }
+        if (platformPackInfo != null)
+            return platformPackInfo.getDescription();
 
         return null;
     }
 
     @Override
     public Integer getRuns() {
-        for (PackInfo component : componentInfos) {
-            if (component.getRuns() != null)
-                return component.getRuns();
-        }
-
+        if (platformPackInfo != null)
+            return platformPackInfo.getRuns();
         return null;
     }
 
     @Override
     public Integer getDownloads() {
-        for (PackInfo component : componentInfos) {
-            if (component.getDownloads() != null)
-                return component.getDownloads();
-        }
+        if (platformPackInfo != null)
+            return platformPackInfo.getDownloads();
 
         return null;
     }
 
     @Override
     public Integer getLikes() {
-        for (PackInfo component : componentInfos) {
-            if (component.getLikes() != null)
-                return component.getLikes();
-        }
+        if (platformPackInfo != null)
+            return platformPackInfo.getLikes();
 
         return null;
     }
 
     @Override
     public Modpack getModpack(String build) throws BuildInaccessibleException {
-        for (PackInfo component : componentInfos) {
-            Modpack modpack = component.getModpack(build);
-
-            if (modpack != null)
-                return modpack;
-        }
+        if (solderPackInfo != null)
+            return solderPackInfo.getModpack(build);
+        if (platformPackInfo != null)
+            return platformPackInfo.getModpack(build);
 
         return null;
     }
 
     @Override
     public boolean isComplete() {
-        boolean hasPlatform = false;
-        boolean hasSolder = false;
-
-        for (PackInfo component : componentInfos) {
-            if (component.isComplete())
-                return true;
-
-            if (component instanceof SolderPackInfo)
-                hasSolder = true;
-            if (component instanceof PlatformPackInfo)
-                hasPlatform = true;
-        }
-
-        return (hasSolder && hasPlatform);
+        return (platformPackInfo != null);
     }
 }

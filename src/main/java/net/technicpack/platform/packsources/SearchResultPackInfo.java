@@ -48,11 +48,6 @@ public class SearchResultPackInfo implements PackInfo {
     }
 
     @Override
-    public String getUrl() {
-        return result.getUrl();
-    }
-
-    @Override
     public String getWebSite() { return null; }
 
     @Override
