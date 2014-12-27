@@ -89,6 +89,10 @@ public class InstallMinecraftAssetsTask implements IInstallTask {
             throw new DownloadException("The assets json file was invalid.");
         }
 
+        String assetsKey = ((InstallTasksQueue<MojangVersion>)queue).getCompleteVersion().getAssetsKey();
+        if (assetsKey == null || assetsKey.isEmpty())
+            assetsKey = "legacy";
+
         for(Map.Entry<String, JsonElement> field : allObjects.entrySet()) {
             String friendlyName = field.getKey();
             JsonObject file = field.getValue().getAsJsonObject();
@@ -100,7 +104,7 @@ public class InstallMinecraftAssetsTask implements IInstallTask {
 
             (new File(location.getParent())).mkdirs();
 
-            File virtualOut =  new File(assetsDirectory + File.separator + "virtual" + File.separator + ((InstallTasksQueue<MojangVersion>)queue).getCompleteVersion().getAssetsKey() + File.separator + friendlyName);
+            File virtualOut =  new File(assetsDirectory + File.separator + "virtual" + File.separator + assetsKey + File.separator + friendlyName);
 
             checkAssetsQueue.addTask(new EnsureFileTask(location, new FileSizeVerifier(size), null, url, virtualOut.getName(), downloadAssetsQueue, copyAssetsQueue));
 
