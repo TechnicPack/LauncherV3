@@ -74,9 +74,11 @@ public class ModpackWidget extends SelectorWidget implements IImageJobListener<M
         updateIcon.setVisible(modpack.hasRecommendedUpdate());
     }
 
-    public void updateFromPack() {
+    public void updateFromPack(ImageJob<ModpackModel> job) {
         displayName.setText(modpack.getDisplayName());
         updateIcon.setVisible(modpack.hasRecommendedUpdate());
+        icon.setIcon(new ImageIcon(ImageUtils.scaleWithAspectWidth(job.getImage(), 32)));
+        job.addJobListener(this);
     }
 
     @Override

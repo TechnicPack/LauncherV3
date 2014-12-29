@@ -315,9 +315,8 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
                                 refreshWidget.setToolTipText(null);
                             }
 
-
-                            refreshWidget.updateFromPack();
-                            iconRepo.startImageJob(refreshWidget.getModpack()).addJobListener(refreshWidget);
+                            iconRepo.refreshRetry(refreshWidget.getModpack());
+                            refreshWidget.updateFromPack(iconRepo.startImageJob(refreshWidget.getModpack()));
 
                             EventQueue.invokeLater(new Runnable() {
                                 @Override
