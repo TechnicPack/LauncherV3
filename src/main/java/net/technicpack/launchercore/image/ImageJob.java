@@ -64,6 +64,7 @@ public class ImageJob<T> {
     }
 
     public boolean canRetry() { return canRetry; }
+    public void refreshRetry() { canRetry = true; }
 
     public T getJobData() { return lastJobData; }
 

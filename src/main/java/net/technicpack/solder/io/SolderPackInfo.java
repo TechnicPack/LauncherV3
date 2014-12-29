@@ -73,26 +73,17 @@ public class SolderPackInfo extends RestObject implements PackInfo {
 
 	@Override
 	public Resource getIcon() {
-		if (icon == null) {
-			return new Resource(solder.getMirrorUrl() + name + "/resources/icon.png", logo_md5);
-		}
-		return new Resource(icon, icon_md5);
+		return null;
 	}
 
 	@Override
 	public Resource getBackground() {
-		if (background == null) {
-			return new Resource(solder.getMirrorUrl() + name + "/resources/background.jpg", logo_md5);
-		}
-		return new Resource(background, background_md5);
+		return null;
 	}
 
 	@Override
 	public Resource getLogo() {
-		if (logo == null) {
-			return new Resource(solder.getMirrorUrl() + name + "/resources/logo_180.png", logo_md5);
-		}
-		return new Resource(logo, logo_md5);
+		return null;
 	}
 
 	@Override

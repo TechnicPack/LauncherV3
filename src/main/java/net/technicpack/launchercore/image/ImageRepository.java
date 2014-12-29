@@ -48,4 +48,11 @@ public class ImageRepository<T> {
 
         return job;
     }
+
+    public void refreshRetry(T key) {
+        String jobKey = store.getJobKey(key);
+
+        if (allJobs.containsKey(jobKey))
+            allJobs.get(jobKey).refreshRetry();
+    }
 }
