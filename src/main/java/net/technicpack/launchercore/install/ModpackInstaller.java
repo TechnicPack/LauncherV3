@@ -44,16 +44,16 @@ public class ModpackInstaller<VersionData> {
         modpack.save();
         modpack.initDirectories();
 
-		Version installedVersion = modpack.getInstalledVersion();
-        if (installedVersion == null) {
-            platformApi.incrementPackInstalls(modpack.getName());
-            Utils.sendTracking("installModpack", modpack.getName(), modpack.getBuild(), clientId);
-        }
-
         tasksQueue.runAllTasks();
 
         Version versionFile = new Version(build, false);
         versionFile.save(modpack.getBinDir());
+
+        Version installedVersion = modpack.getInstalledVersion();
+        if (installedVersion == null) {
+            platformApi.incrementPackInstalls(modpack.getName());
+            Utils.sendTracking("installModpack", modpack.getName(), modpack.getBuild(), clientId);
+        }
 
         return tasksQueue.getCompleteVersion();
     }
