@@ -70,13 +70,15 @@ public class MinecraftLauncher {
 			first = false;
 		}
 		Utils.getLogger().info("Running " + full.toString());
-        platformApi.incrementPackRuns(pack.getName());
-		if (!Utils.sendTracking("runModpack", pack.getName(), pack.getInstalledVersion().getVersion(), clientId)) {
-			Utils.getLogger().info("Failed to record event");
-		}
 		Process process = new ProcessBuilder(commands).directory(pack.getInstalledDirectory()).redirectErrorStream(true).start();
 		GameProcess mcProcess = new GameProcess(commands, process);
 		if (exitListener != null) mcProcess.setExitListener(exitListener);
+
+        platformApi.incrementPackRuns(pack.getName());
+        if (!Utils.sendTracking("runModpack", pack.getName(), pack.getInstalledVersion().getVersion(), clientId)) {
+            Utils.getLogger().info("Failed to record event");
+        }
+
 		return mcProcess;
 	}
 
