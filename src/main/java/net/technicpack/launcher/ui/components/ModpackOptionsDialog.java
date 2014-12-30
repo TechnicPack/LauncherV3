@@ -100,6 +100,8 @@ public class ModpackOptionsDialog extends LauncherDialog {
     protected void selectManual() {
         if (manualBuildList.getSelectedItem() == null)
             manualBuildList.setSelectedItem(new PackBuildItem(modpack.getBuild(), resources, modpack));
+        if (manualBuildList.getSelectedItem() == null)
+            manualBuildList.setSelectedItem(new PackBuildItem(modpack.getRecommendedBuild(), resources, modpack));
 
         this.modpack.setBuild(((PackBuildItem)manualBuildList.getSelectedItem()).getBuildNumber());
         manualBuildList.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
