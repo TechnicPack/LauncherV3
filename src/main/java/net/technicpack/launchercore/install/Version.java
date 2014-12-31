@@ -20,7 +20,7 @@
 package net.technicpack.launchercore.install;
 
 import com.google.gson.JsonSyntaxException;
-import net.technicpack.launchercore.util.Utils;
+import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;

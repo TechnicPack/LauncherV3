@@ -1,8 +1,3 @@
-package net.technicpack.launchercore.mirror.secure.rest;
-
-import net.technicpack.launchercore.exception.RestfulAPIException;
-import net.technicpack.launchercore.restful.RestObject;
-
 /**
  * This file is part of Technic Launcher Core.
  * Copyright (C) 2013 Syndicate, LLC
@@ -21,6 +16,14 @@ import net.technicpack.launchercore.restful.RestObject;
  * as well as a copy of the GNU Lesser General Public License,
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+package net.technicpack.launchercore.mirror.secure.rest;
+
+import net.technicpack.rest.RestfulAPIException;
+import net.technicpack.rest.RestObject;
+import net.technicpack.utilslib.Utils;
+
+import java.util.logging.Level;
 
 public class JsonWebSecureMirror implements ISecureMirror {
     private String baseUrl;
@@ -43,7 +46,7 @@ public class JsonWebSecureMirror implements ISecureMirror {
         try {
             return RestObject.getRestObject(ValidateResponse.class, constructedUrl);
         } catch (RestfulAPIException ex) {
-            ex.printStackTrace();
+            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
             return new ValidateResponse(ex.getMessage());
         }
     }

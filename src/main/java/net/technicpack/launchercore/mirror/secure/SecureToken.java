@@ -1,11 +1,3 @@
-package net.technicpack.launchercore.mirror.secure;
-
-import net.technicpack.launchercore.exception.DownloadException;
-import net.technicpack.launchercore.install.user.UserModel;
-import net.technicpack.launchercore.mirror.secure.rest.ISecureMirror;
-
-import java.util.Date;
-
 /**
  * This file is part of Technic Launcher Core.
  * Copyright (C) 2013 Syndicate, LLC
@@ -24,6 +16,14 @@ import java.util.Date;
  * as well as a copy of the GNU Lesser General Public License,
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+package net.technicpack.launchercore.mirror.secure;
+
+import net.technicpack.launchercore.exception.DownloadException;
+import net.technicpack.launchercore.auth.UserModel;
+import net.technicpack.launchercore.mirror.secure.rest.ISecureMirror;
+
+import java.util.Date;
 
 public class SecureToken {
     private String token;
@@ -47,25 +47,5 @@ public class SecureToken {
 
     public String queryForSecureToken() throws DownloadException {
         return null;
-//        if (this.token != null && this.receivedTime != null && this.userModel.getCurrentUser() != null /*&& this.tokenUserName != null &&
-//                this.tokenAccessToken != null && this.userModel.getCurrentUser().getUsername().equals(this.tokenUserName) &&
-//                this.userModel.getCurrentUser().getAccessToken().equals(this.tokenAccessToken)*/) {
-//            Date now = new Date();
-//            long diffInMinutes = ((now.getTime() - receivedTime.getTime()) / 1000) / 60;
-//
-//            if (diffInMinutes < 25)
-//                return this.token;
-//        }
-//
-//        //We need to hit the mirror for a new token
-//        this.token = userModel.retrieveDownloadToken(this.mirror);
-//
-//        if (this.token != null) {
-//            this.receivedTime = new Date();
-//            //this.tokenUserName = userModel.getCurrentUser().getUsername();
-//            //this.tokenAccessToken = userModel.getCurrentUser().getAccessToken();
-//        }
-//
-//        return this.token;
     }
 }

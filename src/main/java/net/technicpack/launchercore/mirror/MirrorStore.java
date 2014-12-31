@@ -1,20 +1,3 @@
-package net.technicpack.launchercore.mirror;
-
-import net.technicpack.launchercore.exception.DownloadException;
-import net.technicpack.launchercore.install.user.UserModel;
-import net.technicpack.launchercore.mirror.download.Download;
-import net.technicpack.launchercore.mirror.secure.SecureToken;
-import net.technicpack.launchercore.mirror.secure.rest.ISecureMirror;
-import net.technicpack.launchercore.util.DownloadListener;
-import net.technicpack.launchercore.util.verifiers.IFileVerifier;
-import org.apache.commons.io.FileUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.*;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * This file is part of Technic Launcher Core.
  * Copyright (C) 2013 Syndicate, LLC
@@ -33,6 +16,24 @@ import java.util.Map;
  * as well as a copy of the GNU Lesser General Public License,
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+package net.technicpack.launchercore.mirror;
+
+import net.technicpack.launchercore.exception.DownloadException;
+import net.technicpack.launchercore.auth.UserModel;
+import net.technicpack.launchercore.mirror.download.Download;
+import net.technicpack.launchercore.mirror.secure.SecureToken;
+import net.technicpack.launchercore.mirror.secure.rest.ISecureMirror;
+import net.technicpack.launchercore.util.DownloadListener;
+import net.technicpack.launchercore.install.verifiers.IFileVerifier;
+import net.technicpack.utilslib.Utils;
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MirrorStore {
     Map<String, SecureToken> secureMirrors = new HashMap<String, SecureToken>();
@@ -103,12 +104,12 @@ public class MirrorStore {
         return md5;
     }
 
-    public Download downloadFile(String url, String name, String output, File cache, IFileVerifier verifier, DownloadListener listener) throws IOException {
+    public Download downloadFile(String url, String name, String output, File cache, IFileVerifier verifier, DownloadListener listener) throws IOException, InterruptedException {
         int tries = DOWNLOAD_RETRIES;
         File outputFile = null;
         Download download = null;
         while (tries > 0) {
-            System.out.println("Starting download of " + url + ", with " + tries + " tries remaining");
+            Utils.getLogger().info("Starting download of " + url + ", with " + tries + " tries remaining");
             tries--;
             download = new Download(getFullUrl(url), name, output);
             download.setListener(listener);
@@ -117,6 +118,10 @@ public class MirrorStore {
                 if (download.getOutFile() != null) {
                     download.getOutFile().delete();
                 }
+
+                if (Thread.interrupted())
+                    throw new InterruptedException();
+
                 System.err.println("Download of " + url + " Failed!");
                 if (listener != null) {
                     listener.stateChanged("Download failed, retries remaining: " + tries, 0F);
@@ -137,11 +142,11 @@ public class MirrorStore {
         return download;
     }
 
-    public Download downloadFile(String url, String name, String output, File cache) throws IOException {
+    public Download downloadFile(String url, String name, String output, File cache) throws IOException, InterruptedException {
         return downloadFile(url, name, output, cache, null, null);
     }
 
-    public Download downloadFile(String url, String name, String output) throws IOException {
+    public Download downloadFile(String url, String name, String output) throws IOException, InterruptedException {
         return downloadFile(url, name, output, null);
     }
 

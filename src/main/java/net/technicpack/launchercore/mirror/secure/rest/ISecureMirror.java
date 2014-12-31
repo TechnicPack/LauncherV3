@@ -1,5 +1,3 @@
-package net.technicpack.launchercore.mirror.secure.rest;
-
 /**
  * This file is part of Technic Launcher Core.
  * Copyright (C) 2013 Syndicate, LLC
@@ -18,6 +16,8 @@ package net.technicpack.launchercore.mirror.secure.rest;
  * as well as a copy of the GNU Lesser General Public License,
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+package net.technicpack.launchercore.mirror.secure.rest;
 
 public interface ISecureMirror {
     String getDownloadHost();
