@@ -20,11 +20,9 @@
 package net.technicpack.solder.http;
 
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
-import net.technicpack.rest.io.Modpack;
-import net.technicpack.rest.io.PackInfo;
-import net.technicpack.solder.io.Solder;
 import net.technicpack.rest.RestObject;
 import net.technicpack.rest.RestfulAPIException;
+import net.technicpack.rest.io.Modpack;
 import net.technicpack.solder.ISolderPackApi;
 import net.technicpack.solder.io.SolderPackInfo;
 
@@ -44,7 +42,7 @@ public class HttpSolderPackApi implements ISolderPackApi {
         this.mirrorUrl = mirrorUrl;
 
         if (mirrorUrl == null)
-            throw new RestfulAPIException("A mirror URL could not be retrieved from '"+baseUrl+"modpack/'");
+            throw new RestfulAPIException("A mirror URL could not be retrieved from '" + baseUrl + "modpack/'");
     }
 
     @Override
@@ -68,7 +66,7 @@ public class HttpSolderPackApi implements ISolderPackApi {
     @Override
     public Modpack getPackBuild(String build) throws BuildInaccessibleException {
         try {
-            String url = baseUrl + "modpack/" + modpackSlug + "/" + build + "/?cid=" + clientId + "&u="+ userDisplayName;
+            String url = baseUrl + "modpack/" + modpackSlug + "/" + build + "/?cid=" + clientId + "&u=" + userDisplayName;
             Modpack pack = RestObject.getRestObject(Modpack.class, url);
 
             if (pack != null) {

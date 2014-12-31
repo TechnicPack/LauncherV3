@@ -21,10 +21,10 @@ package net.technicpack.solder.io;
 
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
 import net.technicpack.platform.io.FeedItem;
+import net.technicpack.rest.RestObject;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.rest.io.Resource;
-import net.technicpack.rest.RestObject;
 import net.technicpack.solder.ISolderPackApi;
 
 import java.util.ArrayList;
@@ -32,83 +32,87 @@ import java.util.List;
 
 public class SolderPackInfo extends RestObject implements PackInfo {
 
-	private String name;
-	private String display_name;
-	private String url;
-	private String icon;
-	private String icon_md5;
-	private String logo;
-	private String logo_md5;
-	private String background;
-	private String background_md5;
-	private String recommended;
-	private String latest;
-	private List<String> builds;
-	private transient ISolderPackApi solder;
+    private String name;
+    private String display_name;
+    private String url;
+    private String icon;
+    private String icon_md5;
+    private String logo;
+    private String logo_md5;
+    private String background;
+    private String background_md5;
+    private String recommended;
+    private String latest;
+    private List<String> builds;
+    private transient ISolderPackApi solder;
 
-	public SolderPackInfo() {
+    public SolderPackInfo() {
 
-	}
+    }
 
-	public ISolderPackApi getSolder() {
-		return solder;
-	}
+    public ISolderPackApi getSolder() {
+        return solder;
+    }
 
-	public void setSolder(ISolderPackApi solder) {
-		this.solder = solder;
-	}
-
-	@Override
-	public String getName() {
-		return name;
-	}
-
-	@Override
-	public String getDisplayName() {
-		return display_name;
-	}
+    public void setSolder(ISolderPackApi solder) {
+        this.solder = solder;
+    }
 
     @Override
-    public String getWebSite() { return null; }
-
-	@Override
-	public Resource getIcon() {
-		return null;
-	}
-
-	@Override
-	public Resource getBackground() {
-		return null;
-	}
-
-	@Override
-	public Resource getLogo() {
-		return null;
-	}
-
-	@Override
-	public String getRecommended() {
-		return recommended;
-	}
-
-	@Override
-	public String getLatest() {
-		return latest;
-	}
-
-	@Override
-	public List<String> getBuilds() {
-		return builds;
-	}
-
-	@Override
-	public boolean shouldForceDirectory() {
-		//TODO: This is not really implemented properly
-		return false;
-	}
+    public String getName() {
+        return name;
+    }
 
     @Override
-    public ArrayList<FeedItem> getFeed() { return null; }
+    public String getDisplayName() {
+        return display_name;
+    }
+
+    @Override
+    public String getWebSite() {
+        return null;
+    }
+
+    @Override
+    public Resource getIcon() {
+        return null;
+    }
+
+    @Override
+    public Resource getBackground() {
+        return null;
+    }
+
+    @Override
+    public Resource getLogo() {
+        return null;
+    }
+
+    @Override
+    public String getRecommended() {
+        return recommended;
+    }
+
+    @Override
+    public String getLatest() {
+        return latest;
+    }
+
+    @Override
+    public List<String> getBuilds() {
+        return builds;
+    }
+
+    @Override
+    public boolean shouldForceDirectory() {
+        //TODO: This is not really implemented properly
+        return false;
+    }
+
+    @Override
+    public ArrayList<FeedItem> getFeed() {
+        return null;
+    }
 
     @Override
     public String getDescription() {
@@ -116,35 +120,43 @@ public class SolderPackInfo extends RestObject implements PackInfo {
     }
 
     @Override
-    public Integer getLikes() { return null; }
+    public Integer getLikes() {
+        return null;
+    }
 
     @Override
-    public Integer getDownloads() { return null; }
+    public Integer getDownloads() {
+        return null;
+    }
 
     @Override
-    public Integer getRuns() { return null; }
+    public Integer getRuns() {
+        return null;
+    }
 
-	@Override
-	public Modpack getModpack(String build) throws BuildInaccessibleException {
+    @Override
+    public Modpack getModpack(String build) throws BuildInaccessibleException {
         return solder.getPackBuild(build);
-	}
+    }
 
     @Override
-    public boolean isComplete() { return false; }
+    public boolean isComplete() {
+        return false;
+    }
 
-	@Override
-	public String toString() {
-		return "SolderPackInfo{" +
-				"name='" + name + '\'' +
-				", display_name='" + display_name + '\'' +
-				", url='" + url + '\'' +
-				", icon_md5='" + icon_md5 + '\'' +
-				", logo_md5='" + logo_md5 + '\'' +
-				", background_md5='" + background_md5 + '\'' +
-				", recommended='" + recommended + '\'' +
-				", latest='" + latest + '\'' +
-				", builds=" + builds +
-				", solder=" + solder +
-				'}';
-	}
+    @Override
+    public String toString() {
+        return "SolderPackInfo{" +
+                "name='" + name + '\'' +
+                ", display_name='" + display_name + '\'' +
+                ", url='" + url + '\'' +
+                ", icon_md5='" + icon_md5 + '\'' +
+                ", logo_md5='" + logo_md5 + '\'' +
+                ", background_md5='" + background_md5 + '\'' +
+                ", recommended='" + recommended + '\'' +
+                ", latest='" + latest + '\'' +
+                ", builds=" + builds +
+                ", solder=" + solder +
+                '}';
+    }
 }

@@ -20,12 +20,11 @@
 package net.technicpack.solder.http;
 
 import net.technicpack.launchercore.auth.UserModel;
-import net.technicpack.rest.io.PackInfo;
-import net.technicpack.solder.io.FullModpacks;
 import net.technicpack.rest.RestObject;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.solder.ISolderApi;
 import net.technicpack.solder.ISolderPackApi;
+import net.technicpack.solder.io.FullModpacks;
 import net.technicpack.solder.io.Solder;
 import net.technicpack.solder.io.SolderPackInfo;
 

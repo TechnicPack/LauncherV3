@@ -24,14 +24,14 @@ import net.technicpack.utilslib.Utils;
 import java.util.List;
 
 public class GameProcess {
-	private final List<String> commands;
-	private final Process process;
-	private ProcessExitListener exitListener;
-	private final ProcessMonitorThread monitorThread;
+    private final List<String> commands;
+    private final Process process;
+    private ProcessExitListener exitListener;
+    private final ProcessMonitorThread monitorThread;
 
-	public GameProcess(List<String> commands, Process process) {
-		this.commands = commands;
-		this.process = process;
+    public GameProcess(List<String> commands, Process process) {
+        this.commands = commands;
+        this.process = process;
 
         String commandText = "";
 
@@ -40,19 +40,19 @@ public class GameProcess {
         }
         Utils.getLogger().info(commandText);
 
-		this.monitorThread = new ProcessMonitorThread(this);
-		this.monitorThread.start();
-	}
+        this.monitorThread = new ProcessMonitorThread(this);
+        this.monitorThread.start();
+    }
 
-	public ProcessExitListener getExitListener() {
-		return exitListener;
-	}
+    public ProcessExitListener getExitListener() {
+        return exitListener;
+    }
 
-	public void setExitListener(ProcessExitListener exitListener) {
-		this.exitListener = exitListener;
-	}
+    public void setExitListener(ProcessExitListener exitListener) {
+        this.exitListener = exitListener;
+    }
 
-	public Process getProcess() {
-		return process;
-	}
+    public Process getProcess() {
+        return process;
+    }
 }

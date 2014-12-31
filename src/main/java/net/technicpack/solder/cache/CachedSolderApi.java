@@ -26,7 +26,6 @@ import net.technicpack.solder.ISolderPackApi;
 import net.technicpack.solder.io.SolderPackInfo;
 import org.joda.time.DateTime;
 import org.joda.time.Seconds;
-import sun.misc.Launcher;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,7 +61,7 @@ public class CachedSolderApi implements ISolderApi {
                 return cachedPublicPacks;
         }
 
-        if (Seconds.secondsBetween(lastSolderPull, DateTime.now()).isLessThan(Seconds.seconds(cacheInSeconds/10)))
+        if (Seconds.secondsBetween(lastSolderPull, DateTime.now()).isLessThan(Seconds.seconds(cacheInSeconds / 10)))
             return new ArrayList<SolderPackInfo>(0);
 
         try {

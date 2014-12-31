@@ -29,13 +29,13 @@ import java.io.IOException;
 import java.util.logging.Level;
 
 public class MinotarFaceImageStore implements IImageStore<IUserType> {
-	private String mBaseUrl;
+    private String mBaseUrl;
     private MirrorStore mirrorStore;
 
-	public MinotarFaceImageStore(String baseUrl, MirrorStore mirrorStore) {
-		mBaseUrl = baseUrl;
+    public MinotarFaceImageStore(String baseUrl, MirrorStore mirrorStore) {
+        mBaseUrl = baseUrl;
         this.mirrorStore = mirrorStore;
-	}
+    }
 
     @Override
     public boolean canDownloadImage(IUserType user, File location) {
@@ -55,9 +55,11 @@ public class MinotarFaceImageStore implements IImageStore<IUserType> {
 
     @Override
     public String getJobKey(IUserType key) {
-        return "user-face-"+key.getDisplayName();
+        return "user-face-" + key.getDisplayName();
     }
 
     @Override
-    public boolean canRetry(IUserType key) { return false; }
+    public boolean canRetry(IUserType key) {
+        return false;
+    }
 }

@@ -28,25 +28,25 @@ import java.util.List;
 
 public interface PackInfo {
 
-	public String getName();
+    public String getName();
 
-	public String getDisplayName();
+    public String getDisplayName();
 
     public String getWebSite();
 
-	public Resource getIcon();
+    public Resource getIcon();
 
-	public Resource getBackground();
+    public Resource getBackground();
 
-	public Resource getLogo();
+    public Resource getLogo();
 
-	public String getRecommended();
+    public String getRecommended();
 
-	public String getLatest();
+    public String getLatest();
 
-	public List<String> getBuilds();
+    public List<String> getBuilds();
 
-	public boolean shouldForceDirectory();
+    public boolean shouldForceDirectory();
 
     public ArrayList<FeedItem> getFeed();
 
@@ -58,7 +58,7 @@ public interface PackInfo {
 
     public Integer getLikes();
 
-	public Modpack getModpack(String build) throws BuildInaccessibleException;
+    public Modpack getModpack(String build) throws BuildInaccessibleException;
 
     public boolean isComplete();
 }

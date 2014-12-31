@@ -43,7 +43,7 @@ public class ValidJsonFileVerifier implements IFileVerifier {
 
             return (obj != null);
         } catch (Exception ex) {
-            Utils.getLogger().log(Level.SEVERE, "An exception was raised while verifying "+file.getAbsolutePath()+"- this probably just means the file is invalid, in which case this is not an error:", ex);
+            Utils.getLogger().log(Level.SEVERE, "An exception was raised while verifying " + file.getAbsolutePath() + "- this probably just means the file is invalid, in which case this is not an error:", ex);
         }
 
         return false;

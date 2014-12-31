@@ -24,7 +24,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonSyntaxException;
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
 import net.technicpack.launchercore.install.LauncherDirectories;
-import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.solder.ISolderPackApi;
@@ -33,7 +32,6 @@ import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Seconds;
-import sun.misc.Launcher;
 
 import java.io.File;
 import java.io.IOException;
@@ -97,7 +95,7 @@ public class CachedSolderPackApi implements ISolderPackApi {
                 return rootInfoCache;
         }
 
-        if (Seconds.secondsBetween(DateTime.now(), lastInfoAccess).isGreaterThan(Seconds.seconds(cacheInSeconds/10)))
+        if (Seconds.secondsBetween(DateTime.now(), lastInfoAccess).isGreaterThan(Seconds.seconds(cacheInSeconds / 10)))
             return rootInfoCache;
 
         return pullAndCache();

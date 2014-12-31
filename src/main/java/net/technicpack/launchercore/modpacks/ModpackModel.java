@@ -65,11 +65,21 @@ public class ModpackModel {
         isPlatform = true;
     }
 
-    public boolean isOfficial() { return isOfficial; }
-    public void setOfficial() { isOfficial = true; }
+    public boolean isOfficial() {
+        return isOfficial;
+    }
 
-    public InstalledPack getInstalledPack() { return installedPack; }
-    public PackInfo getPackInfo() { return packInfo; }
+    public void setOfficial() {
+        isOfficial = true;
+    }
+
+    public InstalledPack getInstalledPack() {
+        return installedPack;
+    }
+
+    public PackInfo getPackInfo() {
+        return packInfo;
+    }
 
     public void setInstalledPack(InstalledPack pack, IInstalledPackRepository packRepo) {
         installedPack = pack;
@@ -206,7 +216,7 @@ public class ModpackModel {
         if (!allBuilds.contains(installedBuild))
             return true;
 
-        for(String build : allBuilds) {
+        for (String build : allBuilds) {
             if (build.equalsIgnoreCase(packInfo.getRecommended())) {
                 return false;
             } else if (build.equalsIgnoreCase(installedBuild)) {
@@ -395,7 +405,10 @@ public class ModpackModel {
         installedPackRepository.save();
     }
 
-    public Collection<String> getTags() { return tags; }
+    public Collection<String> getTags() {
+        return tags;
+    }
+
     public void updateTags(IModpackTagBuilder tagBuilder) {
         this.tags.clear();
 
@@ -406,7 +419,10 @@ public class ModpackModel {
         }
     }
 
-    public int getPriority() { return priority; }
+    public int getPriority() {
+        return priority;
+    }
+
     public void updatePriority(int priority) {
         if (this.priority < priority)
             this.priority = priority;

@@ -55,9 +55,11 @@ public class CrafatarFaceImageStore implements IImageStore<IUserType> {
 
     @Override
     public String getJobKey(IUserType key) {
-        return "user-face-"+key.getDisplayName();
+        return "user-face-" + key.getDisplayName();
     }
 
     @Override
-    public boolean canRetry(IUserType key) { return false; }
+    public boolean canRetry(IUserType key) {
+        return false;
+    }
 }

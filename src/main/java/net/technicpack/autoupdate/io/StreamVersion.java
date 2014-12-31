@@ -25,7 +25,15 @@ public class StreamVersion extends RestObject {
     private int build;
     private StreamUrls url;
 
-    public int getBuild() { return build; }
-    public String getExeUrl() { return url.getExeUrl(); }
-    public String getJarUrl() { return url.getJarUrl(); }
+    public int getBuild() {
+        return build;
+    }
+
+    public String getExeUrl() {
+        return url.getExeUrl();
+    }
+
+    public String getJarUrl() {
+        return url.getJarUrl();
+    }
 }

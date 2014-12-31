@@ -41,7 +41,7 @@ public class SinglePlatformSource extends PlatformPackInfoRepository implements 
 
     @Override
     public String getSourceName() {
-        return "Platform pack from '"+this.platformUrl+"'";
+        return "Platform pack from '" + this.platformUrl + "'";
     }
 
     @Override

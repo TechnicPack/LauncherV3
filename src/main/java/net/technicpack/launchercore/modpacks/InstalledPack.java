@@ -20,51 +20,56 @@
 package net.technicpack.launchercore.modpacks;
 
 public class InstalledPack {
-	public static final String RECOMMENDED = "recommended";
-	public static final String LATEST = "latest";
-	public static final String LAUNCHER_DIR = "launcher\\";
-	public static final String MODPACKS_DIR = "%MODPACKS%\\";
+    public static final String RECOMMENDED = "recommended";
+    public static final String LATEST = "latest";
+    public static final String LAUNCHER_DIR = "launcher\\";
+    public static final String MODPACKS_DIR = "%MODPACKS%\\";
 
-	private String name;
-	private String build;
-	private String directory;
+    private String name;
+    private String build;
+    private String directory;
 
-	public InstalledPack(String name, String build, String directory) {
-		this();
-		this.name = name;
-		this.build = build;
-		this.directory = directory;
-	}
+    public InstalledPack(String name, String build, String directory) {
+        this();
+        this.name = name;
+        this.build = build;
+        this.directory = directory;
+    }
 
-	public InstalledPack(String name, String build) {
-		this(name, build, MODPACKS_DIR + name);
-	}
+    public InstalledPack(String name, String build) {
+        this(name, build, MODPACKS_DIR + name);
+    }
 
-	public InstalledPack() {
-		build = RECOMMENDED;
-	}
+    public InstalledPack() {
+        build = RECOMMENDED;
+    }
 
-	public String getBuild() {
-		return build;
-	}
+    public String getBuild() {
+        return build;
+    }
 
-	public void setBuild(String build) {
-		this.build = build;
-	}
+    public void setBuild(String build) {
+        this.build = build;
+    }
 
-    public String getDirectory() { return directory; }
-    public void setDirectory(String directory) { this.directory = directory; }
+    public String getDirectory() {
+        return directory;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public void setDirectory(String directory) {
+        this.directory = directory;
+    }
 
-	@Override
-	public String toString() {
-		return "InstalledPack{" +
-				", name='" + name + '\'' +
-				", build='" + build + '\'' +
-				", directory='" + directory + '\'' +
-				'}';
-	}
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String toString() {
+        return "InstalledPack{" +
+                ", name='" + name + '\'' +
+                ", build='" + build + '\'' +
+                ", directory='" + directory + '\'' +
+                '}';
+    }
 }

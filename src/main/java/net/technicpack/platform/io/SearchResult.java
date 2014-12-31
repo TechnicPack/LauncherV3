@@ -25,8 +25,19 @@ public class SearchResult {
     private String slug;
     private String url;
 
-    public int getId() { return id; }
-    public String getDisplayName() { return name; }
-    public String getSlug() { return slug; }
-    public String getUrl() { return url; }
+    public int getId() {
+        return id;
+    }
+
+    public String getDisplayName() {
+        return name;
+    }
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public String getUrl() {
+        return url;
+    }
 }

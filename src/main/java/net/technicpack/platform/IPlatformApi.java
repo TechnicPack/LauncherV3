@@ -19,17 +19,23 @@
 
 package net.technicpack.platform;
 
-import net.technicpack.platform.io.*;
+import net.technicpack.platform.io.NewsData;
+import net.technicpack.platform.io.PlatformPackInfo;
+import net.technicpack.platform.io.SearchResultsData;
 import net.technicpack.rest.RestfulAPIException;
-
-import java.util.Collection;
 
 public interface IPlatformApi {
     PlatformPackInfo getPlatformPackInfoForBulk(String packSlug) throws RestfulAPIException;
+
     PlatformPackInfo getPlatformPackInfo(String packSlug) throws RestfulAPIException;
+
     void incrementPackRuns(String packSlug);
+
     void incrementPackInstalls(String packSlug);
+
     NewsData getNews() throws RestfulAPIException;
+
     SearchResultsData getSearchResults(String searchTerm) throws RestfulAPIException;
+
     String getPlatformUri(String slug);
 }

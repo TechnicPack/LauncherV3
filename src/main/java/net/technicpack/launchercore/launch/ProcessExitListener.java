@@ -21,5 +21,5 @@ package net.technicpack.launchercore.launch;
 
 public interface ProcessExitListener {
 
-	public void onProcessExit();
+    public void onProcessExit();
 }

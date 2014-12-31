@@ -23,5 +23,6 @@ import net.technicpack.launchercore.install.tasks.IInstallTask;
 
 public interface ITasksQueue {
     void addNextTask(IInstallTask task);
+
     void addTask(IInstallTask task);
 }

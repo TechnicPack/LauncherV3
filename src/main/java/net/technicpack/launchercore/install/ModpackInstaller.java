@@ -19,28 +19,22 @@
 
 package net.technicpack.launchercore.install;
 
-import net.technicpack.launchercore.exception.PackNotAvailableOfflineException;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.platform.IPlatformApi;
-
 import net.technicpack.utilslib.Utils;
-import net.technicpack.utilslib.ZipUtils;
-import org.apache.commons.io.FileUtils;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 public class ModpackInstaller<VersionData> {
     private final IPlatformApi platformApi;
     private final String clientId;
 
-	public ModpackInstaller(IPlatformApi platformApi, String clientId) {
-		this.clientId = clientId;
+    public ModpackInstaller(IPlatformApi platformApi, String clientId) {
+        this.clientId = clientId;
         this.platformApi = platformApi;
-	}
+    }
 
-	public VersionData installPack(InstallTasksQueue<VersionData> tasksQueue, ModpackModel modpack, String build) throws IOException, InterruptedException {
+    public VersionData installPack(InstallTasksQueue<VersionData> tasksQueue, ModpackModel modpack, String build) throws IOException, InterruptedException {
         modpack.save();
         modpack.initDirectories();
 

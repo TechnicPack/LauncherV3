@@ -24,5 +24,6 @@ import net.technicpack.rest.io.Resource;
 
 public interface IModpackResourceType {
     Resource getResource(ModpackModel modpack);
+
     String getImageName();
 }

@@ -53,9 +53,11 @@ public class WebAvatarImageStore implements IImageStore<AuthorshipInfo> {
 
     @Override
     public String getJobKey(AuthorshipInfo key) {
-        return "user-avatar-"+key.getUser();
+        return "user-avatar-" + key.getUser();
     }
 
     @Override
-    public boolean canRetry(AuthorshipInfo key) { return false; }
+    public boolean canRetry(AuthorshipInfo key) {
+        return false;
+    }
 }

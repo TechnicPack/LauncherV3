@@ -47,10 +47,10 @@ public class TaskGroup implements ITasksQueue, IInstallTask {
         if (taskList.size() == 0)
             return 0;
 
-        float baseProgress = (100.0f/taskList.size());
+        float baseProgress = (100.0f / taskList.size());
         float finishedTasksProgress = baseProgress * taskProgress;
         IInstallTask currentTask = taskList.get(taskProgress);
-        float currentTaskProgress = (currentTask.getTaskProgress()/100.0f)*baseProgress;
+        float currentTaskProgress = (currentTask.getTaskProgress() / 100.0f) * baseProgress;
         return finishedTasksProgress + currentTaskProgress;
     }
 

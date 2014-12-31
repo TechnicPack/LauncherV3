@@ -24,5 +24,6 @@ package net.technicpack.launchercore.auth;
  */
 public interface IAuthResponse {
     public String getError();
+
     public String getErrorMessage();
 }

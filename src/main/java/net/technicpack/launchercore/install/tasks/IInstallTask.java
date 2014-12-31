@@ -24,8 +24,9 @@ import net.technicpack.launchercore.install.InstallTasksQueue;
 import java.io.IOException;
 
 public interface IInstallTask {
-	String getTaskDescription();
-	float getTaskProgress();
+    String getTaskDescription();
 
-	void runTask(InstallTasksQueue queue) throws IOException, InterruptedException;
+    float getTaskProgress();
+
+    void runTask(InstallTasksQueue queue) throws IOException, InterruptedException;
 }

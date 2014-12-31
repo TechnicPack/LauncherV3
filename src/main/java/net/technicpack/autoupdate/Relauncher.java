@@ -25,7 +25,10 @@ import net.technicpack.launchercore.mirror.download.Download;
 import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.utilslib.OperatingSystem;
+import net.technicpack.utilslib.Utils;
+import org.apache.commons.io.IOUtils;
 
+import javax.swing.*;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -34,11 +37,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
-
-import net.technicpack.utilslib.Utils;
-import org.apache.commons.io.IOUtils;
-
-import javax.swing.*;
 
 public class Relauncher {
     private IUpdateStream updateStream;
@@ -97,11 +95,11 @@ public class Relauncher {
 
         String command = "";
 
-        for(String token : commands) {
+        for (String token : commands) {
             command += token + " ";
         }
 
-        Utils.getLogger().info("Launching command: '"+command+"'");
+        Utils.getLogger().info("Launching command: '" + command + "'");
 
         processBuilder.command(commands);
 
@@ -138,8 +136,8 @@ public class Relauncher {
 
     public void replacePackage(Class mainClass, String targetPath) throws UnsupportedEncodingException {
         String currentPath = getRunningPath(mainClass);
-        Utils.getLogger().log(Level.INFO, "Moving running package from "+currentPath+" to "+targetPath);
-        
+        Utils.getLogger().log(Level.INFO, "Moving running package from " + currentPath + " to " + targetPath);
+
         File source = new File(currentPath);
         File dest = new File(targetPath);
 
@@ -171,7 +169,7 @@ public class Relauncher {
             dest = new File(directories.getLauncherDirectory(), "temp.jar");
 
         try {
-            Utils.getLogger().info("Downloading update from "+url+" to "+dest.getAbsolutePath());
+            Utils.getLogger().info("Downloading update from " + url + " to " + dest.getAbsolutePath());
             Download download = new Download(new URL(url), progressText, dest.getPath());
             download.setListener(listener);
             download.run();
@@ -182,7 +180,7 @@ public class Relauncher {
                 return null;
             }
         } catch (MalformedURLException ex) {
-            Utils.getLogger().log(Level.SEVERE, "Received bad url from build stream: "+url, ex);
+            Utils.getLogger().log(Level.SEVERE, "Received bad url from build stream: " + url, ex);
         }
 
         return dest.getAbsolutePath();

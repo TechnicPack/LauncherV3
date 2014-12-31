@@ -25,7 +25,10 @@ import java.util.Collection;
 
 public interface IPackSource {
     String getSourceName();
+
     Collection<PackInfo> getPublicPacks();
+
     int getPriority(PackInfo packInfo);
+
     boolean isOfficialPack(String packSlug);
 }

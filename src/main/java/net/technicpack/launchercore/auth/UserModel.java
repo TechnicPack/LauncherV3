@@ -20,72 +20,68 @@
 package net.technicpack.launchercore.auth;
 
 import net.technicpack.launchercore.exception.AuthenticationNetworkFailureException;
-import net.technicpack.launchercore.exception.DownloadException;
-import net.technicpack.launchercore.mirror.secure.rest.ISecureMirror;
-import net.technicpack.launchercore.mirror.secure.rest.ValidateRequest;
-import net.technicpack.launchercore.mirror.secure.rest.ValidateResponse;
 
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
 public class UserModel<UserType extends IUserType> {
-	private UserType mCurrentUser = null;
-	private List<IAuthListener> mAuthListeners = new LinkedList<IAuthListener>();
-	private IUserStore<UserType> mUserStore;
+    private UserType mCurrentUser = null;
+    private List<IAuthListener> mAuthListeners = new LinkedList<IAuthListener>();
+    private IUserStore<UserType> mUserStore;
     private IGameAuthService<UserType> gameAuthService;
 
-	public UserModel(IUserStore userStore, IGameAuthService<UserType> gameAuthService) {
-		this.mCurrentUser = null;
-		this.mUserStore = userStore;
+    public UserModel(IUserStore userStore, IGameAuthService<UserType> gameAuthService) {
+        this.mCurrentUser = null;
+        this.mUserStore = userStore;
         this.gameAuthService = gameAuthService;
-	}
+    }
 
-	public UserType getCurrentUser() {
-		return this.mCurrentUser;
-	}
+    public UserType getCurrentUser() {
+        return this.mCurrentUser;
+    }
 
-	public void setCurrentUser(UserType user) {
-		this.mCurrentUser = user;
+    public void setCurrentUser(UserType user) {
+        this.mCurrentUser = user;
 
         if (user != null)
             setLastUser(user);
-		this.triggerAuthListeners();
-	}
+        this.triggerAuthListeners();
+    }
 
-	public void addAuthListener(IAuthListener<UserType> listener) {
-		this.mAuthListeners.add(listener);
-	}
+    public void addAuthListener(IAuthListener<UserType> listener) {
+        this.mAuthListeners.add(listener);
+    }
 
-	protected void triggerAuthListeners() {
-		for(IAuthListener<UserType> listener : mAuthListeners) {
-			listener.userChanged(this.mCurrentUser);
-		}
-	}
+    protected void triggerAuthListeners() {
+        for (IAuthListener<UserType> listener : mAuthListeners) {
+            listener.userChanged(this.mCurrentUser);
+        }
+    }
 
-	public AuthError attemptUserRefresh(UserType user) throws AuthenticationNetworkFailureException {
-		IAuthResponse response = gameAuthService.requestRefresh(user);
+    public AuthError attemptUserRefresh(UserType user) throws AuthenticationNetworkFailureException {
+        IAuthResponse response = gameAuthService.requestRefresh(user);
         if (response == null) {
             mUserStore.removeUser(user.getUsername());
             return new AuthError("Session Error", "Please log in again.");
         } else if (response.getError() != null) {
-			mUserStore.removeUser(user.getUsername());
-			return new AuthError(response.getError(), response.getErrorMessage());
-		} else {
-			//Refresh user from response
-			user = gameAuthService.createClearedUser(user.getUsername(), response);
-			mUserStore.addUser(user);
-			setCurrentUser(user);
-			return null;
-		}
-	}
+            mUserStore.removeUser(user.getUsername());
+            return new AuthError(response.getError(), response.getErrorMessage());
+        } else {
+            //Refresh user from response
+            user = gameAuthService.createClearedUser(user.getUsername(), response);
+            mUserStore.addUser(user);
+            setCurrentUser(user);
+            return null;
+        }
+    }
 
     public AuthError attemptInitialLogin(String username, String password) {
         try {
             IAuthResponse response = gameAuthService.requestLogin(username, password, getClientToken());
 
             if (response == null) {
-                return new AuthError("Auth Error","Invalid credentials. Invalid username or password.");
+                return new AuthError("Auth Error", "Invalid credentials. Invalid username or password.");
             } else if (response.getError() != null) {
                 return new AuthError(response.getError(), response.getErrorMessage());
             } else {
@@ -95,7 +91,7 @@ public class UserModel<UserType extends IUserType> {
                 return null;
             }
         } catch (AuthenticationNetworkFailureException ex) {
-            return new AuthError("Auth Servers Inaccessible", "An error occurred while attempting to reach "+ex.getTargetSite());
+            return new AuthError("Auth Servers Inaccessible", "An error occurred while attempting to reach " + ex.getTargetSite());
         }
     }
 
@@ -115,49 +111,49 @@ public class UserModel<UserType extends IUserType> {
             setCurrentUser(null);
     }
 
-	public Collection<UserType> getUsers() {
-		return mUserStore.getSavedUsers();
-	}
+    public Collection<UserType> getUsers() {
+        return mUserStore.getSavedUsers();
+    }
 
-	public UserType getLastUser() {
-		return mUserStore.getUser(mUserStore.getLastUser());
-	}
+    public UserType getLastUser() {
+        return mUserStore.getUser(mUserStore.getLastUser());
+    }
 
-	public UserType getUser(String username) {
-		return mUserStore.getUser(username);
-	}
+    public UserType getUser(String username) {
+        return mUserStore.getUser(username);
+    }
 
-	public void addUser(UserType user) {
-		mUserStore.addUser(user);
-	}
+    public void addUser(UserType user) {
+        mUserStore.addUser(user);
+    }
 
-	public void removeUser(UserType user) {
-		mUserStore.removeUser(user.getUsername());
-	}
+    public void removeUser(UserType user) {
+        mUserStore.removeUser(user.getUsername());
+    }
 
-	public void setLastUser(UserType user) {
-		mUserStore.setLastUser(user.getUsername());
-	}
+    public void setLastUser(UserType user) {
+        mUserStore.setLastUser(user.getUsername());
+    }
 
-	public String getClientToken() {
-		return mUserStore.getClientToken();
-	}
+    public String getClientToken() {
+        return mUserStore.getClientToken();
+    }
 
-	public class AuthError {
-		private String mError;
-		private String mErrorDescription;
+    public class AuthError {
+        private String mError;
+        private String mErrorDescription;
 
-		public AuthError(String error, String errorDescription) {
-			this.mError = error;
-			this.mErrorDescription = errorDescription;
-		}
+        public AuthError(String error, String errorDescription) {
+            this.mError = error;
+            this.mErrorDescription = errorDescription;
+        }
 
-		public String getError() {
-			return mError;
-		}
+        public String getError() {
+            return mError;
+        }
 
-		public String getErrorDescription() {
-			return mErrorDescription;
-		}
-	}
+        public String getErrorDescription() {
+            return mErrorDescription;
+        }
+    }
 }

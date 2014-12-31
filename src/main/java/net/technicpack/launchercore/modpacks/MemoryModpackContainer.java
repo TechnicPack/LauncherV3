@@ -9,7 +9,8 @@ public class MemoryModpackContainer implements IModpackContainer {
     private Map<String, ModpackModel> modpacks = new HashMap<String, ModpackModel>();
     private Map<IModpackContainer, IModpackContainer> passthroughContainers = new ConcurrentHashMap<IModpackContainer, IModpackContainer>();
 
-    public MemoryModpackContainer() {}
+    public MemoryModpackContainer() {
+    }
 
     @Override
     public void clear() {
@@ -38,7 +39,7 @@ public class MemoryModpackContainer implements IModpackContainer {
 
     @Override
     public void refreshComplete() {
-        for(IModpackContainer container : passthroughContainers.values())
+        for (IModpackContainer container : passthroughContainers.values())
             container.refreshComplete();
     }
 

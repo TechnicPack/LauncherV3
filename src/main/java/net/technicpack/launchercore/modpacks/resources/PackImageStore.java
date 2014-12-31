@@ -63,13 +63,13 @@ public class PackImageStore implements IImageStore<ModpackModel> {
             //user cancel
             return;
         } catch (IOException e) {
-            Utils.getLogger().log(Level.INFO, "Error downloading pack resource "+res.getUrl()+" for pack "+key.getName(), e);
+            Utils.getLogger().log(Level.INFO, "Error downloading pack resource " + res.getUrl() + " for pack " + key.getName(), e);
         }
     }
 
     @Override
     public String getJobKey(ModpackModel key) {
-        return "pack-resource-"+key.getName()+"-"+resourceType.getImageName();
+        return "pack-resource-" + key.getName() + "-" + resourceType.getImageName();
     }
 
     @Override

@@ -19,8 +19,8 @@
 
 package net.technicpack.launchercore.mirror.secure.rest;
 
-import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.rest.RestObject;
+import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.utilslib.Utils;
 
 import java.util.logging.Level;

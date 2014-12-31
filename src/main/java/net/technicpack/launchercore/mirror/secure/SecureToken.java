@@ -19,8 +19,8 @@
 
 package net.technicpack.launchercore.mirror.secure;
 
-import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.auth.UserModel;
+import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.mirror.secure.rest.ISecureMirror;
 
 import java.util.Date;

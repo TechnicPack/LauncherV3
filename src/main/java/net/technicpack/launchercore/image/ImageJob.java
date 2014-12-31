@@ -63,10 +63,17 @@ public class ImageJob<T> {
         }
     }
 
-    public boolean canRetry() { return canRetry; }
-    public void refreshRetry() { canRetry = true; }
+    public boolean canRetry() {
+        return canRetry;
+    }
 
-    public T getJobData() { return lastJobData; }
+    public void refreshRetry() {
+        canRetry = true;
+    }
+
+    public T getJobData() {
+        return lastJobData;
+    }
 
     protected void setImage(BufferedImage image) {
         canRetry = false;
@@ -95,7 +102,7 @@ public class ImageJob<T> {
     public void start(final T jobData) {
         lastJobData = jobData;
 
-        Thread imageThread = new Thread("Image Download: "+store.getJobKey(jobData)) {
+        Thread imageThread = new Thread("Image Download: " + store.getJobKey(jobData)) {
             @Override
             public void run() {
                 try {

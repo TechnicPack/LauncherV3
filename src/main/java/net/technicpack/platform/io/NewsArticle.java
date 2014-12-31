@@ -34,12 +34,35 @@ public class NewsArticle {
 
     }
 
-    public int getId() { return id; }
-    public String getUsername() { return username; }
-    public String getAvatar() { return avatar; }
-    public String getTitle() { return title; }
-    public String getContent() { return content; }
-    public Date getDate() { return new Date(date*1000); }
-    public AuthorshipInfo getAuthorshipInfo() { return new AuthorshipInfo(getUsername(), getAvatar(), getDate()); }
-    public String getUrl() { return url; }
+    public int getId() {
+        return id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public Date getDate() {
+        return new Date(date * 1000);
+    }
+
+    public AuthorshipInfo getAuthorshipInfo() {
+        return new AuthorshipInfo(getUsername(), getAvatar(), getDate());
+    }
+
+    public String getUrl() {
+        return url;
+    }
 }

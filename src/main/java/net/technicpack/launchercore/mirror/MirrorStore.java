@@ -19,13 +19,13 @@
 
 package net.technicpack.launchercore.mirror;
 
-import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.auth.UserModel;
+import net.technicpack.launchercore.exception.DownloadException;
+import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.mirror.download.Download;
 import net.technicpack.launchercore.mirror.secure.SecureToken;
 import net.technicpack.launchercore.mirror.secure.rest.ISecureMirror;
 import net.technicpack.launchercore.util.DownloadListener;
-import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 

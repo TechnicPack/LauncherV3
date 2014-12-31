@@ -20,105 +20,109 @@
 package net.technicpack.platform.io;
 
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
+import net.technicpack.rest.RestObject;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.rest.io.Resource;
-import net.technicpack.rest.RestObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class PlatformPackInfo extends RestObject implements PackInfo {
-	private String name;
-	private String displayName;
-	private String url;
+    private String name;
+    private String displayName;
+    private String url;
     private String platformUrl;
-	private Resource icon;
-	private Resource logo;
-	private Resource background;
-	private String minecraft;
-	private String forge;
-	private String version;
-	private String solder;
+    private Resource icon;
+    private Resource logo;
+    private Resource background;
+    private String minecraft;
+    private String forge;
+    private String version;
+    private String solder;
     private String description;
     private Integer ratings;
     private Integer runs;
     private Integer downloads;
-	private boolean forceDir;
+    private boolean forceDir;
     private ArrayList<FeedItem> feed = new ArrayList<FeedItem>();
 
-	public PlatformPackInfo() {
+    public PlatformPackInfo() {
 
-	}
-
-	@Override
-	public String getName() {
-		return name;
-	}
-
-	@Override
-	public String getDisplayName() {
-		return displayName;
-	}
+    }
 
     @Override
-    public String getWebSite() { return platformUrl; }
-
-	@Override
-	public Resource getIcon() {
-		return icon;
-	}
-
-	@Override
-	public Resource getBackground() {
-		return background;
-	}
-
-	@Override
-	public Resource getLogo() {
-		return logo;
-	}
-
-	@Override
-	public String getRecommended() {
-		return version;
-	}
-
-	@Override
-	public String getLatest() {
-		return version;
-	}
-
-	@Override
-	public boolean shouldForceDirectory() {
-		return forceDir;
-	}
+    public String getName() {
+        return name;
+    }
 
     @Override
-    public ArrayList<FeedItem> getFeed() { return feed; }
+    public String getDisplayName() {
+        return displayName;
+    }
 
-	@Override
-	public List<String> getBuilds() {
-		List<String> builds = new ArrayList<String>();
-		builds.add(version);
-		return builds;
-	}
+    @Override
+    public String getWebSite() {
+        return platformUrl;
+    }
 
-	public String getGameVersion() {
-		return minecraft;
-	}
+    @Override
+    public Resource getIcon() {
+        return icon;
+    }
 
-	public String getForge() {
-		return forge;
-	}
+    @Override
+    public Resource getBackground() {
+        return background;
+    }
 
-	public String getSolder() {
-		return solder;
-	}
+    @Override
+    public Resource getLogo() {
+        return logo;
+    }
 
-	public boolean hasSolder() {
-		return solder != null && !solder.equals("");
-	}
+    @Override
+    public String getRecommended() {
+        return version;
+    }
+
+    @Override
+    public String getLatest() {
+        return version;
+    }
+
+    @Override
+    public boolean shouldForceDirectory() {
+        return forceDir;
+    }
+
+    @Override
+    public ArrayList<FeedItem> getFeed() {
+        return feed;
+    }
+
+    @Override
+    public List<String> getBuilds() {
+        List<String> builds = new ArrayList<String>();
+        builds.add(version);
+        return builds;
+    }
+
+    public String getGameVersion() {
+        return minecraft;
+    }
+
+    public String getForge() {
+        return forge;
+    }
+
+    public String getSolder() {
+        return solder;
+    }
+
+    public boolean hasSolder() {
+        return solder != null && !solder.equals("");
+    }
 
     public String getDescription() {
         if (description == null)
@@ -139,30 +143,34 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
         return downloads;
     }
 
-	@Override
-	public Modpack getModpack(String build) throws BuildInaccessibleException {
-		return new Modpack(this);
-	}
+    @Override
+    public Modpack getModpack(String build) throws BuildInaccessibleException {
+        return new Modpack(this);
+    }
 
     @Override
-    public boolean isComplete() { return true; }
+    public boolean isComplete() {
+        return true;
+    }
 
-    public String getUrl() { return url; }
+    public String getUrl() {
+        return url;
+    }
 
-	@Override
-	public String toString() {
-		return "PlatformPackInfo{" +
-				"name='" + name + '\'' +
-				", displayName='" + displayName + '\'' +
-				", url='" + url + '\'' +
-				", icon=" + icon +
-				", logo=" + logo +
-				", background=" + background +
-				", gameVersion='" + minecraft + '\'' +
-				", forge='" + forge + '\'' +
-				", version='" + version + '\'' +
-				", solder='" + solder + '\'' +
-				", forceDir=" + forceDir +
-				'}';
-	}
+    @Override
+    public String toString() {
+        return "PlatformPackInfo{" +
+                "name='" + name + '\'' +
+                ", displayName='" + displayName + '\'' +
+                ", url='" + url + '\'' +
+                ", icon=" + icon +
+                ", logo=" + logo +
+                ", background=" + background +
+                ", gameVersion='" + minecraft + '\'' +
+                ", forge='" + forge + '\'' +
+                ", version='" + version + '\'' +
+                ", solder='" + solder + '\'' +
+                ", forceDir=" + forceDir +
+                '}';
+    }
 }

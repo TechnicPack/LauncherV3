@@ -20,13 +20,16 @@
 package net.technicpack.solder;
 
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
-import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.RestfulAPIException;
+import net.technicpack.rest.io.Modpack;
 import net.technicpack.solder.io.SolderPackInfo;
 
 public interface ISolderPackApi {
     String getMirrorUrl();
+
     SolderPackInfo getPackInfoForBulk() throws RestfulAPIException;
+
     SolderPackInfo getPackInfo() throws RestfulAPIException;
+
     Modpack getPackBuild(String build) throws BuildInaccessibleException;
 }

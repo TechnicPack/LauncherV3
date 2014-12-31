@@ -35,7 +35,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 
 public class ModpackCachePlatformApi implements IPlatformApi {
 
@@ -62,7 +61,7 @@ public class ModpackCachePlatformApi implements IPlatformApi {
         deadPacks = CacheBuilder.newBuilder()
                 .concurrencyLevel(4)
                 .maximumSize(300)
-                .expireAfterWrite(cacheInSeconds/10, TimeUnit.SECONDS)
+                .expireAfterWrite(cacheInSeconds / 10, TimeUnit.SECONDS)
                 .build();
     }
 

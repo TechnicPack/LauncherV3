@@ -42,7 +42,7 @@ public class SolderPackSource implements IPackSource {
 
     @Override
     public String getSourceName() {
-        return "Public packs for solder "+baseUrl;
+        return "Public packs for solder " + baseUrl;
     }
 
     @Override
@@ -52,7 +52,7 @@ public class SolderPackSource implements IPackSource {
         try {
             Collection<SolderPackInfo> packs = solder.getPublicSolderPacks(baseUrl);
 
-            for(SolderPackInfo info : packs) {
+            for (SolderPackInfo info : packs) {
                 returnValue.add(info);
             }
         } catch (RestfulAPIException ex) {
@@ -68,5 +68,7 @@ public class SolderPackSource implements IPackSource {
     }
 
     @Override
-    public boolean isOfficialPack(String slug) { return isOfficialSource; }
+    public boolean isOfficialPack(String slug) {
+        return isOfficialSource;
+    }
 }

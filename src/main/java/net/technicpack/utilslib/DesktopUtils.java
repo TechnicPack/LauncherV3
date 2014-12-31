@@ -45,11 +45,11 @@ public class DesktopUtils {
     }
 
     public static void open(final File file) {
-        new SwingWorker<Void,Void>() {
+        new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() throws Exception {
                 if (OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS) {
-                    Runtime.getRuntime().exec("explorer "+file.getAbsolutePath());
+                    Runtime.getRuntime().exec("explorer " + file.getAbsolutePath());
                 } else {
                     try {
                         Desktop.getDesktop().browse(file.toURI());

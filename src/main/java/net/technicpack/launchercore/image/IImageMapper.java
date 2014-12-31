@@ -21,11 +21,11 @@ package net.technicpack.launchercore.image;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 public interface IImageMapper<T> {
     boolean shouldDownloadImage(T imageKey);
+
     File getImageLocation(T imageKey);
+
     BufferedImage getDefaultImage();
 }

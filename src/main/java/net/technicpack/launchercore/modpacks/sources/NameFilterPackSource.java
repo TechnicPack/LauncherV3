@@ -18,7 +18,7 @@ public class NameFilterPackSource implements IPackSource {
 
     @Override
     public String getSourceName() {
-        return "Installed packs filtered by '"+filterTerms+"'";
+        return "Installed packs filtered by '" + filterTerms + "'";
     }
 
     @Override

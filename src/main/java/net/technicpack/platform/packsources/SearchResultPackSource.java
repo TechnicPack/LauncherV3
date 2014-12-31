@@ -40,7 +40,7 @@ public class SearchResultPackSource implements IPackSource {
 
     @Override
     public String getSourceName() {
-        return "Modpack search results for query '"+searchTerms+"'";
+        return "Modpack search results for query '" + searchTerms + "'";
     }
 
     @Override
@@ -58,7 +58,7 @@ public class SearchResultPackSource implements IPackSource {
         ArrayList<PackInfo> resultPacks = new ArrayList<PackInfo>(results.getResults().length);
 
         int priority = 10;
-        for(SearchResult result : results.getResults()) {
+        for (SearchResult result : results.getResults()) {
             resultPacks.add(new SearchResultPackInfo(result));
             resultPriorities.put(result.getSlug(), priority--);
         }
@@ -74,5 +74,7 @@ public class SearchResultPackSource implements IPackSource {
     }
 
     @Override
-    public boolean isOfficialPack(String slug) { return false; }
+    public boolean isOfficialPack(String slug) {
+        return false;
+    }
 }

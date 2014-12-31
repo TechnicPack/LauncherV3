@@ -116,5 +116,7 @@ public class Memory {
         return DEFAULT_MEM;
     }
 
-    public String toString() { return getDescription(); }
+    public String toString() {
+        return getDescription();
+    }
 }

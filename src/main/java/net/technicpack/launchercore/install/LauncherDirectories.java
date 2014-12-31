@@ -22,11 +22,11 @@ package net.technicpack.launchercore.install;
 import java.io.File;
 
 public abstract class LauncherDirectories {
-	public abstract File getLauncherDirectory();
+    public abstract File getLauncherDirectory();
 
-	public abstract File getCacheDirectory();
+    public abstract File getCacheDirectory();
 
-	public abstract File getAssetsDirectory();
+    public abstract File getAssetsDirectory();
 
-	public abstract File getModpacksDirectory();
+    public abstract File getModpacksDirectory();
 }

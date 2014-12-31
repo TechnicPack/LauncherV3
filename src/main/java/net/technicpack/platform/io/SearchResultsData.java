@@ -21,10 +21,10 @@ package net.technicpack.platform.io;
 
 import net.technicpack.rest.RestObject;
 
-import java.util.ArrayList;
-
 public class SearchResultsData extends RestObject {
     private SearchResult[] modpacks;
 
-    public SearchResult[] getResults() { return modpacks; }
+    public SearchResult[] getResults() {
+        return modpacks;
+    }
 }

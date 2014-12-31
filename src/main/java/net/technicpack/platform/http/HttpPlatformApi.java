@@ -21,17 +21,15 @@ package net.technicpack.platform.http;
 
 import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.platform.IPlatformApi;
-import net.technicpack.platform.io.*;
+import net.technicpack.platform.io.NewsData;
+import net.technicpack.platform.io.PlatformPackInfo;
+import net.technicpack.platform.io.SearchResultsData;
 import net.technicpack.rest.RestObject;
 import net.technicpack.rest.RestfulAPIException;
-import net.technicpack.rest.io.PackInfo;
 import net.technicpack.utilslib.Utils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 public class HttpPlatformApi implements IPlatformApi {
     private String rootUrl;
@@ -56,7 +54,7 @@ public class HttpPlatformApi implements IPlatformApi {
     @Override
     public PlatformPackInfo getPlatformPackInfo(String packSlug) throws RestfulAPIException {
         String url = getPlatformUri(packSlug);
-        return RestObject.getRestObject(PlatformPackInfo.class,  url);
+        return RestObject.getRestObject(PlatformPackInfo.class, url);
     }
 
     @Override

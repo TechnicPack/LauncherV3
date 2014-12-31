@@ -21,15 +21,11 @@ package net.technicpack.launchercore.modpacks.packinfo;
 
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
 import net.technicpack.platform.io.FeedItem;
-import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.rest.io.Resource;
-import net.technicpack.solder.io.SolderPackInfo;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
 public class CombinedPackInfo implements PackInfo {
