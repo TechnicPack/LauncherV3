@@ -27,6 +27,7 @@ import net.technicpack.utilslib.ImageUtils;
 import org.joda.time.*;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.Date;
 
 public class AuthorshipWidget extends JPanel implements IImageJobListener<AuthorshipInfo> {
@@ -58,7 +59,7 @@ public class AuthorshipWidget extends JPanel implements IImageJobListener<Author
         add(Box.createHorizontalStrut(6));
 
         authorName = new JLabel("");
-        authorName.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS_BOLD, 12));
+        authorName.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 12, Font.BOLD));
         authorName.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         add(authorName);
 

@@ -85,7 +85,7 @@ public class UserWidget extends JPanel implements IImageJobListener<MojangUser> 
         userName = new JLabel("");
         userName.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         userName.setBackground(Color.white);
-        userName.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15, Font.BOLD));
+        userName.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 17, Font.BOLD));
         this.add(userName);
 
         staticText = new JLabel(postText);

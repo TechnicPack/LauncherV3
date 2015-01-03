@@ -421,7 +421,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         CountCircle newsCircle = new CountCircle();
         newsCircle.setBackground(COLOR_RED);
         newsCircle.setForeground(COLOR_WHITE_TEXT);
-        newsCircle.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS_BOLD, 14));
+        newsCircle.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16, Font.BOLD));
         newsTab.add(newsCircle);
         newsCircle.setBounds(10,17,25,25);
 
