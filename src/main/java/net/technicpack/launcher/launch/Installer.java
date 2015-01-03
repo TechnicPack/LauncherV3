@@ -98,6 +98,8 @@ public class Installer {
         runningThread = new Thread(new Runnable() {
             @Override
             public void run() {
+                boolean everythingWorked = false;
+
                 try {
                     MojangVersion version = null;
 
@@ -128,6 +130,8 @@ public class Installer {
                             System.exit(0);
                         }
                     }
+
+                    everythingWorked = true;
                 } catch (InterruptedException e) {
                     //Canceled by user
                 } catch (PackNotAvailableOfflineException e) {
@@ -144,12 +148,14 @@ public class Installer {
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
-                    EventQueue.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            frame.launchCompleted();
-                        }
-                    });
+                    if (!everythingWorked) {
+                        EventQueue.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                frame.launchCompleted();
+                            }
+                        });
+                    }
                 }
             }
         });
@@ -158,8 +164,6 @@ public class Installer {
 
     public boolean isCurrentlyRunning() {
         if (runningThread != null && runningThread.isAlive())
-            return true;
-        if (launcherUnhider != null && !launcherUnhider.hasExited())
             return true;
         return false;
     }
