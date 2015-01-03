@@ -165,6 +165,8 @@ public class Installer {
     public boolean isCurrentlyRunning() {
         if (runningThread != null && runningThread.isAlive())
             return true;
+        if (launcherUnhider != null && !launcherUnhider.hasExited())
+            return true;
         return false;
     }
 
