@@ -74,7 +74,6 @@ public class SplashScreen extends JWindow {
         }
 
         // Finalize
-        setAlwaysOnTop(true);
         this.getRootPane().setOpaque(false);
         try {
             // Not always supported...
