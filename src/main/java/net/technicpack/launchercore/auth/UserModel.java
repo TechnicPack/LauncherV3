@@ -91,6 +91,7 @@ public class UserModel<UserType extends IUserType> {
                 return null;
             }
         } catch (AuthenticationNetworkFailureException ex) {
+            ex.printStackTrace();
             return new AuthError("Auth Servers Inaccessible", "An error occurred while attempting to reach " + ex.getTargetSite());
         }
     }
