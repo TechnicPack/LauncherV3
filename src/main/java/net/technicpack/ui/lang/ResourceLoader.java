@@ -46,7 +46,6 @@ public class ResourceLoader {
     public static final Locale[] SUPPORTED_LOCALES = { Locale.ENGLISH, new Locale("pt","BR"), new Locale("pt","PT"), Locale.GERMAN, Locale.FRENCH, Locale.ITALIAN, Locale.CHINA, Locale.TAIWAN };
     public static final String DEFAULT_LOCALE = "default";
 
-    public static final String FONT_OPENSANS_BOLD = "font.opensans.bold";
     public static final String FONT_OPENSANS = "font.opensans.regular";
     public static final String FONT_RALEWAY = "font.raleway.light";
 
