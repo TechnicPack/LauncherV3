@@ -47,6 +47,8 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
     private boolean forceDir;
     private ArrayList<FeedItem> feed = new ArrayList<FeedItem>();
 
+    private transient boolean isLocal = false;
+
     public PlatformPackInfo() {
 
     }
@@ -156,6 +158,10 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
     public String getUrl() {
         return url;
     }
+
+    public void setLocal() { isLocal = true; }
+    @Override
+    public boolean isLocal() { return isLocal; }
 
     @Override
     public String toString() {

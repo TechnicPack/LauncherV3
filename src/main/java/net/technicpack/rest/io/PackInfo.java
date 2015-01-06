@@ -61,4 +61,6 @@ public interface PackInfo {
     public Modpack getModpack(String build) throws BuildInaccessibleException;
 
     public boolean isComplete();
+
+    public boolean isLocal();
 }

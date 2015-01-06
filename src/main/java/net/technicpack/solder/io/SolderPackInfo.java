@@ -145,6 +145,11 @@ public class SolderPackInfo extends RestObject implements PackInfo {
     }
 
     @Override
+    public boolean isLocal() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         return "SolderPackInfo{" +
                 "name='" + name + '\'' +

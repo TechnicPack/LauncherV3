@@ -181,4 +181,11 @@ public class CombinedPackInfo implements PackInfo {
     public boolean isComplete() {
         return (platformPackInfo != null);
     }
+
+    @Override
+    public boolean isLocal() {
+        if (platformPackInfo != null && !platformPackInfo.isLocal())
+            return false;
+        return true;
+    }
 }

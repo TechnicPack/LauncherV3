@@ -121,4 +121,9 @@ public class SearchResultPackInfo implements PackInfo {
     public boolean isComplete() {
         return false;
     }
+
+    @Override
+    public boolean isLocal() {
+        return false;
+    }
 }

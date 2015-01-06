@@ -21,11 +21,14 @@ package net.technicpack.launchercore.modpacks;
 
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.Version;
+import net.technicpack.launchercore.modpacks.packinfo.CombinedPackInfo;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.launchercore.modpacks.sources.IModpackTagBuilder;
 import net.technicpack.platform.io.FeedItem;
+import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.rest.io.Resource;
+import net.technicpack.solder.io.SolderPackInfo;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 
@@ -187,7 +190,9 @@ public class ModpackModel {
     }
 
     public boolean isLocalOnly() {
-        return (packInfo == null);
+        if (packInfo == null)
+            return true;
+        return packInfo.isLocal();
     }
 
     public Version getInstalledVersion() {

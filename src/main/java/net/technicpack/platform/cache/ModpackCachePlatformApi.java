@@ -89,7 +89,7 @@ public class ModpackCachePlatformApi implements IPlatformApi {
         PlatformPackInfo info = cache.getIfPresent(packSlug);
 
         if (info == null && isDead(packSlug))
-            return getPlatformPackInfoForBulk(packSlug);
+            return getDeadPackInfo(packSlug);
 
         try {
             if (info == null) {
@@ -99,10 +99,22 @@ public class ModpackCachePlatformApi implements IPlatformApi {
             ex.printStackTrace();
 
             deadPacks.put(packSlug, true);
-            return getPlatformPackInfoForBulk(packSlug);
+            return getDeadPackInfo(packSlug);
         }
 
         return info;
+    }
+
+    protected PlatformPackInfo getDeadPackInfo(String packSlug) {
+        try {
+            PlatformPackInfo deadInfo = getPlatformPackInfoForBulk(packSlug);
+
+            if (deadInfo != null)
+                deadInfo.setLocal();
+            return deadInfo;
+        } catch (RestfulAPIException ex) {
+            return null;
+        }
     }
 
     private boolean isDead(String packSlug) {
