@@ -206,6 +206,8 @@ public class LauncherMain {
         System.setProperty("xr.load.xml-reader",  "org.ccil.cowan.tagsoup.Parser");
 
         final SplashScreen splash = new SplashScreen(resources.getImage("launch_splash.png"), 0);
+        Color bg = LauncherFrame.COLOR_FORMELEMENT_INTERNAL;
+        splash.getContentPane().setBackground(new Color (bg.getRed(),bg.getGreen(),bg.getBlue(),255));
         splash.pack();
         splash.setLocationRelativeTo(null);
         splash.setVisible(true);
@@ -311,6 +313,8 @@ public class LauncherMain {
         }
 
         SplashScreen screen = new SplashScreen(resources.getImage("launch_splash.png"), 30);
+        Color bg = LauncherFrame.COLOR_FORMELEMENT_INTERNAL;
+        screen.getContentPane().setBackground(new Color (bg.getRed(),bg.getGreen(),bg.getBlue(),255));
         screen.getProgressBar().setForeground(Color.white);
         screen.getProgressBar().setBackground(LauncherFrame.COLOR_GREEN);
         screen.getProgressBar().setBackFill(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
