@@ -78,9 +78,7 @@ public class SplashScreen extends JWindow {
         this.getRootPane().setOpaque(false);
         try {
             // Not always supported...
-            this.setBackground(new Color(0, 0, 0, 0));
             AWTUtilities.setWindowOpaque(this, false);
-
         } catch (UnsupportedOperationException e) {
             this.setBackground(new Color(0, 0, 0));
         } catch (IllegalArgumentException ex) {
