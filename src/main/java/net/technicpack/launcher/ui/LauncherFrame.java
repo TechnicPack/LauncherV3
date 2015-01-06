@@ -259,9 +259,10 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         Version installedVersion = pack.getInstalledVersion();
 
         //Force a full install (check cache, redownload, unzip files) if we have no current installation of this modpack
-        if (installedVersion == null)
+        if (installedVersion == null) {
             forceInstall = true;
-        else if (pack.getBuild() != null && !pack.isLocalOnly()) {
+            requiresInstall = true;
+        } else if (pack.getBuild() != null && !pack.isLocalOnly()) {
 
             //Ask the user if they want to update to the newer version if:
             //1- the pack build is RECOMMENDED & the recommended version is diff from the installed version
@@ -295,10 +296,10 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
                 installBuild = pack.getPackInfo().getRecommended();
             else if (installBuild.equalsIgnoreCase(InstalledPack.LATEST))
                 installBuild = pack.getPackInfo().getLatest();
-        } else
+        } else if (installedVersion != null)
             installBuild = installedVersion.getVersion();
 
-        if (requiresInstall) {
+        if (requiresInstall && installBuild != null && !installBuild.isEmpty()) {
             installer.justInstall(resources, pack, installBuild, forceInstall, this, installProgress);
         } else {
             installer.installAndRun(resources, pack, installBuild, forceInstall, this, installProgress);

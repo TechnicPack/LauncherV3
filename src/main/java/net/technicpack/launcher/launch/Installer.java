@@ -106,16 +106,22 @@ public class Installer {
                     InstallTasksQueue<MojangVersion> tasksQueue = new InstallTasksQueue<MojangVersion>(listener, mirrorStore);
                     MojangVersionBuilder versionBuilder = createVersionBuilder(pack, tasksQueue);
 
-                    if (!pack.isLocalOnly()) {
+                    if (!pack.isLocalOnly() && build != null && !build.isEmpty()) {
                         buildTasksQueue(tasksQueue, resources, pack, build, doFullInstall, versionBuilder);
 
                         version = installer.installPack(tasksQueue, pack, build);
                     } else {
-                        pack.initDirectories();
                         version = versionBuilder.buildVersionFromKey(null);
+
+                        if (version != null)
+                            pack.initDirectories();
                     }
 
                     if (doLaunch) {
+                        if (version == null) {
+                            throw new PackNotAvailableOfflineException(pack.getDisplayName());
+                        }
+
                         long memory = Memory.getClosesAvailableMemory(Memory.getMemoryFromId(settings.getMemory())).getMemoryMB();
 
                         LaunchOptions options = new LaunchOptions(pack.getDisplayName(), packIconMapper.getImageLocation(pack).getAbsolutePath(), startupParameters.getWidth(), startupParameters.getHeight(), startupParameters.getFullscreen());
@@ -173,6 +179,10 @@ public class Installer {
     public void buildTasksQueue(InstallTasksQueue queue, ResourceLoader resources, ModpackModel modpack, String build, boolean doFullInstall, MojangVersionBuilder versionBuilder) throws CacheDeleteException, BuildInaccessibleException {
         PackInfo packInfo = modpack.getPackInfo();
         Modpack modpackData = packInfo.getModpack(build);
+
+        if (modpackData.getGameVersion() == null)
+            return;
+
         String minecraft = modpackData.getGameVersion();
         Version installedVersion = modpack.getInstalledVersion();
 
