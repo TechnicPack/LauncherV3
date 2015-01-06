@@ -20,6 +20,7 @@
 package net.technicpack.ui.controls.installation;
 
 import com.sun.awt.AWTUtilities;
+import net.technicpack.utilslib.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -82,6 +83,8 @@ public class SplashScreen extends JWindow {
 
         } catch (UnsupportedOperationException e) {
             this.setBackground(new Color(0, 0, 0));
+        } catch (IllegalArgumentException ex) {
+            Utils.getLogger().warning("Your desktop environment does not support translucent windows.  Technic launcher will not look as rad for you.");
         }
     }
 

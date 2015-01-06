@@ -33,8 +33,15 @@ public class LauncherDialog extends JDialog {
         super(owner, null, true);
 
         setUndecorated(true);
-        getRootPane().setBorder(new DropShadowBorder(Color.black, 4));
-        AWTUtilities.setWindowOpaque(this, false);
+
+        try {
+            AWTUtilities.setWindowOpaque(this, false);
+            getRootPane().setBorder(new DropShadowBorder(Color.black, 4));
+        } catch (IllegalArgumentException ex) {
+            //OS doesn't support translucent windows- dumb dumb dumb
+            //Eat it and just don't do the drop shadow
+        }
+
         ((JPanel)getContentPane()).setOpaque(true);
     }
 
