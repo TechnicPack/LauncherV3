@@ -184,8 +184,10 @@ public class CombinedPackInfo implements PackInfo {
 
     @Override
     public boolean isLocal() {
-        if (platformPackInfo != null && !platformPackInfo.isLocal())
-            return false;
-        return true;
+        if (platformPackInfo == null || platformPackInfo.isLocal())
+            return true;
+        if (solderPackInfo == null || solderPackInfo.isLocal())
+            return true;
+        return false;
     }
 }

@@ -45,6 +45,7 @@ public class SolderPackInfo extends RestObject implements PackInfo {
     private String latest;
     private List<String> builds;
     private transient ISolderPackApi solder;
+    private transient boolean isLocal = false;
 
     public SolderPackInfo() {
 
@@ -146,8 +147,10 @@ public class SolderPackInfo extends RestObject implements PackInfo {
 
     @Override
     public boolean isLocal() {
-        return true;
+        return isLocal;
     }
+
+    public void setLocal() { isLocal = true; }
 
     @Override
     public String toString() {
