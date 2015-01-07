@@ -98,7 +98,13 @@ public class CachedSolderPackApi implements ISolderPackApi {
         if (Seconds.secondsBetween(DateTime.now(), lastInfoAccess).isGreaterThan(Seconds.seconds(cacheInSeconds / 10)))
             return rootInfoCache;
 
-        return pullAndCache();
+        try {
+            return pullAndCache();
+        } catch (RestfulAPIException ex) {
+            ex.printStackTrace();
+
+            return getPackInfoForBulk();
+        }
     }
 
     private SolderPackInfo pullAndCache() throws RestfulAPIException {
@@ -119,6 +125,9 @@ public class CachedSolderPackApi implements ISolderPackApi {
         try {
             String packCache = FileUtils.readFileToString(cacheFile, Charset.forName("UTF-8"));
             rootInfoCache = Utils.getGson().fromJson(packCache, SolderPackInfo.class);
+
+            if (rootInfoCache != null)
+                rootInfoCache.setLocal();
         } catch (IOException ex) {
         } catch (JsonSyntaxException ex) {
         }

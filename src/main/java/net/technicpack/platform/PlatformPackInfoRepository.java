@@ -27,6 +27,7 @@ import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.solder.ISolderApi;
 import net.technicpack.solder.ISolderPackApi;
+import net.technicpack.solder.io.SolderPackInfo;
 import net.technicpack.utilslib.Utils;
 
 import java.util.logging.Level;
@@ -69,7 +70,12 @@ public class PlatformPackInfoRepository implements IAuthoritativePackSource {
         if (platformInfo != null && platformInfo.hasSolder()) {
             try {
                 ISolderPackApi solderPack = solder.getSolderPack(platformInfo.getSolder(), platformInfo.getName(), solder.getMirrorUrl(platformInfo.getSolder()));
-                return new CombinedPackInfo(solderPack.getPackInfoForBulk(), platformInfo);
+                SolderPackInfo solderInfo = solderPack.getPackInfoForBulk();
+
+                if (solderInfo == null)
+                    return platformInfo;
+                else
+                    return new CombinedPackInfo(solderInfo, platformInfo);
             } catch (RestfulAPIException ex) {
                 return platformInfo;
             }
