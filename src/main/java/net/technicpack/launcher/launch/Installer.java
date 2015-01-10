@@ -154,7 +154,7 @@ public class Installer {
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
-                    if (!everythingWorked) {
+                    if (!everythingWorked || !doLaunch) {
                         EventQueue.invokeLater(new Runnable() {
                             @Override
                             public void run() {
