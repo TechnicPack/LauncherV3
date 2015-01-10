@@ -47,6 +47,21 @@ public enum OperatingSystem {
         return path + "java";
     }
 
+    public static String getJavaDir( String javaHome ) {
+        String separator = System.getProperty("file.separator");
+        String path = javaHome;
+    	if ( path == null || "".equals(path.trim()) ) { 
+            path = System.getProperty("java.home");
+    	}
+    	path = path + separator + "bin" + separator;
+
+        if (getOperatingSystem() == WINDOWS) {
+            return path + "javaw.exe";
+        }
+
+        return path + "java";
+    }
+
     public static OperatingSystem getOperatingSystem() {
         if (OperatingSystem.operatingSystem != null) {
             return OperatingSystem.operatingSystem;
