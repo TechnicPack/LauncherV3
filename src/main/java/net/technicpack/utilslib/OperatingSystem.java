@@ -41,10 +41,10 @@ public enum OperatingSystem {
         String path = System.getProperty("java.home") + separator + "bin" + separator;
 
         if (getOperatingSystem() == WINDOWS) {
-            return "javaw.exe";
+            return path + "javaw.exe";
         }
 
-        return "java";
+        return path + "java";
     }
 
     public static OperatingSystem getOperatingSystem() {
