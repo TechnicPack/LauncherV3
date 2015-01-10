@@ -42,6 +42,7 @@ public class TechnicSettings {
     private String languageCode = "default";
     private String clientId = UUID.randomUUID().toString();
     private String directory;
+    private String javaHome;
     private String javaArgs;
     private int latestNewsArticle;
 
@@ -113,6 +114,8 @@ public class TechnicSettings {
 
     public String getClientId() { return clientId; }
 
+    public String getJavaHome() { return javaHome; }
+    public void setJavaHome(String javahome) { javaHome = javahome; }
     public String getJavaArgs() { return javaArgs; }
     public void setJavaArgs(String args) { javaArgs = args; }
 

@@ -69,7 +69,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     private boolean hasShownStreamInfo = false;
     private ResourceLoader resources;
 
-    private DocumentListener listener = new DocumentListener() {
+    private DocumentListener javaArgslistener = new DocumentListener() {
         @Override
         public void insertUpdate(DocumentEvent e) {
             changeJavaArgs();
@@ -85,7 +85,24 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             changeJavaArgs();
         }
     };
+    private DocumentListener javaHomelistener = new DocumentListener() {
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            changeJavaHome();
+        }
 
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            changeJavaHome();
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            changeJavaHome();
+        }
+    };
+
+    JTextField javaHomeField;
     JComboBox memSelect;
     JTextArea javaArgs;
     JComboBox streamSelect;
@@ -108,6 +125,11 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     protected void closeDialog() {
         resources.unregisterResource(this);
         dispose();
+    }
+
+    protected void changeJavaHome() {
+        settings.setJavaHome(javaHomeField.getText());
+        settings.save();
     }
 
     protected void changeJavaArgs() {
@@ -174,9 +196,13 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
     private void initControlValues() {
 
-        javaArgs.getDocument().removeDocumentListener(listener);
+    	javaHomeField.getDocument().removeDocumentListener(javaHomelistener);
+        javaHomeField.setText(settings.getJavaHome());
+        javaHomeField.getDocument().addDocumentListener(javaHomelistener);
+    	
+        javaArgs.getDocument().removeDocumentListener(javaArgslistener);
         javaArgs.setText(settings.getJavaArgs());
-        javaArgs.getDocument().addDocumentListener(listener);
+        javaArgs.getDocument().addDocumentListener(javaArgslistener);
 
         installField.setText(settings.getTechnicRoot().getAbsolutePath());
         clientId.setText(settings.getClientId());
@@ -569,10 +595,25 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     private void setupJavaOptionsPanel(JPanel panel) {
         panel.setLayout(new GridBagLayout());
 
+        JLabel javaHomeLabel = new JLabel(resources.getString("launcheroptions.java.home"));
+        javaHomeLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+        javaHomeLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        panel.add(javaHomeLabel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 60, 0, 0), 0, 0));
+        
+        javaHomeField = new JTextField("");
+        javaHomeField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+        javaHomeField.setForeground(LauncherFrame.COLOR_BLUE);
+        javaHomeField.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        javaHomeField.setHighlighter(null);
+        javaHomeField.setEditable(true);
+        javaHomeField.setCursor(null);
+        javaHomeField.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
+        panel.add(javaHomeField, new GridBagConstraints(1, 0, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 80), 0, 16));
+
         JLabel memLabel = new JLabel(resources.getString("launcheroptions.java.memory"));
         memLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         memLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        panel.add(memLabel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 60, 0, 0), 0, 0));
+        panel.add(memLabel, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 60, 0, 0), 0, 0));
 
         memSelect = new JComboBox();
 
@@ -596,12 +637,12 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         list.setSelectionBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
         list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
 
-        panel.add(memSelect, new GridBagConstraints(1, 0, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 80), 0, 16));
+        panel.add(memSelect, new GridBagConstraints(1, 1, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 80), 0, 16));
 
         JLabel argsLabel = new JLabel(resources.getString("launcheroptions.java.arguments"));
         argsLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         argsLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        panel.add(argsLabel, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 60, 0, 0), 0, 0));
+        panel.add(argsLabel, new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.NORTHEAST, GridBagConstraints.NONE, new Insets(0, 60, 0, 0), 0, 0));
 
         javaArgs = new JTextArea(32, 4);
         javaArgs.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
@@ -615,7 +656,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         javaArgs.setSelectionColor(LauncherFrame.COLOR_BUTTON_BLUE);
         javaArgs.setSelectedTextColor(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
 
-        panel.add(javaArgs, new GridBagConstraints(1, 1, 1, 2, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 64, 80), 0, 0));
+        panel.add(javaArgs, new GridBagConstraints(1, 2, 1, 2, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 64, 80), 0, 0));
 
         panel.add(Box.createGlue(), new GridBagConstraints(0, 2, 2, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
     }
