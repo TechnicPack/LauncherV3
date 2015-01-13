@@ -144,7 +144,7 @@ public abstract class Relauncher {
             commands.add("-Dswing.aatext=true");
             commands.add("-cp");
             commands.add(launchPath);
-            commands.add(getClass().getName());
+            commands.add(getMainClass().getName());
         } else
             commands.add(launchPath);
         commands.addAll(Arrays.asList(args));
