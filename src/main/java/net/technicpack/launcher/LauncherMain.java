@@ -116,7 +116,7 @@ public class LauncherMain {
         }
 
         if (settings == null) {
-            ResourceLoader installerResources = new ResourceLoader("net","technicpack","launcher","resources");
+            ResourceLoader installerResources = new ResourceLoader(null, "net","technicpack","launcher","resources");
             installerResources.setLocale(ResourceLoader.DEFAULT_LOCALE);
             InstallerFrame dialog = new InstallerFrame(installerResources, params);
             dialog.setVisible(true);
@@ -124,7 +124,7 @@ public class LauncherMain {
         }
 
         LauncherDirectories directories = new TechnicLauncherDirectories(settings.getTechnicRoot());
-        ResourceLoader resources = new ResourceLoader("net","technicpack","launcher","resources");
+        ResourceLoader resources = new ResourceLoader(directories, "net","technicpack","launcher","resources");
         resources.setLocale(settings.getLanguageCode());
 
         setupLogging(directories, resources);
