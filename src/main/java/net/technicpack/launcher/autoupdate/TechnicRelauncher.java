@@ -112,7 +112,7 @@ public class TechnicRelauncher extends Relauncher {
         screen.setLocationRelativeTo(null);
         screen.setVisible(true);
 
-        InstallTasksQueue<Object> queue = new InstallTasksQueue<Object>(null, createMirrorStore());
+        InstallTasksQueue<Object> queue = new InstallTasksQueue<Object>(screen.getProgressBar(), createMirrorStore());
 
         ArrayList<IInstallTask> postDownloadTasks = new ArrayList<IInstallTask>();
         postDownloadTasks.add(new LaunchMoverMode(resources.getString("updater.launchmover"), getTempLauncher(), this));
