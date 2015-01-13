@@ -19,6 +19,7 @@
 package net.technicpack.launcher.ui;
 
 import net.technicpack.autoupdate.Relauncher;
+import net.technicpack.autoupdate.tasks.MoveLauncherPackage;
 import net.technicpack.launcher.autoupdate.TechnicRelauncher;
 import net.technicpack.launcher.io.TechnicLauncherDirectories;
 import net.technicpack.launcher.settings.SettingsFactory;
@@ -215,13 +216,23 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
             File targetExe = new File(portableInstallDir.getText(), launcher);
 
-            if (targetExe.exists() && !targetExe.delete()) {
-                JOptionPane.showMessageDialog(this, resources.getString("installer.portable.replacefailed"), resources.getString("installer.portable.replacefailtitle"), JOptionPane.ERROR_MESSAGE);
-                return;
+            if (!currentPath.equals(targetExe.getAbsolutePath())) {
+                if (targetExe.exists() && !targetExe.delete()) {
+                    JOptionPane.showMessageDialog(this, resources.getString("installer.portable.replacefailed"), resources.getString("installer.portable.replacefailtitle"), JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                MoveLauncherPackage moveTask = new MoveLauncherPackage("", targetExe, relauncher);
+                moveTask.runTask(null);
             }
 
 
         } catch (UnsupportedEncodingException ex) {
+            ex.printStackTrace();
+            return;
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return;
+        } catch (InterruptedException ex) {
             ex.printStackTrace();
             return;
         }
