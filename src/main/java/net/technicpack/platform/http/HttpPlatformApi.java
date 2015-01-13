@@ -38,7 +38,7 @@ public class HttpPlatformApi implements IPlatformApi {
 
     public HttpPlatformApi(String rootUrl, MirrorStore mirrorStore) {
         this.rootUrl = rootUrl;
-        this.platformUrl = rootUrl + "api/";
+        this.platformUrl = rootUrl;
         this.mirrorStore = mirrorStore;
     }
 
