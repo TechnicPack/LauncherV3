@@ -465,12 +465,26 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
     }
 
     protected String getApiLinkSlug(String searchText) {
-        String slug = getApiLinkSlugWithUrl(searchText, "http://www.technicpack.net/api/modpack/");
+        String slug = getApiLinkSlugWithUrl(searchText, "http://api.technicpack.net/modpack/");
         if (slug != null)
             return slug;
+
+        slug = getApiLinkSlugWithUrl(searchText, "http://www.technicpack.net/api/modpack/");
+        if (slug != null)
+            return slug;
+
+        slug = getApiLinkSlugWithUrl(searchText, "api.technicpack.net/modpack/");
+        if (slug != null)
+            return slug;
+
         slug = getApiLinkSlugWithUrl(searchText, "www.technicpack.net/api/modpack/");
         if (slug != null)
             return slug;
+
+        slug = getApiLinkSlugWithUrl(searchText, "https://api.technicpack.net/modpack/");
+        if (slug != null)
+            return slug;
+
         return getApiLinkSlugWithUrl(searchText, "https://www.technicpack.net/api/modpack/");
     }
 

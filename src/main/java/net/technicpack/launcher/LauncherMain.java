@@ -138,7 +138,7 @@ public class LauncherMain {
             //This is probably a debug build or something, build number is invalid
         }
 
-        Relauncher launcher = new TechnicRelauncher(new HttpUpdateStream("http://www.technicpack.net/api/launcher/"), settings.getBuildStream()+"4", build, directories, resources, params);
+        Relauncher launcher = new TechnicRelauncher(new HttpUpdateStream("http://api.technicpack.net/launcher/"), settings.getBuildStream()+"4", build, directories, resources, params);
 
         try {
             if (launcher.runAutoUpdater())
@@ -233,7 +233,7 @@ public class LauncherMain {
 
         HttpSolderApi httpSolder = new HttpSolderApi(settings.getClientId(), userModel);
         ISolderApi solder = new CachedSolderApi(directories, httpSolder, 60 * 60);
-        HttpPlatformApi httpPlatform = new HttpPlatformApi("http://www.technicpack.net/", mirrorStore);
+        HttpPlatformApi httpPlatform = new HttpPlatformApi("http://api.technicpack.net/", mirrorStore);
 
         IPlatformApi platform = new ModpackCachePlatformApi(httpPlatform, 60 * 60, directories);
 
