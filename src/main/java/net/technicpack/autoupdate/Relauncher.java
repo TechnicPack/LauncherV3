@@ -66,6 +66,7 @@ public abstract class Relauncher {
     public abstract InstallTasksQueue buildMoverTasks();
     public abstract InstallTasksQueue buildUpdaterTasks();
     public abstract String[] getLaunchArgs();
+    public abstract void updateComplete();
 
     public boolean runAutoUpdater() throws IOException, InterruptedException {
         if (isLauncherOnly())
@@ -94,6 +95,7 @@ public abstract class Relauncher {
             return true;
 
         updateTasksQueue.runAllTasks();
+        updateComplete();
 
         return !didUpdate;
     }
