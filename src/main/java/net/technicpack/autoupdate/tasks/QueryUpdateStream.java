@@ -70,7 +70,7 @@ public class QueryUpdateStream implements IInstallTask {
         try {
             StreamVersion version = updateStream.getStreamVersion(relauncher.getStreamName());
 
-            if (version == null)
+            if (version == null || version.getBuild() == 0)
                 return;
 
             for(LauncherResource resource : version.getResources()) {

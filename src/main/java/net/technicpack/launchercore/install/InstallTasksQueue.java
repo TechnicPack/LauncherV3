@@ -41,7 +41,8 @@ public class InstallTasksQueue<Metadata> implements ITasksQueue {
     }
 
     public void refreshProgress() {
-        listener.stateChanged(currentTask.getTaskDescription(), currentTask.getTaskProgress());
+        if (listener != null)
+            listener.stateChanged(currentTask.getTaskDescription(), currentTask.getTaskProgress());
     }
 
     public void runAllTasks() throws IOException, InterruptedException {
