@@ -35,6 +35,8 @@ public final class StartupParameters {
     private boolean launcher = false;
     @Parameter(names = {"-mover"}, description = "Starts in mover mode (copies recently-downloaded update to originally-run package)")
     private boolean mover = false;
+    @Parameter(names = {"-update"}, description = "Starts in update mode (closes after downloading updated resources)")
+    private boolean update = false;
     @Parameter(names = {"-movetarget"}, description = "The path of the originally-run package to copy to")
     private String moveTarget = null;
     @Parameter(names = {"-width"}, description = "Sets the width of the minecraft window to be fixed to this.")
@@ -88,6 +90,8 @@ public final class StartupParameters {
     public boolean isLauncher() { return launcher; }
 
     public boolean isMover() { return mover; }
+
+    public boolean isUpdate() { return update; }
 
     public String getMoveTarget() { return moveTarget; }
 

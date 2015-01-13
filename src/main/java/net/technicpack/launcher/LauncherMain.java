@@ -21,6 +21,7 @@ package net.technicpack.launcher;
 import com.beust.jcommander.JCommander;
 import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.autoupdate.http.HttpUpdateStream;
+import net.technicpack.launcher.autoupdate.TechnicRelauncher;
 import net.technicpack.launcher.io.*;
 import net.technicpack.launcher.settings.migration.IMigrator;
 import net.technicpack.launcher.settings.migration.InitialV3Migrator;
@@ -29,6 +30,7 @@ import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserStore;
+import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.image.face.CrafatarFaceImageStore;
 import net.technicpack.launchercore.logging.BuildLogFormatter;
 import net.technicpack.launchercore.logging.RotatingFileHandler;
@@ -53,7 +55,6 @@ import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.minecraftcore.mojang.auth.AuthenticationService;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.image.ImageRepository;
-import net.technicpack.launchercore.image.face.MinotarFaceImageStore;
 import net.technicpack.launchercore.image.face.WebAvatarImageStore;
 import net.technicpack.launchercore.install.ModpackInstaller;
 import net.technicpack.minecraftcore.launch.MinecraftLauncher;
@@ -65,7 +66,6 @@ import net.technicpack.launchercore.modpacks.resources.resourcetype.IModpackReso
 import net.technicpack.launchercore.modpacks.resources.resourcetype.IconResourceType;
 import net.technicpack.launchercore.modpacks.resources.resourcetype.LogoResourceType;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
-import net.technicpack.launchercore.modpacks.sources.IPackSource;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.launchercore.mirror.secure.rest.JsonWebSecureMirror;
@@ -77,14 +77,13 @@ import net.technicpack.solder.ISolderApi;
 import net.technicpack.solder.SolderPackSource;
 import net.technicpack.solder.http.HttpSolderApi;
 import net.technicpack.utilslib.Utils;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -108,11 +107,10 @@ public class LauncherMain {
             ex.printStackTrace();
         }
 
-        Relauncher launcher = new Relauncher(new HttpUpdateStream("http://www.technicpack.net/api/launcher/version/"));
         TechnicSettings settings = null;
 
         try {
-            settings = SettingsFactory.buildSettingsObject(launcher.getRunningPath(LauncherMain.class), params.isMover());
+            settings = SettingsFactory.buildSettingsObject(Relauncher.getRunningPath(LauncherMain.class), params.isMover());
         } catch (UnsupportedEncodingException ex) {
             ex.printStackTrace();
         }
@@ -131,24 +129,26 @@ public class LauncherMain {
 
         setupLogging(directories, resources);
 
-        boolean needsReboot = false;
+        String launcherBuild = resources.getLauncherBuild();
+        int build = -1;
 
-        if (System.getProperty("awt.useSystemAAFontSettings") == null || !System.getProperty("awt.useSystemAAFontSettings").equals("lcd"))
-            needsReboot = true;
-        else if (!Boolean.parseBoolean(System.getProperty("java.net.preferIPv4Stack")))
-            needsReboot = true;
+        try {
+            build = Integer.parseInt(launcherBuild);
+        } catch (NumberFormatException ex) {
+            //This is probably a debug build or something, build number is invalid
+        }
 
-        if (params.isLauncher())
-            startLauncher(settings, params, directories, resources);
-        else if (params.isMover())
-            startMover(params, launcher);
-        else if (needsReboot && StringUtils.isNumeric(resources.getLauncherBuild())) {
-            // ^^^^^
-            //The debugger can't really relaunch so double check the build number to make sure we're operating in a valid environment
-            launcher.launch(null, LauncherMain.class, params.getArgs());
-            return;
-        } else {
-            updateAndRelaunch(params, directories, resources, settings, launcher);
+        Relauncher launcher = new TechnicRelauncher(new HttpUpdateStream("http://www.technicpack.net/api/launcher/"), settings.getBuildStream(), build, directories, resources, params);
+
+        try {
+            if (launcher.runAutoUpdater())
+                startLauncher(settings, params, directories, resources);
+        } catch (InterruptedException e) {
+            //Canceled by user
+        } catch (DownloadException e) {
+            //JOptionPane.showMessageDialog(null, resources.getString("launcher.updateerror.download", pack.getDisplayName(), e.getMessage()), resources.getString("launcher.installerror.title"), JOptionPane.WARNING_MESSAGE);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -271,73 +271,5 @@ public class LauncherMain {
         });
 
         userModel.initAuth();
-    }
-
-    private static void startMover(StartupParameters params, Relauncher relauncher) {
-        try {
-            relauncher.replacePackage(LauncherMain.class, params.getMoveTarget());
-        } catch (UnsupportedEncodingException ex) {
-            Utils.getLogger().log(Level.SEVERE, "Error attempting to copy downloaded package: ", ex);
-            return;
-        }
-
-        String[] args = relauncher.buildLauncherArgs(relauncher.buildLauncherArgs(params.getArgs()));
-        relauncher.launch(params.getMoveTarget(), LauncherMain.class, args);
-    }
-
-    private static void updateAndRelaunch(StartupParameters params, LauncherDirectories directories, ResourceLoader resources, TechnicSettings settings, Relauncher relauncher) {
-        String launcherBuild = resources.getLauncherBuild();
-        int build = -1;
-
-        try {
-            build = Integer.parseInt(launcherBuild);
-        } catch (NumberFormatException ex) {
-            //This is probably a debug build or something, build number is invalid
-        }
-
-        if (build < 1) {
-            //We're in debug mode do not relaunch
-            startLauncher(settings, params, directories, resources);
-            return;
-        }
-
-        //In order to allow the old launcher to update & maintain backward compatibility we're keeping the old
-        //stream pages live, and appending a "4" to the new streams.  So "stable" in the settings file means we
-        //pull from "stable4"
-        String url = relauncher.getUpdateUrl(settings.getBuildStream()+"4", build, LauncherMain.class);
-
-        String[] args;
-        if (url == null) {
-            startLauncher(settings, params, directories, resources);
-            return;
-        }
-
-        SplashScreen screen = new SplashScreen(resources.getImage("launch_splash.png"), 30);
-        Color bg = LauncherFrame.COLOR_FORMELEMENT_INTERNAL;
-        screen.getContentPane().setBackground(new Color (bg.getRed(),bg.getGreen(),bg.getBlue(),255));
-        screen.getProgressBar().setForeground(Color.white);
-        screen.getProgressBar().setBackground(LauncherFrame.COLOR_GREEN);
-        screen.getProgressBar().setBackFill(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
-        screen.getProgressBar().setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 12));
-        screen.pack();
-        screen.setLocationRelativeTo(null);
-        screen.setVisible(true);
-
-        String tempPath = relauncher.downloadUpdate(url, directories, resources.getString("updater.downloading"), screen.getProgressBar());
-
-        if (tempPath == null) {
-            Utils.getLogger().severe("The launcher update failed to download.");
-            screen.dispose();
-            startLauncher(settings, params, directories, resources);
-            return;
-        }
-
-        try {
-            args = relauncher.buildMoverArgs(LauncherMain.class, params.getArgs());
-        } catch (UnsupportedEncodingException ex) {
-            Utils.getLogger().log(Level.SEVERE, "Error attempting to launch mover mode: ", ex);
-            return;
-        }
-        relauncher.launch(tempPath, LauncherMain.class, args);
     }
 }

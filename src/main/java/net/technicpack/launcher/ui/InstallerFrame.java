@@ -19,13 +19,13 @@
 package net.technicpack.launcher.ui;
 
 import net.technicpack.autoupdate.Relauncher;
-import net.technicpack.launcher.LauncherMain;
+import net.technicpack.launcher.autoupdate.TechnicRelauncher;
+import net.technicpack.launcher.io.TechnicLauncherDirectories;
 import net.technicpack.launcher.settings.SettingsFactory;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.ui.controls.DraggableFrame;
 import net.technicpack.ui.controls.RoundedButton;
-import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.controls.borders.RoundBorder;
 import net.technicpack.ui.controls.lang.LanguageCellRenderer;
 import net.technicpack.ui.controls.lang.LanguageCellUI;
@@ -189,10 +189,10 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
                 settings.setLanguageCode(((LanguageItem)standardLanguages.getSelectedItem()).getLangCode());
                 settings.save();
 
-                Relauncher relauncher = new Relauncher(null);
+                Relauncher relauncher = new TechnicRelauncher(null, settings.getBuildStream(), 0, new TechnicLauncherDirectories(settings.getTechnicRoot()), resources, params);
                 try {
-                    String currentPath = relauncher.getRunningPath(LauncherMain.class);
-                    relauncher.launch(currentPath, LauncherMain.class, params.getArgs());
+                    String currentPath = relauncher.getRunningPath();
+                    relauncher.launch(currentPath, params.getArgs());
                     System.exit(0);
                     return;
                 } catch (UnsupportedEncodingException ex) {
@@ -205,10 +205,10 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
     }
 
     protected void portableInstall() {
-        final Relauncher relauncher = new Relauncher(null);
         String targetPath = null;
+        final Relauncher relauncher = new TechnicRelauncher(null, settings.getBuildStream(), 0, new TechnicLauncherDirectories(settings.getTechnicRoot()), resources, params);
         try {
-            String currentPath = relauncher.getRunningPath(LauncherMain.class);
+            String currentPath = relauncher.getRunningPath();
             String launcher = (currentPath.endsWith(".exe"))?"TechnicLauncher.exe":"TechnicLauncher.jar";
 
             targetPath = new File(portableInstallDir.getText(), launcher).getAbsolutePath();
@@ -220,7 +220,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
                 return;
             }
 
-            relauncher.replacePackage(LauncherMain.class, targetExe.getAbsolutePath());
+
         } catch (UnsupportedEncodingException ex) {
             ex.printStackTrace();
             return;
@@ -262,7 +262,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
                 settings.setLanguageCode(((LanguageItem)portableLanguages.getSelectedItem()).getLangCode());
                 settings.save();
 
-                relauncher.launch(threadTargetPath, LauncherMain.class, params.getArgs());
+                relauncher.launch(threadTargetPath, params.getArgs());
                 System.exit(0);
             }
         });
