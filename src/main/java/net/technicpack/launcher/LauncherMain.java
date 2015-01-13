@@ -138,7 +138,7 @@ public class LauncherMain {
             //This is probably a debug build or something, build number is invalid
         }
 
-        Relauncher launcher = new TechnicRelauncher(new HttpUpdateStream("http://www.technicpack.net/api/launcher/"), settings.getBuildStream(), build, directories, resources, params);
+        Relauncher launcher = new TechnicRelauncher(new HttpUpdateStream("http://www.technicpack.net/api/launcher/"), settings.getBuildStream()+"4", build, directories, resources, params);
 
         try {
             if (launcher.runAutoUpdater())
