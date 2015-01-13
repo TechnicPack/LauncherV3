@@ -60,21 +60,24 @@ public class MoveLauncherPackage implements IInstallTask {
         File source = new File(currentPath);
         File dest = new File(launcher.getAbsolutePath());
 
-        if (dest.exists()) {
-            if (!dest.delete())
-                Utils.getLogger().log(Level.SEVERE, "Deletion of existing package failed!");
-        }
-        FileInputStream sourceStream = null;
-        FileOutputStream destStream = null;
-        try {
-            sourceStream = new FileInputStream(source);
-            destStream = new FileOutputStream(dest);
-            IOUtils.copy(sourceStream, destStream);
-        } catch (IOException ex) {
-            Utils.getLogger().log(Level.SEVERE, "Error attempting to copy download package:", ex);
-        } finally {
-            IOUtils.closeQuietly(sourceStream);
-            IOUtils.closeQuietly(destStream);
+        if (!source.equals(dest)) {
+            if (dest.exists()) {
+                if (!dest.delete())
+                    Utils.getLogger().log(Level.SEVERE, "Deletion of existing package failed!");
+            }
+            FileInputStream sourceStream = null;
+            FileOutputStream destStream = null;
+
+            try {
+                sourceStream = new FileInputStream(source);
+                destStream = new FileOutputStream(dest);
+                IOUtils.copy(sourceStream, destStream);
+            } catch (IOException ex) {
+                Utils.getLogger().log(Level.SEVERE, "Error attempting to copy download package:", ex);
+            } finally {
+                IOUtils.closeQuietly(sourceStream);
+                IOUtils.closeQuietly(destStream);
+            }
         }
 
         dest.setExecutable(true, true);
