@@ -19,7 +19,9 @@
 
 package net.technicpack.ui.lang;
 
+import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.utilslib.Utils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 import javax.imageio.ImageIO;
@@ -28,6 +30,7 @@ import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -42,6 +45,7 @@ public class ResourceLoader {
     private String slashResourcePath;
     private boolean isDefaultLocaleSupported = true;
     private Locale defaultLocale;
+    private File launcherAssets;
 
     public static final Locale[] SUPPORTED_LOCALES = { Locale.ENGLISH, new Locale("pt","BR"), new Locale("pt","PT"), new Locale("cs"), Locale.GERMAN, Locale.FRENCH, Locale.ITALIAN, Locale.CHINA, Locale.TAIWAN };
     public static final String DEFAULT_LOCALE = "default";
@@ -51,31 +55,47 @@ public class ResourceLoader {
 
     public static final Map<String, Font> fontCache = new HashMap<String, Font>();
 
+    public static final Font fallbackFont = new Font("Arial", Font.PLAIN, 12);
+
     public Font getFontByName(String fontName) {
         Font font;
 
         if (fontCache.containsKey(fontName))
             return fontCache.get(fontName);
 
+        if (launcherAssets == null)
+            return fallbackFont;
+
         InputStream fontStream = null;
         try {
             String fullName = getString(fontName);
-            fontStream = ResourceLoader.class.getResourceAsStream(getResourcePath("/fonts/"+fullName));
+            fontStream = FileUtils.openInputStream(new File(launcherAssets, fullName));
+
+            if (fontStream == null)
+                return fallbackFont;
+
             font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
         } catch (Exception e) {
             e.printStackTrace();
             // Fallback
-            font = new Font("Arial", Font.PLAIN, 12);
+            return fallbackFont;
         } finally {
             if (fontStream != null)
                 IOUtils.closeQuietly(fontStream);
         }
         fontCache.put(fontName, font);
+
+        if (font == null)
+            return fallbackFont;
         
         return font;
     }
 
-    public ResourceLoader(String... resourcesPath) {
+    public ResourceLoader(LauncherDirectories directories, String... resourcesPath) {
+        if (directories == null)
+            this.launcherAssets = null;
+        else
+            this.launcherAssets = new File(directories.getAssetsDirectory(), "launcher");
         dottedResourcePath = "";
         slashResourcePath = "";
 
