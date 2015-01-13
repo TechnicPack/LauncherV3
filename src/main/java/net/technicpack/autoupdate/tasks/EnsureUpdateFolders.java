@@ -49,6 +49,8 @@ public class EnsureUpdateFolders implements IInstallTask {
     public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
         File launcherAssets = new File(directories.getAssetsDirectory(), "launcher");
         File patches = new File(launcherAssets, "patches");
-        patches.mkdirs();
+
+        if (!patches.exists())
+            patches.mkdirs();
     }
 }
