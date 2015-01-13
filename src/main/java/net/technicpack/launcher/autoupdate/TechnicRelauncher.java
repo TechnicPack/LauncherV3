@@ -47,6 +47,7 @@ public class TechnicRelauncher extends Relauncher {
     private ResourceLoader resources;
     private StartupParameters parameters;
     private IUpdateStream updateStream;
+    private SplashScreen screen = null;
 
     public TechnicRelauncher(IUpdateStream updateStream, String stream, int currentBuild, LauncherDirectories directories, ResourceLoader resources, StartupParameters parameters) {
         super(stream, currentBuild, directories);
@@ -101,7 +102,7 @@ public class TechnicRelauncher extends Relauncher {
 
     @Override
     public InstallTasksQueue buildUpdaterTasks() {
-        SplashScreen screen = new SplashScreen(resources.getImage("launch_splash.png"), 30);
+        screen = new SplashScreen(resources.getImage("launch_splash.png"), 30);
         Color bg = LauncherFrame.COLOR_FORMELEMENT_INTERNAL;
         screen.getContentPane().setBackground(new Color (bg.getRed(),bg.getGreen(),bg.getBlue(),255));
         screen.getProgressBar().setForeground(Color.white);
@@ -128,5 +129,10 @@ public class TechnicRelauncher extends Relauncher {
     @Override
     public String[] getLaunchArgs() {
         return parameters.getArgs();
+    }
+
+    @Override
+    public void updateComplete() {
+        screen.dispose();
     }
 }
