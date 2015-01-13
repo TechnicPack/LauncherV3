@@ -218,7 +218,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
             File targetExe = new File(portableInstallDir.getText(), launcher);
 
-            if (!currentPath.equals(targetExe.getAbsolutePath())) {
+            if (!(new File(currentPath).equals(targetExe))) {
                 if (targetExe.exists() && !targetExe.delete()) {
                     JOptionPane.showMessageDialog(this, resources.getString("installer.portable.replacefailed"), resources.getString("installer.portable.replacefailtitle"), JOptionPane.ERROR_MESSAGE);
                     return;
