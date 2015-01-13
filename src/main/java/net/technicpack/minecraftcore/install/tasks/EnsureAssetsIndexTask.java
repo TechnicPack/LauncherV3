@@ -60,7 +60,7 @@ public class EnsureAssetsIndexTask implements IInstallTask {
 
     @Override
 	public void runTask(InstallTasksQueue queue) throws IOException {
-		String assets = ((InstallTasksQueue<MojangVersion>)queue).getCompleteVersion().getAssetsKey();
+		String assets = ((InstallTasksQueue<MojangVersion>)queue).getMetadata().getAssetsKey();
 
 		if (assets == null || assets.isEmpty()) {
 			assets = "legacy";
