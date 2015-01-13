@@ -49,6 +49,6 @@ public class ModpackInstaller<VersionData> {
             Utils.sendTracking("installModpack", modpack.getName(), modpack.getBuild(), clientId);
         }
 
-        return tasksQueue.getCompleteVersion();
+        return tasksQueue.getMetadata();
     }
 }

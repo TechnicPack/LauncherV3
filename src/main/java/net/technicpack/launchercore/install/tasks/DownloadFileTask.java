@@ -32,6 +32,8 @@ public class DownloadFileTask extends ListenerTask {
     private String taskDescription;
     private IFileVerifier fileVerifier;
 
+    protected File getDestination() { return destination; }
+
     public DownloadFileTask(String url, File destination, IFileVerifier verifier) {
         this(url, destination, verifier, destination.getName());
     }

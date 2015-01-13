@@ -17,22 +17,16 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.autoupdate.http;
+package net.technicpack.autoupdate.io;
 
-import net.technicpack.autoupdate.IUpdateStream;
-import net.technicpack.autoupdate.io.StreamVersion;
-import net.technicpack.rest.RestObject;
-import net.technicpack.rest.RestfulAPIException;
+public class LauncherResource {
+    private String filename;
+    private String url;
+    private String md5;
 
-public class HttpUpdateStream implements IUpdateStream {
-    private String baseUrl;
+    public LauncherResource() {}
 
-    public HttpUpdateStream(String baseUrl) {
-        this.baseUrl = baseUrl;
-    }
-
-    @Override
-    public StreamVersion getStreamVersion(String stream) throws RestfulAPIException {
-        return RestObject.getRestObject(StreamVersion.class, baseUrl + "version/" + stream);
-    }
+    public String getFilename() { return filename; }
+    public String getUrl() { return url; }
+    public String getMd5() { return md5; }
 }

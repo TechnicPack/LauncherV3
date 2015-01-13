@@ -19,57 +19,111 @@
 
 package net.technicpack.autoupdate;
 
-import net.technicpack.autoupdate.io.StreamVersion;
+import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.LauncherDirectories;
-import net.technicpack.launchercore.mirror.download.Download;
-import net.technicpack.launchercore.util.DownloadListener;
-import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
-import org.apache.commons.io.IOUtils;
 
 import javax.swing.*;
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
 
-public class Relauncher {
-    private IUpdateStream updateStream;
+public abstract class Relauncher {
 
-    public Relauncher(IUpdateStream updateStream) {
-        this.updateStream = updateStream;
+    private String stream;
+    private int currentBuild;
+    private LauncherDirectories directories;
+    private boolean didUpdate = false;
+
+    public Relauncher(String stream, int currentBuild, LauncherDirectories directories) {
+        this.stream = stream;
+        this.currentBuild = currentBuild;
+        this.directories = directories;
     }
 
-    public String getUpdateUrl(String stream, int currentBuild, Class mainClass) {
+    public int getCurrentBuild() { return currentBuild; }
+    public String getStreamName() { return stream; }
+    public void setUpdated() { didUpdate = true; }
+
+    protected LauncherDirectories getDirectories() { return directories; }
+
+    public String getRunningPath() throws UnsupportedEncodingException {
+        return getRunningPath(getMainClass());
+    }
+
+    public static String getRunningPath(Class clazz) throws UnsupportedEncodingException {
+        return URLDecoder.decode(clazz.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8");
+    }
+
+    protected abstract Class getMainClass();
+    public abstract String getUpdateText();
+    public abstract boolean isUpdateOnly();
+    public abstract boolean isMover();
+    public abstract boolean isLauncherOnly();
+    public abstract InstallTasksQueue buildMoverTasks();
+    public abstract InstallTasksQueue buildUpdaterTasks();
+    public abstract String[] getLaunchArgs();
+
+    public boolean runAutoUpdater() throws IOException, InterruptedException {
+        if (isLauncherOnly())
+            return true;
+
+        boolean needsReboot = false;
+
+        if (System.getProperty("awt.useSystemAAFontSettings") == null || !System.getProperty("awt.useSystemAAFontSettings").equals("lcd"))
+            needsReboot = true;
+        else if (!Boolean.parseBoolean(System.getProperty("java.net.preferIPv4Stack")))
+            needsReboot = true;
+
+        InstallTasksQueue updateTasksQueue = null;
+        if (isMover()) {
+            updateTasksQueue = buildMoverTasks();
+        } else if (needsReboot && getCurrentBuild() > 0) {
+            relaunch();
+            return false;
+        } else if (getCurrentBuild() < 1) {
+            return true;
+        } else {
+            updateTasksQueue = buildUpdaterTasks();
+        }
+
+        if (updateTasksQueue == null)
+            return true;
+
+        updateTasksQueue.runAllTasks();
+
+        return !didUpdate;
+    }
+
+    public void relaunch() {
+        launch(null, getLaunchArgs());
+    }
+
+    public File getTempLauncher() {
+        File dest;
+        String runningPath = null;
+
         try {
-            StreamVersion version = updateStream.getStreamVersion(stream);
-
-            if (version.getBuild() == currentBuild)
-                return null;
-
-            String runningPath = getRunningPath(mainClass);
-
-            if (runningPath.endsWith(".exe"))
-                return version.getExeUrl();
-            else
-                return version.getJarUrl();
-
-        } catch (RestfulAPIException ex) {
-            return null;
+            runningPath = getRunningPath();
         } catch (UnsupportedEncodingException ex) {
+            ex.printStackTrace();
             return null;
         }
+
+        if (runningPath.endsWith(".exe"))
+            dest = new File(directories.getLauncherDirectory(), "temp.exe");
+        else
+            dest = new File(directories.getLauncherDirectory(), "temp.jar");
+        return dest;
     }
 
-    public void launch(String launchPath, Class mainClass, String[] args) {
+    public void launch(String launchPath, String[] args) {
         if (launchPath == null) {
             try {
-                launchPath = getRunningPath(mainClass);
+                launchPath = getRunningPath();
             } catch (UnsupportedEncodingException ex) {
                 return;
             }
@@ -88,7 +142,7 @@ public class Relauncher {
             commands.add("-Dswing.aatext=true");
             commands.add("-cp");
             commands.add(launchPath);
-            commands.add(mainClass.getName());
+            commands.add(getClass().getName());
         } else
             commands.add(launchPath);
         commands.addAll(Arrays.asList(args));
@@ -114,75 +168,19 @@ public class Relauncher {
         System.exit(0);
     }
 
-    public String[] buildMoverArgs(Class mainClass, String[] args) throws UnsupportedEncodingException {
+    public String[] buildMoverArgs() throws UnsupportedEncodingException {
         List<String> outArgs = new ArrayList<String>();
         outArgs.add("-movetarget");
-        outArgs.add(getRunningPath(mainClass));
+        outArgs.add(getRunningPath());
         outArgs.add("-mover");
-        outArgs.addAll(Arrays.asList(args));
+        outArgs.addAll(Arrays.asList(getLaunchArgs()));
         return outArgs.toArray(new String[outArgs.size()]);
     }
 
-    public String[] buildLauncherArgs(String[] args) {
+    public String[] buildLauncherArgs() {
         List<String> outArgs = new ArrayList<String>();
         outArgs.add("-launcher");
-        outArgs.addAll(Arrays.asList(args));
+        outArgs.addAll(Arrays.asList(getLaunchArgs()));
         return outArgs.toArray(new String[outArgs.size()]);
-    }
-
-    public String getRunningPath(Class mainClass) throws UnsupportedEncodingException {
-        return URLDecoder.decode(mainClass.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8");
-    }
-
-    public void replacePackage(Class mainClass, String targetPath) throws UnsupportedEncodingException {
-        String currentPath = getRunningPath(mainClass);
-        Utils.getLogger().log(Level.INFO, "Moving running package from " + currentPath + " to " + targetPath);
-
-        File source = new File(currentPath);
-        File dest = new File(targetPath);
-
-        if (dest.exists()) {
-            if (!dest.delete())
-                Utils.getLogger().log(Level.SEVERE, "Deletion of existing package failed!");
-        }
-        FileInputStream sourceStream = null;
-        FileOutputStream destStream = null;
-        try {
-            sourceStream = new FileInputStream(source);
-            destStream = new FileOutputStream(dest);
-            IOUtils.copy(sourceStream, destStream);
-        } catch (IOException ex) {
-            Utils.getLogger().log(Level.SEVERE, "Error attempting to copy download package:", ex);
-        } finally {
-            IOUtils.closeQuietly(sourceStream);
-            IOUtils.closeQuietly(destStream);
-        }
-
-        dest.setExecutable(true, true);
-    }
-
-    public String downloadUpdate(String url, LauncherDirectories directories, String progressText, DownloadListener listener) {
-        File dest;
-        if (url.endsWith(".exe"))
-            dest = new File(directories.getLauncherDirectory(), "temp.exe");
-        else
-            dest = new File(directories.getLauncherDirectory(), "temp.jar");
-
-        try {
-            Utils.getLogger().info("Downloading update from " + url + " to " + dest.getAbsolutePath());
-            Download download = new Download(new URL(url), progressText, dest.getPath());
-            download.setListener(listener);
-            download.run();
-
-            if (download.getResult() != Download.Result.SUCCESS) {
-                if (download.getException() != null)
-                    download.getException().printStackTrace();
-                return null;
-            }
-        } catch (MalformedURLException ex) {
-            Utils.getLogger().log(Level.SEVERE, "Received bad url from build stream: " + url, ex);
-        }
-
-        return dest.getAbsolutePath();
     }
 }

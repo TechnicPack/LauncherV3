@@ -21,9 +21,13 @@ package net.technicpack.autoupdate.io;
 
 import net.technicpack.rest.RestObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class StreamVersion extends RestObject {
     private int build;
     private StreamUrls url;
+    private List<LauncherResource> resources = new ArrayList<LauncherResource>();
 
     public int getBuild() {
         return build;
@@ -36,4 +40,6 @@ public class StreamVersion extends RestObject {
     public String getJarUrl() {
         return url.getJarUrl();
     }
+
+    public List<LauncherResource> getResources() { return resources; }
 }
