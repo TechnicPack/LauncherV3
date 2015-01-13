@@ -81,6 +81,8 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
         addGlassPane();
 
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
         relocalize(resources);
     }
 
@@ -360,7 +362,8 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         closeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                mainFrame.setVisible(true);
+                if (mainFrame != null)
+                    mainFrame.setVisible(true);
                 dispose();
             }
         });
