@@ -33,7 +33,7 @@ public final class StartupParameters {
     private boolean console = false;
     @Parameter(names = {"-launcheronly"}, description = "Starts in launcher mode (rather than update/mover)")
     private boolean launcher = false;
-    @Parameter(names = {"-mover"}, description = "Starts in mover mode (copies recently-downloaded update to originally-run package)")
+    @Parameter(names = {"-moveronly"}, description = "Starts in mover mode (copies recently-downloaded update to originally-run package)")
     private boolean mover = false;
     @Parameter(names = {"-update"}, description = "Starts in update mode (closes after downloading updated resources)")
     private boolean update = false;
