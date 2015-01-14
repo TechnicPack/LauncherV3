@@ -174,7 +174,7 @@ public abstract class Relauncher {
         List<String> outArgs = new ArrayList<String>();
         outArgs.add("-movetarget");
         outArgs.add(getRunningPath());
-        outArgs.add("-mover");
+        outArgs.add("-moveronly");
         outArgs.addAll(Arrays.asList(getLaunchArgs()));
         return outArgs.toArray(new String[outArgs.size()]);
     }
