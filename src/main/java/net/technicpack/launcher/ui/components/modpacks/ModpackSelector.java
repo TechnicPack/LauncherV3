@@ -26,6 +26,7 @@ import net.technicpack.launchercore.modpacks.packinfo.CombinedPackInfo;
 import net.technicpack.launchercore.modpacks.sources.IPackSource;
 import net.technicpack.launchercore.modpacks.sources.NameFilterPackSource;
 import net.technicpack.platform.IPlatformApi;
+import net.technicpack.platform.IPlatformSearchApi;
 import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.platform.packsources.SearchResultPackSource;
 import net.technicpack.platform.packsources.SinglePlatformSource;
@@ -63,6 +64,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
     private IPackSource technicSolder;
     private ImageRepository<ModpackModel> iconRepo;
     private final IPlatformApi platformApi;
+    private final IPlatformSearchApi platformSearchApi;
     private final ISolderApi solderApi;
 
     private JPanel widgetList;
@@ -83,13 +85,14 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
 
     private String findMoreUrl;
 
-    public ModpackSelector(ResourceLoader resources, PackLoader packLoader, IPackSource techicSolder, ISolderApi solderApi, IPlatformApi platformApi, ImageRepository<ModpackModel> iconRepo) {
+    public ModpackSelector(ResourceLoader resources, PackLoader packLoader, IPackSource techicSolder, ISolderApi solderApi, IPlatformApi platformApi, IPlatformSearchApi platformSearchApi, ImageRepository<ModpackModel> iconRepo) {
         this.resources = resources;
         this.packLoader = packLoader;
         this.iconRepo = iconRepo;
         this.technicSolder = techicSolder;
         this.platformApi = platformApi;
         this.solderApi = solderApi;
+        this.platformSearchApi = platformSearchApi;
 
         platformRegexPattern = Pattern.compile("^https?\\:\\/\\/beta\\.technicpack\\.net\\/modpack\\/([^.]+)\\.\\d+$");
 
@@ -537,7 +540,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
 
                     ArrayList<IPackSource> sources = new ArrayList<IPackSource>(2);
                     sources.add(new NameFilterPackSource(defaultPacks, localSearchTag));
-                    sources.add(new SearchResultPackSource(platformApi, localSearchTag));
+                    sources.add(new SearchResultPackSource(platformSearchApi, localSearchTag));
                     currentLoadJob = packLoader.createRepositoryLoadJob(ModpackSelector.this, sources, null, false);
 
                 }

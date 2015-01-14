@@ -37,7 +37,9 @@ import net.technicpack.launchercore.logging.RotatingFileHandler;
 import net.technicpack.launchercore.modpacks.PackLoader;
 import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;
+import net.technicpack.platform.IPlatformSearchApi;
 import net.technicpack.platform.cache.ModpackCachePlatformApi;
+import net.technicpack.platform.http.HttpPlatformSearchApi;
 import net.technicpack.solder.cache.CachedSolderApi;
 import net.technicpack.ui.components.Console;
 import net.technicpack.ui.components.ConsoleFrame;
@@ -236,6 +238,7 @@ public class LauncherMain {
         HttpPlatformApi httpPlatform = new HttpPlatformApi("http://api.technicpack.net/", mirrorStore);
 
         IPlatformApi platform = new ModpackCachePlatformApi(httpPlatform, 60 * 60, directories);
+        IPlatformSearchApi platformSearch = new HttpPlatformSearchApi("http://www.technicpack.net/");
 
         IInstalledPackRepository packStore = TechnicInstalledPackStore.load(new File(directories.getLauncherDirectory(), "installedPacks"));
         IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(platform, solder);
@@ -245,7 +248,7 @@ public class LauncherMain {
         SettingsFactory.migrateSettings(settings, packStore, directories, users, migrators);
 
         PackLoader packList = new PackLoader(directories, packStore, packInfoRepository);
-        ModpackSelector selector = new ModpackSelector(resources, packList, new SolderPackSource("http://solder.technicpack.net/api/", solder, true), solder, platform, iconRepo);
+        ModpackSelector selector = new ModpackSelector(resources, packList, new SolderPackSource("http://solder.technicpack.net/api/", solder, true), solder, platform, platformSearch, iconRepo);
         selector.setBorder(BorderFactory.createEmptyBorder());
         userModel.addAuthListener(selector);
 
