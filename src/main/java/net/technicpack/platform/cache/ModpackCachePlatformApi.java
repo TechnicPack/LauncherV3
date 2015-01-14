@@ -195,9 +195,4 @@ public class ModpackCachePlatformApi implements IPlatformApi {
     public NewsData getNews() throws RestfulAPIException {
         return innerApi.getNews();
     }
-
-    @Override
-    public SearchResultsData getSearchResults(String searchTerm) throws RestfulAPIException {
-        return innerApi.getSearchResults(searchTerm);
-    }
 }

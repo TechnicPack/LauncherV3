@@ -32,12 +32,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 public class HttpPlatformApi implements IPlatformApi {
-    private String rootUrl;
     private String platformUrl;
     private MirrorStore mirrorStore;
 
     public HttpPlatformApi(String rootUrl, MirrorStore mirrorStore) {
-        this.rootUrl = rootUrl;
         this.platformUrl = rootUrl;
         this.mirrorStore = mirrorStore;
     }
@@ -73,15 +71,5 @@ public class HttpPlatformApi implements IPlatformApi {
     public NewsData getNews() throws RestfulAPIException {
         String url = platformUrl + "news";
         return RestObject.getRestObject(NewsData.class, url);
-    }
-
-    @Override
-    public SearchResultsData getSearchResults(String searchTerm) throws RestfulAPIException {
-        try {
-            String url = rootUrl + "search/modpacks/launcher/" + URLEncoder.encode(searchTerm.trim(), "UTF-8");
-            return RestObject.getRestObject(SearchResultsData.class, url);
-        } catch (UnsupportedEncodingException ex) {
-            return new SearchResultsData();
-        }
     }
 }

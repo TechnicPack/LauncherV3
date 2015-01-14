@@ -17,23 +17,31 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.platform;
+package net.technicpack.platform.http;
 
-import net.technicpack.platform.io.NewsData;
-import net.technicpack.platform.io.PlatformPackInfo;
+import net.technicpack.launchercore.mirror.MirrorStore;
+import net.technicpack.platform.IPlatformSearchApi;
 import net.technicpack.platform.io.SearchResultsData;
+import net.technicpack.rest.RestObject;
 import net.technicpack.rest.RestfulAPIException;
 
-public interface IPlatformApi {
-    PlatformPackInfo getPlatformPackInfoForBulk(String packSlug) throws RestfulAPIException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
-    PlatformPackInfo getPlatformPackInfo(String packSlug) throws RestfulAPIException;
+public class HttpPlatformSearchApi implements IPlatformSearchApi {
+    private String rootUrl;
 
-    void incrementPackRuns(String packSlug);
+    public HttpPlatformSearchApi(String rootUrl) {
+        this.rootUrl = rootUrl;
+    }
 
-    void incrementPackInstalls(String packSlug);
-
-    NewsData getNews() throws RestfulAPIException;
-
-    String getPlatformUri(String slug);
+    @Override
+    public SearchResultsData getSearchResults(String searchTerm) throws RestfulAPIException {
+        try {
+            String url = rootUrl + "search/modpacks/launcher/" + URLEncoder.encode(searchTerm.trim(), "UTF-8");
+            return RestObject.getRestObject(SearchResultsData.class, url);
+        } catch (UnsupportedEncodingException ex) {
+            return new SearchResultsData();
+        }
+    }
 }
