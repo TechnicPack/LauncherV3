@@ -31,7 +31,7 @@ public final class StartupParameters {
     private List<String> parameters = Lists.newArrayList();
     @Parameter(names = {"-console"}, description = "Shows the console window")
     private boolean console = false;
-    @Parameter(names = {"-launcher"}, description = "Starts in launcher mode (rather than update/mover)")
+    @Parameter(names = {"-launcheronly"}, description = "Starts in launcher mode (rather than update/mover)")
     private boolean launcher = false;
     @Parameter(names = {"-mover"}, description = "Starts in mover mode (copies recently-downloaded update to originally-run package)")
     private boolean mover = false;
