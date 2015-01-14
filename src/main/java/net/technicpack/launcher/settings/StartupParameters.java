@@ -35,6 +35,8 @@ public final class StartupParameters {
     private boolean launcher = false;
     @Parameter(names = {"-moveronly"}, description = "Starts in mover mode (copies recently-downloaded update to originally-run package)")
     private boolean mover = false;
+    @Parameter(names = {"-mover"}, description = "Legacy mover mode- used to detect old-updater clients trying to update")
+    private boolean oldMover = false;
     @Parameter(names = {"-update"}, description = "Starts in update mode (closes after downloading updated resources)")
     private boolean update = false;
     @Parameter(names = {"-movetarget"}, description = "The path of the originally-run package to copy to")
@@ -90,6 +92,8 @@ public final class StartupParameters {
     public boolean isLauncher() { return launcher; }
 
     public boolean isMover() { return mover; }
+
+    public boolean isLegacyMover() { return mover; }
 
     public boolean isUpdate() { return update; }
 

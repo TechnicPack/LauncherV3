@@ -74,7 +74,7 @@ public class TechnicRelauncher extends Relauncher {
 
     @Override
     public boolean isMover() {
-        return parameters.isMover();
+        return parameters.isMover() || parameters.isLegacyMover();
     }
 
     @Override
@@ -95,7 +95,7 @@ public class TechnicRelauncher extends Relauncher {
         InstallTasksQueue<Object> queue = new InstallTasksQueue<Object>(null, createMirrorStore());
 
         queue.addTask(new MoveLauncherPackage(resources.getString("updater.mover"), new File(parameters.getMoveTarget()), this));
-        queue.addTask(new LaunchLauncherMode(resources.getString("updater.finallaunch"), this, parameters.getMoveTarget()));
+        queue.addTask(new LaunchLauncherMode(resources.getString("updater.finallaunch"), this, parameters.getMoveTarget(), parameters.isLegacyMover()));
 
         return queue;
     }
