@@ -30,11 +30,13 @@ public class LaunchLauncherMode implements IInstallTask {
     private String description;
     private Relauncher relauncher;
     private String launchTarget;
+    private boolean isLegacy;
 
-    public LaunchLauncherMode(String description, Relauncher relauncher, String launchTarget) {
+    public LaunchLauncherMode(String description, Relauncher relauncher, String launchTarget, boolean isLegacy) {
         this.description = description;
         this.relauncher = relauncher;
         this.launchTarget = launchTarget;
+        this.isLegacy = isLegacy;
     }
 
     @Override
@@ -49,7 +51,7 @@ public class LaunchLauncherMode implements IInstallTask {
 
     @Override
     public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
-        String[] args = relauncher.buildLauncherArgs();
+        String[] args = relauncher.buildLauncherArgs(isLegacy);
         relauncher.launch(launchTarget, args);
     }
 }
