@@ -74,7 +74,7 @@ public class TechnicRelauncher extends Relauncher {
 
     @Override
     public boolean isMover() {
-        return parameters.isMover() || parameters.isLegacyMover();
+        return (parameters.isMover() || parameters.isLegacyMover()) && !parameters.isLegacyLauncher();
     }
 
     @Override

@@ -33,6 +33,8 @@ public final class StartupParameters {
     private boolean console = false;
     @Parameter(names = {"-launcheronly"}, description = "Starts in launcher mode (rather than update/mover)")
     private boolean launcher = false;
+    @Parameter(names = {"-launcher"}, description = "Legacy launcher mode (indicates we should do a full update)")
+    private boolean oldLauncher = false;
     @Parameter(names = {"-moveronly"}, description = "Starts in mover mode (copies recently-downloaded update to originally-run package)")
     private boolean mover = false;
     @Parameter(names = {"-mover"}, description = "Legacy mover mode- used to detect old-updater clients trying to update")
@@ -90,6 +92,8 @@ public final class StartupParameters {
     }
 
     public boolean isLauncher() { return launcher; }
+
+    public boolean isLegacyLauncher() { return oldLauncher; }
 
     public boolean isMover() { return mover; }
 
