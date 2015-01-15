@@ -97,7 +97,7 @@ public abstract class Relauncher {
         updateTasksQueue.runAllTasks();
         updateComplete();
 
-        return !didUpdate;
+        return !didUpdate && !isUpdateOnly();
     }
 
     public void relaunch() {
