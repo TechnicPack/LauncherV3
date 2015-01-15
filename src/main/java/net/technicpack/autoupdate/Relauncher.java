@@ -183,6 +183,8 @@ public abstract class Relauncher {
         List<String> outArgs = new ArrayList<String>();
         if (!isLegacy)
             outArgs.add("-launcheronly");
+        else
+            outArgs.add("-launcher");
         outArgs.addAll(Arrays.asList(getLaunchArgs()));
         return outArgs.toArray(new String[outArgs.size()]);
     }
