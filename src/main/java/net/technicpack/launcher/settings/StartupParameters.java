@@ -93,7 +93,7 @@ public final class StartupParameters {
 
     public boolean isMover() { return mover; }
 
-    public boolean isLegacyMover() { return mover; }
+    public boolean isLegacyMover() { return oldMover; }
 
     public boolean isUpdate() { return update; }
 
