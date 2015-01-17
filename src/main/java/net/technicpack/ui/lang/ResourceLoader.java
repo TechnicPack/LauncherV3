@@ -259,6 +259,10 @@ public class ResourceLoader {
         }
     }
 
+    public InputStream getResourceAsStream(String path) {
+        return ResourceLoader.class.getResourceAsStream(getResourcePath(path));
+    }
+
     public BufferedImage getCircleClippedImage(String imageName) {
         BufferedImage contentImage = getImage(imageName);
         return getCircleClippedImage(contentImage);
