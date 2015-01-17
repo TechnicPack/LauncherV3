@@ -90,9 +90,12 @@ public class DiscoverResourceLoader extends ImageResourceLoader {
                 // couldnt open stream at URI...
                 XRLog.exception("Can't open stream for URI '" + uri + "': " + e.getMessage());
             }
-            if (ir == null) {
-                ir = createImageResource(uri, null);
-            }
+
+            //When we do this we return null which will raise an exception on layout/render, which
+            //will allow us to use the fallback discover page in cases when the network/site are unavailable
+//            if (ir == null) {
+//                ir = createImageResource(uri, null);
+//            }
             return ir;
         }
     }

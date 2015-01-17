@@ -254,7 +254,7 @@ public class LauncherMain {
 
         resources.registerResource(selector);
 
-        DiscoverInfoPanel discoverInfoPanel = new DiscoverInfoPanel(resources, startupParameters.getDiscoverUrl(), platform, splash);
+        DiscoverInfoPanel discoverInfoPanel = new DiscoverInfoPanel(resources, startupParameters.getDiscoverUrl(), platform, directories, splash);
 
         MinecraftLauncher launcher = new MinecraftLauncher(platform, directories, userModel, settings.getClientId());
         ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());
