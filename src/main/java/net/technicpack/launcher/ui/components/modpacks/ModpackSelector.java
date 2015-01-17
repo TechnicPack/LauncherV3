@@ -70,6 +70,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
     private JPanel widgetList;
     private JScrollPane scrollPane;
     private ModpackInfoPanel modpackInfoPanel;
+    private LauncherFrame launcherFrame;
     private JTextField filterContents;
     private FindMoreWidget findMoreWidget;
 
@@ -111,6 +112,10 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         this.modpackInfoPanel = modpackInfoPanel;
     }
 
+    public void setLauncherFrame(LauncherFrame launcherFrame) {
+        this.launcherFrame = launcherFrame;
+    }
+
     public ModpackModel getSelectedPack() {
         if (selectedWidget == null)
             return null;
@@ -129,7 +134,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         header.setBackground(LauncherFrame.COLOR_PANEL);
         add(header, BorderLayout.PAGE_START);
 
-        filterContents = new WatermarkTextField(resources.getString("launcher.packselector.filter"), LauncherFrame.COLOR_DIM_TEXT);
+        filterContents = new WatermarkTextField(resources.getString("launcher.packselector.filter.hotfix"), LauncherFrame.COLOR_DIM_TEXT);
         filterContents.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         filterContents.setBorder(BorderFactory.createEmptyBorder());
         filterContents.setColumns(20);
@@ -421,6 +426,14 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         ArrayList<IPackSource> sources = new ArrayList<IPackSource>(1);
         sources.add(technicSolder);
         packLoader.createRepositoryLoadJob(defaultPacks, sources, null, true);
+    }
+
+    public void setFilter(String text) {
+        filterContents.setText(text);
+        detectFilterChanges();
+
+        if (this.launcherFrame != null)
+            this.launcherFrame.selectTab("modpacks");
     }
 
     protected void detectFilterChanges() {

@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.ui.components.discover;
 
+import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.http.HttpPlatformApi;
 import net.technicpack.utilslib.DesktopUtils;
@@ -39,11 +40,13 @@ import java.util.List;
 public class DiscoverLinkListener extends LinkListener {
 
     private IPlatformApi platform;
+    private ModpackSelector modpackSelector;
     private List<Box> mousedLinks = new LinkedList<Box>();
     private Box _previouslyHovered;
 
-    public DiscoverLinkListener(IPlatformApi platform ) {
+    public DiscoverLinkListener(IPlatformApi platform, ModpackSelector modpackSelector ) {
         this.platform = platform;
+        this.modpackSelector = modpackSelector;
     }
 
     @Override
@@ -55,8 +58,7 @@ public class DiscoverLinkListener extends LinkListener {
 
             String platformUri = this.platform.getPlatformUri(slug);
             try {
-                StringSelection selection = new StringSelection(platformUri);
-                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
+                modpackSelector.setFilter(platformUri);
             } catch (Exception ex) {
                 //The clipboard is really temperamental if we mess with it too much, just ignore it
             }

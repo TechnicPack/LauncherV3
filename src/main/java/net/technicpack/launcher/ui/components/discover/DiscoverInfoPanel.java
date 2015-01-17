@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.ui.components.discover;
 
+import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.http.HttpPlatformApi;
@@ -64,7 +65,7 @@ public class DiscoverInfoPanel extends TiledBackground {
     final private LauncherDirectories directories;
     final private ResourceLoader resources;
 
-    public DiscoverInfoPanel(final ResourceLoader loader, String discoverUrl, final IPlatformApi platform, final LauncherDirectories directories, final net.technicpack.ui.controls.installation.SplashScreen splash) {
+    public DiscoverInfoPanel(final ResourceLoader loader, String discoverUrl, final IPlatformApi platform, final LauncherDirectories directories, final ModpackSelector modpackSelector, final net.technicpack.ui.controls.installation.SplashScreen splash) {
         super(loader.getImage("background_repeat2.png"));
 
         this.directories = directories;
@@ -128,7 +129,7 @@ public class DiscoverInfoPanel extends TiledBackground {
         for (Object listener : panel.getMouseTrackingListeners()) {
             panel.removeMouseTrackingListener((FSMouseListener)listener);
         }
-        panel.addMouseTrackingListener(new DiscoverLinkListener(platform));
+        panel.addMouseTrackingListener(new DiscoverLinkListener(platform, modpackSelector));
 
         final DelegatingUserAgent uac = new DelegatingUserAgent();
         ImageResourceLoader imageLoader = new DiscoverResourceLoader();

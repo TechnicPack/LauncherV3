@@ -52,7 +52,6 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.utilslib.DesktopUtils;
-import net.technicpack.utilslib.PasteWatcher;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -143,8 +142,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     ModpackInfoPanel modpackPanel;
     DiscoverInfoPanel discoverInfoPanel;
 
-    private PasteWatcher pasteWatcher = null;
-
     public LauncherFrame(final ResourceLoader resources, final ImageRepository<IUserType> skinRepository, final UserModel userModel, final TechnicSettings settings, final ModpackSelector modpackSelector, final ImageRepository<ModpackModel> iconRepo, final ImageRepository<ModpackModel> logoRepo, final ImageRepository<ModpackModel> backgroundRepo, final Installer installer, final ImageRepository<AuthorshipInfo> avatarRepo, final IPlatformApi platformApi, final LauncherDirectories directories, final IInstalledPackRepository packRepository, final StartupParameters params, final DiscoverInfoPanel discoverInfoPanel) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -183,7 +180,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     // Action responses
     /////////////////////////////////////////////////
 
-    protected void selectTab(String tabName) {
+    public void selectTab(String tabName) {
         discoverTab.setIsActive(false);
         modpacksTab.setIsActive(false);
         newsTab.setIsActive(false);
@@ -514,6 +511,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         }
         );
         modpackSelector.setInfoPanel(modpackPanel);
+        modpackSelector.setLauncherFrame(this);
         playButton = modpackPanel.getPlayButton();
         playButton.addActionListener(new ActionListener() {
             @Override
@@ -653,14 +651,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             if (modpackSelector.getSelectedPack() != null)
                 setupPlayButtonText(modpackSelector.getSelectedPack(), mojangUser);
 
-            if (pasteWatcher == null) {
-                pasteWatcher = new PasteWatcher(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        pasteUpdated((Transferable)e.getSource());
-                    }
-                });
-            }
             modpackSelector.forceRefresh();
             EventQueue.invokeLater(new Runnable() {
                 @Override
@@ -695,78 +685,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             }
             playButton.setIcon(new ImageIcon(resources.colorImage(resources.getImage("download_button.png"), LauncherFrame.COLOR_BUTTON_BLUE)));
             playButton.setHoverIcon(new ImageIcon(resources.colorImage(resources.getImage("download_button.png"), LauncherFrame.COLOR_BLUE)));
-        }
-    }
-
-    protected void pasteUpdated(Transferable transferable) {
-        String text;
-
-        if (!transferable.isDataFlavorSupported(DataFlavor.stringFlavor))
-            return;
-
-        try {
-            text = transferable.getTransferData(DataFlavor.stringFlavor).toString();
-        } catch (IOException ex) {
-            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
-            return;
-        } catch (UnsupportedFlavorException ex) {
-            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
-            return;
-        }
-
-        try {
-            final URL platformUrl = new URL(text);
-            new SwingWorker<PlatformPackInfo, Void>() {
-                @Override
-                protected PlatformPackInfo doInBackground() throws Exception {
-                    PlatformPackInfo info = RestObject.getRestObject(PlatformPackInfo.class, platformUrl.toString());
-
-                    //Don't let people jerk us around with non-platform sites- make sure this is a real pack
-                    //on the technic platform
-                    return platformApi.getPlatformPackInfoForBulk(info.getName());
-                }
-
-                @Override
-                public void done() {
-                    PlatformPackInfo result;
-                    try {
-                        result = get();
-
-                        if (result == null)
-                            return;
-                    } catch (ExecutionException ex) {
-                        //We eat these two exceptions because they are almost certainly caused by
-                        //the pasted text not being relevant to this program
-                        return;
-                    } catch (InterruptedException ex) {
-                        return;
-                    }
-
-                    if (!packRepo.getInstalledPacks().containsKey(result.getName())) {
-                        packRepo.put(new InstalledPack(result.getName(), InstalledPack.RECOMMENDED));
-                    }
-
-                    packRepo.setSelectedSlug(result.getName());
-                    modpackSelector.forceRefresh();
-
-                    LauncherFrame.this.setExtendedState(JFrame.ICONIFIED);
-
-                    EventQueue.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            LauncherFrame.this.setExtendedState(JFrame.NORMAL);
-                            EventQueue.invokeLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    LauncherFrame.this.selectTab("modpacks");
-                                }
-                            });
-                        }
-                    });
-                }
-            }.execute();
-        } catch (MalformedURLException ex) {
-            return;
         }
     }
 }
