@@ -240,9 +240,6 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
                 refreshUsers();
                 setCurrentUser(mojangUser.getUsername());
             }
-        } else {
-            //We have a cleared user, start the launcher up
-            userModel.setCurrentUser(loginMojangUser);
         }
     }
 
