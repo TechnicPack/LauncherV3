@@ -147,6 +147,9 @@ public class SolderPackInfo extends RestObject implements PackInfo {
 
     @Override
     public boolean isLocal() {
+        if (builds.size() == 0)
+            return true;
+
         return isLocal;
     }
 
