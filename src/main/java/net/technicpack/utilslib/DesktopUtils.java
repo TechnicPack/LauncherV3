@@ -30,7 +30,10 @@ import java.util.logging.Level;
 public class DesktopUtils {
     public static void browseUrl(String url) {
         try {
-            Desktop.getDesktop().browse(new URI(url));
+            if (url.startsWith("mailto:"))
+                Desktop.getDesktop().mail(new URI(url));
+            else
+                Desktop.getDesktop().browse(new URI(url));
         } catch (IOException ex) {
             //Thrown by Desktop.browse() - just log & ignore
             Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
