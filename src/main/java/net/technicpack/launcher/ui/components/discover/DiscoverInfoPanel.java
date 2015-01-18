@@ -170,13 +170,15 @@ public class DiscoverInfoPanel extends TiledBackground {
     }
 
     protected void triggerLoadListener() {
-        if (loadListener != null) {
+        final ActionListener deferredListener = loadListener;
+        if (deferredListener != null) {
             EventQueue.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    loadListener.actionPerformed(new ActionEvent(this, 0,"loaded"));
+                    deferredListener.actionPerformed(new ActionEvent(this, 0, "loaded"));
                 }
             });
+            loadListener = null;
         }
     }
 

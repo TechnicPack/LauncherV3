@@ -94,6 +94,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     JTextField installField;
     JTextField clientId;
     JCheckBox showConsole;
+    JCheckBox launchToModpacks;
     StartupParameters params;
 
     public OptionsDialog(Frame owner, TechnicSettings settings, ResourceLoader resourceLoader, StartupParameters params) {
@@ -123,6 +124,11 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     protected void changeShowConsole() {
         settings.setShowConsole(showConsole.isSelected());
         LauncherMain.consoleFrame.setVisible(showConsole.isSelected());
+        settings.save();
+    }
+
+    protected void changeLaunchToModpacks() {
+        settings.setLaunchToModpacks(launchToModpacks.isSelected());
         settings.save();
     }
 
@@ -188,6 +194,16 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             @Override
             public void actionPerformed(ActionEvent e) {
                 changeShowConsole();
+            }
+        });
+
+        for (ActionListener listener : launchToModpacks.getActionListeners())
+            launchToModpacks.removeActionListener(listener);
+        launchToModpacks.setSelected(settings.getLaunchToModpacks());
+        launchToModpacks.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeLaunchToModpacks();
             }
         });
 
@@ -548,7 +564,24 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         panel.add(showConsole, new GridBagConstraints(1, 5, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(16, 16, 0, 0), 0, 0));
 
-        panel.add(Box.createGlue(), new GridBagConstraints(0, 6, 5, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0, 0));
+        //Add launch to modpacks
+        JLabel launchToModpacksField = new JLabel(resources.getString("launcheroptions.general.modpacktab"));
+        launchToModpacksField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+        launchToModpacksField.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        panel.add(launchToModpacksField, new GridBagConstraints(0,6,1,1,0,0,GridBagConstraints.EAST,GridBagConstraints.NONE,new Insets(10,40,0,0),0,0));
+
+        launchToModpacks = new JCheckBox("", false);
+        launchToModpacks.setOpaque(false);
+        launchToModpacks.setHorizontalAlignment(SwingConstants.RIGHT);
+        launchToModpacks.setBorder(BorderFactory.createEmptyBorder());
+        launchToModpacks.setIconTextGap(0);
+        launchToModpacks.setSelectedIcon(resources.getIcon("checkbox_closed.png"));
+        launchToModpacks.setIcon(resources.getIcon("checkbox_open.png"));
+        launchToModpacks.setFocusPainted(false);
+
+        panel.add(launchToModpacks, new GridBagConstraints(1, 6, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(16, 16 ,0, 0), 0,0));
+
+        panel.add(Box.createGlue(), new GridBagConstraints(0, 7, 5, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0, 0));
 
         //Open logs button
         RoundedButton openLogs = new RoundedButton(resources.getString("launcheroptions.general.logs"));
@@ -563,7 +596,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
                 openLogs();
             }
         });
-        panel.add(openLogs, new GridBagConstraints(0, 7, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 10, 10, 0), 0, 0));
+        panel.add(openLogs, new GridBagConstraints(0, 8, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 10, 10, 0), 0, 0));
     }
 
     private void setupJavaOptionsPanel(JPanel panel) {
