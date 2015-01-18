@@ -126,7 +126,7 @@ public class Installer {
 
                         LaunchOptions options = new LaunchOptions(pack.getDisplayName(), packIconMapper.getImageLocation(pack).getAbsolutePath(), startupParameters.getWidth(), startupParameters.getHeight(), startupParameters.getFullscreen());
                         launcherUnhider = new LauncherUnhider(settings, frame);
-                        launcher.launch(pack, memory, options, launcherUnhider, version);
+                        launcher.launch(pack, settings.getJavaHome(), memory, options, launcherUnhider, version);
 
                         LaunchAction launchAction = settings.getLaunchAction();
 
