@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.ui.components.discover;
 
+import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.platform.IPlatformApi;
@@ -43,6 +44,7 @@ import org.xhtmlrenderer.swing.SwingReplacedElementFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
+import sun.misc.Launcher;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -64,8 +66,9 @@ public class DiscoverInfoPanel extends TiledBackground {
     final private XHTMLPanel panel;
     final private LauncherDirectories directories;
     final private ResourceLoader resources;
+    private ActionListener loadListener = null;
 
-    public DiscoverInfoPanel(final ResourceLoader loader, String discoverUrl, final IPlatformApi platform, final LauncherDirectories directories, final ModpackSelector modpackSelector, final net.technicpack.ui.controls.installation.SplashScreen splash) {
+    public DiscoverInfoPanel(final ResourceLoader loader, String discoverUrl, final IPlatformApi platform, final LauncherDirectories directories, final ModpackSelector modpackSelector) {
         super(loader.getImage("background_repeat2.png"));
 
         this.directories = directories;
@@ -90,7 +93,7 @@ public class DiscoverInfoPanel extends TiledBackground {
 
             @Override
             public void documentLoaded() {
-                splash.dispose();
+                triggerLoadListener();
             }
 
             @Override
@@ -154,12 +157,27 @@ public class DiscoverInfoPanel extends TiledBackground {
                     //Can't load document from internet- don't beef
                     ex.printStackTrace();
 
-                    splash.dispose();
+                    triggerLoadListener();
                 }
             }
         });
 
         add(panel, BorderLayout.CENTER);
+    }
+
+    public void setLoadListener(ActionListener listener) {
+        this.loadListener = listener;
+    }
+
+    protected void triggerLoadListener() {
+        if (loadListener != null) {
+            EventQueue.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    loadListener.actionPerformed(new ActionEvent(this, 0,"loaded"));
+                }
+            });
+        }
     }
 
     public Document getDiscoverDocument(String url, File localCache) {

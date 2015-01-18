@@ -44,6 +44,7 @@ public class TechnicSettings {
     private String directory;
     private String javaArgs;
     private int latestNewsArticle;
+    private boolean launchToModpacks;
 
     private String launcherSettingsVersion = "0";
 
@@ -95,6 +96,13 @@ public class TechnicSettings {
     public boolean getShowConsole() { return showConsole; }
     public void setShowConsole(boolean showConsole) {
         this.showConsole = showConsole;
+        save();
+    }
+
+    //Whether to launch into the modpacks tab directly or launch to the discover tab
+    public boolean getLaunchToModpacks() { return launchToModpacks; }
+    public void setLaunchToModpacks(boolean launchToModpacks) {
+        this.launchToModpacks = launchToModpacks;
         save();
     }
 

@@ -82,6 +82,8 @@ import net.technicpack.utilslib.Utils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -202,7 +204,7 @@ public class LauncherMain {
         });
     }
 
-    private static void startLauncher(TechnicSettings settings, StartupParameters startupParameters, LauncherDirectories directories, ResourceLoader resources) {
+    private static void startLauncher(final TechnicSettings settings, StartupParameters startupParameters, LauncherDirectories directories, ResourceLoader resources) {
         UIManager.put( "ComboBox.disabledBackground", LauncherFrame.COLOR_FORMELEMENT_INTERNAL );
         UIManager.put( "ComboBox.disabledForeground", LauncherFrame.COLOR_GREY_TEXT );
         System.setProperty("xr.load.xml-reader",  "org.ccil.cowan.tagsoup.Parser");
@@ -254,14 +256,25 @@ public class LauncherMain {
 
         resources.registerResource(selector);
 
-        DiscoverInfoPanel discoverInfoPanel = new DiscoverInfoPanel(resources, startupParameters.getDiscoverUrl(), platform, directories, selector, splash);
+        DiscoverInfoPanel discoverInfoPanel = new DiscoverInfoPanel(resources, startupParameters.getDiscoverUrl(), platform, directories, selector);
 
         MinecraftLauncher launcher = new MinecraftLauncher(platform, directories, userModel, settings.getClientId());
         ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());
         Installer installer = new Installer(startupParameters, mirrorStore, directories, modpackInstaller, launcher, settings, iconMapper);
 
-        LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, selector, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo, platform, directories, packStore, startupParameters, discoverInfoPanel);
+        final LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, selector, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo, platform, directories, packStore, startupParameters, discoverInfoPanel);
         userModel.addAuthListener(frame);
+
+        ActionListener listener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                splash.dispose();
+                if (settings.getLaunchToModpacks())
+                    frame.selectTab("modpacks");
+            }
+        };
+
+        discoverInfoPanel.setLoadListener(listener);
 
         LoginFrame login = new LoginFrame(resources, settings, userModel, skinRepo);
         userModel.addAuthListener(login);
