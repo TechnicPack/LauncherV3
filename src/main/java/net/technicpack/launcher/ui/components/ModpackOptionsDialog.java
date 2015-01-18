@@ -98,6 +98,9 @@ public class ModpackOptionsDialog extends LauncherDialog {
     }
 
     protected void selectManual() {
+        if (manualBuildList.getItemCount() == 0)
+            return;
+
         if (manualBuildList.getSelectedItem() == null)
             manualBuildList.setSelectedItem(new PackBuildItem(modpack.getBuild(), resources, modpack));
         if (manualBuildList.getSelectedItem() == null)
@@ -398,6 +401,16 @@ public class ModpackOptionsDialog extends LauncherDialog {
 
         for (String build : modpack.getBuilds()) {
             manualBuildList.insertItemAt(new PackBuildItem(build, resources, modpack), 0);
+        }
+
+        if (manualBuildList.getItemCount() == 0) {
+            recommended.setEnabled(false);
+            latest.setEnabled(false);
+            manual.setEnabled(false);
+            recommended.setSelected(true);
+            manualBuildList.addItem(new PackBuildItem(resources.getString("modpackoptions.version.missing"), resources, modpack));
+            manualBuildList.setEnabled(false);
+            return;
         }
 
         String build = modpack.getBuild();
