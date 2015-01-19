@@ -489,6 +489,10 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         if (slug != null)
             return slug;
 
+        slug = getApiLinkSlugWithUrl(searchText, "http://technicpack.net/api/modpack/");
+        if (slug != null)
+            return slug;
+
         slug = getApiLinkSlugWithUrl(searchText, "api.technicpack.net/modpack/");
         if (slug != null)
             return slug;
@@ -497,11 +501,19 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         if (slug != null)
             return slug;
 
+        slug = getApiLinkSlugWithUrl(searchText, "technicpack.net/api/modpack/");
+        if (slug != null)
+            return slug;
+
         slug = getApiLinkSlugWithUrl(searchText, "https://api.technicpack.net/modpack/");
         if (slug != null)
             return slug;
 
-        return getApiLinkSlugWithUrl(searchText, "https://www.technicpack.net/api/modpack/");
+        slug = getApiLinkSlugWithUrl(searchText, "https://www.technicpack.net/api/modpack/");
+        if (slug != null)
+            return slug;
+
+        return getApiLinkSlugWithUrl(searchText, "https://technicpack.net/api/modpack/");
     }
 
     protected String getSiteSlug(String searchText) {
