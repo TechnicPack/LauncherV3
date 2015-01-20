@@ -32,6 +32,9 @@ import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.image.face.CrafatarFaceImageStore;
+import net.technicpack.launchercore.launch.java.JavaVersionRepository;
+import net.technicpack.launchercore.launch.java.source.FileJavaSource;
+import net.technicpack.launchercore.launch.java.source.InstalledJavaSource;
 import net.technicpack.launchercore.logging.BuildLogFormatter;
 import net.technicpack.launchercore.logging.RotatingFileHandler;
 import net.technicpack.launchercore.modpacks.PackLoader;
@@ -216,6 +219,11 @@ public class LauncherMain {
         splash.setLocationRelativeTo(null);
         splash.setVisible(true);
 
+        JavaVersionRepository javaVersions = new JavaVersionRepository();
+        (new InstalledJavaSource()).enumerateVersions(javaVersions);
+        FileJavaSource javaVersionFile = FileJavaSource.load(new File(settings.getTechnicRoot(), "javaVersions.json"));
+        javaVersionFile.enumerateVersions(javaVersions);
+
         IUserStore<MojangUser> users = TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json"));
         UserModel userModel = new UserModel(users, new AuthenticationService());
 
@@ -258,7 +266,7 @@ public class LauncherMain {
 
         DiscoverInfoPanel discoverInfoPanel = new DiscoverInfoPanel(resources, startupParameters.getDiscoverUrl(), platform, directories, selector);
 
-        MinecraftLauncher launcher = new MinecraftLauncher(platform, directories, userModel, settings.getClientId());
+        MinecraftLauncher launcher = new MinecraftLauncher(platform, directories, userModel, settings.getClientId(), javaVersions);
         ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());
         Installer installer = new Installer(startupParameters, mirrorStore, directories, modpackInstaller, launcher, settings, iconMapper);
 
