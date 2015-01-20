@@ -77,6 +77,7 @@ public class PlatformPackInfoRepository implements IAuthoritativePackSource {
                 else
                     return new CombinedPackInfo(solderInfo, platformInfo);
             } catch (RestfulAPIException ex) {
+                ex.printStackTrace();
                 return platformInfo;
             }
         } else {
