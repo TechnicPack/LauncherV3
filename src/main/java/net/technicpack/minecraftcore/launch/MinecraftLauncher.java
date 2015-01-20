@@ -21,6 +21,7 @@ package net.technicpack.minecraftcore.launch;
 
 import net.technicpack.launchercore.launch.GameProcess;
 import net.technicpack.launchercore.launch.ProcessExitListener;
+import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.launch.LaunchOptions;
@@ -47,12 +48,14 @@ public class MinecraftLauncher {
     private final IPlatformApi platformApi;
     private final String clientId;
     private final UserModel<MojangUser> userModel;
+    private final JavaVersionRepository javaVersions;
 
-	public MinecraftLauncher(IPlatformApi platformApi, LauncherDirectories directories, UserModel userModel, String clientId) {
+	public MinecraftLauncher(final IPlatformApi platformApi, final LauncherDirectories directories, final UserModel userModel, final String clientId, final JavaVersionRepository javaVersions) {
         this.directories = directories;
         this.platformApi = platformApi;
         this.clientId = clientId;
         this.userModel = userModel;
+        this.javaVersions = javaVersions;
 	}
 
 	public GameProcess launch(ModpackModel pack, int memory, LaunchOptions options, CompleteVersion version) throws IOException {
@@ -84,7 +87,7 @@ public class MinecraftLauncher {
 
 	private List<String> buildCommands(ModpackModel pack, long memory, MojangVersion version, LaunchOptions options) {
 		List<String> commands = new ArrayList<String>();
-		commands.add(OperatingSystem.getJavaDir());
+		commands.add(javaVersions.getSelectedPath());
 
 		OperatingSystem operatingSystem = OperatingSystem.getOperatingSystem();
 
