@@ -113,6 +113,9 @@ public class SearchResultPackInfo implements PackInfo {
     }
 
     @Override
+    public boolean isServerPack() { return false; }
+
+    @Override
     public Modpack getModpack(String build) throws BuildInaccessibleException {
         throw new BuildInaccessibleException(getDisplayName(), build);
     }

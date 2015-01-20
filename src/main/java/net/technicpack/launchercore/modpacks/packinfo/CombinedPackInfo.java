@@ -168,6 +168,14 @@ public class CombinedPackInfo implements PackInfo {
     }
 
     @Override
+    public boolean isServerPack() {
+        if (platformPackInfo != null)
+            return platformPackInfo.isServerPack();
+
+        return false;
+    }
+
+    @Override
     public Modpack getModpack(String build) throws BuildInaccessibleException {
         if (solderPackInfo != null)
             return solderPackInfo.getModpack(build);

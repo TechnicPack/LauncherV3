@@ -45,6 +45,7 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
     private Integer runs;
     private Integer downloads;
     private boolean forceDir;
+    private boolean isServer;
     private ArrayList<FeedItem> feed = new ArrayList<FeedItem>();
 
     private transient boolean isLocal = false;
@@ -144,6 +145,8 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
     public Integer getDownloads() {
         return downloads;
     }
+
+    public boolean isServerPack() { return isServer; }
 
     @Override
     public Modpack getModpack(String build) throws BuildInaccessibleException {

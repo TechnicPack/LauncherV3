@@ -136,6 +136,9 @@ public class SolderPackInfo extends RestObject implements PackInfo {
     }
 
     @Override
+    public boolean isServerPack() { return false; }
+
+    @Override
     public Modpack getModpack(String build) throws BuildInaccessibleException {
         return solder.getPackBuild(build);
     }

@@ -245,6 +245,13 @@ public class ModpackModel {
         return packInfo.getDescription();
     }
 
+    public boolean isServerPack() {
+        if (packInfo == null)
+            return false;
+
+        return packInfo.isServerPack();
+    }
+
     public Integer getLikes() {
         if (packInfo == null)
             return null;
