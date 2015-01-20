@@ -157,14 +157,27 @@ public class Utils {
             ProcessBuilder pb = new ProcessBuilder(command);
             pb.redirectErrorStream(true);
             Process process = pb.start();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            final StringBuilder response=new StringBuilder();
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        String line;
+                        while ((line = bufferedReader.readLine()) != null) {
+                            response.append(line + "\n");
+                        }
+                    } catch (IOException ex) {
+                        //Don't let other process' problems concern us
+                    } finally {
+                        IOUtils.closeQuietly(bufferedReader);
+                    }
+                }
+            }).start();
             process.waitFor();
-            StringBuilder response=new StringBuilder();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                response.append(line + "\n");
-            }
-            bufferedReader.close();
+
+
             if (response.toString().length() > 0) {
                 out = response.toString().trim();
             }

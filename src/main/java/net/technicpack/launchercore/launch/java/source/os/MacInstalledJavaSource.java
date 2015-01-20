@@ -36,6 +36,6 @@ public class MacInstalledJavaSource implements IVersionSource {
 
     protected String getMacJava(String versionNumber) {
         String path = Utils.getProcessOutput("/usr/libexec/java_home", "-v " + versionNumber);
-        return path + File.pathSeparator + "bin" + File.pathSeparator + "java";
+        return path + File.separator + "bin" + File.separator + "java";
     }
 }

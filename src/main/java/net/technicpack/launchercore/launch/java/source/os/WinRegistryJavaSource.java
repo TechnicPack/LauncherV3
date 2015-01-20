@@ -34,7 +34,7 @@ import java.io.File;
 public class WinRegistryJavaSource implements IVersionSource {
     @Override
     public void enumerateVersions(JavaVersionRepository repository) {
-        String output = Utils.getProcessOutput("reg","query","HKEY_LOCAL_MACHINE\\Software\\JavaSoft","/f Home","/t REG_SZ","/s");
+        String output = Utils.getProcessOutput("reg","query","HKEY_LOCAL_MACHINE\\Software\\JavaSoft\\","/f","Home","/t","REG_SZ","/s");
 
         //Split reg query response into lines
         for (String line : output.split("\\r?\\n")) {
@@ -54,7 +54,7 @@ public class WinRegistryJavaSource implements IVersionSource {
             typeIndex += "REG_SZ".length();
 
             String path = line.substring(typeIndex).trim();
-            repository.addVersion(new FileBasedJavaVersion(new File(path + File.pathSeparator + "bin" + File.pathSeparator + "javaw.exe")));
+            repository.addVersion(new FileBasedJavaVersion(new File(path + File.separator + "bin" + File.separator + "javaw.exe")));
         }
     }
 }
