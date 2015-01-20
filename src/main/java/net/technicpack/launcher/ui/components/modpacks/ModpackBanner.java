@@ -102,6 +102,9 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
         if (modpack.getPackInfo() instanceof SolderPackInfo || modpack.getPackInfo() instanceof CombinedPackInfo)
             addTag("launcher.pack.tag.solder", LauncherFrame.COLOR_GREEN);
 
+        if (modpack.isServerPack())
+            addTag("launcher.pack.tag.server", LauncherFrame.COLOR_SERVER);
+
         if (modpack.isLocalOnly())
             addTag("launcher.pack.tag.offline", LauncherFrame.COLOR_RED);
 
