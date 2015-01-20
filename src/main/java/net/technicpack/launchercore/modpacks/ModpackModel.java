@@ -90,7 +90,21 @@ public class ModpackModel {
     }
 
     public void setPackInfo(PackInfo packInfo) {
-        this.packInfo = packInfo;
+
+        //HACK
+        //I need to rework the way platform & solder data interact to produce a complete pack, but until I do so, this
+        //awesome hack will combine platform & solder data where necessary
+        if (packInfo instanceof SolderPackInfo && this.packInfo instanceof PlatformPackInfo) {
+            this.packInfo = new CombinedPackInfo(packInfo, this.packInfo);
+        } else if (packInfo instanceof PlatformPackInfo && this.packInfo instanceof SolderPackInfo) {
+            this.packInfo = new CombinedPackInfo(this.packInfo, packInfo);
+        } else if (packInfo instanceof SolderPackInfo && this.packInfo instanceof CombinedPackInfo) {
+            this.packInfo = new CombinedPackInfo(packInfo, this.packInfo);
+        } else if (packInfo instanceof PlatformPackInfo && this.packInfo instanceof CombinedPackInfo) {
+            this.packInfo = new CombinedPackInfo(this.packInfo, packInfo);
+        } else {
+            this.packInfo = packInfo;
+        }
     }
 
     public String getName() {
