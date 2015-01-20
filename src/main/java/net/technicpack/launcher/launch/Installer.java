@@ -124,14 +124,25 @@ public class Installer {
 
                         long memory = Memory.getClosesAvailableMemory(Memory.getMemoryFromId(settings.getMemory())).getMemoryMB();
 
-                        LaunchOptions options = new LaunchOptions(pack.getDisplayName(), packIconMapper.getImageLocation(pack).getAbsolutePath(), startupParameters.getWidth(), startupParameters.getHeight(), startupParameters.getFullscreen());
-                        launcherUnhider = new LauncherUnhider(settings, frame);
-                        launcher.launch(pack, memory, options, launcherUnhider, version);
-
                         LaunchAction launchAction = settings.getLaunchAction();
 
                         if (launchAction == null || launchAction == LaunchAction.HIDE) {
+                            launcherUnhider = new LauncherUnhider(settings, frame);
+                        } else
+                            launcherUnhider = null;
+
+                        LaunchOptions options = new LaunchOptions(pack.getDisplayName(), packIconMapper.getImageLocation(pack).getAbsolutePath(), startupParameters.getWidth(), startupParameters.getHeight(), startupParameters.getFullscreen());
+                        launcher.launch(pack, memory, options, launcherUnhider, version);
+
+                        if (launchAction == null || launchAction == LaunchAction.HIDE) {
                             frame.setVisible(false);
+                        } else if (launchAction == LaunchAction.NOTHING) {
+                            EventQueue.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    frame.launchCompleted();
+                                }
+                            });
                         } else if (launchAction == LaunchAction.CLOSE) {
                             System.exit(0);
                         }
