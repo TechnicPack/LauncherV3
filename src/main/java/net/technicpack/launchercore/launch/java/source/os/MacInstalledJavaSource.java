@@ -31,7 +31,7 @@ public class MacInstalledJavaSource implements IVersionSource {
     public void enumerateVersions(JavaVersionRepository repository) {
         repository.addVersion(new FileBasedJavaVersion(new File(getMacJava("1.6"))));
         repository.addVersion(new FileBasedJavaVersion(new File(getMacJava("1.7"))));
-        repository.addVersion(new FileBasedJavaVersion(new File(getMacJava("1.9"))));
+        repository.addVersion(new FileBasedJavaVersion(new File(getMacJava("1.8"))));
     }
 
     protected String getMacJava(String versionNumber) {
