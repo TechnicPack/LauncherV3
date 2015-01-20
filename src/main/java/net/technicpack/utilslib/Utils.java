@@ -142,4 +142,41 @@ public class Utils {
             return false;
         }
     }
+
+    /**
+     *
+     * Run a command on the local command line and return the program output.
+     * THIS COMMAND IS BLOCKING!  Only run for short command line stuff, or I guess run on a thread.
+     *
+     * @param command List of args to run on the command line
+     * @return The newline-separated program output
+     */
+    public static String getProcessOutput(String... command) {
+        String out = null;
+        try {
+            ProcessBuilder pb = new ProcessBuilder(command);
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            process.waitFor();
+            StringBuilder response=new StringBuilder();
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                response.append(line + "\n");
+            }
+            bufferedReader.close();
+            if (response.toString().length() > 0) {
+                out = response.toString().trim();
+            }
+        }
+        catch (IOException e) {
+            //Some kind of problem running java -version or getting output, just assume the version is bad
+            return null;
+        } catch (InterruptedException ex) {
+            //Something booted us while we were waiting on java -version to complete, just assume
+            //this version is bad
+            return null;
+        }
+        return out;
+    }
 }
