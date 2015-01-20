@@ -57,7 +57,7 @@ public class FileJavaSource implements IVersionSource {
 
     public static FileJavaSource load(File file) {
 
-        if (file == null || file.exists())
+        if (file == null || !file.exists())
             return new FileJavaSource(file);
 
         try {
