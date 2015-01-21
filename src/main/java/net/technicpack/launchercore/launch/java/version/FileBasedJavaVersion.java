@@ -81,11 +81,13 @@ public class FileBasedJavaVersion implements IJavaVersion {
      * the executable.
      */
     protected String getVersionNumberFromJava() {
+        Utils.getLogger().info("Getting info for "+javaPath.getAbsolutePath());
         String data = Utils.getProcessOutput(javaPath.getAbsolutePath(), "-version");
 
         if (data == null)
             return null;
 
+        Utils.getLogger().info(data);
         is64Bit = data.contains("64-Bit");
 
         int versionStartIndex = data.indexOf("java version \"");
