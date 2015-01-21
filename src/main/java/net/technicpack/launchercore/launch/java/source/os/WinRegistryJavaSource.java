@@ -34,12 +34,15 @@ import java.io.File;
 public class WinRegistryJavaSource implements IVersionSource {
     @Override
     public void enumerateVersions(JavaVersionRepository repository) {
-        String output = Utils.getProcessOutput("reg","query","HKEY_LOCAL_MACHINE\\Software\\JavaSoft\\","/f","Home","/t","REG_SZ","/s");
+        enumerateRegistryForBitness(repository, "32");
+        enumerateRegistryForBitness(repository, "64");
+    }
+
+    public void enumerateRegistryForBitness(JavaVersionRepository repository, String bitness) {
+        String output = Utils.getProcessOutput("reg","query","HKEY_LOCAL_MACHINE\\Software\\JavaSoft\\","/f","Home","/t","REG_SZ","/s","/reg:"+bitness);
 
         if (output == null || output.isEmpty())
             return;
-
-        Utils.getLogger().info(output);
 
         //Split reg query response into lines
         for (String line : output.split("\\r?\\n")) {
