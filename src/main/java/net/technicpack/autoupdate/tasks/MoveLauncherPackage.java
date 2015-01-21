@@ -70,6 +70,7 @@ public class MoveLauncherPackage implements IInstallTask {
 
             try {
                 dest.mkdirs();
+                dest.createNewFile();
                 sourceStream = new FileInputStream(source);
                 destStream = new FileOutputStream(dest);
                 IOUtils.copy(sourceStream, destStream);
