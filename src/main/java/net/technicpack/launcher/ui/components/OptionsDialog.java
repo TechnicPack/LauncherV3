@@ -228,8 +228,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         versionSelect.removeAllItems();
         versionSelect.addItem(new DefaultVersionItem(javaVersions.getVersion(null), resources));
 
-        IJavaVersion best64Bit = javaVersions.getVersion("64bit");
-
+        IJavaVersion best64Bit = javaVersions.getBest64BitVersion();
         if (best64Bit != null)
             versionSelect.addItem(new Best64BitVersionItem(javaVersions.getVersion("64bit"), resources));
 
