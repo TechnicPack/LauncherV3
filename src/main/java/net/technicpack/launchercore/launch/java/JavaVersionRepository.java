@@ -57,7 +57,7 @@ public class JavaVersionRepository {
             selectedVersion = version;
     }
 
-    protected IJavaVersion getBest64BitVersion() {
+    public IJavaVersion getBest64BitVersion() {
         IJavaVersion bestVersion = null;
         for (IJavaVersion version : loadedVersions.values()) {
             if (version.is64Bit()) {
