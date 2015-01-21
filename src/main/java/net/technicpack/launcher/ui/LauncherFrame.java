@@ -22,6 +22,8 @@ import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.ui.components.ModpackOptionsDialog;
 import net.technicpack.launchercore.install.LauncherDirectories;
+import net.technicpack.launchercore.launch.java.JavaVersionRepository;
+import net.technicpack.launchercore.launch.java.source.FileJavaSource;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.rest.RestObject;
@@ -118,6 +120,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private final LauncherDirectories directories;
     private final IInstalledPackRepository packRepo;
     private final StartupParameters params;
+    private final JavaVersionRepository javaVersions;
+    private final FileJavaSource fileJavaSource;
 
     private ModpackOptionsDialog modpackOptionsDialog = null;
 
@@ -143,7 +147,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     ModpackInfoPanel modpackPanel;
     DiscoverInfoPanel discoverInfoPanel;
 
-    public LauncherFrame(final ResourceLoader resources, final ImageRepository<IUserType> skinRepository, final UserModel userModel, final TechnicSettings settings, final ModpackSelector modpackSelector, final ImageRepository<ModpackModel> iconRepo, final ImageRepository<ModpackModel> logoRepo, final ImageRepository<ModpackModel> backgroundRepo, final Installer installer, final ImageRepository<AuthorshipInfo> avatarRepo, final IPlatformApi platformApi, final LauncherDirectories directories, final IInstalledPackRepository packRepository, final StartupParameters params, final DiscoverInfoPanel discoverInfoPanel) {
+    public LauncherFrame(final ResourceLoader resources, final ImageRepository<IUserType> skinRepository, final UserModel userModel, final TechnicSettings settings, final ModpackSelector modpackSelector, final ImageRepository<ModpackModel> iconRepo, final ImageRepository<ModpackModel> logoRepo, final ImageRepository<ModpackModel> backgroundRepo, final Installer installer, final ImageRepository<AuthorshipInfo> avatarRepo, final IPlatformApi platformApi, final LauncherDirectories directories, final IInstalledPackRepository packRepository, final StartupParameters params, final DiscoverInfoPanel discoverInfoPanel, final JavaVersionRepository javaVersions, final FileJavaSource fileJavaSource) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -161,6 +165,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.packRepo = packRepository;
         this.params = params;
         this.discoverInfoPanel = discoverInfoPanel;
+        this.fileJavaSource = fileJavaSource;
+        this.javaVersions = javaVersions;
 
         //Handles rebuilding the frame, so use it to build the frame in the first place
         relocalize(resources);
@@ -352,7 +358,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     protected void openLauncherOptions() {
         centralPanel.setTintActive(true);
         footer.setTintActive(true);
-        OptionsDialog dialog = new OptionsDialog(this, settings, resources, params);
+        OptionsDialog dialog = new OptionsDialog(this, settings, resources, params, javaVersions, fileJavaSource);
         dialog.setVisible(true);
         centralPanel.setTintActive(false);
         footer.setTintActive(false);

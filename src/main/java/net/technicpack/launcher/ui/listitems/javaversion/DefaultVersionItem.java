@@ -16,19 +16,19 @@
  * along with the Technic Launcher.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.launcher.ui.listitems;
+package net.technicpack.launcher.ui.listitems.javaversion;
 
-import net.technicpack.launchercore.util.LaunchAction;
+import net.technicpack.launchercore.launch.java.IJavaVersion;
+import net.technicpack.ui.lang.ResourceLoader;
 
-public class OnLaunchItem {
-    private String text;
-    private LaunchAction launchAction;
+public class DefaultVersionItem extends JavaVersionItem {
 
-    public OnLaunchItem(String text, LaunchAction action) {
-        this.text = text;
-        this.launchAction = action;
+    public DefaultVersionItem(IJavaVersion version, ResourceLoader resourceLoader) {
+        super(version, resourceLoader);
     }
 
-    public LaunchAction getLaunchAction() { return launchAction; }
-    public String toString() { return text; }
+    @Override
+    public String toString() {
+        return getResourceLoader().getString("launcheroptions.java.defaultversion", super.toString());
+    }
 }

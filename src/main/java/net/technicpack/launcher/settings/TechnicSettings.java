@@ -45,6 +45,7 @@ public class TechnicSettings {
     private String javaArgs;
     private int latestNewsArticle;
     private boolean launchToModpacks;
+    private String javaVersion = "default";
 
     private String launcherSettingsVersion = "0";
 
@@ -90,6 +91,12 @@ public class TechnicSettings {
     public String getBuildStream() { return buildStream; }
     public void setBuildStream(String buildStream) {
         this.buildStream = buildStream;
+        save();
+    }
+
+    public String getJavaVersion() { return javaVersion; }
+    public void setJavaVersion(String javaVersion) {
+        this.javaVersion = javaVersion;
         save();
     }
 

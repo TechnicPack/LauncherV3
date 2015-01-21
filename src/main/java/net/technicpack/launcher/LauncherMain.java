@@ -223,6 +223,7 @@ public class LauncherMain {
         (new InstalledJavaSource()).enumerateVersions(javaVersions);
         FileJavaSource javaVersionFile = FileJavaSource.load(new File(settings.getTechnicRoot(), "javaVersions.json"));
         javaVersionFile.enumerateVersions(javaVersions);
+        javaVersions.selectVersion(settings.getJavaVersion());
 
         IUserStore<MojangUser> users = TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json"));
         UserModel userModel = new UserModel(users, new AuthenticationService());
@@ -270,7 +271,7 @@ public class LauncherMain {
         ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());
         Installer installer = new Installer(startupParameters, mirrorStore, directories, modpackInstaller, launcher, settings, iconMapper);
 
-        final LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, selector, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo, platform, directories, packStore, startupParameters, discoverInfoPanel);
+        final LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, selector, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo, platform, directories, packStore, startupParameters, discoverInfoPanel, javaVersions, javaVersionFile);
         userModel.addAuthListener(frame);
 
         ActionListener listener = new ActionListener() {
