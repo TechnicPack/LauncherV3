@@ -23,6 +23,7 @@ import net.technicpack.launchercore.launch.java.version.CurrentJavaVersion;
 import net.technicpack.utilslib.OperatingSystem;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,7 +57,7 @@ public class JavaVersionRepository {
             selectedVersion = version;
     }
 
-    public IJavaVersion getBest64BitVersion() {
+    protected IJavaVersion getBest64BitVersion() {
         IJavaVersion bestVersion = null;
         for(IJavaVersion version : loadedVersions.values()) {
             if (version.is64Bit()) {
@@ -75,6 +76,8 @@ public class JavaVersionRepository {
 
         return bestVersion;
     }
+
+    public Collection<IJavaVersion> getVersions() { return versionsByString.values(); }
 
     public IJavaVersion getSelectedVersion() { return selectedVersion; }
     public void selectVersion(String version) {
