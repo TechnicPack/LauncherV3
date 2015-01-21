@@ -59,7 +59,7 @@ public class JavaVersionRepository {
 
     protected IJavaVersion getBest64BitVersion() {
         IJavaVersion bestVersion = null;
-        for(IJavaVersion version : loadedVersions.values()) {
+        for (IJavaVersion version : loadedVersions.values()) {
             if (version.is64Bit()) {
                 if (bestVersion == null || bestVersion.getVersionNumber() == null) {
                     bestVersion = version;
@@ -77,26 +77,38 @@ public class JavaVersionRepository {
         return bestVersion;
     }
 
-    public Collection<IJavaVersion> getVersions() { return versionsByString.values(); }
+    public Collection<IJavaVersion> getVersions() {
+        return versionsByString.values();
+    }
 
-    public IJavaVersion getSelectedVersion() { return selectedVersion; }
+    public IJavaVersion getSelectedVersion() {
+        return selectedVersion;
+    }
+
     public void selectVersion(String version) {
+        selectedVersion = getVersion(version);
+    }
+
+    public IJavaVersion getVersion(String version) {
         if (version == null || version.isEmpty() || version.equals("default")) {
-            selectedVersion = loadedVersions.get(null);
+            return loadedVersions.get(null);
         } else if (version.equals("64bit")) {
-            selectedVersion = getBest64BitVersion();
-            if (selectedVersion == null)
-                selectedVersion = loadedVersions.get(null);
+            IJavaVersion best64BitVersion = getBest64BitVersion();
+            if (best64BitVersion == null)
+                best64BitVersion = loadedVersions.get(null);
+            return best64BitVersion;
         } else {
-            selectedVersion = versionsByString.get(version);
+            IJavaVersion specifiedVersion = versionsByString.get(version);
 
-            if ( selectedVersion == null) {
-                selectedVersion = loadedVersions.get(new File(version));
+            if (specifiedVersion == null) {
+                specifiedVersion = loadedVersions.get(new File(version));
             }
 
-            if (selectedVersion == null) {
-                loadedVersions.get(null);
+            if (specifiedVersion == null) {
+                specifiedVersion = loadedVersions.get(null);
             }
+
+            return specifiedVersion;
         }
     }
 
