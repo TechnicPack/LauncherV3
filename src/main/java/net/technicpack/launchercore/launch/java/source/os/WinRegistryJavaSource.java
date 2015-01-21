@@ -36,6 +36,11 @@ public class WinRegistryJavaSource implements IVersionSource {
     public void enumerateVersions(JavaVersionRepository repository) {
         String output = Utils.getProcessOutput("reg","query","HKEY_LOCAL_MACHINE\\Software\\JavaSoft\\","/f","Home","/t","REG_SZ","/s");
 
+        if (output == null || output.isEmpty())
+            return;
+
+        Utils.getLogger().info(output);
+
         //Split reg query response into lines
         for (String line : output.split("\\r?\\n")) {
 
