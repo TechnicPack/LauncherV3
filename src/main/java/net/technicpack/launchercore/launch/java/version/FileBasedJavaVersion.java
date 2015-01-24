@@ -47,6 +47,22 @@ public class FileBasedJavaVersion implements IJavaVersion {
         return versionNumber;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+        if (!(obj instanceof FileBasedJavaVersion))
+            return false;
+        return (is64Bit() == ((FileBasedJavaVersion) obj).is64Bit() && getVersionNumber().equals(((FileBasedJavaVersion) obj).getVersionNumber()));
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = getVersionNumber().hashCode();
+        hash = (hash * 31) + (is64Bit()?1:0);
+        return hash;
+    }
+
     public boolean is64Bit() {
         if (!haveQueriedVersion) {
             verify();

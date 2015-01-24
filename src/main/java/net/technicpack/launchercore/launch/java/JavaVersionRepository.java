@@ -25,6 +25,7 @@ import net.technicpack.utilslib.OperatingSystem;
 import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 /**
@@ -32,7 +33,7 @@ import java.util.Map;
  */
 public class JavaVersionRepository {
     private Map<File, IJavaVersion> loadedVersions = new HashMap<File, IJavaVersion>();
-    private Map<String, IJavaVersion> versionsByString = new HashMap<String, IJavaVersion>();
+    private Collection<IJavaVersion> versionCache = new LinkedList<IJavaVersion>();
     private IJavaVersion selectedVersion;
 
     public JavaVersionRepository() {
@@ -48,11 +49,11 @@ public class JavaVersionRepository {
         File path = version.getJavaPath();
         String versionText = version.getVersionNumber();
 
-        if (versionsByString.containsKey(versionText))
+        if (versionCache.contains(version))
             return;
 
         loadedVersions.put(path, version);
-        versionsByString.put(versionText, version);
+        versionCache.add(version);
         if (selectedVersion == null)
             selectedVersion = version;
     }
@@ -78,18 +79,18 @@ public class JavaVersionRepository {
     }
 
     public Collection<IJavaVersion> getVersions() {
-        return versionsByString.values();
+        return versionCache;
     }
 
     public IJavaVersion getSelectedVersion() {
         return selectedVersion;
     }
 
-    public void selectVersion(String version) {
-        selectedVersion = getVersion(version);
+    public void selectVersion(String version, boolean is64Bit) {
+        selectedVersion = getVersion(version, is64Bit);
     }
 
-    public IJavaVersion getVersion(String version) {
+    public IJavaVersion getVersion(String version, boolean is64Bit) {
         if (version == null || version.isEmpty() || version.equals("default")) {
             return loadedVersions.get(null);
         } else if (version.equals("64bit")) {
@@ -98,11 +99,12 @@ public class JavaVersionRepository {
                 best64BitVersion = loadedVersions.get(null);
             return best64BitVersion;
         } else {
-            IJavaVersion specifiedVersion = versionsByString.get(version);
-
-            if (specifiedVersion == null) {
-                specifiedVersion = loadedVersions.get(new File(version));
+            for (IJavaVersion checkVersion : versionCache) {
+                if (version.equals(checkVersion.getVersionNumber()) && is64Bit == checkVersion.is64Bit())
+                    return checkVersion;
             }
+
+            IJavaVersion specifiedVersion = loadedVersions.get(new File(version));
 
             if (specifiedVersion == null) {
                 specifiedVersion = loadedVersions.get(null);
