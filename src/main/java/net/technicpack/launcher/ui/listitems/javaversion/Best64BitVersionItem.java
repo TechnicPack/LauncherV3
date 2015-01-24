@@ -27,6 +27,9 @@ public class Best64BitVersionItem extends JavaVersionItem {
     }
 
     @Override
+    public String getVersionNumber() { return "64bit"; }
+
+    @Override
     public String toString() {
         return getResourceLoader().getString("launcheroptions.java.best64version", super.toString());
     }

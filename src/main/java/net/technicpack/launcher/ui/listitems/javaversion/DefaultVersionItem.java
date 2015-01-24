@@ -28,6 +28,9 @@ public class DefaultVersionItem extends JavaVersionItem {
     }
 
     @Override
+    public String getVersionNumber() { return "default"; }
+
+    @Override
     public String toString() {
         return getResourceLoader().getString("launcheroptions.java.defaultversion", super.toString());
     }

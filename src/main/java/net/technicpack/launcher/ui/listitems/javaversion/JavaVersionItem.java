@@ -31,6 +31,9 @@ public class JavaVersionItem {
         this.resourceLoader = resourceLoader;
     }
 
+    public String getVersionNumber() { return javaVersion.getVersionNumber(); }
+    public boolean is64Bit() { return javaVersion.is64Bit(); }
+
     protected IJavaVersion getJavaVersion() { return javaVersion; }
     protected ResourceLoader getResourceLoader() { return resourceLoader; }
 

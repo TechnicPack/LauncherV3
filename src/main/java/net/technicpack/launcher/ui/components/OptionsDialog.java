@@ -144,7 +144,12 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     }
 
     protected void changeJavaVersion() {
-
+        String version = ((JavaVersionItem)versionSelect.getSelectedItem()).getVersionNumber();
+        boolean is64 = ((JavaVersionItem)versionSelect.getSelectedItem()).is64Bit();
+        javaVersions.selectVersion(version, is64);
+        settings.setJavaVersion(version);
+        settings.setJavaBitness(is64);
+        settings.save();
     }
 
     protected void changeMemory() {
@@ -234,6 +239,21 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         for (IJavaVersion version : javaVersions.getVersions()) {
             versionSelect.addItem(new JavaVersionItem(version, resources));
+        }
+
+        String settingsVersion = settings.getJavaVersion();
+        boolean settingsBitness = settings.getJavaBitness();
+        if (settingsVersion == null || settingsVersion.isEmpty() || settingsVersion.equals("default"))
+            versionSelect.setSelectedIndex(0);
+        else if (settingsVersion.equals("64bit"))
+            versionSelect.setSelectedIndex(1);
+        else {
+            for (int i = 2; i < versionSelect.getItemCount(); i++) {
+                if (((JavaVersionItem)versionSelect.getItemAt(i)).getVersionNumber().equals(settingsVersion) && ((JavaVersionItem)versionSelect.getItemAt(i)).is64Bit() == settingsBitness) {
+                    versionSelect.setSelectedIndex(i);
+                    break;
+                }
+            }
         }
 
         versionSelect.addActionListener(new ActionListener() {
