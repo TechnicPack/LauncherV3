@@ -46,6 +46,10 @@ public class TechnicSettings {
     private int latestNewsArticle;
     private boolean launchToModpacks;
     private String javaVersion = "default";
+    /**
+     * 64 bit if true, 32 bit if false
+     */
+    private boolean javaBitness = true;
 
     private String launcherSettingsVersion = "0";
 
@@ -97,6 +101,12 @@ public class TechnicSettings {
     public String getJavaVersion() { return javaVersion; }
     public void setJavaVersion(String javaVersion) {
         this.javaVersion = javaVersion;
+        save();
+    }
+
+    public boolean getJavaBitness() { return javaBitness; }
+    public void setJavaBitness(boolean javaBitness) {
+        this.javaBitness = javaBitness;
         save();
     }
 

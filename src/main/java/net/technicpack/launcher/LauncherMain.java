@@ -223,7 +223,7 @@ public class LauncherMain {
         (new InstalledJavaSource()).enumerateVersions(javaVersions);
         FileJavaSource javaVersionFile = FileJavaSource.load(new File(settings.getTechnicRoot(), "javaVersions.json"));
         javaVersionFile.enumerateVersions(javaVersions);
-        javaVersions.selectVersion(settings.getJavaVersion());
+        javaVersions.selectVersion(settings.getJavaVersion(), settings.getJavaBitness());
 
         IUserStore<MojangUser> users = TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json"));
         UserModel userModel = new UserModel(users, new AuthenticationService());
