@@ -27,6 +27,7 @@ import net.technicpack.utilslib.Utils;
 import javax.swing.*;
 import java.io.*;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -55,7 +56,9 @@ public abstract class Relauncher {
     }
 
     public static String getRunningPath(Class clazz) throws UnsupportedEncodingException {
-        return URLDecoder.decode(clazz.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8");
+        String path = clazz.getProtectionDomain().getCodeSource().getLocation().getPath();
+        path.replace("+", URLEncoder.encode("+", "UTF-8"));
+        return URLDecoder.decode(path, "UTF-8");
     }
 
     protected abstract Class getMainClass();
