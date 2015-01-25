@@ -57,7 +57,7 @@ public abstract class Relauncher {
 
     public static String getRunningPath(Class clazz) throws UnsupportedEncodingException {
         String path = clazz.getProtectionDomain().getCodeSource().getLocation().getPath();
-        path.replace("+", URLEncoder.encode("+", "UTF-8"));
+        path = path.replace("+", URLEncoder.encode("+", "UTF-8"));
         return URLDecoder.decode(path, "UTF-8");
     }
 
@@ -70,6 +70,7 @@ public abstract class Relauncher {
     public abstract InstallTasksQueue buildUpdaterTasks();
     public abstract String[] getLaunchArgs();
     public abstract void updateComplete();
+    public abstract boolean canReboot();
 
     public boolean runAutoUpdater() throws IOException, InterruptedException {
         if (isLauncherOnly())
@@ -77,15 +78,17 @@ public abstract class Relauncher {
 
         boolean needsReboot = false;
 
-        if (System.getProperty("awt.useSystemAAFontSettings") == null || !System.getProperty("awt.useSystemAAFontSettings").equals("lcd"))
-            needsReboot = true;
-        else if (!Boolean.parseBoolean(System.getProperty("java.net.preferIPv4Stack")))
-            needsReboot = true;
+        if (canReboot()) {
+            if (System.getProperty("awt.useSystemAAFontSettings") == null || !System.getProperty("awt.useSystemAAFontSettings").equals("lcd"))
+                needsReboot = true;
+            else if (!Boolean.parseBoolean(System.getProperty("java.net.preferIPv4Stack")))
+                needsReboot = true;
+        }
 
         InstallTasksQueue updateTasksQueue = null;
         if (isMover()) {
             updateTasksQueue = buildMoverTasks();
-        } else if (needsReboot && getCurrentBuild() > 0) {
+        } else if (needsReboot) {
             relaunch();
             return false;
         } else if (getCurrentBuild() < 1) {
