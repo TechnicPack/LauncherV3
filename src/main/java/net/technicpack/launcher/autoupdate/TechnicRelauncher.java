@@ -73,6 +73,9 @@ public class TechnicRelauncher extends Relauncher {
     }
 
     @Override
+    public boolean canReboot() { return !parameters.isBlockReboot(); }
+
+    @Override
     public boolean isMover() {
         return (parameters.isMover() || parameters.isLegacyMover()) && !parameters.isLegacyLauncher();
     }
@@ -128,6 +131,9 @@ public class TechnicRelauncher extends Relauncher {
 
     @Override
     public String[] getLaunchArgs() {
+        String[] launchArgs = new String[parameters.getArgs().length + 1];
+        System.arraycopy(parameters.getArgs(), 0, launchArgs, 0, parameters.getArgs().length);
+        launchArgs[parameters.getArgs().length] = "-blockReboot";
         return parameters.getArgs();
     }
 

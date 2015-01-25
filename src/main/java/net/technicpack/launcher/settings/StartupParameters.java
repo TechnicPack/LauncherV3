@@ -51,6 +51,8 @@ public final class StartupParameters {
     private boolean fullscreen = false;
     @Parameter(names = {"-discover"}, description = "An override param for the discover URL")
     private String discover = null;
+    @Parameter(names = {"-blockReboot"}, description = "Prevent rebooting the launcher due to bad java properties.")
+    private boolean blockReboot = false;
 
     public StartupParameters(String[] args) {
         this.args = args;
@@ -100,6 +102,8 @@ public final class StartupParameters {
     public boolean isLegacyMover() { return oldMover; }
 
     public boolean isUpdate() { return update; }
+
+    public boolean isBlockReboot() { return blockReboot; }
 
     public String getMoveTarget() { return moveTarget; }
 
