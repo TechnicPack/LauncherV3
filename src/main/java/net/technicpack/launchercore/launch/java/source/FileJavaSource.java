@@ -29,13 +29,14 @@ import org.apache.commons.io.IOUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Loads versions from an external file
  */
 public class FileJavaSource implements IVersionSource {
     private transient File loadedFile;
-    private ArrayList<FileBasedJavaVersion> versions = new ArrayList<FileBasedJavaVersion>();
+    private List<FileBasedJavaVersion> versions = new ArrayList<FileBasedJavaVersion>();
 
     protected FileJavaSource(File loadFile) {
         this.loadedFile = loadFile;

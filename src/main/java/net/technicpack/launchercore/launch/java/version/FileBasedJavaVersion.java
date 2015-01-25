@@ -31,11 +31,13 @@ public class FileBasedJavaVersion implements IJavaVersion {
     private transient boolean haveQueriedVersion = false;
     private transient String versionNumber;
     private transient boolean is64Bit;
-    private File javaPath;
+    private transient File javaPath;
+    private String filePath;
 
     public FileBasedJavaVersion() {}
     public FileBasedJavaVersion(File javaPath) {
         this.javaPath = javaPath;
+        this.filePath = javaPath.getAbsolutePath();
     }
 
     @Override
@@ -71,14 +73,18 @@ public class FileBasedJavaVersion implements IJavaVersion {
         return is64Bit;
     }
 
-    public File getJavaPath() { return javaPath; }
+    public File getJavaPath() {
+        if (javaPath == null && filePath != null && !filePath.isEmpty())
+            javaPath = new File(filePath);
+        return javaPath;
+    }
 
     /**
      *
      * @return True if the javaPath points to a valid version of java that can be run, false otherwise
      */
     public boolean verify() {
-        if (javaPath == null || !javaPath.exists())
+        if (getJavaPath() == null || !getJavaPath().exists())
             return false;
 
         if (!haveQueriedVersion) {
@@ -97,7 +103,7 @@ public class FileBasedJavaVersion implements IJavaVersion {
      * the executable.
      */
     protected String getVersionNumberFromJava() {
-        String data = Utils.getProcessOutput(javaPath.getAbsolutePath(), "-version");
+        String data = Utils.getProcessOutput(filePath, "-version");
 
         if (data == null)
             return null;
