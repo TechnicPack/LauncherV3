@@ -90,12 +90,12 @@ public class CachedSolderPackApi implements ISolderPackApi {
 
     @Override
     public SolderPackInfo getPackInfo() throws RestfulAPIException {
-        if (Seconds.secondsBetween(DateTime.now(), lastInfoAccess).isGreaterThan(Seconds.seconds(cacheInSeconds))) {
+        if (Seconds.secondsBetween(lastInfoAccess, DateTime.now()).isLessThan(Seconds.seconds(cacheInSeconds))) {
             if (rootInfoCache != null)
                 return rootInfoCache;
         }
 
-        if (Seconds.secondsBetween(DateTime.now(), lastInfoAccess).isGreaterThan(Seconds.seconds(cacheInSeconds / 10)))
+        if (Seconds.secondsBetween(lastInfoAccess, DateTime.now()).isLessThan(Seconds.seconds(cacheInSeconds / 10)))
             return rootInfoCache;
 
         try {
