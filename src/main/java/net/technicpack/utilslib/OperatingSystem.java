@@ -19,6 +19,7 @@
 
 package net.technicpack.utilslib;
 
+import java.io.File;
 import java.util.Locale;
 
 public enum OperatingSystem {
@@ -66,6 +67,28 @@ public enum OperatingSystem {
         }
 
         return UNKNOWN;
+    }
+
+    public File getUserDirectoryForApp(String appName) {
+        String userHome = System.getProperty("user.home", ".");
+
+        switch (this) {
+            case LINUX:
+                return new File(userHome, "."+appName+"/");
+            case WINDOWS:
+                String applicationData = System.getenv("APPDATA");
+                if (applicationData != null) {
+                    return new File(applicationData, "."+appName+"/");
+                } else {
+                    return new File(userHome, "."+appName+"/");
+                }
+            case OSX:
+                return new File(userHome, "Library/Application Support/" + appName);
+            case UNKNOWN:
+                return new File(userHome, appName + "/");
+            default:
+                return new File(userHome, appName + "/");
+        }
     }
 
     public String[] getAliases() {
