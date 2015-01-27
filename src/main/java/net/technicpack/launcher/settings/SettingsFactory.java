@@ -56,7 +56,7 @@ public class SettingsFactory {
             return portableSettings;
         }
 
-        File installedSettingsDir = getTechnicHomeDir();
+        File installedSettingsDir = OperatingSystem.getOperatingSystem().getUserDirectoryForApp("technic");
 
         TechnicSettings settings = tryGetSettings(installedSettingsDir);
 
@@ -108,28 +108,5 @@ public class SettingsFactory {
             return runningFolder;
         else
             return new File(runningFolder,"technic");
-    }
-
-    public static File getTechnicHomeDir() {
-        String userHome = System.getProperty("user.home", ".");
-
-        OperatingSystem os = OperatingSystem.getOperatingSystem();
-        switch (os) {
-            case LINUX:
-                return new File(userHome, ".technic/");
-            case WINDOWS:
-                String applicationData = System.getenv("APPDATA");
-                if (applicationData != null) {
-                    return new File(applicationData, ".technic/");
-                } else {
-                    return new File(userHome, ".technic/");
-                }
-            case OSX:
-                return new File(userHome, "Library/Application Support/technic");
-            case UNKNOWN:
-                return new File(userHome, "technic/");
-            default:
-                return new File(userHome, "technic/");
-        }
     }
 }
