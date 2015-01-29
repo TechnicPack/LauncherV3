@@ -34,6 +34,7 @@ import net.technicpack.ui.controls.tabs.SimpleTabPane;
 import net.technicpack.ui.lang.IRelocalizableResource;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.ui.listitems.LanguageItem;
+import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 
@@ -76,7 +77,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         this.resources = resources;
         this.params = params;
         this.settings = new TechnicSettings();
-        this.settings.setFilePath(new File(SettingsFactory.getTechnicHomeDir(), "settings.json"));
+        this.settings.setFilePath(new File(OperatingSystem.getOperatingSystem().getUserDirectoryForApp("technic"), "settings.json"));
         this.settings.getTechnicRoot();
 
         addGlassPane();
@@ -161,7 +162,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
             @Override
             public void run() {
                 File oldSettings = settings.getFilePath();
-                File newSettings = new File(SettingsFactory.getTechnicHomeDir(), "settings.json");
+                File newSettings = new File(OperatingSystem.getOperatingSystem().getUserDirectoryForApp("technic"), "settings.json");
 
                 if (oldSettings.exists() && !oldSettings.getAbsolutePath().equals(newSettings.getAbsolutePath())) {
                     oldSettings.delete();
@@ -186,7 +187,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
                 settings.setFilePath(newSettings);
 
-                if (settings.isPortable() || rootHasChanged || !standardInstallDir.getText().equals(SettingsFactory.getTechnicHomeDir().getAbsolutePath()))
+                if (settings.isPortable() || rootHasChanged || !standardInstallDir.getText().equals(OperatingSystem.getOperatingSystem().getUserDirectoryForApp("technic").getAbsolutePath()))
                     settings.installTo(standardInstallDir.getText());
                 settings.getTechnicRoot();
                 settings.setLanguageCode(((LanguageItem)standardLanguages.getSelectedItem()).getLangCode());
@@ -328,7 +329,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
             standardInstallDir.setBorder(new RoundBorder(LauncherFrame.COLOR_SCROLL_THUMB, 1, 10));
             standardSelectButton.setEnabled(false);
             standardSelectButton.setForeground(LauncherFrame.COLOR_GREY_TEXT);
-            standardInstallDir.setText(SettingsFactory.getTechnicHomeDir().getAbsolutePath());
+            standardInstallDir.setText(OperatingSystem.getOperatingSystem().getUserDirectoryForApp("technic").getAbsolutePath());
         }
     }
 
@@ -421,7 +422,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         standardDefaultDirectory.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         standardDefaultDirectory.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         standardDefaultDirectory.setIconTextGap(6);
-        standardDefaultDirectory.setSelected(settings.isPortable() || settings.getTechnicRoot().getAbsolutePath().equals(SettingsFactory.getTechnicHomeDir().getAbsolutePath()));
+        standardDefaultDirectory.setSelected(settings.isPortable() || settings.getTechnicRoot().getAbsolutePath().equals(OperatingSystem.getOperatingSystem().getUserDirectoryForApp("technic").getAbsolutePath()));
         standardDefaultDirectory.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -435,7 +436,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         installFolderLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(installFolderLabel, new GridBagConstraints(0, 3, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,24,0,8), 0,0));
 
-        String installDir = SettingsFactory.getTechnicHomeDir().getAbsolutePath();
+        String installDir = OperatingSystem.getOperatingSystem().getUserDirectoryForApp("technic").getAbsolutePath();
 
         if (!settings.isPortable())
             installDir = settings.getTechnicRoot().getAbsolutePath();
