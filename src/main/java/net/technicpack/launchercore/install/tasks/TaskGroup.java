@@ -20,14 +20,20 @@
 package net.technicpack.launchercore.install.tasks;
 
 import net.technicpack.launchercore.install.ITasksQueue;
+import net.technicpack.launchercore.install.IWeightedTasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
-public class TaskGroup implements ITasksQueue, IInstallTask {
+public class TaskGroup implements IWeightedTasksQueue, IInstallTask {
     private final String groupName;
     private final LinkedList<IInstallTask> taskList = new LinkedList<IInstallTask>();
+    private final Map<IInstallTask, Float> taskWeights = new HashMap<IInstallTask, Float>();
+
+    private float totalWeight = 0;
 
     private int taskProgress = 0;
     private String fileName = "";
@@ -46,12 +52,28 @@ public class TaskGroup implements ITasksQueue, IInstallTask {
 
         if (taskList.size() == 0)
             return 0;
+        if (totalWeight == 0)
+            return 0;
 
-        float baseProgress = (100.0f / taskList.size());
-        float finishedTasksProgress = baseProgress * taskProgress;
+        float completedWeight = 0;
+        for (int i = 0; i < taskProgress; i++) {
+            IInstallTask task = taskList.get(i);
+            if (taskWeights.containsKey(task)) {
+                completedWeight += taskWeights.get(task);
+            }
+        }
+
+        float finishedTasksProgress = (completedWeight / totalWeight);
         IInstallTask currentTask = taskList.get(taskProgress);
-        float currentTaskProgress = (currentTask.getTaskProgress() / 100.0f) * baseProgress;
-        return finishedTasksProgress + currentTaskProgress;
+        float currentTaskProgress = (currentTask.getTaskProgress() / 100.0f);
+
+        float currentTaskWeight = 1;
+        if (taskWeights.containsKey(currentTask))
+            currentTaskWeight = taskWeights.get(currentTask);
+
+        currentTaskProgress *= (currentTaskWeight / totalWeight);
+
+        return (finishedTasksProgress + currentTaskProgress) * 100.0f;
     }
 
     @Override
@@ -69,11 +91,23 @@ public class TaskGroup implements ITasksQueue, IInstallTask {
 
     @Override
     public void addNextTask(IInstallTask task) {
-        taskList.addFirst(task);
+        addNextTask(task, 1);
     }
 
     @Override
     public void addTask(IInstallTask task) {
+        addTask(task, 1);
+    }
+
+    public void addNextTask(IInstallTask task, float weight) {
+        taskList.addFirst(task);
+        taskWeights.put(task, weight);
+        totalWeight += weight;
+    }
+
+    public void addTask(IInstallTask task, float weight) {
         taskList.addLast(task);
+        taskWeights.put(task, weight);
+        totalWeight += weight;
     }
 }
