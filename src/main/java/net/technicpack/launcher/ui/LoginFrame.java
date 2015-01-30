@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.ui;
 
+import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.ui.controls.popupformatter.RoundedBorderFormatter;
 import net.technicpack.ui.controls.lang.LanguageCellRenderer;
 import net.technicpack.ui.controls.lang.LanguageCellUI;
@@ -456,14 +457,14 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         }
 
         languages.addItem(new LanguageItem(ResourceLoader.DEFAULT_LOCALE, defaultLocaleText, resources));
-        for (int i = 0; i < ResourceLoader.SUPPORTED_LOCALES.length; i++) {
-            languages.addItem(new LanguageItem(resources.getCodeFromLocale(ResourceLoader.SUPPORTED_LOCALES[i]), ResourceLoader.SUPPORTED_LOCALES[i].getDisplayName(ResourceLoader.SUPPORTED_LOCALES[i]), resources.getVariant(ResourceLoader.SUPPORTED_LOCALES[i])));
+        for (int i = 0; i < LauncherMain.supportedLanguages.length; i++) {
+            languages.addItem(new LanguageItem(resources.getCodeFromLocale(LauncherMain.supportedLanguages[i]), LauncherMain.supportedLanguages[i].getDisplayName(LauncherMain.supportedLanguages[i]), resources.getVariant(LauncherMain.supportedLanguages[i])));
         }
         if (!settings.getLanguageCode().equalsIgnoreCase(ResourceLoader.DEFAULT_LOCALE)) {
             Locale loc = resources.getLocaleFromCode(settings.getLanguageCode());
 
-            for (int i = 0; i < ResourceLoader.SUPPORTED_LOCALES.length; i++) {
-                if (loc.equals(ResourceLoader.SUPPORTED_LOCALES[i])) {
+            for (int i = 0; i < LauncherMain.supportedLanguages.length; i++) {
+                if (loc.equals(LauncherMain.supportedLanguages[i])) {
                     languages.setSelectedIndex(i+1);
                     break;
                 }

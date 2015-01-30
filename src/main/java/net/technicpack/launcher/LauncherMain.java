@@ -92,6 +92,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -99,6 +100,18 @@ import java.util.logging.Logger;
 public class LauncherMain {
 
     public static ConsoleFrame consoleFrame;
+
+    public static Locale[] supportedLanguages = new Locale[] {
+            Locale.ENGLISH,
+            new Locale("pt","BR"),
+            new Locale("pt","PT"),
+            new Locale("cs"),
+            Locale.GERMAN,
+            Locale.FRENCH,
+            Locale.ITALIAN,
+            Locale.CHINA,
+            Locale.TAIWAN
+    };
 
     public static void main(String[] args) {
         try {
@@ -124,6 +137,7 @@ public class LauncherMain {
 
         if (settings == null) {
             ResourceLoader installerResources = new ResourceLoader(null, "net","technicpack","launcher","resources");
+            installerResources.setSupportedLanguages(supportedLanguages);
             installerResources.setLocale(ResourceLoader.DEFAULT_LOCALE);
             InstallerFrame dialog = new InstallerFrame(installerResources, params);
             dialog.setVisible(true);
@@ -132,6 +146,7 @@ public class LauncherMain {
 
         LauncherDirectories directories = new TechnicLauncherDirectories(settings.getTechnicRoot());
         ResourceLoader resources = new ResourceLoader(directories, "net","technicpack","launcher","resources");
+        resources.setSupportedLanguages(supportedLanguages);
         resources.setLocale(settings.getLanguageCode());
 
         setupLogging(directories, resources);
