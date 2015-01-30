@@ -46,8 +46,8 @@ public class ResourceLoader {
     private boolean isDefaultLocaleSupported = true;
     private Locale defaultLocale;
     private File launcherAssets;
+    private Locale[] locales = { Locale.ENGLISH };
 
-    public static final Locale[] SUPPORTED_LOCALES = { Locale.ENGLISH, new Locale("pt","BR"), new Locale("pt","PT"), new Locale("cs"), Locale.GERMAN, Locale.FRENCH, Locale.ITALIAN, Locale.CHINA, Locale.TAIWAN };
     public static final String DEFAULT_LOCALE = "default";
 
     public static final String FONT_OPENSANS = "font.opensans.regular";
@@ -56,6 +56,10 @@ public class ResourceLoader {
     public static final Map<String, Font> fontCache = new HashMap<String, Font>();
 
     public static final Font fallbackFont = new Font("Arial", Font.PLAIN, 12);
+
+    public void setSupportedLanguages(Locale[] locales) {
+        this.locales = locales;
+    }
 
     public Font getFontByName(String fontName) {
         Font font;
@@ -136,6 +140,7 @@ public class ResourceLoader {
 
     public ResourceLoader getVariant(Locale locale) {
         ResourceLoader variant = new ResourceLoader(this);
+        variant.setSupportedLanguages(locales);
         variant.setLocale(locale);
         return variant;
     }
@@ -217,8 +222,8 @@ public class ResourceLoader {
     private Locale matchClosestSupportedLocale(Locale definiteLocale) {
         Locale bestSupportedLocale = null;
         int bestLocaleScore = 0;
-        for (int i = 0; i < SUPPORTED_LOCALES.length; i++) {
-            Locale testLocale = SUPPORTED_LOCALES[i];
+        for (int i = 0; i < locales.length; i++) {
+            Locale testLocale = locales[i];
             int testScore = 0;
 
             if (testLocale.getLanguage().equals(definiteLocale.getLanguage())) {
