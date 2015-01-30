@@ -19,7 +19,7 @@
 package net.technicpack.launcher.ui;
 
 import net.technicpack.launcher.LauncherMain;
-import net.technicpack.launcher.ui.controls.popupformatter.RoundedBorderFormatter;
+import net.technicpack.ui.controls.list.popupformatters.RoundedBorderFormatter;
 import net.technicpack.ui.controls.lang.LanguageCellRenderer;
 import net.technicpack.ui.controls.lang.LanguageCellUI;
 import net.technicpack.ui.controls.list.SimpleButtonComboUI;
@@ -41,7 +41,7 @@ import net.technicpack.utilslib.DesktopUtils;
 import net.technicpack.utilslib.Utils;
 
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicComboPopup;
+import javax.swing.border.LineBorder;
 import javax.swing.plaf.metal.MetalComboBoxUI;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -472,7 +472,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         }
         languages.setBorder(BorderFactory.createEmptyBorder());
         languages.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        languages.setUI(new LanguageCellUI(resources));
+        languages.setUI(new LanguageCellUI(resources, new RoundedBorderFormatter(new LineBorder(Color.black, 1)), LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
         languages.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         languages.setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
         languages.setRenderer(new LanguageCellRenderer(resources, "globe.png", LauncherFrame.COLOR_SELECTOR_BACK, LauncherFrame.COLOR_WHITE_TEXT));

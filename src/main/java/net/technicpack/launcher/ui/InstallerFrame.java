@@ -23,9 +23,9 @@ import net.technicpack.autoupdate.tasks.MoveLauncherPackage;
 import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.autoupdate.TechnicRelauncher;
 import net.technicpack.launcher.io.TechnicLauncherDirectories;
-import net.technicpack.launcher.settings.SettingsFactory;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
+import net.technicpack.ui.controls.list.popupformatters.RoundedBorderFormatter;
 import net.technicpack.ui.controls.DraggableFrame;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.borders.RoundBorder;
@@ -40,6 +40,7 @@ import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -488,7 +489,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         }
         standardLanguages.setBorder(new RoundBorder(LauncherFrame.COLOR_SCROLL_THUMB, 1, 10));
         standardLanguages.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        standardLanguages.setUI(new LanguageCellUI(resources));
+        standardLanguages.setUI(new LanguageCellUI(resources, new RoundedBorderFormatter(new LineBorder(Color.black, 1)), LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
         standardLanguages.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         standardLanguages.setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
         standardLanguages.setRenderer(new LanguageCellRenderer(resources, "globe.png", LauncherFrame.COLOR_SELECTOR_BACK, LauncherFrame.COLOR_WHITE_TEXT));
@@ -585,7 +586,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         }
         portableLanguages.setBorder(new RoundBorder(LauncherFrame.COLOR_SCROLL_THUMB, 1, 10));
         portableLanguages.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        portableLanguages.setUI(new LanguageCellUI(resources));
+        portableLanguages.setUI(new LanguageCellUI(resources, new RoundedBorderFormatter(new LineBorder(Color.black, 1)), LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
         portableLanguages.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         portableLanguages.setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
         portableLanguages.setRenderer(new LanguageCellRenderer(resources, "globe.png", LauncherFrame.COLOR_SELECTOR_BACK, LauncherFrame.COLOR_WHITE_TEXT));
