@@ -19,7 +19,6 @@
 package net.technicpack.launcher.ui.components;
 
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launcher.ui.controls.popupformatter.RoundedBorderFormatter;
 import net.technicpack.launcher.ui.listitems.PackBuildItem;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.modpacks.InstalledPack;
@@ -31,6 +30,7 @@ import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.borders.RoundBorder;
 import net.technicpack.ui.controls.list.AdvancedCellRenderer;
 import net.technicpack.ui.controls.list.SimpleButtonComboUI;
+import net.technicpack.ui.controls.list.popupformatters.RoundedBorderFormatter;
 import net.technicpack.ui.controls.tabs.SimpleTabPane;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.DesktopUtils;
