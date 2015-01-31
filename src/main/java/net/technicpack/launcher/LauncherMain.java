@@ -109,6 +109,7 @@ public class LauncherMain {
             Locale.GERMAN,
             Locale.FRENCH,
             Locale.ITALIAN,
+            new Locale("hu"),
             Locale.CHINA,
             Locale.TAIWAN
     };
