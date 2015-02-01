@@ -55,6 +55,10 @@ public class UnzipFileTask extends ListenerTask {
             destination.mkdirs();
         }
 
-        ZipUtils.unzipFile(zipFile, destination, filter, this);
+        try {
+            ZipUtils.unzipFile(zipFile, destination, filter, this);
+        } catch (ZipException ex) {
+            throw new ZipException("Error extracting file "+zipFile.getName()+".");
+        }
     }
 }
