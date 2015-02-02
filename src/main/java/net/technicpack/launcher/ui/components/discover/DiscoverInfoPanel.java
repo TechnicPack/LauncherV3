@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.ui.components.discover;
 
+import com.google.common.base.Charsets;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launchercore.install.LauncherDirectories;
@@ -201,7 +202,7 @@ public class DiscoverInfoPanel extends TiledBackground {
         try {
             HttpURLConnection conn = Utils.openHttpConnection(new URL(url));
             InputStream stream = conn.getInputStream();
-            String data = IOUtils.toString(stream);
+            String data = IOUtils.toString(stream, Charsets.UTF_8);
 
             Document doc = XMLResource.load(conn.getInputStream()).getDocument();
             if (doc != null) {
