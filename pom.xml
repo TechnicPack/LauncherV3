@@ -331,9 +331,9 @@
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>org.bluestemsoftware.open.maven.plugin</groupId>
-						<artifactId>launch4j-plugin</artifactId>
-						<version>1.5.0.0</version>
+						<groupId>com.akathist.maven.plugins.launch4j</groupId>
+						<artifactId>launch4j-maven-plugin</artifactId>
+						<version>1.7.4</version>
 						<executions>
 							<execution>
 								<configuration>
@@ -346,6 +346,7 @@
 										<addDependencies>false</addDependencies>
 										<preCp>anything</preCp>
 									</classPath>
+                                    <manifest>myapp.manifest</manifest>
 									<jre>
 										<minVersion>1.5.0</minVersion>
 										<opts><opt>-Djava.net.preferIPv4Stack=true</opt><opt>-Dawt.useSystemAAFontSettings=lcd</opt><opt>-Dswing.aatext=true</opt></opts>
