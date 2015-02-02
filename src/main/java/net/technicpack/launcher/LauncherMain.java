@@ -121,6 +121,8 @@ public class LauncherMain {
             Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
         }
 
+        ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
+
         StartupParameters params = new StartupParameters(args);
         try {
             new JCommander(params, args);

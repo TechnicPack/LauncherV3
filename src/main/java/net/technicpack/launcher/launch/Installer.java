@@ -122,7 +122,7 @@ public class Installer {
                             throw new PackNotAvailableOfflineException(pack.getDisplayName());
                         }
 
-                        long memory = Memory.getClosesAvailableMemory(Memory.getMemoryFromId(settings.getMemory())).getMemoryMB();
+                        long memory = Memory.getClosestAvailableMemory(Memory.getMemoryFromId(settings.getMemory()), launcher.getJavaVersions().getSelectedVersion().is64Bit()).getMemoryMB();
 
                         LaunchAction launchAction = settings.getLaunchAction();
 
