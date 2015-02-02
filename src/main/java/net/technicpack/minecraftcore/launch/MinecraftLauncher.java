@@ -58,6 +58,8 @@ public class MinecraftLauncher {
         this.javaVersions = javaVersions;
 	}
 
+    public JavaVersionRepository getJavaVersions() { return javaVersions; }
+
 	public GameProcess launch(ModpackModel pack, int memory, LaunchOptions options, CompleteVersion version) throws IOException {
 		return launch(pack, memory, options, null, version);
 	}
