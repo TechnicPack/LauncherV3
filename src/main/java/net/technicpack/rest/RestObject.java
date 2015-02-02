@@ -21,6 +21,7 @@ package net.technicpack.rest;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
+import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
@@ -52,7 +53,7 @@ public class RestObject {
             conn.setReadTimeout(15000);
 
             stream = conn.getInputStream();
-            String data = IOUtils.toString(stream);
+            String data = IOUtils.toString(stream, Charsets.UTF_8);
             T result = gson.fromJson(data, restObject);
 
             if (result == null) {
@@ -86,7 +87,7 @@ public class RestObject {
             conn.setReadTimeout(15000);
 
             stream = conn.getInputStream();
-            String data = IOUtils.toString(stream);
+            String data = IOUtils.toString(stream, Charsets.UTF_8);
             T result = gson.fromJson(data, restObject);
 
             if (result == null) {
