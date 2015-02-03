@@ -446,7 +446,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             if (is64Bit) {
                 parent.add(memSelect, new GridBagConstraints(1, 1, 6, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 80), 0, 16));
             } else {
-                parent.add(memSelect, new GridBagConstraints(1, 1, 5, 1, 5, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 8), 0, 16));
+                parent.add(memSelect, new GridBagConstraints(1, 1, 5, 1, 5, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 0), 0, 16));
 
                 JToolTip toolTip = new JToolTip();
                 toolTip.setBackground(LauncherFrame.COLOR_FOOTER);
@@ -456,17 +456,19 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
                 
 
                 String text = null;
-                Icon icon = resources.getIcon("update_available.png");
+                Icon icon = null;
 
                 if (has64Bit) {
                     text = resources.getString("launcheroptions.java.use64bit");
+                    icon = resources.getIcon("danger_icon.png");
                 } else {
                     text = resources.getString("launcheroptions.java.get64bit");
+                    icon = resources.getIcon("warning_icon.png");
                 }
 
                 ramWarning = new TooltipWarning(icon, toolTip);
                 ((TooltipWarning)ramWarning).setToolTipText(text);
-                parent.add(ramWarning, new GridBagConstraints(6, 1, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(8,16,8,80),0,0));
+                parent.add(ramWarning, new GridBagConstraints(6, 1, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(8,8,8,80),0,0));
             }
             repaint();
         }
