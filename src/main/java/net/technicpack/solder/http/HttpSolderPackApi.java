@@ -57,7 +57,7 @@ public class HttpSolderPackApi implements ISolderPackApi {
 
     @Override
     public SolderPackInfo getPackInfo() throws RestfulAPIException {
-        String packUrl = baseUrl + "modpack/" + modpackSlug + "/?cid=" + clientId + "&u=" + userDisplayName;
+        String packUrl = baseUrl + "modpack/" + modpackSlug + "/?cid=" + clientId;
         SolderPackInfo info = RestObject.getRestObject(SolderPackInfo.class, packUrl);
         info.setSolder(this);
         return info;
@@ -66,7 +66,7 @@ public class HttpSolderPackApi implements ISolderPackApi {
     @Override
     public Modpack getPackBuild(String build) throws BuildInaccessibleException {
         try {
-            String url = baseUrl + "modpack/" + modpackSlug + "/" + build + "/?cid=" + clientId + "&u=" + userDisplayName;
+            String url = baseUrl + "modpack/" + modpackSlug + "/" + build + "/?cid=" + clientId;
             Modpack pack = RestObject.getRestObject(Modpack.class, url);
 
             if (pack != null) {
