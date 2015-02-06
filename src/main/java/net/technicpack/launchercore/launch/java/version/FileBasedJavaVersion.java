@@ -19,6 +19,7 @@
 
 package net.technicpack.launchercore.launch.java.version;
 
+import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 import net.technicpack.launchercore.launch.java.IJavaVersion;
 
@@ -103,7 +104,15 @@ public class FileBasedJavaVersion implements IJavaVersion {
      * the executable.
      */
     protected String getVersionNumberFromJava() {
-        String data = Utils.getProcessOutput(filePath, "-version");
+        String versionJavaExec = filePath;
+
+        if (versionJavaExec.endsWith("javaw.exe")) {
+            //On windows operating systems, we ask people to find javaw.exe, which we use to actually run anything
+            //however, javaw -version isn't a thing, only java -version is
+            //so we have to change the path to point at java.exe
+            versionJavaExec = versionJavaExec.substring(0, versionJavaExec.length() - 5) + ".exe";
+        }
+        String data = Utils.getProcessOutput(versionJavaExec, "-version");
 
         if (data == null)
             return null;
