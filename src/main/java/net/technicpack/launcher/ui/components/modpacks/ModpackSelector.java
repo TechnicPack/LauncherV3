@@ -36,6 +36,7 @@ import net.technicpack.solder.ISolderApi;
 import net.technicpack.solder.ISolderPackApi;
 import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.controls.WatermarkTextField;
+import net.technicpack.ui.controls.borders.RoundBorder;
 import net.technicpack.ui.lang.IRelocalizableResource;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
@@ -130,13 +131,15 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
 
         JPanel header = new JPanel();
         header.setLayout(new GridBagLayout());
-        header.setBorder(BorderFactory.createEmptyBorder(9,8,8,8));
-        header.setBackground(LauncherFrame.COLOR_PANEL);
+        header.setBorder(BorderFactory.createEmptyBorder(4,8,4,4));
+        header.setBackground(LauncherFrame.COLOR_SELECTOR_OPTION);
         add(header, BorderLayout.PAGE_START);
 
-        filterContents = new WatermarkTextField(resources.getString("launcher.packselector.filter.hotfix"), LauncherFrame.COLOR_DIM_TEXT);
+        filterContents = new WatermarkTextField(resources.getString("launcher.packselector.filter.hotfix"), LauncherFrame.COLOR_BLUE_DARKER);
         filterContents.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        filterContents.setBorder(BorderFactory.createEmptyBorder());
+        filterContents.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
+        filterContents.setForeground(LauncherFrame.COLOR_BLUE);
+        filterContents.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
         filterContents.setColumns(20);
         filterContents.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -154,18 +157,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
                 detectFilterChanges();
             }
         });
-
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.gridx = 0;
-        constraints.gridy = 0;
-        constraints.gridwidth = 2;
-        constraints.gridheight = 1;
-        constraints.weightx = 1.0;
-        constraints.weighty = 0.0;
-        constraints.insets = new Insets(0, 8, 0, 0);
-        constraints.fill = GridBagConstraints.VERTICAL;
-        constraints.anchor = GridBagConstraints.WEST;
-        header.add(filterContents, constraints);
+        header.add(filterContents, new GridBagConstraints(1,0,1,1,1,0,GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(3,0,3,0), 0, 12));
 
         widgetList = new JPanel();
         widgetList.setOpaque(false);
@@ -181,8 +173,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         add(scrollPane, BorderLayout.CENTER);
 
         widgetList.add(Box.createHorizontalStrut(294), new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,0,0,0),0,0));
-        constraints = new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0,0);
-        widgetList.add(Box.createGlue(), constraints);
+        widgetList.add(Box.createGlue(), new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0,0));
     }
 
     @Override

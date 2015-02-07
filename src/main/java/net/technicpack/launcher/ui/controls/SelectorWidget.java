@@ -48,6 +48,6 @@ public class SelectorWidget extends JButton {
     public boolean isSelected() { return isSelected; }
     public void setIsSelected(boolean isSelected) {
         this.isSelected = isSelected;
-        setBackground(isSelected?LauncherFrame.COLOR_PANEL:LauncherFrame.COLOR_SELECTOR_BACK);
+        setBackground(isSelected?LauncherFrame.COLOR_SELECTOR_OPTION:LauncherFrame.COLOR_SELECTOR_BACK);
     }
 }
