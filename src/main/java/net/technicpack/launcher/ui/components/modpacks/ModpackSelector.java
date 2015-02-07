@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.ui.components.modpacks;
 
+import net.technicpack.contrib.romainguy.AbstractFilter;
 import net.technicpack.launcher.ui.controls.modpacks.FindMoreWidget;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserType;
@@ -49,6 +50,10 @@ import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -140,7 +145,35 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         filterContents.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
         filterContents.setForeground(LauncherFrame.COLOR_BLUE);
         filterContents.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        filterContents.setSelectedTextColor(Color.black);
+        filterContents.setSelectionColor(LauncherFrame.COLOR_BUTTON_BLUE);
+        filterContents.setCaretColor(LauncherFrame.COLOR_BUTTON_BLUE);
         filterContents.setColumns(20);
+        ((AbstractDocument)filterContents.getDocument()).setDocumentFilter(new DocumentFilter() {
+            @Override
+            public void insertString(DocumentFilter.FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException
+            {
+                if(fb.getDocument().getLength() + string.length() <= 30)
+                {
+                    fb.insertString(offset, string, attr);
+                }
+            }
+
+            @Override
+            public void remove(DocumentFilter.FilterBypass fb, int offset, int length) throws BadLocationException
+            {
+                fb.remove(offset, length);
+            }
+
+            @Override
+            public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs)throws BadLocationException
+            {
+                int finalTextLength = (fb.getDocument().getLength() - length) + text.length();
+                if (finalTextLength > 30)
+                    text = text.substring(0, text.length() - (finalTextLength-30));
+                fb.replace(offset, length, text, attrs);
+            }
+        });
         filterContents.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
