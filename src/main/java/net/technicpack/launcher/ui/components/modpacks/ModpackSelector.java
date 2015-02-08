@@ -92,7 +92,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
 
     private String findMoreUrl;
 
-    private static final int MAX_SEARCH_STRING = 70;
+    private static final int MAX_SEARCH_STRING = 90;
 
     public ModpackSelector(ResourceLoader resources, PackLoader packLoader, IPackSource techicSolder, ISolderApi solderApi, IPlatformApi platformApi, IPlatformSearchApi platformSearchApi, ImageRepository<ModpackModel> iconRepo) {
         this.resources = resources;
