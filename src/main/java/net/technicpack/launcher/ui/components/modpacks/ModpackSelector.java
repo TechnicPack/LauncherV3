@@ -92,6 +92,8 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
 
     private String findMoreUrl;
 
+    private static final int MAX_SEARCH_STRING = 70;
+
     public ModpackSelector(ResourceLoader resources, PackLoader packLoader, IPackSource techicSolder, ISolderApi solderApi, IPlatformApi platformApi, IPlatformSearchApi platformSearchApi, ImageRepository<ModpackModel> iconRepo) {
         this.resources = resources;
         this.packLoader = packLoader;
@@ -153,7 +155,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
             @Override
             public void insertString(DocumentFilter.FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException
             {
-                if(fb.getDocument().getLength() + string.length() <= 30)
+                if(fb.getDocument().getLength() + string.length() <= MAX_SEARCH_STRING)
                 {
                     fb.insertString(offset, string, attr);
                 }
@@ -169,8 +171,8 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
             public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs)throws BadLocationException
             {
                 int finalTextLength = (fb.getDocument().getLength() - length) + text.length();
-                if (finalTextLength > 30)
-                    text = text.substring(0, text.length() - (finalTextLength-30));
+                if (finalTextLength > MAX_SEARCH_STRING)
+                    text = text.substring(0, text.length() - (finalTextLength-MAX_SEARCH_STRING));
                 fb.replace(offset, length, text, attrs);
             }
         });
