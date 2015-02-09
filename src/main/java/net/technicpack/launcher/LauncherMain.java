@@ -19,9 +19,11 @@
 package net.technicpack.launcher;
 
 import com.beust.jcommander.JCommander;
+import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.autoupdate.http.HttpUpdateStream;
 import net.technicpack.launcher.autoupdate.TechnicRelauncher;
+import net.technicpack.launcher.autoupdate.VersionFileBuildNumber;
 import net.technicpack.launcher.io.*;
 import net.technicpack.launcher.settings.migration.IMigrator;
 import net.technicpack.launcher.settings.migration.InitialV3Migrator;
@@ -153,9 +155,11 @@ public class LauncherMain {
         resources.setSupportedLanguages(supportedLanguages);
         resources.setLocale(settings.getLanguageCode());
 
-        setupLogging(directories, resources);
+        IBuildNumber buildNumber = new VersionFileBuildNumber(resources);
 
-        String launcherBuild = resources.getLauncherBuild();
+        setupLogging(directories, resources, buildNumber);
+
+        String launcherBuild = buildNumber.getBuildNumber();
         int build = -1;
 
         try {
@@ -168,7 +172,7 @@ public class LauncherMain {
 
         try {
             if (launcher.runAutoUpdater())
-                startLauncher(settings, params, directories, resources);
+                startLauncher(settings, params, directories, resources, buildNumber);
         } catch (InterruptedException e) {
             //Canceled by user
         } catch (DownloadException e) {
@@ -178,7 +182,7 @@ public class LauncherMain {
         }
     }
 
-    private static void setupLogging(LauncherDirectories directories, ResourceLoader resources) {
+    private static void setupLogging(LauncherDirectories directories, ResourceLoader resources, IBuildNumber buildNumber) {
         System.out.println("Setting up logging");
         final Logger logger = Utils.getLogger();
         File logDirectory = new File(directories.getLauncherDirectory(), "logs");
@@ -188,7 +192,7 @@ public class LauncherMain {
         File logs = new File(logDirectory, "techniclauncher_%D.log");
         RotatingFileHandler fileHandler = new RotatingFileHandler(logs.getPath());
 
-        fileHandler.setFormatter(new BuildLogFormatter(resources.getLauncherBuild()));
+        fileHandler.setFormatter(new BuildLogFormatter(buildNumber.getBuildNumber()));
 
         for (Handler h : logger.getHandlers()) {
             logger.removeHandler(h);
@@ -197,7 +201,7 @@ public class LauncherMain {
         logger.setUseParentHandlers(false);
 
         LauncherMain.consoleFrame = new ConsoleFrame(2500, resources.getImage("icon.png"));
-        Console console = new Console(LauncherMain.consoleFrame, resources.getLauncherBuild());
+        Console console = new Console(LauncherMain.consoleFrame, buildNumber.getBuildNumber());
 
         logger.addHandler(new ConsoleHandler(console));
 
@@ -226,7 +230,7 @@ public class LauncherMain {
         });
     }
 
-    private static void startLauncher(final TechnicSettings settings, StartupParameters startupParameters, LauncherDirectories directories, ResourceLoader resources) {
+    private static void startLauncher(final TechnicSettings settings, StartupParameters startupParameters, LauncherDirectories directories, ResourceLoader resources, IBuildNumber buildNumber) {
         UIManager.put( "ComboBox.disabledBackground", LauncherFrame.COLOR_FORMELEMENT_INTERNAL );
         UIManager.put( "ComboBox.disabledForeground", LauncherFrame.COLOR_GREY_TEXT );
         System.setProperty("xr.load.xml-reader",  "org.ccil.cowan.tagsoup.Parser");
@@ -265,10 +269,10 @@ public class LauncherMain {
 
         HttpSolderApi httpSolder = new HttpSolderApi(settings.getClientId(), userModel);
         ISolderApi solder = new CachedSolderApi(directories, httpSolder, 60 * 60);
-        HttpPlatformApi httpPlatform = new HttpPlatformApi("http://api.technicpack.net/", mirrorStore);
+        HttpPlatformApi httpPlatform = new HttpPlatformApi("http://api.technicpack.net/", mirrorStore, buildNumber.getBuildNumber());
 
         IPlatformApi platform = new ModpackCachePlatformApi(httpPlatform, 60 * 60, directories);
-        IPlatformSearchApi platformSearch = new HttpPlatformSearchApi("http://api.technicpack.net/");
+        IPlatformSearchApi platformSearch = new HttpPlatformSearchApi("http://api.technicpack.net/", buildNumber.getBuildNumber());
 
         IInstalledPackRepository packStore = TechnicInstalledPackStore.load(new File(directories.getLauncherDirectory(), "installedPacks"));
         IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(platform, solder);
@@ -290,7 +294,7 @@ public class LauncherMain {
         ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());
         Installer installer = new Installer(startupParameters, mirrorStore, directories, modpackInstaller, launcher, settings, iconMapper);
 
-        final LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, selector, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo, platform, directories, packStore, startupParameters, discoverInfoPanel, javaVersions, javaVersionFile);
+        final LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, selector, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo, platform, directories, packStore, startupParameters, discoverInfoPanel, javaVersions, javaVersionFile, buildNumber);
         userModel.addAuthListener(frame);
 
         ActionListener listener = new ActionListener() {

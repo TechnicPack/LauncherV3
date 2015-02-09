@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.ui;
 
+import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.ui.components.ModpackOptionsDialog;
@@ -123,6 +124,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private final StartupParameters params;
     private final JavaVersionRepository javaVersions;
     private final FileJavaSource fileJavaSource;
+    private final IBuildNumber buildNumber;
 
     private ModpackOptionsDialog modpackOptionsDialog = null;
 
@@ -148,7 +150,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     ModpackInfoPanel modpackPanel;
     DiscoverInfoPanel discoverInfoPanel;
 
-    public LauncherFrame(final ResourceLoader resources, final ImageRepository<IUserType> skinRepository, final UserModel userModel, final TechnicSettings settings, final ModpackSelector modpackSelector, final ImageRepository<ModpackModel> iconRepo, final ImageRepository<ModpackModel> logoRepo, final ImageRepository<ModpackModel> backgroundRepo, final Installer installer, final ImageRepository<AuthorshipInfo> avatarRepo, final IPlatformApi platformApi, final LauncherDirectories directories, final IInstalledPackRepository packRepository, final StartupParameters params, final DiscoverInfoPanel discoverInfoPanel, final JavaVersionRepository javaVersions, final FileJavaSource fileJavaSource) {
+    public LauncherFrame(final ResourceLoader resources, final ImageRepository<IUserType> skinRepository, final UserModel userModel, final TechnicSettings settings, final ModpackSelector modpackSelector, final ImageRepository<ModpackModel> iconRepo, final ImageRepository<ModpackModel> logoRepo, final ImageRepository<ModpackModel> backgroundRepo, final Installer installer, final ImageRepository<AuthorshipInfo> avatarRepo, final IPlatformApi platformApi, final LauncherDirectories directories, final IInstalledPackRepository packRepository, final StartupParameters params, final DiscoverInfoPanel discoverInfoPanel, final JavaVersionRepository javaVersions, final FileJavaSource fileJavaSource, final IBuildNumber buildNumber) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -168,6 +170,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.discoverInfoPanel = discoverInfoPanel;
         this.fileJavaSource = fileJavaSource;
         this.javaVersions = javaVersions;
+        this.buildNumber = buildNumber;
 
         //Handles rebuilding the frame, so use it to build the frame in the first place
         relocalize(resources);
@@ -359,7 +362,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     protected void openLauncherOptions() {
         centralPanel.setTintActive(true);
         footer.setTintActive(true);
-        OptionsDialog dialog = new OptionsDialog(this, settings, resources, params, javaVersions, fileJavaSource);
+        OptionsDialog dialog = new OptionsDialog(this, settings, resources, params, javaVersions, fileJavaSource, buildNumber);
         dialog.setVisible(true);
         centralPanel.setTintActive(false);
         footer.setTintActive(false);
@@ -610,7 +613,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         installProgressPlaceholder = Box.createHorizontalGlue();
         footer.add(installProgressPlaceholder);
 
-        JLabel buildCtrl = new JLabel(resources.getString("launcher.build.text", resources.getLauncherBuild(), resources.getString("launcher.build." + settings.getBuildStream())));
+        JLabel buildCtrl = new JLabel(resources.getString("launcher.build.text", buildNumber.getBuildNumber(), resources.getString("launcher.build." + settings.getBuildStream())));
         buildCtrl.setForeground(COLOR_WHITE_TEXT);
         buildCtrl.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         buildCtrl.setHorizontalTextPosition(SwingConstants.RIGHT);

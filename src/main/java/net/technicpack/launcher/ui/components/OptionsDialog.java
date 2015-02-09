@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.ui.components;
 
+import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.ui.InstallerFrame;
@@ -78,6 +79,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     private ResourceLoader resources;
     private final JavaVersionRepository javaVersions;
     private final FileJavaSource fileJavaSource;
+    private final IBuildNumber buildNumber;
 
     private DocumentListener listener = new DocumentListener() {
         @Override
@@ -109,13 +111,14 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     StartupParameters params;
     Component ramWarning;
 
-    public OptionsDialog(final Frame owner, final TechnicSettings settings, final ResourceLoader resourceLoader, final StartupParameters params, final JavaVersionRepository javaVersions, final FileJavaSource fileJavaSource) {
+    public OptionsDialog(final Frame owner, final TechnicSettings settings, final ResourceLoader resourceLoader, final StartupParameters params, final JavaVersionRepository javaVersions, final FileJavaSource fileJavaSource, final IBuildNumber buildNumber) {
         super(owner);
 
         this.settings = settings;
         this.params = params;
         this.javaVersions = javaVersions;
         this.fileJavaSource = fileJavaSource;
+        this.buildNumber = buildNumber;
 
         relocalize(resourceLoader);
     }
@@ -530,7 +533,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         String linkText = "<a href=\"https://github.com/TechnicPack/\">"+resources.getString("launcheroptions.about.linktext")+"</a>";
         String aboutText = "<html><head><link rel=\"stylesheet\" type=\"text/css\" href=\"http://www.technicpack.net/assets/css/launcher.css\" /></head><body style=\"font-family: "+resources.getFont(ResourceLoader.FONT_OPENSANS, 12).getFamily()+";color:#D0D0D0\">";
-        aboutText += "<p>" + resources.getString("launcheroptions.about.copyright", resources.getLauncherBuild(), linkText) + "</p>";
+        aboutText += "<p>" + resources.getString("launcheroptions.about.copyright", buildNumber.getBuildNumber(), linkText) + "</p>";
         aboutText += "<p>" + resources.getString("launcheroptions.about.romainguy") + "</p>";
         aboutText += "<p>" + resources.getString("launcheroptions.about.summary") + "</p>";
 
