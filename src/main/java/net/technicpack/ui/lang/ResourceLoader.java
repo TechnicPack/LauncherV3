@@ -170,16 +170,6 @@ public class ResourceLoader {
         }
     }
 
-    public String getLauncherBuild() {
-        String build = "0";
-        try {
-            build = IOUtils.toString(ResourceLoader.class.getResource(getResourcePath("/version")).openStream(), "UTF-8");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return build;
-    }
-
     public String getCodeFromLocale(Locale locale) {
         if (locale.getLanguage().isEmpty()) {
             return "default";
