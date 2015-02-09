@@ -20,6 +20,8 @@
 package net.technicpack.rest;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -27,6 +29,8 @@ import org.apache.commons.io.IOUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RestObject {
     private static final Gson gson = new Gson();
@@ -62,6 +66,50 @@ public class RestObject {
 
             if (result.hasError()) {
                 throw new RestfulAPIException("Error in response: " + result.getError());
+            }
+
+            return result;
+        } catch (SocketTimeoutException e) {
+            throw new RestfulAPIException("Timed out accessing URL [" + url + "]", e);
+        } catch (MalformedURLException e) {
+            throw new RestfulAPIException("Invalid URL [" + url + "]", e);
+        } catch (JsonParseException e) {
+            throw new RestfulAPIException("Error parsing response JSON at URL [" + url + "]", e);
+        } catch (IOException e) {
+            throw new RestfulAPIException("Error accessing URL [" + url + "]", e);
+        } finally {
+            IOUtils.closeQuietly(stream);
+        }
+    }
+
+    public static <T> List<T> getRestArray(Class<T> restObject, String url) throws RestfulAPIException {
+        InputStream stream = null;
+        try {
+            URLConnection conn = new URL(url).openConnection();
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
+            conn.setConnectTimeout(15000);
+            conn.setReadTimeout(15000);
+
+            stream = conn.getInputStream();
+            String data = IOUtils.toString(stream, Charsets.UTF_8);
+
+            JsonElement response = gson.fromJson(data, JsonElement.class);
+
+            if (response == null ||!response.isJsonArray()) {
+                if (response.isJsonObject() && response.getAsJsonObject().has("error"))
+                    throw new RestfulAPIException("Error in response: " + response.getAsJsonObject().get("error"));
+                else
+                    throw new RestfulAPIException("Unable to access URL [" + url + "]");
+            }
+
+            JsonArray array = response.getAsJsonArray();
+            List<T> result = new ArrayList<T>(array.size());
+
+            for (JsonElement element : array) {
+                if (element.isJsonObject())
+                    result.add(gson.fromJson(element.getAsJsonObject(), restObject));
+                else
+                    result.add(gson.fromJson(element.getAsString(), restObject));
             }
 
             return result;

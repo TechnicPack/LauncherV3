@@ -30,15 +30,17 @@ import java.net.URLEncoder;
 
 public class HttpPlatformSearchApi implements IPlatformSearchApi {
     private String rootUrl;
+    private String launcherBuild;
 
-    public HttpPlatformSearchApi(String rootUrl) {
+    public HttpPlatformSearchApi(String rootUrl, String launcherBuild) {
         this.rootUrl = rootUrl;
+        this.launcherBuild = launcherBuild;
     }
 
     @Override
     public SearchResultsData getSearchResults(String searchTerm) throws RestfulAPIException {
         try {
-            String url = rootUrl + "search?q=" + URLEncoder.encode(searchTerm.trim(), "UTF-8");
+            String url = rootUrl + "search?build=" + launcherBuild +"q=" + URLEncoder.encode(searchTerm.trim(), "UTF-8");
             return RestObject.getRestObject(SearchResultsData.class, url);
         } catch (UnsupportedEncodingException ex) {
             return new SearchResultsData();

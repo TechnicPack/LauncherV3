@@ -34,14 +34,16 @@ import java.net.URLEncoder;
 public class HttpPlatformApi implements IPlatformApi {
     private String platformUrl;
     private MirrorStore mirrorStore;
+    private String launcherBuild;
 
-    public HttpPlatformApi(String rootUrl, MirrorStore mirrorStore) {
+    public HttpPlatformApi(String rootUrl, MirrorStore mirrorStore, String launcherBuild) {
         this.platformUrl = rootUrl;
         this.mirrorStore = mirrorStore;
+        this.launcherBuild = launcherBuild;
     }
 
     public String getPlatformUri(String packSlug) {
-        return platformUrl + "modpack/" + packSlug;
+        return platformUrl + "modpack/" + packSlug + "?build="+launcherBuild;
     }
 
     @Override
@@ -57,19 +59,19 @@ public class HttpPlatformApi implements IPlatformApi {
 
     @Override
     public void incrementPackRuns(String packSlug) {
-        String url = platformUrl + "modpack/" + packSlug + "/stat/run";
+        String url = platformUrl + "modpack/" + packSlug + "/stat/run?build="+launcherBuild;
         Utils.pingHttpURL(url, mirrorStore);
     }
 
     @Override
     public void incrementPackInstalls(String packSlug) {
-        String url = platformUrl + "modpack/" + packSlug + "/stat/install";
+        String url = platformUrl + "modpack/" + packSlug + "/stat/install?build="+launcherBuild;
         Utils.pingHttpURL(url, mirrorStore);
     }
 
     @Override
     public NewsData getNews() throws RestfulAPIException {
-        String url = platformUrl + "news";
+        String url = platformUrl + "news?build="+launcherBuild;
         return RestObject.getRestObject(NewsData.class, url);
     }
 }
