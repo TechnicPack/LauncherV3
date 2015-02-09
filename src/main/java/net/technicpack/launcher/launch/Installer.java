@@ -52,6 +52,7 @@ import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.utilslib.Memory;
+import net.technicpack.utilslib.OperatingSystem;
 
 import javax.swing.*;
 import java.awt.*;
@@ -222,6 +223,8 @@ public class Installer {
         queue.addTask(examineIndex);
         queue.addTask(verifyingAssets);
         queue.addTask(installingAssets);
+        if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX)
+            queue.addTask(new CopyDylibJnilibTask(modpack));
 
         if (minecraft.startsWith("1.5")) {
             verifyingFiles.addTask(new EnsureFileTask(new File(directories.getCacheDirectory(), "fml_libs15.zip"), new ValidZipFileVerifier(), new File(modpack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs15.zip", installingLibs, installingLibs));
