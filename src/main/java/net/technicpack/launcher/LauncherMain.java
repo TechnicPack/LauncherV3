@@ -22,6 +22,7 @@ import com.beust.jcommander.JCommander;
 import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.autoupdate.http.HttpUpdateStream;
+import net.technicpack.launcher.autoupdate.CommandLineBuildNumber;
 import net.technicpack.launcher.autoupdate.TechnicRelauncher;
 import net.technicpack.launcher.autoupdate.VersionFileBuildNumber;
 import net.technicpack.launcher.io.*;
@@ -155,7 +156,12 @@ public class LauncherMain {
         resources.setSupportedLanguages(supportedLanguages);
         resources.setLocale(settings.getLanguageCode());
 
-        IBuildNumber buildNumber = new VersionFileBuildNumber(resources);
+        IBuildNumber buildNumber = null;
+
+        if (params.getBuildNumber() != null && !params.getBuildNumber().isEmpty())
+            buildNumber = new CommandLineBuildNumber(params);
+        else
+            buildNumber = new VersionFileBuildNumber(resources);
 
         setupLogging(directories, resources, buildNumber);
 

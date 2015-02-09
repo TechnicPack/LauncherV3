@@ -53,6 +53,8 @@ public final class StartupParameters {
     private String discover = null;
     @Parameter(names = {"-blockReboot"}, description = "Prevent rebooting the launcher due to bad java properties.")
     private boolean blockReboot = false;
+    @Parameter(names = {"-buildNumber"}, description = "Force build number to this value for debugging.")
+    private String buildNumber = "";
 
     public StartupParameters(String[] args) {
         this.args = args;
@@ -108,4 +110,6 @@ public final class StartupParameters {
     public String getMoveTarget() { return moveTarget; }
 
     public String getDiscoverUrl() { return discover; }
+
+    public String getBuildNumber() { return buildNumber; }
 }
