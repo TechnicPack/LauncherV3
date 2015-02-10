@@ -58,6 +58,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.*;
@@ -86,7 +88,8 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
     private PackLoadJob currentLoadJob;
     private Timer currentSearchTimer;
 
-    private Pattern platformRegexPattern;
+    private Pattern slugRegex;
+    private Pattern siteRegex;
 
     private String lastFilterContents = "";
 
@@ -103,7 +106,8 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         this.solderApi = solderApi;
         this.platformSearchApi = platformSearchApi;
 
-        platformRegexPattern = Pattern.compile("^https?\\:\\/\\/beta\\.technicpack\\.net\\/modpack\\/([^.]+)\\.\\d+$");
+        slugRegex = Pattern.compile("^[a-zA-Z0-9-]+$");
+        siteRegex = Pattern.compile("^([a-zA-Z0-9-]+)\\.\\d+$");
 
         findMoreWidget = new FindMoreWidget(resources);
         findMoreWidget.addActionListener(new ActionListener() {
@@ -492,72 +496,6 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         }
     }
 
-    protected String getApiLinkSlugWithUrl(String searchText, String url) {
-        if (searchText.startsWith(url) && searchText.length() > url.length()) {
-            String slug = searchText.substring(url.length());
-
-            if (slug.endsWith("/"))
-                slug = slug.substring(0, slug.length()-1);
-
-            if (isEncodedSlug(slug))
-                return slug;
-        }
-
-        return null;
-    }
-
-    protected String getApiLinkSlug(String searchText) {
-        String slug = getApiLinkSlugWithUrl(searchText, "http://api.technicpack.net/modpack/");
-        if (slug != null)
-            return slug;
-
-        slug = getApiLinkSlugWithUrl(searchText, "http://www.technicpack.net/api/modpack/");
-        if (slug != null)
-            return slug;
-
-        slug = getApiLinkSlugWithUrl(searchText, "http://technicpack.net/api/modpack/");
-        if (slug != null)
-            return slug;
-
-        slug = getApiLinkSlugWithUrl(searchText, "api.technicpack.net/modpack/");
-        if (slug != null)
-            return slug;
-
-        slug = getApiLinkSlugWithUrl(searchText, "www.technicpack.net/api/modpack/");
-        if (slug != null)
-            return slug;
-
-        slug = getApiLinkSlugWithUrl(searchText, "technicpack.net/api/modpack/");
-        if (slug != null)
-            return slug;
-
-        slug = getApiLinkSlugWithUrl(searchText, "https://api.technicpack.net/modpack/");
-        if (slug != null)
-            return slug;
-
-        slug = getApiLinkSlugWithUrl(searchText, "https://www.technicpack.net/api/modpack/");
-        if (slug != null)
-            return slug;
-
-        return getApiLinkSlugWithUrl(searchText, "https://technicpack.net/api/modpack/");
-    }
-
-    protected String getSiteSlug(String searchText) {
-        Matcher match = platformRegexPattern.matcher(searchText);
-
-        if (match.find()) {
-            String slug = match.group(0);
-            if (isEncodedSlug(slug))
-                return slug;
-        }
-
-        return null;
-    }
-
-    protected boolean isSiteLink(String searchText) {
-        return getSiteSlug(searchText) != null;
-    }
-
     private void loadNewJob(final String searchText) {
         setTintActive(true);
         defaultPacks.removePassthroughContainer(this);
@@ -566,35 +504,56 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
             @Override
             public void actionPerformed(ActionEvent e) {
                 String localSearchTag = searchText;
-                if (localSearchTag.startsWith("www.technicpack.net/"))
-                    localSearchTag = "http://" + searchText;
 
-                String apiSlug = getApiLinkSlug(localSearchTag);
-                if (apiSlug != null) {
-                    findMoreUrl = localSearchTag;
-                    findMoreWidget.setWidgetData(resources.getString("launcher.packselector.api"));
-                    ArrayList<IPackSource> source = new ArrayList<IPackSource>(1);
-                    source.add(new SinglePlatformSource(platformApi, solderApi, localSearchTag));
-                    currentLoadJob = packLoader.createRepositoryLoadJob(ModpackSelector.this, source, null, false);
-                } else if (isSiteLink(localSearchTag)) {
-                    findMoreUrl = localSearchTag;
-                    findMoreWidget.setWidgetData(resources.getString("launcher.packselector.website"));
-                    ArrayList<IPackSource> source = new ArrayList<IPackSource>(0);
-                    currentLoadJob = packLoader.createRepositoryLoadJob(ModpackSelector.this, source, null, false);
-                } else {
-                    String encodedSearch = filterContents.getText();
-                    try {
-                        encodedSearch = URLEncoder.encode(encodedSearch, "UTF-8");
-                    } catch (UnsupportedEncodingException ex) {}
-                    findMoreUrl = "http://www.technicpack.net/search/modpacks?q="+encodedSearch;
-                    findMoreWidget.setWidgetData(resources.getString("launcher.packselector.more"));
+                if (!localSearchTag.startsWith("http://") && !localSearchTag.startsWith("https://"))
+                    localSearchTag = "http://" + localSearchTag;
 
-                    ArrayList<IPackSource> sources = new ArrayList<IPackSource>(2);
-                    sources.add(new NameFilterPackSource(defaultPacks, localSearchTag));
-                    sources.add(new SearchResultPackSource(platformSearchApi, localSearchTag));
-                    currentLoadJob = packLoader.createRepositoryLoadJob(ModpackSelector.this, sources, null, false);
+                try {
+                    URI uri = new URI(searchText);
+                    String host = uri.getHost();
+                    String scheme = uri.getScheme();
+                    if (host.equals("www.technicpack.net") || host.equals("technicpack.net") || host.equals("api.technicpack.net")) {
+                        String path = uri.getPath();
+                        if (path.startsWith("/"))
+                            path = path.substring(1);
+                        if (path.endsWith("/"))
+                            path = path.substring(0, path.length()-1);
+                        String[] fragments = path.split("/");
 
+                        if (fragments.length == 2 && fragments[0].equals("modpack")) {
+                            String slug = fragments[1];
+
+                            Matcher siteMatcher = siteRegex.matcher(slug);
+                            if (siteMatcher.find()) {
+                                slug = siteMatcher.group(1);
+                            }
+
+                            Matcher slugMatcher = slugRegex.matcher(slug);
+                            if (slugMatcher.find()) {
+                                findMoreUrl = localSearchTag;
+                                findMoreWidget.setWidgetData(resources.getString("launcher.packselector.api"));
+                                ArrayList<IPackSource> source = new ArrayList<IPackSource>(1);
+                                source.add(new SinglePlatformSource(platformApi, solderApi, slug));
+                                currentLoadJob = packLoader.createRepositoryLoadJob(ModpackSelector.this, source, null, false);
+                                return;
+                            }
+                        }
+                    }
+                } catch (URISyntaxException ex) {
+                    //It wasn't a valid URI which is actually fine.
                 }
+
+                String encodedSearch = filterContents.getText();
+                try {
+                    encodedSearch = URLEncoder.encode(encodedSearch, "UTF-8");
+                } catch (UnsupportedEncodingException ex) {}
+                findMoreUrl = "http://www.technicpack.net/search/modpacks?q="+encodedSearch;
+                findMoreWidget.setWidgetData(resources.getString("launcher.packselector.more"));
+
+                ArrayList<IPackSource> sources = new ArrayList<IPackSource>(2);
+                sources.add(new NameFilterPackSource(defaultPacks, localSearchTag));
+                sources.add(new SearchResultPackSource(platformSearchApi, localSearchTag));
+                currentLoadJob = packLoader.createRepositoryLoadJob(ModpackSelector.this, sources, null, false);
             }
         });
         currentSearchTimer.setRepeats(false);
