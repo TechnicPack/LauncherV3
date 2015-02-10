@@ -40,7 +40,7 @@ public class HttpPlatformSearchApi implements IPlatformSearchApi {
     @Override
     public SearchResultsData getSearchResults(String searchTerm) throws RestfulAPIException {
         try {
-            String url = rootUrl + "search?build=" + launcherBuild +"q=" + URLEncoder.encode(searchTerm.trim(), "UTF-8");
+            String url = rootUrl + "search?build=" + launcherBuild +"&q=" + URLEncoder.encode(searchTerm.trim(), "UTF-8");
             return RestObject.getRestObject(SearchResultsData.class, url);
         } catch (UnsupportedEncodingException ex) {
             return new SearchResultsData();
