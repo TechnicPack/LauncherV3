@@ -169,7 +169,7 @@ public class LauncherMain {
         int build = -1;
 
         try {
-            build = Integer.parseInt(launcherBuild);
+            build = Integer.parseInt((new VersionFileBuildNumber(resources)).getBuildNumber());
         } catch (NumberFormatException ex) {
             //This is probably a debug build or something, build number is invalid
         }
