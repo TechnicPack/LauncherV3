@@ -505,14 +505,15 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
             public void actionPerformed(ActionEvent e) {
                 String localSearchTag = searchText;
 
-                if (!localSearchTag.startsWith("http://") && !localSearchTag.startsWith("https://"))
-                    localSearchTag = "http://" + localSearchTag;
+                String localSearchUrl = searchText;
+                if (!localSearchUrl.startsWith("http://") && !localSearchUrl.startsWith("https://"))
+                    localSearchUrl = "http://" + localSearchTag;
 
                 try {
-                    URI uri = new URI(searchText);
+                    URI uri = new URI(localSearchUrl);
                     String host = uri.getHost();
                     String scheme = uri.getScheme();
-                    if (host.equals("www.technicpack.net") || host.equals("technicpack.net") || host.equals("api.technicpack.net")) {
+                    if (host != null && scheme != null && (scheme.equals("http") || scheme.equals("https")) && (host.equals("www.technicpack.net") || host.equals("technicpack.net") || host.equals("api.technicpack.net"))) {
                         String path = uri.getPath();
                         if (path.startsWith("/"))
                             path = path.substring(1);
@@ -520,8 +521,8 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
                             path = path.substring(0, path.length()-1);
                         String[] fragments = path.split("/");
 
-                        if (fragments.length == 2 && fragments[0].equals("modpack")) {
-                            String slug = fragments[1];
+                        if ((fragments.length == 2 && fragments[0].equals("modpack")) || (fragments.length == 3 && fragments[0].equals("api") && fragments[1].equals("modpack"))) {
+                            String slug = fragments[fragments.length-1];
 
                             Matcher siteMatcher = siteRegex.matcher(slug);
                             if (siteMatcher.find()) {
@@ -530,7 +531,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
 
                             Matcher slugMatcher = slugRegex.matcher(slug);
                             if (slugMatcher.find()) {
-                                findMoreUrl = localSearchTag;
+                                findMoreUrl = localSearchUrl;
                                 findMoreWidget.setWidgetData(resources.getString("launcher.packselector.api"));
                                 ArrayList<IPackSource> source = new ArrayList<IPackSource>(1);
                                 source.add(new SinglePlatformSource(platformApi, solderApi, slug));
