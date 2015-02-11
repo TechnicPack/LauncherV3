@@ -32,29 +32,25 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class SinglePlatformSource extends PlatformPackInfoRepository implements IPackSource {
-    private String platformUrl;
+    private String slug;
 
-    public SinglePlatformSource(IPlatformApi platformApi, ISolderApi solderApi, String platformUrl) {
+    public SinglePlatformSource(IPlatformApi platformApi, ISolderApi solderApi, String slug) {
         super(platformApi, solderApi);
-        this.platformUrl = platformUrl;
+        this.slug = slug;
     }
 
     @Override
     public String getSourceName() {
-        return "Platform pack from '" + this.platformUrl + "'";
+        return "Platform pack with slug '" + this.slug + "'";
     }
 
     @Override
     public Collection<PackInfo> getPublicPacks() {
         ArrayList<PackInfo> packs = new ArrayList<PackInfo>(1);
-        try {
-            PlatformPackInfo info = RestObject.getRestObject(PlatformPackInfo.class, platformUrl.toString());
+        PackInfo info = getPlatformPackInfo(slug);
 
-            if (info != null) {
-                packs.add(getInfoFromPlatformInfo(info));
-            }
-        } catch (RestfulAPIException ex) {
-            //The url was garbage for whatever reason so just don't return anything
+        if (info != null) {
+            packs.add(info);
         }
 
         return packs;
