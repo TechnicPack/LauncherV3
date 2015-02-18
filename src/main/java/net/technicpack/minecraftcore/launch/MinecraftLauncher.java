@@ -75,7 +75,7 @@ public class MinecraftLauncher {
 			first = false;
 		}
 		Utils.getLogger().info("Running " + full.toString());
-		Process process = new ProcessBuilder(commands).directory(pack.getInstalledDirectory()).start();
+		Process process = new ProcessBuilder(commands).directory(pack.getInstalledDirectory()).redirectErrorStream(true).start();
 		GameProcess mcProcess = new GameProcess(commands, process);
 		if (exitListener != null) mcProcess.setExitListener(exitListener);
 
@@ -175,6 +175,15 @@ public class MinecraftLauncher {
 		StringBuilder result = new StringBuilder();
 		String separator = System.getProperty("path.separator");
 
+        // Add the modpack.jar to the classpath, if it exists and minecraftforge is not a library already
+        File modpack = new File(pack.getBinDir(), "modpack.jar");
+        if (modpack.exists()) {
+            if (result.length() > 1) {
+                result.append(separator);
+            }
+            result.append(modpack.getAbsolutePath());
+        }
+
 		// Add all the libraries to the classpath.
 		for (Library library : version.getLibrariesForOS()) {
 			if (library.getNatives() != null) {
@@ -198,15 +207,6 @@ public class MinecraftLauncher {
 				result.append(separator);
 			}
 			result.append(file.getAbsolutePath());
-		}
-
-		// Add the modpack.jar to the classpath, if it exists and minecraftforge is not a library already
-		File modpack = new File(pack.getBinDir(), "modpack.jar");
-		if (modpack.exists()) {
-			if (result.length() > 1) {
-				result.append(separator);
-			}
-			result.append(modpack.getAbsolutePath());
 		}
 
 		// Add the minecraft jar to the classpath
