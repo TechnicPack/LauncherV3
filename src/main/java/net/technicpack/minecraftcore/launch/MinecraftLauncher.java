@@ -75,7 +75,7 @@ public class MinecraftLauncher {
 			first = false;
 		}
 		Utils.getLogger().info("Running " + full.toString());
-		Process process = new ProcessBuilder(commands).directory(pack.getInstalledDirectory()).redirectErrorStream(true).start();
+		Process process = new ProcessBuilder(commands).directory(pack.getInstalledDirectory()).start();
 		GameProcess mcProcess = new GameProcess(commands, process);
 		if (exitListener != null) mcProcess.setExitListener(exitListener);
 
