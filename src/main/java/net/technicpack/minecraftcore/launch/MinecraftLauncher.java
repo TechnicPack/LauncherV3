@@ -105,7 +105,7 @@ public class MinecraftLauncher {
 		if (memory >= 2048) {
 			permSize = 256;
 		}
-        commands.add("-Xincgc");
+
 		commands.add("-XX:MaxPermSize=" + permSize + "m");
 		commands.add("-Djava.library.path=" + new File(pack.getBinDir(), "natives").getAbsolutePath());
 		// Tell forge 1.5 to download from our mirror instead
