@@ -49,7 +49,7 @@ public class AuthenticationService implements IGameAuthService<MojangUser> {
 			String returned = postJson(AUTH_SERVER + "refresh", data);
 			response = MojangUtils.getGson().fromJson(returned, AuthResponse.class);
 		} catch (IOException e) {
-			throw new AuthenticationNetworkFailureException("auth.minecraft.net", e);
+			throw new AuthenticationNetworkFailureException("authserver.mojang.com", e);
 		}
 
 		return response;
@@ -105,7 +105,7 @@ public class AuthenticationService implements IGameAuthService<MojangUser> {
 			String returned = postJson(AUTH_SERVER + "authenticate", data);
 			response = MojangUtils.getGson().fromJson(returned, AuthResponse.class);
 		} catch (IOException e) {
-			throw new AuthenticationNetworkFailureException("auth.minecraft.net", e);
+			throw new AuthenticationNetworkFailureException("authserver.mojang.com", e);
 		}
 		return response;
 	}
