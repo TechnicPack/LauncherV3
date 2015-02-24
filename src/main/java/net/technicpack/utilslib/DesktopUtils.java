@@ -55,7 +55,11 @@ public class DesktopUtils {
                     Runtime.getRuntime().exec("explorer " + file.getAbsolutePath());
                 } else {
                     try {
-                        Desktop.getDesktop().browse(file.toURI());
+                        String path = file.getAbsolutePath();
+                        if (OperatingSystem.getOperatingSystem() == OperatingSystem.LINUX)
+                            path = "//" + path;
+                        URI uri = (new File(path)).toURI();
+                        Desktop.getDesktop().browse(uri);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
