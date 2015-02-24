@@ -93,21 +93,24 @@ public class StatBox extends JButton {
         this.add(fieldLabel);
     }
 
-    private String buildValueStr(Integer value) {
-        if (value == null)
+    private String buildValueStr(Integer value) {        if (value == null)
             return "??";
 
         if (value >= 1000000000) {
-            return buildShortenedStr(value/1000000000,"B");
+            return buildShortenedStr((value+50000000)/100000000,"B");
         } else if (value >= 1000000) {
-            return buildShortenedStr(value/1000000, "M");
+            return buildShortenedStr((value+50000)/100000, "M");
         } else if (value >= 1000) {
-            return buildShortenedStr(value/1000, "K");
+            return buildShortenedStr((value+50)/100, "K");
         } else
             return NumberFormat.getInstance().format(value);
     }
 
     private String buildShortenedStr(int value, String suffix) {
-        return Integer.toString(value)+suffix;
+        if (value > 100) {
+            return Integer.toString(value/10)+suffix;
+        } else {
+            return Float.toString((float)value/10.0f)+suffix;
+        }
     }
 }
