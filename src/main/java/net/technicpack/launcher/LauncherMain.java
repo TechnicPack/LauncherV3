@@ -84,6 +84,7 @@ import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.solder.ISolderApi;
 import net.technicpack.solder.SolderPackSource;
 import net.technicpack.solder.http.HttpSolderApi;
+import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 
 import javax.swing.*;
@@ -240,6 +241,9 @@ public class LauncherMain {
         UIManager.put( "ComboBox.disabledBackground", LauncherFrame.COLOR_FORMELEMENT_INTERNAL );
         UIManager.put( "ComboBox.disabledForeground", LauncherFrame.COLOR_GREY_TEXT );
         System.setProperty("xr.load.xml-reader",  "org.ccil.cowan.tagsoup.Parser");
+
+        Utils.getLogger().info("OS: "+System.getProperty("os.name").toLowerCase(Locale.ENGLISH));
+        Utils.getLogger().info("Identified as "+ OperatingSystem.getOperatingSystem().getName());
 
         final SplashScreen splash = new SplashScreen(resources.getImage("launch_splash.png"), 0);
         Color bg = LauncherFrame.COLOR_FORMELEMENT_INTERNAL;
