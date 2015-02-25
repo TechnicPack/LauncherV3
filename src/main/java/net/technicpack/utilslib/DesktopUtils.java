@@ -51,15 +51,16 @@ public class DesktopUtils {
         new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() throws Exception {
-                String path = file.getAbsolutePath();
-                if (OperatingSystem.getOperatingSystem() == OperatingSystem.LINUX)
-                    path = "//" + path;
+                Utils.getLogger().info("Attempting to open "+file.getAbsolutePath());
+                Utils.getLogger().info("Using "+file.toURI().toASCIIString());
+                String path = file.toURI().getPath();
+                Utils.getLogger().info("Intermediary path "+path);
                 try {
-                    Desktop.getDesktop().open(new File(path));
+                    Desktop.getDesktop().open(new File(new URI("file://"+path).getPath()));
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
-                
+
                 return null;
             }
         }.execute();
