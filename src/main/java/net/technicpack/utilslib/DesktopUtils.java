@@ -51,20 +51,15 @@ public class DesktopUtils {
         new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() throws Exception {
-                if (OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS) {
-                    Runtime.getRuntime().exec("explorer " + file.getAbsolutePath());
-                } else {
-                    try {
-                        String path = file.getAbsolutePath();
-                        if (OperatingSystem.getOperatingSystem() == OperatingSystem.LINUX)
-                            path = "//" + path;
-                        URI uri = (new File(path)).toURI();
-                        Desktop.getDesktop().browse(uri);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                String path = file.getAbsolutePath();
+                if (OperatingSystem.getOperatingSystem() == OperatingSystem.LINUX)
+                    path = "//" + path;
+                try {
+                    Desktop.getDesktop().open(new File(path));
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
-
+                
                 return null;
             }
         }.execute();
