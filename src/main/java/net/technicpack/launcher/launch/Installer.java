@@ -132,7 +132,7 @@ public class Installer {
                         } else
                             launcherUnhider = null;
 
-                        LaunchOptions options = new LaunchOptions(pack.getDisplayName(), packIconMapper.getImageLocation(pack).getAbsolutePath(), startupParameters.getWidth(), startupParameters.getHeight(), startupParameters.getFullscreen());
+                        LaunchOptions options = new LaunchOptions(pack.getDisplayName(), packIconMapper.getImageLocation(pack).getAbsolutePath(), startupParameters.getWidth(), startupParameters.getHeight(), startupParameters.getFullscreen(), settings.getJavaArgs());
                         launcher.launch(pack, memory, options, launcherUnhider, version);
 
                         if (launchAction == null || launchAction == LaunchAction.HIDE) {
