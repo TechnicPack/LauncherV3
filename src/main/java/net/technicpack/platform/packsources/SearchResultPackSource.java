@@ -58,7 +58,7 @@ public class SearchResultPackSource implements IPackSource {
 
         ArrayList<PackInfo> resultPacks = new ArrayList<PackInfo>(results.getResults().length);
 
-        int priority = 10;
+        int priority = 100;
         for (SearchResult result : results.getResults()) {
             resultPacks.add(new SearchResultPackInfo(result));
             resultPriorities.put(result.getSlug(), priority--);

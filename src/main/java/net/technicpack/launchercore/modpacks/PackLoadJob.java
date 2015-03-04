@@ -90,7 +90,7 @@ public class PackLoadJob implements Runnable {
         if (doLoadRepository) {
             for (final String packName : packRepository.getPackNames()) {
                 InstalledPack pack = packRepository.getInstalledPacks().get(packName);
-                addPackThreadSafe(pack, null, 1000);
+                addPackThreadSafe(pack, null, -1);
             }
         }
 

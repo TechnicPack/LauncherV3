@@ -62,6 +62,6 @@ public class SolderPackSource implements IPackSource {
 
     @Override
     public int getPriority(PackInfo pack) {
-        return 5000;
+        return -1;
     }
 }

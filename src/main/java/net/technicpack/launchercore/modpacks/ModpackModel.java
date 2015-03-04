@@ -50,7 +50,7 @@ public class ModpackModel {
     private boolean isPlatform;
 
     private File installedDirectory;
-    private int priority = 0;
+    private int priority = -2;
 
     public ModpackModel(InstalledPack installedPack, PackInfo info, IInstalledPackRepository installedPackRepository, LauncherDirectories directories) {
         this();
@@ -447,8 +447,16 @@ public class ModpackModel {
     }
 
     public void updatePriority(int priority) {
-        if (this.priority < priority)
+        if (this.priority < priority) {
             this.priority = priority;
+        }
+
+        if (this.priority == -1 && this.packInfo != null && this.packInfo.isComplete()) {
+            if (this.packInfo.isOfficial())
+                this.priority = 5000;
+            else
+                this.priority = 1000;
+        }
     }
 
     public void resetPack() {
