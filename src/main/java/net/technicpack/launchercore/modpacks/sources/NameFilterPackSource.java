@@ -43,14 +43,4 @@ public class NameFilterPackSource implements IPackSource {
 
         return 0;
     }
-
-    @Override
-    public boolean isOfficialPack(String slug) {
-        for (ModpackModel model : baseModpacks.getModpacks()) {
-            if (model.getName().equals(slug))
-                return model.isOfficial();
-        }
-
-        return false;
-    }
 }

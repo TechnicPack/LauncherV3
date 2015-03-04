@@ -65,4 +65,6 @@ public interface PackInfo {
     public boolean isLocal();
 
     public boolean isServerPack();
+
+    public boolean isOfficial();
 }

@@ -60,9 +60,4 @@ public class SinglePlatformSource extends PlatformPackInfoRepository implements 
     public int getPriority(PackInfo packInfo) {
         return 0;
     }
-
-    @Override
-    public boolean isOfficialPack(String packSlug) {
-        return false;
-    }
 }

@@ -46,6 +46,7 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
     private Integer downloads;
     private boolean forceDir;
     private boolean isServer;
+    private boolean isOfficial;
     private ArrayList<FeedItem> feed = new ArrayList<FeedItem>();
 
     private transient boolean isLocal = false;
@@ -165,6 +166,9 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
     public void setLocal() { isLocal = true; }
     @Override
     public boolean isLocal() { return isLocal; }
+
+    @Override
+    public boolean isOfficial() { return isOfficial; }
 
     @Override
     public String toString() {

@@ -29,6 +29,4 @@ public interface IPackSource {
     Collection<PackInfo> getPublicPacks();
 
     int getPriority(PackInfo packInfo);
-
-    boolean isOfficialPack(String packSlug);
 }

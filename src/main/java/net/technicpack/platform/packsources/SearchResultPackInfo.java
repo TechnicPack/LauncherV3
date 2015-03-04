@@ -126,6 +126,9 @@ public class SearchResultPackInfo implements PackInfo {
     }
 
     @Override
+    public boolean isOfficial() { return false; }
+
+    @Override
     public boolean isLocal() {
         return false;
     }
