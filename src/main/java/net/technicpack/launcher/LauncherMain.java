@@ -86,6 +86,7 @@ import net.technicpack.solder.SolderPackSource;
 import net.technicpack.solder.http.HttpSolderApi;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
+import sun.misc.ClassLoaderUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -95,6 +96,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.logging.Handler;
@@ -251,6 +256,34 @@ public class LauncherMain {
         splash.pack();
         splash.setLocationRelativeTo(null);
         splash.setVisible(true);
+
+        boolean loadedAether = false;
+
+        try {
+            if (Class.forName("org.apache.maven.repository.internal.MavenRepositorySystemUtils", false, ClassLoader.getSystemClassLoader()) != null) {
+                loadedAether = true;
+            }
+        } catch (ClassNotFoundException ex) {
+            //Aether is not loaded
+        }
+
+        if (!loadedAether) {
+            File launcherAssets = new File(directories.getAssetsDirectory(), "launcher");
+
+            File aether = new File(launcherAssets, "aether-dep.jar");
+
+            try {
+                Method m = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+                m.setAccessible(true);
+                m.invoke(ClassLoader.getSystemClassLoader(), aether.toURI());
+            } catch (NoSuchMethodException ex) {
+                ex.printStackTrace();
+            } catch (InvocationTargetException ex) {
+                ex.printStackTrace();
+            } catch (IllegalAccessException ex) {
+                ex.printStackTrace();
+            }
+        }
 
         JavaVersionRepository javaVersions = new JavaVersionRepository();
         (new InstalledJavaSource()).enumerateVersions(javaVersions);
