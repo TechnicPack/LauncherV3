@@ -23,21 +23,13 @@ import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.install.ITasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.LauncherDirectories;
-import net.technicpack.launchercore.install.tasks.EnsureFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
-import net.technicpack.launchercore.install.verifiers.IFileVerifier;
-import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
-import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
 import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.minecraftcore.mojang.version.ExtractRulesFileFilter;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
-import net.technicpack.utilslib.IZipFileFilter;
-import net.technicpack.utilslib.MavenConnector;
-import net.technicpack.utilslib.OperatingSystem;
+import net.technicpack.utilslib.maven.MavenConnector;
 
-import java.io.File;
 import java.io.IOException;
 
 public class HandleVersionFileTask implements IInstallTask {
@@ -46,17 +38,19 @@ public class HandleVersionFileTask implements IInstallTask {
     private final ITasksQueue checkLibraryQueue;
     private final ITasksQueue downloadLibraryQueue;
     private final ITasksQueue copyLibraryQueue;
+    private final ITasksQueue checkNonMavenLibsQueue;
     private final MojangVersionBuilder versionBuilder;
     private final MavenConnector mavenConnector;
 
     private String libraryName;
 
-    public HandleVersionFileTask(ModpackModel pack, LauncherDirectories directories, ITasksQueue checkLibraryQueue, ITasksQueue downloadLibraryQueue, ITasksQueue copyLibraryQueue, MojangVersionBuilder versionBuilder) {
+    public HandleVersionFileTask(ModpackModel pack, LauncherDirectories directories, ITasksQueue checkNonMavenLibsQueue, ITasksQueue checkLibraryQueue, ITasksQueue downloadLibraryQueue, ITasksQueue copyLibraryQueue, MojangVersionBuilder versionBuilder) {
         this.pack = pack;
         this.directories = directories;
         this.checkLibraryQueue = checkLibraryQueue;
         this.downloadLibraryQueue = downloadLibraryQueue;
         this.copyLibraryQueue = copyLibraryQueue;
+        this.checkNonMavenLibsQueue = checkNonMavenLibsQueue;
         this.versionBuilder = versionBuilder;
         this.mavenConnector = new MavenConnector(directories);
     }
@@ -91,7 +85,7 @@ public class HandleVersionFileTask implements IInstallTask {
                 continue;
             }
 
-            checkLibraryQueue.addTask(new InstallVersionLibTask(library, mavenConnector, checkLibraryQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
+            checkLibraryQueue.addTask(new InstallVersionLibTask(library, mavenConnector, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
         }
 
         queue.setMetadata(version);

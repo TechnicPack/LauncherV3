@@ -4,7 +4,6 @@ import net.technicpack.launchercore.install.ITasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.tasks.EnsureFileTask;
-import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.install.tasks.ListenerTask;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
@@ -12,9 +11,8 @@ import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.mojang.version.ExtractRulesFileFilter;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
-import net.technicpack.rest.io.Modpack;
 import net.technicpack.utilslib.IZipFileFilter;
-import net.technicpack.utilslib.MavenConnector;
+import net.technicpack.utilslib.maven.MavenConnector;
 import net.technicpack.utilslib.OperatingSystem;
 
 import java.io.File;
@@ -46,7 +44,9 @@ public class InstallVersionLibTask extends ListenerTask {
 
     @Override
     public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
-        if (library.getUrl() != null && mavenConnector.attemptLibraryDownload(library.getName(), library.getUrl()))
+        super.runTask(queue);
+
+        if (library.getUrl() != null && mavenConnector.attemptLibraryDownload(library.getName(), library.getUrl(), this))
             return;
 
         String[] nameBits = library.getName().split(":", 3);
