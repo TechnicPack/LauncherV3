@@ -98,6 +98,7 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -275,12 +276,14 @@ public class LauncherMain {
             try {
                 Method m = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
                 m.setAccessible(true);
-                m.invoke(ClassLoader.getSystemClassLoader(), aether.toURI());
+                m.invoke(ClassLoader.getSystemClassLoader(), aether.toURI().toURL());
             } catch (NoSuchMethodException ex) {
                 ex.printStackTrace();
             } catch (InvocationTargetException ex) {
                 ex.printStackTrace();
             } catch (IllegalAccessException ex) {
+                ex.printStackTrace();
+            } catch (MalformedURLException ex) {
                 ex.printStackTrace();
             }
         }
