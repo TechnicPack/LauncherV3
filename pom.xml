@@ -253,6 +253,12 @@
 										<include>com/sun/syndication/**</include>
 									</includes>
 								</filter>
+                                <fitler>
+                                    <artifact>org.codehaus.plexus:*</artifact>
+                                    <excludes>
+                                        <exclude>**</exclude>
+                                    </excludes>
+                                </fitler>
 								<filter>
 									<artifact>*:*</artifact>
 									<excludes>
