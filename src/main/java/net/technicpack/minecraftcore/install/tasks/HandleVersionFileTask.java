@@ -82,8 +82,6 @@ public class HandleVersionFileTask implements IInstallTask {
             throw new DownloadException("The version.json file was invalid.");
         }
 
-        ValidZipFileVerifier zipVerifier = new ValidZipFileVerifier();
-
         for (Library library : version.getLibrariesForOS()) {
             // If minecraftforge is described in the libraries, skip it
             // HACK - Please let us get rid of this when we move to actually hosting forge,
@@ -93,52 +91,7 @@ public class HandleVersionFileTask implements IInstallTask {
                 continue;
             }
 
-            if (library.getUrl() != null && mavenConnector.attemptLibraryDownload(library.getName(), library.getUrl()))
-                continue;
-
-            String[] nameBits = library.getName().split(":", 3);
-            libraryName = nameBits[1] + "-" + nameBits[2] + ".jar";
-            queue.refreshProgress();
-
-            String natives = null;
-            File extractDirectory = null;
-            if (library.getNatives() != null) {
-                natives = library.getNatives().get(OperatingSystem.getOperatingSystem());
-
-                if (natives != null) {
-                    extractDirectory = new File(this.pack.getBinDir(), "natives");
-                }
-            }
-
-            String path = library.getArtifactPath(natives).replace("${arch}", System.getProperty("sun.arch.data.model"));
-
-            File cache = new File(directories.getCacheDirectory(), path);
-            if (cache.getParentFile() != null) {
-                cache.getParentFile().mkdirs();
-            }
-
-            if (cache.exists() && zipVerifier.isFileValid(cache) && extractDirectory == null)
-                continue;
-
-            IFileVerifier verifier = null;
-            String url = null;
-
-            if (!cache.exists() || !zipVerifier.isFileValid(cache)) {
-                url = library.getDownloadUrl(path, queue.getMirrorStore()).replace("${arch}", System.getProperty("sun.arch.data.model"));
-                String md5 = queue.getMirrorStore().getETag(url);
-                if (md5 != null && !md5.isEmpty()) {
-                    verifier = new MD5FileVerifier(md5);
-                } else {
-                    verifier = zipVerifier;
-                }
-            }
-
-            IZipFileFilter filter = null;
-
-            if (library.getExtract() != null)
-                filter = new ExtractRulesFileFilter(library.getExtract());
-
-            checkLibraryQueue.addTask(new EnsureFileTask(cache, verifier, extractDirectory, url, downloadLibraryQueue, copyLibraryQueue, filter));
+            checkLibraryQueue.addTask(new InstallVersionLibTask(library, mavenConnector, checkLibraryQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
         }
 
         queue.setMetadata(version);
