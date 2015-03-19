@@ -52,7 +52,7 @@ public class HandleVersionFileTask implements IInstallTask {
         this.copyLibraryQueue = copyLibraryQueue;
         this.checkNonMavenLibsQueue = checkNonMavenLibsQueue;
         this.versionBuilder = versionBuilder;
-        this.mavenConnector = new MavenConnector(directories);
+        this.mavenConnector = new MavenConnector(directories, "forge", "http://files.minecraftforge.net/maven/");
     }
 
     @Override
