@@ -17,9 +17,10 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.utilslib;
+package net.technicpack.utilslib.maven;
 
 import net.technicpack.launchercore.install.LauncherDirectories;
+import net.technicpack.launchercore.util.DownloadListener;
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
@@ -36,6 +37,7 @@ import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
 import org.eclipse.aether.spi.connector.transport.TransporterFactory;
+import org.eclipse.aether.transfer.TransferListener;
 import org.eclipse.aether.transport.file.FileTransporterFactory;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
 
@@ -74,10 +76,14 @@ public class MavenConnector {
     }
 
     public boolean attemptLibraryDownload(String name) {
-        return attemptLibraryDownload(name, null);
+        return attemptLibraryDownload(name, null, null);
     }
 
-    public boolean attemptLibraryDownload(String name, String url) {
+    public boolean attemptLibraryDownload(String name, DownloadListener listener) {
+        return attemptLibraryDownload(name, null, listener);
+    }
+
+    public boolean attemptLibraryDownload(String name, String url, DownloadListener listener) {
         Dependency dependency = new Dependency(new DefaultArtifact(name), "compile");
 
         CollectRequest collectRequest = new CollectRequest();
@@ -96,6 +102,8 @@ public class MavenConnector {
             DependencyRequest dependencyRequest = new DependencyRequest();
             dependencyRequest.setRoot(node);
 
+            if (listener != null)
+                session.setTransferListener(new MavenListenerAdapter(listener));
             system.resolveDependencies(session, dependencyRequest);
             return true;
         } catch (DependencyCollectionException ex) {
