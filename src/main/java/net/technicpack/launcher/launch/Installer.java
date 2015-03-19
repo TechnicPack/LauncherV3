@@ -211,6 +211,7 @@ public class Installer {
         TaskGroup verifyingAssets = new TaskGroup(resources.getString("install.message.verifyassets"));
         TaskGroup installingAssets = new TaskGroup(resources.getString("install.message.installassets"));
         TaskGroup grabLibs = new TaskGroup(resources.getString("install.message.grablibraries"));
+        TaskGroup checkNonMavenLibs = new TaskGroup(resources.getString("install.message.nonmavenlibs"));
 
         queue.addTask(examineModpackData);
         queue.addTask(verifyingFiles);
@@ -220,6 +221,7 @@ public class Installer {
         queue.addTask(installVersionFile);
         queue.addTask(examineVersionFile);
         queue.addTask(grabLibs);
+        queue.addTask(checkNonMavenLibs);
         queue.addTask(installingLibs);
         queue.addTask(installingMinecraft);
         queue.addTask(examineIndex);
@@ -247,7 +249,7 @@ public class Installer {
         }
 
         checkVersionFile.addTask(new VerifyVersionFilePresentTask(modpack, minecraft, versionBuilder));
-        examineVersionFile.addTask(new HandleVersionFileTask(modpack, directories, grabLibs, installingLibs, installingLibs, versionBuilder));
+        examineVersionFile.addTask(new HandleVersionFileTask(modpack, directories, checkNonMavenLibs, grabLibs, installingLibs, installingLibs, versionBuilder));
         examineVersionFile.addTask(new EnsureAssetsIndexTask(directories.getAssetsDirectory(), installingMinecraft, examineIndex, verifyingAssets, installingAssets, installingAssets));
 
         if (doFullInstall || (installedVersion != null && installedVersion.isLegacy()))
