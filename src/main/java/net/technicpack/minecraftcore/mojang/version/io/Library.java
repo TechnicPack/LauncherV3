@@ -36,6 +36,8 @@ public class Library {
 	private ExtractRules extract;
 	private String url;
 
+    public String getUrl() { return url; }
+
 	public String getName() {
 		return name;
 	}

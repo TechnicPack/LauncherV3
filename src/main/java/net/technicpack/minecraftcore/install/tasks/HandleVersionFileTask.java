@@ -34,6 +34,7 @@ import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
 import net.technicpack.utilslib.IZipFileFilter;
+import net.technicpack.utilslib.MavenConnector;
 import net.technicpack.utilslib.OperatingSystem;
 
 import java.io.File;
@@ -46,6 +47,7 @@ public class HandleVersionFileTask implements IInstallTask {
     private final ITasksQueue downloadLibraryQueue;
     private final ITasksQueue copyLibraryQueue;
     private final MojangVersionBuilder versionBuilder;
+    private final MavenConnector mavenConnector;
 
     private String libraryName;
 
@@ -56,6 +58,7 @@ public class HandleVersionFileTask implements IInstallTask {
         this.downloadLibraryQueue = downloadLibraryQueue;
         this.copyLibraryQueue = copyLibraryQueue;
         this.versionBuilder = versionBuilder;
+        this.mavenConnector = new MavenConnector(directories);
     }
 
     @Override
@@ -89,6 +92,9 @@ public class HandleVersionFileTask implements IInstallTask {
                     library.getName().startsWith("net.minecraftforge:forge")) {
                 continue;
             }
+
+            if (library.getUrl() != null && mavenConnector.attemptLibraryDownload(library.getName(), library.getUrl()))
+                continue;
 
             String[] nameBits = library.getName().split(":", 3);
             libraryName = nameBits[1] + "-" + nameBits[2] + ".jar";
