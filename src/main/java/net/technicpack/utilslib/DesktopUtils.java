@@ -52,11 +52,13 @@ public class DesktopUtils {
             @Override
             protected Void doInBackground() throws Exception {
                 Utils.getLogger().info("Attempting to open "+file.getAbsolutePath());
-                Utils.getLogger().info("Using "+file.toURI().toASCIIString());
-                String path = file.toURI().getPath();
-                Utils.getLogger().info("Intermediary path "+path);
+                String asciiUri = file.toURI().toASCIIString();
+                Utils.getLogger().info("Using "+asciiUri);
+                if (asciiUri.startsWith("file:") && !asciiUri.startsWith("file://"))
+                    asciiUri = asciiUri.replace("file:", "file://");
+                Utils.getLogger().info("Intermediary path "+asciiUri);
                 try {
-                    Desktop.getDesktop().open(new File(new URI("file://"+path).getPath()));
+                    Desktop.getDesktop().open(new File(new URI(asciiUri).getPath()));
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
