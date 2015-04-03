@@ -55,7 +55,7 @@ public class DesktopUtils {
                 String asciiUri = file.toURI().toASCIIString();
                 Utils.getLogger().info("Using "+asciiUri);
                 if (asciiUri.startsWith("file:") && !asciiUri.startsWith("file://"))
-                    asciiUri = asciiUri.replace("file:", "file://");
+                    asciiUri = asciiUri.replaceFirst("file:", "file://");
                 Utils.getLogger().info("Intermediary path "+asciiUri);
                 try {
                     Desktop.getDesktop().open(new File(new URI(asciiUri).getPath()));
