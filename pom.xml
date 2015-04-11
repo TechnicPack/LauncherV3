@@ -404,7 +404,7 @@
 		</profile>
 		<!-- Package for OS X -->
 		<profile>
-			<id>package-win</id>
+			<id>package-osx</id>
 			<activation>
 				<os>
 					<family>mac</family>
