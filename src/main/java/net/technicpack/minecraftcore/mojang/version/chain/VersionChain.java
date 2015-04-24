@@ -108,7 +108,8 @@ public class VersionChain implements MojangVersion {
     public List<Library> getLibrariesForOS() {
         List<Library> allLibraries  = new LinkedList<Library>();
 
-        for (MojangVersion version : chain) {
+        for (int i = chain.size()-1; i>=0; i--) {
+            MojangVersion version = chain.get(i);
             if (version.getLibrariesForOS() != null)
                 allLibraries.addAll(0, version.getLibrariesForOS());
         }
