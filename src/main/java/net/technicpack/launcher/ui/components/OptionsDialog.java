@@ -538,6 +538,13 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         aboutText += "<p>" + resources.getString("launcheroptions.about.summary") + "</p>";
 
         about.setLayout(new BorderLayout());
+
+        JLabel buildCtrl = new JLabel(resources.getString("launcher.build.text", buildNumber.getBuildNumber(), resources.getString("launcher.build." + settings.getBuildStream())));
+        buildCtrl.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        buildCtrl.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
+        buildCtrl.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 0));
+        about.add(buildCtrl, BorderLayout.SOUTH);
+
         JTextPane textPane = new JTextPane();
         textPane.setBorder(BorderFactory.createEmptyBorder(0, 24, 9, 24));
         textPane.setOpaque(false);
