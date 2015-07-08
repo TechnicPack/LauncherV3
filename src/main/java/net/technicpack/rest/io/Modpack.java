@@ -27,6 +27,8 @@ import java.util.List;
 
 public class Modpack extends RestObject {
     private String minecraft;
+    private String java;
+    private String memory;
     private List<Mod> mods;
 
     public Modpack() {
@@ -47,4 +49,7 @@ public class Modpack extends RestObject {
     public List<Mod> getMods() {
         return mods;
     }
+
+    public String getJava() { return java; }
+    public String getMemory() { return memory; }
 }
