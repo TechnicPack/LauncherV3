@@ -212,6 +212,7 @@ public class Installer {
         TaskGroup installingAssets = new TaskGroup(resources.getString("install.message.installassets"));
         TaskGroup grabLibs = new TaskGroup(resources.getString("install.message.grablibraries"));
         TaskGroup checkNonMavenLibs = new TaskGroup(resources.getString("install.message.nonmavenlibs"));
+        TaskGroup rundataTaskGroup = new TaskGroup(resources.getString("install.message.runData"));
 
         queue.addTask(examineModpackData);
         queue.addTask(verifyingFiles);
@@ -219,6 +220,7 @@ public class Installer {
         queue.addTask(installingMods);
         queue.addTask(checkVersionFile);
         queue.addTask(installVersionFile);
+        queue.addTask(rundataTaskGroup);
         queue.addTask(examineVersionFile);
         queue.addTask(grabLibs);
         queue.addTask(checkNonMavenLibs);
@@ -247,6 +249,11 @@ public class Installer {
 
             examineModpackData.addTask(new InstallModpackTask(modpack, modpackData, verifyingFiles, downloadingMods, installingMods));
         }
+
+        if (doFullInstall)
+            rundataTaskGroup.addTask(new WriteRundataFile(modpack, modpackData));
+        else
+            rundataTaskGroup.addTask(new CheckRundataFile(modpack, modpackData, rundataTaskGroup));
 
         checkVersionFile.addTask(new VerifyVersionFilePresentTask(modpack, minecraft, versionBuilder));
         examineVersionFile.addTask(new HandleVersionFileTask(modpack, directories, checkNonMavenLibs, grabLibs, installingLibs, installingLibs, versionBuilder));
