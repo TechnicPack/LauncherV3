@@ -34,6 +34,9 @@ public class WriteRundataFile implements IInstallTask {
 
     @Override
     public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
+        if (modpack.getJava() == null && modpack.getMemory() == null)
+            return;
+
         File file = modpackModel.getBinDir();
         File runDataFile = new File(file, "runData");
         JsonObject runData = new JsonObject();
