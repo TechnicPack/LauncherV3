@@ -224,8 +224,8 @@ public class FixRunDataDialog extends LauncherDialog {
             currentJava += resourceLoader.getString("fixRunData.bestOption", javaVersion);
         }
 
-        addSuccessFailPanel(centerPanel, fontFamily, 1, memorySuccess, memRequirement, currentMem);
-        addSuccessFailPanel(centerPanel, fontFamily, 2, javaSuccess, javaRequirement, currentJava);
+        addSuccessFailPanel(centerPanel, fontFamily, 1, memorySuccess, recommendedMemory != null, memRequirement, currentMem);
+        addSuccessFailPanel(centerPanel, fontFamily, 2, javaSuccess, recommendedVersion != null, javaRequirement, currentJava);
     }
 
     private int buildFailureReasons(JPanel centerPanel, int gridBagIndex, String fontFamily) {
@@ -289,14 +289,14 @@ public class FixRunDataDialog extends LauncherDialog {
         return gridBagIndex;
     }
 
-    private void addSuccessFailPanel(JPanel centerPanel, String fontFamily, int gridBagRow, boolean isSuccess, String compareText, String contrastText) {
+    private void addSuccessFailPanel(JPanel centerPanel, String fontFamily, int gridBagRow, boolean isSuccess, boolean hasRecommendation, String compareText, String contrastText) {
         JPanel successFailPanel = new JPanel();
-        successFailPanel.setBorder(new RoundBorder(getPanelColor(isSuccess)));
-        successFailPanel.setBackground(getPanelColor(isSuccess));
+        successFailPanel.setBorder(new RoundBorder(getPanelColor(isSuccess, hasRecommendation)));
+        successFailPanel.setBackground(getPanelColor(isSuccess, hasRecommendation));
         centerPanel.add(successFailPanel, new GridBagConstraints(0, gridBagRow, 1, 1, 1.0f, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8,0,10,0),0,0));
         successFailPanel.setLayout(new GridBagLayout());
 
-        JLabel checkbox = new JLabel(resourceLoader.getIcon(getPanelIcon(isSuccess)));
+        JLabel checkbox = new JLabel(resourceLoader.getIcon(getPanelIcon(isSuccess, hasRecommendation)));
         successFailPanel.add(checkbox, new GridBagConstraints(0, 0, 1, 2, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,14,0,0), 0,0));
 
         JLabel label = new JLabel(
@@ -397,12 +397,12 @@ public class FixRunDataDialog extends LauncherDialog {
         buttonPanel.add(okButton);
     }
 
-    private Color getPanelColor(boolean isSuccess) {
-        return isSuccess?LauncherFrame.COLOR_REQUIREMENT_SUCCEED:LauncherFrame.COLOR_REQUIREMENT_FAIL;
+    private Color getPanelColor(boolean isSuccess, boolean hasRecommended) {
+        return isSuccess?LauncherFrame.COLOR_REQUIREMENT_SUCCEED:(hasRecommended?LauncherFrame.COLOR_REQUIREMENT_WARNING:LauncherFrame.COLOR_REQUIREMENT_FAIL);
     }
 
-    public String getPanelIcon(boolean isSuccess) {
-        return isSuccess?"req_success.png":"req_failed.png";
+    public String getPanelIcon(boolean isSuccess, boolean hasRecommended) {
+        return isSuccess?"req_success.png":(hasRecommended?"req_warning.png":"req_failed.png");
     }
 
     /**Returns the preferred size to set a component at in order to render
