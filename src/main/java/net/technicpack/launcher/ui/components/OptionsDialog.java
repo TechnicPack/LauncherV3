@@ -110,6 +110,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     JCheckBox launchToModpacks;
     StartupParameters params;
     Component ramWarning;
+    JCheckBox askFirstBox;
 
     public OptionsDialog(final Frame owner, final TechnicSettings settings, final ResourceLoader resourceLoader, final StartupParameters params, final JavaVersionRepository javaVersions, final FileJavaSource fileJavaSource, final IBuildNumber buildNumber) {
         super(owner);
@@ -141,6 +142,11 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     protected void changeShowConsole() {
         settings.setShowConsole(showConsole.isSelected());
         LauncherMain.consoleFrame.setVisible(showConsole.isSelected());
+        settings.save();
+    }
+
+    protected void changeAskFirst() {
+        settings.setAutoAcceptModpackRequirements(!askFirstBox.isSelected());
         settings.save();
     }
 
@@ -272,6 +278,16 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             @Override
             public void actionPerformed(ActionEvent e) {
                 changeShowConsole();
+            }
+        });
+
+        for (ActionListener listener : askFirstBox.getActionListeners())
+            askFirstBox.removeActionListener(listener);
+        askFirstBox.setSelected(!settings.shouldAutoAcceptModpackRequirements());
+        askFirstBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeAskFirst();
             }
         });
 
@@ -866,9 +882,24 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         javaArgs.setSelectionColor(LauncherFrame.COLOR_BUTTON_BLUE);
         javaArgs.setSelectedTextColor(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
 
-        panel.add(javaArgs, new GridBagConstraints(1, 2, 6, 2, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 64, 80), 0, 0));
+        panel.add(javaArgs, new GridBagConstraints(1, 2, 6, 2, 0, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 6, 80), 0, 0));
 
-        panel.add(Box.createGlue(), new GridBagConstraints(4, 3, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
+        JLabel autoApprovalLabel = new JLabel(resources.getString("launcheroptions.java.autoApprove"));
+        autoApprovalLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+        autoApprovalLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        panel.add(autoApprovalLabel, new GridBagConstraints(0, 4, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 20, 0, 0), 0, 0));
+
+        askFirstBox = new JCheckBox("", false);
+        askFirstBox.setOpaque(false);
+        askFirstBox.setHorizontalAlignment(SwingConstants.RIGHT);
+        askFirstBox.setBorder(BorderFactory.createEmptyBorder());
+        askFirstBox.setIconTextGap(0);
+        askFirstBox.setSelectedIcon(resources.getIcon("checkbox_closed.png"));
+        askFirstBox.setIcon(resources.getIcon("checkbox_open.png"));
+        askFirstBox.setFocusPainted(false);
+        panel.add(askFirstBox, new GridBagConstraints(1, 4, 6, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(8, 16, 8, 8), 0, 0));
+
+        panel.add(Box.createGlue(), new GridBagConstraints(4, 5, 1, 1, 1, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
     }
 
     @Override

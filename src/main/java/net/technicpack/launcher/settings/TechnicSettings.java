@@ -46,6 +46,7 @@ public class TechnicSettings {
     private int latestNewsArticle;
     private boolean launchToModpacks;
     private String javaVersion = "default";
+    private boolean autoAcceptRequirements = false;
     /**
      * 64 bit if true, 32 bit if false
      */
@@ -133,6 +134,12 @@ public class TechnicSettings {
     public void setLatestNewsArticle(int latestNewsArticle)
     {
         this.latestNewsArticle = latestNewsArticle;
+        save();
+    }
+
+    public boolean shouldAutoAcceptModpackRequirements() { return autoAcceptRequirements; }
+    public void setAutoAcceptModpackRequirements(boolean value) {
+        this.autoAcceptRequirements = value;
         save();
     }
 
