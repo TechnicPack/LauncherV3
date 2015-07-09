@@ -284,6 +284,22 @@ public class ModpackModel {
         return packInfo.getDownloads();
     }
 
+    public RunData getRunData() {
+        File runDataFile = new File(getBinDir(), "runData");
+
+        if (!runDataFile.exists())
+            return null;
+
+        String runData = "{}";
+        try {
+            runData = FileUtils.readFileToString(runDataFile);
+        } catch (IOException ex) {
+            return null;
+        }
+
+        return (RunData)Utils.getGson().fromJson(runData, RunData.class);
+    }
+
     public File getInstalledDirectory() {
         if (installedPack == null)
             return null;
