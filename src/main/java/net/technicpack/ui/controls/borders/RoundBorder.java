@@ -35,7 +35,7 @@ public class RoundBorder extends AbstractBorder {
 
         public RoundBorder(
                 Color color) {
-            new RoundBorder(color, 4, 8);
+            this(color, 4, 8);
         }
 
         public RoundBorder(
@@ -78,7 +78,7 @@ public class RoundBorder extends AbstractBorder {
             RoundRectangle2D.Double bubble = new RoundRectangle2D.Double(
                     0 + strokePad,
                     0 + strokePad,
-                    width - thickness,
+                    width - thickness - 1,
                     bottomLineY,
                     radii,
                     radii);
