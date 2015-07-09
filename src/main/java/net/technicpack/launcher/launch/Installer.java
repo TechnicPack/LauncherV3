@@ -134,7 +134,7 @@ public class Installer {
                         RunData data = pack.getRunData();
 
                         if (data != null && !data.isRunDataValid(memory, versionNumber)) {
-                            FixRunDataDialog dialog = new FixRunDataDialog(frame, resources, data, javaVersions, memoryObj);
+                            FixRunDataDialog dialog = new FixRunDataDialog(frame, resources, data, javaVersions, memoryObj, settings.shouldAutoAcceptModpackRequirements());
                             dialog.setVisible(true);
                             if (dialog.getResult() == FixRunDataDialog.Result.ACCEPT) {
                                 memoryObj = dialog.getRecommendedMemory();
@@ -143,9 +143,7 @@ public class Installer {
                                 javaVersions.selectVersion(recommendedJavaVersion.getVersionNumber(), recommendedJavaVersion.is64Bit());
 
                                 if (dialog.shouldRemember()) {
-                                    settings.setMemory(memoryObj.getSettingsId());
-                                    settings.setJavaVersion(recommendedJavaVersion.getVersionNumber());
-                                    settings.setJavaBitness(recommendedJavaVersion.is64Bit());
+                                    settings.setAutoAcceptModpackRequirements(true);
                                 }
                             } else
                                 return;

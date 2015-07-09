@@ -38,7 +38,7 @@ public class FixRunDataDialog extends LauncherDialog {
         CANCEL
     }
 
-    public FixRunDataDialog(Frame owner, ResourceLoader resourceLoader, RunData runData, JavaVersionRepository javaVersionRepository, Memory attemptedMemory) {
+    public FixRunDataDialog(Frame owner, ResourceLoader resourceLoader, RunData runData, JavaVersionRepository javaVersionRepository, Memory attemptedMemory, boolean shouldAskFirst) {
         super(owner);
         this.runData = runData;
         this.javaVersionRepository = javaVersionRepository;
