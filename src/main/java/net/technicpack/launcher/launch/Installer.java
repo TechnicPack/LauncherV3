@@ -18,7 +18,11 @@
 
 package net.technicpack.launcher.launch;
 
+import net.technicpack.launcher.ui.components.FixRunDataDialog;
 import net.technicpack.launchercore.TechnicConstants;
+import net.technicpack.launchercore.launch.java.IJavaVersion;
+import net.technicpack.launchercore.launch.java.JavaVersionRepository;
+import net.technicpack.launchercore.modpacks.RunData;
 import net.technicpack.minecraftcore.mojang.version.CompleteVersionParser;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
@@ -123,7 +127,29 @@ public class Installer {
                             throw new PackNotAvailableOfflineException(pack.getDisplayName());
                         }
 
-                        long memory = Memory.getClosestAvailableMemory(Memory.getMemoryFromId(settings.getMemory()), launcher.getJavaVersions().getSelectedVersion().is64Bit()).getMemoryMB();
+                        JavaVersionRepository javaVersions = launcher.getJavaVersions();
+                        Memory memoryObj = Memory.getClosestAvailableMemory(Memory.getMemoryFromId(settings.getMemory()), javaVersions.getSelectedVersion().is64Bit());
+                        long memory = memoryObj.getMemoryMB();
+                        String versionNumber = javaVersions.getSelectedVersion().getVersionNumber();
+                        RunData data = pack.getRunData();
+
+                        if (data != null && !data.isRunDataValid(memory, versionNumber)) {
+                            FixRunDataDialog dialog = new FixRunDataDialog(frame, resources, data, javaVersions, memoryObj);
+                            dialog.setVisible(true);
+                            if (dialog.getResult() == FixRunDataDialog.Result.ACCEPT) {
+                                memoryObj = dialog.getRecommendedMemory();
+                                memory = memoryObj.getMemoryMB();
+                                IJavaVersion recommendedJavaVersion = dialog.getRecommendedJavaVersion();
+                                javaVersions.selectVersion(recommendedJavaVersion.getVersionNumber(), recommendedJavaVersion.is64Bit());
+
+                                if (dialog.shouldRemember()) {
+                                    settings.setMemory(memoryObj.getSettingsId());
+                                    settings.setJavaVersion(recommendedJavaVersion.getVersionNumber());
+                                    settings.setJavaBitness(recommendedJavaVersion.is64Bit());
+                                }
+                            } else
+                                return;
+                        }
 
                         LaunchAction launchAction = settings.getLaunchAction();
 
