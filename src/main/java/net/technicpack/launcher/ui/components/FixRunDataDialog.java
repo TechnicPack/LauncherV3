@@ -25,6 +25,7 @@ public class FixRunDataDialog extends LauncherDialog {
     private RunData runData;
     private JavaVersionRepository javaVersionRepository;
     private Memory attemptedMemory;
+    private boolean shouldAskFirst;
 
     private IJavaVersion recommendedVersion;
     private Memory recommendedMemory;
@@ -44,6 +45,7 @@ public class FixRunDataDialog extends LauncherDialog {
         this.javaVersionRepository = javaVersionRepository;
         this.attemptedMemory = attemptedMemory;
         this.resourceLoader = resourceLoader;
+        this.shouldAskFirst = shouldAskFirst;
 
         recommendSettings();
         initComponents();
@@ -51,7 +53,9 @@ public class FixRunDataDialog extends LauncherDialog {
 
     @Override
     public void setVisible(boolean visible) {
-        if (recommendedVersion != null && recommendedMemory != null && javaVersionRepository.getSelectedVersion().equals(recommendedVersion) && attemptedMemory.getMemoryMB() == recommendedMemory.getMemoryMB()) {
+        if ((recommendedVersion != null && recommendedMemory != null && javaVersionRepository.getSelectedVersion().equals(recommendedVersion) && attemptedMemory.getMemoryMB() == recommendedMemory.getMemoryMB()) ||
+                (!shouldAskFirst && recommendedMemory != null && recommendedVersion != null)) {
+            result = Result.ACCEPT;
             dispose();
             return;
         }

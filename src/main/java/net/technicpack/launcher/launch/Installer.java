@@ -134,7 +134,7 @@ public class Installer {
                         RunData data = pack.getRunData();
 
                         if (data != null && !data.isRunDataValid(memory, versionNumber)) {
-                            FixRunDataDialog dialog = new FixRunDataDialog(frame, resources, data, javaVersions, memoryObj, settings.shouldAutoAcceptModpackRequirements());
+                            FixRunDataDialog dialog = new FixRunDataDialog(frame, resources, data, javaVersions, memoryObj, !settings.shouldAutoAcceptModpackRequirements());
                             dialog.setVisible(true);
                             if (dialog.getResult() == FixRunDataDialog.Result.ACCEPT) {
                                 memoryObj = dialog.getRecommendedMemory();
