@@ -79,6 +79,8 @@ public class ResourceLoader {
                 return fallbackFont;
 
             font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
+            GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            genv.registerFont(font);
         } catch (Exception e) {
             e.printStackTrace();
             // Fallback
