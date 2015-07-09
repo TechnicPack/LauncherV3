@@ -108,7 +108,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     public static final Color COLOR_REQUIREMENT_SUCCEED = new Color(94, 181, 103);
     public static final Color COLOR_REQUIREMENT_FAIL = new Color(133, 12, 12);
     public static final Color COLOR_REQUIREMENT_SEPARATOR = new Color(37, 44, 49);
-    public static final Color COLOR_REQUIREMENT_WARNING = new Color(230, 112, 0);
+    public static final Color COLOR_REQUIREMENT_WARNING = new Color(230, 119, 0);
 
     public static final String TAB_DISCOVER = "discover";
     public static final String TAB_MODPACKS = "modpacks";
