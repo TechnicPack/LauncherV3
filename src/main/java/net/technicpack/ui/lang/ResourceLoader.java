@@ -243,6 +243,10 @@ public class ResourceLoader {
         }
     }
 
+    public boolean hasResource(String name) {
+        return (ResourceLoader.class.getResource(getResourcePath("/"+name)) != null);
+    }
+
     public ImageIcon getIcon(String iconName) {
         return new ImageIcon(ResourceLoader.class.getResource(getResourcePath("/" + iconName)));
     }
