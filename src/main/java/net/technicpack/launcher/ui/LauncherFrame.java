@@ -30,6 +30,7 @@ import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.rest.RestObject;
 import net.technicpack.ui.controls.DraggableFrame;
 import net.technicpack.ui.controls.RoundedButton;
+import net.technicpack.ui.controls.SplatPane;
 import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.lang.IRelocalizableResource;
 import net.technicpack.ui.lang.ResourceLoader;
@@ -379,7 +380,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     private void initComponents() {
         BorderLayout layout = new BorderLayout();
-        setLayout(layout);
+        getRootPane().getContentPane().setLayout(layout);
 
         /////////////////////////////////////////////////////////////
         //HEADER
@@ -389,7 +390,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         header.setBackground(COLOR_BLUE);
         header.setForeground(COLOR_WHITE_TEXT);
         header.setBorder(BorderFactory.createEmptyBorder(0,5,0,10));
-        this.add(header, BorderLayout.PAGE_START);
+        getRootPane().getContentPane().add(header, BorderLayout.PAGE_START);
 
         ImageIcon headerIcon = resources.getIcon("platform_icon_title.png");
         JButton headerLabel = new JButton(headerIcon);
@@ -510,7 +511,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         centralPanel.setBackground(COLOR_CHARCOAL);
         centralPanel.setForeground(COLOR_WHITE_TEXT);
         centralPanel.setTintColor(COLOR_CENTRAL_BACK);
-        this.add(centralPanel, BorderLayout.CENTER);
+        getRootPane().getContentPane().add(centralPanel, BorderLayout.CENTER);
         centralPanel.setLayout(new BorderLayout());
 
         modpackPanel = new ModpackInfoPanel(resources, iconRepo, logoRepo, backgroundRepo, avatarRepo, new ActionListener() {
@@ -633,7 +634,12 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         });
         footer.add(buildCtrl);
 
-        this.add(footer, BorderLayout.PAGE_END);
+        getRootPane().getContentPane().add(footer, BorderLayout.PAGE_END);
+
+        if (resources.hasResource("teaser.png")) {
+            getRootPane().setGlassPane(new SplatPane(discoverTab, resources.getIcon("teaser.png"), JLabel.SOUTH_EAST, 3, 3));
+            getRootPane().getGlassPane().setVisible(true);
+        }
     }
 
     @Override
@@ -644,8 +650,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         setIconImage(this.resources.getImage("icon.png"));
 
         //Wipe controls
-        this.getContentPane().removeAll();
-        this.setLayout(null);
+        getRootPane().getContentPane().removeAll();
+        getRootPane().getContentPane().setLayout(null);
 
         //Clear references to existing controls
 
