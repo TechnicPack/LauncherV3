@@ -19,11 +19,10 @@
 
 package net.technicpack.minecraftcore.mojang.auth.io;
 
-import com.google.gson.JsonObject;
 
 public class User {
 	private String id;
-	private JsonObject userProperties;
+	private UserProperties properties;
 
 	public User() {
 
@@ -33,7 +32,7 @@ public class User {
 		return id;
 	}
 
-	public JsonObject getUserProperties() {
-		return userProperties;
+	public UserProperties getUserProperties() {
+		return properties;
 	}
 }

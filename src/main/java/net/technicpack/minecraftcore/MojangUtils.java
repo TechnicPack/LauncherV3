@@ -21,6 +21,8 @@ package net.technicpack.minecraftcore;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.technicpack.minecraftcore.mojang.auth.io.UserProperties;
+import net.technicpack.minecraftcore.mojang.auth.io.UserPropertiesAdapter;
 import net.technicpack.utilslib.DateTypeAdapter;
 import net.technicpack.utilslib.LowerCaseEnumTypeAdapterFactory;
 
@@ -58,17 +60,22 @@ public class MojangUtils {
 	}
 
     private static final Gson gson;
+    private static final Gson uglyGson;
 
     static {
         GsonBuilder builder = new GsonBuilder();
-        builder.setPrettyPrinting();
         builder.registerTypeAdapterFactory(new LowerCaseEnumTypeAdapterFactory());
         builder.registerTypeAdapter(Date.class, new DateTypeAdapter());
+        builder.registerTypeAdapter(UserProperties.class, new UserPropertiesAdapter());
         builder.enableComplexMapKeySerialization();
+        uglyGson = builder.create();
+
+        builder.setPrettyPrinting();
         gson = builder.create();
     }
 
     public static Gson getGson() { return gson; }
+    public static Gson getUglyGson() { return uglyGson; }
 
     public static void copyMinecraftJar(File minecraft, File output) throws IOException {
         String[] security = {"MOJANG_C.DSA",

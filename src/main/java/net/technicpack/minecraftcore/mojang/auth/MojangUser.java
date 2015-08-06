@@ -19,24 +19,24 @@
 
 package net.technicpack.minecraftcore.mojang.auth;
 
-import com.google.gson.JsonObject;
 import net.technicpack.launchercore.auth.IUserType;
+import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.auth.io.Profile;
+import net.technicpack.minecraftcore.mojang.auth.io.UserProperties;
 import net.technicpack.minecraftcore.mojang.auth.response.AuthResponse;
-import net.technicpack.utilslib.Utils;
 
 public class MojangUser implements IUserType {
-	private String username;
-	private String accessToken;
-	private String clientToken;
-	private String displayName;
-	private Profile profile;
-	private JsonObject userProperties;
+    private String username;
+    private String accessToken;
+    private String clientToken;
+    private String displayName;
+    private Profile profile;
+    private UserProperties userProperties;
     private transient boolean isOffline;
 
-	public MojangUser() {
-		isOffline = false;
-	}
+    public MojangUser() {
+        isOffline = false;
+    }
 
     //This constructor is used to build a user for offline mode
     public MojangUser(String username) {
@@ -46,59 +46,65 @@ public class MojangUser implements IUserType {
         this.clientToken = "0";
         this.profile = new Profile("0", "");
         this.isOffline = true;
-	    this.userProperties = Utils.getGson().fromJson("{}", JsonObject.class);
+        this.userProperties = new UserProperties();
     }
 
-	public MojangUser(String username, AuthResponse response) {
+    public MojangUser(String username, AuthResponse response) {
         this.isOffline = false;
-		this.username = username;
-		this.accessToken = response.getAccessToken();
-		this.clientToken = response.getClientToken();
-		this.displayName = response.getSelectedProfile().getName();
-		this.profile = response.getSelectedProfile();
+        this.username = username;
+        this.accessToken = response.getAccessToken();
+        this.clientToken = response.getClientToken();
+        this.displayName = response.getSelectedProfile().getName();
+        this.profile = response.getSelectedProfile();
 
-		if (response.getUser() == null) {
-			this.userProperties = Utils.getGson().fromJson("{}", JsonObject.class);
-		} else {
-			this.userProperties = response.getUser().getUserProperties();
-		}
-	}
+        if (response.getUser() == null) {
+            this.userProperties = new UserProperties();
+        } else {
+            this.userProperties = response.getUser().getUserProperties();
+        }
+    }
 
-    public String getId() { return profile.getId(); }
+    public String getId() {
+        return profile.getId();
+    }
 
-	public String getUsername() {
-		return username;
-	}
+    public String getUsername() {
+        return username;
+    }
 
-	public String getAccessToken() {
-		return accessToken;
-	}
+    public String getAccessToken() {
+        return accessToken;
+    }
 
-	public String getClientToken() {
-		return clientToken;
-	}
+    public String getClientToken() {
+        return clientToken;
+    }
 
-	public String getDisplayName() {
-		return displayName;
-	}
+    public String getDisplayName() {
+        return displayName;
+    }
 
-	public Profile getProfile() {
-		return profile;
-	}
+    public Profile getProfile() {
+        return profile;
+    }
 
     public boolean isOffline() {
         return isOffline;
     }
 
-	public String getSessionId() {
-		return "token:" + accessToken + ":" + profile.getId();
-	}
+    public String getSessionId() {
+        return "token:" + accessToken + ":" + profile.getId();
+    }
 
     public void rotateAccessToken(String newToken) {
         this.accessToken = newToken;
     }
 
-	public String getUserPropertiesAsJson() {
-		return Utils.getGson().toJson(this.userProperties);
-	}
+    public String getUserPropertiesAsJson() {
+        return MojangUtils.getUglyGson().toJson(this.userProperties);
+    }
+
+    public void mergeUserProperties(MojangUser mergeUser) {
+        this.userProperties.merge(mergeUser.userProperties);
+    }
 }
