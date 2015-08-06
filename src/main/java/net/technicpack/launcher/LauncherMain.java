@@ -86,6 +86,8 @@ import net.technicpack.solder.SolderPackSource;
 import net.technicpack.solder.http.HttpSolderApi;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
+import org.apache.commons.io.FileUtils;
+import org.joda.time.DateTime;
 import sun.misc.ClassLoaderUtil;
 
 import javax.swing.*;
@@ -102,6 +104,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -243,12 +246,26 @@ public class LauncherMain {
         });
     }
 
-    private static void startLauncher(final TechnicSettings settings, StartupParameters startupParameters, LauncherDirectories directories, ResourceLoader resources, IBuildNumber buildNumber) {
+    private static void startLauncher(final TechnicSettings settings, StartupParameters startupParameters, final LauncherDirectories directories, ResourceLoader resources, IBuildNumber buildNumber) {
         UIManager.put( "ComboBox.disabledBackground", LauncherFrame.COLOR_FORMELEMENT_INTERNAL );
         UIManager.put( "ComboBox.disabledForeground", LauncherFrame.COLOR_GREY_TEXT );
-        System.setProperty("xr.load.xml-reader",  "org.ccil.cowan.tagsoup.Parser");
+        System.setProperty("xr.load.xml-reader", "org.ccil.cowan.tagsoup.Parser");
 
-        Utils.getLogger().info("OS: "+System.getProperty("os.name").toLowerCase(Locale.ENGLISH));
+        //Remove all log files older than a week
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Iterator<File> files = FileUtils.iterateFiles(new File(directories.getLauncherDirectory(), "logs"), new String[] {"log"}, false);
+                while (files.hasNext()) {
+                    File logFile = files.next();
+                    if (logFile.exists() && (new DateTime(logFile.lastModified())).isBefore(DateTime.now().minusWeeks(1))) {
+                        logFile.delete();
+                    }
+                }
+            }
+        }).start();
+
+        Utils.getLogger().info("OS: " + System.getProperty("os.name").toLowerCase(Locale.ENGLISH));
         Utils.getLogger().info("Identified as "+ OperatingSystem.getOperatingSystem().getName());
 
         final SplashScreen splash = new SplashScreen(resources.getImage("launch_splash.png"), 0);
