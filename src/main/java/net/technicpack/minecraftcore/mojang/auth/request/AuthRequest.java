@@ -22,19 +22,20 @@ package net.technicpack.minecraftcore.mojang.auth.request;
 import net.technicpack.minecraftcore.mojang.auth.io.Agent;
 
 public class AuthRequest {
-	private Agent agent;
-	private String username;
-	private String password;
-	private String clientToken;
+    private Agent agent;
+    private String username;
+    private String password;
+    private String clientToken;
+    private boolean requestUser = true;
 
-	public AuthRequest() {
+    public AuthRequest() {
 
-	}
+    }
 
-	public AuthRequest(Agent agent, String username, String password, String clientToken) {
-		this.agent = agent;
-		this.username = username;
-		this.password = password;
-		this.clientToken = clientToken;
-	}
+    public AuthRequest(Agent agent, String username, String password, String clientToken) {
+        this.agent = agent;
+        this.username = username;
+        this.password = password;
+        this.clientToken = clientToken;
+    }
 }
