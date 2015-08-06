@@ -18,8 +18,10 @@
 
 package net.technicpack.launcher.io;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 import net.technicpack.launchercore.auth.IUserStore;
+import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
@@ -54,7 +56,7 @@ public class TechnicUserStore implements IUserStore<MojangUser> {
 
         try {
             String json = FileUtils.readFileToString(userFile, Charset.forName("UTF-8"));
-            TechnicUserStore newModel = Utils.getGson().fromJson(json, TechnicUserStore.class);
+            TechnicUserStore newModel = MojangUtils.getGson().fromJson(json, TechnicUserStore.class);
 
             if (newModel != null) {
                 newModel.setUserFile(userFile);
@@ -74,7 +76,7 @@ public class TechnicUserStore implements IUserStore<MojangUser> {
     }
 
     public void save() {
-        String json = Utils.getGson().toJson(this);
+        String json = MojangUtils.getGson().toJson(this);
 
         try {
             FileUtils.writeStringToFile(usersFile, json, Charset.forName("UTF-8"));
@@ -84,6 +86,10 @@ public class TechnicUserStore implements IUserStore<MojangUser> {
     }
 
     public void addUser(MojangUser mojangUser) {
+        if (savedUsers.containsKey(mojangUser.getUsername())) {
+            MojangUser oldUser = savedUsers.get(mojangUser.getUsername());
+            mojangUser.mergeUserProperties(oldUser);
+        }
         savedUsers.put(mojangUser.getUsername(), mojangUser);
         save();
     }
