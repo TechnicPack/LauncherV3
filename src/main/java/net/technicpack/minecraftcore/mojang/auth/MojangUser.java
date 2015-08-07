@@ -101,7 +101,10 @@ public class MojangUser implements IUserType {
     }
 
     public String getUserPropertiesAsJson() {
-        return MojangUtils.getUglyGson().toJson(this.userProperties);
+        if (this.userProperties != null)
+            return MojangUtils.getUglyGson().toJson(this.userProperties);
+        else
+            return "{}";
     }
 
     public void mergeUserProperties(MojangUser mergeUser) {
