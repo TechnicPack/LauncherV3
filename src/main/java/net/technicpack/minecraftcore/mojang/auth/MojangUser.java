@@ -105,6 +105,7 @@ public class MojangUser implements IUserType {
     }
 
     public void mergeUserProperties(MojangUser mergeUser) {
-        this.userProperties.merge(mergeUser.userProperties);
+        if (this.userProperties != null && mergeUser.userProperties != null)
+            this.userProperties.merge(mergeUser.userProperties);
     }
 }
