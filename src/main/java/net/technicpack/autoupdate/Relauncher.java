@@ -140,10 +140,7 @@ public abstract class Relauncher {
         ProcessBuilder processBuilder = new ProcessBuilder();
         ArrayList<String> commands = new ArrayList<String>();
         if (!launchPath.endsWith(".exe")) {
-            if (OperatingSystem.getOperatingSystem().equals(OperatingSystem.WINDOWS))
-                commands.add("javaw");
-            else
-                commands.add("java");
+            commands.add(OperatingSystem.getJavaDir());
             commands.add("-Xmx256m");
             commands.add("-Djava.net.preferIPv4Stack=true");
             commands.add("-Dawt.useSystemAAFontSettings=lcd");
