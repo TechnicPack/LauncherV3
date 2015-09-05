@@ -279,6 +279,8 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
                 changeWindowDimensions();
                 break;
         }
+
+        updateDimensionsEnabled();
     }
 
     protected void changeEnableStencil() {
@@ -509,6 +511,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
                 changeWindowType();
             }
         });
+        updateDimensionsEnabled();
 
         for (ActionListener listener : useStencil.getActionListeners()) {
             useStencil.removeActionListener(listener);
@@ -913,6 +916,24 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             }
         });
         panel.add(openLogs, new GridBagConstraints(0, 8, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 10, 10, 0), 0, 0));
+    }
+
+    private void updateDimensionsEnabled() {
+        if (windowSelect.getSelectedIndex() == 2) {
+            widthInput.setEnabled(true);
+            heightInput.setEnabled(true);
+            widthInput.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+            heightInput.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+            widthInput.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
+            heightInput.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
+        } else {
+            widthInput.setEnabled(false);
+            heightInput.setEnabled(false);
+            widthInput.setForeground(LauncherFrame.COLOR_GREY_TEXT);
+            heightInput.setForeground(LauncherFrame.COLOR_GREY_TEXT);
+            widthInput.setBorder(new RoundBorder(LauncherFrame.COLOR_GREY_TEXT, 1, 8));
+            heightInput.setBorder(new RoundBorder(LauncherFrame.COLOR_GREY_TEXT, 1, 8));
+        }
     }
 
     private void setupVideoOptionsPanel(JPanel panel) {
