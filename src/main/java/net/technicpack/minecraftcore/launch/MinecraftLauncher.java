@@ -24,7 +24,6 @@ import net.technicpack.launchercore.launch.ProcessExitListener;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.launchercore.auth.UserModel;
-import net.technicpack.launchercore.launch.LaunchOptions;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
@@ -46,14 +45,12 @@ import java.util.Map;
 public class MinecraftLauncher {
     private final LauncherDirectories directories;
     private final IPlatformApi platformApi;
-    private final String clientId;
     private final UserModel<MojangUser> userModel;
     private final JavaVersionRepository javaVersions;
 
-	public MinecraftLauncher(final IPlatformApi platformApi, final LauncherDirectories directories, final UserModel userModel, final String clientId, final JavaVersionRepository javaVersions) {
+	public MinecraftLauncher(final IPlatformApi platformApi, final LauncherDirectories directories, final UserModel userModel, final JavaVersionRepository javaVersions) {
         this.directories = directories;
         this.platformApi = platformApi;
-        this.clientId = clientId;
         this.userModel = userModel;
         this.javaVersions = javaVersions;
 	}
@@ -80,7 +77,7 @@ public class MinecraftLauncher {
 		if (exitListener != null) mcProcess.setExitListener(exitListener);
 
         platformApi.incrementPackRuns(pack.getName());
-        if (!Utils.sendTracking("runModpack", pack.getName(), pack.getInstalledVersion().getVersion(), clientId)) {
+        if (!Utils.sendTracking("runModpack", pack.getName(), pack.getInstalledVersion().getVersion(), options.getOptions().getClientId())) {
             Utils.getLogger().info("Failed to record event");
         }
 
@@ -112,6 +109,9 @@ public class MinecraftLauncher {
 		commands.add("-Dfml.core.libraries.mirror=http://mirror.technicpack.net/Technic/lib/fml/%s");
 		commands.add("-Dminecraft.applet.TargetDirectory=" +  pack.getInstalledDirectory().getAbsolutePath());
         commands.add("-Djava.net.preferIPv4Stack=true");
+
+        if (!options.getOptions().shouldUseStencilBuffer())
+            commands.add("-Dforge.forceNoStencil=true");
 
         String javaArguments = version.getJavaArguments();
 
