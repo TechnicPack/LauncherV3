@@ -19,6 +19,7 @@
 package net.technicpack.launcher.settings;
 
 import net.technicpack.launchercore.util.LaunchAction;
+import net.technicpack.minecraftcore.launch.WindowType;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
@@ -53,6 +54,11 @@ public class TechnicSettings {
     private boolean javaBitness = true;
 
     private String launcherSettingsVersion = "0";
+
+    private WindowType windowType = WindowType.DEFAULT;
+    private int windowWidth = 0;
+    private int windowHeight = 0;
+    private boolean enableStencilBuffer = true;
 
     public File getFilePath() { return this.settingsFile; }
     public void setFilePath(File settingsFile) {
@@ -140,6 +146,26 @@ public class TechnicSettings {
     public boolean shouldAutoAcceptModpackRequirements() { return autoAcceptRequirements; }
     public void setAutoAcceptModpackRequirements(boolean value) {
         this.autoAcceptRequirements = value;
+        save();
+    }
+
+    public WindowType getLaunchWindowType() { return windowType; }
+    public void setLaunchWindowType(WindowType type) {
+        this.windowType = type;
+        save();
+    }
+
+    public int getLaunchWindowWidth() { return windowWidth; }
+    public int getLaunchWindowHeight() { return windowHeight; }
+    public void setLaunchWindowDimensions(int width, int height) {
+        this.windowWidth = width;
+        this.windowHeight = height;
+        save();
+    }
+
+    public boolean shouldUseStencilBuffer() { return enableStencilBuffer; }
+    public void setUseStencilBuffer(boolean stencilBuffer) {
+        this.enableStencilBuffer = stencilBuffer;
         save();
     }
 
