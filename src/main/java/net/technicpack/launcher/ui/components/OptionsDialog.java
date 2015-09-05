@@ -22,7 +22,7 @@ import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.ui.InstallerFrame;
-import net.technicpack.rest.io.Resource;
+import net.technicpack.minecraftcore.launch.WindowType;
 import net.technicpack.ui.listitems.javaversion.Best64BitVersionItem;
 import net.technicpack.ui.listitems.javaversion.DefaultVersionItem;
 import net.technicpack.ui.listitems.javaversion.JavaVersionItem;
@@ -82,7 +82,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     private final FileJavaSource fileJavaSource;
     private final IBuildNumber buildNumber;
 
-    private DocumentListener listener = new DocumentListener() {
+    private DocumentListener javaArgsListener = new DocumentListener() {
         @Override
         public void insertUpdate(DocumentEvent e) {
             changeJavaArgs();
@@ -96,6 +96,23 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         @Override
         public void changedUpdate(DocumentEvent e) {
             changeJavaArgs();
+        }
+    };
+
+    private DocumentListener dimensionListener = new DocumentListener() {
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            changeWindowDimensions();
+        }
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            changeWindowDimensions();
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            changeWindowDimensions();
         }
     };
 
@@ -249,6 +266,46 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         resources.setLocale(((LanguageItem) langSelect.getSelectedItem()).getLangCode());
     }
 
+    protected void changeWindowType() {
+        switch(windowSelect.getSelectedIndex()) {
+            case 0:
+                settings.setLaunchWindowType(WindowType.DEFAULT);
+                break;
+            case 1:
+                settings.setLaunchWindowType(WindowType.FULLSCREEN);
+                break;
+            case 2:
+                settings.setLaunchWindowType(WindowType.CUSTOM);
+                changeWindowDimensions();
+                break;
+        }
+    }
+
+    protected void changeEnableStencil() {
+        settings.setUseStencilBuffer(useStencil.getSelectedIndex() == 0);
+    }
+
+    protected void changeWindowDimensions() {
+        String widthStr = widthInput.getText();
+        String heightStr = heightInput.getText();
+        int width = 800;
+        int height = 600;
+
+        try {
+            width = Integer.parseInt(widthStr);
+        } catch (NumberFormatException ex) {
+            //Not important
+        }
+
+        try {
+            height = Integer.parseInt(heightStr);
+        } catch (NumberFormatException ex) {
+            //Not important
+        }
+
+        settings.setLaunchWindowDimensions(width, height);
+    }
+
     protected void reinstall() {
         final InstallerFrame frame = new InstallerFrame(resources, params, settings, getOwner());
         frame.setVisible(true);
@@ -269,9 +326,9 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
     private void initControlValues() {
 
-        javaArgs.getDocument().removeDocumentListener(listener);
+        javaArgs.getDocument().removeDocumentListener(javaArgsListener);
         javaArgs.setText(settings.getJavaArgs());
-        javaArgs.getDocument().addDocumentListener(listener);
+        javaArgs.getDocument().addDocumentListener(javaArgsListener);
 
         installField.setText(settings.getTechnicRoot().getAbsolutePath());
         clientId.setText(settings.getClientId());
@@ -416,6 +473,18 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             }
         });
 
+        widthInput.getDocument().removeDocumentListener(dimensionListener);
+        heightInput.getDocument().removeDocumentListener(dimensionListener);
+        int width = settings.getCustomWidth();
+        int height = settings.getCustomHeight();
+
+        width = (width<1)?800:width;
+        height = (height<1)?600:height;
+        widthInput.setText(Integer.toString(width));
+        heightInput.setText(Integer.toString(height));
+        widthInput.getDocument().addDocumentListener(dimensionListener);
+        heightInput.getDocument().addDocumentListener(dimensionListener);
+
         for (ActionListener listener : windowSelect.getActionListeners()) {
             windowSelect.removeActionListener(listener);
         }
@@ -423,6 +492,23 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         windowSelect.addItem(resources.getString("launcheroptions.video.windowSize.default"));
         windowSelect.addItem(resources.getString("launcheroptions.video.windowSize.fullscreen"));
         windowSelect.addItem(resources.getString("launcheroptions.video.windowSize.custom"));
+        switch (settings.getLaunchWindowType()) {
+            case DEFAULT:
+                windowSelect.setSelectedIndex(0);
+                break;
+            case FULLSCREEN:
+                windowSelect.setSelectedIndex(1);
+                break;
+            case CUSTOM:
+                windowSelect.setSelectedIndex(2);
+                break;
+        }
+        windowSelect.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeWindowType();
+            }
+        });
 
         for (ActionListener listener : useStencil.getActionListeners()) {
             useStencil.removeActionListener(listener);
@@ -430,6 +516,16 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         useStencil.removeAllItems();
         useStencil.addItem(resources.getString("launcheroptions.video.stencil.enabled"));
         useStencil.addItem(resources.getString("launcheroptions.video.stencil.disabled"));
+        if (settings.shouldUseStencilBuffer())
+            useStencil.setSelectedIndex(0);
+        else
+            useStencil.setSelectedIndex(1);
+        useStencil.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeEnableStencil();
+            }
+        });
     }
 
     private void rebuildMemoryList() {
@@ -860,6 +956,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         widthInput.setForeground(LauncherFrame.COLOR_BLUE);
         widthInput.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
         widthInput.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
+        widthInput.setCaretColor(LauncherFrame.COLOR_BLUE);
         widthInput.setText("800");
         panel.add(widthInput, new GridBagConstraints(3, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 6, 8, 16), 0, 0));
 
@@ -873,6 +970,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         heightInput.setForeground(LauncherFrame.COLOR_BLUE);
         heightInput.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
         heightInput.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
+        heightInput.setCaretColor(LauncherFrame.COLOR_BLUE);
         heightInput.setText("600");
         panel.add(heightInput, new GridBagConstraints(5, 0, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(8, 6, 8, 16), 0,0));
 
