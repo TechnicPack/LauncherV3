@@ -19,6 +19,7 @@
 package net.technicpack.launcher.settings;
 
 import net.technicpack.launchercore.util.LaunchAction;
+import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.launch.WindowType;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
@@ -30,7 +31,7 @@ import java.nio.charset.Charset;
 import java.util.UUID;
 import java.util.logging.Level;
 
-public class TechnicSettings {
+public class TechnicSettings implements ILaunchOptions {
     public static final String STABLE = "stable";
     public static final String BETA = "beta";
 
@@ -155,8 +156,8 @@ public class TechnicSettings {
         save();
     }
 
-    public int getLaunchWindowWidth() { return windowWidth; }
-    public int getLaunchWindowHeight() { return windowHeight; }
+    public int getCustomWidth() { return windowWidth; }
+    public int getCustomHeight() { return windowHeight; }
     public void setLaunchWindowDimensions(int width, int height) {
         this.windowWidth = width;
         this.windowHeight = height;

@@ -43,12 +43,6 @@ public final class StartupParameters {
     private boolean update = false;
     @Parameter(names = {"-movetarget"}, description = "The path of the originally-run package to copy to")
     private String moveTarget = null;
-    @Parameter(names = {"-width"}, description = "Sets the width of the minecraft window to be fixed to this.")
-    private int width = -1;
-    @Parameter(names = {"-height"}, description = "Sets the height of the minecraft window to be fixed to this.")
-    private int height = -1;
-    @Parameter(names = {"-fullscreen"}, description = "Whether to launch minecraft in fullscreen mode.")
-    private boolean fullscreen = false;
     @Parameter(names = {"-discover"}, description = "An override param for the discover URL")
     private String discover = null;
     @Parameter(names = {"-blockReboot"}, description = "Prevent rebooting the launcher due to bad java properties.")
@@ -65,34 +59,8 @@ public final class StartupParameters {
     }
     public String[] getArgs() { return args; }
 
-    public void logParameters(Logger log) {
-        log.info("------------ Startup Parameters ------------");
-        if (console) {
-            log.info("Console frame enabled");
-        }
-        if (width != -1) {
-            log.info("Minecraft frame width: " + width);
-        }
-        if (height != -1) {
-            log.info("Minecraft frame height: " + height);
-        }
-        log.info("--------- End of Startup Parameters ---------");
-    }
-
     public boolean isConsole() {
         return console;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public boolean getFullscreen() {
-        return fullscreen;
     }
 
     public boolean isLauncher() { return launcher; }

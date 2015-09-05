@@ -23,7 +23,6 @@ import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.launch.java.IJavaVersion;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.modpacks.RunData;
-import net.technicpack.minecraftcore.mojang.version.CompleteVersionParser;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
 import net.technicpack.minecraftcore.mojang.version.builder.FileVersionBuilder;
@@ -44,7 +43,7 @@ import net.technicpack.launchercore.install.ModpackInstaller;
 import net.technicpack.launchercore.install.Version;
 import net.technicpack.launchercore.install.tasks.*;
 import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
-import net.technicpack.launchercore.launch.LaunchOptions;
+import net.technicpack.minecraftcore.launch.LaunchOptions;
 import net.technicpack.minecraftcore.install.tasks.*;
 import net.technicpack.minecraftcore.launch.MinecraftLauncher;
 import net.technicpack.launchercore.mirror.MirrorStore;
@@ -156,7 +155,7 @@ public class Installer {
                         } else
                             launcherUnhider = null;
 
-                        LaunchOptions options = new LaunchOptions(pack.getDisplayName(), packIconMapper.getImageLocation(pack).getAbsolutePath(), startupParameters.getWidth(), startupParameters.getHeight(), startupParameters.getFullscreen());
+                        LaunchOptions options = new LaunchOptions(pack.getDisplayName(), packIconMapper.getImageLocation(pack).getAbsolutePath(), settings);
                         launcher.launch(pack, memory, options, launcherUnhider, version);
 
                         if (launchAction == null || launchAction == LaunchAction.HIDE) {
