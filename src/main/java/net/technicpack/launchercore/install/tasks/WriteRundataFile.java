@@ -34,7 +34,7 @@ public class WriteRundataFile implements IInstallTask {
 
     @Override
     public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
-        if (modpack.getJava() == null && modpack.getMemory() == null)
+        if ((modpack.getJava() == null || modpack.getJava().isEmpty()) && (modpack.getMemory() == null || modpack.getMemory().isEmpty()))
             return;
 
         File file = modpackModel.getBinDir();
