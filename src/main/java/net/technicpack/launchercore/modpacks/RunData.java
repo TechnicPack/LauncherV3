@@ -23,11 +23,7 @@ public class RunData {
         return getMemorySetting(getMemory());
     }
 
-    public boolean isJavaValid(String testString) {
-        String compareString = java;
-        if (compareString == null || compareString.length() == 0)
-            compareString = "1.6";
-
+    public static boolean isJavaVersionAtLeast(String testString, String compareString) {
         String[] compareVersion = compareString.split("[._]");
         String[] testVersion = testString.split("[._]");
 
@@ -43,6 +39,14 @@ public class RunData {
         if (compareVersion.length == testVersion.length)
             return true;
         return compareVersion.length < testVersion.length;
+    }
+
+    public boolean isJavaValid(String testString) {
+        String compareString = java;
+        if (compareString == null || compareString.length() == 0)
+            compareString = "1.6";
+
+        return isJavaVersionAtLeast(testString, compareString);
     }
 
     public boolean isMemoryValid(long memory) {
