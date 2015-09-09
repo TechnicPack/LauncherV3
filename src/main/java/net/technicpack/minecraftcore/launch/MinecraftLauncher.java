@@ -25,6 +25,7 @@ import net.technicpack.launchercore.launch.GameProcess;
 import net.technicpack.launchercore.launch.ProcessExitListener;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.launchercore.modpacks.RunData;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
@@ -103,7 +104,17 @@ public class MinecraftLauncher {
             permSize = 256;
         }
 
-        commands.add("-XX:MaxPermSize=" + permSize + "m");
+        String launchJavaVersion = javaVersions.getSelectedVersion().getVersionNumber();
+        if (!RunData.isJavaVersionAtLeast(launchJavaVersion, "1.8"))
+            commands.add("-XX:MaxPermSize=" + permSize + "m");
+
+        if (memory >= 4096) {
+            if (RunData.isJavaVersionAtLeast(launchJavaVersion, "1.7"))
+                commands.add("-XX:+UseG1GC");
+            else
+                commands.add("-XX:+UseConcMarkSweepGC");
+        }
+
         commands.add("-Djava.library.path=" + new File(pack.getBinDir(), "natives").getAbsolutePath());
         // Tell forge 1.5 to download from our mirror instead
         commands.add("-Dfml.core.libraries.mirror=http://mirror.technicpack.net/Technic/lib/fml/%s");
