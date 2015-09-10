@@ -108,11 +108,11 @@ public class MinecraftLauncher {
         if (!RunData.isJavaVersionAtLeast(launchJavaVersion, "1.8"))
             commands.add("-XX:MaxPermSize=" + permSize + "m");
 
-        if (memory >= 4096) {
-            if (RunData.isJavaVersionAtLeast(launchJavaVersion, "1.7"))
-                commands.add("-XX:+UseG1GC");
-            else
-                commands.add("-XX:+UseConcMarkSweepGC");
+        if (RunData.isJavaVersionAtLeast(launchJavaVersion, "1.7")) {
+            commands.add("-XX:+UseG1GC");
+            commands.add("-XX:MaxGCPauseMillis=4");
+        } else if (memory >= 4096) {
+            commands.add("-XX:+UseConcMarkSweepGC");
         }
 
         commands.add("-Djava.library.path=" + new File(pack.getBinDir(), "natives").getAbsolutePath());
