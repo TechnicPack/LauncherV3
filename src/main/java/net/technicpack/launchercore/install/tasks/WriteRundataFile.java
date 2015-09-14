@@ -49,7 +49,7 @@ public class WriteRundataFile implements IInstallTask {
     }
 
     private JsonElement getJsonValue(String value) {
-        if (modpack.getJava() == null)
+        if (value == null)
             return JsonNull.INSTANCE;
         return new JsonPrimitive(value);
     }
