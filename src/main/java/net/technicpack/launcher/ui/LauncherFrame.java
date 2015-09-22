@@ -638,7 +638,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         getRootPane().getContentPane().add(footer, BorderLayout.PAGE_END);
 
         if (resources.hasResource("teaser.png")) {
-            getRootPane().setGlassPane(new SplatPane(discoverTab, resources.getIcon("teaser.png"), JLabel.SOUTH_EAST, 3, 3));
+            getRootPane().setGlassPane(new SplatPane(modpacksTab, resources.getIcon("teaser.png"), JLabel.SOUTH, 5, 0));
             getRootPane().getGlassPane().setVisible(true);
         }
     }
