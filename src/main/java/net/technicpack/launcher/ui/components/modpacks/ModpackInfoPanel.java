@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.ui.components.modpacks;
 
+import net.technicpack.discord.IDiscordApi;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.TiledBackground;
 import net.technicpack.ui.lang.ResourceLoader;
@@ -53,13 +54,13 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
 
     private ModpackModel modpack;
 
-    public ModpackInfoPanel(ResourceLoader loader, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, ImageRepository<AuthorshipInfo> avatarRepo, ActionListener modpackOptionsListener, ActionListener modpackRefreshListener) {
+    public ModpackInfoPanel(ResourceLoader loader, ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ImageRepository<ModpackModel> backgroundRepo, ImageRepository<AuthorshipInfo> avatarRepo, IDiscordApi discordApi, ActionListener modpackOptionsListener, ActionListener modpackRefreshListener) {
         this.resources  = loader;
         this.backgroundRepo = backgroundRepo;
         this.avatarRepo = avatarRepo;
         this.modpackRefreshListener = modpackRefreshListener;
 
-        initComponents(iconRepo, logoRepo, modpackOptionsListener);
+        initComponents(iconRepo, logoRepo, modpackOptionsListener, discordApi);
     }
 
     public void setModpackIfSame(ModpackModel modpack) {
@@ -130,7 +131,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
             feedGallery.selectComponent(item);
     }
 
-    private void initComponents(ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ActionListener modpackOptionsListener) {
+    private void initComponents(ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ActionListener modpackOptionsListener, IDiscordApi discordApi) {
         setLayout(new BorderLayout());
 
         background = new TiledBackground(null);
@@ -160,7 +161,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         rootFeedPanel.setBorder(BorderFactory.createEmptyBorder(16, 20, 20, 16));
         layoutPanel.add(rootFeedPanel);
 
-        dataDisplay = new ModpackDataDisplay(resources, logoRepo);
+        dataDisplay = new ModpackDataDisplay(resources, logoRepo, discordApi);
         rootFeedPanel.add(dataDisplay, BorderLayout.PAGE_START);
 
         JPanel feedBottom = new JPanel();

@@ -22,6 +22,9 @@ import com.beust.jcommander.JCommander;
 import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.autoupdate.http.HttpUpdateStream;
+import net.technicpack.discord.CacheDiscordApi;
+import net.technicpack.discord.HttpDiscordApi;
+import net.technicpack.discord.IDiscordApi;
 import net.technicpack.launcher.autoupdate.CommandLineBuildNumber;
 import net.technicpack.launcher.autoupdate.TechnicRelauncher;
 import net.technicpack.launcher.autoupdate.VersionFileBuildNumber;
@@ -357,7 +360,10 @@ public class LauncherMain {
         ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());
         Installer installer = new Installer(startupParameters, mirrorStore, directories, modpackInstaller, launcher, settings, iconMapper);
 
-        final LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, selector, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo, platform, directories, packStore, startupParameters, discoverInfoPanel, javaVersions, javaVersionFile, buildNumber);
+        IDiscordApi discordApi = new HttpDiscordApi("https://discordapp.com/api/");
+        discordApi = new CacheDiscordApi(discordApi, 600, 60);
+
+        final LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, selector, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo, platform, directories, packStore, startupParameters, discoverInfoPanel, javaVersions, javaVersionFile, buildNumber, discordApi);
         userModel.addAuthListener(frame);
 
         ActionListener listener = new ActionListener() {

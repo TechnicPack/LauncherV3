@@ -18,6 +18,9 @@
 
 package net.technicpack.launcher.ui.components.modpacks;
 
+import net.technicpack.discord.IDiscordApi;
+import net.technicpack.discord.IDiscordCallback;
+import net.technicpack.discord.io.Server;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.ui.controls.list.SimpleScrollbarUI;
@@ -35,10 +38,12 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 
-public class ModpackDataDisplay extends JPanel implements IImageJobListener<ModpackModel> {
+public class ModpackDataDisplay extends JPanel implements IImageJobListener<ModpackModel>, IDiscordCallback {
     private ResourceLoader resources;
     private ImageRepository<ModpackModel> logoRepo;
+    private IDiscordApi discordApi;
 
     private JPanel statBoxes;
 
@@ -50,13 +55,18 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
     private StatBox runs;
     private StatBox downloads;
 
+    private JPanel discordPanel;
+    private JButton countLabel;
+    private java.util.List<JButton> discordButtons = new ArrayList<JButton>(3);
+
     private String packSiteUrl;
 
     private ModpackModel currentModpack;
 
-    public ModpackDataDisplay(ResourceLoader resources, ImageRepository<ModpackModel> logoRepo) {
+    public ModpackDataDisplay(ResourceLoader resources, ImageRepository<ModpackModel> logoRepo, IDiscordApi api) {
         this.resources = resources;
         this.logoRepo = logoRepo;
+        this.discordApi = api;
 
         initComponents();
     }
@@ -98,10 +108,14 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                description.scrollRectToVisible(new Rectangle(new Dimension(1,1)));
+                description.scrollRectToVisible(new Rectangle(new Dimension(1, 1)));
                 repaint();
             }
         });
+
+        discordPanel.setVisible(false);
+        if (modpack.getDiscordId() != null && !modpack.getDiscordId().isEmpty())
+            discordApi.retrieveServer(modpack, modpack.getDiscordId(), this);
     }
 
     private void initComponents() {
@@ -138,13 +152,13 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         packInfoPanel.setLayout(new GridBagLayout());
         packInfoPanel.setOpaque(false);
         packInfoPanel.setAlignmentY(TOP_ALIGNMENT);
-        packInfoPanel.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+        packInfoPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         this.add(packInfoPanel, BorderLayout.CENTER);
 
         statBoxes = new JPanel();
-        statBoxes.setLayout(new GridLayout(1,3,5,0));
+        statBoxes.setLayout(new GridLayout(1, 3, 5, 0));
         statBoxes.setOpaque(false);
-        statBoxes.setBorder(BorderFactory.createEmptyBorder(5,0,0,0));
+        statBoxes.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
 
         ActionListener listener = new ActionListener() {
             @Override
@@ -171,9 +185,41 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         runs.addActionListener(listener);
         statBoxes.add(runs);
 
-        packInfoPanel.add(statBoxes, new GridBagConstraints(0,2,3,1,0.0,0.0,GridBagConstraints.SOUTH, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
+        packInfoPanel.add(statBoxes, new GridBagConstraints(0, 2, 2, 1, 0.0, 0.0, GridBagConstraints.SOUTH, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 
-        packInfoPanel.add(Box.createHorizontalGlue(), new GridBagConstraints(3,2,1,1,1.0,0.0,GridBagConstraints.CENTER,GridBagConstraints.HORIZONTAL, new Insets(5,8,0,0),0,0));
+        packInfoPanel.add(Box.createHorizontalGlue(), new GridBagConstraints(2, 2, 1, 1, 1.0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+
+        discordPanel = new JPanel();
+        discordPanel.setOpaque(false);
+        discordPanel.setLayout(new GridBagLayout());
+
+        JButton discordImage = new JButton(resources.getIcon("discord.png"));
+        discordImage.setContentAreaFilled(false);
+        discordImage.setFocusPainted(false);
+        discordImage.setBorder(BorderFactory.createEmptyBorder());
+        discordPanel.add(discordImage, new GridBagConstraints(0, 0, 1, 2, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(2, 0, 0, 3), 0, 0));
+        discordButtons.add(discordImage);
+
+        JButton joinText = new JButton(resources.getString("launcher.packstats.discord"));
+        joinText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        joinText.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 20));
+        joinText.setContentAreaFilled(false);
+        joinText.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+        joinText.setFocusPainted(false);
+        discordPanel.add(joinText, new GridBagConstraints(1, 0, 1, 1, 1, 0.5, GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        discordButtons.add(joinText);
+
+        countLabel = new JButton(resources.getString("launcher.packstats.discordCount", Integer.toString(0)));
+        countLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        countLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
+        countLabel.setContentAreaFilled(false);
+        countLabel.setBorder(BorderFactory.createEmptyBorder());
+        countLabel.setFocusPainted(false);
+        discordPanel.add(countLabel, new GridBagConstraints(1, 1, 1, 1, 1, 0.5, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        discordButtons.add(countLabel);
+
+        packInfoPanel.add(discordPanel, new GridBagConstraints(3, 2, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 4), 0, 0));
+        discordPanel.setVisible(false);
 
         titleLabel = new JLabel(resources.getString("launcher.packstats.title", "Modpack"));
         titleLabel.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 24, Font.BOLD));
@@ -276,6 +322,27 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
     public void jobComplete(ImageJob<ModpackModel> job) {
         if (job.getJobData() == currentModpack) {
             packImage.setIcon(new ImageIcon(ImageUtils.scaleImage(job.getImage(), 370, 220)));
+        }
+    }
+
+    @Override
+    public void serverGetCallback(ModpackModel pack, final Server server) {
+        this.discordPanel.setVisible(server != null);
+        if (this.currentModpack == pack && server != null) {
+            this.countLabel.setText(resources.getString("launcher.packstats.discordCount", Integer.toString(server.getMemberCount())));
+
+            for (JButton discordButton : discordButtons) {
+                int actionListenerCount = discordButton.getActionListeners().length;
+                for (int i = 0; i < actionListenerCount; i++) {
+                    discordButton.removeActionListener(discordButton.getActionListeners()[0]);
+                }
+                discordButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        DesktopUtils.browseUrl(server.getInviteLink());
+                    }
+                });
+            }
         }
     }
 }
