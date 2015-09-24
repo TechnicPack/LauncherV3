@@ -198,6 +198,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         discordImage.setContentAreaFilled(false);
         discordImage.setFocusPainted(false);
         discordImage.setBorder(BorderFactory.createEmptyBorder());
+        discordImage.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         discordPanel.add(discordImage, new GridBagConstraints(0, 0, 1, 2, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(2, 0, 0, 3), 0, 0));
         discordButtons.add(discordImage);
 
@@ -207,6 +208,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         discordLabel.setContentAreaFilled(false);
         discordLabel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         discordLabel.setFocusPainted(false);
+        discordLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         discordPanel.add(discordLabel, new GridBagConstraints(1, 0, 1, 1, 1, 0.5, GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
         discordButtons.add(discordLabel);
 
@@ -216,6 +218,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         countLabel.setContentAreaFilled(false);
         countLabel.setBorder(BorderFactory.createEmptyBorder());
         countLabel.setFocusPainted(false);
+        countLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         discordPanel.add(countLabel, new GridBagConstraints(1, 1, 1, 1, 1, 0.5, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
         discordButtons.add(countLabel);
 
