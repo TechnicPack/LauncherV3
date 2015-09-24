@@ -328,7 +328,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
     @Override
     public void serverGetCallback(ModpackModel pack, final Server server) {
         this.discordPanel.setVisible(server != null);
-        if (this.currentModpack == pack && server != null) {
+        if (this.currentModpack == pack && server != null && server.getInviteLink() != null && !server.getInviteLink().isEmpty()) {
             this.countLabel.setText(resources.getString("launcher.packstats.discordCount", Integer.toString(server.getMemberCount())));
 
             for (JButton discordButton : discordButtons) {
