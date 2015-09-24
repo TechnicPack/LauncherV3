@@ -109,21 +109,21 @@ public class MinecraftLauncher {
         // So in 1.8 permgen autoscales- only problem, it doesn't do it based on RAM allocation like we do, instead
         // It has a SEPARATE heap for permgen that is by default unbounded by anything.  Result: instead of 2GB
         // with 256m set aside for permgen, you have a whole 2GB PLUS however much permgen uses.
-        
+
         commands.add("-Xmx" + memory + "m");
 
         if (!RunData.isJavaVersionAtLeast(launchJavaVersion, "1.8"))
             commands.add("-XX:MaxPermSize=" + permSize + "m");
-        else
-            commands.add("-XX:MetaspaceSize=" + permSize*2 + "m");
 
-        if (RunData.isJavaVersionAtLeast(launchJavaVersion, "1.7")) {
-            commands.add("-XX:+UseG1GC");
-            commands.add("-XX:MaxGCPauseMillis=4");
-        } else if (memory >= 4096) {
-            commands.add("-XX:+UseConcMarkSweepGC");
+        if (memory >= 4096) {
+            if (RunData.isJavaVersionAtLeast(launchJavaVersion, "1.7")) {
+                commands.add("-XX:+UseG1GC");
+                commands.add("-XX:MaxGCPauseMillis=4");
+            } else {
+                commands.add("-XX:+UseConcMarkSweepGC");
+            }
         }
-
+        
         commands.add("-Djava.library.path=" + new File(pack.getBinDir(), "natives").getAbsolutePath());
         // Tell forge 1.5 to download from our mirror instead
         commands.add("-Dfml.core.libraries.mirror=http://mirror.technicpack.net/Technic/lib/fml/%s");
