@@ -68,6 +68,14 @@ public class CombinedPackInfo implements PackInfo {
     }
 
     @Override
+    public String getDiscordId() {
+        if (platformPackInfo != null)
+            return platformPackInfo.getDiscordId();
+
+        return null;
+    }
+
+    @Override
     public Resource getIcon() {
         if (platformPackInfo != null)
             return platformPackInfo.getIcon();

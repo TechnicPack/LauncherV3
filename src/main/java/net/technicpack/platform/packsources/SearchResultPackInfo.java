@@ -48,6 +48,9 @@ public class SearchResultPackInfo implements PackInfo {
     }
 
     @Override
+    public String getDiscordId() { return null; }
+
+    @Override
     public String getWebSite() {
         return null;
     }

@@ -104,6 +104,13 @@ public class ModpackModel {
         }
     }
 
+    public String getDiscordId() {
+        if (packInfo != null)
+            return packInfo.getDiscordId();
+        else
+            return null;
+    }
+
     public String getName() {
         if (packInfo != null) {
             return packInfo.getName();

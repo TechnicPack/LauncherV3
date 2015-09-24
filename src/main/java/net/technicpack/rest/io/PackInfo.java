@@ -28,43 +28,45 @@ import java.util.List;
 
 public interface PackInfo {
 
-    public String getName();
+    String getName();
 
-    public String getDisplayName();
+    String getDisplayName();
 
-    public String getWebSite();
+    String getWebSite();
 
-    public Resource getIcon();
+    Resource getIcon();
 
-    public Resource getBackground();
+    Resource getBackground();
 
-    public Resource getLogo();
+    Resource getLogo();
 
-    public String getRecommended();
+    String getRecommended();
 
-    public String getLatest();
+    String getLatest();
 
-    public List<String> getBuilds();
+    List<String> getBuilds();
 
-    public boolean shouldForceDirectory();
+    boolean shouldForceDirectory();
 
-    public ArrayList<FeedItem> getFeed();
+    ArrayList<FeedItem> getFeed();
 
-    public String getDescription();
+    String getDescription();
 
-    public Integer getRuns();
+    Integer getRuns();
 
-    public Integer getDownloads();
+    Integer getDownloads();
 
-    public Integer getLikes();
+    Integer getLikes();
 
-    public Modpack getModpack(String build) throws BuildInaccessibleException;
+    Modpack getModpack(String build) throws BuildInaccessibleException;
 
-    public boolean isComplete();
+    boolean isComplete();
 
-    public boolean isLocal();
+    boolean isLocal();
 
-    public boolean isServerPack();
+    boolean isServerPack();
 
-    public boolean isOfficial();
+    boolean isOfficial();
+
+    String getDiscordId();
 }

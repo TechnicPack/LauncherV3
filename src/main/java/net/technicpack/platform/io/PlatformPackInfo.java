@@ -47,6 +47,8 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
     private boolean forceDir;
     private boolean isServer;
     private boolean isOfficial;
+    private String discordServerId;
+
     private ArrayList<FeedItem> feed = new ArrayList<FeedItem>();
 
     private transient boolean isLocal = false;
@@ -104,6 +106,9 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
     public ArrayList<FeedItem> getFeed() {
         return feed;
     }
+
+    @Override
+    public String getDiscordId() { return discordServerId; }
 
     @Override
     public List<String> getBuilds() {
