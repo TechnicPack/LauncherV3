@@ -56,6 +56,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
     private StatBox downloads;
 
     private JPanel discordPanel;
+    private JButton discordLabel;
     private JButton countLabel;
     private java.util.List<JButton> discordButtons = new ArrayList<JButton>(3);
 
@@ -200,16 +201,16 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         discordPanel.add(discordImage, new GridBagConstraints(0, 0, 1, 2, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(2, 0, 0, 3), 0, 0));
         discordButtons.add(discordImage);
 
-        JButton joinText = new JButton(resources.getString("launcher.packstats.discord"));
-        joinText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        joinText.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 20));
-        joinText.setContentAreaFilled(false);
-        joinText.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-        joinText.setFocusPainted(false);
-        discordPanel.add(joinText, new GridBagConstraints(1, 0, 1, 1, 1, 0.5, GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-        discordButtons.add(joinText);
+        discordLabel = new JButton(resources.getString("launcher.discord.join"));
+        discordLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        discordLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 20));
+        discordLabel.setContentAreaFilled(false);
+        discordLabel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+        discordLabel.setFocusPainted(false);
+        discordPanel.add(discordLabel, new GridBagConstraints(1, 0, 1, 1, 1, 0.5, GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        discordButtons.add(discordLabel);
 
-        countLabel = new JButton(resources.getString("launcher.packstats.discordCount", Integer.toString(0)));
+        countLabel = new JButton(resources.getString("launcher.discord.count", Integer.toString(0)));
         countLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         countLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         countLabel.setContentAreaFilled(false);
@@ -329,7 +330,12 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
     public void serverGetCallback(ModpackModel pack, final Server server) {
         this.discordPanel.setVisible(server != null);
         if (this.currentModpack == pack && server != null && server.getInviteLink() != null && !server.getInviteLink().isEmpty()) {
-            this.countLabel.setText(resources.getString("launcher.packstats.discordCount", Integer.toString(server.getMemberCount())));
+            this.countLabel.setText(resources.getString("launcher.discord.count", Integer.toString(server.getMemberCount())));
+
+            if (pack.isOfficial())
+                this.discordLabel.setText(resources.getString("launcher.discord.official"));
+            else
+                this.discordLabel.setText(resources.getString("launcher.discord.join"));
 
             for (JButton discordButton : discordButtons) {
                 int actionListenerCount = discordButton.getActionListeners().length;
