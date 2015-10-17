@@ -21,7 +21,7 @@ public class HttpDiscordApi implements IDiscordApi {
         new SwingWorker<Server, Server>() {
             @Override
             public Server doInBackground() {
-                String guildUrl = url + "servers/" + serverId + "/embed.json";
+                String guildUrl = url + "servers/" + serverId + "/widget.json";
 
                 try {
                     return RestObject.getRestObject(Server.class, guildUrl);
