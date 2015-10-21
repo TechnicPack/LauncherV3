@@ -56,6 +56,7 @@ import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.utilslib.Memory;
 import net.technicpack.utilslib.OperatingSystem;
+import net.technicpack.utilslib.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -175,6 +176,7 @@ public class Installer {
                     everythingWorked = true;
                 } catch (InterruptedException e) {
                     //Canceled by user
+                    Utils.getLogger().info("Cancelled by user.");
                 } catch (PackNotAvailableOfflineException e) {
                     JOptionPane.showMessageDialog(frame, e.getMessage(), resources.getString("launcher.installerror.unavailable"), JOptionPane.WARNING_MESSAGE);
                 } catch (DownloadException e) {
@@ -187,6 +189,8 @@ public class Installer {
                     e.printStackTrace();
                     JOptionPane.showMessageDialog(frame, e.getMessage(), resources.getString("launcher.installerror.title"), JOptionPane.WARNING_MESSAGE);
                 } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
                     if (!everythingWorked || !doLaunch) {
