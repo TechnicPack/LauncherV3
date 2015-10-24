@@ -89,6 +89,7 @@ import net.technicpack.solder.SolderPackSource;
 import net.technicpack.solder.http.HttpSolderApi;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
+import net.technicpack.utilslib.maven.MavenConnector;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 import sun.misc.ClassLoaderUtil;
@@ -186,6 +187,38 @@ public class LauncherMain {
         } catch (NumberFormatException ex) {
             //This is probably a debug build or something, build number is invalid
         }
+
+
+        boolean loadedAether = false;
+
+        try {
+            if (Class.forName("org.apache.maven.repository.internal.MavenRepositorySystemUtils", false, ClassLoader.getSystemClassLoader()) != null) {
+                loadedAether = true;
+            }
+        } catch (ClassNotFoundException ex) {
+            //Aether is not loaded
+        }
+
+        if (!loadedAether) {
+            File launcherAssets = new File(directories.getAssetsDirectory(), "launcher");
+
+            File aether = new File(launcherAssets, "aether-dep.jar");
+
+            try {
+                Method m = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+                m.setAccessible(true);
+                m.invoke(ClassLoader.getSystemClassLoader(), aether.toURI().toURL());
+            } catch (NoSuchMethodException ex) {
+                ex.printStackTrace();
+            } catch (InvocationTargetException ex) {
+                ex.printStackTrace();
+            } catch (IllegalAccessException ex) {
+                ex.printStackTrace();
+            } catch (MalformedURLException ex) {
+                ex.printStackTrace();
+            }
+        }
+        new MavenConnector(directories, "forge", "http://files.minecraftforge.net/maven/");
 
         Relauncher launcher = new TechnicRelauncher(new HttpUpdateStream("http://api.technicpack.net/launcher/"), settings.getBuildStream()+"4", build, directories, resources, params);
 
