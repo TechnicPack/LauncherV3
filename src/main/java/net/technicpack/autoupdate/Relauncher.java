@@ -142,6 +142,7 @@ public abstract class Relauncher {
         if (!launchPath.endsWith(".exe")) {
             commands.add(OperatingSystem.getJavaDir());
             commands.add("-Xmx256m");
+            commands.add("-verbose");
             commands.add("-Djava.net.preferIPv4Stack=true");
             commands.add("-Dawt.useSystemAAFontSettings=lcd");
             commands.add("-Dswing.aatext=true");
