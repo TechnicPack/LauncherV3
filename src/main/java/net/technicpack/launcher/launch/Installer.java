@@ -58,6 +58,7 @@ import net.technicpack.utilslib.Memory;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 
+import javax.rmi.CORBA.Util;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -224,7 +225,29 @@ public class Installer {
                     }
                 }
             }
-        });
+        }) {
+            ///Interrupt is being called from a mysterious source, so unless this is a user-initiated cancel
+            ///Let's print the stack trace of the interruptor.
+            @Override
+            public void interrupt() {
+                boolean userCancelled = false;
+                synchronized (cancelLock) {
+                    if (isCancelledByUser)
+                        userCancelled = true;
+                }
+
+                if (!userCancelled) {
+                    Utils.getLogger().info("Mysterious interruption source.");
+                    try {
+                        //I am a charlatan and a hack.
+                        throw new Exception("Grabbing stack trace- this isn't necessarily an error.");
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                super.interrupt();
+            }
+        };
         runningThread.start();
     }
 
