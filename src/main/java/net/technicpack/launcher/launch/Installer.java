@@ -195,7 +195,7 @@ public class Installer {
                             Utils.getLogger().info("Cancelled by exception.");
                         else
                             Utils.getLogger().info("Cancelled by code.");
-                        e.getCause().printStackTrace();
+                        e.printStackTrace();
                     } else
                         Utils.getLogger().info("Cancelled by user.");
                 } catch (PackNotAvailableOfflineException e) {
