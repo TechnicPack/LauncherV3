@@ -46,6 +46,9 @@ public class Download implements Runnable {
     private File outFile = null;
     private Exception exception = null;
 
+    private Object timeoutLock = new Object();
+    private boolean isTimedOut = false;
+
     public Download(URL url, String name, String outPath) throws MalformedURLException {
         this.url = url;
         this.outPath = outPath;
@@ -108,6 +111,13 @@ public class Download implements Runnable {
             in.close();
             rbc.close();
             progress.interrupt();
+
+            synchronized (timeoutLock) {
+                if (isTimedOut) {
+                    return;
+                }
+            }
+
             if (size > 0) {
                 if (size == outFile.length()) {
                     result = Result.SUCCESS;
@@ -172,6 +182,12 @@ public class Download implements Runnable {
             listener.stateChanged(name, getProgress());
     }
 
+    private void timeout() {
+        synchronized (timeoutLock) {
+            isTimedOut = true;
+        }
+    }
+
     public void setListener(DownloadListener listener) {
         this.listener = listener;
     }
@@ -226,12 +242,9 @@ public class Download implements Runnable {
                 downloaded = outFile.length();
                 if (diff == 0) {
                     if ((System.currentTimeMillis() - last) > TIMEOUT) {
-                        if (listener != null) {
-                            listener.stateChanged("Download Failed", getProgress());
-                        }
                         try {
                             rbc.close();
-                            downloadThread.interrupt();
+                            timeout();
                         } catch (Exception ignore) {
                             //We catch all exceptions here, because ReadableByteChannel is AWESOME
                             //and was throwing NPE's sometimes when we tried to close it after
