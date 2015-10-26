@@ -88,6 +88,7 @@ public class Installer {
     }
 
     public void cancel() {
+        Utils.getLogger().info("User pressed cancel button.");
         runningThread.interrupt();
     }
 
