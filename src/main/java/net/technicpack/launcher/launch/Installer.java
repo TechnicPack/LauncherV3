@@ -73,6 +73,8 @@ public class Installer {
     protected final StartupParameters startupParameters;
     protected final MirrorStore mirrorStore;
     protected final LauncherDirectories directories;
+    protected Object cancelLock = new Object();
+    protected boolean isCancelledByUser = false;
 
     private Thread runningThread;
     private LauncherUnhider launcherUnhider;
@@ -89,6 +91,9 @@ public class Installer {
 
     public void cancel() {
         Utils.getLogger().info("User pressed cancel button.");
+        synchronized (cancelLock) {
+            isCancelledByUser = true;
+        }
         runningThread.interrupt();
     }
 
@@ -176,9 +181,20 @@ public class Installer {
 
                     everythingWorked = true;
                 } catch (InterruptedException e) {
+                    boolean cancelledByUser = false;
+                    synchronized (cancelLock) {
+                        if (isCancelledByUser) {
+                            cancelledByUser = true;
+                            isCancelledByUser = false;
+                        }
+                    }
+
                     //Canceled by user
-                    if (e.getCause() != null) {
-                        Utils.getLogger().info("Cancelled by exception.");
+                    if (!cancelledByUser) {
+                        if (e.getCause() != null)
+                            Utils.getLogger().info("Cancelled by exception.");
+                        else
+                            Utils.getLogger().info("Cancelled by code.");
                         e.getCause().printStackTrace();
                     } else
                         Utils.getLogger().info("Cancelled by user.");
