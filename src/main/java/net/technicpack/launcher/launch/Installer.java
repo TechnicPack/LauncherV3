@@ -176,7 +176,11 @@ public class Installer {
                     everythingWorked = true;
                 } catch (InterruptedException e) {
                     //Canceled by user
-                    Utils.getLogger().info("Cancelled by user.");
+                    if (e.getCause() != null) {
+                        Utils.getLogger().info("Cancelled by exception.");
+                        e.getCause().printStackTrace();
+                    } else
+                        Utils.getLogger().info("Cancelled by user.");
                 } catch (PackNotAvailableOfflineException e) {
                     JOptionPane.showMessageDialog(frame, e.getMessage(), resources.getString("launcher.installerror.unavailable"), JOptionPane.WARNING_MESSAGE);
                 } catch (DownloadException e) {
