@@ -186,8 +186,8 @@ public class TechnicSettings implements ILaunchOptions {
     }
 
     protected void buildTechnicRoot() {
-        System.out.print("Settings File Location: "+settingsFile.getAbsolutePath());
-        System.out.print("Target directory: "+directory);
+        System.out.println("Settings File Location: "+settingsFile.getAbsolutePath());
+        System.out.println("Target directory: "+directory);
         if (directory == null || directory.isEmpty() || directory.equalsIgnoreCase("portable"))
             technicRoot = settingsFile.getParentFile();
         else
