@@ -190,6 +190,7 @@ public abstract class Relauncher {
         else
             outArgs.add("-launcher");
         outArgs.addAll(Arrays.asList(getLaunchArgs()));
+        outArgs.remove("-moveronly");
         return outArgs.toArray(new String[outArgs.size()]);
     }
 }
