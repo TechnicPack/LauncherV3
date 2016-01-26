@@ -388,5 +388,7 @@ public class LauncherMain {
         });
 
         userModel.initAuth();
+
+        Utils.sendTracking("runLauncher", "run", buildNumber.getBuildNumber(), settings.getClientId());
     }
 }

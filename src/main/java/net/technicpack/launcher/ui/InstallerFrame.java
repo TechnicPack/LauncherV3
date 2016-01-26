@@ -22,6 +22,7 @@ import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.autoupdate.tasks.MoveLauncherPackage;
 import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.autoupdate.TechnicRelauncher;
+import net.technicpack.launcher.autoupdate.VersionFileBuildNumber;
 import net.technicpack.launcher.io.TechnicLauncherDirectories;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
@@ -195,6 +196,9 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
                 settings.setLanguageCode(((LanguageItem)standardLanguages.getSelectedItem()).getLangCode());
                 settings.save();
 
+                VersionFileBuildNumber buildNumber = new VersionFileBuildNumber(resources);
+                Utils.sendTracking("installLauncher", "standard", buildNumber.getBuildNumber(), settings.getClientId());
+
                 Relauncher relauncher = new TechnicRelauncher(null, settings.getBuildStream(), 0, new TechnicLauncherDirectories(settings.getTechnicRoot()), resources, params);
                 try {
                     String currentPath = relauncher.getRunningPath();
@@ -277,6 +281,9 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
                 settings.getTechnicRoot();
                 settings.setLanguageCode(((LanguageItem)portableLanguages.getSelectedItem()).getLangCode());
                 settings.save();
+
+                VersionFileBuildNumber buildNumber = new VersionFileBuildNumber(resources);
+                Utils.sendTracking("installLauncher", "portable", buildNumber.getBuildNumber(), settings.getClientId());
 
                 relauncher.launch(threadTargetPath, params.getArgs());
                 System.exit(0);
