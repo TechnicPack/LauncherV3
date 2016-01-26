@@ -164,7 +164,6 @@ public class LauncherMain {
             return;
         }
 
-        System.out.println("AAAAA");
         LauncherDirectories directories = new TechnicLauncherDirectories(settings.getTechnicRoot());
         ResourceLoader resources = new ResourceLoader(directories, "net","technicpack","launcher","resources");
         resources.setSupportedLanguages(supportedLanguages);
