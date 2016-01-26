@@ -178,6 +178,9 @@ public class LauncherMain {
 
         setupLogging(directories, resources, buildNumber);
 
+        Utils.getLogger().info("Settings File Location: "+settings.getFilePath().getAbsolutePath());
+        Utils.getLogger().info("Target directory: "+settings.getTechnicRoot().getAbsolutePath());
+
         String launcherBuild = buildNumber.getBuildNumber();
         int build = -1;
 
