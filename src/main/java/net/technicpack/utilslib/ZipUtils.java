@@ -66,8 +66,10 @@ public class ZipUtils {
             return false;
         }
 
-        ZipFile zipFile = new ZipFile(zip);
+        ZipFile zipFile = null;
+
         try {
+            zipFile = new ZipFile(zip);
             ZipEntry entry = zipFile.getEntry(fileName);
             if (entry == null) {
                 Utils.getLogger().log(Level.WARNING, "File " + fileName + " not found in " + zip.getAbsolutePath());
@@ -81,11 +83,16 @@ public class ZipUtils {
 
             unzipEntry(zipFile, zipFile.getEntry(fileName), outputFile);
             return true;
+        } catch (ZipException e) {
+            e.printStackTrace();
+            throw new ZipException("Error extracting file " + zip.getName());
         } catch (IOException e) {
             Utils.getLogger().log(Level.WARNING, "Error extracting file " + fileName + " from " + zip.getAbsolutePath());
             return false;
         } finally {
-            zipFile.close();
+            if (zipFile != null) {
+                zipFile.close();
+            }
         }
     }
 
