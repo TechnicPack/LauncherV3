@@ -331,26 +331,30 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
 
     @Override
     public void serverGetCallback(ModpackModel pack, final Server server) {
-        this.discordPanel.setVisible(server != null);
-        if (this.currentModpack == pack && server != null && server.getInviteLink() != null && !server.getInviteLink().isEmpty()) {
-            this.countLabel.setText(resources.getString("launcher.discord.count", Integer.toString(server.getMemberCount())));
+        if (this.currentModpack == pack) {
+            if (server != null && server.getInviteLink() != null && !server.getInviteLink().isEmpty()) {
+                this.discordPanel.setVisible(true);
+                this.countLabel.setText(resources.getString("launcher.discord.count", Integer.toString(server.getMemberCount())));
 
-            if (pack.isOfficial())
-                this.discordLabel.setText(resources.getString("launcher.discord.official"));
-            else
-                this.discordLabel.setText(resources.getString("launcher.discord.join"));
+                if (pack.isOfficial())
+                    this.discordLabel.setText(resources.getString("launcher.discord.official"));
+                else
+                    this.discordLabel.setText(resources.getString("launcher.discord.join"));
 
-            for (JButton discordButton : discordButtons) {
-                int actionListenerCount = discordButton.getActionListeners().length;
-                for (int i = 0; i < actionListenerCount; i++) {
-                    discordButton.removeActionListener(discordButton.getActionListeners()[0]);
-                }
-                discordButton.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        DesktopUtils.browseUrl(server.getInviteLink());
+                for (JButton discordButton : discordButtons) {
+                    int actionListenerCount = discordButton.getActionListeners().length;
+                    for (int i = 0; i < actionListenerCount; i++) {
+                        discordButton.removeActionListener(discordButton.getActionListeners()[0]);
                     }
-                });
+                    discordButton.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            DesktopUtils.browseUrl(server.getInviteLink());
+                        }
+                    });
+                }
+            } else {
+                this.discordPanel.setVisible(false);
             }
         }
     }
