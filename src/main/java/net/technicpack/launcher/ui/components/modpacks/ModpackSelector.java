@@ -548,7 +548,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
                 try {
                     encodedSearch = URLEncoder.encode(encodedSearch, "UTF-8");
                 } catch (UnsupportedEncodingException ex) {}
-                findMoreUrl = "http://www.technicpack.net/search/modpacks?q="+encodedSearch;
+                findMoreUrl = "http://www.technicpack.net/modpacks?q="+encodedSearch;
                 findMoreWidget.setWidgetData(resources.getString("launcher.packselector.more"));
 
                 ArrayList<IPackSource> sources = new ArrayList<IPackSource>(2);
