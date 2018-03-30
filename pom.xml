@@ -7,7 +7,7 @@
 	<groupId>net.technicpack</groupId>
 	<artifactId>launcher</artifactId>
 	<version>4.0-${buildNumber}</version>
-	<url>http://www.technicpack.net</url>
+	<url>https://www.technicpack.net</url>
 	<inceptionYear>2014</inceptionYear>
 	<description>Minecraft launcher for installing and updating Modpacks from the Technic Platform.</description>
 
@@ -20,7 +20,7 @@
 
 	<!-- Company information -->
 	<organization>
-		<url>http://www.technicpack.net</url>
+		<url>https://www.technicpack.net</url>
 		<name>Syndicate, LLC</name>
 	</organization>
 

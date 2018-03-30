@@ -128,11 +128,11 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     }
 
     protected void visitTerms() {
-        DesktopUtils.browseUrl("http://www.technicpack.net/terms");
+        DesktopUtils.browseUrl("https://www.technicpack.net/terms");
     }
 
     protected void visitPrivacy() {
-        DesktopUtils.browseUrl("http://www.technicpack.net/privacy");
+        DesktopUtils.browseUrl("https://www.technicpack.net/privacy");
     }
 
     @Override

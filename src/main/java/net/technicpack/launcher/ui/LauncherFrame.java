@@ -405,7 +405,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         headerLabel.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                DesktopUtils.browseUrl("http://www.technicpack.net/");
+                DesktopUtils.browseUrl("https://www.technicpack.net/");
             }
         });
         header.add(headerLabel);

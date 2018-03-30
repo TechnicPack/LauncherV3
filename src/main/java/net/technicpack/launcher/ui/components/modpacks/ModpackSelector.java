@@ -278,7 +278,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         if (findMoreWidget.getWidgetData().equals(resources.getString("launcher.packselector.api"))) {
             if (allModpacks.size() == 0) {
                 findMoreWidget.setWidgetData(resources.getString("launcher.packselector.badapi"));
-                findMoreUrl = "http://www.technicpack.net/";
+                findMoreUrl = "https://www.technicpack.net/";
             } else {
                 for(ModpackWidget widget : allModpacks.values()) {
                     findMoreUrl = widget.getModpack().getWebSite();
@@ -548,7 +548,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
                 try {
                     encodedSearch = URLEncoder.encode(encodedSearch, "UTF-8");
                 } catch (UnsupportedEncodingException ex) {}
-                findMoreUrl = "http://www.technicpack.net/modpacks?q="+encodedSearch;
+                findMoreUrl = "https://www.technicpack.net/modpacks?q="+encodedSearch;
                 findMoreWidget.setWidgetData(resources.getString("launcher.packselector.more"));
 
                 ArrayList<IPackSource> sources = new ArrayList<IPackSource>(2);

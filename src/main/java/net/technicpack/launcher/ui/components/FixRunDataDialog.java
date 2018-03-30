@@ -251,7 +251,7 @@ public class FixRunDataDialog extends LauncherDialog {
         if (getBetterJava) {
             label = new JLabel(
                     "<html>" +
-                            "<head><link rel=\"stylesheet\" type=\"text/css\" href=\"http://www.technicpack.net/assets/css/launcher.css\" /></head>" +
+                            "<head><link rel=\"stylesheet\" type=\"text/css\" href=\"https://www.technicpack.net/assets/css/launcher.css\" /></head>" +
                             "<body style=\"font-family:" + fontFamily + ";font-size:11px;font-color:#D0D0D0\">" +
                             resourceLoader.getString("fixRunData.needBetterJava") +
                             "</body>" +
@@ -264,7 +264,7 @@ public class FixRunDataDialog extends LauncherDialog {
         if (get64BitJava) {
             label = new JLabel(
                     "<html>" +
-                            "<head><link rel=\"stylesheet\" type=\"text/css\" href=\"http://www.technicpack.net/assets/css/launcher.css\" /></head>" +
+                            "<head><link rel=\"stylesheet\" type=\"text/css\" href=\"https://www.technicpack.net/assets/css/launcher.css\" /></head>" +
                             "<body style=\"font-family:" + fontFamily + ";font-size:11px;font-color:#D0D0D0\">" +
                             resourceLoader.getString("fixRunData.need64BitJava") +
                             "</body>" +
