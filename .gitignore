@@ -12,3 +12,4 @@ target/
 module_launcherv3.xml
 launcherv3.xml
 launcherv3.properties
+dependency-reduced-pom.xml

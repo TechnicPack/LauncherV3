@@ -356,7 +356,7 @@ public class LauncherMain {
 
         DiscoverInfoPanel discoverInfoPanel = new DiscoverInfoPanel(resources, startupParameters.getDiscoverUrl(), platform, directories, selector);
 
-        MinecraftLauncher launcher = new MinecraftLauncher(platform, directories, userModel, javaVersions);
+        MinecraftLauncher launcher = new MinecraftLauncher(platform, directories, userModel, javaVersions, buildNumber);
         ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());
         Installer installer = new Installer(startupParameters, mirrorStore, directories, modpackInstaller, launcher, settings, iconMapper);
 
