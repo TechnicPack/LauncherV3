@@ -157,7 +157,7 @@ public class CompleteVersionV21 implements MojangVersion {
 
     @Override
     public String toString() {
-        return "CompleteVersion{" +
+        return "CompleteVersionV21{" +
                 "id='" + id + '\'' +
                 ", time=" + time +
                 ", releaseTime=" + releaseTime +
