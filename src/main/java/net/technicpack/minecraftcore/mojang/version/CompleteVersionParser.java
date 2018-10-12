@@ -21,12 +21,12 @@ package net.technicpack.minecraftcore.mojang.version;
 
 import net.technicpack.launchercore.install.IVersionDataParser;
 import net.technicpack.minecraftcore.MojangUtils;
-import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
 
 public class CompleteVersionParser implements IVersionDataParser<MojangVersion> {
 
     @Override
     public MojangVersion parseVersionData(String data) {
-        return MojangUtils.getGson().fromJson(data, CompleteVersion.class);
+        return MojangUtils.parseVersionJson(data);
     }
+
 }

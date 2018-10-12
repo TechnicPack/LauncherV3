@@ -69,6 +69,6 @@ public class FileVersionBuilder implements MojangVersionBuilder {
             return null;
 
         String json = FileUtils.readFileToString(target, Charset.forName("UTF-8"));
-        return MojangUtils.getGson().fromJson(json, CompleteVersion.class);
+        return MojangUtils.parseVersionJson(json);
     }
 }

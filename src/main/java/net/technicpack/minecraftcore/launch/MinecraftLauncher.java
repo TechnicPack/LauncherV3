@@ -19,6 +19,7 @@
 
 package net.technicpack.minecraftcore.launch;
 
+import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.launch.GameProcess;
@@ -30,6 +31,7 @@ import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
+import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
@@ -37,19 +39,29 @@ import org.apache.commons.lang3.text.StrSubstitutor;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MinecraftLauncher {
+
+    private static final String[] BAD_ENV_VARS = new String[] {
+            "JAVA_ARGS", "CLASSPATH", "CONFIGPATH", "JAVA_HOME", "JRE_HOME",
+            "_JAVA_OPTIONS", "JAVA_OPTIONS", "JAVA_TOOL_OPTIONS"
+    };
+
     private final LauncherDirectories directories;
     private final IPlatformApi platformApi;
     private final UserModel<MojangUser> userModel;
     private final JavaVersionRepository javaVersions;
+    private final IBuildNumber buildNumber;
 
-    public MinecraftLauncher(final IPlatformApi platformApi, final LauncherDirectories directories, final UserModel userModel, final JavaVersionRepository javaVersions) {
+    public MinecraftLauncher(final IPlatformApi platformApi, final LauncherDirectories directories, final UserModel userModel, final JavaVersionRepository javaVersions, IBuildNumber buildNumber) {
         this.directories = directories;
         this.platformApi = platformApi;
         this.userModel = userModel;
         this.javaVersions = javaVersions;
+        this.buildNumber = buildNumber;
     }
 
     public JavaVersionRepository getJavaVersions() {
@@ -71,7 +83,10 @@ public class MinecraftLauncher {
             first = false;
         }
         Utils.getLogger().info("Running " + full.toString());
-        Process process = new ProcessBuilder(commands).directory(pack.getInstalledDirectory()).redirectErrorStream(true).start();
+        ProcessBuilder processBuilder = new ProcessBuilder(commands).directory(pack.getInstalledDirectory()).redirectErrorStream(true);
+        Map<String, String> envVars = processBuilder.environment();
+        for (String badVar : BAD_ENV_VARS) envVars.remove(badVar);
+        Process process = processBuilder.start();
         GameProcess mcProcess = new GameProcess(commands, process);
         if (exitListener != null) mcProcess.setExitListener(exitListener);
 
@@ -84,87 +99,37 @@ public class MinecraftLauncher {
     }
 
     private List<String> buildCommands(ModpackModel pack, long memory, MojangVersion version, LaunchOptions options) {
-        List<String> commands = new ArrayList<String>();
-        commands.add(javaVersions.getSelectedPath());
+        LaunchCommandCollector commands = new LaunchCommandCollector();
+        commands.addRaw(javaVersions.getSelectedPath());
 
         OperatingSystem operatingSystem = OperatingSystem.getOperatingSystem();
+        String nativesDir = new File(pack.getBinDir(), "natives").getAbsolutePath();
+        String cpString = buildClassPath(pack, version);
 
-        if (operatingSystem.equals(OperatingSystem.OSX)) {
-            commands.add("-Xdock:icon="+options.getIconPath());
-            commands.add("-Xdock:name=" + pack.getDisplayName());
-        } else if (operatingSystem.equals(OperatingSystem.WINDOWS)) {
-            // I have no idea if this helps technic or not.
-            commands.add("-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump");
-        }
+        // build arg parameter map
+        Map<String, String> params = new HashMap<String, String>();
+        StrSubstitutor paramDereferencer = new StrSubstitutor(params);
+        MojangUser mojangUser = userModel.getCurrentUser();
+        File gameDirectory = pack.getInstalledDirectory();
+        ILaunchOptions launchOpts = options.getOptions();
 
-        String launchJavaVersion = javaVersions.getSelectedVersion().getVersionNumber();
+        params.put("auth_username", mojangUser.getUsername());
+        params.put("auth_session", mojangUser.getSessionId());
+        params.put("auth_access_token", mojangUser.getAccessToken());
 
-        int permSize = 128;
-        if (memory >= (1024 * 6)) {
-            permSize = 512;
-        } else if (memory >= 2048) {
-            permSize = 256;
-        }
+        params.put("auth_player_name", mojangUser.getDisplayName());
+        params.put("auth_uuid", mojangUser.getProfile().getId());
 
-        // So in 1.8 permgen autoscales- only problem, it doesn't do it based on RAM allocation like we do, instead
-        // It has a SEPARATE heap for permgen that is by default unbounded by anything.  Result: instead of 2GB
-        // with 256m set aside for permgen, you have a whole 2GB PLUS however much permgen uses.
-        commands.add("-Xms" + memory + "m");
-        commands.add("-Xmx" + memory + "m");
+        params.put("profile_name", mojangUser.getDisplayName());
+        params.put("version_name", version.getId());
+        params.put("version_type", version.getType().getName());
 
-        if (!RunData.isJavaVersionAtLeast(launchJavaVersion, "1.8"))
-            commands.add("-XX:MaxPermSize=" + permSize + "m");
+        params.put("game_directory", gameDirectory.getAbsolutePath());
+        params.put("natives_directory", nativesDir);
+        params.put("classpath", cpString);
 
-        if (memory >= 4096) {
-            if (RunData.isJavaVersionAtLeast(launchJavaVersion, "1.7")) {
-                commands.add("-XX:+UseG1GC");
-                commands.add("-XX:MaxGCPauseMillis=4");
-            } else {
-                commands.add("-XX:+UseConcMarkSweepGC");
-            }
-        }
-
-        commands.add("-Djava.library.path=" + new File(pack.getBinDir(), "natives").getAbsolutePath());
-        // Tell forge 1.5 to download from our mirror instead
-        commands.add("-Dfml.core.libraries.mirror=http://mirror.technicpack.net/Technic/lib/fml/%s");
-        commands.add("-Dminecraft.applet.TargetDirectory=" + pack.getInstalledDirectory().getAbsolutePath());
-        commands.add("-Djava.net.preferIPv4Stack=true");
-
-        if (!options.getOptions().shouldUseStencilBuffer())
-            commands.add("-Dforge.forceNoStencil=true");
-
-        String javaArguments = version.getJavaArguments();
-
-        if (javaArguments != null && !javaArguments.isEmpty()) {
-            commands.addAll(Arrays.asList(javaArguments.split(" ")));
-        }
-
-        commands.add("-cp");
-        commands.add(buildClassPath(pack, version));
-        commands.add(version.getMainClass());
-        commands.addAll(Arrays.asList(getMinecraftArguments(version, pack.getInstalledDirectory(), userModel.getCurrentUser())));
-        options.appendToCommands(commands);
-
-        //TODO: Add all the other less important commands
-        return commands;
-    }
-
-    private String[] getMinecraftArguments(MojangVersion version, File gameDirectory, MojangUser mojangUser) {
-        Map<String, String> map = new HashMap<String, String>();
-        StrSubstitutor substitutor = new StrSubstitutor(map);
-        String[] split = version.getMinecraftArguments().split(" ");
-
-        map.put("auth_username", mojangUser.getUsername());
-        map.put("auth_session", mojangUser.getSessionId());
-        map.put("auth_access_token", mojangUser.getAccessToken());
-
-        map.put("auth_player_name", mojangUser.getDisplayName());
-        map.put("auth_uuid", mojangUser.getProfile().getId());
-
-        map.put("profile_name", mojangUser.getDisplayName());
-        map.put("version_name", version.getId());
-
-        map.put("game_directory", gameDirectory.getAbsolutePath());
+        params.put("resolution_width", Integer.toString(launchOpts.getCustomWidth()));
+        params.put("resolution_height", Integer.toString(launchOpts.getCustomHeight()));
 
         String targetAssets = directories.getAssetsDirectory().getAbsolutePath();
 
@@ -178,17 +143,77 @@ public class MinecraftLauncher {
             targetAssets += File.separator + "virtual" + File.separator + assetsKey;
         }
 
-        map.put("game_assets", targetAssets);
-        map.put("assets_root", targetAssets);
-        map.put("assets_index_name", assetsKey);
-        map.put("user_type", mojangUser.getProfile().isLegacy() ? "legacy" : "mojang");
-        map.put("user_properties", mojangUser.getUserPropertiesAsJson());
+        params.put("game_assets", targetAssets);
+        params.put("assets_root", targetAssets);
+        params.put("assets_index_name", assetsKey);
+        params.put("user_type", mojangUser.getProfile().isLegacy() ? "legacy" : "mojang");
+        params.put("user_properties", mojangUser.getUserPropertiesAsJson());
 
-        for (int i = 0; i < split.length; i++) {
-            split[i] = substitutor.replace(split[i]);
+        params.put("launcher_name", "technic");
+        params.put("launcher_version", "4." + buildNumber.getBuildNumber());
+
+        // build jvm args
+        String launchJavaVersion = javaVersions.getSelectedVersion().getVersionNumber();
+        ArgumentList jvmArgs = version.getJavaArguments();
+
+        if (jvmArgs != null) {
+            for (String arg : jvmArgs.resolve(options.getOptions(), paramDereferencer)) {
+                commands.add(arg);
+            }
         }
 
-        return split;
+        int permSize = 128;
+        if (memory >= (1024 * 6)) {
+            permSize = 512;
+        } else if (memory >= 2048) {
+            permSize = 256;
+        }
+
+        // So in 1.8 permgen autoscales- only problem, it doesn't do it based on RAM allocation like we do, instead
+        // It has a SEPARATE heap for permgen that is by default unbounded by anything.  Result: instead of 2GB
+        // with 256m set aside for permgen, you have a whole 2GB PLUS however much permgen uses.
+        commands.addRaw("-Xms" + memory + "m");
+        commands.addRaw("-Xmx" + memory + "m");
+
+        if (!RunData.isJavaVersionAtLeast(launchJavaVersion, "1.8"))
+            commands.add("-XX:MaxPermSize=" + permSize + "m");
+
+        if (memory >= 4096) {
+            if (RunData.isJavaVersionAtLeast(launchJavaVersion, "1.7")) {
+                commands.add("-XX:+UseG1GC");
+                commands.add("-XX:MaxGCPauseMillis=4");
+            } else {
+                commands.add("-XX:+UseConcMarkSweepGC");
+            }
+        }
+
+        commands.addUnique("-Djava.library.path=" + nativesDir);
+        // Tell forge 1.5 to download from our mirror instead
+        commands.addUnique("-Dfml.core.libraries.mirror=http://mirror.technicpack.net/Technic/lib/fml/%s");
+        commands.addUnique("-Dminecraft.applet.TargetDirectory=" + pack.getInstalledDirectory().getAbsolutePath());
+        commands.addUnique("-Djava.net.preferIPv4Stack=true");
+
+        if (!options.getOptions().shouldUseStencilBuffer())
+            commands.add("-Dforge.forceNoStencil=true");
+
+        if (operatingSystem.equals(OperatingSystem.OSX)) {
+            commands.add("-Xdock:icon=" + options.getIconPath());
+            commands.add("-Xdock:name=" + pack.getDisplayName());
+        } else if (operatingSystem.equals(OperatingSystem.WINDOWS)) {
+            // I have no idea if this helps technic or not.
+            commands.addUnique("-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump");
+        }
+
+        // build game args
+        commands.addUnique("-cp", cpString);
+        commands.addRaw(version.getMainClass());
+        for (String arg : version.getMinecraftArguments().resolve(launchOpts, paramDereferencer)) {
+            commands.add(arg);
+        }
+        options.appendToCommands(commands);
+
+        //TODO: Add all the other less important commands
+        return commands.collect();
     }
 
     private String buildClassPath(ModpackModel pack, MojangVersion version) {
@@ -241,4 +266,5 @@ public class MinecraftLauncher {
 
         return result.toString();
     }
+
 }

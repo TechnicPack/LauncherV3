@@ -19,9 +19,8 @@
 
 package net.technicpack.minecraftcore.launch;
 
-import java.util.List;
-
 public class LaunchOptions {
+
     private String title;
     private String iconPath;
     private ILaunchOptions options;
@@ -40,26 +39,25 @@ public class LaunchOptions {
         return iconPath;
     }
 
-    public ILaunchOptions getOptions() { return options; }
+    public ILaunchOptions getOptions() {
+        return options;
+    }
 
-    public void appendToCommands(List<String> commands) {
+    public void appendToCommands(LaunchCommandCollector commands) {
         if (getTitle() != null) {
-            commands.add("--title");
-            commands.add(title);
+            commands.addUnique("--title", title);
         }
 
         if (options.getLaunchWindowType() == WindowType.FULLSCREEN)
-            commands.add("--fullscreen");
+            commands.addUnique("--fullscreen");
         else if (options.getLaunchWindowType() == WindowType.CUSTOM) {
-            commands.add("--width");
-            commands.add(Integer.toString(options.getCustomWidth()));
-            commands.add("--height");
-            commands.add(Integer.toString(options.getCustomHeight()));
+            commands.addUnique("--width", Integer.toString(options.getCustomWidth()));
+            commands.addUnique("--height", Integer.toString(options.getCustomHeight()));
         }
 
         if (getIconPath() != null) {
-            commands.add("--icon");
-            commands.add(getIconPath());
+            commands.addUnique("--icon", getIconPath());
         }
     }
+
 }

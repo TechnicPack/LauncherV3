@@ -20,9 +20,11 @@
 package net.technicpack.minecraftcore.mojang.version.chain;
 
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.io.AssetIndex;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
 import net.technicpack.minecraftcore.mojang.version.io.ReleaseType;
 import net.technicpack.minecraftcore.mojang.version.io.Rule;
+import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 
 import java.util.Date;
 import java.util.LinkedList;
@@ -73,7 +75,7 @@ public class VersionChain implements MojangVersion {
     }
 
     @Override
-    public String getMinecraftArguments() {
+    public ArgumentList getMinecraftArguments() {
         for (MojangVersion version : chain) {
             if (version.getMinecraftArguments() != null)
                 return version.getMinecraftArguments();
@@ -83,7 +85,7 @@ public class VersionChain implements MojangVersion {
     }
 
     @Override
-    public String getJavaArguments() {
+    public ArgumentList getJavaArguments() {
         for (MojangVersion version : chain) {
             if (version.getJavaArguments() != null)
                 return version.getJavaArguments();
@@ -94,7 +96,7 @@ public class VersionChain implements MojangVersion {
 
     @Override
     public List<Library> getLibraries() {
-        List<Library> allLibraries  = new LinkedList<Library>();
+        List<Library> allLibraries = new LinkedList<Library>();
 
         for (MojangVersion version : chain) {
             if (version.getLibraries() != null)
@@ -106,9 +108,9 @@ public class VersionChain implements MojangVersion {
 
     @Override
     public List<Library> getLibrariesForOS() {
-        List<Library> allLibraries  = new LinkedList<Library>();
+        List<Library> allLibraries = new LinkedList<Library>();
 
-        for (int i = chain.size()-1; i>=0; i--) {
+        for (int i = chain.size() - 1; i >= 0; i--) {
             MojangVersion version = chain.get(i);
             if (version.getLibrariesForOS() != null)
                 allLibraries.addAll(0, version.getLibrariesForOS());
@@ -144,7 +146,7 @@ public class VersionChain implements MojangVersion {
 
     @Override
     public List<Rule> getRules() {
-        List<Rule> allRules  = new LinkedList<Rule>();
+        List<Rule> allRules = new LinkedList<Rule>();
 
         for (MojangVersion version : chain) {
             if (version.getRules() != null)
@@ -152,6 +154,16 @@ public class VersionChain implements MojangVersion {
         }
 
         return allRules;
+    }
+
+    @Override
+    public AssetIndex getAssetIndex() {
+        for (MojangVersion version : chain) {
+            if (version.getAssetIndex() != null)
+                return version.getAssetIndex();
+        }
+
+        return null;
     }
 
     @Override
@@ -167,7 +179,7 @@ public class VersionChain implements MojangVersion {
     @Override
     public String getJarKey() {
         for (MojangVersion version : chain) {
-            if (version.getAssetsKey() != null)
+            if (version.getAssetIndex() != null)
                 return version.getAssetsKey();
         }
 
@@ -185,7 +197,12 @@ public class VersionChain implements MojangVersion {
     }
 
     @Override
-    public String getParentVersion() { return null; }
+    public String getParentVersion() {
+        return null;
+    }
 
-    public void addVersionToChain(MojangVersion version) { chain.add(version); }
+    public void addVersionToChain(MojangVersion version) {
+        chain.add(version);
+    }
+
 }

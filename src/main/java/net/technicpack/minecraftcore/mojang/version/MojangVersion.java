@@ -19,32 +19,34 @@
 
 package net.technicpack.minecraftcore.mojang.version;
 
+import net.technicpack.minecraftcore.mojang.version.io.AssetIndex;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
 import net.technicpack.minecraftcore.mojang.version.io.ReleaseType;
 import net.technicpack.minecraftcore.mojang.version.io.Rule;
+import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 
 import java.util.Date;
 import java.util.List;
 
 public interface MojangVersion {
 
-	public String getId();
+    public String getId();
 
-	public ReleaseType getType();
+    public ReleaseType getType();
 
-	public void setType(ReleaseType releaseType);
+    public void setType(ReleaseType releaseType);
 
-	public Date getUpdatedTime();
+    public Date getUpdatedTime();
 
-	public void setUpdatedTime(Date updatedTime);
+    public void setUpdatedTime(Date updatedTime);
 
-	public Date getReleaseTime();
+    public Date getReleaseTime();
 
-	public void setReleaseTime(Date releaseTime);
+    public void setReleaseTime(Date releaseTime);
 
-    public String getMinecraftArguments();
+    public ArgumentList getMinecraftArguments();
 
-    public String getJavaArguments();
+    public ArgumentList getJavaArguments();
 
     public List<Library> getLibraries();
 
@@ -58,7 +60,9 @@ public interface MojangVersion {
 
     public List<Rule> getRules();
 
-    public String getAssetsKey();
+    String getAssetsKey();
+
+    public AssetIndex getAssetIndex();
 
     public String getJarKey();
 
@@ -67,4 +71,5 @@ public interface MojangVersion {
     public boolean getAreAssetsVirtual();
 
     public void setAreAssetsVirtual(boolean areAssetsVirtual);
+
 }

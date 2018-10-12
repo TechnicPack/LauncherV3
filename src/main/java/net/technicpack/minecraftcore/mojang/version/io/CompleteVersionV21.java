@@ -26,14 +26,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class CompleteVersion implements MojangVersion {
+public class CompleteVersionV21 implements MojangVersion {
 
     private String id;
     private Date time;
     private Date releaseTime;
     private ReleaseType type;
-    private String minecraftArguments;
-    private String javaArguments;
+    private LaunchArguments arguments;
     private List<Library> libraries;
     private String mainClass;
     private int minimumLauncherVersion;
@@ -82,12 +81,12 @@ public class CompleteVersion implements MojangVersion {
 
     @Override
     public ArgumentList getMinecraftArguments() {
-        return ArgumentList.fromString(minecraftArguments);
+        return arguments.getGameArgs();
     }
 
     @Override
     public ArgumentList getJavaArguments() {
-        return ArgumentList.fromString(javaArguments);
+        return arguments.getJvmArgs();
     }
 
     @Override
@@ -163,7 +162,7 @@ public class CompleteVersion implements MojangVersion {
                 ", time=" + time +
                 ", releaseTime=" + releaseTime +
                 ", type=" + type +
-                ", minecraftArguments='" + minecraftArguments + '\'' +
+                ", arguments='" + arguments + '\'' +
                 ", libraries=" + libraries +
                 ", mainClass='" + mainClass + '\'' +
                 ", minimumLauncherVersion=" + minimumLauncherVersion +
