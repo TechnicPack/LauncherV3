@@ -19,10 +19,7 @@
 
 package net.technicpack.minecraftcore.mojang.version;
 
-import net.technicpack.minecraftcore.mojang.version.io.AssetIndex;
-import net.technicpack.minecraftcore.mojang.version.io.Library;
-import net.technicpack.minecraftcore.mojang.version.io.ReleaseType;
-import net.technicpack.minecraftcore.mojang.version.io.Rule;
+import net.technicpack.minecraftcore.mojang.version.io.*;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 
 import java.util.Date;
@@ -62,7 +59,9 @@ public interface MojangVersion {
 
     String getAssetsKey();
 
-    public AssetIndex getAssetIndex();
+    AssetIndex getAssetIndex();
+
+    GameDownloads getDownloads();
 
     public String getJarKey();
 

@@ -20,10 +20,7 @@
 package net.technicpack.minecraftcore.mojang.version.chain;
 
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
-import net.technicpack.minecraftcore.mojang.version.io.AssetIndex;
-import net.technicpack.minecraftcore.mojang.version.io.Library;
-import net.technicpack.minecraftcore.mojang.version.io.ReleaseType;
-import net.technicpack.minecraftcore.mojang.version.io.Rule;
+import net.technicpack.minecraftcore.mojang.version.io.*;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 
 import java.util.Date;
@@ -171,6 +168,16 @@ public class VersionChain implements MojangVersion {
         for (MojangVersion version : chain) {
             if (version.getAssetsKey() != null)
                 return version.getAssetsKey();
+        }
+
+        return null;
+    }
+
+    @Override
+    public GameDownloads getDownloads() {
+        for (MojangVersion version : chain) {
+            if (version.getAssetsKey() != null)
+                return version.getDownloads();
         }
 
         return null;

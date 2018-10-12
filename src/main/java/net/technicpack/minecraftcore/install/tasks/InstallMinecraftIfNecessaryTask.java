@@ -21,40 +21,49 @@ package net.technicpack.minecraftcore.install.tasks;
 
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.ListenerTask;
-import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.minecraftcore.MojangUtils;
-import net.technicpack.minecraftcore.mojang.auth.MojangUser;
-import net.technicpack.utilslib.ZipUtils;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
+import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.minecraftcore.MojangUtils;
+import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.io.GameDownloads;
 
 import java.io.File;
 import java.io.IOException;
 
 public class InstallMinecraftIfNecessaryTask extends ListenerTask {
-	private ModpackModel pack;
-	private String minecraftVersion;
+
+    private ModpackModel pack;
+    private String minecraftVersion;
     private File cacheDirectory;
 
-	public InstallMinecraftIfNecessaryTask(ModpackModel pack, String minecraftVersion, File cacheDirectory) {
-		this.pack = pack;
-		this.minecraftVersion = minecraftVersion;
+    public InstallMinecraftIfNecessaryTask(ModpackModel pack, String minecraftVersion, File cacheDirectory) {
+        this.pack = pack;
+        this.minecraftVersion = minecraftVersion;
         this.cacheDirectory = cacheDirectory;
-	}
+    }
 
-	@Override
-	public String getTaskDescription() {
-		return "Installing Minecraft";
-	}
+    @Override
+    public String getTaskDescription() {
+        return "Installing Minecraft";
+    }
 
-	@Override
-	public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
-		super.runTask(queue);
+    @Override
+    public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
+        super.runTask(queue);
 
-		String url = MojangUtils.getVersionDownload(this.minecraftVersion);
-		String md5 = queue.getMirrorStore().getETag(url);
-		File cache = new File(cacheDirectory, "minecraft_" + this.minecraftVersion + ".jar");
+        MojangVersion version = ((InstallTasksQueue<MojangVersion>)queue).getMetadata();
+
+        String url;
+        GameDownloads dls = version.getDownloads();
+        if (dls != null) {
+            url = dls.forClient().getUrl(); // TODO maybe use the sha1 sum?
+        } else {
+            url = MojangUtils.getVersionDownload(this.minecraftVersion);
+        }
+        String md5 = queue.getMirrorStore().getETag(url);
+        File cache = new File(cacheDirectory, "minecraft_" + this.minecraftVersion + ".jar");
 
         IFileVerifier verifier = null;
 
@@ -64,11 +73,12 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask {
             verifier = new ValidZipFileVerifier();
         }
 
-		if (!cache.exists() || !verifier.isFileValid(cache)) {
-			String output = this.pack.getCacheDir() + File.separator + "minecraft.jar";
-			queue.getMirrorStore().downloadFile(url, cache.getName(), output, cache, verifier, this);
-		}
+        if (!cache.exists() || !verifier.isFileValid(cache)) {
+            String output = this.pack.getCacheDir() + File.separator + "minecraft.jar";
+            queue.getMirrorStore().downloadFile(url, cache.getName(), output, cache, verifier, this);
+        }
 
-		MojangUtils.copyMinecraftJar(cache, new File(this.pack.getBinDir(), "minecraft.jar"));
-	}
+        MojangUtils.copyMinecraftJar(cache, new File(this.pack.getBinDir(), "minecraft.jar"));
+    }
+
 }

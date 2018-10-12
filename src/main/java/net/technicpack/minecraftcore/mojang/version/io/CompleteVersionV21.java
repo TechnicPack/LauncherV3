@@ -40,6 +40,7 @@ public class CompleteVersionV21 implements MojangVersion {
     private List<Rule> rules;
     private String assets;
     private AssetIndex assetIndex;
+    private GameDownloads downloads;
     private String jar;
     private String inheritsFrom;
     private transient boolean areAssetsVirtual;
@@ -133,6 +134,11 @@ public class CompleteVersionV21 implements MojangVersion {
     @Override
     public AssetIndex getAssetIndex() {
         return assetIndex;
+    }
+
+    @Override
+    public GameDownloads getDownloads() {
+        return downloads;
     }
 
     @Override
