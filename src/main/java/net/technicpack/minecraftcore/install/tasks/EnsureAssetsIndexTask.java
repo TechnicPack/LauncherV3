@@ -23,15 +23,17 @@ import net.technicpack.launchercore.install.ITasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.DownloadFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
-import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidJsonFileVerifier;
+import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.io.AssetIndex;
 
 import java.io.File;
 import java.io.IOException;
 
 public class EnsureAssetsIndexTask implements IInstallTask {
+
     private final File assetsDirectory;
     private final ITasksQueue downloadIndexQueue;
     private final ITasksQueue examineIndexQueue;
@@ -39,19 +41,19 @@ public class EnsureAssetsIndexTask implements IInstallTask {
     private final ITasksQueue downloadAssetsQueue;
     private final ITasksQueue installAssetsQueue;
 
-	public EnsureAssetsIndexTask(File assetsDirectory, ITasksQueue downloadIndexQueue, ITasksQueue examineIndexQueue, ITasksQueue checkAssetsQueue, ITasksQueue downloadAssetsQueue, ITasksQueue installAssetsQueue) {
+    public EnsureAssetsIndexTask(File assetsDirectory, ITasksQueue downloadIndexQueue, ITasksQueue examineIndexQueue, ITasksQueue checkAssetsQueue, ITasksQueue downloadAssetsQueue, ITasksQueue installAssetsQueue) {
         this.assetsDirectory = assetsDirectory;
         this.downloadIndexQueue = downloadIndexQueue;
         this.examineIndexQueue = examineIndexQueue;
         this.checkAssetsQueue = checkAssetsQueue;
         this.downloadAssetsQueue = downloadAssetsQueue;
         this.installAssetsQueue = installAssetsQueue;
-	}
+    }
 
-	@Override
-	public String getTaskDescription() {
-		return "Retrieving assets index";
-	}
+    @Override
+    public String getTaskDescription() {
+        return "Retrieving assets index";
+    }
 
     @Override
     public float getTaskProgress() {
@@ -59,24 +61,31 @@ public class EnsureAssetsIndexTask implements IInstallTask {
     }
 
     @Override
-	public void runTask(InstallTasksQueue queue) throws IOException {
-		String assets = ((InstallTasksQueue<MojangVersion>)queue).getMetadata().getAssetsKey();
+    public void runTask(InstallTasksQueue queue) throws IOException {
+        MojangVersion version = ((InstallTasksQueue<MojangVersion>)queue).getMetadata();
 
-		if (assets == null || assets.isEmpty()) {
-			assets = "legacy";
-		}
+        String assetKey = version.getAssetsKey();
+        if (assetKey == null || assetKey.isEmpty()) {
+            assetKey = "legacy";
+        }
 
-		File output = new File(assetsDirectory + File.separator + "indexes", assets+".json");
+        String assetsUrl;
+        AssetIndex assetIndex = version.getAssetIndex();
+        if (assetIndex != null) {
+            assetsUrl = assetIndex.getUrl();
+        } else {
+            assetsUrl = MojangUtils.getAssetsIndex(assetKey);
+        }
 
-		(new File(output.getParent())).mkdirs();
+        File output = new File(assetsDirectory + File.separator + "indexes", assetKey + ".json");
 
+        (new File(output.getParent())).mkdirs();
         IFileVerifier fileVerifier = new ValidJsonFileVerifier(MojangUtils.getGson());
-        String assetsUrl = MojangUtils.getAssetsIndex(assets);
-
-		if (!output.exists() || !fileVerifier.isFileValid(output)) {
+        if (!output.exists() || !fileVerifier.isFileValid(output)) {
             downloadIndexQueue.addTask(new DownloadFileTask(assetsUrl, output, fileVerifier));
-		}
+        }
 
         examineIndexQueue.addTask(new InstallMinecraftAssetsTask(assetsDirectory.getAbsolutePath(), output, checkAssetsQueue, downloadAssetsQueue, installAssetsQueue));
-	}
+    }
+
 }
