@@ -9,27 +9,27 @@ import java.util.List;
 
 public abstract class Argument {
 
-    public boolean doesApply(ILaunchOptions opts) {
-        return true;
-    }
+	public boolean doesApply(ILaunchOptions opts) {
+		return true;
+	}
 
-    public abstract List<String> getArgStrings();
+	public abstract List<String> getArgStrings();
 
-    public abstract JsonElement serialize();
+	public abstract JsonElement serialize();
 
-    public static Argument literal(final String arg) {
-        return new Argument() {
-            @Override
-            public List<String> getArgStrings() {
-                return Collections.singletonList(arg);
-            }
+	public static Argument literal(final String arg) {
+		return new Argument() {
+			@Override
+			public List<String> getArgStrings() {
+				return Collections.singletonList(arg);
+			}
 
-            @Override
-            public JsonElement serialize() {
-                return new JsonPrimitive(arg);
-            }
-        };
-    }
+			@Override
+			public JsonElement serialize() {
+				return new JsonPrimitive(arg);
+			}
+		};
+	}
 
 
 }
