@@ -4,15 +4,15 @@ import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 
 public class LaunchArguments {
 
-    private ArgumentList game;
-    private ArgumentList jvm;
+	private ArgumentList game;
+	private ArgumentList jvm;
 
-    public ArgumentList getGameArgs() {
-        return game;
-    }
+	public ArgumentList getGameArgs() {
+		return game;
+	}
 
-    public ArgumentList getJvmArgs() {
-        return jvm;
-    }
+	public ArgumentList getJvmArgs() {
+		return jvm;
+	}
 
 }

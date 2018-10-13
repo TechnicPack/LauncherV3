@@ -28,147 +28,153 @@ import java.util.List;
 
 public class CompleteVersionV21 implements MojangVersion {
 
-    private String id;
-    private Date time;
-    private Date releaseTime;
-    private ReleaseType type;
-    private LaunchArguments arguments;
-    private List<Library> libraries;
-    private String mainClass;
-    private int minimumLauncherVersion;
-    private String incompatibilityReason;
-    private List<Rule> rules;
-    private String assets;
-    private AssetIndex assetIndex;
-    private String jar;
-    private String inheritsFrom;
-    private transient boolean areAssetsVirtual;
+	private String id;
+	private Date time;
+	private Date releaseTime;
+	private ReleaseType type;
+	private LaunchArguments arguments;
+	private List<Library> libraries;
+	private String mainClass;
+	private int minimumLauncherVersion;
+	private String incompatibilityReason;
+	private List<Rule> rules;
+	private String assets;
+	private AssetIndex assetIndex;
+	private GameDownloads downloads;
+	private String jar;
+	private String inheritsFrom;
+	private transient boolean areAssetsVirtual;
 
-    @Override
-    public String getId() {
-        return id;
-    }
+	@Override
+	public String getId() {
+		return id;
+	}
 
-    @Override
-    public ReleaseType getType() {
-        return type;
-    }
+	@Override
+	public ReleaseType getType() {
+		return type;
+	}
 
-    @Override
-    public void setType(ReleaseType type) {
-        this.type = type;
-    }
+	@Override
+	public void setType(ReleaseType type) {
+		this.type = type;
+	}
 
-    @Override
-    public Date getUpdatedTime() {
-        return time;
-    }
+	@Override
+	public Date getUpdatedTime() {
+		return time;
+	}
 
-    @Override
-    public void setUpdatedTime(Date updatedTime) {
-        this.time = updatedTime;
-    }
+	@Override
+	public void setUpdatedTime(Date updatedTime) {
+		this.time = updatedTime;
+	}
 
-    @Override
-    public Date getReleaseTime() {
-        return releaseTime;
-    }
+	@Override
+	public Date getReleaseTime() {
+		return releaseTime;
+	}
 
-    @Override
-    public void setReleaseTime(Date releaseTime) {
-        this.releaseTime = releaseTime;
-    }
+	@Override
+	public void setReleaseTime(Date releaseTime) {
+		this.releaseTime = releaseTime;
+	}
 
-    @Override
-    public ArgumentList getMinecraftArguments() {
-        return arguments.getGameArgs();
-    }
+	@Override
+	public ArgumentList getMinecraftArguments() {
+		return arguments.getGameArgs();
+	}
 
-    @Override
-    public ArgumentList getJavaArguments() {
-        return arguments.getJvmArgs();
-    }
+	@Override
+	public ArgumentList getJavaArguments() {
+		return arguments.getJvmArgs();
+	}
 
-    @Override
-    public List<Library> getLibraries() {
-        return libraries;
-    }
+	@Override
+	public List<Library> getLibraries() {
+		return libraries;
+	}
 
-    @Override
-    public List<Library> getLibrariesForOS() {
-        List<Library> libraryList = new ArrayList<Library>(libraries.size());
-        for (Library library : libraries) {
-            if (library.isForCurrentOS()) {
-                libraryList.add(library);
-            }
-        }
-        return libraryList;
-    }
+	@Override
+	public List<Library> getLibrariesForOS() {
+		List<Library> libraryList = new ArrayList<Library>(libraries.size());
+		for (Library library : libraries) {
+			if (library.isForCurrentOS()) {
+				libraryList.add(library);
+			}
+		}
+		return libraryList;
+	}
 
-    @Override
-    public String getMainClass() {
-        return mainClass;
-    }
+	@Override
+	public String getMainClass() {
+		return mainClass;
+	}
 
-    @Override
-    public int getMinimumLauncherVersion() {
-        return minimumLauncherVersion;
-    }
+	@Override
+	public int getMinimumLauncherVersion() {
+		return minimumLauncherVersion;
+	}
 
-    @Override
-    public String getIncompatibilityReason() {
-        return incompatibilityReason;
-    }
+	@Override
+	public String getIncompatibilityReason() {
+		return incompatibilityReason;
+	}
 
-    @Override
-    public List<Rule> getRules() {
-        return rules;
-    }
+	@Override
+	public List<Rule> getRules() {
+		return rules;
+	}
 
-    @Override
-    public String getAssetsKey() {
-        return assets;
-    }
+	@Override
+	public String getAssetsKey() {
+		return assets;
+	}
 
-    @Override
-    public AssetIndex getAssetIndex() {
-        return assetIndex;
-    }
+	@Override
+	public AssetIndex getAssetIndex() {
+		return assetIndex;
+	}
 
-    @Override
-    public String getJarKey() {
-        return jar;
-    }
+	@Override
+	public GameDownloads getDownloads() {
+		return downloads;
+	}
 
-    @Override
-    public String getParentVersion() {
-        return inheritsFrom;
-    }
+	@Override
+	public String getJarKey() {
+		return jar;
+	}
 
-    @Override
-    public boolean getAreAssetsVirtual() {
-        return areAssetsVirtual;
-    }
+	@Override
+	public String getParentVersion() {
+		return inheritsFrom;
+	}
 
-    @Override
-    public void setAreAssetsVirtual(boolean areAssetsVirtual) {
-        this.areAssetsVirtual = areAssetsVirtual;
-    }
+	@Override
+	public boolean getAreAssetsVirtual() {
+		return areAssetsVirtual;
+	}
 
-    @Override
-    public String toString() {
-        return "CompleteVersionV21{" +
-                "id='" + id + '\'' +
-                ", time=" + time +
-                ", releaseTime=" + releaseTime +
-                ", type=" + type +
-                ", arguments='" + arguments + '\'' +
-                ", libraries=" + libraries +
-                ", mainClass='" + mainClass + '\'' +
-                ", minimumLauncherVersion=" + minimumLauncherVersion +
-                ", incompatibilityReason='" + incompatibilityReason + '\'' +
-                ", rules=" + rules +
-                '}';
-    }
+	@Override
+	public void setAreAssetsVirtual(boolean areAssetsVirtual) {
+		this.areAssetsVirtual = areAssetsVirtual;
+	}
+
+	@Override
+	public String toString() {
+		return "CompleteVersionV21{" +
+				"id='" + id + '\'' +
+				", time=" + time +
+				", releaseTime=" + releaseTime +
+				", type=" + type +
+				", arguments='" + arguments + '\'' +
+				", libraries=" + libraries +
+				", mainClass='" + mainClass + '\'' +
+				", minimumLauncherVersion=" + minimumLauncherVersion +
+				", incompatibilityReason='" + incompatibilityReason + '\'' +
+				", rules=" + rules +
+				'}';
+	}
 
 }
