@@ -34,6 +34,7 @@ import net.technicpack.launcher.settings.migration.InitialV3Migrator;
 import net.technicpack.launcher.ui.InstallerFrame;
 import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
+import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.exception.DownloadException;
@@ -131,6 +132,8 @@ public class LauncherMain {
             Locale.TAIWAN
     };
 
+    private static IBuildNumber buildNumber;
+
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -169,14 +172,14 @@ public class LauncherMain {
         resources.setSupportedLanguages(supportedLanguages);
         resources.setLocale(settings.getLanguageCode());
 
-        IBuildNumber buildNumber = null;
-
         if (params.getBuildNumber() != null && !params.getBuildNumber().isEmpty())
             buildNumber = new CommandLineBuildNumber(params);
         else
             buildNumber = new VersionFileBuildNumber(resources);
 
-        setupLogging(directories, resources, buildNumber);
+        TechnicConstants.setBuildNumber(buildNumber);
+
+        setupLogging(directories, resources);
 
         String launcherBuild = buildNumber.getBuildNumber();
         int build = -1;
@@ -191,7 +194,7 @@ public class LauncherMain {
 
         try {
             if (launcher.runAutoUpdater())
-                startLauncher(settings, params, directories, resources, buildNumber);
+                startLauncher(settings, params, directories, resources);
         } catch (InterruptedException e) {
             //Canceled by user
         } catch (DownloadException e) {
@@ -201,7 +204,7 @@ public class LauncherMain {
         }
     }
 
-    private static void setupLogging(LauncherDirectories directories, ResourceLoader resources, IBuildNumber buildNumber) {
+    private static void setupLogging(LauncherDirectories directories, ResourceLoader resources) {
         System.out.println("Setting up logging");
         final Logger logger = Utils.getLogger();
         File logDirectory = new File(directories.getLauncherDirectory(), "logs");
@@ -249,7 +252,7 @@ public class LauncherMain {
         });
     }
 
-    private static void startLauncher(final TechnicSettings settings, StartupParameters startupParameters, final LauncherDirectories directories, ResourceLoader resources, IBuildNumber buildNumber) {
+    private static void startLauncher(final TechnicSettings settings, StartupParameters startupParameters, final LauncherDirectories directories, ResourceLoader resources) {
         UIManager.put( "ComboBox.disabledBackground", LauncherFrame.COLOR_FORMELEMENT_INTERNAL );
         UIManager.put( "ComboBox.disabledForeground", LauncherFrame.COLOR_GREY_TEXT );
         System.setProperty("xr.load.xml-reader", "org.ccil.cowan.tagsoup.Parser");
