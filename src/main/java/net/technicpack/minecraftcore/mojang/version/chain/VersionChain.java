@@ -186,7 +186,7 @@ public class VersionChain implements MojangVersion {
     @Override
     public String getJarKey() {
         for (MojangVersion version : chain) {
-            if (version.getAssetIndex() != null)
+            if (version.getAssetsKey() != null)
                 return version.getAssetsKey();
         }
 
