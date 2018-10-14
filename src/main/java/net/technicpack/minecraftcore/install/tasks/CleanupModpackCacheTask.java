@@ -60,7 +60,16 @@ public class CleanupModpackCacheTask implements IInstallTask {
 
 		Set<String> keepFiles = new HashSet<String>(modpack.getMods().size() + 1);
 		for (Mod mod : modpack.getMods()) {
-			keepFiles.add(mod.getName() + "-" + mod.getVersion() + ".zip");
+			String version = mod.getVersion();
+
+			String name;
+			if (version != null) {
+				name = mod.getName() + "-" + version + ".zip";
+			} else {
+				name = mod.getName() + ".zip";
+			}
+
+			keepFiles.add(name);
 		}
 		keepFiles.add("minecraft.jar");
 

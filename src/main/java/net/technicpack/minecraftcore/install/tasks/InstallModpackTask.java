@@ -85,7 +85,15 @@ public class InstallModpackTask implements IInstallTask {
 		for (Mod mod : modpack.getMods()) {
 			String url = mod.getUrl();
 			String md5 = mod.getMd5();
-			String name = mod.getName() + "-" + mod.getVersion() + ".zip";
+
+			String version = mod.getVersion();
+
+			String name;
+			if (version != null) {
+				name = mod.getName() + "-" + version + ".zip";
+			} else {
+				name = mod.getName() + ".zip";
+			}
 
 			File cache = new File(this.pack.getCacheDir(), name);
 
