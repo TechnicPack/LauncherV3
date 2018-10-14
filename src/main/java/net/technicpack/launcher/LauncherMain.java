@@ -270,6 +270,7 @@ public class LauncherMain {
 
         Utils.getLogger().info("OS: " + System.getProperty("os.name").toLowerCase(Locale.ENGLISH));
         Utils.getLogger().info("Identified as "+ OperatingSystem.getOperatingSystem().getName());
+        Utils.getLogger().info("Java: " + System.getProperty("java.version") + " " + System.getProperty("sun.arch.data.model", "32") + "-bit");
 
         final SplashScreen splash = new SplashScreen(resources.getImage("launch_splash.png"), 0);
         Color bg = LauncherFrame.COLOR_FORMELEMENT_INTERNAL;
