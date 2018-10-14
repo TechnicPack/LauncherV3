@@ -35,7 +35,7 @@ public class TechnicConstants {
     public static void setBuildNumber(IBuildNumber buildNumber) {
         TechnicConstants.buildNumber = buildNumber;
 
-        userAgent = "TechnicLauncher/4." + buildNumber.getBuildNumber();
+        userAgent = "Mozilla/5.0 (Java) TechnicLauncher/4." + buildNumber.getBuildNumber();
     }
 
     public static String getUserAgent() {
