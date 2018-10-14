@@ -23,6 +23,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import net.technicpack.launchercore.TechnicConstants;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 
@@ -49,7 +50,7 @@ public class RestObject {
         InputStream stream = null;
         try {
             HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
+            conn.setRequestProperty("User-Agent", TechnicConstants.getUserAgent());
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type",
                     "application/json");
@@ -86,7 +87,7 @@ public class RestObject {
         InputStream stream = null;
         try {
             URLConnection conn = new URL(url).openConnection();
-            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
+            conn.setRequestProperty("User-Agent", TechnicConstants.getUserAgent());
             conn.setConnectTimeout(15000);
             conn.setReadTimeout(15000);
 
@@ -130,7 +131,7 @@ public class RestObject {
         InputStream stream = null;
         try {
             URLConnection conn = new URL(url).openConnection();
-            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
+            conn.setRequestProperty("User-Agent", TechnicConstants.getUserAgent());
             conn.setConnectTimeout(15000);
             conn.setReadTimeout(15000);
 

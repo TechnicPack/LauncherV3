@@ -19,6 +19,7 @@
 
 package net.technicpack.launchercore.mirror;
 
+import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
@@ -82,8 +83,8 @@ public class MirrorStore {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setDoInput(true);
             conn.setDoOutput(false);
-            System.setProperty("http.agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.162 Safari/535.19");
-            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.162 Safari/535.19");
+            System.setProperty("http.agent", TechnicConstants.getUserAgent());
+            conn.setRequestProperty("User-Agent", TechnicConstants.getUserAgent());
             HttpURLConnection.setFollowRedirects(true);
             conn.setUseCaches(false);
             conn.setInstanceFollowRedirects(true);

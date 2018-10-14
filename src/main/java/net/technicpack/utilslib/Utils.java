@@ -20,6 +20,7 @@ package net.technicpack.utilslib;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.mirror.MirrorStore;
 import org.apache.commons.io.IOUtils;
@@ -59,8 +60,8 @@ public class Utils {
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setDoInput(true);
         conn.setDoOutput(false);
-        System.setProperty("http.agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.162 Safari/535.19");
-        conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.162 Safari/535.19");
+        System.setProperty("http.agent", TechnicConstants.getUserAgent());
+        conn.setRequestProperty("User-Agent", TechnicConstants.getUserAgent());
         conn.setUseCaches(false);
         return conn;
     }
