@@ -29,11 +29,12 @@ public class RunData {
 
         int compareLength = Math.min(compareVersion.length, testVersion.length);
         for (int i = 0; i < compareLength; i++) {
-            int compare = compareVersion[i].compareTo(testVersion[i]);
+            int refVal = Integer.parseInt(compareVersion[i]);
+            int testVal = Integer.parseInt(testVersion[i]);
 
-            if (compare == 0)
+            if (refVal == testVal)
                 continue;
-            return compare < 0;
+            return testVal > refVal;
         }
 
         if (compareVersion.length == testVersion.length)
