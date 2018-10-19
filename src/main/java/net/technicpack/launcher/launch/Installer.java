@@ -18,11 +18,35 @@
 
 package net.technicpack.launcher.launch;
 
+import net.technicpack.launcher.settings.StartupParameters;
+import net.technicpack.launcher.settings.TechnicSettings;
+import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.components.FixRunDataDialog;
 import net.technicpack.launchercore.TechnicConstants;
+import net.technicpack.launchercore.exception.BuildInaccessibleException;
+import net.technicpack.launchercore.exception.CacheDeleteException;
+import net.technicpack.launchercore.exception.DownloadException;
+import net.technicpack.launchercore.exception.PackNotAvailableOfflineException;
+import net.technicpack.launchercore.install.InstallTasksQueue;
+import net.technicpack.launchercore.install.LauncherDirectories;
+import net.technicpack.launchercore.install.ModpackInstaller;
+import net.technicpack.launchercore.install.Version;
+import net.technicpack.launchercore.install.tasks.CheckRundataFile;
+import net.technicpack.launchercore.install.tasks.EnsureFileTask;
+import net.technicpack.launchercore.install.tasks.TaskGroup;
+import net.technicpack.launchercore.install.tasks.WriteRundataFile;
+import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
 import net.technicpack.launchercore.launch.java.IJavaVersion;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
+import net.technicpack.launchercore.mirror.MirrorStore;
+import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.RunData;
+import net.technicpack.launchercore.modpacks.resources.PackResourceMapper;
+import net.technicpack.launchercore.util.DownloadListener;
+import net.technicpack.launchercore.util.LaunchAction;
+import net.technicpack.minecraftcore.install.tasks.*;
+import net.technicpack.minecraftcore.launch.LaunchOptions;
+import net.technicpack.minecraftcore.launch.MinecraftLauncher;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
 import net.technicpack.minecraftcore.mojang.version.builder.FileVersionBuilder;
@@ -30,35 +54,13 @@ import net.technicpack.minecraftcore.mojang.version.builder.MojangVersionRetriev
 import net.technicpack.minecraftcore.mojang.version.builder.retrievers.HttpFileRetriever;
 import net.technicpack.minecraftcore.mojang.version.builder.retrievers.ZipFileRetriever;
 import net.technicpack.minecraftcore.mojang.version.chain.ChainVersionBuilder;
-import net.technicpack.ui.lang.ResourceLoader;
-import net.technicpack.launcher.settings.StartupParameters;
-import net.technicpack.launcher.settings.TechnicSettings;
-import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launchercore.exception.BuildInaccessibleException;
-import net.technicpack.launchercore.exception.CacheDeleteException;
-import net.technicpack.launchercore.exception.DownloadException;
-import net.technicpack.launchercore.exception.PackNotAvailableOfflineException;
-import net.technicpack.launchercore.install.InstallTasksQueue;
-import net.technicpack.launchercore.install.ModpackInstaller;
-import net.technicpack.launchercore.install.Version;
-import net.technicpack.launchercore.install.tasks.*;
-import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
-import net.technicpack.minecraftcore.launch.LaunchOptions;
-import net.technicpack.minecraftcore.install.tasks.*;
-import net.technicpack.minecraftcore.launch.MinecraftLauncher;
-import net.technicpack.launchercore.mirror.MirrorStore;
-import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.launchercore.modpacks.resources.PackResourceMapper;
-import net.technicpack.launchercore.util.DownloadListener;
-import net.technicpack.launchercore.util.LaunchAction;
-import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.Memory;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 
-import javax.rmi.CORBA.Util;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -153,6 +155,12 @@ public class Installer {
                                     settings.setAutoAcceptModpackRequirements(true);
                                 }
                             } else
+                                return;
+                        }
+
+                        if (RunData.isJavaVersionAtLeast(versionNumber, "1.9")) {
+                            int result = JOptionPane.showConfirmDialog(frame, resources.getString("launcher.jverwarning", versionNumber), resources.getString("launcher.jverwarning.title"), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                            if (result != JOptionPane.YES_OPTION)
                                 return;
                         }
 
