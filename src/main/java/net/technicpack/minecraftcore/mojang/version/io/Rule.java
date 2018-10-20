@@ -24,6 +24,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.launch.WindowType;
+import net.technicpack.utilslib.OperatingSystem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -125,10 +126,11 @@ public class Rule {
 
         @Override
         public boolean test(ILaunchOptions opts) {
-            String os = System.getProperty("os.name").toLowerCase();
+            String os = OperatingSystem.getOperatingSystem().getName();
+            String osVersion = System.getProperty("os.version");
             String archProp = System.getProperty("os.arch").toLowerCase();
-            return (name == null || os.startsWith(name.toLowerCase()))
-                    && (version == null || version.matcher(os.substring(name.length() + 1)).find())
+            return (name == null || name.equalsIgnoreCase(os))
+                    && (version == null || version.matcher().matches(osVersion))
                     && (arch == null || archProp.contains(arch.toLowerCase()));
         }
 
