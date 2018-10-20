@@ -92,7 +92,7 @@ public class Rule {
         for (RuleCondition condition : conditions) {
             condition.serialize(json);
         }
-        json.addProperty("acton", negated ? "disallow" : "allow");
+        json.addProperty("action", negated ? "disallow" : "allow");
         return json;
     }
 
