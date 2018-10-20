@@ -21,9 +21,9 @@ package net.technicpack.minecraftcore.mojang.auth.io;
 
 public class Agent {
 	private String name;
-	private String version;
+	private int version;
 
-	public Agent(String name, String version) {
+	public Agent(String name, int version) {
 		this.name = name;
 		this.version = version;
 	}

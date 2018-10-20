@@ -65,7 +65,7 @@ public class AuthenticationService implements IGameAuthService<MojangUser> {
 		connection.setReadTimeout(15000);
 		connection.setRequestMethod("POST");
 		connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-		connection.setRequestProperty("Content-Length", rawData.length + "");
+		connection.setRequestProperty("Content-Length", Integer.toString(rawData.length));
 		connection.setRequestProperty("Content-Language", "en-US");
 
 		DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
@@ -95,7 +95,7 @@ public class AuthenticationService implements IGameAuthService<MojangUser> {
 	}
 
 	public AuthResponse requestLogin(String username, String password, String clientToken) throws AuthenticationNetworkFailureException {
-		Agent agent = new Agent("Minecraft", "1");
+		Agent agent = new Agent("Minecraft", 1);
 
 		AuthRequest request = new AuthRequest(agent, username, password, clientToken);
 		String data = MojangUtils.getGson().toJson(request);
