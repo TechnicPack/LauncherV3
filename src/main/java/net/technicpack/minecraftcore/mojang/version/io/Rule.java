@@ -130,7 +130,7 @@ public class Rule {
             String osVersion = System.getProperty("os.version");
             String archProp = System.getProperty("os.arch").toLowerCase();
             return (name == null || name.equalsIgnoreCase(os))
-                    && (version == null || version.matcher().matches(osVersion))
+                    && (version == null || version.matcher(osVersion).matches())
                     && (arch == null || archProp.contains(arch.toLowerCase()));
         }
 
