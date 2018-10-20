@@ -113,7 +113,7 @@ public class Library {
                 }
             }
         }
-        return " https://libraries.minecraft.net/" + path;
+        return "https://libraries.minecraft.net/" + path;
     }
 
 }
