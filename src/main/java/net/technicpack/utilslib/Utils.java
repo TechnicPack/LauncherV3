@@ -110,7 +110,7 @@ public class Utils {
     }
 
     public static boolean sendTracking(String category, String action, String label, String clientId) {
-        String url = "http://www.google-analytics.com/collect";
+        String url = "https://www.google-analytics.com/collect";
         try {
             URL urlObj = new URL(url);
             HttpURLConnection con = (HttpURLConnection) urlObj.openConnection();
