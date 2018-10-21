@@ -76,12 +76,33 @@ public class HandleVersionFileTask implements IInstallTask {
             throw new DownloadException("The version.json file was invalid.");
         }
 
+        String[] mcVersionParts = version.getId().split("\\.");
+
+        // if MC < 1.6, we inject LegacyWrapper
+        // HACK
+        boolean isLegacy = false;
+        if (Integer.valueOf(mcVersionParts[0]) > 1 || (Integer.valueOf(mcVersionParts[0]) <= 1 && Integer.valueOf(mcVersionParts[1]) < 6)) {
+            isLegacy = true;
+
+            Library legacyWrapper = new Library();
+            legacyWrapper.setName("net.technicpack:legacywrapper:1.2.1");
+            legacyWrapper.setUrl("http://mirror.technicpack.net/Technic/lib/");
+
+            version.addLibrary(legacyWrapper);
+
+            version.setMainClass("net.technicpack.legacywrapper.Launch");
+        }
+
         for (Library library : version.getLibrariesForOS()) {
             // If minecraftforge is described in the libraries, skip it
             // HACK - Please let us get rid of this when we move to actually hosting forge,
             // or at least only do it if the users are sticking with modpack.jar
             if (library.getName().startsWith("net.minecraftforge:minecraftforge") ||
                     library.getName().startsWith("net.minecraftforge:forge")) {
+                continue;
+            }
+
+            if (isLegacy && library.getName().startsWith("net.minecraft:launchwrapper")) {
                 continue;
             }
 

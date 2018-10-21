@@ -51,6 +51,8 @@ public interface MojangVersion {
 
     public String getMainClass();
 
+    public void setMainClass(String mainClass);
+
     public int getMinimumLauncherVersion();
 
     public String getIncompatibilityReason();
@@ -71,4 +73,5 @@ public interface MojangVersion {
 
     public void setAreAssetsVirtual(boolean areAssetsVirtual);
 
+    public void addLibrary(Library library);
 }

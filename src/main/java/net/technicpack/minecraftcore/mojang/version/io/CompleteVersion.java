@@ -113,6 +113,11 @@ public class CompleteVersion implements MojangVersion {
     }
 
     @Override
+    public void setMainClass(String mainClass) {
+        this.mainClass = mainClass;
+    }
+
+    @Override
     public int getMinimumLauncherVersion() {
         return minimumLauncherVersion;
     }
@@ -160,6 +165,11 @@ public class CompleteVersion implements MojangVersion {
     @Override
     public void setAreAssetsVirtual(boolean areAssetsVirtual) {
         this.areAssetsVirtual = areAssetsVirtual;
+    }
+
+    @Override
+    public void addLibrary(Library library) {
+        libraries.add(library);
     }
 
     @Override

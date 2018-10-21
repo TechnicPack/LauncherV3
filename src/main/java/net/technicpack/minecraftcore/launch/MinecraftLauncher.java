@@ -229,6 +229,11 @@ public class MinecraftLauncher {
             result.append(modpack.getAbsolutePath());
         }
 
+        // if MC < 1.6, we inject LegacyWrapper
+        // HACK
+        String[] mcVersionParts = version.getId().split("\\.");
+        boolean isLegacy = Integer.valueOf(mcVersionParts[0]) > 1 || (Integer.valueOf(mcVersionParts[0]) <= 1 && Integer.valueOf(mcVersionParts[1]) < 6);
+
         // Add all the libraries to the classpath.
         for (Library library : version.getLibrariesForOS()) {
             if (library.getNatives() != null) {
@@ -240,6 +245,10 @@ public class MinecraftLauncher {
             // or at least only do it if the users are sticking with modpack.jar
             if (library.getName().startsWith("net.minecraftforge:minecraftforge") ||
                     library.getName().startsWith("net.minecraftforge:forge")) {
+                continue;
+            }
+
+            if (isLegacy && library.getName().startsWith("net.minecraft:launchwrapper")) {
                 continue;
             }
 

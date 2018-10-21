@@ -127,6 +127,11 @@ public class VersionChain implements MojangVersion {
     }
 
     @Override
+    public void setMainClass(String mainClass) {
+        chain.get(0).setMainClass(mainClass);
+    }
+
+    @Override
     public int getMinimumLauncherVersion() {
         return chain.get(0).getMinimumLauncherVersion();
     }
@@ -206,6 +211,11 @@ public class VersionChain implements MojangVersion {
     @Override
     public String getParentVersion() {
         return null;
+    }
+
+    @Override
+    public void addLibrary(Library library) {
+        chain.get(0).addLibrary(library);
     }
 
     public void addVersionToChain(MojangVersion version) {
