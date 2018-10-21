@@ -27,6 +27,7 @@ import net.technicpack.launchercore.launch.ProcessExitListener;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.RunData;
+import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
@@ -231,8 +232,7 @@ public class MinecraftLauncher {
 
         // if MC < 1.6, we inject LegacyWrapper
         // HACK
-        String[] mcVersionParts = version.getId().split("\\.");
-        boolean isLegacy = Integer.valueOf(mcVersionParts[0]) > 1 || (Integer.valueOf(mcVersionParts[0]) <= 1 && Integer.valueOf(mcVersionParts[1]) < 6);
+        boolean isLegacy = MojangUtils.isLegacyVersion(version.getId());
 
         // Add all the libraries to the classpath.
         for (Library library : version.getLibrariesForOS()) {

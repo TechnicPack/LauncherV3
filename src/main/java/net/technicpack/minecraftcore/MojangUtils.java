@@ -165,4 +165,9 @@ public class MojangUtils {
         return getGson().fromJson(root, versionJsonType);
     }
 
+    public static boolean isLegacyVersion(String version) {
+        final String[] versionParts = version.split("\\.");
+
+        return Integer.valueOf(versionParts[0]) == 1 && Integer.valueOf(versionParts[1]) < 6;
+    }
 }

@@ -25,6 +25,7 @@ import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
@@ -76,14 +77,11 @@ public class HandleVersionFileTask implements IInstallTask {
             throw new DownloadException("The version.json file was invalid.");
         }
 
-        String[] mcVersionParts = version.getId().split("\\.");
-
         // if MC < 1.6, we inject LegacyWrapper
         // HACK
-        boolean isLegacy = false;
-        if (Integer.valueOf(mcVersionParts[0]) > 1 || (Integer.valueOf(mcVersionParts[0]) <= 1 && Integer.valueOf(mcVersionParts[1]) < 6)) {
-            isLegacy = true;
+        boolean isLegacy = MojangUtils.isLegacyVersion(version.getId());
 
+        if (isLegacy) {
             Library legacyWrapper = new Library();
             legacyWrapper.setName("net.technicpack:legacywrapper:1.2.1");
             legacyWrapper.setUrl("http://mirror.technicpack.net/Technic/lib/");
