@@ -118,7 +118,7 @@ public class LauncherMain {
 
     public static ConsoleFrame consoleFrame;
 
-    public static Locale[] supportedLanguages = new Locale[] {
+    public static final Locale[] supportedLanguages = new Locale[] {
             Locale.ENGLISH,
             new Locale("pt","BR"),
             new Locale("pt","PT"),
