@@ -26,11 +26,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class SplashScreen extends JWindow {
+public class SplashScreen extends JFrame {
     protected final ImageIcon image;
     private ProgressBar progressBar = null;
 
     public SplashScreen(Image img, int barHeight) {
+        setUndecorated(true);
+        setTitle("Technic Launcher");
+
         this.image = new ImageIcon(img);
 
         Container container = getContentPane();
