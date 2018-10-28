@@ -45,7 +45,7 @@ import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 
 public class MojangUtils {
-    public static final String assetsBaseUrl = "http://resources.download.minecraft.net/";
+    public static final String assetsBaseUrl = "https://resources.download.minecraft.net/";
 
     public static String getResourceUrl(String hash) {
         return assetsBaseUrl + hash.substring(0, 2) + "/" + hash;
