@@ -165,7 +165,7 @@ public class MojangUtils {
     }
 
     public static boolean isLegacyVersion(String version) {
-        final String[] versionParts = version.split("[.-]", 2);
+        final String[] versionParts = version.split("[.-]", 3);
 
         return Integer.valueOf(versionParts[0]) == 1 && Integer.valueOf(versionParts[1]) < 6;
     }
