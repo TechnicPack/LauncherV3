@@ -69,7 +69,13 @@ public class EnsureAssetsIndexTask implements IInstallTask {
             assetKey = "legacy";
         }
 
-        final String assetsUrl = version.getAssetIndex().getUrl();
+        String assetsUrl;
+        AssetIndex assetIndex = version.getAssetIndex();
+        if (assetIndex != null) {
+            assetsUrl = assetIndex.getUrl();
+        } else {
+            assetsUrl = MojangUtils.getAssetsIndex(assetKey);
+        }
 
         File output = new File(assetsDirectory + File.separator + "indexes", assetKey + ".json");
 

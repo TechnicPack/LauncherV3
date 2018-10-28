@@ -23,12 +23,10 @@ import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.ListenerTask;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
-import net.technicpack.launchercore.install.verifiers.SHA1FileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
-import net.technicpack.minecraftcore.mojang.version.io.Download;
 import net.technicpack.minecraftcore.mojang.version.io.GameDownloads;
 
 import java.io.File;
@@ -57,18 +55,20 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask {
 
 		MojangVersion version = ((InstallTasksQueue<MojangVersion>)queue).getMetadata();
 
-		final Download client = version.getDownloads().forClient();
-
-		final String url = client.getUrl();
-
+		String url;
+		GameDownloads dls = version.getDownloads();
+		if (dls != null) {
+			url = dls.forClient().getUrl(); // TODO maybe use the sha1 sum?
+		} else {
+			url = MojangUtils.getVersionDownload(this.minecraftVersion);
+		}
+		String md5 = queue.getMirrorStore().getETag(url);
 		File cache = new File(cacheDirectory, "minecraft_" + this.minecraftVersion + ".jar");
 
-		IFileVerifier verifier;
+		IFileVerifier verifier = null;
 
-		final String sha1 = client.getSha1();
-
-		if (sha1 != null && !sha1.isEmpty()) {
-			verifier = new SHA1FileVerifier(sha1);
+		if (md5 != null && !md5.isEmpty()) {
+			verifier = new MD5FileVerifier(md5);
 		} else {
 			verifier = new ValidZipFileVerifier();
 		}

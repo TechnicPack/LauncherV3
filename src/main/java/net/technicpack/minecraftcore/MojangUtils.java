@@ -45,10 +45,26 @@ import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 
 public class MojangUtils {
-    public static final String assetsBaseUrl = "https://resources.download.minecraft.net/";
+    public static final String baseURL = "https://s3.amazonaws.com/Minecraft.Download/";
+    public static final String assetsIndexes = baseURL + "indexes/";
+    public static final String versions = baseURL + "versions/";
+    public static final String assets = "http://resources.download.minecraft.net/";
+    public static final String versionList = versions + "versions.json";
+
+    public static String getVersionJson(String version) {
+        return versions + version + "/" + version + ".json";
+    }
+
+    public static String getVersionDownload(String version) {
+        return versions + version + "/" + version + ".jar";
+    }
+
+    public static String getAssetsIndex(String assetsKey) {
+        return assetsIndexes + assetsKey + ".json";
+    }
 
     public static String getResourceUrl(String hash) {
-        return assetsBaseUrl + hash.substring(0, 2) + "/" + hash;
+        return assets + hash.substring(0, 2) + "/" + hash;
     }
 
     private static final Gson gson;
