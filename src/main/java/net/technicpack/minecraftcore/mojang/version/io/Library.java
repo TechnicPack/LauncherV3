@@ -24,13 +24,15 @@ import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.lang3.text.StrSubstitutor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 public class Library {
 
     private static final StrSubstitutor SUBSTITUTOR = new StrSubstitutor();
-    private static final String[] fallback = { "http://mirror.technicpack.net/Technic/lib/", "https://search.maven.org/remotecontent?filepath=" };
+    private static final ArrayList<String> fallback = new ArrayList<>(Arrays.asList("http://mirror.technicpack.net/Technic/lib/", "https://search.maven.org/remotecontent?filepath="));
     private String name;
     private List<Rule> rules;
     private Map<OperatingSystem, String> natives;
@@ -110,6 +112,11 @@ public class Library {
 
     public String getDownloadUrl(String path, MirrorStore mirrorStore) {
         if (this.url != null) {
+            if (this.url.equals("http://files.minecraftforge.net/maven/")) {
+                // HACK
+                fallback.add(this.url);
+                this.url = fallback.remove(0);
+            }
             String checkUrl = url + path;
             if (Utils.pingHttpURL(checkUrl, mirrorStore)) {
                 return checkUrl;
