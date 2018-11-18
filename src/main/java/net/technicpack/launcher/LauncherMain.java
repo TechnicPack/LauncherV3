@@ -120,18 +120,17 @@ public class LauncherMain {
 
     public static final Locale[] supportedLanguages = new Locale[] {
             Locale.ENGLISH,
-            Locale.GERMAN,
-            Locale.FRENCH,
-            Locale.ITALIAN,
             new Locale("pt","BR"),
             new Locale("pt","PT"),
             new Locale("cs"),
-            new Locale("sk", "SK"),
+            Locale.GERMAN,
+            Locale.FRENCH,
+            Locale.ITALIAN,
+            new Locale("hu"),
             new Locale("pl"),
-            new Locale("nl", "NL"),
             Locale.CHINA,
             Locale.TAIWAN,
-            new Locale("hu")
+            new Locale("nl", "NL")
             
     };
 
