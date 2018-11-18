@@ -131,7 +131,6 @@ public class LauncherMain {
             Locale.CHINA,
             Locale.TAIWAN,
             new Locale("nl", "NL")
-            
     };
 
     private static IBuildNumber buildNumber;
