@@ -120,17 +120,19 @@ public class LauncherMain {
 
     public static final Locale[] supportedLanguages = new Locale[] {
             Locale.ENGLISH,
-            new Locale("pt","BR"),
-            new Locale("pt","PT"),
-            new Locale("cs"),
             Locale.GERMAN,
             Locale.FRENCH,
             Locale.ITALIAN,
-            new Locale("hu"),
+            new Locale("pt","BR"),
+            new Locale("pt","PT"),
+            new Locale("cs"),
+            new Locale("sk", "SK"),
             new Locale("pl"),
+            new Locale("nl", "NL"),
             Locale.CHINA,
             Locale.TAIWAN,
-            new Locale("nl", "NL")
+            new Locale("hu")
+            
     };
 
     private static IBuildNumber buildNumber;
