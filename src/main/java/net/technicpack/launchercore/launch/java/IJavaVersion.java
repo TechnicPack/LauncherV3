@@ -28,5 +28,6 @@ public interface IJavaVersion {
     String getVersionNumber();
     File getJavaPath();
     boolean is64Bit();
+    boolean isOpenJDK();
     boolean verify();
 }

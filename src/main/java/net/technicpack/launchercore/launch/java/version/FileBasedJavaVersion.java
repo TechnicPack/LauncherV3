@@ -33,6 +33,7 @@ public class FileBasedJavaVersion implements IJavaVersion {
     private transient boolean haveQueriedVersion = false;
     private transient String versionNumber;
     private transient boolean is64Bit;
+    private transient boolean isOpenJDK;
     private transient File javaPath;
     private String filePath;
 
@@ -73,6 +74,14 @@ public class FileBasedJavaVersion implements IJavaVersion {
         }
 
         return is64Bit;
+    }
+
+    public boolean isOpenJDK() {
+        if(!haveQueriedVersion) {
+            verify();
+        }
+
+        return isOpenJDK;
     }
 
     public File getJavaPath() {
@@ -120,12 +129,14 @@ public class FileBasedJavaVersion implements IJavaVersion {
 
         is64Bit = data.contains("64-Bit");
 
-        Pattern versionPattern = Pattern.compile("(?:java|openjdk) version \"(.+?)\"");
+        Pattern versionPattern = Pattern.compile("(java|openjdk) version \"(.+?)\"");
         Matcher versionMatcher = versionPattern.matcher(data);
 
         if (!versionMatcher.lookingAt())
             return null;
 
-        return versionMatcher.group(1);
+        isOpenJDK = versionMatcher.group(1).equals("openjdk");
+
+        return versionMatcher.group(2);
     }
 }
