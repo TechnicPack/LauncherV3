@@ -19,11 +19,12 @@
 
 package net.technicpack.launchercore.launch.java.version;
 
-import net.technicpack.utilslib.OperatingSystem;
-import net.technicpack.utilslib.Utils;
 import net.technicpack.launchercore.launch.java.IJavaVersion;
+import net.technicpack.utilslib.Utils;
 
 import java.io.File;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * An IJavaVersion based on an externally-selected java executable.
@@ -119,12 +120,12 @@ public class FileBasedJavaVersion implements IJavaVersion {
 
         is64Bit = data.contains("64-Bit");
 
-        int versionStartIndex = data.indexOf("java version \"");
+        Pattern versionPattern = Pattern.compile("(?:java|openjdk) version \"(.+?)\"");
+        Matcher versionMatcher = versionPattern.matcher(data);
 
-        if (versionStartIndex < 0)
+        if (!versionMatcher.lookingAt())
             return null;
-        versionStartIndex += "java version \"".length();
-        int versionEndIndex = data.indexOf('\"', versionStartIndex);
-        return data.substring(versionStartIndex, versionEndIndex);
+
+        return versionMatcher.group(1);
     }
 }
