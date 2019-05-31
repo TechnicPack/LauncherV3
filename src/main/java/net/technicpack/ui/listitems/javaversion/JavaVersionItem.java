@@ -34,15 +34,19 @@ public class JavaVersionItem {
 
     public String getVersionNumber() { return javaVersion.getVersionNumber(); }
     public boolean is64Bit() { return javaVersion.is64Bit(); }
+    public boolean isOpenJDK() { return javaVersion.isOpenJDK(); }
 
     protected IJavaVersion getJavaVersion() { return javaVersion; }
     protected ResourceLoader getResourceLoader() { return resourceLoader; }
 
     public String toString() {
-        String text = javaVersion.getVersionNumber();
+        String version = javaVersion.getVersionNumber();
 
         String bitness = (javaVersion.is64Bit())?resourceLoader.getString("launcheroptions.java.64bit"):resourceLoader.getString("launcheroptions.java.32bit");
 
-        return text + " " + bitness;
+        if (isOpenJDK())
+            return "OpenJDK " + version + " " + bitness;
+        else
+            return version + " " + bitness;
     }
 }
