@@ -47,7 +47,7 @@ public class CurrentJavaVersion implements IJavaVersion {
     }
 
     @Override
-    public boolean isOpenJDK() { return System.getProperty("java.vm.name").contains("OpenJDK"); }
+    public boolean isOpenJDK() { return System.getProperty("java.runtime.name").contains("OpenJDK"); }
 
     @Override
     public boolean verify() {
