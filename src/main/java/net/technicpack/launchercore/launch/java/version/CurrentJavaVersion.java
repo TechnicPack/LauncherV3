@@ -31,6 +31,7 @@ public class CurrentJavaVersion implements IJavaVersion {
 
     public CurrentJavaVersion() {}
 
+
     @Override
     public String getVersionNumber() {
         return System.getProperty("java.version");
