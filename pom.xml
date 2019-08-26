@@ -346,7 +346,7 @@
 										<preCp>anything</preCp>
 									</classPath>
 									<jre>
-										<minVersion>1.5.0</minVersion>
+										<minVersion>1.8.0</minVersion>
 										<maxVersion>1.8.0</maxVersion>
 										<opts><opt>-Djava.net.preferIPv4Stack=true</opt><opt>-Dawt.useSystemAAFontSettings=lcd</opt><opt>-Dswing.aatext=true</opt></opts>
 									</jre>
