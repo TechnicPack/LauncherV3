@@ -192,7 +192,6 @@ public class MinecraftLauncher {
         // Tell forge 1.5 to download from our mirror instead
         commands.addUnique("-Dfml.core.libraries.mirror=http://mirror.technicpack.net/Technic/lib/fml/%s");
         commands.addUnique("-Dminecraft.applet.TargetDirectory=" + pack.getInstalledDirectory().getAbsolutePath());
-        commands.addUnique("-Djava.net.preferIPv4Stack=true");
 
         if (!options.getOptions().shouldUseStencilBuffer())
             commands.add("-Dforge.forceNoStencil=true");
