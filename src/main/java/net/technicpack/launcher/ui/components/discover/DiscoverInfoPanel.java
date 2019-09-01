@@ -61,6 +61,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.ByteBuffer;
 
 public class DiscoverInfoPanel extends TiledBackground {
 
@@ -202,11 +203,12 @@ public class DiscoverInfoPanel extends TiledBackground {
         try {
             HttpURLConnection conn = Utils.openHttpConnection(new URL(url));
             InputStream stream = conn.getInputStream();
-            String data = IOUtils.toString(stream, Charsets.UTF_8);
+            byte[] data = IOUtils.toByteArray(stream);
 
-            Document doc = XMLResource.load(conn.getInputStream()).getDocument();
+            Document doc = XMLResource.load(new ByteArrayInputStream(data)).getDocument();
             if (doc != null) {
-                FileUtils.write(localCache, data, Charsets.UTF_8);
+                FileUtils.writeByteArrayToFile(localCache, data);
+                return doc;
             }
         } catch (MalformedURLException ex) {
             ex.printStackTrace();
