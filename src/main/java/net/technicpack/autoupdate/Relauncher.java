@@ -81,6 +81,8 @@ public abstract class Relauncher {
         if (canReboot()) {
             if (System.getProperty("awt.useSystemAAFontSettings") == null || !System.getProperty("awt.useSystemAAFontSettings").equals("lcd"))
                 needsReboot = true;
+            else if (!Boolean.parseBoolean(System.getProperty("java.net.preferIPv4Stack")))
+                needsReboot = true;
         }
 
         InstallTasksQueue updateTasksQueue = null;
@@ -141,6 +143,7 @@ public abstract class Relauncher {
             commands.add(OperatingSystem.getJavaDir());
             commands.add("-Xmx256m");
             commands.add("-verbose");
+            commands.add("-Djava.net.preferIPv4Stack=true");
             commands.add("-Dawt.useSystemAAFontSettings=lcd");
             commands.add("-Dswing.aatext=true");
             commands.add("-cp");
