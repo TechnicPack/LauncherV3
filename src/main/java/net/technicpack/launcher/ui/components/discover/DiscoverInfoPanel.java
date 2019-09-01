@@ -206,7 +206,7 @@ public class DiscoverInfoPanel extends TiledBackground {
 
             Document doc = XMLResource.load(conn.getInputStream()).getDocument();
             if (doc != null) {
-                FileUtils.write(localCache, data);
+                FileUtils.write(localCache, data, Charsets.UTF_8);
                 return doc;
             }
         } catch (MalformedURLException ex) {
