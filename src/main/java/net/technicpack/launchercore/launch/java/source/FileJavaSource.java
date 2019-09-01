@@ -19,6 +19,7 @@
 
 package net.technicpack.launchercore.launch.java.source;
 
+import com.google.common.base.Charsets;
 import net.technicpack.launchercore.launch.java.IVersionSource;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.launch.java.version.FileBasedJavaVersion;
@@ -76,7 +77,7 @@ public class FileJavaSource implements IVersionSource {
         String data = Utils.getGson().toJson(this);
 
         try {
-            FileUtils.write(loadedFile, data);
+            FileUtils.write(loadedFile, data, Charsets.UTF_8);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
