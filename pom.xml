@@ -243,7 +243,6 @@
 										<exclude>META-INF/ASL2.0</exclude>
 										<exclude>META-INF/LICENSE</exclude>
 										<exclude>META-INF/NOTICE</exclude>
-										<exclude>org/slf4j/**</exclude>
 										<exclude>org/eclipse/**</exclude>
 										<exclude>org/codehaus/**</exclude>
 										<exclude>org/apache/maven/**</exclude>
