@@ -118,6 +118,12 @@
             <version>3.3.9</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <!-- Necessary to squelch SLF4J warning introduced by Aether dependency -->
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>1.6.2</version>
+        </dependency>
 	</dependencies>
 
 	<!-- Build configuration -->
@@ -221,6 +227,12 @@
 									<artifact>rome:rome</artifact>
 									<includes>
 										<include>com/sun/syndication/**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>org.slf4j:slf4j-nop</artifact>
+									<includes>
+										<include>**</include>
 									</includes>
 								</filter>
 								<filter>
