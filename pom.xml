@@ -122,7 +122,7 @@
             <!-- Necessary to squelch SLF4J warning introduced by Aether dependency -->
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-nop</artifactId>
-            <version>1.6.2</version>
+            <version>1.7.28</version>
         </dependency>
 	</dependencies>
 
