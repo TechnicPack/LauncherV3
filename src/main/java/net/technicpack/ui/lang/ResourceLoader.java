@@ -50,8 +50,8 @@ public class ResourceLoader {
 
     public static final String DEFAULT_LOCALE = "default";
 
-    public static final String FONT_OPENSANS = "font.opensans.regular";
-    public static final String FONT_RALEWAY = "font.raleway.light";
+    public static final String FONT_OPENSANS = "OpenSans+Cyberbit.ttf";
+    public static final String FONT_RALEWAY = "Raleway+FireflySung.ttf";
 
     public static final Map<String, Font> fontCache = new HashMap<String, Font>();
 
@@ -71,8 +71,7 @@ public class ResourceLoader {
             return fallbackFont;
 
         try {
-            String fullName = getString(fontName);
-            try (InputStream fontStream = FileUtils.openInputStream(new File(launcherAssets, fullName))) {
+            try (InputStream fontStream = FileUtils.openInputStream(new File(launcherAssets, fontName))) {
                 if (fontStream == null)
                     return fallbackFont;
 
