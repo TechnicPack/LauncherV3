@@ -70,24 +70,20 @@ public class ResourceLoader {
         if (launcherAssets == null)
             return fallbackFont;
 
-        InputStream fontStream = null;
         try {
             String fullName = getString(fontName);
-            fontStream = FileUtils.openInputStream(new File(launcherAssets, fullName));
+            try (InputStream fontStream = FileUtils.openInputStream(new File(launcherAssets, fullName))) {
+                if (fontStream == null)
+                    return fallbackFont;
 
-            if (fontStream == null)
-                return fallbackFont;
-
-            font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
+                font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
+            }
             GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
             genv.registerFont(font);
         } catch (Exception e) {
             e.printStackTrace();
             // Fallback
             return fallbackFont;
-        } finally {
-            if (fontStream != null)
-                IOUtils.closeQuietly(fontStream);
         }
         fontCache.put(fontName, font);
 
