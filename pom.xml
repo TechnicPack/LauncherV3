@@ -6,7 +6,7 @@
     <name>Technic Launcher</name>
     <groupId>net.technicpack</groupId>
     <artifactId>launcher</artifactId>
-    <version>4.0-${buildNumber}</version>
+    <version>${revision}</version>
     <url>https://www.technicpack.net</url>
     <inceptionYear>2014</inceptionYear>
     <description>Minecraft launcher for installing and updating Modpacks from the Technic Platform.</description>
@@ -16,6 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>${project.groupId}.${project.artifactId}.LauncherMain</mainClass>
         <buildNumber>0</buildNumber>
+        <revision>4.0.0.${buildNumber}</revision>
     </properties>
 
     <!-- Company information -->
