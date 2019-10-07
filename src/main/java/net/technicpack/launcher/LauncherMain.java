@@ -136,7 +136,7 @@ public class LauncherMain {
 
     private static IBuildNumber buildNumber;
 
-    public static void main(String[] args) {
+    public static void main(String[] argv) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ex) {
@@ -145,9 +145,12 @@ public class LauncherMain {
 
         ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
 
-        StartupParameters params = new StartupParameters(args);
+        StartupParameters params = new StartupParameters(argv);
         try {
-            new JCommander(params, args);
+            JCommander.newBuilder()
+                    .addObject(params)
+                    .build()
+                    .parse(argv);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
