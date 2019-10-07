@@ -69,7 +69,6 @@ public class MojangUtils {
 
     private static final Gson gson;
     private static final Gson uglyGson;
-    private static final JsonParser jsonParser;
     private static final NavigableMap<Integer, Class<? extends MojangVersion>> versionJsonVersions;
 
     static {
@@ -84,8 +83,6 @@ public class MojangUtils {
 
         builder.setPrettyPrinting();
         gson = builder.create();
-
-        jsonParser = new JsonParser();
 
         versionJsonVersions = new TreeMap<Integer, Class<? extends MojangVersion>>();
         versionJsonVersions.put(0, CompleteVersion.class);
@@ -149,7 +146,7 @@ public class MojangUtils {
     }
 
     public static MojangVersion parseVersionJson(String json) {
-        JsonObject root = jsonParser.parse(json).getAsJsonObject();
+        JsonObject root = JsonParser.parseString(json).getAsJsonObject();
         Class<? extends MojangVersion> versionJsonType;
         if (root.has("minimumLauncherVersion")) {
             int minLauncherVersion = root.get("minimumLauncherVersion").getAsInt();

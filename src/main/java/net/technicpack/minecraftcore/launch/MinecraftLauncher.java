@@ -36,7 +36,7 @@ import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
-import org.apache.commons.lang3.text.StrSubstitutor;
+import org.apache.commons.text.StringSubstitutor;
 
 import java.io.File;
 import java.io.IOException;
@@ -109,7 +109,6 @@ public class MinecraftLauncher {
 
         // build arg parameter map
         Map<String, String> params = new HashMap<String, String>();
-        StrSubstitutor paramDereferencer = new StrSubstitutor(params);
         MojangUser mojangUser = userModel.getCurrentUser();
         File gameDirectory = pack.getInstalledDirectory();
         ILaunchOptions launchOpts = options.getOptions();
@@ -131,6 +130,8 @@ public class MinecraftLauncher {
 
         params.put("resolution_width", Integer.toString(launchOpts.getCustomWidth()));
         params.put("resolution_height", Integer.toString(launchOpts.getCustomHeight()));
+
+        StringSubstitutor paramDereferencer = new StringSubstitutor(params);
 
         String targetAssets = directories.getAssetsDirectory().getAbsolutePath();
 

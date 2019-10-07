@@ -34,7 +34,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class InstallMinecraftAssetsTask implements IInstallTask {
@@ -69,7 +69,7 @@ public class InstallMinecraftAssetsTask implements IInstallTask {
 
     @Override
     public void runTask(InstallTasksQueue queue) throws IOException {
-        String json = FileUtils.readFileToString(assetsIndex, Charset.forName("UTF-8"));
+        String json = FileUtils.readFileToString(assetsIndex, StandardCharsets.UTF_8);
         JsonObject obj = MojangUtils.getGson().fromJson(json, JsonObject.class);
 
         if (obj == null) {

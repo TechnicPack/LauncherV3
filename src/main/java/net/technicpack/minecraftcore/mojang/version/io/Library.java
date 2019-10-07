@@ -22,14 +22,14 @@ package net.technicpack.minecraftcore.mojang.version.io;
 import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
-import org.apache.commons.lang3.text.StrSubstitutor;
+import org.apache.commons.text.StringSubstitutor;
 
 import java.util.List;
 import java.util.Map;
 
 public class Library {
 
-    private static final StrSubstitutor SUBSTITUTOR = new StrSubstitutor();
+    private static final StringSubstitutor SUBSTITUTOR = new StringSubstitutor();
     private static final String[] fallback = { "http://mirror.technicpack.net/Technic/lib/", "https://search.maven.org/remotecontent?filepath=" };
     private String name;
     private List<Rule> rules;

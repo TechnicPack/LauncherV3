@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 public class AuthenticationService implements IGameAuthService<MojangUser> {
 	private static final String AUTH_SERVER = "https://authserver.mojang.com/";
@@ -56,7 +57,7 @@ public class AuthenticationService implements IGameAuthService<MojangUser> {
 	}
 
 	private String postJson(String url, String data) throws IOException {
-		byte[] rawData = data.getBytes("UTF-8");
+		byte[] rawData = data.getBytes(StandardCharsets.UTF_8);
 		HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
 		connection.setUseCaches(false);
 		connection.setDoOutput(true);

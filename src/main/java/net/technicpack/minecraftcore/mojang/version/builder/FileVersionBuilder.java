@@ -27,7 +27,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class FileVersionBuilder implements MojangVersionBuilder {
@@ -68,7 +68,7 @@ public class FileVersionBuilder implements MojangVersionBuilder {
         if (!target.exists())
             return null;
 
-        String json = FileUtils.readFileToString(target, Charset.forName("UTF-8"));
+        String json = FileUtils.readFileToString(target, StandardCharsets.UTF_8);
         return MojangUtils.parseVersionJson(json);
     }
 }
