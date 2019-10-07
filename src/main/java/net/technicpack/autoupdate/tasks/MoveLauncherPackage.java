@@ -65,21 +65,17 @@ public class MoveLauncherPackage implements IInstallTask {
                 if (!dest.delete())
                     Utils.getLogger().log(Level.SEVERE, "Deletion of existing package failed!");
             }
-            FileInputStream sourceStream = null;
-            FileOutputStream destStream = null;
 
             try {
                 if (!dest.getParentFile().exists())
                     dest.getParentFile().mkdirs();
                 dest.createNewFile();
-                sourceStream = new FileInputStream(source);
-                destStream = new FileOutputStream(dest);
-                IOUtils.copy(sourceStream, destStream);
+                try (FileInputStream sourceStream = new FileInputStream(source);
+                     FileOutputStream destStream = new FileOutputStream(dest);) {
+                    IOUtils.copy(sourceStream, destStream);
+                }
             } catch (IOException ex) {
                 Utils.getLogger().log(Level.SEVERE, "Error attempting to copy download package:", ex);
-            } finally {
-                IOUtils.closeQuietly(sourceStream);
-                IOUtils.closeQuietly(destStream);
             }
         }
 

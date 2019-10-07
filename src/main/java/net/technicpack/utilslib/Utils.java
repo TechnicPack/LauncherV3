@@ -74,7 +74,6 @@ public class Utils {
      * @return True if the content can be accessed successfully, false otherwise.
      */
     public static boolean pingHttpURL(String urlLoc, MirrorStore mirrorStore) {
-        InputStream stream = null;
         try {
             final URL url = mirrorStore.getFullUrl(urlLoc);
             HttpURLConnection conn = openHttpConnection(url);
@@ -97,15 +96,14 @@ public class Utils {
             }
 
             if (responseFamily == 2) {
-                stream = conn.getInputStream();
-                return true;
+                try (InputStream stream = conn.getInputStream()) {
+                    return true;
+                }
             } else {
                 return false;
             }
         } catch (IOException e) {
             return false;
-        } finally {
-            IOUtils.closeQuietly(stream);
         }
     }
 
