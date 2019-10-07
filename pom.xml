@@ -16,7 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>${project.groupId}.${project.artifactId}.LauncherMain</mainClass>
         <buildNumber>0</buildNumber>
-        <revision>4.0.0.${buildNumber}</revision>
+        <revision>4.0-${buildNumber}</revision>
     </properties>
 
     <!-- Company information -->
