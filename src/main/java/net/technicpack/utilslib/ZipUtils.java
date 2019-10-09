@@ -20,15 +20,16 @@ package net.technicpack.utilslib;
 
 
 import net.technicpack.launchercore.util.DownloadListener;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.nio.channels.ClosedByInterruptException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.logging.Level;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
 
 public class ZipUtils {
 
@@ -70,7 +71,7 @@ public class ZipUtils {
 
         try {
             zipFile = new ZipFile(zip);
-            ZipEntry entry = zipFile.getEntry(fileName);
+            ZipArchiveEntry entry = zipFile.getEntry(fileName);
             if (entry == null) {
                 Utils.getLogger().log(Level.WARNING, "File " + fileName + " not found in " + zip.getAbsolutePath());
                 return false;
@@ -83,9 +84,6 @@ public class ZipUtils {
 
             unzipEntry(zipFile, zipFile.getEntry(fileName), outputFile);
             return true;
-        } catch (ZipException e) {
-            e.printStackTrace();
-            throw new ZipException("Error extracting file " + zip.getName());
         } catch (IOException e) {
             Utils.getLogger().log(Level.WARNING, "Error extracting file " + fileName + " from " + zip.getAbsolutePath());
             return false;
@@ -96,7 +94,7 @@ public class ZipUtils {
         }
     }
 
-    private static void unzipEntry(ZipFile zipFile, ZipEntry entry, File outputFile) throws IOException, InterruptedException {
+    private static void unzipEntry(ZipFile zipFile, ZipArchiveEntry entry, File outputFile) throws IOException, InterruptedException {
         byte[] buffer = new byte[2048];
         BufferedInputStream inputStream = new BufferedInputStream(zipFile.getInputStream(entry));
         BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(outputFile));
@@ -123,23 +121,13 @@ public class ZipUtils {
         }
 
         ZipFile zipFile = new ZipFile(zip);
-        int size = zipFile.size() + 1;
+        ArrayList<ZipArchiveEntry> entries = Collections.list(zipFile.getEntries());
+        int size = entries.size();
         int progress = 1;
         try {
-            Enumeration<? extends ZipEntry> entries = zipFile.entries();
-            while (entries.hasMoreElements()) {
+            for (ZipArchiveEntry entry : entries) {
                 if (Thread.interrupted())
                     throw new InterruptedException();
-
-                ZipEntry entry = null;
-
-                try {
-                    entry = entries.nextElement();
-                } catch (IllegalArgumentException ex) {
-                    //We must catch & rethrow as a zip exception because some crappy code in the zip lib will
-                    //throw illegal argument exceptions for malformed zips.
-                    throw new ZipException("IllegalArgumentException while parsing next element.");
-                }
 
                 if (!entry.getName().contains("../") && (fileFilter == null || fileFilter.shouldExtract(entry.getName()))) {
                     File outputFile = new File(output, entry.getName());
