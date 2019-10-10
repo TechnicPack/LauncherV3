@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.logging.Level;
+import java.util.zip.ZipException;
 
 public class ZipUtils {
 
@@ -123,6 +124,16 @@ public class ZipUtils {
         ZipFile zipFile = new ZipFile(zip);
         ArrayList<ZipArchiveEntry> entries = Collections.list(zipFile.getEntries());
         int size = entries.size();
+
+        // Commons Compress doesn't seem to throw exception when ZIP files aren't valid, so we just check if they
+        // have no entries as a means of validating it, and throw a ZipException so the launcher will show the correct
+        // warning message when trying to install/update the modpack, rather than just printing it to console.
+        if (size == 0) {
+            Utils.getLogger().log(Level.SEVERE, "Zip file is empty: " + zip.getAbsolutePath());
+            zipFile.close();
+            throw new ZipException("Zip file is empty: " + zip.getAbsolutePath());
+        }
+
         int progress = 1;
         try {
             for (ZipArchiveEntry entry : entries) {
