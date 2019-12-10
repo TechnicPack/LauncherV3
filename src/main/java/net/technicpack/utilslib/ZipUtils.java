@@ -143,6 +143,14 @@ public class ZipUtils {
                 if (!entry.getName().contains("../") && (fileFilter == null || fileFilter.shouldExtract(entry.getName()))) {
                     File outputFile = new File(output, entry.getName());
 
+                    if (outputFile.exists() && outputFile.isFile() && !outputFile.canWrite()) {
+                        if (outputFile.delete()) {
+                            Utils.getLogger().log(Level.INFO, "Deleted non-writable file " + outputFile.getAbsolutePath());
+                        } else {
+                            throw new IOException("Failed to delete non-writable file " + outputFile.getAbsolutePath());
+                        }
+                    }
+
                     if (outputFile.getParentFile() != null) {
                         outputFile.getParentFile().mkdirs();
                     }
