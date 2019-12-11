@@ -54,28 +54,29 @@ public class NewsWidget extends SelectorWidget implements IImageJobListener<Auth
 
     protected void initComponents() {
         super.initComponents();
-        setBorder(BorderFactory.createEmptyBorder(8,10,8,8));
+        setBorder(BorderFactory.createEmptyBorder(8,10,8,15));
 
         avatarView = new JLabel();
         add(avatarView);
 
-        add(Box.createHorizontalStrut(14));
+        add(Box.createHorizontalStrut(10));
 
         JLabel text = new JLabel(article.getTitle());
         text.setFont(getResources().getFont(ResourceLoader.FONT_OPENSANS, 14));
         text.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        text.setPreferredSize(new Dimension(180, text.getPreferredSize().height));
+        text.setPreferredSize(new Dimension(200, text.getPreferredSize().height));
         add(text);
 
         add(Box.createHorizontalGlue());
+        add(Box.createHorizontalStrut(5));
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(article.getDate());
 
         DateFormat format = DateFormat.getDateInstance(DateFormat.SHORT);
         JLabel date = new JLabel(format.format(article.getDate()));
-        date.setFont(getResources().getFont(ResourceLoader.FONT_OPENSANS, 14));
-        date.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        date.setFont(getResources().getFont(ResourceLoader.FONT_OPENSANS, 12));
+        date.setForeground(LauncherFrame.COLOR_DIM_TEXT);
         add(date);
     }
 
