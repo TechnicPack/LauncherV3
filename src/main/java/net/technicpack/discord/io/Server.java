@@ -12,6 +12,7 @@ public class Server extends RestObject {
     private String instant_invite;
     private List<MemberInfo> members;
     private List<ChannelInfo> channels;
+    private int presence_count;
 
     public String getId() { return this.id; }
     public String getName() { return this.name; }
@@ -31,4 +32,5 @@ public class Server extends RestObject {
     public MemberInfo getMember(int index) {
         return members.get(index);
     }
+    public int getPresenceCount() { return presence_count; }
 }
