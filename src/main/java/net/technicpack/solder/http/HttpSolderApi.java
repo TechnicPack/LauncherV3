@@ -55,7 +55,7 @@ public class HttpSolderApi implements ISolderApi {
 
     public String getMirrorUrl(String solderRoot) throws RestfulAPIException {
         if (!mirrorUrls.containsKey(solderRoot)) {
-            String allPacksUrl = solderRoot + "modpack/";
+            String allPacksUrl = solderRoot + "modpack";
             Solder solder = RestObject.getRestObject(Solder.class, allPacksUrl);
             mirrorUrls.put(solderRoot, solder.getMirrorUrl());
         }
@@ -66,7 +66,7 @@ public class HttpSolderApi implements ISolderApi {
     @Override
     public Collection<SolderPackInfo> internalGetPublicSolderPacks(String solderRoot, ISolderApi packFactory) throws RestfulAPIException {
         LinkedList<SolderPackInfo> allPackApis = new LinkedList<SolderPackInfo>();
-        String allPacksUrl = solderRoot + "modpack/?include=full&cid=" + clientId;
+        String allPacksUrl = solderRoot + "modpack?include=full&cid=" + clientId;
 
         FullModpacks technic = RestObject.getRestObject(FullModpacks.class, allPacksUrl);
         for (SolderPackInfo info : technic.getModpacks().values()) {
