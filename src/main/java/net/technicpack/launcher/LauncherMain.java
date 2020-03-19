@@ -92,7 +92,6 @@ import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
-import sun.misc.ClassLoaderUtil;
 
 import javax.swing.*;
 import java.awt.*;

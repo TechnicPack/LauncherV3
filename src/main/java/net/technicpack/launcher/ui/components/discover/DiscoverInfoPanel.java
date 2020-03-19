@@ -45,7 +45,6 @@ import org.xhtmlrenderer.swing.SwingReplacedElementFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-import sun.misc.Launcher;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
