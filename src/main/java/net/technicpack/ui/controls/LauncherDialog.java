@@ -19,7 +19,6 @@
 
 package net.technicpack.ui.controls;
 
-import com.sun.awt.AWTUtilities;
 import net.technicpack.ui.controls.borders.DropShadowBorder;
 
 import javax.swing.*;
@@ -35,7 +34,7 @@ public class LauncherDialog extends JDialog {
         setUndecorated(true);
 
         try {
-            AWTUtilities.setWindowOpaque(this, false);
+            this.setBackground(new Color(0, 0, 0, 0));
             getRootPane().setBorder(new DropShadowBorder(Color.black, 4));
         } catch (IllegalArgumentException ex) {
             //OS doesn't support translucent windows- dumb dumb dumb

@@ -19,7 +19,6 @@
 
 package net.technicpack.ui.controls.installation;
 
-import com.sun.awt.AWTUtilities;
 import net.technicpack.utilslib.Utils;
 
 import javax.swing.*;
@@ -80,12 +79,12 @@ public class SplashScreen extends JFrame {
         // Finalize
         this.getRootPane().setOpaque(false);
         try {
-            // Not always supported...
-            AWTUtilities.setWindowOpaque(this, false);
-        } catch (UnsupportedOperationException e) {
+            // Try to set a transparent background, but it isn't always supported
+            this.setBackground(new Color(0, 0, 0, 0));
+        } catch (UnsupportedOperationException ex) {
             this.setBackground(new Color(0, 0, 0));
         } catch (IllegalArgumentException ex) {
-            Utils.getLogger().warning("Your desktop environment does not support translucent windows.  Technic launcher will not look as rad for you.");
+            Utils.getLogger().warning("Your desktop environment does not support translucent windows. Technic Launcher will not look as rad for you.");
         }
     }
 
