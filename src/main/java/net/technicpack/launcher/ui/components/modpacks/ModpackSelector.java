@@ -503,9 +503,9 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         currentSearchTimer = new Timer(500, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String localSearchTag = searchText;
+                String localSearchTag = searchText.trim();
 
-                String localSearchUrl = searchText;
+                String localSearchUrl = searchText.trim();
                 if (!localSearchUrl.startsWith("http://") && !localSearchUrl.startsWith("https://"))
                     localSearchUrl = "http://" + localSearchTag;
 
