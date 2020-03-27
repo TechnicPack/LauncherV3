@@ -45,7 +45,7 @@ public class CrafatarFaceImageStore implements IImageStore<IUserType> {
     @Override
     public void downloadImage(IUserType user, File location) {
         try {
-            mirrorStore.downloadFile(mBaseUrl + "avatars/" + user.getId() + "?size=100&helm", user.getDisplayName(), location.getAbsolutePath());
+            mirrorStore.downloadFile(mBaseUrl + "avatars/" + user.getId() + "?size=100&overlay", user.getDisplayName(), location.getAbsolutePath());
         } catch (InterruptedException ex) {
             //User cancelled
         } catch (IOException e) {
