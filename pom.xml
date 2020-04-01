@@ -363,7 +363,6 @@
                                         <preCp>anything</preCp>
                                     </classPath>
                                     <jre>
-                                        <minVersion>1.8.0</minVersion>
                                         <opts>
                                             <opt>-Djava.net.preferIPv4Stack=true</opt>
                                             <opt>-Dawt.useSystemAAFontSettings=lcd</opt>
