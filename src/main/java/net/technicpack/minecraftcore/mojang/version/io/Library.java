@@ -19,6 +19,7 @@
 
 package net.technicpack.minecraftcore.mojang.version.io;
 
+import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
@@ -126,7 +127,7 @@ public class Library {
         return SUBSTITUTOR.replace(result);
     }
 
-    public String getDownloadUrl(String path, MirrorStore mirrorStore) {
+    public String getDownloadUrl(String path, MirrorStore mirrorStore) throws DownloadException {
         if (this.url != null) {
             String checkUrl = url + path;
             if (Utils.pingHttpURL(checkUrl, mirrorStore)) {
@@ -140,7 +141,8 @@ public class Library {
                 return checkUrl;
             }
         }
-        return "https://libraries.minecraft.net/" + path;
+
+        throw new DownloadException("Failed to download library " + path + ": no mirror found");
     }
 
 }
