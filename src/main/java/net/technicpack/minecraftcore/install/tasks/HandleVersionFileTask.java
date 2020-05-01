@@ -108,7 +108,6 @@ public class HandleVersionFileTask implements IInstallTask {
             }
             Library forgeWrapper = new Library();
             forgeWrapper.setName("io.github.zekerzhayard:ForgeWrapper:1.4.1");
-            forgeWrapper.setUrl("https://phit.link/maven/");
 
             version.addLibrary(forgeWrapper);
 
