@@ -210,7 +210,7 @@ public class MinecraftLauncher {
         commands.addUnique("-cp", cpString);
         commands.addRaw(version.getMainClass());
         for (String arg : version.getMinecraftArguments().resolve(launchOpts, paramDereferencer)) {
-            commands.add(arg);
+            commands.addUnique(arg);
         }
         options.appendToCommands(commands);
 
@@ -221,15 +221,6 @@ public class MinecraftLauncher {
     private String buildClassPath(ModpackModel pack, MojangVersion version) {
         StringBuilder result = new StringBuilder();
         String separator = System.getProperty("path.separator");
-
-        // Add the modpack.jar to the classpath, if it exists and minecraftforge is not a library already
-        File modpack = new File(pack.getBinDir(), "modpack.jar");
-        if (modpack.exists()) {
-            if (result.length() > 1) {
-                result.append(separator);
-            }
-            result.append(modpack.getAbsolutePath());
-        }
 
         // if MC < 1.6, we inject LegacyWrapper
         // HACK
@@ -245,7 +236,7 @@ public class MinecraftLauncher {
             // HACK - Please let us get rid of this when we move to actually hosting forge,
             // or at least only do it if the users are sticking with modpack.jar
             if (library.getName().startsWith("net.minecraftforge:minecraftforge") ||
-                    library.getName().startsWith("net.minecraftforge:forge")) {
+                    (library.getName().startsWith("net.minecraftforge:forge:") && !library.getName().endsWith("launcher"))) {
                 continue;
             }
 
@@ -262,6 +253,17 @@ public class MinecraftLauncher {
                 result.append(separator);
             }
             result.append(file.getAbsolutePath());
+        }
+
+        // Add the modpack.jar to the classpath, if it exists and minecraftforge is not a library already
+        if (!(MojangUtils.needsForgeWrapper(version))) {
+            File modpack = new File(pack.getBinDir(), "modpack.jar");
+            if (modpack.exists()) {
+                if (result.length() > 1) {
+                    result.append(separator);
+                }
+                result.append(modpack.getAbsolutePath());
+            }
         }
 
         // Add the minecraft jar to the classpath

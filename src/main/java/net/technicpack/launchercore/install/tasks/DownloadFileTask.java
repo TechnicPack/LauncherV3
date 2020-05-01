@@ -22,9 +22,11 @@ package net.technicpack.launchercore.install.tasks;
 import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
+import net.technicpack.utilslib.Utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class DownloadFileTask extends ListenerTask {
     private String url;

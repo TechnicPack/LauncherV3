@@ -80,7 +80,7 @@ public class Utils {
 
             int responseCode = conn.getResponseCode();
             int responseFamily = responseCode / 100;
-
+            //System.out.println(responseCode + " " + urlLoc);
             if (responseFamily == 3) {
                 String newUrl = conn.getHeaderField("Location");
                 URL redirectUrl = null;

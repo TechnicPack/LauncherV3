@@ -23,6 +23,7 @@ import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.text.StringSubstitutor;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 
 import java.util.List;
 import java.util.Map;
@@ -30,9 +31,15 @@ import java.util.Map;
 public class Library {
 
     private static final StringSubstitutor SUBSTITUTOR = new StringSubstitutor();
-    private static final String[] fallback = { "http://mirror.technicpack.net/Technic/lib/", "https://search.maven.org/remotecontent?filepath=" };
+    private static final String[] fallback = {
+        "http://mirror.technicpack.net/Technic/lib/",
+        "https://libraries.minecraft.net/",
+        "https://files.minecraftforge.net/maven/",
+        "https://search.maven.org/remotecontent?filepath="
+    };
     private String name;
     private List<Rule> rules;
+    private Downloads downloads;
     private Map<OperatingSystem, String> natives;
     private ExtractRules extract;
     private String url;
@@ -88,7 +95,12 @@ public class Library {
             throw new IllegalStateException("Cannot get artifact dir of empty/blank artifact");
         }
         String[] parts = this.name.split(":", 3);
-        return String.format("%s/%s/%s", parts[0].replaceAll("\\.", "/"), parts[1], parts[2]);
+        String version = parts[2].replace("-installer", "").replace("-shadowed", "")
+                .replace("-service", "").replace("-launcher", "").replace("-universal", "");
+        if (version.contains("@")) {
+            version = version.split("@", 2)[0];
+        }
+        return String.format("%s/%s/%s", parts[0].replaceAll("\\.", "/"), parts[1], version);
     }
 
     public String getArtifactFilename(String classifier) {
@@ -102,7 +114,13 @@ public class Library {
         if (classifier != null) {
             result = String.format("%s-%s%s.jar", parts[1], parts[2], "-" + classifier);
         } else {
-            result = String.format("%s-%s%s.jar", parts[1], parts[2], "");
+            if (parts[2].contains("@")) {
+                String[] split = parts[2].split("@", 2);
+                result = String.format("%s-%s%s.%s", parts[1], split[0], "", split[1]);
+            } else {
+                result = String.format("%s-%s%s.jar", parts[1], parts[2], "");
+            }
+
         }
 
         return SUBSTITUTOR.replace(result);
@@ -114,11 +132,12 @@ public class Library {
             if (Utils.pingHttpURL(checkUrl, mirrorStore)) {
                 return checkUrl;
             }
-            for (String string : fallback) {
-                checkUrl = string + path;
-                if (Utils.pingHttpURL(checkUrl, mirrorStore)) {
-                    return checkUrl;
-                }
+
+        }
+        for (String string : fallback) {
+            String checkUrl = string + path;
+            if (Utils.pingHttpURL(checkUrl, mirrorStore)) {
+                return checkUrl;
             }
         }
         return "https://libraries.minecraft.net/" + path;

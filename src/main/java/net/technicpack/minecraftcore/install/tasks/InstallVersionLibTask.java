@@ -49,8 +49,6 @@ public class InstallVersionLibTask extends ListenerTask {
         if (library.getUrl() != null && mavenConnector.attemptLibraryDownload(library.getName(), library.getUrl(), this))
             return;
 
-        String[] nameBits = library.getName().split(":", 3);
-        String libraryName = nameBits[1] + "-" + nameBits[2] + ".jar";
         queue.refreshProgress();
 
         String natives = null;

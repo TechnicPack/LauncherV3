@@ -21,6 +21,7 @@ package net.technicpack.minecraftcore.mojang.version.chain;
 
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.*;
+import net.technicpack.minecraftcore.mojang.version.io.argument.Argument;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 
 import java.util.Date;
@@ -73,12 +74,17 @@ public class VersionChain implements MojangVersion {
 
     @Override
     public ArgumentList getMinecraftArguments() {
+        ArgumentList.Builder allArguments = new ArgumentList.Builder();
+
         for (MojangVersion version : chain) {
-            if (version.getMinecraftArguments() != null)
-                return version.getMinecraftArguments();
+            if (version.getMinecraftArguments() != null) {
+                for (Argument arg : version.getMinecraftArguments().getArguments()) {
+                    allArguments.addArgument(arg);
+                }
+            }
         }
 
-        return null;
+        return allArguments.build();
     }
 
     @Override
