@@ -90,7 +90,6 @@ public class TechnicRelauncher extends Relauncher {
         UserModel userModel = new UserModel(users, new AuthenticationService());
         MirrorStore mirrorStore = new MirrorStore(userModel);
         mirrorStore.addSecureMirror("mirror.technicpack.net", new JsonWebSecureMirror("http://mirror.technicpack.net/", "mirror.technicpack.net"));
-        mirrorStore.addSecureMirror("files.minecraftforge.net", new JsonWebSecureMirror("https://files.minecraftforge.net/maven/", "files.minecraftforge.net"));
         return mirrorStore;
     }
 

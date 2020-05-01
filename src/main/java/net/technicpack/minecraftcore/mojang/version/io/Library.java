@@ -31,10 +31,12 @@ import java.util.Map;
 public class Library {
 
     private static final StringSubstitutor SUBSTITUTOR = new StringSubstitutor();
-    private static final String[] fallback = { "https://libraries.minecraft.net/", "https://files.minecraftforge.net/maven/", "http://mirror"
-            + ".technicpack.net/Technic/lib/", "https"
-            + "://search.maven"
-            + ".org/remotecontent?filepath=" };
+    private static final String[] fallback = {
+        "http://mirror.technicpack.net/Technic/lib/",
+        "https://libraries.minecraft.net/",
+        "https://files.minecraftforge.net/maven/",
+        "https://search.maven.org/remotecontent?filepath="
+    };
     private String name;
     private List<Rule> rules;
     private Downloads downloads;
