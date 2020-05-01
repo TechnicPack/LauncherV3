@@ -33,13 +33,6 @@ public class GameProcess {
         this.commands = commands;
         this.process = process;
 
-        String commandText = "";
-
-        for (String command : commands) {
-            commandText += command + " ";
-        }
-        Utils.getLogger().info(commandText);
-
         this.monitorThread = new ProcessMonitorThread(this);
         this.monitorThread.start();
     }

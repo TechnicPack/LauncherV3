@@ -83,7 +83,7 @@ public class MinecraftLauncher {
             full.append(part);
             first = false;
         }
-        Utils.getLogger().info("Running " + full.toString());
+        Utils.getLogger().info("Running " + full.toString().replace(userModel.getCurrentUser().getAccessToken(), "redacted"));
         ProcessBuilder processBuilder = new ProcessBuilder(commands).directory(pack.getInstalledDirectory()).redirectErrorStream(true);
         Map<String, String> envVars = processBuilder.environment();
         for (String badVar : BAD_ENV_VARS) envVars.remove(badVar);
