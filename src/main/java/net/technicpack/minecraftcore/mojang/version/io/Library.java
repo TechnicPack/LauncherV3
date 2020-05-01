@@ -93,7 +93,8 @@ public class Library {
             throw new IllegalStateException("Cannot get artifact dir of empty/blank artifact");
         }
         String[] parts = this.name.split(":", 3);
-        String version = parts[2].replace("-installer", "").replace("-shadowed", "").replace("-service", "");
+        String version = parts[2].replace("-installer", "").replace("-shadowed", "")
+                .replace("-service", "").replace("-launcher", "").replace("-universal", "");
         if (version.contains("@")) {
             version = version.split("@", 2)[0];
         }

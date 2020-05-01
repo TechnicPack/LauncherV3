@@ -56,8 +56,6 @@ public class DownloadFileTask extends ListenerTask {
     public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
         super.runTask(queue);
 
-        System.out.println(url);
-        Utils.getLogger().info(Arrays.toString(Thread.currentThread().getStackTrace()));
         queue.getMirrorStore().downloadFile(url, this.destination.getName(), this.destination.getAbsolutePath(), null, fileVerifier, this);
 
         if (!this.destination.exists()) {

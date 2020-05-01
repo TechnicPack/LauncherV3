@@ -23,11 +23,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.technicpack.launchercore.install.Version;
+import net.technicpack.minecraftcore.install.tasks.InstallVersionLibTask;
 import net.technicpack.minecraftcore.mojang.auth.io.UserProperties;
 import net.technicpack.minecraftcore.mojang.auth.io.UserPropertiesAdapter;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
 import net.technicpack.minecraftcore.mojang.version.io.CompleteVersionV21;
+import net.technicpack.minecraftcore.mojang.version.io.Library;
 import net.technicpack.minecraftcore.mojang.version.io.Rule;
 import net.technicpack.minecraftcore.mojang.version.io.RuleAdapter;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
@@ -167,9 +170,23 @@ public class MojangUtils {
         return Integer.valueOf(versionParts[0]) == 1 && Integer.valueOf(versionParts[1]) < 6;
     }
 
+    public static boolean needsForgeWrapper(MojangVersion version) {
+        if (isNewVersion(version.getId())) {
+            boolean foundForge = false;
+            for (Library library : version.getLibrariesForOS()) {
+                if (library.getName().startsWith("net.minecraftforge:forge")) {
+                    foundForge = true;
+                    break;
+                }
+            }
+            return foundForge;
+        } else {
+            return false;
+        }
+    }
+
     public static boolean isNewVersion(String version) {
         final String[] versionParts = version.split("[.-]", 3);
-
-        return Integer.valueOf(versionParts[0]) == 1 && Integer.valueOf(versionParts[1]) > 12;
+        return Integer.parseInt(versionParts[0]) == 1 && Integer.parseInt(versionParts[1]) > 12;
     }
 }

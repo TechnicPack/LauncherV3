@@ -83,7 +83,7 @@ public class HandleVersionFileTask implements IInstallTask {
         // if MC < 1.6, we inject LegacyWrapper
         // HACK
         boolean isLegacy = MojangUtils.isLegacyVersion(version.getId());
-        boolean needsWrapper = MojangUtils.isNewVersion(version.getId());
+        boolean needsWrapper = MojangUtils.needsForgeWrapper(version);
 
         if (isLegacy) {
             Library legacyWrapper = new Library();
@@ -108,17 +108,24 @@ public class HandleVersionFileTask implements IInstallTask {
             }
             Library forgeWrapper = new Library();
             forgeWrapper.setName("io.github.zekerzhayard:ForgeWrapper:1.4.1");
-            forgeWrapper.setUrl("https://files.multimc.org/maven/");
+            forgeWrapper.setUrl("https://phit.link/maven/");
 
             version.addLibrary(forgeWrapper);
 
             for (Library library : version.getLibrariesForOS()) {
                 if (library.getName().startsWith("net.minecraftforge:forge:")) {
-                    Library forgeInstaller = new Library();
-                    forgeInstaller.setName(library.getName() + "-installer");
-                    forgeInstaller.setUrl("https://files.minecraftforge.net/maven/");
+                    Library forgeLauncher = new Library();
+                    forgeLauncher.setName(library.getName() + "-launcher");
+                    forgeLauncher.setUrl("https://files.minecraftforge.net/maven/");
 
-                    version.addLibrary(forgeInstaller);
+                    version.addLibrary(forgeLauncher);
+                    checkLibraryQueue.addTask(new InstallVersionLibTask(forgeLauncher, mavenConnector, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
+
+                    Library forgeUniversal = new Library();
+                    forgeUniversal.setName(library.getName() + "-universal");
+                    forgeUniversal.setUrl("https://files.minecraftforge.net/maven/");
+
+                    checkLibraryQueue.addTask(new InstallVersionLibTask(forgeUniversal, mavenConnector, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
                     break;
                 }
             }
@@ -131,7 +138,7 @@ public class HandleVersionFileTask implements IInstallTask {
             // HACK - Please let us get rid of this when we move to actually hosting forge,
             // or at least only do it if the users are sticking with modpack.jar
             if (library.getName().startsWith("net.minecraftforge:minecraftforge") ||
-                    (library.getName().startsWith("net.minecraftforge:forge") && !library.getName().endsWith("-installer"))) {
+                    (library.getName().startsWith("net.minecraftforge:forge:"))) {
                 continue;
             }
 

@@ -319,7 +319,6 @@ public class Installer {
         }
 
         if (MojangUtils.isNewVersion(minecraft)) {
-            Utils.getLogger().info("doit!");
             File versionFile = new File(modpack.getBinDir(), "install_profile.json");
             if (versionFile.exists()) {
                 if (!versionFile.delete()) {

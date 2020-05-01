@@ -36,7 +36,6 @@ public class ChainVersionBuilder implements MojangVersionBuilder {
     }
 
     public MojangVersion buildVersionFromKey(String key) throws InterruptedException, IOException {
-        Utils.getLogger().info(key);
         MojangVersion primary = primaryVersionBuilder.buildVersionFromKey(key);
 
         if (primary == null)
