@@ -327,6 +327,8 @@ public class LauncherMain {
 
         MirrorStore mirrorStore = new MirrorStore(userModel);
         mirrorStore.addSecureMirror("mirror.technicpack.net", new JsonWebSecureMirror("http://mirror.technicpack.net/", "mirror.technicpack.net"));
+        mirrorStore.addSecureMirror("libraries.minecraft.net", new JsonWebSecureMirror("https://libraries.minecraft.net/", "libraries.minecraft.net"));
+        mirrorStore.addSecureMirror("files.minecraftforge.net", new JsonWebSecureMirror("https://files.minecraftforge.net/maven/", "files.minecraftforge.net"));
 
         IModpackResourceType iconType = new IconResourceType();
         IModpackResourceType logoType = new LogoResourceType();

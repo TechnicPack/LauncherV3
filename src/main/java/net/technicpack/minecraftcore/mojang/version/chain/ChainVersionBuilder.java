@@ -21,6 +21,7 @@ package net.technicpack.minecraftcore.mojang.version.chain;
 
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
+import net.technicpack.utilslib.Utils;
 
 import java.io.IOException;
 
@@ -35,6 +36,7 @@ public class ChainVersionBuilder implements MojangVersionBuilder {
     }
 
     public MojangVersion buildVersionFromKey(String key) throws InterruptedException, IOException {
+        Utils.getLogger().info(key);
         MojangVersion primary = primaryVersionBuilder.buildVersionFromKey(key);
 
         if (primary == null)

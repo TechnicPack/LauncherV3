@@ -79,6 +79,10 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask {
 		}
 
 		MojangUtils.copyMinecraftJar(cache, new File(this.pack.getBinDir(), "minecraft.jar"));
+//		File target = new File(cacheDirectory,
+//				"com" + File.separator + "mojang" + File.separator + "minecraft" + File.separator + this.minecraftVersion);
+//		target.mkdirs();
+//		MojangUtils.copyMinecraftJar(cache, new File(target, File.separator + "minecraft-" + this.minecraftVersion + "-client.jar"));
 	}
 
 }

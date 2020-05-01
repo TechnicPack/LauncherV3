@@ -237,6 +237,12 @@ public class MinecraftLauncher {
 
         // Add all the libraries to the classpath.
         for (Library library : version.getLibrariesForOS()) {
+//            String[] thisIsFine = library.getName().split(":", 3);
+//            String ok = thisIsFine[0].replaceAll("\\.", Matcher.quoteReplacement(File.separator)) + File.separator + thisIsFine[1];
+//            Utils.getLogger().info(ok);
+//            if (result.toString().contains(ok)) {
+//                continue;
+//            }
             if (library.getNatives() != null) {
                 continue;
             }
@@ -245,7 +251,8 @@ public class MinecraftLauncher {
             // HACK - Please let us get rid of this when we move to actually hosting forge,
             // or at least only do it if the users are sticking with modpack.jar
             if (library.getName().startsWith("net.minecraftforge:minecraftforge") ||
-                    library.getName().startsWith("net.minecraftforge:forge")) {
+                    library.getName().startsWith("net.minecraftforge:forge:")
+            || library.getName().startsWith("net.minecraftforge:forgespi")) {
                 continue;
             }
 
@@ -262,6 +269,7 @@ public class MinecraftLauncher {
                 result.append(separator);
             }
             result.append(file.getAbsolutePath());
+            Utils.getLogger().info(file.getAbsolutePath());
         }
 
         // Add the minecraft jar to the classpath

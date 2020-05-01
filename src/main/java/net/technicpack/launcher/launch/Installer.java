@@ -44,6 +44,7 @@ import net.technicpack.launchercore.modpacks.RunData;
 import net.technicpack.launchercore.modpacks.resources.PackResourceMapper;
 import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.launchercore.util.LaunchAction;
+import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.install.tasks.*;
 import net.technicpack.minecraftcore.launch.LaunchOptions;
 import net.technicpack.minecraftcore.launch.MinecraftLauncher;
@@ -315,6 +316,16 @@ public class Installer {
             verifyingFiles.addTask(new EnsureFileTask(new File(directories.getCacheDirectory(), "fml_libs15.zip"), new ValidZipFileVerifier(), new File(modpack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs15.zip", installingLibs, installingLibs));
         } else if (minecraft.startsWith("1.4")) {
             verifyingFiles.addTask(new EnsureFileTask(new File(directories.getCacheDirectory(), "fml_libs.zip"), new ValidZipFileVerifier(), new File(modpack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs.zip", installingLibs, installingLibs));
+        }
+
+        if (MojangUtils.isNewVersion(minecraft)) {
+            Utils.getLogger().info("doit!");
+            File versionFile = new File(modpack.getBinDir(), "install_profile.json");
+            if (versionFile.exists()) {
+                if (!versionFile.delete()) {
+                    throw new CacheDeleteException(versionFile.getAbsolutePath());
+                }
+            }
         }
 
         if (doFullInstall) {

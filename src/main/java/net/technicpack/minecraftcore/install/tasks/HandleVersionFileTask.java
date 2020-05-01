@@ -28,9 +28,12 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
+import net.technicpack.minecraftcore.mojang.version.builder.FileVersionBuilder;
+import net.technicpack.minecraftcore.mojang.version.builder.retrievers.ZipFileRetriever;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
 import net.technicpack.utilslib.maven.MavenConnector;
 
+import java.io.File;
 import java.io.IOException;
 
 public class HandleVersionFileTask implements IInstallTask {
@@ -80,6 +83,7 @@ public class HandleVersionFileTask implements IInstallTask {
         // if MC < 1.6, we inject LegacyWrapper
         // HACK
         boolean isLegacy = MojangUtils.isLegacyVersion(version.getId());
+        boolean needsWrapper = MojangUtils.isNewVersion(version.getId());
 
         if (isLegacy) {
             Library legacyWrapper = new Library();
@@ -91,12 +95,43 @@ public class HandleVersionFileTask implements IInstallTask {
             version.setMainClass("net.technicpack.legacywrapper.Launch");
         }
 
+        if (needsWrapper) {
+
+            File profileJson = new File(pack.getBinDir(), "install_profile.json");
+            ZipFileRetriever zipVersionRetriever = new ZipFileRetriever(new File(pack.getBinDir(), "modpack.jar"));
+            MojangVersion profileVersion = new FileVersionBuilder(profileJson, zipVersionRetriever, null).buildVersionFromKey("install_profile");
+            for (Library library : profileVersion.getLibrariesForOS()) {
+                if (library.getName().startsWith("net.minecraftforge:forge") && library.getName().endsWith(":universal")) {
+                    continue;
+                }
+                checkLibraryQueue.addTask(new InstallVersionLibTask(library, mavenConnector, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
+            }
+            Library forgeWrapper = new Library();
+            forgeWrapper.setName("io.github.zekerzhayard:ForgeWrapper:1.4.1");
+            forgeWrapper.setUrl("https://files.multimc.org/maven/");
+
+            version.addLibrary(forgeWrapper);
+
+            for (Library library : version.getLibrariesForOS()) {
+                if (library.getName().startsWith("net.minecraftforge:forge:")) {
+                    Library forgeInstaller = new Library();
+                    forgeInstaller.setName(library.getName() + "-installer");
+                    forgeInstaller.setUrl("https://files.minecraftforge.net/maven/");
+
+                    version.addLibrary(forgeInstaller);
+                    break;
+                }
+            }
+
+            version.setMainClass("io.github.zekerzhayard.forgewrapper.installer.Main");
+        }
+
         for (Library library : version.getLibrariesForOS()) {
             // If minecraftforge is described in the libraries, skip it
             // HACK - Please let us get rid of this when we move to actually hosting forge,
             // or at least only do it if the users are sticking with modpack.jar
             if (library.getName().startsWith("net.minecraftforge:minecraftforge") ||
-                    library.getName().startsWith("net.minecraftforge:forge")) {
+                    (library.getName().startsWith("net.minecraftforge:forge") && !library.getName().endsWith("-installer"))) {
                 continue;
             }
 
