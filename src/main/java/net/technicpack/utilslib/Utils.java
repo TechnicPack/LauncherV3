@@ -77,6 +77,7 @@ public class Utils {
         try {
             final URL url = mirrorStore.getFullUrl(urlLoc);
             HttpURLConnection conn = openHttpConnection(url);
+            conn.setRequestMethod("HEAD");
 
             int responseCode = conn.getResponseCode();
             int responseFamily = responseCode / 100;
