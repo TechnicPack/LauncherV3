@@ -318,12 +318,12 @@ public class Installer {
             verifyingFiles.addTask(new EnsureFileTask(new File(directories.getCacheDirectory(), "fml_libs.zip"), new ValidZipFileVerifier(), new File(modpack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs.zip", installingLibs, installingLibs));
         }
 
-        if (MojangUtils.isNewVersion(minecraft)) {
-            File versionFile = new File(modpack.getBinDir(), "install_profile.json");
-            if (versionFile.exists()) {
-                if (!versionFile.delete()) {
-                    throw new CacheDeleteException(versionFile.getAbsolutePath());
-                }
+        // Remove bin/install_profile.json, which is used by ForgeWrapper to install Forge in Minecraft 1.13+
+        // (and the latest few Forge builds in 1.12.2)
+        File installProfileFile = new File(modpack.getBinDir(), "install_profile.json");
+        if (installProfileFile.exists()) {
+            if (!installProfileFile.delete()) {
+                throw new CacheDeleteException(installProfileFile.getAbsolutePath());
             }
         }
 
