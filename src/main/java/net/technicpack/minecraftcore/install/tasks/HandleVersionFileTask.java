@@ -107,7 +107,6 @@ public class HandleVersionFileTask implements IInstallTask {
             final boolean is1_12_2 = versionIdParts[0].equals("1.12.2");
 
             for (Library library : profileVersion.getLibrariesForOS()) {
-                System.out.println(library.getName());
                 if (library.getName().startsWith("net.minecraftforge:forge:")) {
                     if (is1_12_2) {
                         library.setName(library.getName() + ":universal");
