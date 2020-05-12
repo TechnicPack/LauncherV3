@@ -83,7 +83,6 @@ public class HandleVersionFileTask implements IInstallTask {
         // if MC < 1.6, we inject LegacyWrapper
         // HACK
         boolean isLegacy = MojangUtils.isLegacyVersion(version.getId());
-        boolean needsWrapper = MojangUtils.needsForgeWrapper(version);
 
         if (isLegacy) {
             Library legacyWrapper = new Library();
@@ -95,41 +94,62 @@ public class HandleVersionFileTask implements IInstallTask {
             version.setMainClass("net.technicpack.legacywrapper.Launch");
         }
 
-        if (needsWrapper) {
+        // For Forge 1.13+ and the latest 1.12.2 builds, there's an installer
+        // Forge 1.13+ needs to use a wrapper
+        final boolean needsWrapper = MojangUtils.needsForgeWrapper(version);
 
+        if (needsWrapper) {
             File profileJson = new File(pack.getBinDir(), "install_profile.json");
             ZipFileRetriever zipVersionRetriever = new ZipFileRetriever(new File(pack.getBinDir(), "modpack.jar"));
             MojangVersion profileVersion = new FileVersionBuilder(profileJson, zipVersionRetriever, null).buildVersionFromKey("install_profile");
+
+            final String[] versionIdParts = version.getId().split("-", 3);
+            final boolean is1_12_2 = versionIdParts[0].equals("1.12.2");
+
             for (Library library : profileVersion.getLibrariesForOS()) {
-                if (library.getName().startsWith("net.minecraftforge:forge") && library.getName().endsWith(":universal")) {
+                System.out.println(library.getName());
+                if (library.getName().startsWith("net.minecraftforge:forge:")) {
+                    if (is1_12_2) {
+                        library.setName(library.getName() + ":universal");
+                        library.setUrl("https://files.minecraftforge.net/maven/");
+
+                        // Add the mutated library
+                        version.addLibrary(library);
+
+                        checkLibraryQueue.addTask(new InstallVersionLibTask(library, mavenConnector, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
+                    }
                     continue;
                 }
                 checkLibraryQueue.addTask(new InstallVersionLibTask(library, mavenConnector, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
             }
-            Library forgeWrapper = new Library();
-            forgeWrapper.setName("io.github.zekerzhayard:ForgeWrapper:1.4.1");
 
-            version.addLibrary(forgeWrapper);
+            if (!is1_12_2) {
+                Library forgeWrapper = new Library();
+                forgeWrapper.setName("io.github.zekerzhayard:ForgeWrapper:1.4.1");
 
-            for (Library library : version.getLibrariesForOS()) {
-                if (library.getName().startsWith("net.minecraftforge:forge:")) {
-                    Library forgeLauncher = new Library();
-                    forgeLauncher.setName(library.getName() + "-launcher");
-                    forgeLauncher.setUrl("https://files.minecraftforge.net/maven/");
+                version.addLibrary(forgeWrapper);
 
-                    version.addLibrary(forgeLauncher);
-                    checkLibraryQueue.addTask(new InstallVersionLibTask(forgeLauncher, mavenConnector, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
+                version.setMainClass("io.github.zekerzhayard.forgewrapper.installer.Main");
 
-                    Library forgeUniversal = new Library();
-                    forgeUniversal.setName(library.getName() + "-universal");
-                    forgeUniversal.setUrl("https://files.minecraftforge.net/maven/");
+                for (Library library : version.getLibrariesForOS()) {
+                    if (library.getName().startsWith("net.minecraftforge:forge:")) {
+                        Library forgeLauncher = new Library();
+                        forgeLauncher.setName(library.getName() + "-launcher");
+                        forgeLauncher.setUrl("https://files.minecraftforge.net/maven/");
 
-                    checkLibraryQueue.addTask(new InstallVersionLibTask(forgeUniversal, mavenConnector, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
-                    break;
+                        version.addLibrary(forgeLauncher);
+                        checkLibraryQueue.addTask(new InstallVersionLibTask(forgeLauncher, mavenConnector, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
+
+                        Library forgeUniversal = new Library();
+                        forgeUniversal.setName(library.getName() + "-universal");
+                        forgeUniversal.setUrl("https://files.minecraftforge.net/maven/");
+
+                        checkLibraryQueue.addTask(new InstallVersionLibTask(forgeUniversal, mavenConnector, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
+
+                        break;
+                    }
                 }
             }
-
-            version.setMainClass("io.github.zekerzhayard.forgewrapper.installer.Main");
         }
 
         for (Library library : version.getLibrariesForOS()) {

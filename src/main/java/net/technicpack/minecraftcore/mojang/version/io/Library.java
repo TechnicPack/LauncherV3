@@ -95,7 +95,7 @@ public class Library {
         if (this.name == null) {
             throw new IllegalStateException("Cannot get artifact dir of empty/blank artifact");
         }
-        String[] parts = this.name.split(":", 3);
+        String[] parts = this.name.split(":", 4);
         String version = parts[2].replace("-installer", "").replace("-shadowed", "")
                 .replace("-service", "").replace("-launcher", "").replace("-universal", "");
         if (version.contains("@")) {
@@ -109,7 +109,7 @@ public class Library {
             throw new IllegalStateException("Cannot get artifact filename of empty/blank artifact");
         }
 
-        String[] parts = this.name.split(":", 3);
+        String[] parts = this.name.split(":", 4);
         String result;
 
         if (classifier != null) {
@@ -118,6 +118,8 @@ public class Library {
             if (parts[2].contains("@")) {
                 String[] split = parts[2].split("@", 2);
                 result = String.format("%s-%s%s.%s", parts[1], split[0], "", split[1]);
+            } else if (parts.length > 3) {
+                result = String.format("%s-%s-%s.jar", parts[1], parts[2], parts[3]);
             } else {
                 result = String.format("%s-%s%s.jar", parts[1], parts[2], "");
             }

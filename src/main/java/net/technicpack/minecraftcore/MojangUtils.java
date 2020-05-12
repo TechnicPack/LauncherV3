@@ -23,8 +23,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.technicpack.launchercore.install.Version;
-import net.technicpack.minecraftcore.install.tasks.InstallVersionLibTask;
 import net.technicpack.minecraftcore.mojang.auth.io.UserProperties;
 import net.technicpack.minecraftcore.mojang.auth.io.UserPropertiesAdapter;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
@@ -37,6 +35,7 @@ import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentListAdapter;
 import net.technicpack.utilslib.DateTypeAdapter;
 import net.technicpack.utilslib.LowerCaseEnumTypeAdapterFactory;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -46,6 +45,8 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MojangUtils {
     public static final String baseURL = "https://s3.amazonaws.com/Minecraft.Download/";
@@ -171,22 +172,37 @@ public class MojangUtils {
     }
 
     public static boolean needsForgeWrapper(MojangVersion version) {
-        if (isNewVersion(version.getId())) {
-            boolean foundForge = false;
-            for (Library library : version.getLibrariesForOS()) {
-                if (library.getName().startsWith("net.minecraftforge:forge")) {
-                    foundForge = true;
-                    break;
-                }
+        boolean foundForge = false;
+        for (Library library : version.getLibrariesForOS()) {
+            if (library.getName().startsWith("net.minecraftforge:forge")) {
+                foundForge = true;
+                break;
             }
-            return foundForge;
-        } else {
+        }
+
+        if (!foundForge) {
             return false;
         }
+
+        Pattern p = Pattern.compile("^(?<mc>[0-9.]+)-forge-(?<forge>[0-9.]+)$");
+        Matcher m = p.matcher(version.getId());
+
+        if (!m.matches()) {
+            return false;
+        }
+
+        final ComparableVersion mcVersion = new ComparableVersion(m.group("mc"));
+        final ComparableVersion forgeVersion = new ComparableVersion(m.group("forge"));
+
+        // Needs ForgeWrapper:
+        // Forge for MC 1.13+
+        // Forge for MC 1.12.2, after the version 14.23.5.2847
+        return mcVersion.compareTo(new ComparableVersion("1.13")) >= 0 || (
+                mcVersion.compareTo(new ComparableVersion("1.12.2")) == 0
+                        && forgeVersion.compareTo(new ComparableVersion("14.23.5.2847")) > 0
+        );
     }
 
-    public static boolean isNewVersion(String version) {
-        final String[] versionParts = version.split("[.-]", 3);
-        return Integer.parseInt(versionParts[0]) == 1 && Integer.parseInt(versionParts[1]) > 12;
-    }
+
+
 }
