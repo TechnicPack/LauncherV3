@@ -251,7 +251,6 @@
                                         <exclude>META-INF/NOTICE</exclude>
                                         <exclude>org/eclipse/**</exclude>
                                         <exclude>org/codehaus/**</exclude>
-                                        <exclude>org/apache/maven/**</exclude>
                                         <exclude>org/apache/http/**</exclude>
                                     </excludes>
                                 </filter>
