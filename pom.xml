@@ -249,7 +249,6 @@
                                         <exclude>META-INF/ASL2.0</exclude>
                                         <exclude>META-INF/LICENSE</exclude>
                                         <exclude>META-INF/NOTICE</exclude>
-                                        <exclude>org/codehaus/**</exclude>
                                         <exclude>org/apache/http/**</exclude>
                                     </excludes>
                                 </filter>
