@@ -12,7 +12,6 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.mojang.version.ExtractRulesFileFilter;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
 import net.technicpack.utilslib.IZipFileFilter;
-import net.technicpack.utilslib.maven.MavenConnector;
 import net.technicpack.utilslib.OperatingSystem;
 
 import java.io.File;
@@ -20,16 +19,14 @@ import java.io.IOException;
 
 public class InstallVersionLibTask extends ListenerTask {
     private Library library;
-    private MavenConnector mavenConnector;
     private ITasksQueue grabQueue;
     private ITasksQueue downloadLibraryQueue;
     private ITasksQueue copyLibraryQueue;
     private ModpackModel pack;
     private LauncherDirectories directories;
 
-    public InstallVersionLibTask(Library library, MavenConnector mavenConnector, ITasksQueue grabQueue, ITasksQueue downloadLibraryQueue, ITasksQueue copyLibraryQueue, ModpackModel pack, LauncherDirectories directories) {
+    public InstallVersionLibTask(Library library, ITasksQueue grabQueue, ITasksQueue downloadLibraryQueue, ITasksQueue copyLibraryQueue, ModpackModel pack, LauncherDirectories directories) {
         this.library = library;
-        this.mavenConnector = mavenConnector;
         this.downloadLibraryQueue = downloadLibraryQueue;
         this.copyLibraryQueue = copyLibraryQueue;
         this.grabQueue = grabQueue;
@@ -45,9 +42,6 @@ public class InstallVersionLibTask extends ListenerTask {
     @Override
     public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
         super.runTask(queue);
-
-        if (library.getUrl() != null && mavenConnector.attemptLibraryDownload(library.getName(), library.getUrl(), this))
-            return;
 
         queue.refreshProgress();
 

@@ -31,7 +31,6 @@ import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
 import net.technicpack.minecraftcore.mojang.version.builder.FileVersionBuilder;
 import net.technicpack.minecraftcore.mojang.version.builder.retrievers.ZipFileRetriever;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
-import net.technicpack.utilslib.maven.MavenConnector;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,7 +43,6 @@ public class HandleVersionFileTask implements IInstallTask {
     private final ITasksQueue copyLibraryQueue;
     private final ITasksQueue checkNonMavenLibsQueue;
     private final MojangVersionBuilder versionBuilder;
-    private final MavenConnector mavenConnector;
 
     private String libraryName;
 
@@ -56,7 +54,6 @@ public class HandleVersionFileTask implements IInstallTask {
         this.copyLibraryQueue = copyLibraryQueue;
         this.checkNonMavenLibsQueue = checkNonMavenLibsQueue;
         this.versionBuilder = versionBuilder;
-        this.mavenConnector = new MavenConnector(directories, "forge", "https://files.minecraftforge.net/maven/");
     }
 
     @Override
@@ -115,11 +112,11 @@ public class HandleVersionFileTask implements IInstallTask {
                         // Add the mutated library
                         version.addLibrary(library);
 
-                        checkLibraryQueue.addTask(new InstallVersionLibTask(library, mavenConnector, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
+                        checkLibraryQueue.addTask(new InstallVersionLibTask(library, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
                     }
                     continue;
                 }
-                checkLibraryQueue.addTask(new InstallVersionLibTask(library, mavenConnector, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
+                checkLibraryQueue.addTask(new InstallVersionLibTask(library, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
             }
 
             if (!is1_12_2) {
@@ -137,13 +134,13 @@ public class HandleVersionFileTask implements IInstallTask {
                         forgeLauncher.setUrl("https://files.minecraftforge.net/maven/");
 
                         version.addLibrary(forgeLauncher);
-                        checkLibraryQueue.addTask(new InstallVersionLibTask(forgeLauncher, mavenConnector, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
+                        checkLibraryQueue.addTask(new InstallVersionLibTask(forgeLauncher, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
 
                         Library forgeUniversal = new Library();
                         forgeUniversal.setName(library.getName() + "-universal");
                         forgeUniversal.setUrl("https://files.minecraftforge.net/maven/");
 
-                        checkLibraryQueue.addTask(new InstallVersionLibTask(forgeUniversal, mavenConnector, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
+                        checkLibraryQueue.addTask(new InstallVersionLibTask(forgeUniversal, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
 
                         break;
                     }
@@ -164,7 +161,7 @@ public class HandleVersionFileTask implements IInstallTask {
                 continue;
             }
 
-            checkLibraryQueue.addTask(new InstallVersionLibTask(library, mavenConnector, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
+            checkLibraryQueue.addTask(new InstallVersionLibTask(library, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
         }
 
         queue.setMetadata(version);

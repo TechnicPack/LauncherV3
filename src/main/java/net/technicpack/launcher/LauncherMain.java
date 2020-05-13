@@ -286,36 +286,6 @@ public class LauncherMain {
         splash.setLocationRelativeTo(null);
         splash.setVisible(true);
 
-        boolean loadedAether = false;
-
-        try {
-            if (Class.forName("org.apache.maven.repository.internal.MavenRepositorySystemUtils", false, ClassLoader.getSystemClassLoader()) != null) {
-                loadedAether = true;
-            }
-        } catch (ClassNotFoundException ex) {
-            //Aether is not loaded
-        }
-
-        if (!loadedAether) {
-            File launcherAssets = new File(directories.getAssetsDirectory(), "launcher");
-
-            File aether = new File(launcherAssets, "aether-dep.jar");
-
-            try {
-                Method m = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-                m.setAccessible(true);
-                m.invoke(ClassLoader.getSystemClassLoader(), aether.toURI().toURL());
-            } catch (NoSuchMethodException ex) {
-                ex.printStackTrace();
-            } catch (InvocationTargetException ex) {
-                ex.printStackTrace();
-            } catch (IllegalAccessException ex) {
-                ex.printStackTrace();
-            } catch (MalformedURLException ex) {
-                ex.printStackTrace();
-            }
-        }
-
         JavaVersionRepository javaVersions = new JavaVersionRepository();
         (new InstalledJavaSource()).enumerateVersions(javaVersions);
         FileJavaSource javaVersionFile = FileJavaSource.load(new File(settings.getTechnicRoot(), "javaVersions.json"));

@@ -45,25 +45,21 @@
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
             <version>2.10.6</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.beust</groupId>
             <artifactId>jcommander</artifactId>
             <version>1.78</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.8.6</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.6</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.ccil.cowan.tagsoup</groupId>
@@ -75,37 +71,6 @@
             <groupId>org.xhtmlrenderer</groupId>
             <artifactId>flying-saucer-core</artifactId>
             <version>9.1.20</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.aether</groupId>
-            <artifactId>aether-connector-basic</artifactId>
-            <version>1.1.0</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.aether</groupId>
-            <artifactId>aether-transport-file</artifactId>
-            <version>1.1.0</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.aether</groupId>
-            <artifactId>aether-transport-http</artifactId>
-            <version>1.1.0</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-aether-provider</artifactId>
-            <version>3.3.9</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <!-- Necessary to squelch SLF4J warning introduced by Aether dependency -->
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-nop</artifactId>
-            <version>1.6.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -116,19 +81,21 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
             <version>1.20</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
             <version>1.14</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>23.0</version>
-            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-artifact</artifactId>
+            <version>3.6.3</version>
         </dependency>
     </dependencies>
 
@@ -224,24 +191,6 @@
                                     </includes>
                                 </filter>
                                 <filter>
-                                    <artifact>org.jdom:jdom</artifact>
-                                    <includes>
-                                        <include>org/jdom/**</include>
-                                    </includes>
-                                </filter>
-                                <filter>
-                                    <artifact>rome:rome</artifact>
-                                    <includes>
-                                        <include>com/sun/syndication/**</include>
-                                    </includes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.slf4j:slf4j-nop</artifact>
-                                    <includes>
-                                        <include>**</include>
-                                    </includes>
-                                </filter>
-                                <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
                                         <exclude>META-INF/*.txt</exclude>
@@ -249,7 +198,6 @@
                                         <exclude>META-INF/ASL2.0</exclude>
                                         <exclude>META-INF/LICENSE</exclude>
                                         <exclude>META-INF/NOTICE</exclude>
-                                        <exclude>org/apache/http/**</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
@@ -257,33 +205,6 @@
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jarsigner-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <id>sign</id>
-                        <configuration>
-                            <storetype>pkcs12</storetype>
-                            <keystore>${env.CERT_KEYSTORE}</keystore>
-                            <alias>${env.CERT_ALIAS}</alias>
-                            <storepass>${env.CERT_STOREPASS}</storepass>
-                            <keypass>${env.CERT_KEYPASS}</keypass>
-                            <verbose>true</verbose>
-                        </configuration>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>verify</id>
-                        <goals>
-                            <goal>verify</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -319,7 +240,7 @@
                 </property>
             </activation>
             <properties>
-                <buildNumber>0</buildNumber>
+                <buildNumber>999</buildNumber>
             </properties>
         </profile>
         <profile>
