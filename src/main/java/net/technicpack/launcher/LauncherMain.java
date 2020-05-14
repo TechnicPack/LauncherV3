@@ -338,7 +338,7 @@ public class LauncherMain {
         ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());
         Installer installer = new Installer(startupParameters, mirrorStore, directories, modpackInstaller, launcher, settings, iconMapper);
 
-        IDiscordApi discordApi = new HttpDiscordApi("https://discordapp.com/api/");
+        IDiscordApi discordApi = new HttpDiscordApi("https://discord.com/api/");
         discordApi = new CacheDiscordApi(discordApi, 600, 60);
 
         final LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, selector, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo, platform, directories, packStore, startupParameters, discoverInfoPanel, javaVersions, javaVersionFile, buildNumber, discordApi);
