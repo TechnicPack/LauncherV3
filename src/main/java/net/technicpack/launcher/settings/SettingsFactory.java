@@ -19,13 +19,11 @@
 package net.technicpack.launcher.settings;
 
 import com.google.gson.JsonSyntaxException;
-import net.technicpack.launcher.io.TechnicInstalledPackStore;
 import net.technicpack.launcher.settings.migration.IMigrator;
 import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;
-import net.technicpack.minecraftcore.mojang.auth.io.User;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
@@ -33,7 +31,6 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.LinkedList;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.logging.Level;

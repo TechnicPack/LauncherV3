@@ -28,7 +28,6 @@ import java.io.*;
 import java.nio.channels.ClosedByInterruptException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.zip.ZipException;
 

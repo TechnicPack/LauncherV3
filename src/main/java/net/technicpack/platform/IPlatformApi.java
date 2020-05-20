@@ -21,7 +21,6 @@ package net.technicpack.platform;
 
 import net.technicpack.platform.io.NewsData;
 import net.technicpack.platform.io.PlatformPackInfo;
-import net.technicpack.platform.io.SearchResultsData;
 import net.technicpack.rest.RestfulAPIException;
 
 public interface IPlatformApi {

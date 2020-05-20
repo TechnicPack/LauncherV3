@@ -26,7 +26,6 @@ import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.NewsData;
 import net.technicpack.platform.io.PlatformPackInfo;
-import net.technicpack.platform.io.SearchResultsData;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;

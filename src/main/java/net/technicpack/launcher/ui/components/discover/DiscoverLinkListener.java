@@ -20,7 +20,6 @@ package net.technicpack.launcher.ui.components.discover;
 
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.platform.IPlatformApi;
-import net.technicpack.platform.http.HttpPlatformApi;
 import net.technicpack.utilslib.DesktopUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -33,7 +32,6 @@ import org.xhtmlrenderer.swing.BasicPanel;
 import org.xhtmlrenderer.swing.LinkListener;
 
 import java.awt.*;
-import java.awt.datatransfer.StringSelection;
 import java.util.LinkedList;
 import java.util.List;
 

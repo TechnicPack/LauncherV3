@@ -21,7 +21,6 @@ package net.technicpack.launcher.settings;
 import net.technicpack.launchercore.util.LaunchAction;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.launch.WindowType;
-import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 

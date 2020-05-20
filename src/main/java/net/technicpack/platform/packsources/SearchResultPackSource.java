@@ -20,7 +20,6 @@
 package net.technicpack.platform.packsources;
 
 import net.technicpack.launchercore.modpacks.sources.IPackSource;
-import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.IPlatformSearchApi;
 import net.technicpack.platform.io.SearchResult;
 import net.technicpack.platform.io.SearchResultsData;

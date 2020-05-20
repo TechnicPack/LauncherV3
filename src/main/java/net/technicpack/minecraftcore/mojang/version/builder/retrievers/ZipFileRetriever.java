@@ -19,9 +19,6 @@
 
 package net.technicpack.minecraftcore.mojang.version.builder.retrievers;
 
-import net.technicpack.launchercore.install.verifiers.IFileVerifier;
-import net.technicpack.launchercore.install.verifiers.ValidJsonFileVerifier;
-import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.builder.MojangVersionRetriever;
 import net.technicpack.utilslib.ZipUtils;
 

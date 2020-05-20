@@ -18,7 +18,6 @@
 
 package net.technicpack.launcher.ui.components.modpacks;
 
-import net.technicpack.contrib.romainguy.AbstractFilter;
 import net.technicpack.launcher.ui.controls.modpacks.FindMoreWidget;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserType;

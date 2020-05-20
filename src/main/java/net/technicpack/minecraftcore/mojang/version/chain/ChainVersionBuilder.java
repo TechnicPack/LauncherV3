@@ -21,7 +21,6 @@ package net.technicpack.minecraftcore.mojang.version.chain;
 
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
-import net.technicpack.utilslib.Utils;
 
 import java.io.IOException;
 

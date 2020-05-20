@@ -24,7 +24,6 @@ import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.text.StringSubstitutor;
-import org.apache.maven.artifact.versioning.ComparableVersion;
 
 import java.util.List;
 import java.util.Map;

@@ -24,7 +24,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import net.technicpack.launchercore.TechnicConstants;
-import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;

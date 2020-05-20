@@ -20,12 +20,10 @@
 package net.technicpack.ui.controls.borders;
 
 import net.technicpack.contrib.romainguy.FastBlurFilter;
-import net.technicpack.utilslib.Utils;
 
 import javax.swing.border.AbstractBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.logging.Level;
 
 public class DropShadowBorder extends AbstractBorder {
     private Color color;

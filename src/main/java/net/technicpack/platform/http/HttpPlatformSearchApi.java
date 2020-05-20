@@ -19,7 +19,6 @@
 
 package net.technicpack.platform.http;
 
-import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.platform.IPlatformSearchApi;
 import net.technicpack.platform.io.SearchResultsData;
 import net.technicpack.rest.RestObject;

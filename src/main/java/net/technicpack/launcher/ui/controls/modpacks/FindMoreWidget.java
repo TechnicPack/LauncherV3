@@ -21,7 +21,6 @@ package net.technicpack.launcher.ui.controls.modpacks;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.SelectorWidget;
 import net.technicpack.ui.lang.ResourceLoader;
-import net.technicpack.utilslib.ImageUtils;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

@@ -19,7 +19,6 @@
 
 package net.technicpack.launchercore.install.tasks;
 
-import net.technicpack.launchercore.install.ITasksQueue;
 import net.technicpack.launchercore.install.IWeightedTasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 

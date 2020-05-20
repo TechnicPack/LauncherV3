@@ -20,7 +20,6 @@ package net.technicpack.launcher.io;
 
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launchercore.auth.IUserType;
-import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.launchercore.image.IImageMapper;
 import net.technicpack.launchercore.install.LauncherDirectories;
 

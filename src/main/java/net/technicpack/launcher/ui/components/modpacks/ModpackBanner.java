@@ -36,9 +36,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.font.TextAttribute;
 import java.awt.image.BufferedImage;
-import java.util.Map;
 
 public class ModpackBanner extends JPanel implements IImageJobListener<ModpackModel> {
     private ResourceLoader resources;

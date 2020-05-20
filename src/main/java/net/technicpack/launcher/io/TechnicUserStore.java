@@ -18,7 +18,6 @@
 
 package net.technicpack.launcher.io;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.minecraftcore.MojangUtils;

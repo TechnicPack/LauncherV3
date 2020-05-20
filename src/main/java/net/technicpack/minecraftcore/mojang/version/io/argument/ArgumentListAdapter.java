@@ -5,7 +5,6 @@ import net.technicpack.minecraftcore.mojang.version.io.Rule;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class ArgumentListAdapter implements JsonSerializer<ArgumentList>, JsonDeserializer<ArgumentList> {

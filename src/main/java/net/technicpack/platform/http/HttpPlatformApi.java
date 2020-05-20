@@ -23,13 +23,9 @@ import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.NewsData;
 import net.technicpack.platform.io.PlatformPackInfo;
-import net.technicpack.platform.io.SearchResultsData;
 import net.technicpack.rest.RestObject;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.utilslib.Utils;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 public class HttpPlatformApi implements IPlatformApi {
     private String platformUrl;

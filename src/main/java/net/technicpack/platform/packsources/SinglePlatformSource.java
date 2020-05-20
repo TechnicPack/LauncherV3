@@ -22,9 +22,6 @@ package net.technicpack.platform.packsources;
 import net.technicpack.launchercore.modpacks.sources.IPackSource;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.PlatformPackInfoRepository;
-import net.technicpack.platform.io.PlatformPackInfo;
-import net.technicpack.rest.RestObject;
-import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.solder.ISolderApi;
 

@@ -25,11 +25,9 @@ import net.technicpack.launchercore.modpacks.InstalledPack;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;
-import net.technicpack.minecraftcore.mojang.auth.io.User;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.NewsArticle;
 import net.technicpack.rest.RestfulAPIException;
-import net.technicpack.rest.io.Modpack;
 
 import java.util.LinkedList;
 import java.util.List;

@@ -19,13 +19,11 @@
 
 package net.technicpack.minecraftcore.mojang.auth.response;
 
-import com.google.gson.JsonArray;
 import net.technicpack.launchercore.auth.IAuthResponse;
 import net.technicpack.minecraftcore.mojang.auth.io.Profile;
 import net.technicpack.minecraftcore.mojang.auth.io.User;
 
 import java.util.Arrays;
-import java.util.HashMap;
 
 public class AuthResponse extends Response implements IAuthResponse {
     private String accessToken;

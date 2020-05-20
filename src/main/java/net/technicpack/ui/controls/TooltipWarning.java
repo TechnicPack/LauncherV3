@@ -19,10 +19,7 @@
 
 package net.technicpack.ui.controls;
 
-import net.technicpack.ui.lang.ResourceLoader;
-
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import javax.swing.plaf.metal.MetalToolTipUI;
 import java.awt.*;
 

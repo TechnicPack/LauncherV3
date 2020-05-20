@@ -28,7 +28,6 @@ import net.technicpack.minecraftcore.mojang.auth.io.Agent;
 import net.technicpack.minecraftcore.mojang.auth.request.AuthRequest;
 import net.technicpack.minecraftcore.mojang.auth.request.RefreshRequest;
 import net.technicpack.minecraftcore.mojang.auth.response.AuthResponse;
-import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.IOUtils;
 
 import java.io.DataOutputStream;

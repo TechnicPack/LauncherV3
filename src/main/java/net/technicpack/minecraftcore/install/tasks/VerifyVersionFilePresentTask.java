@@ -21,18 +21,11 @@ package net.technicpack.minecraftcore.install.tasks;
 
 import net.technicpack.launchercore.exception.PackNotAvailableOfflineException;
 import net.technicpack.launchercore.install.InstallTasksQueue;
-import net.technicpack.launchercore.install.tasks.DownloadFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.launchercore.TechnicConstants;
-import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
-import net.technicpack.utilslib.ZipUtils;
-import net.technicpack.launchercore.install.verifiers.IFileVerifier;
-import net.technicpack.launchercore.install.verifiers.ValidJsonFileVerifier;
 
-import java.io.File;
 import java.io.IOException;
 
 public class VerifyVersionFilePresentTask implements IInstallTask {

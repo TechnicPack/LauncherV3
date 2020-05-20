@@ -30,9 +30,7 @@ import net.technicpack.utilslib.ImageUtils;
 import javax.swing.*;
 import java.awt.*;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 public class NewsWidget extends SelectorWidget implements IImageJobListener<AuthorshipInfo> {
     private NewsArticle article;

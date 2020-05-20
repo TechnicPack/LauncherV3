@@ -18,7 +18,6 @@
 
 package net.technicpack.launcher.ui.controls.modpacks;
 
-import net.technicpack.ui.controls.borders.DropShadowBorder;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.SelectorWidget;

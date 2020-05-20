@@ -25,7 +25,6 @@ import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.launch.java.version.FileBasedJavaVersion;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 import java.io.IOException;

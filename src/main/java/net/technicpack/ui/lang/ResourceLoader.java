@@ -22,7 +22,6 @@ package net.technicpack.ui.lang;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

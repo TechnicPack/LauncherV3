@@ -22,7 +22,6 @@ import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 
 import javax.swing.*;
-import java.awt.*;
 
 public class SelectorWidget extends JButton {
 

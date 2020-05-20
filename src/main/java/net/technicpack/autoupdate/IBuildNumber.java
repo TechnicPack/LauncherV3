@@ -19,8 +19,6 @@
 
 package net.technicpack.autoupdate;
 
-import org.apache.commons.io.IOUtils;
-
 public interface IBuildNumber {
     String getBuildNumber();
 }

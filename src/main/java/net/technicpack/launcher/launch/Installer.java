@@ -44,7 +44,6 @@ import net.technicpack.launchercore.modpacks.RunData;
 import net.technicpack.launchercore.modpacks.resources.PackResourceMapper;
 import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.launchercore.util.LaunchAction;
-import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.install.tasks.*;
 import net.technicpack.minecraftcore.launch.LaunchOptions;
 import net.technicpack.minecraftcore.launch.MinecraftLauncher;

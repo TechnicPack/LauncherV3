@@ -18,41 +18,23 @@
 
 package net.technicpack.launcher.ui.components.discover;
 
-import com.google.common.base.Charsets;
-import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.platform.IPlatformApi;
-import net.technicpack.platform.http.HttpPlatformApi;
-import net.technicpack.ui.controls.installation.*;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.ui.controls.TiledBackground;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
-import org.xhtmlrenderer.css.sheet.StylesheetInfo;
 import org.xhtmlrenderer.event.DocumentListener;
-import org.xhtmlrenderer.resource.CSSResource;
-import org.xhtmlrenderer.resource.FSEntityResolver;
-import org.xhtmlrenderer.resource.ImageResource;
 import org.xhtmlrenderer.resource.XMLResource;
 import org.xhtmlrenderer.simple.XHTMLPanel;
 import org.xhtmlrenderer.swing.DelegatingUserAgent;
 import org.xhtmlrenderer.swing.FSMouseListener;
 import org.xhtmlrenderer.swing.ImageResourceLoader;
 import org.xhtmlrenderer.swing.SwingReplacedElementFactory;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMResult;
-import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stream.StreamSource;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -60,7 +42,6 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.ByteBuffer;
 
 public class DiscoverInfoPanel extends TiledBackground {
 
