@@ -211,33 +211,6 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jarsigner-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <id>sign</id>
-                        <configuration>
-                            <storetype>pkcs12</storetype>
-                            <keystore>${env.CERT_KEYSTORE}</keystore>
-                            <alias>${env.CERT_ALIAS}</alias>
-                            <storepass>${env.CERT_STOREPASS}</storepass>
-                            <keypass>${env.CERT_KEYPASS}</keypass>
-                            <verbose>true</verbose>
-                        </configuration>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>verify</id>
-                        <goals>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.3.0</version>
                 <executions>
@@ -267,7 +240,7 @@
                 </property>
             </activation>
             <properties>
-                <buildNumber>999</buildNumber>
+                <buildNumber>0</buildNumber>
             </properties>
         </profile>
         <profile>
@@ -373,6 +346,45 @@
                         </executions>
                     </plugin>
 
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>sign</id>
+            <activation>
+                <property>
+                    <name>env.CERT_KEYSTORE</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jarsigner-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>sign</id>
+                                <configuration>
+                                    <storetype>pkcs12</storetype>
+                                    <keystore>${env.CERT_KEYSTORE}</keystore>
+                                    <alias>${env.CERT_ALIAS}</alias>
+                                    <storepass>${env.CERT_STOREPASS}</storepass>
+                                    <keypass>${env.CERT_KEYPASS}</keypass>
+                                    <verbose>true</verbose>
+                                </configuration>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>verify</id>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
