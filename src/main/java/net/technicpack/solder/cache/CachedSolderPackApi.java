@@ -36,6 +36,7 @@ import org.joda.time.Seconds;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class CachedSolderPackApi implements ISolderPackApi {
@@ -123,7 +124,7 @@ public class CachedSolderPackApi implements ISolderPackApi {
             return;
 
         try {
-            String packCache = FileUtils.readFileToString(cacheFile, Charset.forName("UTF-8"));
+            String packCache = FileUtils.readFileToString(cacheFile, StandardCharsets.UTF_8);
             rootInfoCache = Utils.getGson().fromJson(packCache, SolderPackInfo.class);
 
             if (rootInfoCache != null)
@@ -139,7 +140,7 @@ public class CachedSolderPackApi implements ISolderPackApi {
         String packCache = Utils.getGson().toJson(info);
 
         try {
-            FileUtils.writeStringToFile(cacheFile, packCache, Charset.forName("UTF-8"));
+            FileUtils.writeStringToFile(cacheFile, packCache, StandardCharsets.UTF_8);
         } catch (IOException e) {
             return;
         }

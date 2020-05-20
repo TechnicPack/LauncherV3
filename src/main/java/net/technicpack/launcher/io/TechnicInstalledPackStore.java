@@ -27,6 +27,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,7 +53,7 @@ public class TechnicInstalledPackStore implements IInstalledPackRepository {
         }
 
         try {
-            String json = FileUtils.readFileToString(jsonFile, Charset.forName("UTF-8"));
+            String json = FileUtils.readFileToString(jsonFile, StandardCharsets.UTF_8);
             TechnicInstalledPackStore parsedList = Utils.getGson().fromJson(json, TechnicInstalledPackStore.class);
 
             if (parsedList != null) {
@@ -126,7 +127,7 @@ public class TechnicInstalledPackStore implements IInstalledPackRepository {
         String json = Utils.getGson().toJson(this);
 
         try {
-            FileUtils.writeStringToFile(loadedFile, json, Charset.forName("UTF-8"));
+            FileUtils.writeStringToFile(loadedFile, json, StandardCharsets.UTF_8);
         } catch (IOException e) {
             Utils.getLogger().log(Level.WARNING, "Unable to save settings " + loadedFile, e);
         }

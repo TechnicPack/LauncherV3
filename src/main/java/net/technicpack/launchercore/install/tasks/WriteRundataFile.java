@@ -12,6 +12,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class WriteRundataFile implements IInstallTask {
     private ModpackModel modpackModel;
@@ -45,7 +46,7 @@ public class WriteRundataFile implements IInstallTask {
         runData.add("java", java);
         runData.add("memory", memory);
         String output = Utils.getGson().toJson(runData);
-        FileUtils.writeStringToFile(runDataFile, output);
+        FileUtils.writeStringToFile(runDataFile, output, StandardCharsets.UTF_8);
     }
 
     private JsonElement getJsonValue(String value) {

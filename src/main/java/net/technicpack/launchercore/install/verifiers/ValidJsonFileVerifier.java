@@ -26,6 +26,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 
 public class ValidJsonFileVerifier implements IFileVerifier {
@@ -38,7 +39,7 @@ public class ValidJsonFileVerifier implements IFileVerifier {
     @Override
     public boolean isFileValid(File file) {
         try {
-            String json = FileUtils.readFileToString(file, Charset.forName("UTF-8"));
+            String json = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
             JsonObject obj = validatingGson.fromJson(json, JsonObject.class);
 
             return (obj != null);

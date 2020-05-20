@@ -29,6 +29,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -55,7 +56,7 @@ public class TechnicUserStore implements IUserStore<MojangUser> {
         }
 
         try {
-            String json = FileUtils.readFileToString(userFile, Charset.forName("UTF-8"));
+            String json = FileUtils.readFileToString(userFile, StandardCharsets.UTF_8);
             TechnicUserStore newModel = MojangUtils.getGson().fromJson(json, TechnicUserStore.class);
 
             if (newModel != null) {
@@ -79,7 +80,7 @@ public class TechnicUserStore implements IUserStore<MojangUser> {
         String json = MojangUtils.getGson().toJson(this);
 
         try {
-            FileUtils.writeStringToFile(usersFile, json, Charset.forName("UTF-8"));
+            FileUtils.writeStringToFile(usersFile, json, StandardCharsets.UTF_8);
         } catch (IOException e) {
             Utils.getLogger().log(Level.WARNING, "Unable to save users " + usersFile);
         }

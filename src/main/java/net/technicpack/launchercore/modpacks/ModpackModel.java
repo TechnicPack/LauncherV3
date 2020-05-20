@@ -34,6 +34,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -299,7 +300,7 @@ public class ModpackModel {
 
         String runData = "{}";
         try {
-            runData = FileUtils.readFileToString(runDataFile);
+            runData = FileUtils.readFileToString(runDataFile, StandardCharsets.UTF_8);
         } catch (IOException ex) {
             return null;
         }

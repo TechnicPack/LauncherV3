@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -148,23 +149,18 @@ public class ResourceLoader {
 
     public String getString(String stringKey, String... replacements) {
         String outString = stringData.getString(stringKey);
-        try {
-            outString = new String(outString.getBytes("ISO-8859-1"), "UTF-8");
+        outString = new String(outString.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
 
-            for (int i = 0; i < replacements.length; i++) {
-                String find = String.format("{%d}", i);
-                String replace = replacements[i];
+        for (int i = 0; i < replacements.length; i++) {
+            String find = String.format("{%d}", i);
+            String replace = replacements[i];
 
-                if (outString.contains(find)) {
-                    outString = outString.replace(find, replace);
-                }
+            if (outString.contains(find)) {
+                outString = outString.replace(find, replace);
             }
-
-            return outString;
-        } catch (UnsupportedEncodingException ex) {
-            ex.printStackTrace();
-            return null;
         }
+
+        return outString;
     }
 
     public String getCodeFromLocale(Locale locale) {

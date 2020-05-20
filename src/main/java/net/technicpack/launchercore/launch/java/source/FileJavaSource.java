@@ -29,6 +29,7 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,7 +64,7 @@ public class FileJavaSource implements IVersionSource {
             return new FileJavaSource(file);
 
         try {
-            String sourceText = FileUtils.readFileToString(file);
+            String sourceText = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
             FileJavaSource source = Utils.getGson().fromJson(sourceText, FileJavaSource.class);
             source.setLoadedFile(file);
             return source;

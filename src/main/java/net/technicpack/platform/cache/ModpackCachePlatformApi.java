@@ -34,6 +34,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class ModpackCachePlatformApi implements IPlatformApi {
@@ -149,7 +150,7 @@ public class ModpackCachePlatformApi implements IPlatformApi {
             return null;
 
         try {
-            String packCache = FileUtils.readFileToString(cacheFile, Charset.forName("UTF-8"));
+            String packCache = FileUtils.readFileToString(cacheFile, StandardCharsets.UTF_8);
             PlatformPackInfo info = Utils.getGson().fromJson(packCache, PlatformPackInfo.class);
 
             if (info != null) {
@@ -170,7 +171,7 @@ public class ModpackCachePlatformApi implements IPlatformApi {
         String packCache = Utils.getGson().toJson(info);
 
         try {
-            FileUtils.writeStringToFile(cacheFile, packCache, Charset.forName("UTF-8"));
+            FileUtils.writeStringToFile(cacheFile, packCache, StandardCharsets.UTF_8);
         } catch (IOException e) {
             return;
         }

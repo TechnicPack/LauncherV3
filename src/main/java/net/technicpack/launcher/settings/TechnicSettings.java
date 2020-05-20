@@ -28,6 +28,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -179,7 +180,7 @@ public class TechnicSettings implements ILaunchOptions {
         String json = Utils.getGson().toJson(this);
 
         try {
-            FileUtils.writeStringToFile(settingsFile, json, Charset.forName("UTF-8"));
+            FileUtils.writeStringToFile(settingsFile, json, StandardCharsets.UTF_8);
         } catch (IOException e) {
             Utils.getLogger().log(Level.WARNING, "Unable to save installed " + settingsFile);
         }

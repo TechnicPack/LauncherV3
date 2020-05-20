@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -85,7 +86,7 @@ public class SettingsFactory {
             return null;
 
         try {
-            String json = FileUtils.readFileToString(settingsFile, Charset.forName("UTF-8"));
+            String json = FileUtils.readFileToString(settingsFile, StandardCharsets.UTF_8);
             TechnicSettings settings = Utils.getGson().fromJson(json, TechnicSettings.class);
 
             if (settings != null)

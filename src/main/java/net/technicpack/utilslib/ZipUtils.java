@@ -97,18 +97,15 @@ public class ZipUtils {
 
     private static void unzipEntry(ZipFile zipFile, ZipArchiveEntry entry, File outputFile) throws IOException, InterruptedException {
         byte[] buffer = new byte[2048];
-        BufferedInputStream inputStream = new BufferedInputStream(zipFile.getInputStream(entry));
-        BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(outputFile));
-        try {
+
+        try (BufferedInputStream inputStream = new BufferedInputStream(zipFile.getInputStream(entry));
+             BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(outputFile))) {
             int length;
             while ((length = inputStream.read(buffer, 0, buffer.length)) != -1) {
                 outputStream.write(buffer, 0, length);
             }
         } catch (ClosedByInterruptException ex) {
             throw new InterruptedException();
-        } finally {
-            IOUtils.closeQuietly(outputStream);
-            IOUtils.closeQuietly(inputStream);
         }
     }
 

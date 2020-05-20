@@ -66,8 +66,6 @@ public class Download implements Runnable {
     @Override
     @SuppressWarnings("unused")
     public void run() {
-        ReadableByteChannel rbc = null;
-        FileOutputStream fos = null;
         try {
             HttpURLConnection conn = Utils.openHttpConnection(url);
             int response = conn.getResponseCode();
@@ -99,31 +97,32 @@ public class Download implements Runnable {
             outFile = new File(outPath);
             outFile.delete();
 
-            rbc = Channels.newChannel(in);
-            fos = new FileOutputStream(outFile);
+            try (ReadableByteChannel rbc = Channels.newChannel(in);
+                 FileOutputStream fos = new FileOutputStream(outFile)) {
 
-            stateChanged();
+                stateChanged();
 
-            Thread progress = new MonitorThread(Thread.currentThread(), rbc);
-            progress.start();
+                Thread progress = new MonitorThread(Thread.currentThread(), rbc);
+                progress.start();
 
-            fos.getChannel().transferFrom(rbc, 0, size > 0 ? size : Integer.MAX_VALUE);
-            in.close();
-            rbc.close();
-            progress.interrupt();
+                fos.getChannel().transferFrom(rbc, 0, size > 0 ? size : Integer.MAX_VALUE);
+                in.close();
+                rbc.close();
+                progress.interrupt();
 
-            synchronized (timeoutLock) {
-                if (isTimedOut) {
-                    return;
+                synchronized (timeoutLock) {
+                    if (isTimedOut) {
+                        return;
+                    }
                 }
-            }
 
-            if (size > 0) {
-                if (size == outFile.length()) {
+                if (size > 0) {
+                    if (size == outFile.length()) {
+                        result = Result.SUCCESS;
+                    }
+                } else {
                     result = Result.SUCCESS;
                 }
-            } else {
-                result = Result.SUCCESS;
             }
         } catch (ClosedByInterruptException ex) {
             result = Result.FAILURE;
@@ -137,9 +136,6 @@ public class Download implements Runnable {
         } catch (Exception e) {
             exception = e;
             e.printStackTrace();
-        } finally {
-            IOUtils.closeQuietly(fos);
-            IOUtils.closeQuietly(rbc);
         }
     }
 

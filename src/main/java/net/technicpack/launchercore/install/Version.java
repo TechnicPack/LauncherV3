@@ -26,6 +26,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 
 public class Version {
@@ -64,7 +65,7 @@ public class Version {
         }
 
         try {
-            String json = FileUtils.readFileToString(version, Charset.forName("UTF-8"));
+            String json = FileUtils.readFileToString(version, StandardCharsets.UTF_8);
             return Utils.getGson().fromJson(json, Version.class);
         } catch (JsonSyntaxException e) {
             Utils.getLogger().log(Level.WARNING, "Unable to load version from " + version);
@@ -80,7 +81,7 @@ public class Version {
         String json = Utils.getGson().toJson(this);
 
         try {
-            FileUtils.writeStringToFile(version, json, Charset.forName("UTF-8"));
+            FileUtils.writeStringToFile(version, json, StandardCharsets.UTF_8);
         } catch (IOException e) {
             Utils.getLogger().log(Level.WARNING, "Unable to save installed " + version);
         }
