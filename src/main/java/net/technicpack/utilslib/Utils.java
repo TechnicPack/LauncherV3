@@ -29,6 +29,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Utils {
@@ -103,7 +104,8 @@ public class Utils {
             } else {
                 return false;
             }
-        } catch (IOException e) {
+        } catch (IOException ex) {
+            logger.log(Level.SEVERE, "Got an error when pinging " + urlLoc, ex);
             return false;
         }
     }
