@@ -278,20 +278,20 @@ public class Installer {
         Version installedVersion = modpack.getInstalledVersion();
 
         TaskGroup examineModpackData = new TaskGroup(resources.getString("install.message.examiningmodpack"));
-        TaskGroup checkVersionFile = new TaskGroup(resources.getString("install.message.checkversionfile"));
-        TaskGroup installVersionFile = new TaskGroup(resources.getString("install.message.installversionfile"));
-        TaskGroup examineVersionFile = new TaskGroup(resources.getString("install.message.examiningversionfile"));
         TaskGroup verifyingFiles = new TaskGroup(resources.getString("install.message.verifyingfiles"));
         TaskGroup downloadingMods = new TaskGroup(resources.getString("install.message.downloadmods"));
         TaskGroup installingMods = new TaskGroup(resources.getString("install.message.installmods"));
+        TaskGroup checkVersionFile = new TaskGroup(resources.getString("install.message.checkversionfile"));
+        TaskGroup installVersionFile = new TaskGroup(resources.getString("install.message.installversionfile"));
+        TaskGroup rundataTaskGroup = new TaskGroup(resources.getString("install.message.runData"));
+        TaskGroup examineVersionFile = new TaskGroup(resources.getString("install.message.examiningversionfile"));
+        TaskGroup grabLibs = new TaskGroup(resources.getString("install.message.grablibraries"));
+        TaskGroup checkNonMavenLibs = new TaskGroup(resources.getString("install.message.nonmavenlibs"));
         TaskGroup installingLibs = new TaskGroup(resources.getString("install.message.installlibs"));
         TaskGroup installingMinecraft = new TaskGroup(resources.getString("install.message.installminecraft"));
         TaskGroup examineIndex = new TaskGroup(resources.getString("install.message.examiningindex"));
         TaskGroup verifyingAssets = new TaskGroup(resources.getString("install.message.verifyassets"));
         TaskGroup installingAssets = new TaskGroup(resources.getString("install.message.installassets"));
-        TaskGroup grabLibs = new TaskGroup(resources.getString("install.message.grablibraries"));
-        TaskGroup checkNonMavenLibs = new TaskGroup(resources.getString("install.message.nonmavenlibs"));
-        TaskGroup rundataTaskGroup = new TaskGroup(resources.getString("install.message.runData"));
 
         queue.addTask(examineModpackData);
         queue.addTask(verifyingFiles);
