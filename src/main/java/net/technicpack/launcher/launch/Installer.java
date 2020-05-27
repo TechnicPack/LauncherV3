@@ -311,9 +311,9 @@ public class Installer {
         if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX)
             queue.addTask(new CopyDylibJnilibTask(modpack));
 
-        if (minecraft.startsWith("1.5")) {
+        if (minecraft.startsWith("1.5.") || minecraft.equals("1.5")) {
             verifyingFiles.addTask(new EnsureFileTask(new File(directories.getCacheDirectory(), "fml_libs15.zip"), new ValidZipFileVerifier(), new File(modpack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs15.zip", installingLibs, installingLibs));
-        } else if (minecraft.startsWith("1.4")) {
+        } else if (minecraft.startsWith("1.4.") || minecraft.equals("1.4")) {
             verifyingFiles.addTask(new EnsureFileTask(new File(directories.getCacheDirectory(), "fml_libs.zip"), new ValidZipFileVerifier(), new File(modpack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs.zip", installingLibs, installingLibs));
         }
 
