@@ -24,6 +24,7 @@ import net.technicpack.autoupdate.IBuildNumber;
 public class TechnicConstants {
     public static final String technicURL = "http://mirror.technicpack.net/Technic/";
     public static final String technicVersions = technicURL + "version/";
+    public static final String technicFmlLibRepo = technicURL + "lib/fml/";
 
     private static IBuildNumber buildNumber;
     private static String userAgent;

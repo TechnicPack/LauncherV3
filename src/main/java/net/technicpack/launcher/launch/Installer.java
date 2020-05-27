@@ -31,10 +31,8 @@ import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.ModpackInstaller;
 import net.technicpack.launchercore.install.Version;
-import net.technicpack.launchercore.install.tasks.CheckRundataFile;
-import net.technicpack.launchercore.install.tasks.EnsureFileTask;
-import net.technicpack.launchercore.install.tasks.TaskGroup;
-import net.technicpack.launchercore.install.tasks.WriteRundataFile;
+import net.technicpack.launchercore.install.tasks.*;
+import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
 import net.technicpack.launchercore.launch.java.IJavaVersion;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
@@ -66,6 +64,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.zip.ZipException;
 
 public class Installer {
@@ -311,10 +310,57 @@ public class Installer {
         if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX)
             queue.addTask(new CopyDylibJnilibTask(modpack));
 
-        if (minecraft.startsWith("1.5.") || minecraft.equals("1.5")) {
-            verifyingFiles.addTask(new EnsureFileTask(new File(directories.getCacheDirectory(), "fml_libs15.zip"), new ValidZipFileVerifier(), new File(modpack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs15.zip", installingLibs, installingLibs));
-        } else if (minecraft.startsWith("1.4.") || minecraft.equals("1.4")) {
-            verifyingFiles.addTask(new EnsureFileTask(new File(directories.getCacheDirectory(), "fml_libs.zip"), new ValidZipFileVerifier(), new File(modpack.getInstalledDirectory(), "lib"), "http://mirror.technicpack.net/Technic/lib/fml/fml_libs.zip", installingLibs, installingLibs));
+        // Add FML libs
+        String fmlLibsZip;
+        File modpackFmlLibDir = new File(modpack.getInstalledDirectory(), "lib");
+        HashMap<String, String> fmlLibs = new HashMap<>();
+
+        switch (minecraft) {
+            case "1.4":
+            case "1.4.1":
+            case "1.4.2":
+            case "1.4.3":
+            case "1.4.4":
+            case "1.4.5":
+            case "1.4.6":
+            case "1.4.7":
+                fmlLibsZip = "fml_libs.zip";
+                break;
+            case "1.5":
+                fmlLibsZip = "fml_libs15.zip";
+                fmlLibs.put("deobfuscation_data_1.5.zip", "dba6d410a91a855f3b84457c86a8132a");
+                break;
+            case "1.5.1":
+                fmlLibsZip = "fml_libs15.zip";
+                fmlLibs.put("deobfuscation_data_1.5.1.zip", "c4fc2fedba60d920e4c7f9a095b2b883");
+                break;
+            case "1.5.2":
+                fmlLibsZip = "fml_libs15.zip";
+                fmlLibs.put("deobfuscation_data_1.5.2.zip", "270d9775872cc9fa773389812cab91fe");
+                break;
+            default:
+                fmlLibsZip = "";
+        }
+
+        if (!fmlLibsZip.isEmpty()) {
+            verifyingFiles.addTask(new EnsureFileTask(new File(directories.getCacheDirectory(), fmlLibsZip), new ValidZipFileVerifier(), modpackFmlLibDir, TechnicConstants.technicFmlLibRepo + fmlLibsZip, installingLibs, installingLibs));
+        }
+
+        if (!fmlLibs.isEmpty()) {
+            fmlLibs.forEach((name, md5) -> {
+                MD5FileVerifier verifier = null;
+
+                if (!md5.isEmpty())
+                    verifier = new MD5FileVerifier(md5);
+
+                File cached = new File(directories.getCacheDirectory(), name);
+                File target = new File(modpackFmlLibDir, name);
+
+                if (!target.exists() || (verifier != null && !verifier.isFileValid(target)) ) {
+                    verifyingFiles.addTask(new EnsureFileTask(cached, verifier, null, TechnicConstants.technicFmlLibRepo + name, installingLibs, installingLibs));
+                    installingLibs.addTask(new CopyFileTask(cached, target));
+                }
+            });
         }
 
         // Remove bin/install_profile.json, which is used by ForgeWrapper to install Forge in Minecraft 1.13+
