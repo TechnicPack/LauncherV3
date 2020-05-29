@@ -615,19 +615,11 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         installProgressPlaceholder = Box.createHorizontalGlue();
         footer.add(installProgressPlaceholder);
 
-        JButton buildCtrl = new JButton(resources.getIcon("apex-logo.png"));
-        buildCtrl.setBorder(BorderFactory.createEmptyBorder());
-        buildCtrl.setContentAreaFilled(false);
+        JLabel buildCtrl = new JLabel(resources.getString("launcher.build.text", buildNumber.getBuildNumber(), resources.getString("launcher.build." + settings.getBuildStream())));
+        buildCtrl.setForeground(COLOR_WHITE_TEXT);
+        buildCtrl.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         buildCtrl.setHorizontalTextPosition(SwingConstants.RIGHT);
         buildCtrl.setHorizontalAlignment(SwingConstants.RIGHT);
-        buildCtrl.setFocusable(false);
-        buildCtrl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        buildCtrl.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                DesktopUtils.browseUrl("https://apexminecrafthosting.com/partners/technic");
-            }
-        });
         footer.add(buildCtrl);
 
         getRootPane().getContentPane().add(footer, BorderLayout.PAGE_END);
