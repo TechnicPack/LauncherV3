@@ -78,6 +78,12 @@ public class ZipUtils {
             }
             File outputFile = new File(output, entry.getName());
 
+            // Zip Slip check
+            if (!outputFile.toPath().normalize().startsWith(output.toPath())) {
+                Utils.getLogger().log(Level.SEVERE, "Detected Zip Slip attempt on entry " + entry.getName() + " from " + zip.getAbsolutePath());
+                return false;
+            }
+
             if (outputFile.getParentFile() != null) {
                 outputFile.getParentFile().mkdirs();
             }
@@ -136,8 +142,14 @@ public class ZipUtils {
                 if (Thread.interrupted())
                     throw new InterruptedException();
 
-                if (!entry.getName().contains("../") && (fileFilter == null || fileFilter.shouldExtract(entry.getName()))) {
+                if (fileFilter == null || fileFilter.shouldExtract(entry.getName())) {
                     File outputFile = new File(output, entry.getName());
+
+                    // Zip Slip check
+                    if (!outputFile.toPath().normalize().startsWith(output.toPath())) {
+                        Utils.getLogger().log(Level.SEVERE, "Detected Zip Slip attempt on entry " + entry.getName() + " from " + zip.getAbsolutePath());
+                        throw new IOException("Bad zip entry");
+                    }
 
                     if (outputFile.exists() && outputFile.isFile() && !outputFile.canWrite()) {
                         if (outputFile.delete()) {
