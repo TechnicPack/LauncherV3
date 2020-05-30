@@ -29,84 +29,92 @@ import net.technicpack.launcher.autoupdate.CommandLineBuildNumber;
 import net.technicpack.launcher.autoupdate.TechnicRelauncher;
 import net.technicpack.launcher.autoupdate.VersionFileBuildNumber;
 import net.technicpack.launcher.io.*;
+import net.technicpack.launcher.launch.Installer;
+import net.technicpack.launcher.settings.SettingsFactory;
+import net.technicpack.launcher.settings.StartupParameters;
+import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.settings.migration.IMigrator;
 import net.technicpack.launcher.settings.migration.InitialV3Migrator;
 import net.technicpack.launcher.ui.InstallerFrame;
+import net.technicpack.launcher.ui.LauncherFrame;
+import net.technicpack.launcher.ui.LoginFrame;
 import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserStore;
+import net.technicpack.launchercore.auth.IUserType;
+import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.exception.DownloadException;
+import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.image.face.MinotarFaceImageStore;
+import net.technicpack.launchercore.image.face.WebAvatarImageStore;
+import net.technicpack.launchercore.install.LauncherDirectories;
+import net.technicpack.launchercore.install.ModpackInstaller;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.launch.java.source.FileJavaSource;
 import net.technicpack.launchercore.launch.java.source.InstalledJavaSource;
 import net.technicpack.launchercore.logging.BuildLogFormatter;
 import net.technicpack.launchercore.logging.RotatingFileHandler;
-import net.technicpack.launchercore.modpacks.PackLoader;
-import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
-import net.technicpack.minecraftcore.mojang.auth.MojangUser;
-import net.technicpack.platform.IPlatformSearchApi;
-import net.technicpack.platform.cache.ModpackCachePlatformApi;
-import net.technicpack.platform.http.HttpPlatformSearchApi;
-import net.technicpack.solder.cache.CachedSolderApi;
-import net.technicpack.ui.components.Console;
-import net.technicpack.ui.components.ConsoleFrame;
-import net.technicpack.ui.components.ConsoleHandler;
-import net.technicpack.ui.components.LoggerOutputStream;
-import net.technicpack.ui.controls.installation.SplashScreen;
-import net.technicpack.ui.lang.ResourceLoader;
-import net.technicpack.launcher.launch.Installer;
-import net.technicpack.launcher.settings.SettingsFactory;
-import net.technicpack.launcher.settings.StartupParameters;
-import net.technicpack.launcher.settings.TechnicSettings;
-import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launcher.ui.LoginFrame;
-import net.technicpack.launchercore.auth.IUserType;
-import net.technicpack.minecraftcore.mojang.auth.AuthenticationService;
-import net.technicpack.launchercore.auth.UserModel;
-import net.technicpack.launchercore.image.ImageRepository;
-import net.technicpack.launchercore.image.face.WebAvatarImageStore;
-import net.technicpack.launchercore.install.ModpackInstaller;
-import net.technicpack.minecraftcore.launch.MinecraftLauncher;
+import net.technicpack.launchercore.mirror.MirrorStore;
+import net.technicpack.launchercore.mirror.secure.rest.JsonWebSecureMirror;
 import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.launchercore.modpacks.PackLoader;
 import net.technicpack.launchercore.modpacks.resources.PackImageStore;
 import net.technicpack.launchercore.modpacks.resources.PackResourceMapper;
 import net.technicpack.launchercore.modpacks.resources.resourcetype.BackgroundResourceType;
 import net.technicpack.launchercore.modpacks.resources.resourcetype.IModpackResourceType;
 import net.technicpack.launchercore.modpacks.resources.resourcetype.IconResourceType;
 import net.technicpack.launchercore.modpacks.resources.resourcetype.LogoResourceType;
+import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
-import net.technicpack.launchercore.install.LauncherDirectories;
-import net.technicpack.launchercore.mirror.MirrorStore;
-import net.technicpack.launchercore.mirror.secure.rest.JsonWebSecureMirror;
+import net.technicpack.minecraftcore.launch.MinecraftLauncher;
+import net.technicpack.minecraftcore.mojang.auth.AuthenticationService;
+import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.platform.IPlatformApi;
+import net.technicpack.platform.IPlatformSearchApi;
 import net.technicpack.platform.PlatformPackInfoRepository;
+import net.technicpack.platform.cache.ModpackCachePlatformApi;
 import net.technicpack.platform.http.HttpPlatformApi;
+import net.technicpack.platform.http.HttpPlatformSearchApi;
 import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.solder.ISolderApi;
 import net.technicpack.solder.SolderPackSource;
+import net.technicpack.solder.cache.CachedSolderApi;
 import net.technicpack.solder.http.HttpSolderApi;
+import net.technicpack.ui.components.Console;
+import net.technicpack.ui.components.ConsoleFrame;
+import net.technicpack.ui.components.ConsoleHandler;
+import net.technicpack.ui.components.LoggerOutputStream;
+import net.technicpack.ui.controls.installation.SplashScreen;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Locale;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.util.*;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class LauncherMain {
 
@@ -281,6 +289,9 @@ public class LauncherMain {
         splash.setLocationRelativeTo(null);
         splash.setVisible(true);
 
+        // Inject new root certs for compatibility with older Java versions that don't have them
+        injectNewRootCerts();
+
         JavaVersionRepository javaVersions = new JavaVersionRepository();
         (new InstalledJavaSource()).enumerateVersions(javaVersions);
         FileJavaSource javaVersionFile = FileJavaSource.load(new File(settings.getTechnicRoot(), "javaVersions.json"));
@@ -363,5 +374,67 @@ public class LauncherMain {
         userModel.initAuth();
 
         Utils.sendTracking("runLauncher", "run", buildNumber.getBuildNumber(), settings.getClientId());
+    }
+
+    private static void injectNewRootCerts() {
+        // Adapted from Forge installer
+        final String javaVersion = System.getProperty("java.version");
+        if (javaVersion == null || !javaVersion.startsWith("1.8.0_"))
+            return;
+
+        try {
+            if (Integer.parseInt(javaVersion.substring("1.8.0_".length())) >= 101) {
+                Utils.getLogger().log(Level.INFO, "Don't need to inject new root certificates");
+                return;
+            }
+        } catch (final NumberFormatException e) {
+            Utils.getLogger().log(Level.WARNING, "Couldn't parse Java version, can't inject new root certs", e);
+            return;
+        }
+
+        try {
+            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            final Path ksPath = Paths.get(System.getProperty("java.home"),"lib", "security", "cacerts");
+            keyStore.load(Files.newInputStream(ksPath), "changeit".toCharArray());
+            Map<String, Certificate> jdkTrustStore = Collections.list(keyStore.aliases()).stream().collect(Collectors.toMap(a -> a, (String alias) -> {
+                try {
+                    return keyStore.getCertificate(alias);
+                } catch (KeyStoreException e) {
+                    Utils.getLogger().log(Level.WARNING, "Failed to get certificate", e);
+                    return null;
+                }
+            }));
+
+            KeyStore leKS = KeyStore.getInstance(KeyStore.getDefaultType());
+            InputStream leKSFile = LauncherMain.class.getResourceAsStream("/net/technicpack/launcher/resources/technickeystore.jks");
+            leKS.load(leKSFile, "technicrootca".toCharArray());
+            Map<String, Certificate> leTrustStore = Collections.list(leKS.aliases()).stream().collect(Collectors.toMap(a -> a, (String alias) -> {
+                try {
+                    return leKS.getCertificate(alias);
+                } catch (KeyStoreException e) {
+                    Utils.getLogger().log(Level.WARNING, "Failed to get certificate", e);
+                    return null;
+                }
+            }));
+
+            KeyStore mergedTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            mergedTrustStore.load(null, new char[0]);
+            for (final Map.Entry<String, Certificate> entry : jdkTrustStore.entrySet()) {
+                mergedTrustStore.setCertificateEntry(entry.getKey(), entry.getValue());
+            }
+            for (final Map.Entry<String , Certificate> entry : leTrustStore.entrySet()) {
+                mergedTrustStore.setCertificateEntry(entry.getKey(), entry.getValue());
+            }
+
+            TrustManagerFactory instance = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            instance.init(mergedTrustStore);
+            SSLContext tls = SSLContext.getInstance("TLS");
+            tls.init(null, instance.getTrustManagers(), null);
+            HttpsURLConnection.setDefaultSSLSocketFactory(tls.getSocketFactory());
+            Utils.getLogger().log(Level.INFO, "Injected new root certificates");
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | KeyManagementException e) {
+            Utils.getLogger().log(Level.WARNING, "Failed to inject new root certificates. Problems might happen");
+            e.printStackTrace();
+        }
     }
 }
