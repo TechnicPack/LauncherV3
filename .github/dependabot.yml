@@ -1,0 +1,14 @@
+version: 2
+updates:
+- package-ecosystem: maven
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: com.beust:jcommander
+    versions:
+    - ">= 1.75.a, < 1.76"
+  - dependency-name: org.slf4j:slf4j-nop
+    versions:
+    - "> 1.6.2"
