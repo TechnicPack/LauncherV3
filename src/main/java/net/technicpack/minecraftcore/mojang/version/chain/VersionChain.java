@@ -187,7 +187,7 @@ public class VersionChain implements MojangVersion {
     @Override
     public GameDownloads getDownloads() {
         for (MojangVersion version : chain) {
-            if (version.getAssetsKey() != null)
+            if (version.getDownloads() != null)
                 return version.getDownloads();
         }
 
@@ -197,8 +197,8 @@ public class VersionChain implements MojangVersion {
     @Override
     public String getJarKey() {
         for (MojangVersion version : chain) {
-            if (version.getAssetsKey() != null)
-                return version.getAssetsKey();
+            if (version.getJarKey() != null)
+                return version.getJarKey();
         }
 
         return null;
