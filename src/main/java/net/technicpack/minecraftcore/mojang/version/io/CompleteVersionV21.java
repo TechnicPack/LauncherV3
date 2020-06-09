@@ -147,11 +147,6 @@ public class CompleteVersionV21 implements MojangVersion {
 	}
 
 	@Override
-	public String getJarKey() {
-		return jar;
-	}
-
-	@Override
 	public String getParentVersion() {
 		return inheritsFrom;
 	}

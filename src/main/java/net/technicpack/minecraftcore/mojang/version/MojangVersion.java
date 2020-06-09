@@ -65,8 +65,6 @@ public interface MojangVersion {
 
     GameDownloads getDownloads();
 
-    public String getJarKey();
-
     public String getParentVersion();
 
     public boolean getAreAssetsVirtual();

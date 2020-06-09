@@ -42,7 +42,6 @@ public class CompleteVersion implements MojangVersion {
     private String assets;
     private AssetIndex assetIndex;
     private GameDownloads downloads;
-    private String jar;
     private String inheritsFrom;
     private transient boolean areAssetsVirtual;
 
@@ -145,11 +144,6 @@ public class CompleteVersion implements MojangVersion {
     @Override
     public GameDownloads getDownloads() {
         return downloads;
-    }
-
-    @Override
-    public String getJarKey() {
-        return jar;
     }
 
     @Override
