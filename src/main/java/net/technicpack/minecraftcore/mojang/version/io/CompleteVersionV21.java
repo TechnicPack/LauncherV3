@@ -41,7 +41,6 @@ public class CompleteVersionV21 implements MojangVersion {
 	private String assets;
 	private AssetIndex assetIndex;
 	private GameDownloads downloads;
-	private String jar;
 	private String inheritsFrom;
 	private transient boolean areAssetsVirtual;
 
