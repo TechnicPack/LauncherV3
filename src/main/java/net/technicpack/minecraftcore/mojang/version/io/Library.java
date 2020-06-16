@@ -27,22 +27,31 @@ import org.apache.commons.text.StringSubstitutor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Library {
-
-    private static final StringSubstitutor SUBSTITUTOR = new StringSubstitutor();
     private static final String[] fallback = {
         "http://mirror.technicpack.net/Technic/lib/",
         "https://libraries.minecraft.net/",
         "https://files.minecraftforge.net/maven/",
         "https://search.maven.org/remotecontent?filepath="
     };
+    private static final Pattern gradlePattern = Pattern.compile("^([^:@]+):([^:@]+):([^:@]+)(?::([^:@]+))?(?:@([^:@]+))?$");
+
+    // JSON fields
     private String name;
     private List<Rule> rules;
     private Downloads downloads;
     private Map<OperatingSystem, String> natives;
     private ExtractRules extract;
     private String url;
+
+    private transient String gradleGroupId;
+    private transient String gradleArtifactId;
+    private transient String gradleVersion;
+    private transient String gradleClassifier;
+    private transient String gradleExtension = "jar";
 
     public String getUrl() {
         return url;
@@ -72,6 +81,26 @@ public class Library {
         return extract;
     }
 
+    private void parseName() {
+        // Don't reparse if it's already been parsed
+        if (gradleGroupId != null)
+            return;
+
+        Matcher m = gradlePattern.matcher(name);
+
+        if (!m.matches()) {
+            throw new IllegalStateException("Cannot parse empty gradle specifier");
+        }
+
+        gradleGroupId = m.group(1);
+        gradleArtifactId = m.group(2);
+        gradleVersion = m.group(3);
+        gradleClassifier = m.group(4);
+        String extension = m.group(5);
+        if (extension != null && !extension.isEmpty())
+            gradleExtension = extension;
+    }
+
     public boolean isForCurrentOS() {
         if (rules == null) {
             return true;
@@ -79,67 +108,82 @@ public class Library {
         return Rule.isAllowable(rules, null);
     }
 
+    public boolean hasNatives() {
+        return natives != null && !natives.isEmpty();
+    }
+
     public String getArtifactPath() {
         return getArtifactPath(null);
     }
 
-    public String getArtifactPath(String classifier) {
+    public String getArtifactPath(String nativeClassifier) {
         if (this.name == null) {
             throw new IllegalStateException("Cannot get artifact path of empty/blank artifact");
         }
-        return String.format("%s/%s", getArtifactBaseDir(), getArtifactFilename(classifier));
+
+        // Make sure the gradle specifier is parsed
+        parseName();
+
+        String filename = getArtifactFilename(nativeClassifier);
+
+        return gradleGroupId.replace('.', '/') + '/' + gradleArtifactId + '/' + gradleVersion + '/' + filename;
     }
 
-    public String getArtifactBaseDir() {
-        if (this.name == null) {
-            throw new IllegalStateException("Cannot get artifact dir of empty/blank artifact");
-        }
-        String[] parts = this.name.split(":", 4);
-        String version = parts[2].replace("-installer", "").replace("-shadowed", "")
-                .replace("-service", "").replace("-launcher", "").replace("-universal", "");
-        if (version.contains("@")) {
-            version = version.split("@", 2)[0];
-        }
-        return String.format("%s/%s/%s", parts[0].replaceAll("\\.", "/"), parts[1], version);
-    }
-
-    public String getArtifactFilename(String classifier) {
+    public String getArtifactFilename(String nativeClassifier) {
         if (this.name == null) {
             throw new IllegalStateException("Cannot get artifact filename of empty/blank artifact");
         }
 
-        String[] parts = this.name.split(":", 4);
-        String result;
+        // Make sure the gradle specifier is parsed
+        parseName();
 
-        if (classifier != null) {
-            result = String.format("%s-%s%s.jar", parts[1], parts[2], "-" + classifier);
-        } else {
-            if (parts[2].contains("@")) {
-                String[] split = parts[2].split("@", 2);
-                result = String.format("%s-%s%s.%s", parts[1], split[0], "", split[1]);
-            } else if (parts.length > 3) {
-                result = String.format("%s-%s-%s.jar", parts[1], parts[2], parts[3]);
-            } else {
-                result = String.format("%s-%s%s.jar", parts[1], parts[2], "");
-            }
+        String filename = gradleArtifactId + '-' + gradleVersion;
 
-        }
+        // The native classifier overrides the regular classifier
+        if (nativeClassifier != null)
+            filename += '-' + nativeClassifier;
+        else if (gradleClassifier != null && !gradleClassifier.isEmpty())
+            filename += '-' + gradleClassifier;
 
-        return SUBSTITUTOR.replace(result);
+        filename += '.' + gradleExtension;
+
+        return filename;
     }
 
     public String getDownloadUrl(String path, MirrorStore mirrorStore) throws DownloadException {
+        // Check the old-style URL (Forge 1.6, I think?)
+        // It acts as a Maven root URL
         if (this.url != null) {
             String checkUrl = url + path;
             if (Utils.pingHttpURL(checkUrl, mirrorStore)) {
                 return checkUrl;
             }
-
         }
+
+        // Check if any mirrors we know of have this library
         for (String string : fallback) {
             String checkUrl = string + path;
             if (Utils.pingHttpURL(checkUrl, mirrorStore)) {
                 return checkUrl;
+            }
+        }
+
+        // Check if an artifact URL is specified (downloads -> artifact -> url), only if it doesn't have natives
+        // This is a fully specified URL
+        if (!hasNatives()) {
+            String artifactUrl = null;
+
+            if (downloads != null) {
+                Artifact artifact = downloads.getArtifact();
+
+                if (artifact != null)
+                    artifactUrl = artifact.getUrl();
+            }
+
+            if (artifactUrl != null) {
+                if (Utils.pingHttpURL(artifactUrl, mirrorStore)) {
+                    return artifactUrl;
+                }
             }
         }
 

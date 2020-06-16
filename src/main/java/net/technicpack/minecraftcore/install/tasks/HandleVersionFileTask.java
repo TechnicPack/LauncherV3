@@ -132,14 +132,14 @@ public class HandleVersionFileTask implements IInstallTask {
                 for (Library library : version.getLibrariesForOS()) {
                     if (library.getName().startsWith("net.minecraftforge:forge:")) {
                         Library forgeLauncher = new Library();
-                        forgeLauncher.setName(library.getName() + "-launcher");
+                        forgeLauncher.setName(library.getName() + ":launcher");
                         forgeLauncher.setUrl("https://files.minecraftforge.net/maven/");
 
                         version.addLibrary(forgeLauncher);
                         checkLibraryQueue.addTask(new InstallVersionLibTask(forgeLauncher, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
 
                         Library forgeUniversal = new Library();
-                        forgeUniversal.setName(library.getName() + "-universal");
+                        forgeUniversal.setName(library.getName() + ":universal");
                         forgeUniversal.setUrl("https://files.minecraftforge.net/maven/");
 
                         checkLibraryQueue.addTask(new InstallVersionLibTask(forgeUniversal, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));

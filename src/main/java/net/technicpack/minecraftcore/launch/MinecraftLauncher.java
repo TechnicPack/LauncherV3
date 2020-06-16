@@ -244,9 +244,9 @@ public class MinecraftLauncher {
             // or at least only do it if the users are sticking with modpack.jar
             if (isForge) {
                 if (needsWrapper) {
-                    if (!is1_12_2 && !library.getName().endsWith("launcher")) {
+                    if (!is1_12_2 && !library.getName().endsWith(":launcher")) {
                         continue;
-                    } else if (is1_12_2 && !library.getName().endsWith("universal")) {
+                    } else if (is1_12_2 && !library.getName().endsWith(":universal")) {
                         continue;
                     }
                 } else {
