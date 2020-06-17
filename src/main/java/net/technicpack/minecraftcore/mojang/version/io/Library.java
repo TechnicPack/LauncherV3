@@ -47,6 +47,8 @@ public class Library {
     private ExtractRules extract;
     private String url;
 
+    // Gradle specifier/Maven coordinates
+    // groupId:artifactId:version[:classifier][@extension]
     private transient String gradleGroupId;
     private transient String gradleArtifactId;
     private transient String gradleVersion;
