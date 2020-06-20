@@ -34,8 +34,11 @@ public class LauncherDialog extends JDialog {
         setUndecorated(true);
 
         try {
+            // Try to set a transparent background, but it isn't always supported
             this.setBackground(new Color(0, 0, 0, 0));
             getRootPane().setBorder(new DropShadowBorder(Color.black, 4));
+        } catch (UnsupportedOperationException ex) {
+            this.setBackground(new Color(0, 0, 0));
         } catch (IllegalArgumentException ex) {
             //OS doesn't support translucent windows- dumb dumb dumb
             //Eat it and just don't do the drop shadow
