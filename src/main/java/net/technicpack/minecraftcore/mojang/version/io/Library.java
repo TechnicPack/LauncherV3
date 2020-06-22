@@ -25,8 +25,10 @@ import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.text.StringSubstitutor;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -152,21 +154,18 @@ public class Library {
     }
 
     public String getDownloadUrl(String path, MirrorStore mirrorStore) throws DownloadException {
+        Set<String> possibleUrls = new LinkedHashSet<>(8);
+
         // Check the old-style URL (Forge 1.6, I think?)
         // It acts as a Maven root URL
         if (this.url != null) {
-            String checkUrl = url + path;
-            if (Utils.pingHttpURL(checkUrl, mirrorStore)) {
-                return checkUrl;
-            }
+            possibleUrls.add(this.url + path);
         }
 
         // Check if any mirrors we know of have this library
+        // These also work as a Maven root URL
         for (String string : fallback) {
-            String checkUrl = string + path;
-            if (Utils.pingHttpURL(checkUrl, mirrorStore)) {
-                return checkUrl;
-            }
+            possibleUrls.add(string + path);
         }
 
         // Check if an artifact URL is specified (downloads -> artifact -> url), only if it doesn't have natives
@@ -181,10 +180,13 @@ public class Library {
                     artifactUrl = artifact.getUrl();
             }
 
-            if (artifactUrl != null) {
-                if (Utils.pingHttpURL(artifactUrl, mirrorStore)) {
-                    return artifactUrl;
-                }
+            if (artifactUrl != null && !artifactUrl.isEmpty())
+                possibleUrls.add(artifactUrl);
+        }
+
+        for (String possibleUrl : possibleUrls) {
+            if (Utils.pingHttpURL(possibleUrl, mirrorStore)) {
+                return possibleUrl;
             }
         }
 
