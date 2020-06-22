@@ -35,7 +35,6 @@ public class Library {
         "http://mirror.technicpack.net/Technic/lib/",
         "https://libraries.minecraft.net/",
         "https://files.minecraftforge.net/maven/",
-        "https://search.maven.org/remotecontent?filepath="
     };
     private static final Pattern gradlePattern = Pattern.compile("^([^:@]+):([^:@]+):([^:@]+)(?::([^:@]+))?(?:@([^:@]+))?$");
 
