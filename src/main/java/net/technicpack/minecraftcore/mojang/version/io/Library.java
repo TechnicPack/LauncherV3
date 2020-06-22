@@ -19,11 +19,11 @@
 
 package net.technicpack.minecraftcore.mojang.version.io;
 
+import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
-import org.apache.commons.text.StringSubstitutor;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -33,12 +33,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Library {
-    private static final String[] fallback = {
-        "http://mirror.technicpack.net/Technic/lib/",
+    private static final String[] FALLBACK = {
         "https://libraries.minecraft.net/",
         "https://files.minecraftforge.net/maven/",
+        "http://mirror.technicpack.net/Technic/lib/",
     };
-    private static final Pattern gradlePattern = Pattern.compile("^([^:@]+):([^:@]+):([^:@]+)(?::([^:@]+))?(?:@([^:@]+))?$");
+    private static final Pattern GRADLE_PATTERN = Pattern.compile("^([^:@]+):([^:@]+):([^:@]+)(?::([^:@]+))?(?:@([^:@]+))?$");
+    private static final Pattern FORGE_MAVEN_ROOT = Pattern.compile("^https://files\\.minecraftforge\\.net/maven/(.+)$");
 
     // JSON fields
     private String name;
@@ -89,7 +90,7 @@ public class Library {
         if (gradleGroupId != null)
             return;
 
-        Matcher m = gradlePattern.matcher(name);
+        Matcher m = GRADLE_PATTERN.matcher(name);
 
         if (!m.matches()) {
             throw new IllegalStateException("Cannot parse empty gradle specifier");
@@ -162,12 +163,6 @@ public class Library {
             possibleUrls.add(this.url + path);
         }
 
-        // Check if any mirrors we know of have this library
-        // These also work as a Maven root URL
-        for (String string : fallback) {
-            possibleUrls.add(string + path);
-        }
-
         // Check if an artifact URL is specified (downloads -> artifact -> url), only if it doesn't have natives
         // This is a fully specified URL
         if (!hasNatives()) {
@@ -180,8 +175,20 @@ public class Library {
                     artifactUrl = artifact.getUrl();
             }
 
-            if (artifactUrl != null && !artifactUrl.isEmpty())
+            if (artifactUrl != null && !artifactUrl.isEmpty()) {
                 possibleUrls.add(artifactUrl);
+
+                // Check if this URL is in Minecraft Forge's Maven repo and add ours as a backup
+                Matcher m = FORGE_MAVEN_ROOT.matcher(artifactUrl);
+                if (m.matches())
+                    possibleUrls.add(TechnicConstants.technicForgeRepo + m.group(1));
+            }
+        }
+
+        // Check if any fallback mirrors we know of have this library
+        // These also work as a Maven root URL
+        for (String string : FALLBACK) {
+            possibleUrls.add(string + path);
         }
 
         for (String possibleUrl : possibleUrls) {
