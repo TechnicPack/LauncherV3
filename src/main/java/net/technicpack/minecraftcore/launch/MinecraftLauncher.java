@@ -40,9 +40,7 @@ import org.apache.commons.text.StringSubstitutor;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MinecraftLauncher {
 
@@ -209,9 +207,32 @@ public class MinecraftLauncher {
         // build game args
         commands.addUnique("-cp", cpString);
         commands.addRaw(version.getMainClass());
-        for (String arg : version.getMinecraftArguments().resolve(launchOpts, paramDereferencer)) {
-            commands.addUnique(arg);
+        List<String> mcArgs = version.getMinecraftArguments().resolve(launchOpts, paramDereferencer);
+
+        // We manually iterate over the arguments so we can add them in "--name value" pairs, and exclude duplicates
+        // this way. For example: --username Foobar
+        ListIterator<String> mcArgsIterator = mcArgs.listIterator();
+        String current, next;
+        while (mcArgsIterator.hasNext()) {
+            current = mcArgsIterator.next();
+
+            if (mcArgsIterator.hasNext()) {
+                // We don't consume it so we can later add it to the commands if it turns out to not be a value
+                // This allows us to keep the pair detection working correctly
+                next = mcArgs.get(mcArgsIterator.nextIndex());
+            } else {
+                next = null;
+            }
+
+            if (next != null && !next.startsWith("--")) {
+                commands.addUnique(current, next);
+                // Consume the next element in the iterator
+                mcArgsIterator.next();
+            } else {
+                commands.addUnique(current);
+            }
         }
+
         options.appendToCommands(commands);
 
         //TODO: Add all the other less important commands
