@@ -205,6 +205,16 @@ public class VersionChain implements MojangVersion {
     }
 
     @Override
+    public boolean getAssetsMapToResources() {
+        return chain.get(0).getAssetsMapToResources();
+    }
+
+    @Override
+    public void setAssetsMapToResources(boolean mapToResources) {
+        chain.get(0).setAssetsMapToResources(mapToResources);
+    }
+
+    @Override
     public String getParentVersion() {
         return null;
     }

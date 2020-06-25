@@ -144,6 +144,8 @@ public class MinecraftLauncher {
 
         if (version.getAreAssetsVirtual()) {
             targetAssets += File.separator + "virtual" + File.separator + assetsKey;
+        } else if (version.getAssetsMapToResources()) {
+            targetAssets = pack.getResourcesDir().getAbsolutePath();
         }
 
         params.put("game_assets", targetAssets);

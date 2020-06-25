@@ -44,6 +44,7 @@ public class CompleteVersion implements MojangVersion {
     private GameDownloads downloads;
     private String inheritsFrom;
     private transient boolean areAssetsVirtual;
+    private transient boolean mapToResources;
 
     @Override
     public String getId() {
@@ -159,6 +160,16 @@ public class CompleteVersion implements MojangVersion {
     @Override
     public void setAreAssetsVirtual(boolean areAssetsVirtual) {
         this.areAssetsVirtual = areAssetsVirtual;
+    }
+
+    @Override
+    public boolean getAssetsMapToResources() {
+        return mapToResources;
+    }
+
+    @Override
+    public void setAssetsMapToResources(boolean mapToResources) {
+        this.mapToResources = mapToResources;
     }
 
     @Override

@@ -91,6 +91,7 @@ public class InstallMinecraftAssetsTask implements IInstallTask {
             mapToResources = obj.get(mapToResourcesField).getAsBoolean();
 
         ((InstallTasksQueue<MojangVersion>)queue).getMetadata().setAreAssetsVirtual(isVirtual);
+        ((InstallTasksQueue<MojangVersion>)queue).getMetadata().setAssetsMapToResources(mapToResources);
 
         JsonObject allObjects = obj.get(objectsField).getAsJsonObject();
 

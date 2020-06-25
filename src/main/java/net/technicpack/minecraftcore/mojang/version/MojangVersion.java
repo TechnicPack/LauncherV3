@@ -71,5 +71,9 @@ public interface MojangVersion {
 
     public void setAreAssetsVirtual(boolean areAssetsVirtual);
 
+    public boolean getAssetsMapToResources();
+
+    public void setAssetsMapToResources(boolean mapToResources);
+
     public void addLibrary(Library library);
 }
