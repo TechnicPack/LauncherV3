@@ -221,18 +221,30 @@ public class MinecraftLauncher {
 
             if (mcArgsIterator.hasNext()) {
                 // We don't consume it so we can later add it to the commands if it turns out to not be a value
-                // This allows us to keep the pair detection working correctly
+                // This allows us to keep the pair detection working correctly, and if we do end up using the value,
+                // we just consume it from the iterator later on
                 next = mcArgs.get(mcArgsIterator.nextIndex());
             } else {
                 next = null;
             }
 
-            if (next != null && !next.startsWith("--")) {
-                commands.addUnique(current, next);
-                // Consume the next element in the iterator
-                mcArgsIterator.next();
+            // For 1.2.1 through 1.5.2, not all of it is a named argument (--argument):
+            // ${auth_player_name} ${auth_session} --gameDir ${game_directory} --assetsDir ${game_assets}
+            if (current.startsWith("--")) {
+                // This is an --argument, now we check if it has a value or not
+                if (next != null && !next.startsWith("--")) {
+                    // This --argument has a value, so we add that --argument value pair
+                    commands.addUnique(current, next);
+                    // Consume the next element in the iterator
+                    mcArgsIterator.next();
+                } else {
+                    // This --argument doesn't have a value, so we just add the argument itself as a unique parameter
+                    commands.addUnique(current);
+                }
             } else {
-                commands.addUnique(current);
+                // Doesn't start with --, so this is not a named argument, and since we have no way of knowing if this
+                // is a duplicate or not, we just add it as a regular argument (no duplicate detection)
+                commands.add(current);
             }
         }
 
