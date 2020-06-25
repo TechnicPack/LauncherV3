@@ -28,6 +28,7 @@ import net.technicpack.launchercore.install.tasks.CopyFileTask;
 import net.technicpack.launchercore.install.tasks.EnsureFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.install.verifiers.FileSizeVerifier;
+import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import org.apache.commons.io.FileUtils;
@@ -38,6 +39,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class InstallMinecraftAssetsTask implements IInstallTask {
+    private final ModpackModel modpack;
     private final String assetsDirectory;
     private final File assetsIndex;
     private final ITasksQueue checkAssetsQueue;
@@ -45,11 +47,13 @@ public class InstallMinecraftAssetsTask implements IInstallTask {
     private final ITasksQueue copyAssetsQueue;
 
     private final static String virtualField = "virtual";
+    private final static String mapToResourcesField = "map_to_resources";
     private final static String objectsField = "objects";
     private final static String sizeField = "size";
     private final static String hashField = "hash";
 
-    public InstallMinecraftAssetsTask(String assetsDirectory, File assetsIndex, ITasksQueue checkAssetsQueue, ITasksQueue downloadAssetsQueue, ITasksQueue copyAssetsQueue) {
+    public InstallMinecraftAssetsTask(ModpackModel modpack, String assetsDirectory, File assetsIndex, ITasksQueue checkAssetsQueue, ITasksQueue downloadAssetsQueue, ITasksQueue copyAssetsQueue) {
+        this.modpack = modpack;
         this.assetsDirectory = assetsDirectory;
         this.assetsIndex = assetsIndex;
         this.checkAssetsQueue = checkAssetsQueue;
@@ -81,6 +85,11 @@ public class InstallMinecraftAssetsTask implements IInstallTask {
         if (obj.get(virtualField) != null)
             isVirtual = obj.get(virtualField).getAsBoolean();
 
+        boolean mapToResources = false;
+
+        if (obj.get(mapToResourcesField) != null)
+            mapToResources = obj.get(mapToResourcesField).getAsBoolean();
+
         ((InstallTasksQueue<MojangVersion>)queue).getMetadata().setAreAssetsVirtual(isVirtual);
 
         JsonObject allObjects = obj.get(objectsField).getAsJsonObject();
@@ -99,18 +108,23 @@ public class InstallMinecraftAssetsTask implements IInstallTask {
             String hash = file.get(hashField).getAsString();
             long size = file.get(sizeField).getAsLong();
 
-            File location = new File(assetsDirectory + File.separator + "objects" + File.separator + hash.substring(0, 2) + File.separator, hash);
+            File location = new File(assetsDirectory + "/objects/" + hash.substring(0, 2), hash);
             String url = MojangUtils.getResourceUrl(hash);
 
             (new File(location.getParent())).mkdirs();
 
-            File virtualOut =  new File(assetsDirectory + File.separator + "virtual" + File.separator + assetsKey + File.separator + friendlyName);
+            File target = null;
 
-            checkAssetsQueue.addTask(new EnsureFileTask(location, new FileSizeVerifier(size), null, url, virtualOut.getName(), downloadAssetsQueue, copyAssetsQueue));
+            if (isVirtual)
+                target = new File(assetsDirectory + "/virtual/"  + assetsKey + '/' + friendlyName);
+            else if (mapToResources)
+                target = new File(modpack.getResourcesDir(), friendlyName);
 
-            if (isVirtual && !virtualOut.exists()) {
-                (new File(virtualOut.getParent())).mkdirs();
-                copyAssetsQueue.addTask(new CopyFileTask(location, virtualOut));
+            checkAssetsQueue.addTask(new EnsureFileTask(location, new FileSizeVerifier(size), null, url, hash, downloadAssetsQueue, copyAssetsQueue));
+
+            if (target != null && !target.exists()) {
+                (new File(target.getParent())).mkdirs();
+                copyAssetsQueue.addTask(new CopyFileTask(location, target));
             }
         }
     }

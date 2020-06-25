@@ -52,7 +52,7 @@ public class MojangUtils {
     public static final String baseURL = "https://s3.amazonaws.com/Minecraft.Download/";
     public static final String assetsIndexes = baseURL + "indexes/";
     public static final String versions = baseURL + "versions/";
-    public static final String assets = "http://resources.download.minecraft.net/";
+    public static final String assets = "https://resources.download.minecraft.net/";
     public static final String versionList = versions + "versions.json";
 
     public static String getVersionJson(String version) {

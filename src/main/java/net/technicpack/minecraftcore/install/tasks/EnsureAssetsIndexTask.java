@@ -25,9 +25,11 @@ import net.technicpack.launchercore.install.tasks.DownloadFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidJsonFileVerifier;
+import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.AssetIndex;
+import net.technicpack.rest.io.Modpack;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,14 +37,16 @@ import java.io.IOException;
 public class EnsureAssetsIndexTask implements IInstallTask {
 
     private final File assetsDirectory;
+    private final ModpackModel modpack;
     private final ITasksQueue downloadIndexQueue;
     private final ITasksQueue examineIndexQueue;
     private final ITasksQueue checkAssetsQueue;
     private final ITasksQueue downloadAssetsQueue;
     private final ITasksQueue installAssetsQueue;
 
-    public EnsureAssetsIndexTask(File assetsDirectory, ITasksQueue downloadIndexQueue, ITasksQueue examineIndexQueue, ITasksQueue checkAssetsQueue, ITasksQueue downloadAssetsQueue, ITasksQueue installAssetsQueue) {
+    public EnsureAssetsIndexTask(File assetsDirectory, ModpackModel modpack, ITasksQueue downloadIndexQueue, ITasksQueue examineIndexQueue, ITasksQueue checkAssetsQueue, ITasksQueue downloadAssetsQueue, ITasksQueue installAssetsQueue) {
         this.assetsDirectory = assetsDirectory;
+        this.modpack = modpack;
         this.downloadIndexQueue = downloadIndexQueue;
         this.examineIndexQueue = examineIndexQueue;
         this.checkAssetsQueue = checkAssetsQueue;
@@ -85,7 +89,7 @@ public class EnsureAssetsIndexTask implements IInstallTask {
             downloadIndexQueue.addTask(new DownloadFileTask(assetsUrl, output, fileVerifier));
         }
 
-        examineIndexQueue.addTask(new InstallMinecraftAssetsTask(assetsDirectory.getAbsolutePath(), output, checkAssetsQueue, downloadAssetsQueue, installAssetsQueue));
+        examineIndexQueue.addTask(new InstallMinecraftAssetsTask(modpack, assetsDirectory.getAbsolutePath(), output, checkAssetsQueue, downloadAssetsQueue, installAssetsQueue));
     }
 
 }
