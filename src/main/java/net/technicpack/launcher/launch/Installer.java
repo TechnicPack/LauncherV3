@@ -65,6 +65,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 import java.util.zip.ZipException;
 
 public class Installer {
@@ -363,21 +364,34 @@ public class Installer {
             });
         }
 
-        // Remove bin/install_profile.json, which is used by ForgeWrapper to install Forge in Minecraft 1.13+
-        // (and the latest few Forge builds in 1.12.2)
-        File installProfileFile = new File(modpack.getBinDir(), "install_profile.json");
-        if (installProfileFile.exists()) {
-            if (!installProfileFile.delete()) {
-                throw new CacheDeleteException(installProfileFile.getAbsolutePath());
-            }
-        }
-
         if (doFullInstall) {
             //If we're installing a new version of modpack, then we need to get rid of the existing version.json
             File versionFile = new File(modpack.getBinDir(), "version.json");
             if (versionFile.exists()) {
                 if (!versionFile.delete()) {
                     throw new CacheDeleteException(versionFile.getAbsolutePath());
+                }
+            }
+
+            // Remove bin/install_profile.json, which is used by ForgeWrapper to install Forge in Minecraft 1.13+
+            // (and the latest few Forge builds in 1.12.2)
+            File installProfileFile = new File(modpack.getBinDir(), "install_profile.json");
+            if (installProfileFile.exists()) {
+                if (!installProfileFile.delete()) {
+                    throw new CacheDeleteException(installProfileFile.getAbsolutePath());
+                }
+            }
+
+            // Delete all other version JSON files in the bin dir
+            File[] binFiles = modpack.getBinDir().listFiles();
+            if (binFiles != null) {
+                final Pattern minecraftVersionPattern = Pattern.compile("^[0-9]+(\\.[0-9]+)+\\.json$");
+                for (File binFile : binFiles) {
+                    if (minecraftVersionPattern.matcher(binFile.getName()).matches()) {
+                        if (!binFile.delete()) {
+                            throw new CacheDeleteException(binFile.getAbsolutePath());
+                        }
+                    }
                 }
             }
 

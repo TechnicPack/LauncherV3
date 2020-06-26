@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 
 public class ChainVersionBuilder implements MojangVersionBuilder {
-    private static final Pattern MOJANG_VERSION_PATTERN = Pattern.compile("^[0-9]+(\\.[0-9]+)+$");
+    private static final Pattern MINECRAFT_VERSION_PATTERN = Pattern.compile("^[0-9]+(\\.[0-9]+)+$");
 
     private MojangVersionBuilder primaryVersionBuilder;
     private MojangVersionBuilder chainedVersionBuilder;
@@ -63,7 +63,7 @@ public class ChainVersionBuilder implements MojangVersionBuilder {
             // So, we just guess the Minecraft version and forcefully add the Mojang file here.
 
             String[] parts = latest.getId().split("-");
-            if (!MOJANG_VERSION_PATTERN.matcher(parts[0]).matches())
+            if (!MINECRAFT_VERSION_PATTERN.matcher(parts[0]).matches())
                 throw new IOException("Latest version in version chain failed to resolve to a Minecraft version");
 
             chain.addVersionToChain(chainedVersionBuilder.buildVersionFromKey(parts[0]));
