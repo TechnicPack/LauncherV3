@@ -28,9 +28,11 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.GameDownloads;
+import net.technicpack.utilslib.Utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
 
 public class InstallMinecraftIfNecessaryTask extends ListenerTask {
 
@@ -61,6 +63,7 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask {
 			url = dls.forClient().getUrl(); // TODO maybe use the sha1 sum?
 		} else {
 			url = MojangUtils.getVersionDownload(this.minecraftVersion);
+			Utils.getLogger().log(Level.SEVERE, "Using legacy Minecraft download! Version id = " + version.getId() + "; parent = " + version.getParentVersion());
 		}
 		String md5 = queue.getMirrorStore().getETag(url);
 		File cache = new File(cacheDirectory, "minecraft_" + this.minecraftVersion + ".jar");

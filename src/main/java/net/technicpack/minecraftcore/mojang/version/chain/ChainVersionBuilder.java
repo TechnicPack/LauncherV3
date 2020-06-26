@@ -23,8 +23,10 @@ import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 public class ChainVersionBuilder implements MojangVersionBuilder {
+    private static final Pattern MOJANG_VERSION_PATTERN = Pattern.compile("^[0-9]+(\\.[0-9]+)+$");
 
     private MojangVersionBuilder primaryVersionBuilder;
     private MojangVersionBuilder chainedVersionBuilder;
@@ -51,6 +53,20 @@ public class ChainVersionBuilder implements MojangVersionBuilder {
                 return null;
 
             chain.addVersionToChain(latest);
+        }
+
+        if (latest.getDownloads() == null) {
+            // HACK!
+            // For some reason the latest version we have doesn't have any downloads/probably isn't a Mojang version file.
+            // This happens with Attack of the B-Team, because Forge 1.6.4 doesn't has "null" set in inheritsFrom, so the
+            // launcher never attempts to download the Mojang version json from our repo.
+            // So, we just guess the Minecraft version and forcefully add the Mojang file here.
+
+            String[] parts = latest.getId().split("-");
+            if (!MOJANG_VERSION_PATTERN.matcher(parts[0]).matches())
+                throw new IOException("Latest version in version chain failed to resolve to a Minecraft version");
+
+            chain.addVersionToChain(chainedVersionBuilder.buildVersionFromKey(parts[0]));
         }
 
         return chain;

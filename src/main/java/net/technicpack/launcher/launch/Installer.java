@@ -406,7 +406,10 @@ public class Installer {
         fallbackRetrievers.add(fallbackVersionRetriever);
 
         File versionJson = new File(modpack.getBinDir(), "version.json");
+
+        // This always gets the version.json from the modpack.jar (it ignores "key"), cached as bin/version.json
         FileVersionBuilder zipVersionBuilder = new FileVersionBuilder(versionJson, zipVersionRetriever, fallbackRetrievers);
+        // This gets the "key" from bin/$key.json if it exists, otherwise it downloads it from our repo into that location
         FileVersionBuilder webVersionBuilder = new FileVersionBuilder(modpack.getBinDir(), null, fallbackRetrievers);
 
         return new ChainVersionBuilder(zipVersionBuilder, webVersionBuilder);
