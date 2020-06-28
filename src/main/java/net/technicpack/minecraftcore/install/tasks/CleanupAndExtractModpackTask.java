@@ -35,14 +35,14 @@ import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
 import java.io.File;
 import java.io.IOException;
 
-public class InstallModpackTask implements IInstallTask {
+public class CleanupAndExtractModpackTask implements IInstallTask {
 	private final ModpackModel pack;
 	private final Modpack modpack;
     private final ITasksQueue checkModQueue;
     private final ITasksQueue downloadModQueue;
     private final ITasksQueue copyModQueue;
 
-	public InstallModpackTask(ModpackModel pack, Modpack modpack, ITasksQueue checkModQueue, ITasksQueue downloadModQueue, ITasksQueue copyModQueue) {
+	public CleanupAndExtractModpackTask(ModpackModel pack, Modpack modpack, ITasksQueue checkModQueue, ITasksQueue downloadModQueue, ITasksQueue copyModQueue) {
 		this.pack = pack;
 		this.modpack = modpack;
         this.checkModQueue = checkModQueue;

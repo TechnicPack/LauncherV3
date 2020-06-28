@@ -395,7 +395,7 @@ public class Installer {
                 }
             }
 
-            examineModpackData.addTask(new InstallModpackTask(modpack, modpackData, verifyingFiles, downloadingMods, installingMods));
+            examineModpackData.addTask(new CleanupAndExtractModpackTask(modpack, modpackData, verifyingFiles, downloadingMods, installingMods));
         }
 
         if (doFullInstall)
