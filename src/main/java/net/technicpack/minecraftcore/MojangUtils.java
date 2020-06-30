@@ -49,15 +49,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MojangUtils {
+    /** @deprecated Uses old S3 bucket */
     public static final String baseURL = "https://s3.amazonaws.com/Minecraft.Download/";
     public static final String assetsIndexes = baseURL + "indexes/";
     public static final String versions = baseURL + "versions/";
+
     public static final String assets = "https://resources.download.minecraft.net/";
 
+    /** @deprecated Uses old S3 bucket */
     public static String getOldVersionDownload(String version) {
         return versions + version + "/" + version + ".jar";
     }
 
+    /** @deprecated Uses old S3 bucket */
     public static String getAssetsIndex(String assetsKey) {
         return assetsIndexes + assetsKey + ".json";
     }
