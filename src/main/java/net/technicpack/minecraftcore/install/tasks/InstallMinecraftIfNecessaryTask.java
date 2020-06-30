@@ -23,6 +23,7 @@ import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.ListenerTask;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
+import net.technicpack.launchercore.install.verifiers.SHA1FileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
@@ -59,22 +60,26 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask {
 
 		String url;
 		GameDownloads dls = version.getDownloads();
-		if (dls != null) {
-			url = dls.forClient().getUrl(); // TODO maybe use the sha1 sum?
-		} else {
-			url = MojangUtils.getOldVersionDownload(this.minecraftVersion);
-			Utils.getLogger().log(Level.SEVERE, "Using legacy Minecraft download! Version id = " + version.getId() + "; parent = " + version.getParentVersion());
-		}
-		String md5 = queue.getMirrorStore().getETag(url);
-		File cache = new File(cacheDirectory, "minecraft_" + this.minecraftVersion + ".jar");
 
 		IFileVerifier verifier = null;
 
-		if (md5 != null && !md5.isEmpty()) {
-			verifier = new MD5FileVerifier(md5);
+		if (dls != null) {
+			url = dls.forClient().getUrl(); // TODO maybe use the sha1 sum?
+			verifier = new SHA1FileVerifier(dls.forClient().getSha1());
 		} else {
-			verifier = new ValidZipFileVerifier();
+			url = MojangUtils.getOldVersionDownload(this.minecraftVersion);
+			Utils.getLogger().log(Level.SEVERE, "Using legacy Minecraft download! Version id = " + version.getId() + "; parent = " + version.getParentVersion());
+
+			String md5 = queue.getMirrorStore().getETag(url);
+
+			if (md5 != null && !md5.isEmpty()) {
+				verifier = new MD5FileVerifier(md5);
+			} else {
+				verifier = new ValidZipFileVerifier();
+			}
 		}
+
+		File cache = new File(cacheDirectory, "minecraft_" + this.minecraftVersion + ".jar");
 
 		if (!cache.exists() || !verifier.isFileValid(cache)) {
 			String output = this.pack.getCacheDir() + File.separator + "minecraft.jar";

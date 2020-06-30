@@ -22,18 +22,16 @@ package net.technicpack.utilslib;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+
+import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_1;
 
 public class SHA1Utils {
 
     public static String getSHA1(File file) {
         try {
-            FileInputStream fis = new FileInputStream(file);
-            String sha1 = DigestUtils.sha1Hex(fis);
-            fis.close();
-            return sha1;
+            return new DigestUtils(SHA_1).digestAsHex(file);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
