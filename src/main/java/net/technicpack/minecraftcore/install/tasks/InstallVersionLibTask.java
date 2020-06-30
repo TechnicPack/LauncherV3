@@ -7,6 +7,7 @@ import net.technicpack.launchercore.install.tasks.EnsureFileTask;
 import net.technicpack.launchercore.install.tasks.ListenerTask;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
+import net.technicpack.launchercore.install.verifiers.SHA1FileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.mojang.version.ExtractRulesFileFilter;
@@ -45,37 +46,47 @@ public class InstallVersionLibTask extends ListenerTask {
 
         queue.refreshProgress();
 
-        String natives = null;
+        // Native classifier as in the library's downloads -> classifiers -> $nativeClassifier
+        // (the mapping of which is taken from the library's natives map)
+        String nativeClassifier = null;
         File extractDirectory = null;
         if (library.getNatives() != null) {
-            natives = library.getNatives().get(OperatingSystem.getOperatingSystem());
+            nativeClassifier = library.getNatives().get(OperatingSystem.getOperatingSystem());
 
-            if (natives != null) {
+            if (nativeClassifier != null) {
                 extractDirectory = new File(this.pack.getBinDir(), "natives");
             }
         }
 
-        String path = library.getArtifactPath(natives).replace("${arch}", System.getProperty("sun.arch.data.model"));
+        String path = library.getArtifactPath(nativeClassifier).replace("${arch}", System.getProperty("sun.arch.data.model"));
 
         File cache = new File(directories.getCacheDirectory(), path);
         if (cache.getParentFile() != null) {
             cache.getParentFile().mkdirs();
         }
 
-        ValidZipFileVerifier zipVerifier = new ValidZipFileVerifier();
-        if (cache.exists() && zipVerifier.isFileValid(cache) && extractDirectory == null)
+        IFileVerifier verifier;
+
+        String sha1 = library.getArtifactSha1(nativeClassifier);
+        if (sha1 != null && !sha1.isEmpty())
+            verifier = new SHA1FileVerifier(sha1);
+        else
+            verifier = new ValidZipFileVerifier();
+
+        // TODO: Add check based on size (so it fails early if the size is different)
+        if (cache.exists() && verifier.isFileValid(cache) && extractDirectory == null)
             return;
 
-        IFileVerifier verifier = null;
         String url = null;
 
-        if (!cache.exists() || !zipVerifier.isFileValid(cache)) {
+        // TODO: this causes verification to happen twice, for natives
+        if (!cache.exists() || !verifier.isFileValid(cache)) {
             url = library.getDownloadUrl(path, queue.getMirrorStore()).replace("${arch}", System.getProperty("sun.arch.data.model"));
-            String md5 = queue.getMirrorStore().getETag(url);
-            if (md5 != null && !md5.isEmpty()) {
-                verifier = new MD5FileVerifier(md5);
-            } else {
-                verifier = zipVerifier;
+            if (sha1 == null || sha1.isEmpty()) {
+                String md5 = queue.getMirrorStore().getETag(url);
+                if (md5 != null && !md5.isEmpty()) {
+                    verifier = new MD5FileVerifier(md5);
+                }
             }
         }
 

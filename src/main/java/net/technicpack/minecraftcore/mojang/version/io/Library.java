@@ -154,6 +154,23 @@ public class Library {
         return filename;
     }
 
+    public String getArtifactSha1(String nativeClassifier) {
+        if (downloads == null)
+            return null;
+
+        Artifact artifact;
+
+        if (nativeClassifier != null)
+            artifact = downloads.getClassifier(nativeClassifier);
+        else
+            artifact = downloads.getArtifact();
+
+        if (artifact != null)
+            return artifact.getSha1();
+
+        return null;
+    }
+
     public String getDownloadUrl(String path, MirrorStore mirrorStore) throws DownloadException {
         Set<String> possibleUrls = new LinkedHashSet<>(8);
 
