@@ -62,7 +62,7 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask {
 		if (dls != null) {
 			url = dls.forClient().getUrl(); // TODO maybe use the sha1 sum?
 		} else {
-			url = MojangUtils.getVersionDownload(this.minecraftVersion);
+			url = MojangUtils.getOldVersionDownload(this.minecraftVersion);
 			Utils.getLogger().log(Level.SEVERE, "Using legacy Minecraft download! Version id = " + version.getId() + "; parent = " + version.getParentVersion());
 		}
 		String md5 = queue.getMirrorStore().getETag(url);
