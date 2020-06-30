@@ -200,4 +200,8 @@ public class Library {
         throw new DownloadException("Failed to download library " + path + ": no mirror found");
     }
 
+    public boolean isForge() {
+        return name.startsWith("net.minecraftforge:forge:") || name.startsWith("net.minecraftforge:minecraftforge:");
+    }
+
 }

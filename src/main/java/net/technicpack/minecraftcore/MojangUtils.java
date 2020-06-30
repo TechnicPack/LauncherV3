@@ -171,10 +171,10 @@ public class MojangUtils {
         return Integer.parseInt(versionParts[0]) == 1 && Integer.parseInt(versionParts[1]) < 6;
     }
 
-    public static boolean needsForgeWrapper(MojangVersion version) {
+    public static boolean hasModernForge(MojangVersion version) {
         boolean foundForge = false;
         for (Library library : version.getLibrariesForOS()) {
-            if (library.getName().startsWith("net.minecraftforge:forge")) {
+            if (library.isForge()) {
                 foundForge = true;
                 break;
             }
@@ -191,18 +191,21 @@ public class MojangUtils {
             return false;
         }
 
-        final ComparableVersion mcVersion = new ComparableVersion(m.group("mc"));
+        final String mcVersionString = m.group("mc");
+
+        final ComparableVersion mcVersion = new ComparableVersion(mcVersionString);
         final ComparableVersion forgeVersion = new ComparableVersion(m.group("forge"));
 
-        // Needs ForgeWrapper:
+        // The new Forge installer exists in:
         // Forge for MC 1.13+
         // Forge for MC 1.12.2, after the version 14.23.5.2847
-        return mcVersion.compareTo(new ComparableVersion("1.13")) >= 0 || (
-                mcVersion.compareTo(new ComparableVersion("1.12.2")) == 0
-                        && forgeVersion.compareTo(new ComparableVersion("14.23.5.2847")) > 0
-        );
+
+        if (mcVersion.compareTo(new ComparableVersion("1.13")) >= 0)
+            return true;
+
+        if (mcVersionString.equals("1.12.2") && forgeVersion.compareTo(new ComparableVersion("14.23.5.2847")) > 0)
+            return true;
+
+        return false;
     }
-
-
-
 }

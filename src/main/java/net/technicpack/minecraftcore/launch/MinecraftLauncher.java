@@ -264,7 +264,7 @@ public class MinecraftLauncher {
         // HACK
         boolean isLegacy = MojangUtils.isLegacyVersion(version.getId());
 
-        final boolean needsWrapper = MojangUtils.needsForgeWrapper(version);
+        final boolean hasModernForge = MojangUtils.hasModernForge(version);
         final String[] versionIdParts = version.getId().split("-");
         final boolean is1_12_2 = versionIdParts[0].equals("1.12.2");
 
@@ -274,14 +274,11 @@ public class MinecraftLauncher {
                 continue;
             }
 
-            final boolean isForge = library.getName().startsWith("net.minecraftforge:minecraftforge") ||
-                    library.getName().startsWith("net.minecraftforge:forge:");
-
             // If minecraftforge is described in the libraries, skip it
             // HACK - Please let us get rid of this when we move to actually hosting forge,
             // or at least only do it if the users are sticking with modpack.jar
-            if (isForge) {
-                if (needsWrapper) {
+            if (library.isForge()) {
+                if (hasModernForge) {
                     if (!is1_12_2 && !library.getName().endsWith(":launcher")) {
                         continue;
                     } else if (is1_12_2 && !library.getName().endsWith(":universal")) {
@@ -308,7 +305,7 @@ public class MinecraftLauncher {
         }
 
         // Add the modpack.jar to the classpath, if it exists and minecraftforge is not a library already
-        if (!(MojangUtils.needsForgeWrapper(version))) {
+        if (!(MojangUtils.hasModernForge(version))) {
             File modpack = new File(pack.getBinDir(), "modpack.jar");
             if (modpack.exists()) {
                 if (result.length() > 1) {

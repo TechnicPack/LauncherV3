@@ -91,11 +91,14 @@ public class HandleVersionFileTask implements IInstallTask {
             version.setMainClass("net.technicpack.legacywrapper.Launch");
         }
 
-        // For Forge 1.13+ and the latest 1.12.2 builds, there's an installer
-        // Forge 1.13+ needs to use a wrapper
-        final boolean needsWrapper = MojangUtils.needsForgeWrapper(version);
+        // In Forge 1.13+ and 1.12.2 > 2847, there's an installer jar, and the universal jar can't be used since it
+        // doesn't have the required dependencies to actually launch the game.
+        // So, for Forge 1.13+ we need to use ForgeWrapper to install Forge (it performs deobfuscation at install time).
+        // For Forge 1.12.2 it launches directly, as long as we inject the universal jar (it won't launch at all if
+        // you try running it through ForgeWrapper).
+        final boolean hasModernForge = MojangUtils.hasModernForge(version);
 
-        if (needsWrapper) {
+        if (hasModernForge) {
             File profileJson = new File(pack.getBinDir(), "install_profile.json");
             ZipFileRetriever zipVersionRetriever = new ZipFileRetriever(new File(pack.getBinDir(), "modpack.jar"));
             MojangVersion profileVersion = new FileVersionBuilder(profileJson, zipVersionRetriever, null).buildVersionFromKey("install_profile");
@@ -104,7 +107,8 @@ public class HandleVersionFileTask implements IInstallTask {
             final boolean is1_12_2 = versionIdParts[0].equals("1.12.2");
 
             for (Library library : profileVersion.getLibrariesForOS()) {
-                if (library.getName().startsWith("net.minecraftforge:forge:")) {
+                if (library.isForge()) {
+                    // For Forge 1.12.2 > 2847, we have to inject the universal jar as a dependency
                     if (is1_12_2) {
                         library.setName(library.getName() + ":universal");
                         library.setUrl("https://files.minecraftforge.net/maven/");
@@ -114,14 +118,17 @@ public class HandleVersionFileTask implements IInstallTask {
 
                         checkLibraryQueue.addTask(new InstallVersionLibTask(library, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
                     }
+
+                    // We normally skip Forge because Forge specifies itself as a dependency, for some reason
                     continue;
                 }
+
                 checkLibraryQueue.addTask(new InstallVersionLibTask(library, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
             }
 
+            // For Forge 1.13+, we inject our ForgeWrapper as a dependency and launch it through that
             if (!is1_12_2) {
                 Library forgeWrapper = new Library();
-
                 // TODO: add hash validation
                 forgeWrapper.setName("io.github.zekerzhayard:ForgeWrapper:1.4.1-technic2");
 
@@ -130,7 +137,7 @@ public class HandleVersionFileTask implements IInstallTask {
                 version.setMainClass("io.github.zekerzhayard.forgewrapper.installer.Main");
 
                 for (Library library : version.getLibrariesForOS()) {
-                    if (library.getName().startsWith("net.minecraftforge:forge:")) {
+                    if (library.isForge()) {
                         Library forgeLauncher = new Library();
                         forgeLauncher.setName(library.getName() + ":launcher");
                         forgeLauncher.setUrl("https://files.minecraftforge.net/maven/");
@@ -154,8 +161,7 @@ public class HandleVersionFileTask implements IInstallTask {
             // If minecraftforge is described in the libraries, skip it
             // HACK - Please let us get rid of this when we move to actually hosting forge,
             // or at least only do it if the users are sticking with modpack.jar
-            if (library.getName().startsWith("net.minecraftforge:minecraftforge") ||
-                    (library.getName().startsWith("net.minecraftforge:forge:"))) {
+            if (library.isForge()) {
                 continue;
             }
 
