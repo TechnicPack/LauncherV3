@@ -19,7 +19,6 @@
 
 package net.technicpack.solder.http;
 
-import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.rest.RestObject;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.solder.ISolderApi;
@@ -35,17 +34,15 @@ import java.util.Map;
 
 public class HttpSolderApi implements ISolderApi {
     private String clientId;
-    private UserModel userModel;
     private Map<String, String> mirrorUrls = new HashMap<String, String>();
 
-    public HttpSolderApi(String clientId, UserModel userModel) {
+    public HttpSolderApi(String clientId) {
         this.clientId = clientId;
-        this.userModel = userModel;
     }
 
     @Override
     public ISolderPackApi getSolderPack(String solderRoot, String modpackSlug, String mirrorUrl) throws RestfulAPIException {
-        return new HttpSolderPackApi(solderRoot, modpackSlug, clientId, userModel.getCurrentUser().getDisplayName(), mirrorUrl);
+        return new HttpSolderPackApi(solderRoot, modpackSlug, clientId, mirrorUrl);
     }
 
     @Override

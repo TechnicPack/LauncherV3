@@ -31,14 +31,12 @@ public class HttpSolderPackApi implements ISolderPackApi {
     private String baseUrl;
     private String modpackSlug;
     private String clientId;
-    private String userDisplayName;
     private String mirrorUrl;
 
-    protected HttpSolderPackApi(String baseUrl, String modpackSlug, String clientId, String userDisplayName, String mirrorUrl) throws RestfulAPIException {
+    protected HttpSolderPackApi(String baseUrl, String modpackSlug, String clientId, String mirrorUrl) throws RestfulAPIException {
         this.baseUrl = baseUrl;
         this.modpackSlug = modpackSlug;
         this.clientId = clientId;
-        this.userDisplayName = userDisplayName;
         this.mirrorUrl = mirrorUrl;
 
         if (mirrorUrl == null)

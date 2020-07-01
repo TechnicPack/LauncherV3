@@ -304,15 +304,15 @@ public class LauncherMain {
         IModpackResourceType backgroundType = new BackgroundResourceType();
 
         PackResourceMapper iconMapper = new PackResourceMapper(directories, resources.getImage("icon.png"), iconType);
-        ImageRepository<ModpackModel> iconRepo = new ImageRepository<ModpackModel>(iconMapper, new PackImageStore(iconType, userModel));
-        ImageRepository<ModpackModel> logoRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, resources.getImage("modpack/ModImageFiller.png"), logoType), new PackImageStore(logoType, userModel));
-        ImageRepository<ModpackModel> backgroundRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, null, backgroundType), new PackImageStore(backgroundType, userModel));
+        ImageRepository<ModpackModel> iconRepo = new ImageRepository<ModpackModel>(iconMapper, new PackImageStore(iconType));
+        ImageRepository<ModpackModel> logoRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, resources.getImage("modpack/ModImageFiller.png"), logoType), new PackImageStore(logoType));
+        ImageRepository<ModpackModel> backgroundRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, null, backgroundType), new PackImageStore(backgroundType));
 
         ImageRepository<IUserType> skinRepo = new ImageRepository<IUserType>(new TechnicFaceMapper(directories, resources), new MinotarFaceImageStore("https://minotar.net/"));
 
         ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<AuthorshipInfo>(new TechnicAvatarMapper(directories, resources), new WebAvatarImageStore());
 
-        HttpSolderApi httpSolder = new HttpSolderApi(settings.getClientId(), userModel);
+        HttpSolderApi httpSolder = new HttpSolderApi(settings.getClientId());
         ISolderApi solder = new CachedSolderApi(directories, httpSolder, 60 * 60);
         HttpPlatformApi httpPlatform = new HttpPlatformApi("http://api.technicpack.net/", buildNumber.getBuildNumber());
 
