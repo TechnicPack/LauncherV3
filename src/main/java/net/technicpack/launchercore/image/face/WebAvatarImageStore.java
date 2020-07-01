@@ -20,7 +20,6 @@
 package net.technicpack.launchercore.image.face;
 
 import net.technicpack.launchercore.image.IImageStore;
-import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.utilslib.Utils;
 
@@ -29,10 +28,8 @@ import java.io.IOException;
 import java.util.logging.Level;
 
 public class WebAvatarImageStore implements IImageStore<AuthorshipInfo> {
-    private MirrorStore mirrorStore;
 
-    public WebAvatarImageStore(MirrorStore mirrorStore) {
-        this.mirrorStore = mirrorStore;
+    public WebAvatarImageStore() {
     }
 
     @Override
@@ -43,7 +40,7 @@ public class WebAvatarImageStore implements IImageStore<AuthorshipInfo> {
     @Override
     public void downloadImage(AuthorshipInfo key, File target) {
         try {
-            mirrorStore.downloadFile(key.getAvatar(), key.getUser(), target.getAbsolutePath());
+            Utils.downloadFile(key.getAvatar(), key.getUser(), target.getAbsolutePath());
         } catch (InterruptedException ex) {
             //User cancel
         } catch (IOException e) {

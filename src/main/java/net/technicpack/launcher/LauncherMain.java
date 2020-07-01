@@ -56,8 +56,6 @@ import net.technicpack.launchercore.launch.java.source.FileJavaSource;
 import net.technicpack.launchercore.launch.java.source.InstalledJavaSource;
 import net.technicpack.launchercore.logging.BuildLogFormatter;
 import net.technicpack.launchercore.logging.RotatingFileHandler;
-import net.technicpack.launchercore.mirror.MirrorStore;
-import net.technicpack.launchercore.mirror.secure.rest.JsonWebSecureMirror;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.PackLoader;
 import net.technicpack.launchercore.modpacks.resources.PackImageStore;
@@ -301,25 +299,22 @@ public class LauncherMain {
         IUserStore<MojangUser> users = TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json"));
         UserModel userModel = new UserModel(users, new AuthenticationService());
 
-        MirrorStore mirrorStore = new MirrorStore(userModel);
-        mirrorStore.addSecureMirror("mirror.technicpack.net", new JsonWebSecureMirror("http://mirror.technicpack.net/", "mirror.technicpack.net"));
-
         IModpackResourceType iconType = new IconResourceType();
         IModpackResourceType logoType = new LogoResourceType();
         IModpackResourceType backgroundType = new BackgroundResourceType();
 
         PackResourceMapper iconMapper = new PackResourceMapper(directories, resources.getImage("icon.png"), iconType);
-        ImageRepository<ModpackModel> iconRepo = new ImageRepository<ModpackModel>(iconMapper, new PackImageStore(iconType, mirrorStore, userModel));
-        ImageRepository<ModpackModel> logoRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, resources.getImage("modpack/ModImageFiller.png"), logoType), new PackImageStore(logoType, mirrorStore, userModel));
-        ImageRepository<ModpackModel> backgroundRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, null, backgroundType), new PackImageStore(backgroundType, mirrorStore, userModel));
+        ImageRepository<ModpackModel> iconRepo = new ImageRepository<ModpackModel>(iconMapper, new PackImageStore(iconType, userModel));
+        ImageRepository<ModpackModel> logoRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, resources.getImage("modpack/ModImageFiller.png"), logoType), new PackImageStore(logoType, userModel));
+        ImageRepository<ModpackModel> backgroundRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, null, backgroundType), new PackImageStore(backgroundType, userModel));
 
-        ImageRepository<IUserType> skinRepo = new ImageRepository<IUserType>(new TechnicFaceMapper(directories, resources), new MinotarFaceImageStore("https://minotar.net/", mirrorStore));
+        ImageRepository<IUserType> skinRepo = new ImageRepository<IUserType>(new TechnicFaceMapper(directories, resources), new MinotarFaceImageStore("https://minotar.net/"));
 
-        ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<AuthorshipInfo>(new TechnicAvatarMapper(directories, resources), new WebAvatarImageStore(mirrorStore));
+        ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<AuthorshipInfo>(new TechnicAvatarMapper(directories, resources), new WebAvatarImageStore());
 
         HttpSolderApi httpSolder = new HttpSolderApi(settings.getClientId(), userModel);
         ISolderApi solder = new CachedSolderApi(directories, httpSolder, 60 * 60);
-        HttpPlatformApi httpPlatform = new HttpPlatformApi("http://api.technicpack.net/", mirrorStore, buildNumber.getBuildNumber());
+        HttpPlatformApi httpPlatform = new HttpPlatformApi("http://api.technicpack.net/", buildNumber.getBuildNumber());
 
         IPlatformApi platform = new ModpackCachePlatformApi(httpPlatform, 60 * 60, directories);
         IPlatformSearchApi platformSearch = new HttpPlatformSearchApi("http://api.technicpack.net/", buildNumber.getBuildNumber());
@@ -342,7 +337,7 @@ public class LauncherMain {
 
         MinecraftLauncher launcher = new MinecraftLauncher(platform, directories, userModel, javaVersions, buildNumber);
         ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());
-        Installer installer = new Installer(startupParameters, mirrorStore, directories, modpackInstaller, launcher, settings, iconMapper);
+        Installer installer = new Installer(startupParameters, directories, modpackInstaller, launcher, settings, iconMapper);
 
         IDiscordApi discordApi = new HttpDiscordApi("https://discord.com/api/");
         discordApi = new CacheDiscordApi(discordApi, 600, 60);

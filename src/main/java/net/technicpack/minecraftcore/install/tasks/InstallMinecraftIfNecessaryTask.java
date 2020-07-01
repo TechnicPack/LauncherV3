@@ -70,7 +70,7 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask {
 			url = MojangUtils.getOldVersionDownload(this.minecraftVersion);
 			Utils.getLogger().log(Level.SEVERE, "Using legacy Minecraft download! Version id = " + version.getId() + "; parent = " + version.getParentVersion());
 
-			String md5 = queue.getMirrorStore().getETag(url);
+			String md5 = Utils.getETag(url);
 
 			if (md5 != null && !md5.isEmpty()) {
 				verifier = new MD5FileVerifier(md5);
@@ -83,7 +83,7 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask {
 
 		if (!cache.exists() || !verifier.isFileValid(cache)) {
 			String output = this.pack.getCacheDir() + File.separator + "minecraft.jar";
-			queue.getMirrorStore().downloadFile(url, cache.getName(), output, cache, verifier, this);
+			Utils.downloadFile(url, cache.getName(), output, cache, verifier, this);
 		}
 
 		MojangUtils.copyMinecraftJar(cache, new File(this.pack.getBinDir(), "minecraft.jar"));

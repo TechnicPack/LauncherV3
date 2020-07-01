@@ -21,7 +21,6 @@ package net.technicpack.minecraftcore.mojang.version.io;
 
 import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.exception.DownloadException;
-import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 
@@ -171,7 +170,7 @@ public class Library {
         return null;
     }
 
-    public String getDownloadUrl(String path, MirrorStore mirrorStore) throws DownloadException {
+    public String getDownloadUrl(String path) throws DownloadException {
         Set<String> possibleUrls = new LinkedHashSet<>(8);
 
         // Check the old-style URL (Forge 1.6, I think?)
@@ -209,7 +208,7 @@ public class Library {
         }
 
         for (String possibleUrl : possibleUrls) {
-            if (Utils.pingHttpURL(possibleUrl, mirrorStore)) {
+            if (Utils.pingHttpURL(possibleUrl)) {
                 return possibleUrl;
             }
         }

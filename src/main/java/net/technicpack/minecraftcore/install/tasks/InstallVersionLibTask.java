@@ -14,6 +14,7 @@ import net.technicpack.minecraftcore.mojang.version.ExtractRulesFileFilter;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
 import net.technicpack.utilslib.IZipFileFilter;
 import net.technicpack.utilslib.OperatingSystem;
+import net.technicpack.utilslib.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -81,9 +82,9 @@ public class InstallVersionLibTask extends ListenerTask {
 
         // TODO: this causes verification to happen twice, for natives
         if (!cache.exists() || !verifier.isFileValid(cache)) {
-            url = library.getDownloadUrl(path, queue.getMirrorStore()).replace("${arch}", System.getProperty("sun.arch.data.model"));
+            url = library.getDownloadUrl(path).replace("${arch}", System.getProperty("sun.arch.data.model"));
             if (sha1 == null || sha1.isEmpty()) {
-                String md5 = queue.getMirrorStore().getETag(url);
+                String md5 = Utils.getETag(url);
                 if (md5 != null && !md5.isEmpty()) {
                     verifier = new MD5FileVerifier(md5);
                 }

@@ -36,7 +36,6 @@ import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
 import net.technicpack.launchercore.launch.java.IJavaVersion;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
-import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.RunData;
 import net.technicpack.launchercore.modpacks.resources.PackResourceMapper;
@@ -74,7 +73,6 @@ public class Installer {
     protected final TechnicSettings settings;
     protected final PackResourceMapper packIconMapper;
     protected final StartupParameters startupParameters;
-    protected final MirrorStore mirrorStore;
     protected final LauncherDirectories directories;
     protected Object cancelLock = new Object();
     protected boolean isCancelledByUser = false;
@@ -82,13 +80,12 @@ public class Installer {
     private Thread runningThread;
     private LauncherUnhider launcherUnhider;
 
-    public Installer(StartupParameters startupParameters, MirrorStore mirrorStore, LauncherDirectories directories, ModpackInstaller installer, MinecraftLauncher launcher, TechnicSettings settings, PackResourceMapper packIconMapper) {
+    public Installer(StartupParameters startupParameters, LauncherDirectories directories, ModpackInstaller installer, MinecraftLauncher launcher, TechnicSettings settings, PackResourceMapper packIconMapper) {
         this.installer = installer;
         this.launcher = launcher;
         this.settings = settings;
         this.packIconMapper = packIconMapper;
         this.startupParameters = startupParameters;
-        this.mirrorStore = mirrorStore;
         this.directories = directories;
     }
 
@@ -117,7 +114,7 @@ public class Installer {
                 try {
                     MojangVersion version = null;
 
-                    InstallTasksQueue<MojangVersion> tasksQueue = new InstallTasksQueue<MojangVersion>(listener, mirrorStore);
+                    InstallTasksQueue<MojangVersion> tasksQueue = new InstallTasksQueue<MojangVersion>(listener);
                     MojangVersionBuilder versionBuilder = createVersionBuilder(pack, tasksQueue);
 
                     if (!pack.isLocalOnly() && build != null && !build.isEmpty()) {
@@ -414,7 +411,7 @@ public class Installer {
     private MojangVersionBuilder createVersionBuilder(ModpackModel modpack, InstallTasksQueue tasksQueue) {
 
         ZipFileRetriever zipVersionRetriever = new ZipFileRetriever(new File(modpack.getBinDir(), "modpack.jar"));
-        HttpFileRetriever fallbackVersionRetriever = new HttpFileRetriever(mirrorStore, TechnicConstants.technicVersions, tasksQueue.getDownloadListener());
+        HttpFileRetriever fallbackVersionRetriever = new HttpFileRetriever(TechnicConstants.technicVersions, tasksQueue.getDownloadListener());
 
         ArrayList<MojangVersionRetriever> fallbackRetrievers = new ArrayList<MojangVersionRetriever>(1);
         fallbackRetrievers.add(fallbackVersionRetriever);

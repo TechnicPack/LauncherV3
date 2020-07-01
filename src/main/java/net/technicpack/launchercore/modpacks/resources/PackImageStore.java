@@ -21,7 +21,6 @@ package net.technicpack.launchercore.modpacks.resources;
 
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.image.IImageStore;
-import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.resources.resourcetype.IModpackResourceType;
 import net.technicpack.rest.io.Resource;
@@ -33,12 +32,10 @@ import java.util.logging.Level;
 
 public class PackImageStore implements IImageStore<ModpackModel> {
     private IModpackResourceType resourceType;
-    private MirrorStore mirrorStore;
     private UserModel userModel;
 
-    public PackImageStore(IModpackResourceType resourceType, MirrorStore mirrorStore, UserModel userModel) {
+    public PackImageStore(IModpackResourceType resourceType, UserModel userModel) {
         this.resourceType = resourceType;
-        this.mirrorStore = mirrorStore;
         this.userModel = userModel;
     }
 
@@ -58,7 +55,7 @@ public class PackImageStore implements IImageStore<ModpackModel> {
             return;
 
         try {
-            mirrorStore.downloadFile(res.getUrl(), userModel.getCurrentUser().getDisplayName(), target.getAbsolutePath());
+            Utils.downloadFile(res.getUrl(), userModel.getCurrentUser().getDisplayName(), target.getAbsolutePath());
         } catch (InterruptedException ex) {
             //user cancel
             return;

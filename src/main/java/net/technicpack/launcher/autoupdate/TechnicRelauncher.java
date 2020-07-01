@@ -23,19 +23,12 @@ import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.autoupdate.tasks.*;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.LauncherMain;
-import net.technicpack.launcher.io.TechnicUserStore;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launchercore.auth.IUserStore;
-import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.install.tasks.TaskGroup;
-import net.technicpack.launchercore.mirror.MirrorStore;
-import net.technicpack.launchercore.mirror.secure.rest.JsonWebSecureMirror;
-import net.technicpack.minecraftcore.mojang.auth.AuthenticationService;
-import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.ui.controls.installation.SplashScreen;
 
 import java.awt.*;
@@ -85,17 +78,9 @@ public class TechnicRelauncher extends Relauncher {
         return parameters.isLauncher();
     }
 
-    protected MirrorStore createMirrorStore() {
-        IUserStore<MojangUser> users = TechnicUserStore.load(new File(getDirectories().getLauncherDirectory(), "users.json"));
-        UserModel userModel = new UserModel(users, new AuthenticationService());
-        MirrorStore mirrorStore = new MirrorStore(userModel);
-        mirrorStore.addSecureMirror("mirror.technicpack.net", new JsonWebSecureMirror("http://mirror.technicpack.net/", "mirror.technicpack.net"));
-        return mirrorStore;
-    }
-
     @Override
     public InstallTasksQueue buildMoverTasks() {
-        InstallTasksQueue<Object> queue = new InstallTasksQueue<Object>(null, createMirrorStore());
+        InstallTasksQueue<Object> queue = new InstallTasksQueue<Object>(null);
 
         queue.addTask(new MoveLauncherPackage(resources.getString("updater.mover"), new File(parameters.getMoveTarget()), this));
         queue.addTask(new LaunchLauncherMode(resources.getString("updater.finallaunch"), this, parameters.getMoveTarget(), parameters.isLegacyMover()));
@@ -116,7 +101,7 @@ public class TechnicRelauncher extends Relauncher {
         screen.setLocationRelativeTo(null);
         screen.setVisible(true);
 
-        InstallTasksQueue<Object> queue = new InstallTasksQueue<Object>(screen.getProgressBar(), createMirrorStore());
+        InstallTasksQueue<Object> queue = new InstallTasksQueue<Object>(screen.getProgressBar());
 
         ArrayList<IInstallTask> postDownloadTasks = new ArrayList<IInstallTask>();
         postDownloadTasks.add(new LaunchMoverMode(resources.getString("updater.launchmover"), getTempLauncher(), this));

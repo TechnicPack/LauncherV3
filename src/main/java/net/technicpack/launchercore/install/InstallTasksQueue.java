@@ -20,7 +20,6 @@
 package net.technicpack.launchercore.install;
 
 import net.technicpack.launchercore.install.tasks.IInstallTask;
-import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.launchercore.util.DownloadListener;
 
 import java.io.IOException;
@@ -30,12 +29,10 @@ public class InstallTasksQueue<Metadata> implements ITasksQueue {
     private DownloadListener listener;
     private LinkedList<IInstallTask> tasks;
     private IInstallTask currentTask;
-    private MirrorStore mirrorStore;
     private Metadata metadata;
 
-    public InstallTasksQueue(DownloadListener listener, MirrorStore mirrorStore) {
+    public InstallTasksQueue(DownloadListener listener) {
         this.listener = listener;
-        this.mirrorStore = mirrorStore;
         this.tasks = new LinkedList<IInstallTask>();
         this.currentTask = null;
     }
@@ -59,10 +56,6 @@ public class InstallTasksQueue<Metadata> implements ITasksQueue {
 
     public void addTask(IInstallTask task) {
         tasks.addLast(task);
-    }
-
-    public MirrorStore getMirrorStore() {
-        return this.mirrorStore;
     }
 
     public DownloadListener getDownloadListener() {

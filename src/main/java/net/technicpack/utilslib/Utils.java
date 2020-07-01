@@ -22,8 +22,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.exception.DownloadException;
-import net.technicpack.launchercore.mirror.MirrorStore;
-import org.apache.commons.io.IOUtils;
+import net.technicpack.launchercore.install.verifiers.IFileVerifier;
+import net.technicpack.launchercore.mirror.download.Download;
+import net.technicpack.launchercore.util.DownloadListener;
+import org.apache.commons.io.FileUtils;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -35,6 +37,7 @@ import java.util.logging.Logger;
 public class Utils {
     private static final Gson gson;
     private static final Logger logger = Logger.getLogger("net.technicpack.launcher.Main");
+    private static final int DOWNLOAD_RETRIES = 3;
 
     static {
         GsonBuilder builder = new GsonBuilder();
@@ -74,9 +77,9 @@ public class Utils {
      * @param urlLoc The HTTP URL indicating the location of the content.
      * @return True if the content can be accessed successfully, false otherwise.
      */
-    public static boolean pingHttpURL(String urlLoc, MirrorStore mirrorStore) {
+    public static boolean pingHttpURL(String urlLoc) {
         try {
-            final URL url = mirrorStore.getFullUrl(urlLoc);
+            final URL url = getFullUrl(urlLoc);
             HttpURLConnection conn = openHttpConnection(url);
             conn.setRequestMethod("HEAD");
 
@@ -190,5 +193,93 @@ public class Utils {
             return null;
         }
         return out;
+    }
+
+    public static URL getFullUrl(String url) throws DownloadException {
+        URL urlObject;
+
+        try {
+            urlObject = new URL(url);
+        } catch (MalformedURLException ex) {
+            throw new DownloadException("Invalid URL: " + url, ex);
+        }
+
+        return urlObject;
+    }
+
+    public static String getETag(String address) {
+        String md5 = "";
+
+        try {
+            URL url = getFullUrl(address);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setDoInput(true);
+            conn.setDoOutput(false);
+            System.setProperty("http.agent", TechnicConstants.getUserAgent());
+            conn.setRequestProperty("User-Agent", TechnicConstants.getUserAgent());
+            HttpURLConnection.setFollowRedirects(true);
+            conn.setUseCaches(false);
+            conn.setInstanceFollowRedirects(true);
+
+            String eTag = conn.getHeaderField("ETag");
+            if (eTag != null) {
+                eTag = eTag.replaceAll("^\"|\"$", "");
+                if (eTag.length() == 32) {
+                    md5 = eTag;
+                }
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return md5;
+    }
+
+    public static Download downloadFile(String url, String name, String output, File cache, IFileVerifier verifier, DownloadListener listener) throws IOException, InterruptedException {
+        int tries = DOWNLOAD_RETRIES;
+        File outputFile = null;
+        Download download = null;
+        while (tries > 0) {
+            getLogger().info("Starting download of " + url + ", with " + tries + " tries remaining");
+            tries--;
+            download = new Download(getFullUrl(url), name, output);
+            download.setListener(listener);
+            download.run();
+            if (download.getResult() != Download.Result.SUCCESS) {
+                if (download.getOutFile() != null) {
+                    download.getOutFile().delete();
+                }
+
+                if (Thread.interrupted())
+                    throw new InterruptedException();
+
+                System.err.println("Download of " + url + " Failed!");
+                if (listener != null) {
+                    listener.stateChanged("Download failed, retries remaining: " + tries, 0F);
+                }
+            } else {
+                if (download.getOutFile().exists() && (verifier == null || verifier.isFileValid(download.getOutFile()))) {
+                    outputFile = download.getOutFile();
+                    break;
+                }
+            }
+        }
+        if (outputFile == null) {
+            throw new DownloadException("Failed to download " + url, download != null ? download.getException() : null);
+        }
+        if (cache != null) {
+            FileUtils.copyFile(outputFile, cache);
+        }
+        return download;
+    }
+
+    public static Download downloadFile(String url, String name, String output, File cache) throws IOException, InterruptedException {
+        return downloadFile(url, name, output, cache, null, null);
+    }
+
+    public static Download downloadFile(String url, String name, String output) throws IOException, InterruptedException {
+        return downloadFile(url, name, output, null);
     }
 }

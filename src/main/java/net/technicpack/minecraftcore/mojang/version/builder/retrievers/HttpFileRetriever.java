@@ -20,22 +20,20 @@
 package net.technicpack.minecraftcore.mojang.version.builder.retrievers;
 
 import net.technicpack.launchercore.install.verifiers.ValidJsonFileVerifier;
-import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.builder.MojangVersionRetriever;
+import net.technicpack.utilslib.Utils;
 
 import java.io.File;
 import java.io.IOException;
 
 public class HttpFileRetriever implements MojangVersionRetriever {
 
-    private MirrorStore mirrorStore;
     private String baseUrl;
     private DownloadListener listener;
 
-    public HttpFileRetriever(MirrorStore mirrorStore, String baseUrl, DownloadListener listener) {
-        this.mirrorStore = mirrorStore;
+    public HttpFileRetriever(String baseUrl, DownloadListener listener) {
         this.baseUrl = baseUrl;
         this.listener = listener;
     }
@@ -43,6 +41,6 @@ public class HttpFileRetriever implements MojangVersionRetriever {
     @Override
     public void retrieveVersion(File target, String key) throws InterruptedException, IOException {
         String url = baseUrl + key + "/" + key + ".json";
-        mirrorStore.downloadFile(url, target.getName(), target.getAbsolutePath(), null, new ValidJsonFileVerifier(MojangUtils.getGson()), listener);
+        Utils.downloadFile(url, target.getName(), target.getAbsolutePath(), null, new ValidJsonFileVerifier(MojangUtils.getGson()), listener);
     }
 }

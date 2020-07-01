@@ -22,6 +22,7 @@ package net.technicpack.launchercore.install.tasks;
 import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
+import net.technicpack.utilslib.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +55,7 @@ public class DownloadFileTask extends ListenerTask {
     public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
         super.runTask(queue);
 
-        queue.getMirrorStore().downloadFile(url, this.destination.getName(), this.destination.getAbsolutePath(), null, fileVerifier, this);
+        Utils.downloadFile(url, this.destination.getName(), this.destination.getAbsolutePath(), null, fileVerifier, this);
 
         if (!this.destination.exists()) {
             throw new DownloadException("Failed to download " + this.destination.getName() + ".");

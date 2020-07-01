@@ -19,7 +19,6 @@
 
 package net.technicpack.platform.http;
 
-import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.NewsData;
 import net.technicpack.platform.io.PlatformPackInfo;
@@ -29,12 +28,10 @@ import net.technicpack.utilslib.Utils;
 
 public class HttpPlatformApi implements IPlatformApi {
     private String platformUrl;
-    private MirrorStore mirrorStore;
     private String launcherBuild;
 
-    public HttpPlatformApi(String rootUrl, MirrorStore mirrorStore, String launcherBuild) {
+    public HttpPlatformApi(String rootUrl, String launcherBuild) {
         this.platformUrl = rootUrl;
-        this.mirrorStore = mirrorStore;
         this.launcherBuild = launcherBuild;
     }
 
@@ -56,13 +53,13 @@ public class HttpPlatformApi implements IPlatformApi {
     @Override
     public void incrementPackRuns(String packSlug) {
         String url = platformUrl + "modpack/" + packSlug + "/stat/run?build="+launcherBuild;
-        Utils.pingHttpURL(url, mirrorStore);
+        Utils.pingHttpURL(url);
     }
 
     @Override
     public void incrementPackInstalls(String packSlug) {
         String url = platformUrl + "modpack/" + packSlug + "/stat/install?build="+launcherBuild;
-        Utils.pingHttpURL(url, mirrorStore);
+        Utils.pingHttpURL(url);
     }
 
     @Override
