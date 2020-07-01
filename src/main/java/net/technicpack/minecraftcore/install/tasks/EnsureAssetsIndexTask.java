@@ -24,6 +24,7 @@ import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.DownloadFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
+import net.technicpack.launchercore.install.verifiers.SHA1FileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidJsonFileVerifier;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
@@ -84,7 +85,14 @@ public class EnsureAssetsIndexTask implements IInstallTask {
         File output = new File(assetsDirectory + File.separator + "indexes", assetKey + ".json");
 
         (new File(output.getParent())).mkdirs();
-        IFileVerifier fileVerifier = new ValidJsonFileVerifier(MojangUtils.getGson());
+
+        IFileVerifier fileVerifier;
+
+        if (assetIndex != null && assetIndex.getSha1() != null)
+            fileVerifier = new SHA1FileVerifier(assetIndex.getSha1());
+        else
+            fileVerifier = new ValidJsonFileVerifier(MojangUtils.getGson());
+
         if (!output.exists() || !fileVerifier.isFileValid(output)) {
             downloadIndexQueue.addTask(new DownloadFileTask(assetsUrl, output, fileVerifier));
         }
