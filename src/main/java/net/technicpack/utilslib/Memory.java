@@ -49,11 +49,6 @@ public class Memory {
     public static final Memory DEFAULT_MEM = memoryOptions[2];
     public static final int MAX_32_BIT_MEMORY = 1024;
 
-    public static boolean is64Bit() {
-        String architecture = System.getProperty("sun.arch.data.model", "32");
-        return architecture.equals("64");
-    }
-
     public static long getPhysicalMemory() {
         long maxMemory = 0;
         try {
@@ -67,7 +62,7 @@ public class Memory {
     }
 
     public static long getAvailableMemory() {
-        return getAvailableMemory(is64Bit());
+        return getAvailableMemory(JavaUtils.is64Bit());
     }
 
     public static long getAvailableMemory(boolean is64Bit) {
@@ -78,7 +73,7 @@ public class Memory {
     }
 
     public static Memory getClosestAvailableMemory(Memory memory) {
-        return getClosestAvailableMemory(memory, is64Bit());
+        return getClosestAvailableMemory(memory, JavaUtils.is64Bit());
     }
 
     public static Memory getClosestAvailableMemory(Memory memory, boolean is64Bit) {

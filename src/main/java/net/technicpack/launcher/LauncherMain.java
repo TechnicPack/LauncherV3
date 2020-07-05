@@ -86,6 +86,7 @@ import net.technicpack.ui.components.ConsoleHandler;
 import net.technicpack.ui.components.LoggerOutputStream;
 import net.technicpack.ui.controls.installation.SplashScreen;
 import net.technicpack.ui.lang.ResourceLoader;
+import net.technicpack.utilslib.JavaUtils;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
@@ -281,7 +282,7 @@ public class LauncherMain {
         // Startup debug messages
         Utils.getLogger().info("OS: " + System.getProperty("os.name").toLowerCase(Locale.ENGLISH));
         Utils.getLogger().info("Identified as "+ OperatingSystem.getOperatingSystem().getName());
-        Utils.getLogger().info("Java: " + System.getProperty("java.version") + " " + System.getProperty("sun.arch.data.model", "32") + "-bit");
+        Utils.getLogger().info("Java: " + System.getProperty("java.version") + " " + JavaUtils.getJavaBitness() + "-bit (" + System.getProperty("os.arch") + ")");
         final String[] domains = {"minecraft.net", "session.minecraft.net", "textures.minecraft.net", "libraries.minecraft.net", "authserver.mojang.com", "account.mojang.com", "technicpack.net", "launcher.technicpack.net", "api.technicpack.net", "mirror.technicpack.net", "solder.technicpack.net", "files.minecraftforge.net"};
         for (String domain : domains) {
             try {

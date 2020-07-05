@@ -34,6 +34,7 @@ import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import net.technicpack.platform.IPlatformApi;
+import net.technicpack.utilslib.JavaUtils;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.text.StringSubstitutor;
@@ -293,7 +294,7 @@ public class MinecraftLauncher {
                 continue;
             }
 
-            File file = new File(directories.getCacheDirectory(), library.getArtifactPath().replace("${arch}", System.getProperty("sun.arch.data.model")));
+            File file = new File(directories.getCacheDirectory(), library.getArtifactPath().replace("${arch}", JavaUtils.getJavaBitness()));
             if (!file.isFile() || !file.exists()) {
                 throw new RuntimeException("Library " + library.getName() + " not found.");
             }
