@@ -25,7 +25,7 @@ import net.technicpack.utilslib.Utils;
 import java.io.File;
 
 public class MD5FileVerifier implements IFileVerifier {
-    private String md5Hash;
+    private final String md5Hash;
 
     public MD5FileVerifier(String md5Hash) {
         this.md5Hash = md5Hash;
@@ -36,8 +36,10 @@ public class MD5FileVerifier implements IFileVerifier {
             return false;
 
         String resultMD5 = MD5Utils.getMD5(file);
+        boolean hashesMatch = md5Hash.equalsIgnoreCase(resultMD5);
 
-        Utils.getLogger().info("Expected MD5: " + md5Hash + " Calculated MD5: " + resultMD5);
-        return (md5Hash.equalsIgnoreCase(resultMD5));
+        Utils.getLogger().info("Matches: " + hashesMatch + " | Expected MD5: " + md5Hash + " | Calculated MD5: " + resultMD5 + " | " + file.getAbsolutePath());
+
+        return (hashesMatch);
     }
 }
