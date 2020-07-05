@@ -12,9 +12,7 @@ import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.mojang.version.ExtractRulesFileFilter;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
-import net.technicpack.utilslib.IZipFileFilter;
-import net.technicpack.utilslib.OperatingSystem;
-import net.technicpack.utilslib.Utils;
+import net.technicpack.utilslib.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,7 +57,7 @@ public class InstallVersionLibTask extends ListenerTask {
             }
         }
 
-        String path = library.getArtifactPath(nativeClassifier).replace("${arch}", System.getProperty("sun.arch.data.model"));
+        String path = library.getArtifactPath(nativeClassifier).replace("${arch}", JavaUtils.getJavaBitness());
 
         File cache = new File(directories.getCacheDirectory(), path);
         if (cache.getParentFile() != null) {
@@ -82,7 +80,7 @@ public class InstallVersionLibTask extends ListenerTask {
 
         // TODO: this causes verification to happen twice, for natives
         if (!cache.exists() || !verifier.isFileValid(cache)) {
-            url = library.getDownloadUrl(path).replace("${arch}", System.getProperty("sun.arch.data.model"));
+            url = library.getDownloadUrl(path).replace("${arch}", JavaUtils.getJavaBitness());
             if (sha1 == null || sha1.isEmpty()) {
                 String md5 = Utils.getETag(url);
                 if (md5 != null && !md5.isEmpty()) {

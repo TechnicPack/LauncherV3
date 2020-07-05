@@ -22,7 +22,6 @@ package net.technicpack.utilslib;
 import net.technicpack.launchercore.util.DownloadListener;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
-import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.nio.channels.ClosedByInterruptException;
@@ -32,36 +31,6 @@ import java.util.logging.Level;
 import java.util.zip.ZipException;
 
 public class ZipUtils {
-
-    public static boolean checkLaunchDirectory(File dir) {
-        if (!dir.isDirectory()) {
-            return false;
-        }
-
-        if (dir.list().length == 0) {
-            return true;
-        }
-
-        for (File file : dir.listFiles()) {
-            if (file.getName().equals("settings.json")) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Checks if a directory is empty
-     *
-     * @param dir to check
-     * @return true if the directory is empty
-     */
-    public static boolean checkEmpty(File dir) {
-        return dir.isDirectory() && dir.list().length == 0;
-
-    }
-
     public static boolean extractFile(File zip, File output, String fileName) throws IOException, InterruptedException {
         if (!zip.exists() || fileName == null) {
             return false;

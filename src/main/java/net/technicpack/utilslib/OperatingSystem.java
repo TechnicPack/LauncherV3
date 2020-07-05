@@ -98,8 +98,4 @@ public enum OperatingSystem {
     public String getName() {
         return name;
     }
-
-    public boolean isSupported() {
-        return this != UNKNOWN;
-    }
 }

@@ -19,7 +19,7 @@
 
 package net.technicpack.launchercore.launch.java.version;
 
-import net.technicpack.utilslib.Memory;
+import net.technicpack.utilslib.JavaUtils;
 import net.technicpack.launchercore.launch.java.IJavaVersion;
 
 import java.io.File;
@@ -44,7 +44,7 @@ public class CurrentJavaVersion implements IJavaVersion {
 
     @Override
     public boolean is64Bit() {
-        return Memory.is64Bit();
+        return JavaUtils.is64Bit();
     }
 
     @Override
