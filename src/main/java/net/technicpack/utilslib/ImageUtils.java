@@ -44,12 +44,4 @@ public class ImageUtils {
         return newImage;
     }
 
-    public static BufferedImage scaleWithAspectHeight(BufferedImage img, int height) {
-        int imgWidth = img.getWidth();
-        int imgHeight = img.getHeight();
-        int width = imgWidth * height / imgHeight;
-        return scaleImage(img, width, height);
-    }
-
-
 }

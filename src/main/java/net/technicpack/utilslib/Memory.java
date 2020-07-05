@@ -61,19 +61,11 @@ public class Memory {
         return Math.max(512, maxMemory);
     }
 
-    public static long getAvailableMemory() {
-        return getAvailableMemory(JavaUtils.is64Bit());
-    }
-
     public static long getAvailableMemory(boolean is64Bit) {
         long physical = getPhysicalMemory();
         if (!is64Bit && physical > MAX_32_BIT_MEMORY)
             return MAX_32_BIT_MEMORY;
         return physical;
-    }
-
-    public static Memory getClosestAvailableMemory(Memory memory) {
-        return getClosestAvailableMemory(memory, JavaUtils.is64Bit());
     }
 
     public static Memory getClosestAvailableMemory(Memory memory, boolean is64Bit) {
