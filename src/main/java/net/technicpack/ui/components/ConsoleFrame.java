@@ -36,7 +36,7 @@ public class ConsoleFrame extends JFrame implements MouseListener {
     private static String[] monospaceFontNames = {"Consolas", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Lucida Console"};
     private final SimpleAttributeSet highlightedAttributes;
     private final SimpleAttributeSet errorAttributes;
-    private final SimpleAttributeSet infoAttributes;
+    private final SimpleAttributeSet warnAttributes;
     private final SimpleAttributeSet debugAttributes;
     private final SimpleAttributeSet defaultAttributes = new SimpleAttributeSet();
     private JTextComponent textComponent;
@@ -58,8 +58,8 @@ public class ConsoleFrame extends JFrame implements MouseListener {
 
         this.errorAttributes = new SimpleAttributeSet();
         StyleConstants.setForeground(errorAttributes, new Color(200, 0, 0));
-        this.infoAttributes = new SimpleAttributeSet();
-        StyleConstants.setForeground(infoAttributes, new Color(200, 0, 0));
+        this.warnAttributes = new SimpleAttributeSet();
+        StyleConstants.setForeground(warnAttributes, new Color(200, 200, 0));
         this.debugAttributes = new SimpleAttributeSet();
         StyleConstants.setForeground(debugAttributes, Color.DARK_GRAY);
 
@@ -77,7 +77,7 @@ public class ConsoleFrame extends JFrame implements MouseListener {
     public AttributeSet getHighlightedAttributes() { return highlightedAttributes; }
     public AttributeSet getDefaultAttributes() { return defaultAttributes; }
     public AttributeSet getErrorAttributes() { return errorAttributes; }
-    public AttributeSet getInfoAttributes() { return infoAttributes; }
+    public AttributeSet getWarnAttributes() { return warnAttributes; }
     public AttributeSet getDebugAttributes() { return debugAttributes; }
     public void setCaretPosition(int position) { textComponent.setCaretPosition(position); }
 

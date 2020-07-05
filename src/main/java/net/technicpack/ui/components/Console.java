@@ -82,7 +82,7 @@ public class Console {
         } else if (level == Level.SEVERE) {
             attributes = consoleFrame.getErrorAttributes();
         } else if (level == Level.WARNING) {
-            attributes = consoleFrame.getInfoAttributes();
+            attributes = consoleFrame.getWarnAttributes();
         } else if (level.intValue() < Level.INFO.intValue()) {
             attributes = consoleFrame.getDebugAttributes();
         }

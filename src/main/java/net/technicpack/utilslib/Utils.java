@@ -43,6 +43,9 @@ public class Utils {
         GsonBuilder builder = new GsonBuilder();
         builder.setPrettyPrinting();
         gson = builder.create();
+
+        // Make sure we're logging everything we want to be logging
+        logger.setLevel(Level.ALL);
     }
 
     public static Gson getGson() {

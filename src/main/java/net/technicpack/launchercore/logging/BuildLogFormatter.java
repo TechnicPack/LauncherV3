@@ -22,6 +22,7 @@ package net.technicpack.launchercore.logging;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
@@ -38,10 +39,10 @@ public class BuildLogFormatter extends Formatter {
     public String format(LogRecord record) {
         StringBuilder builder = new StringBuilder();
 
-        builder.append("[B#" + launcherBuild + "] ");
+        builder.append("[B#").append(launcherBuild).append("] ");
         builder.append(date.format(record.getMillis()));
         builder.append(" [");
-        builder.append(record.getLevel().getLocalizedName().toUpperCase());
+        builder.append(record.getLevel().getName().toUpperCase(Locale.ENGLISH));
         builder.append("] ");
         builder.append(formatMessage(record));
         builder.append('\n');
