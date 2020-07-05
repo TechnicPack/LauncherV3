@@ -37,7 +37,11 @@ public class SHA1FileVerifier implements IFileVerifier {
 
         String resultSha1 = SHA1Utils.getSHA1(file);
 
-        Utils.getLogger().info("Expected SHA1: " + sha1Hash + " Calculated SHA1: " + resultSha1);
-        return (sha1Hash.equalsIgnoreCase(resultSha1));
+        boolean hashMatches = sha1Hash.equalsIgnoreCase(resultSha1);
+
+        if (!hashMatches)
+            Utils.getLogger().warning("SHA1 verification for " + file + " failed. Expected " + sha1Hash + ", got " + resultSha1);
+
+        return hashMatches;
     }
 }

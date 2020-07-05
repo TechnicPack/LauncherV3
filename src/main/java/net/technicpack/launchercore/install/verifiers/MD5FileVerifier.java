@@ -37,7 +37,11 @@ public class MD5FileVerifier implements IFileVerifier {
 
         String resultMD5 = MD5Utils.getMD5(file);
 
-        Utils.getLogger().info("Expected MD5: " + md5Hash + " Calculated MD5: " + resultMD5);
-        return (md5Hash.equalsIgnoreCase(resultMD5));
+        boolean hashMatches = md5Hash.equalsIgnoreCase(resultMD5);
+
+        if (!hashMatches)
+            Utils.getLogger().warning("MD5 verification for " + file + " failed. Expected " + md5Hash + ", got " + resultMD5);
+
+        return hashMatches;
     }
 }
