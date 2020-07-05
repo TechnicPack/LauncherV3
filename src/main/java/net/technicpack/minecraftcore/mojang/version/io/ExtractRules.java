@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class ExtractRules {
 	private List<String> exclude = new ArrayList<String>();
 

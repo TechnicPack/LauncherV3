@@ -28,6 +28,7 @@ import net.technicpack.rest.io.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class PlatformPackInfo extends RestObject implements PackInfo {
     private String name;
     private String displayName;

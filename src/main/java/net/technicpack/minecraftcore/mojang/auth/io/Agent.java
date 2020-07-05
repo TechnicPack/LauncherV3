@@ -19,6 +19,7 @@
 
 package net.technicpack.minecraftcore.mojang.auth.io;
 
+@SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class Agent {
 	private String name;
 	private int version;

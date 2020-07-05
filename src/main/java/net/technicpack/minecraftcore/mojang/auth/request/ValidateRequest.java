@@ -19,6 +19,7 @@
 
 package net.technicpack.minecraftcore.mojang.auth.request;
 
+@SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class ValidateRequest {
 	private String accessToken;
 

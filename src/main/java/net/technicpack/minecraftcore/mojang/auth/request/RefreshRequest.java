@@ -21,6 +21,7 @@ package net.technicpack.minecraftcore.mojang.auth.request;
 
 import net.technicpack.minecraftcore.mojang.auth.response.Response;
 
+@SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class RefreshRequest extends Response {
 	private String accessToken;
 	private String clientToken;

@@ -21,6 +21,7 @@ package net.technicpack.minecraftcore.mojang.auth.request;
 
 import net.technicpack.minecraftcore.mojang.auth.io.Agent;
 
+@SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class AuthRequest {
     private Agent agent;
     private String username;

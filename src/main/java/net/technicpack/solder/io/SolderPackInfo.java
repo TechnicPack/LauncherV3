@@ -30,6 +30,7 @@ import net.technicpack.solder.ISolderPackApi;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class SolderPackInfo extends RestObject implements PackInfo {
 
     private String name;

@@ -1,5 +1,6 @@
 package net.technicpack.minecraftcore.mojang.version.io;
 
+@SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class Download {
 
 	private String sha1;

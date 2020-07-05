@@ -19,6 +19,7 @@
 
 package net.technicpack.autoupdate.io;
 
+@SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class LauncherResource {
     private String filename;
     private String url;

@@ -2,6 +2,7 @@ package net.technicpack.minecraftcore.mojang.version.io;
 
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 
+@SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class LaunchArguments {
 
 	private ArgumentList game;
