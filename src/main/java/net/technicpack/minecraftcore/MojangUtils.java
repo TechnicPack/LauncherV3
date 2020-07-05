@@ -35,6 +35,9 @@ import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentListAdapter;
 import net.technicpack.utilslib.DateTypeAdapter;
 import net.technicpack.utilslib.LowerCaseEnumTypeAdapterFactory;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 
 import java.io.File;
@@ -101,51 +104,30 @@ public class MojangUtils {
     }
 
     public static void copyMinecraftJar(File minecraft, File output) throws IOException {
-        String[] security = { "MOJANG_C.DSA",
-                "MOJANG_C.SF",
-                "CODESIGN.RSA",
-                "CODESIGN.SF" };
-        JarFile jarFile = new JarFile(minecraft);
-        try {
-            String fileName = jarFile.getName();
-            String fileNameLastPart = fileName.substring(fileName.lastIndexOf(File.separator));
-
-            JarOutputStream jos = new JarOutputStream(new FileOutputStream(output));
-            Enumeration<JarEntry> entries = jarFile.entries();
+        try (ZipFile jarFile = new ZipFile(minecraft)) {
+            ZipArchiveOutputStream zos = new ZipArchiveOutputStream(new FileOutputStream(output));
+            Enumeration<ZipArchiveEntry> entries = jarFile.getEntries();
+            byte[] copyBuffer = new byte[32768];
+            int bytesRead;
 
             while (entries.hasMoreElements()) {
-                JarEntry entry = entries.nextElement();
-                if (containsAny(entry.getName(), security)) {
+                ZipArchiveEntry entry = entries.nextElement();
+                if (entry.getName().contains("META-INF")) {
                     continue;
                 }
-                InputStream is = jarFile.getInputStream(entry);
 
-                //jos.putNextEntry(entry);
-                //create a new entry to avoid ZipException: invalid entry compressed size
-                jos.putNextEntry(new JarEntry(entry.getName()));
-                byte[] buffer = new byte[4096];
-                int bytesRead = 0;
-                while ((bytesRead = is.read(buffer)) != -1) {
-                    jos.write(buffer, 0, bytesRead);
+                // Write entry
+                zos.putArchiveEntry(entry);
+                // Write entry data
+                InputStream is = jarFile.getInputStream(entry);
+                while ((bytesRead = is.read(copyBuffer)) != -1) {
+                    zos.write(copyBuffer, 0, bytesRead);
                 }
                 is.close();
-                jos.flush();
-                jos.closeEntry();
+                zos.closeArchiveEntry();
             }
-            jos.close();
-        } finally {
-            jarFile.close();
+            zos.close();
         }
-
-    }
-
-    private static boolean containsAny(String inputString, String[] contains) {
-        for (String string : contains) {
-            if (inputString.contains(string)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public static MojangVersion parseVersionJson(String json) {
