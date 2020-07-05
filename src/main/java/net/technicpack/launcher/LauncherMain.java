@@ -99,6 +99,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -279,6 +281,19 @@ public class LauncherMain {
         Utils.getLogger().info("OS: " + System.getProperty("os.name").toLowerCase(Locale.ENGLISH));
         Utils.getLogger().info("Identified as "+ OperatingSystem.getOperatingSystem().getName());
         Utils.getLogger().info("Java: " + System.getProperty("java.version") + " " + System.getProperty("sun.arch.data.model", "32") + "-bit");
+        String[] domains = { "minecraft.net", "session.minecraft.net", "textures.minecraft.net", "libraries.minecraft.net", "authserver.mojang.com", "account.mojang.com", "technicpack.net", "launcher.technicpack.net", "api.technicpack.net", "mirror.technicpack.net", "solder.technicpack.net", "files.minecraftforge.net" };
+        for(String domain : domains) {
+            try {
+                InetAddress[] hosts = InetAddress.getAllByName(domain);
+                ArrayList<String> ipAddrs = new ArrayList<>();
+                for (InetAddress host : hosts ) {
+                    ipAddrs.add(host.getHostAddress());
+                }
+                Utils.getLogger().info(domain + " resolved to: " + ipAddrs.toString());
+            } catch(UnknownHostException ex) {
+                Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+            }
+        }
 
         final SplashScreen splash = new SplashScreen(resources.getImage("launch_splash.png"), 0);
         Color bg = LauncherFrame.COLOR_FORMELEMENT_INTERNAL;
