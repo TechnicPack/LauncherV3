@@ -38,7 +38,8 @@ public class SHA1FileVerifier implements IFileVerifier {
         String resultSha1 = SHA1Utils.getSHA1(file);
         boolean hashesMatch = sha1Hash.equalsIgnoreCase(resultSha1);
 
-        Utils.getLogger().info("Matches: " + hashesMatch + " | Expected SHA1: " + sha1Hash + " | Calculated SHA1: " + resultSha1 + " | " + file.getAbsolutePath());
+        Utils.getLogger().info("File integrity check failed! Expected SHA1 hash to be " + sha1Hash + " but calculated  " + resultSha1 + " for file " + file.getAbsolutePath());
+
         return (hashesMatch);
     }
 }
