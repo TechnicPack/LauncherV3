@@ -51,11 +51,14 @@ public class RotatingFileHandler extends StreamHandler {
 
     @Override
     public synchronized void flush() {
-        if (!filename.equals(calculateFilename())) {
-            filename = calculateFilename();
+        final String newFilename = calculateFilename();
+        if (!filename.equals(newFilename)) {
+            final String oldFilename = filename;
+            filename = newFilename;
             try {
                 this.close();
                 setOutputStream(new FileOutputStream(filename, true));
+                super.publish(new LogRecord(Level.INFO, "Continued from " + oldFilename));
             } catch (FileNotFoundException ex) {
                 Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
             }
