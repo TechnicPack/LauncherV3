@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@SuppressWarnings({"FieldCanBeLocal", "unused"})
+@SuppressWarnings({"unused"})
 public class CompleteVersion implements MojangVersion {
 
     private String id;

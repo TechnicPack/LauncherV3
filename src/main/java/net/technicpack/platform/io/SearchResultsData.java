@@ -21,7 +21,7 @@ package net.technicpack.platform.io;
 
 import net.technicpack.rest.RestObject;
 
-@SuppressWarnings({"FieldCanBeLocal", "unused"})
+@SuppressWarnings({"unused"})
 public class SearchResultsData extends RestObject {
     private SearchResult[] modpacks;
 

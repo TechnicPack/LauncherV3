@@ -2,7 +2,7 @@ package net.technicpack.minecraftcore.mojang.version.io;
 
 import java.util.Map;
 
-@SuppressWarnings({"FieldCanBeLocal", "unused"})
+@SuppressWarnings({"unused"})
 public class Downloads {
     private Artifact artifact;
     private Map<String, Artifact> classifiers;

@@ -25,7 +25,7 @@ import net.technicpack.rest.RestObject;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings({"FieldCanBeLocal", "unused"})
+@SuppressWarnings({"unused"})
 public class Modpack extends RestObject {
     private String minecraft;
     private String java;

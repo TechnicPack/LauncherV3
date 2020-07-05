@@ -31,7 +31,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@SuppressWarnings({"FieldCanBeLocal", "unused"})
+@SuppressWarnings({"unused"})
 public class Library {
     private static final String[] FALLBACK = {
         "https://libraries.minecraft.net/",

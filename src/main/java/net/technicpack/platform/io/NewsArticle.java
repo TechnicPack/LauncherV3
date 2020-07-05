@@ -21,7 +21,7 @@ package net.technicpack.platform.io;
 
 import java.util.Date;
 
-@SuppressWarnings({"FieldCanBeLocal", "unused"})
+@SuppressWarnings({"unused"})
 public class NewsArticle {
     private int id;
     private String username;

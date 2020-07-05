@@ -21,7 +21,7 @@ package net.technicpack.platform.io;
 
 import java.util.Date;
 
-@SuppressWarnings({"FieldCanBeLocal", "unused"})
+@SuppressWarnings({"unused"})
 public class FeedItem {
     private String user;
     private long date;

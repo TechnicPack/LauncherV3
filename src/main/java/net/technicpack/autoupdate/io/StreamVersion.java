@@ -24,7 +24,7 @@ import net.technicpack.rest.RestObject;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings({"FieldCanBeLocal", "unused"})
+@SuppressWarnings({"unused"})
 public class StreamVersion extends RestObject {
     private int build;
     private StreamUrls url;

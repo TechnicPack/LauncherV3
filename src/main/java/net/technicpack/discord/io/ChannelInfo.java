@@ -1,6 +1,6 @@
 package net.technicpack.discord.io;
 
-@SuppressWarnings({"FieldCanBeLocal", "unused"})
+@SuppressWarnings({"unused"})
 public class ChannelInfo {
     private String id;
     private String name;

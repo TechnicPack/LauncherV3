@@ -23,7 +23,7 @@ import net.technicpack.rest.RestObject;
 
 import java.util.Map;
 
-@SuppressWarnings({"FieldCanBeLocal", "unused"})
+@SuppressWarnings({"unused"})
 public class Solder extends RestObject {
     private transient String url;
     private Map<String, String> modpacks;

@@ -1,6 +1,6 @@
 package net.technicpack.minecraftcore.mojang.version.io;
 
-@SuppressWarnings({"FieldCanBeLocal", "unused"})
+@SuppressWarnings({"unused"})
 public class Artifact {
     private String path;
     private String url;

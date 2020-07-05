@@ -19,7 +19,7 @@
 
 package net.technicpack.minecraftcore.mojang.auth.response;
 
-@SuppressWarnings({"FieldCanBeLocal", "unused"})
+@SuppressWarnings({"unused"})
 public class Response {
 	private String error;
 	private String errorMessage;

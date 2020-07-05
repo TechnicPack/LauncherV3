@@ -1,6 +1,6 @@
 package net.technicpack.discord.io;
 
-@SuppressWarnings({"FieldCanBeLocal", "unused"})
+@SuppressWarnings({"unused"})
 public class MemberInfo {
     private String username;
     private String status;

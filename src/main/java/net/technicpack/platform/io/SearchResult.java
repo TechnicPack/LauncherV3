@@ -19,7 +19,7 @@
 
 package net.technicpack.platform.io;
 
-@SuppressWarnings({"FieldCanBeLocal", "unused"})
+@SuppressWarnings({"unused"})
 public class SearchResult {
     private int id;
     private String name;

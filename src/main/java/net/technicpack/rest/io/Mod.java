@@ -19,7 +19,7 @@
 
 package net.technicpack.rest.io;
 
-@SuppressWarnings({"FieldCanBeLocal", "unused"})
+@SuppressWarnings({"unused"})
 public class Mod extends Resource {
     private String name;
     private String version;

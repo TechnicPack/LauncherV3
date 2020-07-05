@@ -4,7 +4,7 @@ import net.technicpack.rest.RestObject;
 
 import java.util.List;
 
-@SuppressWarnings({"FieldCanBeLocal", "unused"})
+@SuppressWarnings({"unused"})
 public class Server extends RestObject {
     private String id;
     private String name;
