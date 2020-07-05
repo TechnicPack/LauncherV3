@@ -282,14 +282,14 @@ public class LauncherMain {
         Utils.getLogger().info("OS: " + System.getProperty("os.name").toLowerCase(Locale.ENGLISH));
         Utils.getLogger().info("Identified as "+ OperatingSystem.getOperatingSystem().getName());
         Utils.getLogger().info("Java: " + System.getProperty("java.version") + " " + System.getProperty("sun.arch.data.model", "32") + "-bit");
-        String[] domains = { "minecraft.net", "session.minecraft.net", "textures.minecraft.net", "libraries.minecraft.net", "authserver.mojang.com", "account.mojang.com", "technicpack.net", "launcher.technicpack.net", "api.technicpack.net", "mirror.technicpack.net", "solder.technicpack.net", "files.minecraftforge.net" };
-        for(String domain : domains) {
+        final String[] domains = {"minecraft.net", "session.minecraft.net", "textures.minecraft.net", "libraries.minecraft.net", "authserver.mojang.com", "account.mojang.com", "technicpack.net", "launcher.technicpack.net", "api.technicpack.net", "mirror.technicpack.net", "solder.technicpack.net", "files.minecraftforge.net"};
+        for (String domain : domains) {
             try {
                 Collection<InetAddress> inetAddresses = Arrays.asList(InetAddress.getAllByName(domain));
                 String ips = inetAddresses.stream().map(InetAddress::getHostAddress).collect(Collectors.joining(", "));
-                Utils.getLogger().info(domain + " resolves to: " + ips);
-            } catch(UnknownHostException ex) {
-                Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+                Utils.getLogger().info(domain + " resolves to [" + ips + "]");
+            } catch (UnknownHostException ex) {
+                Utils.getLogger().log(Level.SEVERE, "Failed to resolve " + domain + ": " + ex.toString());
             }
         }
 
