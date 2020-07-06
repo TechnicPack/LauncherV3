@@ -99,6 +99,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -217,7 +219,7 @@ public class LauncherMain {
             logDirectory.mkdir();
         }
         File logs = new File(logDirectory, "techniclauncher_%D.log");
-        RotatingFileHandler fileHandler = new RotatingFileHandler(logs.getPath());
+        RotatingFileHandler fileHandler = new RotatingFileHandler(logs.getPath(), buildNumber.getBuildNumber());
 
         fileHandler.setFormatter(new BuildLogFormatter(buildNumber.getBuildNumber()));
 

@@ -20,45 +20,61 @@
 package net.technicpack.launchercore.logging;
 
 import net.technicpack.utilslib.Utils;
+import org.joda.time.DateTime;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
 
 public class RotatingFileHandler extends StreamHandler {
-    private final SimpleDateFormat date;
-    private final String logFile;
-    private String filename;
+    private final DateTime date;
+    private final String dateFormat = "yyyy-MM-dd";
+    private final String unformattedLogFilePath;
+    private final String buildNumber;
+    private String filePath;
+    private Boolean flushing;
 
-    public RotatingFileHandler(String logFile) {
-        this.logFile = logFile;
-        date = new SimpleDateFormat("yyyy-MM-dd");
-        filename = calculateFilename();
+    public RotatingFileHandler(String unformattedLogFilePath, String buildNumber) {
+        this.unformattedLogFilePath = unformattedLogFilePath;
+        this.buildNumber = buildNumber;
+        date = new DateTime();
+        filePath = unformattedLogFilePath.replace("%D", date.toString(dateFormat));
         try {
-            setOutputStream(new FileOutputStream(filename, true));
+            setOutputStream(new FileOutputStream(filePath, true));
         } catch (FileNotFoundException ex) {
             Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 
     private String calculateFilename() {
-        return logFile.replace("%D", date.format(new Date()));
+        return unformattedLogFilePath.replace("%D", new DateTime().toString(dateFormat));
     }
 
     @Override
     public synchronized void flush() {
-        if (!filename.equals(calculateFilename())) {
-            filename = calculateFilename();
+        String oldFilePath = filePath;
+        String newFilePath = calculateFilename();
+        if (!oldFilePath.equals(newFilePath)) {
             try {
                 this.close();
-                setOutputStream(new FileOutputStream(filename, true));
+                FileOutputStream fd = new FileOutputStream(newFilePath, true);
+                if (!flushing) {
+                    flushing = true;
+                    BuildLogFormatter formattedLogger = new BuildLogFormatter(buildNumber);
+                    fd.write((formattedLogger.format(new LogRecord(Level.INFO, "Continued from " + oldFilePath))).getBytes(Charset.forName("UTF-8")));
+                }
+                setOutputStream(fd);
             } catch (FileNotFoundException ex) {
                 Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+            } catch (IOException ex) {
+                Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
             }
+        } else {
+            flushing = false;
         }
         super.flush();
     }
