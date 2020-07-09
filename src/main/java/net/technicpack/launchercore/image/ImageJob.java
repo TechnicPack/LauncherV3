@@ -38,6 +38,7 @@ public class ImageJob<T> {
     private AtomicReference<BufferedImage> imageReference;
 
     private Collection<IImageJobListener<T>> jobListeners = new LinkedList<IImageJobListener<T>>();
+    private Thread imageThread;
 
     public ImageJob(IImageMapper<T> mapper, IImageStore<T> store) {
         this.mapper = mapper;
@@ -102,7 +103,10 @@ public class ImageJob<T> {
     public void start(final T jobData) {
         lastJobData = jobData;
 
-        Thread imageThread = new Thread("Image Download: " + store.getJobKey(jobData)) {
+        if (imageThread != null && imageThread.isAlive())
+            return;
+
+        imageThread = new Thread("Image Download: " + store.getJobKey(jobData)) {
             @Override
             public void run() {
                 try {

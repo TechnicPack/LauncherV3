@@ -29,6 +29,7 @@ import java.io.*;
 import java.net.*;
 import java.nio.channels.Channels;
 import java.nio.channels.ClosedByInterruptException;
+import java.nio.channels.OverlappingFileLockException;
 import java.nio.channels.ReadableByteChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -99,6 +100,7 @@ public class Download implements Runnable {
 
             try (ReadableByteChannel rbc = Channels.newChannel(in);
                  FileOutputStream fos = new FileOutputStream(outFile)) {
+                fos.getChannel().lock();
 
                 stateChanged();
 
@@ -106,6 +108,7 @@ public class Download implements Runnable {
                 progress.start();
 
                 fos.getChannel().transferFrom(rbc, 0, size > 0 ? size : Integer.MAX_VALUE);
+
                 in.close();
                 rbc.close();
                 progress.interrupt();
@@ -117,8 +120,11 @@ public class Download implements Runnable {
                 }
 
                 if (size > 0) {
-                    if (size == outFile.length()) {
+                    long fileLength = outFile.length();
+                    if (size == fileLength) {
                         result = Result.SUCCESS;
+                    } else {
+                        throw new DownloadException("File size doesn't match. Expected " + size + ", got " + fileLength);
                     }
                 } else {
                     result = Result.SUCCESS;
@@ -130,6 +136,9 @@ public class Download implements Runnable {
         } catch (PermissionDeniedException e) {
             exception = e;
             result = Result.PERMISSION_DENIED;
+        } catch (OverlappingFileLockException e) {
+            exception = e;
+            result = Result.LOCK_FAILED;
         } catch (DownloadException e) {
             exception = e;
             result = Result.FAILURE;
@@ -234,8 +243,9 @@ public class Download implements Runnable {
         @Override
         public void run() {
             while (!this.isInterrupted()) {
-                long diff = outFile.length() - downloaded;
-                downloaded = outFile.length();
+                long fileLength = outFile.length();
+                long diff = fileLength - downloaded;
+                downloaded = fileLength;
                 if (diff == 0) {
                     if ((System.currentTimeMillis() - last) > TIMEOUT) {
                         try {
@@ -263,6 +273,6 @@ public class Download implements Runnable {
     }
 
     public enum Result {
-        SUCCESS, FAILURE, PERMISSION_DENIED,
+        SUCCESS, FAILURE, PERMISSION_DENIED, LOCK_FAILED
     }
 }
