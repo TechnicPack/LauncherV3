@@ -196,6 +196,11 @@ public class MinecraftLauncher {
         commands.addUnique("-Djava.library.path=" + nativesDir);
         // Tell forge 1.5 to download from our mirror instead
         commands.addUnique("-Dfml.core.libraries.mirror=http://mirror.technicpack.net/Technic/lib/fml/%s");
+
+        // This is required because we strip META-INF from the minecraft.jar
+        commands.addUnique("-Dfml.ignoreInvalidMinecraftCertificates=true");
+        commands.addUnique("-Dfml.ignorePatchDiscrepancies=true");
+
         commands.addUnique("-Dminecraft.applet.TargetDirectory=" + pack.getInstalledDirectory().getAbsolutePath());
         commands.addUnique("-Duser.language=en");
 
