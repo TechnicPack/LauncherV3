@@ -68,5 +68,7 @@ public interface PackInfo {
 
     boolean isOfficial();
 
+    boolean hasSolder();
+
     String getDiscordId();
 }

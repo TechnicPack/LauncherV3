@@ -90,11 +90,17 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 
     @Override
     public String getRecommended() {
+        if (hasSolder())
+            return null;
+
         return version;
     }
 
     @Override
     public String getLatest() {
+        if (hasSolder())
+            return null;
+
         return version;
     }
 
@@ -177,7 +183,14 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 
     public void setLocal() { isLocal = true; }
     @Override
-    public boolean isLocal() { return isLocal; }
+    public boolean isLocal() {
+        // If this modpack has a Solder instance set, and code has reached this point, that means that Solder is
+        // unreachable for some reason, and we should consider its Solder to be offline (and mark the pack as local)
+        if (hasSolder())
+            return true;
+
+        return isLocal;
+    }
 
     @Override
     public boolean isOfficial() { return isOfficial; }

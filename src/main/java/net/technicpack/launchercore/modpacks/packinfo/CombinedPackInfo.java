@@ -208,10 +208,20 @@ public class CombinedPackInfo implements PackInfo {
 
     @Override
     public boolean isLocal() {
-        if (platformPackInfo == null || platformPackInfo.isLocal())
-            return true;
-        if (solderPackInfo == null || solderPackInfo.isLocal())
-            return true;
+        if (solderPackInfo != null)
+            return solderPackInfo.isLocal();
+        if (platformPackInfo != null)
+            return platformPackInfo.isLocal();
+
+        return true;
+    }
+
+    @Override
+    public boolean hasSolder() {
+        if (solderPackInfo != null)
+            return solderPackInfo.hasSolder();
+        if (platformPackInfo != null)
+            return platformPackInfo.hasSolder();
         return false;
     }
 }

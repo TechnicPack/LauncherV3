@@ -135,4 +135,9 @@ public class SearchResultPackInfo implements PackInfo {
     public boolean isLocal() {
         return false;
     }
+
+    @Override
+    public boolean hasSolder() {
+        return false;
+    }
 }
