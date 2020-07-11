@@ -30,44 +30,43 @@ import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
 
 public class RotatingFileHandler extends StreamHandler {
-    private final SimpleDateFormat date;
-    private final String logFile;
-    private String filename;
+    private final SimpleDateFormat dateFormat;
+    private final String logPathFormat;
+    private String currentLogPath;
 
-    public RotatingFileHandler(String logFile) {
-        this.logFile = logFile;
-        date = new SimpleDateFormat("yyyy-MM-dd");
-        filename = calculateFilename();
+    public RotatingFileHandler(String logPathFormat) {
+        this.logPathFormat = logPathFormat;
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        currentLogPath = calculatePath();
         try {
-            setOutputStream(new FileOutputStream(filename, true));
+            setOutputStream(new FileOutputStream(currentLogPath, true));
         } catch (FileNotFoundException ex) {
             Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 
-    private String calculateFilename() {
-        return logFile.replace("%D", date.format(new Date()));
+    private String calculatePath() {
+        return logPathFormat.replace("%D", dateFormat.format(new Date()));
     }
 
-    @Override
-    public synchronized void flush() {
-        final String newFilename = calculateFilename();
-        if (!filename.equals(newFilename)) {
-            final String oldFilename = filename;
-            filename = newFilename;
+    private void changeFileIfNeeded() {
+        final String newPath = calculatePath();
+        if (!currentLogPath.equals(newPath)) {
+            final String oldPath = currentLogPath;
+            currentLogPath = newPath;
             try {
                 this.close();
-                setOutputStream(new FileOutputStream(filename, true));
-                super.publish(new LogRecord(Level.INFO, "Continued from " + oldFilename));
+                setOutputStream(new FileOutputStream(currentLogPath, true));
+                super.publish(new LogRecord(Level.INFO, "Continued from " + oldPath));
             } catch (FileNotFoundException ex) {
                 Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
             }
         }
-        super.flush();
     }
 
     @Override
     public synchronized void publish(LogRecord record) {
+        changeFileIfNeeded();
         super.publish(record);
         flush();
     }
