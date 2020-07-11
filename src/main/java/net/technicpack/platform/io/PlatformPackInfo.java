@@ -113,6 +113,12 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 
     @Override
     public List<String> getBuilds() {
+        if (hasSolder()) {
+            // If this is a Solder modpack, Platform modpack version has no play in the builds list
+            // Code can actually reach this if the Solder instance is offline, due to how combined modpack info works
+            return new ArrayList<>(0);
+        }
+
         List<String> builds = new ArrayList<String>();
         builds.add(version);
         return builds;

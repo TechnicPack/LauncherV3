@@ -237,6 +237,9 @@ public class ModpackModel {
 
         List<String> allBuilds = packInfo.getBuilds();
 
+        if (allBuilds.isEmpty())
+            return false;
+
         if (!allBuilds.contains(installedBuild))
             return true;
 
