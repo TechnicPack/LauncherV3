@@ -57,10 +57,10 @@ public class ChainVersionBuilder implements MojangVersionBuilder {
 
         if (latest.getDownloads() == null) {
             // HACK!
-            // For some reason the latest version we have doesn't have any downloads/probably isn't a Mojang version file.
-            // This happens with Attack of the B-Team, because Forge 1.6.4 doesn't has "null" set in inheritsFrom, so the
+            // For some reason the last version in the chain doesn't have any downloads/probably isn't a Mojang version file.
+            // This happens with Attack of the B-Team, because Forge 1.6.4 has "null" set in inheritsFrom, so the
             // launcher never attempts to download the Mojang version json from our repo.
-            // So, we just guess the Minecraft version and forcefully add the Mojang file here.
+            // So, we just guess the Minecraft version and forcefully add the Mojang version file here.
 
             String[] parts = latest.getId().split("-");
             if (!MINECRAFT_VERSION_PATTERN.matcher(parts[0]).matches())
