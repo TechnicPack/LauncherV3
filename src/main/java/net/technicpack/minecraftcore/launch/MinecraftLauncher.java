@@ -201,6 +201,20 @@ public class MinecraftLauncher {
         commands.addUnique("-Dfml.ignoreInvalidMinecraftCertificates=true");
         commands.addUnique("-Dfml.ignorePatchDiscrepancies=true");
 
+        // This is for ForgeWrapper >= 1.4.2
+        if (MojangUtils.requiresForgeWrapper(version)) {
+            commands.addUnique("-Dforgewrapper.librariesDir=" + directories.getCacheDirectory().getAbsolutePath());
+
+            // The Forge installer jar is really the modpack.jar
+            File modpackJar = new File(pack.getBinDir(), "modpack.jar");
+            commands.addUnique("-Dforgewrapper.installer=" + modpackJar.getAbsolutePath());
+
+            // We feed ForgeWrapper the unmodified Minecraft jar here
+            String mcVersion = MojangUtils.getMinecraftVersion(version);
+            File minecraftJar = new File(directories.getCacheDirectory(), "minecraft_" + mcVersion + ".jar");
+            commands.addUnique("-Dforgewrapper.minecraft=" + minecraftJar.getAbsolutePath());
+        }
+
         commands.addUnique("-Dminecraft.applet.TargetDirectory=" + pack.getInstalledDirectory().getAbsolutePath());
         commands.addUnique("-Duser.language=en");
 

@@ -207,4 +207,26 @@ public class MojangUtils {
 
         return false;
     }
+
+    public static String getMinecraftVersion(MojangVersion version) {
+        final String id = version.getId();
+
+        // Simplification in case it doesn't have Forge at all
+        if (!id.contains("-"))
+            return id;
+
+        // For Forge, this will be "mc-forge"
+        final String[] idParts = id.split("-");
+        return idParts[0];
+    }
+
+    public static boolean requiresForgeWrapper(MojangVersion version) {
+        if (!hasModernForge(version)) {
+            return false;
+        }
+
+        final String mcVersion = getMinecraftVersion(version);
+
+        return !mcVersion.equals("1.12.2");
+    }
 }
