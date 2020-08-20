@@ -98,12 +98,22 @@ public class ModpackOptionsDialog extends LauncherDialog {
         if (manualBuildList.getItemCount() == 0)
             return;
 
+        // Nothing is selected, try to set it to the currently installed modpack build
+        // (could be an actual build string (like "1.0"), "recommended" or "latest")
         if (manualBuildList.getSelectedItem() == null)
             manualBuildList.setSelectedItem(new PackBuildItem(modpack.getBuild(), resources, modpack));
+
+        // Still nothing is selected, try to fallback to the recommended build
         if (manualBuildList.getSelectedItem() == null)
             manualBuildList.setSelectedItem(new PackBuildItem(modpack.getRecommendedBuild(), resources, modpack));
 
-        this.modpack.setBuild(((PackBuildItem)manualBuildList.getSelectedItem()).getBuildNumber());
+        // Still nothing is selected, and both the currently installed and recommended builds couldn't be selected,
+        // so we try to select the first available one (we already know there's at least 1 build available)
+        if (manualBuildList.getSelectedIndex() == -1) {
+            manualBuildList.setSelectedIndex(0);
+        }
+
+        this.modpack.setBuild(((PackBuildItem) manualBuildList.getSelectedItem()).getBuildNumber());
         manualBuildList.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
         manualBuildList.setEnabled(true);
     }
