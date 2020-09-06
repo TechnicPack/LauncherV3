@@ -4,6 +4,7 @@ import net.technicpack.launchercore.launch.java.IJavaVersion;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.utilslib.Memory;
 
+@SuppressWarnings({"unused"})
 public class RunData {
     private String java;
     private String memory;

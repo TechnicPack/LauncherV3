@@ -50,14 +50,6 @@ public class Version {
         return version;
     }
 
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    public void setLegacy(boolean legacy) {
-        this.legacy = legacy;
-    }
-
     public static Version load(File version) {
         if (!version.exists()) {
             Utils.getLogger().log(Level.WARNING, "Unable to load version from " + version + " because it does not exist.");
