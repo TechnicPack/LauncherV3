@@ -24,7 +24,6 @@ import net.technicpack.launchercore.auth.IAuthResponse;
 import net.technicpack.launchercore.auth.IGameAuthService;
 import net.technicpack.launchercore.exception.AuthenticationNetworkFailureException;
 import net.technicpack.minecraftcore.MojangUtils;
-import net.technicpack.minecraftcore.mojang.auth.io.Agent;
 import net.technicpack.minecraftcore.mojang.auth.request.AuthRequest;
 import net.technicpack.minecraftcore.mojang.auth.request.RefreshRequest;
 import net.technicpack.minecraftcore.mojang.auth.response.AuthResponse;
@@ -95,9 +94,7 @@ public class AuthenticationService implements IGameAuthService<MojangUser> {
 	}
 
 	public AuthResponse requestLogin(String username, String password, String clientToken) throws AuthenticationNetworkFailureException {
-		Agent agent = new Agent("Minecraft", 1);
-
-		AuthRequest request = new AuthRequest(agent, username, password, clientToken);
+		AuthRequest request = new AuthRequest(username, password, clientToken);
 		String data = MojangUtils.getGson().toJson(request);
 
 		AuthResponse response;
