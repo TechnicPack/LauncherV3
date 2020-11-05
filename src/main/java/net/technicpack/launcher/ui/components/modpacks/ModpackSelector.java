@@ -506,7 +506,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
 
                 String localSearchUrl = searchText.trim();
                 if (!localSearchUrl.startsWith("http://") && !localSearchUrl.startsWith("https://"))
-                    localSearchUrl = "http://" + localSearchTag;
+                    localSearchUrl = "https://" + localSearchTag;
 
                 try {
                     URI uri = new URI(localSearchUrl);

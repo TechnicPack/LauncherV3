@@ -195,6 +195,7 @@ public class MinecraftLauncher {
 
         commands.addUnique("-Djava.library.path=" + nativesDir);
         // Tell forge 1.5 to download from our mirror instead
+        // This can't be HTTPS because Forge 1.5 doesn't load up Let's Encrypt root certs (we use Let's Encrypt on the mirror)
         commands.addUnique("-Dfml.core.libraries.mirror=http://mirror.technicpack.net/Technic/lib/fml/%s");
 
         // This is required because we strip META-INF from the minecraft.jar

@@ -84,7 +84,7 @@ public class HandleVersionFileTask implements IInstallTask {
         if (isLegacy) {
             Library legacyWrapper = new Library();
             legacyWrapper.setName("net.technicpack:legacywrapper:1.2.1");
-            legacyWrapper.setUrl("http://mirror.technicpack.net/Technic/lib/");
+            legacyWrapper.setUrl("https://mirror.technicpack.net/Technic/lib/");
 
             version.addLibrary(legacyWrapper);
 

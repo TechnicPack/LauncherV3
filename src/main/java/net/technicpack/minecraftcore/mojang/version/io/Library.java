@@ -36,7 +36,7 @@ public class Library {
     private static final String[] FALLBACK = {
         "https://libraries.minecraft.net/",
         "https://files.minecraftforge.net/maven/",
-        "http://mirror.technicpack.net/Technic/lib/",
+        "https://mirror.technicpack.net/Technic/lib/",
     };
     private static final Pattern GRADLE_PATTERN = Pattern.compile("^([^:@]+):([^:@]+):([^:@]+)(?::([^:@]+))?(?:@([^:@]+))?$");
     private static final Pattern FORGE_MAVEN_ROOT = Pattern.compile("^https://files\\.minecraftforge\\.net/maven/(.+)$");

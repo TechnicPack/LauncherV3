@@ -198,7 +198,7 @@ public class LauncherMain {
             //This is probably a debug build or something, build number is invalid
         }
 
-        Relauncher launcher = new TechnicRelauncher(new HttpUpdateStream("http://api.technicpack.net/launcher/"), settings.getBuildStream()+"4", build, directories, resources, params);
+        Relauncher launcher = new TechnicRelauncher(new HttpUpdateStream("https://api.technicpack.net/launcher/"), settings.getBuildStream()+"4", build, directories, resources, params);
 
         try {
             if (launcher.runAutoUpdater())
@@ -328,10 +328,10 @@ public class LauncherMain {
 
         HttpSolderApi httpSolder = new HttpSolderApi(settings.getClientId());
         ISolderApi solder = new CachedSolderApi(directories, httpSolder, 60 * 60);
-        HttpPlatformApi httpPlatform = new HttpPlatformApi("http://api.technicpack.net/", buildNumber.getBuildNumber());
+        HttpPlatformApi httpPlatform = new HttpPlatformApi("https://api.technicpack.net/", buildNumber.getBuildNumber());
 
         IPlatformApi platform = new ModpackCachePlatformApi(httpPlatform, 60 * 60, directories);
-        IPlatformSearchApi platformSearch = new HttpPlatformSearchApi("http://api.technicpack.net/", buildNumber.getBuildNumber());
+        IPlatformSearchApi platformSearch = new HttpPlatformSearchApi("https://api.technicpack.net/", buildNumber.getBuildNumber());
 
         IInstalledPackRepository packStore = TechnicInstalledPackStore.load(new File(directories.getLauncherDirectory(), "installedPacks"));
         IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(platform, solder);
@@ -341,7 +341,7 @@ public class LauncherMain {
         SettingsFactory.migrateSettings(settings, packStore, directories, users, migrators);
 
         PackLoader packList = new PackLoader(directories, packStore, packInfoRepository);
-        ModpackSelector selector = new ModpackSelector(resources, packList, new SolderPackSource("http://solder.technicpack.net/api/", solder), solder, platform, platformSearch, iconRepo);
+        ModpackSelector selector = new ModpackSelector(resources, packList, new SolderPackSource("https://solder.technicpack.net/api/", solder), solder, platform, platformSearch, iconRepo);
         selector.setBorder(BorderFactory.createEmptyBorder());
         userModel.addAuthListener(selector);
 
