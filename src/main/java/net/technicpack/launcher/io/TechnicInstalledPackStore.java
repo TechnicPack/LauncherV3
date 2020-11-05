@@ -126,8 +126,15 @@ public class TechnicInstalledPackStore implements IInstalledPackRepository {
     public void save() {
         String json = Utils.getGson().toJson(this);
 
+        File tmpFile = new File(loadedFile.getAbsolutePath() + ".tmp");
+
         try {
-            FileUtils.writeStringToFile(loadedFile, json, StandardCharsets.UTF_8);
+            // First we write to a temp file, then we move that file to the intended path
+            // This way, we won't end up with an empty file if we fail to write to it
+            FileUtils.writeStringToFile(tmpFile, json, StandardCharsets.UTF_8);
+            if (loadedFile.exists() && !loadedFile.delete())
+                throw new IOException("Failed to delete");
+            FileUtils.moveFile(tmpFile, loadedFile);
         } catch (IOException e) {
             Utils.getLogger().log(Level.WARNING, "Unable to save settings " + loadedFile, e);
         }
