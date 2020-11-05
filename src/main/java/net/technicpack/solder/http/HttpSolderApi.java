@@ -34,7 +34,7 @@ import java.util.Map;
 
 public class HttpSolderApi implements ISolderApi {
     private String clientId;
-    private Map<String, String> mirrorUrls = new HashMap<String, String>();
+    private final Map<String, String> mirrorUrls = new HashMap<String, String>();
 
     public HttpSolderApi(String clientId) {
         this.clientId = clientId;
@@ -51,13 +51,15 @@ public class HttpSolderApi implements ISolderApi {
     }
 
     public String getMirrorUrl(String solderRoot) throws RestfulAPIException {
-        if (!mirrorUrls.containsKey(solderRoot)) {
-            String allPacksUrl = solderRoot + "modpack";
-            Solder solder = RestObject.getRestObject(Solder.class, allPacksUrl);
-            mirrorUrls.put(solderRoot, solder.getMirrorUrl());
-        }
+        synchronized (mirrorUrls) {
+            if (!mirrorUrls.containsKey(solderRoot)) {
+                String allPacksUrl = solderRoot + "modpack";
+                Solder solder = RestObject.getRestObject(Solder.class, allPacksUrl);
+                mirrorUrls.put(solderRoot, solder.getMirrorUrl());
+            }
 
-        return mirrorUrls.get(solderRoot);
+            return mirrorUrls.get(solderRoot);
+        }
     }
 
     @Override
