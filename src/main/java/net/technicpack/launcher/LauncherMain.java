@@ -198,6 +198,11 @@ public class LauncherMain {
             //This is probably a debug build or something, build number is invalid
         }
 
+        // These 2 need to happen *before* the launcher or the updater run so we have valuable debug information and so
+        // we can properly use websites that use Let's Encrypt (and other current certs not supported by old Java versions)
+        runStartupDebug();
+        injectNewRootCerts();
+
         Relauncher launcher = new TechnicRelauncher(new HttpUpdateStream("https://api.technicpack.net/launcher/"), settings.getBuildStream()+"4", build, directories, resources, params);
 
         try {
@@ -260,6 +265,85 @@ public class LauncherMain {
         });
     }
 
+    private static void runStartupDebug() {
+        // Startup debug messages
+        Utils.getLogger().info("OS: " + System.getProperty("os.name").toLowerCase(Locale.ENGLISH));
+        Utils.getLogger().info("Identified as "+ OperatingSystem.getOperatingSystem().getName());
+        Utils.getLogger().info("Java: " + System.getProperty("java.version") + " " + JavaUtils.getJavaBitness() + "-bit (" + System.getProperty("os.arch") + ")");
+        final String[] domains = {"minecraft.net", "session.minecraft.net", "textures.minecraft.net", "libraries.minecraft.net", "authserver.mojang.com", "account.mojang.com", "technicpack.net", "launcher.technicpack.net", "api.technicpack.net", "mirror.technicpack.net", "solder.technicpack.net", "files.minecraftforge.net"};
+        for (String domain : domains) {
+            try {
+                Collection<InetAddress> inetAddresses = Arrays.asList(InetAddress.getAllByName(domain));
+                String ips = inetAddresses.stream().map(InetAddress::getHostAddress).collect(Collectors.joining(", "));
+                Utils.getLogger().info(domain + " resolves to [" + ips + "]");
+            } catch (UnknownHostException ex) {
+                Utils.getLogger().log(Level.SEVERE, "Failed to resolve " + domain + ": " + ex.toString());
+            }
+        }
+    }
+
+    private static void injectNewRootCerts() {
+        // Adapted from Forge installer
+        final String javaVersion = System.getProperty("java.version");
+        if (javaVersion == null || !javaVersion.startsWith("1.8.0_"))
+            return;
+
+        try {
+            if (Integer.parseInt(javaVersion.substring("1.8.0_".length())) >= 101) {
+                Utils.getLogger().log(Level.INFO, "Don't need to inject new root certificates");
+                return;
+            }
+        } catch (final NumberFormatException e) {
+            Utils.getLogger().log(Level.WARNING, "Couldn't parse Java version, can't inject new root certs", e);
+            return;
+        }
+
+        try {
+            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            final Path ksPath = Paths.get(System.getProperty("java.home"),"lib", "security", "cacerts");
+            keyStore.load(Files.newInputStream(ksPath), "changeit".toCharArray());
+            Map<String, Certificate> jdkTrustStore = Collections.list(keyStore.aliases()).stream().collect(Collectors.toMap(a -> a, (String alias) -> {
+                try {
+                    return keyStore.getCertificate(alias);
+                } catch (KeyStoreException e) {
+                    Utils.getLogger().log(Level.WARNING, "Failed to get certificate", e);
+                    return null;
+                }
+            }));
+
+            KeyStore leKS = KeyStore.getInstance(KeyStore.getDefaultType());
+            InputStream leKSFile = LauncherMain.class.getResourceAsStream("/net/technicpack/launcher/resources/technickeystore.jks");
+            leKS.load(leKSFile, "technicrootca".toCharArray());
+            Map<String, Certificate> leTrustStore = Collections.list(leKS.aliases()).stream().collect(Collectors.toMap(a -> a, (String alias) -> {
+                try {
+                    return leKS.getCertificate(alias);
+                } catch (KeyStoreException e) {
+                    Utils.getLogger().log(Level.WARNING, "Failed to get certificate", e);
+                    return null;
+                }
+            }));
+
+            KeyStore mergedTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            mergedTrustStore.load(null, new char[0]);
+            for (final Map.Entry<String, Certificate> entry : jdkTrustStore.entrySet()) {
+                mergedTrustStore.setCertificateEntry(entry.getKey(), entry.getValue());
+            }
+            for (final Map.Entry<String , Certificate> entry : leTrustStore.entrySet()) {
+                mergedTrustStore.setCertificateEntry(entry.getKey(), entry.getValue());
+            }
+
+            TrustManagerFactory instance = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            instance.init(mergedTrustStore);
+            SSLContext tls = SSLContext.getInstance("TLS");
+            tls.init(null, instance.getTrustManagers(), null);
+            HttpsURLConnection.setDefaultSSLSocketFactory(tls.getSocketFactory());
+            Utils.getLogger().log(Level.INFO, "Injected new root certificates");
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | KeyManagementException e) {
+            Utils.getLogger().log(Level.WARNING, "Failed to inject new root certificates. Problems might happen");
+            e.printStackTrace();
+        }
+    }
+
     private static void startLauncher(final TechnicSettings settings, StartupParameters startupParameters, final LauncherDirectories directories, ResourceLoader resources) {
         UIManager.put( "ComboBox.disabledBackground", LauncherFrame.COLOR_FORMELEMENT_INTERNAL );
         UIManager.put( "ComboBox.disabledForeground", LauncherFrame.COLOR_GREY_TEXT );
@@ -279,30 +363,12 @@ public class LauncherMain {
             }
         }).start();
 
-        // Startup debug messages
-        Utils.getLogger().info("OS: " + System.getProperty("os.name").toLowerCase(Locale.ENGLISH));
-        Utils.getLogger().info("Identified as "+ OperatingSystem.getOperatingSystem().getName());
-        Utils.getLogger().info("Java: " + System.getProperty("java.version") + " " + JavaUtils.getJavaBitness() + "-bit (" + System.getProperty("os.arch") + ")");
-        final String[] domains = {"minecraft.net", "session.minecraft.net", "textures.minecraft.net", "libraries.minecraft.net", "authserver.mojang.com", "account.mojang.com", "technicpack.net", "launcher.technicpack.net", "api.technicpack.net", "mirror.technicpack.net", "solder.technicpack.net", "files.minecraftforge.net"};
-        for (String domain : domains) {
-            try {
-                Collection<InetAddress> inetAddresses = Arrays.asList(InetAddress.getAllByName(domain));
-                String ips = inetAddresses.stream().map(InetAddress::getHostAddress).collect(Collectors.joining(", "));
-                Utils.getLogger().info(domain + " resolves to [" + ips + "]");
-            } catch (UnknownHostException ex) {
-                Utils.getLogger().log(Level.SEVERE, "Failed to resolve " + domain + ": " + ex.toString());
-            }
-        }
-
         final SplashScreen splash = new SplashScreen(resources.getImage("launch_splash.png"), 0);
         Color bg = LauncherFrame.COLOR_FORMELEMENT_INTERNAL;
         splash.getContentPane().setBackground(new Color (bg.getRed(),bg.getGreen(),bg.getBlue(),255));
         splash.pack();
         splash.setLocationRelativeTo(null);
         splash.setVisible(true);
-
-        // Inject new root certs for compatibility with older Java versions that don't have them
-        injectNewRootCerts();
 
         JavaVersionRepository javaVersions = new JavaVersionRepository();
         (new InstalledJavaSource()).enumerateVersions(javaVersions);
@@ -383,67 +449,5 @@ public class LauncherMain {
         userModel.initAuth();
 
         Utils.sendTracking("runLauncher", "run", buildNumber.getBuildNumber(), settings.getClientId());
-    }
-
-    private static void injectNewRootCerts() {
-        // Adapted from Forge installer
-        final String javaVersion = System.getProperty("java.version");
-        if (javaVersion == null || !javaVersion.startsWith("1.8.0_"))
-            return;
-
-        try {
-            if (Integer.parseInt(javaVersion.substring("1.8.0_".length())) >= 101) {
-                Utils.getLogger().log(Level.INFO, "Don't need to inject new root certificates");
-                return;
-            }
-        } catch (final NumberFormatException e) {
-            Utils.getLogger().log(Level.WARNING, "Couldn't parse Java version, can't inject new root certs", e);
-            return;
-        }
-
-        try {
-            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            final Path ksPath = Paths.get(System.getProperty("java.home"),"lib", "security", "cacerts");
-            keyStore.load(Files.newInputStream(ksPath), "changeit".toCharArray());
-            Map<String, Certificate> jdkTrustStore = Collections.list(keyStore.aliases()).stream().collect(Collectors.toMap(a -> a, (String alias) -> {
-                try {
-                    return keyStore.getCertificate(alias);
-                } catch (KeyStoreException e) {
-                    Utils.getLogger().log(Level.WARNING, "Failed to get certificate", e);
-                    return null;
-                }
-            }));
-
-            KeyStore leKS = KeyStore.getInstance(KeyStore.getDefaultType());
-            InputStream leKSFile = LauncherMain.class.getResourceAsStream("/net/technicpack/launcher/resources/technickeystore.jks");
-            leKS.load(leKSFile, "technicrootca".toCharArray());
-            Map<String, Certificate> leTrustStore = Collections.list(leKS.aliases()).stream().collect(Collectors.toMap(a -> a, (String alias) -> {
-                try {
-                    return leKS.getCertificate(alias);
-                } catch (KeyStoreException e) {
-                    Utils.getLogger().log(Level.WARNING, "Failed to get certificate", e);
-                    return null;
-                }
-            }));
-
-            KeyStore mergedTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            mergedTrustStore.load(null, new char[0]);
-            for (final Map.Entry<String, Certificate> entry : jdkTrustStore.entrySet()) {
-                mergedTrustStore.setCertificateEntry(entry.getKey(), entry.getValue());
-            }
-            for (final Map.Entry<String , Certificate> entry : leTrustStore.entrySet()) {
-                mergedTrustStore.setCertificateEntry(entry.getKey(), entry.getValue());
-            }
-
-            TrustManagerFactory instance = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            instance.init(mergedTrustStore);
-            SSLContext tls = SSLContext.getInstance("TLS");
-            tls.init(null, instance.getTrustManagers(), null);
-            HttpsURLConnection.setDefaultSSLSocketFactory(tls.getSocketFactory());
-            Utils.getLogger().log(Level.INFO, "Injected new root certificates");
-        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | KeyManagementException e) {
-            Utils.getLogger().log(Level.WARNING, "Failed to inject new root certificates. Problems might happen");
-            e.printStackTrace();
-        }
     }
 }
