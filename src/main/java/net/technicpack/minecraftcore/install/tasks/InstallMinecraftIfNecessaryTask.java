@@ -64,7 +64,7 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask {
 		IFileVerifier verifier = null;
 
 		if (dls != null) {
-			url = dls.forClient().getUrl(); // TODO maybe use the sha1 sum?
+			url = dls.forClient().getUrl();
 			verifier = new SHA1FileVerifier(dls.forClient().getSha1());
 		} else {
 			url = MojangUtils.getOldVersionDownload(this.minecraftVersion);
