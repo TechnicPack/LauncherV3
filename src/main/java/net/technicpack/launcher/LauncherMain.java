@@ -285,12 +285,14 @@ public class LauncherMain {
     private static void injectNewRootCerts() {
         // Adapted from Forge installer
         final String javaVersion = System.getProperty("java.version");
-        if (javaVersion == null || !javaVersion.startsWith("1.8.0_"))
+        if (javaVersion == null || !javaVersion.startsWith("1.8.0_")) {
+            Utils.getLogger().log(Level.INFO, "Don't need to inject new root certificates: Java is newer than 8 (" + javaVersion + ")");
             return;
+        }
 
         try {
             if (Integer.parseInt(javaVersion.substring("1.8.0_".length())) >= 101) {
-                Utils.getLogger().log(Level.INFO, "Don't need to inject new root certificates");
+                Utils.getLogger().log(Level.INFO, "Don't need to inject new root certificates: Java 8 is 101+ (" + javaVersion + ")");
                 return;
             }
         } catch (final NumberFormatException e) {
