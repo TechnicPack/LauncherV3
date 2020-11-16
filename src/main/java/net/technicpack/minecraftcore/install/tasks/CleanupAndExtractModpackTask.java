@@ -25,12 +25,13 @@ import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.EnsureFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.minecraftcore.install.tasks.CleanupModpackCacheTask;
+import net.technicpack.minecraftcore.install.ModpackZipFilter;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.Mod;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
+import net.technicpack.utilslib.IZipFileFilter;
 
 import java.io.File;
 import java.io.IOException;
@@ -82,6 +83,9 @@ public class CleanupAndExtractModpackTask implements IInstallTask {
 		}
 
 		File packOutput = this.pack.getInstalledDirectory();
+
+		IZipFileFilter zipFilter = new ModpackZipFilter(this.pack);
+
 		for (Mod mod : modpack.getMods()) {
 			String url = mod.getUrl();
 			String md5 = mod.getMd5();
@@ -104,7 +108,7 @@ public class CleanupAndExtractModpackTask implements IInstallTask {
             else
                 verifier = new ValidZipFileVerifier();
 
-			checkModQueue.addTask(new EnsureFileTask(cache, verifier, packOutput, url, downloadModQueue, copyModQueue));
+			checkModQueue.addTask(new EnsureFileTask(cache, verifier, packOutput, url, downloadModQueue, copyModQueue, zipFilter));
 		}
 
 		copyModQueue.addTask(new CleanupModpackCacheTask(this.pack, modpack));
