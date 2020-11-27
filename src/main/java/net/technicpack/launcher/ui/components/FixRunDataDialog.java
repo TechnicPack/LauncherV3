@@ -1,6 +1,7 @@
 package net.technicpack.launcher.ui.components;
 
 import net.technicpack.launcher.ui.LauncherFrame;
+import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.launch.java.IJavaVersion;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.modpacks.RunData;
@@ -15,17 +16,22 @@ import javax.swing.text.View;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class FixRunDataDialog extends LauncherDialog {
 
     private static final int DIALOG_WIDTH = 620;
 
-    private ResourceLoader resourceLoader;
+    private final ResourceLoader resourceLoader;
 
-    private RunData runData;
-    private JavaVersionRepository javaVersionRepository;
-    private Memory attemptedMemory;
-    private boolean shouldAskFirst;
+    private final RunData runData;
+    private final JavaVersionRepository javaVersionRepository;
+    private final Memory attemptedMemory;
+    private final boolean shouldAskFirst;
 
     private IJavaVersion recommendedVersion;
     private Memory recommendedMemory;
@@ -256,6 +262,16 @@ public class FixRunDataDialog extends LauncherDialog {
                             resourceLoader.getString("fixRunData.needBetterJava") +
                             "</body>" +
                             "</html>", resourceLoader.getIcon("danger_icon.png"), SwingConstants.LEFT);
+            label.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    try {
+                        Desktop.getDesktop().browse(new URI(TechnicConstants.javaDownloadURL));
+                    } catch (URISyntaxException | IOException ex) {
+                        //to the void
+                    }
+                }
+            });
             label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
             centerPanel.add(label, new GridBagConstraints(0, gridBagIndex++, 1, 1, 1.0f, 0, GridBagConstraints.SOUTH, GridBagConstraints.BOTH, new Insets(0, 8, 0, 0), 0, 0));
             label.setPreferredSize(getPreferredSize(label.getText(), DIALOG_WIDTH - 5));
@@ -269,6 +285,16 @@ public class FixRunDataDialog extends LauncherDialog {
                             resourceLoader.getString("fixRunData.need64BitJava") +
                             "</body>" +
                             "</html>", resourceLoader.getIcon("danger_icon.png"), SwingConstants.LEFT);
+            label.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    try {
+                        Desktop.getDesktop().browse(new URI(TechnicConstants.javaDownloadURL));
+                    } catch (URISyntaxException | IOException ex) {
+                        //to the void
+                    }
+                }
+            });
             label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
             centerPanel.add(label, new GridBagConstraints(0, gridBagIndex++, 1, 1, 1.0f, 0, GridBagConstraints.SOUTH, GridBagConstraints.BOTH, new Insets(0, 8, 0, 0), 0, 0));
             label.setPreferredSize(getPreferredSize(label.getText(), DIALOG_WIDTH - 5));
@@ -405,9 +431,11 @@ public class FixRunDataDialog extends LauncherDialog {
         return isSuccess?"req_success.png":(hasRecommended?"req_warning.png":"req_failed.png");
     }
 
-    /**Returns the preferred size to set a component at in order to render
-     * an html string.  You can specify the size of one dimension.*/
-    private static JLabel resizer = new JLabel();
+    /**
+     * Returns the preferred size to set a component at in order to render
+     * an html string.  You can specify the size of one dimension.
+     */
+    private static final JLabel resizer = new JLabel();
     private java.awt.Dimension getPreferredSize(String html, int width) {
         resizer.setText(html);
 
