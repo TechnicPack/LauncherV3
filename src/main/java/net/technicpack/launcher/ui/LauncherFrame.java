@@ -615,11 +615,14 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         installProgressPlaceholder = Box.createHorizontalGlue();
         footer.add(installProgressPlaceholder);
 
-        JLabel buildCtrl = new JLabel(resources.getString("launcher.build.text", buildNumber.getBuildNumber(), resources.getString("launcher.build." + settings.getBuildStream())));
-        buildCtrl.setForeground(COLOR_WHITE_TEXT);
-        buildCtrl.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
+        JButton buildCtrl = new JButton(resources.getIcon("akliz-logo.png"));
+        buildCtrl.setBorder(BorderFactory.createEmptyBorder());
+        buildCtrl.setContentAreaFilled(false);
         buildCtrl.setHorizontalTextPosition(SwingConstants.RIGHT);
         buildCtrl.setHorizontalAlignment(SwingConstants.RIGHT);
+        buildCtrl.setFocusable(false);
+        buildCtrl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        buildCtrl.addActionListener(e -> DesktopUtils.browseUrl("https://www.akliz.net/technic"));
         footer.add(buildCtrl);
 
         getRootPane().getContentPane().add(footer, BorderLayout.PAGE_END);
