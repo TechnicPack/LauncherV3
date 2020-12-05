@@ -175,9 +175,6 @@ public class MinecraftLauncher {
             permSize = 256;
         }
 
-        // So in 1.8 permgen autoscales- only problem, it doesn't do it based on RAM allocation like we do, instead
-        // It has a SEPARATE heap for permgen that is by default unbounded by anything.  Result: instead of 2GB
-        // with 256m set aside for permgen, you have a whole 2GB PLUS however much permgen uses.
         commands.addRaw("-Xms" + memory + "m");
         commands.addRaw("-Xmx" + memory + "m");
 
