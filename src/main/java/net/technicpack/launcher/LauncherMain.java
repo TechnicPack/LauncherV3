@@ -67,7 +67,7 @@ import net.technicpack.launchercore.modpacks.resources.resourcetype.LogoResource
 import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.minecraftcore.launch.MinecraftLauncher;
-import net.technicpack.minecraftcore.mojang.auth.AuthenticationService;
+import net.technicpack.minecraftcore.mojang.auth.MojangAuthenticationService;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.IPlatformSearchApi;
@@ -378,8 +378,8 @@ public class LauncherMain {
         javaVersionFile.enumerateVersions(javaVersions);
         javaVersions.selectVersion(settings.getJavaVersion(), settings.getJavaBitness());
 
-        IUserStore<MojangUser> users = TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json"));
-        UserModel userModel = new UserModel(users, new AuthenticationService());
+        IUserStore users = TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json"));
+        UserModel userModel = new UserModel(users, new MojangAuthenticationService());
 
         IModpackResourceType iconType = new IconResourceType();
         IModpackResourceType logoType = new LogoResourceType();
@@ -442,7 +442,7 @@ public class LauncherMain {
         userModel.addAuthListener(login);
         userModel.addAuthListener(new IAuthListener() {
             @Override
-            public void userChanged(Object user) {
+            public void userChanged(IUserType user) {
                 if (user == null)
                     splash.dispose();
             }

@@ -31,13 +31,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class UserWidget extends JPanel implements IImageJobListener<MojangUser> {
+public class UserWidget extends JPanel implements IImageJobListener<IUserType> {
 
     private ImageRepository<IUserType> skinRepository;
 
     private JLabel userName;
     private JLabel avatar;
-    private MojangUser currentMojangUser;
+    private IUserType currentUser;
 
     public UserWidget(ResourceLoader resources, ImageRepository<IUserType> skinRepository) {
         this.skinRepository = skinRepository;
@@ -96,11 +96,11 @@ public class UserWidget extends JPanel implements IImageJobListener<MojangUser> 
             this.add(staticText);
     }
 
-    public void setUser(MojangUser mojangUser) {
-        currentMojangUser = mojangUser;
-        userName.setText(mojangUser.getDisplayName());
+    public void setUser(IUserType user) {
+        currentUser = user;
+        userName.setText(user.getDisplayName());
 
-        ImageJob<MojangUser> job = skinRepository.startImageJob(currentMojangUser);
+        ImageJob<IUserType> job = skinRepository.startImageJob(user);
         job.addJobListener(this);
         refreshFace(job.getImage());
     }
@@ -110,8 +110,8 @@ public class UserWidget extends JPanel implements IImageJobListener<MojangUser> 
     }
 
     @Override
-    public void jobComplete(ImageJob<MojangUser> job) {
-        if (job.getJobData() == currentMojangUser)
+    public void jobComplete(ImageJob<IUserType> job) {
+        if (job.getJobData() == currentUser)
             refreshFace(job.getImage());
     }
 }

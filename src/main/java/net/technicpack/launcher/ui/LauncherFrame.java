@@ -66,7 +66,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 
-public class LauncherFrame extends DraggableFrame implements IRelocalizableResource, IAuthListener<MojangUser> {
+public class LauncherFrame extends DraggableFrame implements IRelocalizableResource, IAuthListener {
 
     private static final int FRAME_WIDTH = 1194;
     private static final int FRAME_HEIGHT = 718;
@@ -109,7 +109,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     public static final String TAB_NEWS = "news";
 
     private ResourceLoader resources;
-    private final UserModel<MojangUser> userModel;
+    private final UserModel userModel;
     private final ImageRepository<IUserType> skinRepository;
     private final TechnicSettings settings;
     private final ImageRepository<ModpackModel> iconRepo;
@@ -662,15 +662,15 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     }
 
     @Override
-    public void userChanged(MojangUser mojangUser) {
-        if (mojangUser == null)
+    public void userChanged(IUserType user) {
+        if (user == null)
             this.setVisible(false);
         else {
             this.setVisible(true);
-            userWidget.setUser(mojangUser);
+            userWidget.setUser(user);
 
             if (modpackSelector.getSelectedPack() != null)
-                setupPlayButtonText(modpackSelector.getSelectedPack(), mojangUser);
+                setupPlayButtonText(modpackSelector.getSelectedPack(), user);
 
             modpackSelector.forceRefresh();
             EventQueue.invokeLater(new Runnable() {
@@ -682,14 +682,14 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         }
     }
 
-    public void setupPlayButtonText(ModpackModel modpack, MojangUser user) {
+    public void setupPlayButtonText(ModpackModel modpack, IUserType user) {
         playButton.setEnabled(true);
         playButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
 
         if (installer.isCurrentlyRunning()) {
             playButton.setText(resources.getString("launcher.pack.cancel"));
         } else if (modpack.getInstalledVersion() != null) {
-            if (userModel.getCurrentUser() == null || userModel.getCurrentUser().isOffline()) {
+            if (userModel.getCurrentUser() == null || (userModel.getCurrentUser() instanceof MojangUser && ((MojangUser) userModel.getCurrentUser()).isOffline())) {
                 playButton.setText(resources.getString("launcher.pack.launch.offline"));
             } else {
                 playButton.setText(resources.getString("launcher.pack.launch"));
@@ -697,7 +697,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             playButton.setIcon(new ImageIcon(resources.colorImage(resources.getImage("play_button.png"), LauncherFrame.COLOR_BUTTON_BLUE)));
             playButton.setHoverIcon(new ImageIcon(resources.colorImage(resources.getImage("play_button.png"), LauncherFrame.COLOR_BLUE)));
         } else {
-            if (userModel.getCurrentUser() == null || userModel.getCurrentUser().isOffline()) {
+            if (userModel.getCurrentUser() == null || (userModel.getCurrentUser() instanceof MojangUser && ((MojangUser) userModel.getCurrentUser()).isOffline())) {
                 playButton.setEnabled(false);
                 playButton.setForeground(LauncherFrame.COLOR_GREY_TEXT);
                 playButton.setText(resources.getString("launcher.pack.cannotinstall"));

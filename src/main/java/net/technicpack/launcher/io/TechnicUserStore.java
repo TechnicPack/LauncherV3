@@ -20,6 +20,7 @@ package net.technicpack.launcher.io;
 
 import com.google.gson.JsonSyntaxException;
 import net.technicpack.launchercore.auth.IUserStore;
+import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.utilslib.Utils;
@@ -34,8 +35,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class TechnicUserStore implements IUserStore<MojangUser> {
+public class TechnicUserStore implements IUserStore {
     private String clientToken = UUID.randomUUID().toString();
     private Map<String, MojangUser> savedUsers = new HashMap<String, MojangUser>();
     private String lastUser;
@@ -85,12 +88,15 @@ public class TechnicUserStore implements IUserStore<MojangUser> {
         }
     }
 
-    public void addUser(MojangUser mojangUser) {
-        if (savedUsers.containsKey(mojangUser.getUsername())) {
-            MojangUser oldUser = savedUsers.get(mojangUser.getUsername());
-            mojangUser.mergeUserProperties(oldUser);
+    public void addUser(IUserType user) {
+        if (user instanceof MojangUser) {
+            if (savedUsers.containsKey(user.getUsername())) {
+                IUserType oldUser = savedUsers.get(user.getUsername());
+                if (oldUser instanceof MojangUser)
+                    ((MojangUser) user).mergeUserProperties((MojangUser) oldUser);
+            }
+            savedUsers.put(user.getUsername(), (MojangUser) user);
         }
-        savedUsers.put(mojangUser.getUsername(), mojangUser);
         save();
     }
 
@@ -99,7 +105,7 @@ public class TechnicUserStore implements IUserStore<MojangUser> {
         save();
     }
 
-    public MojangUser getUser(String accountName) {
+    public IUserType getUser(String accountName) {
         return savedUsers.get(accountName);
     }
 
@@ -111,9 +117,7 @@ public class TechnicUserStore implements IUserStore<MojangUser> {
         return savedUsers.keySet();
     }
 
-    public Collection<MojangUser> getSavedUsers() {
-        return savedUsers.values();
-    }
+    public Collection<IUserType> getSavedUsers() { return savedUsers.values().stream().collect(Collectors.toSet()); }
 
     public void setLastUser(String lastUser) {
         this.lastUser = lastUser;

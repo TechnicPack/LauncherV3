@@ -20,6 +20,7 @@
 package net.technicpack.minecraftcore.launch;
 
 import net.technicpack.autoupdate.IBuildNumber;
+import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.launch.GameProcess;
@@ -55,7 +56,7 @@ public class MinecraftLauncher {
 
     private final LauncherDirectories directories;
     private final IPlatformApi platformApi;
-    private final UserModel<MojangUser> userModel;
+    private final UserModel userModel;
     private final JavaVersionRepository javaVersions;
     private final IBuildNumber buildNumber;
 
@@ -111,18 +112,33 @@ public class MinecraftLauncher {
 
         // build arg parameter map
         Map<String, String> params = new HashMap<String, String>();
-        MojangUser mojangUser = userModel.getCurrentUser();
+        IUserType currentUser = userModel.getCurrentUser();
         File gameDirectory = pack.getInstalledDirectory();
         ILaunchOptions launchOpts = options.getOptions();
 
-        params.put("auth_username", mojangUser.getUsername());
-        params.put("auth_session", mojangUser.getSessionId());
-        params.put("auth_access_token", mojangUser.getAccessToken());
+        params.put("auth_username", currentUser.getUsername());
+        params.put("auth_access_token", currentUser.getAccessToken());
 
-        params.put("auth_player_name", mojangUser.getDisplayName());
-        params.put("auth_uuid", mojangUser.getProfile().getId());
+        params.put("auth_player_name", currentUser.getDisplayName());
 
-        params.put("profile_name", mojangUser.getDisplayName());
+        params.put("profile_name", currentUser.getDisplayName());
+
+        if (currentUser instanceof MojangUser)
+        {
+            MojangUser mojangUser = (MojangUser) currentUser;
+
+            params.put("auth_username", mojangUser.getUsername());
+            params.put("auth_session", mojangUser.getSessionId());
+            params.put("auth_access_token", mojangUser.getAccessToken());
+
+            params.put("auth_player_name", mojangUser.getDisplayName());
+            params.put("auth_uuid", mojangUser.getProfile().getId());
+
+            params.put("profile_name", mojangUser.getDisplayName());
+
+            params.put("user_type", mojangUser.getProfile().isLegacy() ? "legacy" : "mojang");
+            params.put("user_properties", mojangUser.getUserPropertiesAsJson());
+        }
         params.put("version_name", version.getId());
         params.put("version_type", version.getType().getName());
 
@@ -152,8 +168,6 @@ public class MinecraftLauncher {
         params.put("game_assets", targetAssets);
         params.put("assets_root", targetAssets);
         params.put("assets_index_name", assetsKey);
-        params.put("user_type", mojangUser.getProfile().isLegacy() ? "legacy" : "mojang");
-        params.put("user_properties", mojangUser.getUserPropertiesAsJson());
 
         params.put("launcher_name", "technic");
         params.put("launcher_version", "4." + buildNumber.getBuildNumber());
