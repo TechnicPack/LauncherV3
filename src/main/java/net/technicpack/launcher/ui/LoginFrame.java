@@ -19,6 +19,9 @@
 package net.technicpack.launcher.ui;
 
 import net.technicpack.launcher.LauncherMain;
+import net.technicpack.launchercore.auth.OnLiveLoggedInListener;
+import net.technicpack.minecraftcore.live.auth.LiveUser;
+import net.technicpack.minecraftcore.live.auth.response.MinecraftProfile;
 import net.technicpack.ui.controls.list.popupformatters.RoundedBorderFormatter;
 import net.technicpack.ui.controls.lang.LanguageCellRenderer;
 import net.technicpack.ui.controls.lang.LanguageCellUI;
@@ -66,7 +69,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     private JComboBox languages;
 
     private static final int FRAME_WIDTH = 347;
-    private static final int FRAME_HEIGHT = 409;
+    private static final int FRAME_HEIGHT = 449;
 
     public LoginFrame(ResourceLoader resources, TechnicSettings settings, UserModel userModel, ImageRepository<IUserType> skinRepository) {
         this.skinRepository = skinRepository;
@@ -181,7 +184,9 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
             Object selected = nameSelect.getSelectedItem();
 
             if (selected instanceof MojangUser) {
-                verifyExistingLogin((MojangUser) selected);
+                verifyExistingMojangLogin((MojangUser) selected);
+            } else if (selected instanceof LiveUser) {
+                verifyExistingLiveLogin((LiveUser) selected);
             } else {
                 String username = selected.toString();
 
@@ -193,8 +198,10 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
                         attemptMojangLogin(username);
                     else {
                         setCurrentUser(mojangUser);
-                        verifyExistingLogin(mojangUser);
+                        verifyExistingMojangLogin(mojangUser);
                     }
+                } else if (user instanceof LiveUser) {
+                    verifyExistingLiveLogin((LiveUser) user);
                 }
             }
         } else {
@@ -202,7 +209,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         }
     }
 
-    private void verifyExistingLogin(MojangUser mojangUser) {
+    private void verifyExistingMojangLogin(MojangUser mojangUser) {
         MojangUser loginMojangUser = mojangUser;
         boolean rejected = false;
 
@@ -247,6 +254,10 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         }
     }
 
+    private void verifyExistingLiveLogin(LiveUser liveUser) {
+        userModel.attemptLiveUserRefresh(liveUser);
+    }
+
     private void attemptMojangLogin(String name) {
         UserModel.AuthError error = userModel.attemptMojangInitialLogin(name, new String(this.password.getPassword()));
 
@@ -255,6 +266,15 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         } else if (rememberAccount.isSelected()) {
             userModel.addUser(userModel.getCurrentUser());
         }
+    }
+
+    private void microsoftLogin() {
+        userModel.attemptLiveInitialLogin(new OnLiveLoggedInListener() {
+            @Override
+            public void onLoggedIn() {
+                userModel.addUser(userModel.getCurrentUser());
+            }
+        });
     }
 
     protected void clearCurrentUser() {
@@ -333,15 +353,30 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         platformImage.setIcon(resources.getIcon("platform_logo.png"));
         add(platformImage, new GridBagConstraints(0,0,3,1,0.0,0.0,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(30,0,0,0),0,0));
 
+        // Microsoft Account login
+        RoundedButton msaButton = new RoundedButton(resources.getString("login.microsoft"));
+        msaButton.setBorder(BorderFactory.createEmptyBorder(5,17,10,17));
+        msaButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+        msaButton.setContentAreaFilled(false);
+        msaButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        msaButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        msaButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                microsoftLogin();
+            }
+        });
+        add(msaButton, new GridBagConstraints(0, 1, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(24,20,0,0),0,0));
+
         JLabel instructionText = new JLabel("<html><body align=\"center\">"+ resources.getString("login.instructions") +"</body></html>", JLabel.CENTER);
         instructionText.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         instructionText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        add(instructionText, new GridBagConstraints(0, 1, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(9, 3, 0, 3), 0, 0));
+        add(instructionText, new GridBagConstraints(0, 2, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(9, 3, 0, 3), 0, 0));
 
         JLabel userLabel = new JLabel(resources.getString("login.username"));
         userLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         userLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        add(userLabel, new GridBagConstraints(0, 2, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10,20,0,20), 0,0));
+        add(userLabel, new GridBagConstraints(0, 3, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10,20,0,20), 0,0));
 
         // Setup username box
         nameSelect = new JComboBox();
@@ -374,7 +409,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
             }
         });
 
-        add(nameSelect, new GridBagConstraints(0, 3, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(3, 20, 0, 20), 4, 4));
+        add(nameSelect, new GridBagConstraints(0, 4, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(3, 20, 0, 20), 4, 4));
 
         name = new JTextField();
         name.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
@@ -383,12 +418,12 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         name.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         name.setCaretColor(LauncherFrame.COLOR_BUTTON_BLUE);
         name.addKeyListener(this);
-        add(name, new GridBagConstraints(0, 3, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(3,20,0,20),4,17));
+        add(name, new GridBagConstraints(0, 4, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(3,20,0,20),4,17));
 
         JLabel passLabel = new JLabel(resources.getString("login.password"));
         passLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         passLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        add(passLabel, new GridBagConstraints(0, 4, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(12,20,0,20),0,0));
+        add(passLabel, new GridBagConstraints(0, 5, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(12,20,0,20),0,0));
 
         // Setup password box
         password = new JPasswordField();
@@ -405,7 +440,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
             }
         });
         password.setCaretColor(LauncherFrame.COLOR_BUTTON_BLUE);
-        add(password, new GridBagConstraints(0, 5, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(3, 20, 0, 20), 4, 17));
+        add(password, new GridBagConstraints(0, 6, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(3, 20, 0, 20), 4, 17));
 
         // "Remember this account"
         Font rememberFont = resources.getFont(ResourceLoader.FONT_OPENSANS, 14);
@@ -427,7 +462,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
             }
         });
         rememberAccount.setFocusPainted(false);
-        add(rememberAccount, new GridBagConstraints(1,6,2,1,1.0,0.0, GridBagConstraints.EAST, GridBagConstraints.BOTH, new Insets(24,20,0,20),0,0));
+        add(rememberAccount, new GridBagConstraints(1,7,2,1,1.0,0.0, GridBagConstraints.EAST, GridBagConstraints.BOTH, new Insets(24,20,0,20),0,0));
 
         //Login button
         RoundedButton loginButton = new RoundedButton(resources.getString("login.button"));
@@ -442,9 +477,9 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
                 attemptLogin();
             }
         });
-        add(loginButton, new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(24,20,0,0),0,0));
+        add(loginButton, new GridBagConstraints(0, 7, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(24,20,0,0),0,0));
 
-        add(Box.createVerticalGlue(), new GridBagConstraints(0, 8, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
+        add(Box.createVerticalGlue(), new GridBagConstraints(0, 9, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
 
         JPanel linkPane = new JPanel();
         linkPane.setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
@@ -506,7 +541,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         linkPane.add(termsLink);
         linkPane.add(Box.createHorizontalStrut(8));
 
-        add(linkPane, new GridBagConstraints(0, 9, 3, 1, 1.0, 0.0, GridBagConstraints.SOUTH, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
+        add(linkPane, new GridBagConstraints(0, 10, 3, 1, 1.0, 0.0, GridBagConstraints.SOUTH, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
     }
 
     @Override

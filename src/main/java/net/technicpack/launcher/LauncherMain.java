@@ -67,6 +67,7 @@ import net.technicpack.launchercore.modpacks.resources.resourcetype.LogoResource
 import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.minecraftcore.launch.MinecraftLauncher;
+import net.technicpack.minecraftcore.live.auth.XboxAuthenticationService;
 import net.technicpack.minecraftcore.mojang.auth.MojangAuthenticationService;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.platform.IPlatformApi;
@@ -379,7 +380,7 @@ public class LauncherMain {
         javaVersions.selectVersion(settings.getJavaVersion(), settings.getJavaBitness());
 
         IUserStore users = TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json"));
-        UserModel userModel = new UserModel(users, new MojangAuthenticationService());
+        UserModel userModel = new UserModel(users, new MojangAuthenticationService(), new XboxAuthenticationService());
 
         IModpackResourceType iconType = new IconResourceType();
         IModpackResourceType logoType = new LogoResourceType();

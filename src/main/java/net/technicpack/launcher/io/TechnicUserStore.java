@@ -22,6 +22,7 @@ import com.google.gson.JsonSyntaxException;
 import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.minecraftcore.MojangUtils;
+import net.technicpack.minecraftcore.live.auth.LiveUser;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
@@ -41,6 +42,7 @@ import java.util.stream.Stream;
 public class TechnicUserStore implements IUserStore {
     private String clientToken = UUID.randomUUID().toString();
     private Map<String, MojangUser> savedUsers = new HashMap<String, MojangUser>();
+    private Map<String, LiveUser> savedLiveUsers = new HashMap<String, LiveUser>();
     private String lastUser;
     private transient File usersFile;
 
@@ -96,17 +98,23 @@ public class TechnicUserStore implements IUserStore {
                     ((MojangUser) user).mergeUserProperties((MojangUser) oldUser);
             }
             savedUsers.put(user.getUsername(), (MojangUser) user);
+        } else {
+            savedLiveUsers.put(user.getUsername(), (LiveUser) user);
         }
         save();
     }
 
     public void removeUser(String username) {
         savedUsers.remove(username);
+        savedLiveUsers.remove(username);
         save();
     }
 
     public IUserType getUser(String accountName) {
-        return savedUsers.get(accountName);
+        IUserType user = savedUsers.get(accountName);
+        if (user == null)
+            user = savedLiveUsers.get(accountName);
+        return user;
     }
 
     public String getClientToken() {
@@ -114,10 +122,12 @@ public class TechnicUserStore implements IUserStore {
     }
 
     public Collection<String> getUsers() {
-        return savedUsers.keySet();
+        return Stream.concat(savedUsers.keySet().stream(), savedLiveUsers.keySet().stream()).collect(Collectors.toSet());
     }
 
-    public Collection<IUserType> getSavedUsers() { return savedUsers.values().stream().collect(Collectors.toSet()); }
+    public Collection<IUserType> getSavedUsers() {
+        return Stream.concat(savedUsers.values().stream(), savedLiveUsers.values().stream()).collect(Collectors.toSet());
+    }
 
     public void setLastUser(String lastUser) {
         this.lastUser = lastUser;

@@ -29,6 +29,7 @@ import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.RunData;
 import net.technicpack.minecraftcore.MojangUtils;
+import net.technicpack.minecraftcore.live.auth.LiveUser;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
@@ -139,6 +140,22 @@ public class MinecraftLauncher {
             params.put("user_type", mojangUser.getProfile().isLegacy() ? "legacy" : "mojang");
             params.put("user_properties", mojangUser.getUserPropertiesAsJson());
         }
+        else
+        {
+            LiveUser liveUser = (LiveUser) currentUser;
+
+            params.put("auth_username", liveUser.getUsername());
+            params.put("auth_access_token", liveUser.getAccessToken());
+
+            params.put("auth_player_name", liveUser.getDisplayName());
+            params.put("auth_uuid", liveUser.getId());
+
+            params.put("profile_name", liveUser.getDisplayName());
+
+            params.put("user_type", "msa");
+            params.put("user_properties", "");
+        }
+
         params.put("version_name", version.getId());
         params.put("version_type", version.getType().getName());
 
