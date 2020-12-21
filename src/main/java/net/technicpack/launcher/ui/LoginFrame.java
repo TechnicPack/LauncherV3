@@ -194,14 +194,12 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
 
                 if (user instanceof MojangUser) {
                     MojangUser mojangUser = (MojangUser) user;
-                    if (mojangUser == null)
-                        attemptMojangLogin(username);
-                    else {
-                        setCurrentUser(mojangUser);
-                        verifyExistingMojangLogin(mojangUser);
-                    }
+                    setCurrentUser(mojangUser);
+                    verifyExistingMojangLogin(mojangUser);
                 } else if (user instanceof LiveUser) {
                     verifyExistingLiveLogin((LiveUser) user);
+                } else {
+                    attemptMojangLogin(username);
                 }
             }
         } else {
