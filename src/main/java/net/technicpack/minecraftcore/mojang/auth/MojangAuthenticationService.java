@@ -36,7 +36,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-public class AuthenticationService implements IGameAuthService<MojangUser> {
+public class MojangAuthenticationService implements IGameAuthService<MojangUser> {
 	private static final String AUTH_SERVER = "https://authserver.mojang.com/";
 
 	public AuthResponse requestRefresh(MojangUser mojangUser) throws AuthenticationNetworkFailureException {

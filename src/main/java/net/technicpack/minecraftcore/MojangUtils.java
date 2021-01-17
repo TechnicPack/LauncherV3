@@ -82,6 +82,7 @@ public class MojangUtils {
         builder.registerTypeAdapter(ArgumentList.class, new ArgumentListAdapter());
         builder.registerTypeAdapter(Rule.class, new RuleAdapter());
         builder.enableComplexMapKeySerialization();
+        builder.disableHtmlEscaping();
         uglyGson = builder.create();
 
         builder.setPrettyPrinting();

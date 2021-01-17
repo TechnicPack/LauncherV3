@@ -97,6 +97,21 @@
             <artifactId>maven-artifact</artifactId>
             <version>3.6.3</version>
         </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>16-ea+5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>16-ea+5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
+            <version>16-ea+5</version>
+        </dependency>
     </dependencies>
 
     <!-- Build configuration -->
@@ -191,6 +206,12 @@
                                     </includes>
                                 </filter>
                                 <filter>
+                                    <artifact>org.openjfx:*</artifact>
+                                    <includes>
+                                        <include>**</include>
+                                    </includes>
+                                </filter>
+                                <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
                                         <exclude>META-INF/*.txt</exclude>
@@ -227,6 +248,14 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.5</version>
+                <configuration>
+                        <mainClass>hellofx/org.openjfx.App</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>

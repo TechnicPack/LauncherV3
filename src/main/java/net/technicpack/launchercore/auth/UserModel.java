@@ -20,28 +20,38 @@
 package net.technicpack.launchercore.auth;
 
 import net.technicpack.launchercore.exception.AuthenticationNetworkFailureException;
+import net.technicpack.minecraftcore.live.auth.LiveLoginBrowser;
+import net.technicpack.minecraftcore.live.auth.LiveUser;
+import net.technicpack.minecraftcore.live.auth.OnLoggedInListener;
+import net.technicpack.minecraftcore.live.auth.XboxAuthenticationService;
+import net.technicpack.minecraftcore.live.auth.response.MinecraftProfile;
+import net.technicpack.minecraftcore.mojang.auth.MojangAuthenticationService;
+import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
-public class UserModel<UserType extends IUserType> {
-    private UserType mCurrentUser = null;
+public class UserModel {
+    private IUserType mCurrentUser = null;
     private List<IAuthListener> mAuthListeners = new LinkedList<IAuthListener>();
-    private IUserStore<UserType> mUserStore;
-    private IGameAuthService<UserType> gameAuthService;
+    private IUserStore mUserStore;
+    private MojangAuthenticationService mojangAuthService;
+    private XboxAuthenticationService liveAuthService;
 
-    public UserModel(IUserStore userStore, IGameAuthService<UserType> gameAuthService) {
+    public UserModel(IUserStore userStore, MojangAuthenticationService mojangAuthService, XboxAuthenticationService liveAuthService) {
         this.mCurrentUser = null;
         this.mUserStore = userStore;
-        this.gameAuthService = gameAuthService;
+        this.mojangAuthService = mojangAuthService;
+        this.liveAuthService = liveAuthService;
     }
 
-    public UserType getCurrentUser() {
+    public IUserType getCurrentUser() {
         return this.mCurrentUser;
     }
 
-    public void setCurrentUser(UserType user) {
+    public void setCurrentUser(IUserType user) {
         this.mCurrentUser = user;
 
         if (user != null)
@@ -49,18 +59,18 @@ public class UserModel<UserType extends IUserType> {
         this.triggerAuthListeners();
     }
 
-    public void addAuthListener(IAuthListener<UserType> listener) {
+    public void addAuthListener(IAuthListener listener) {
         this.mAuthListeners.add(listener);
     }
 
     protected void triggerAuthListeners() {
-        for (IAuthListener<UserType> listener : mAuthListeners) {
+        for (IAuthListener listener : mAuthListeners) {
             listener.userChanged(this.mCurrentUser);
         }
     }
 
-    public AuthError attemptUserRefresh(UserType user) throws AuthenticationNetworkFailureException {
-        IAuthResponse response = gameAuthService.requestRefresh(user);
+    public AuthError attemptMojangUserRefresh(MojangUser user) throws AuthenticationNetworkFailureException {
+        IAuthResponse response = mojangAuthService.requestRefresh(user);
         if (response == null) {
             mUserStore.removeUser(user.getUsername());
             return new AuthError("Session Error", "Please log in again.");
@@ -69,16 +79,24 @@ public class UserModel<UserType extends IUserType> {
             return new AuthError(response.getError(), response.getErrorMessage());
         } else {
             //Refresh user from response
-            user = gameAuthService.createClearedUser(user.getUsername(), response);
+            user = mojangAuthService.createClearedUser(user.getUsername(), response);
             mUserStore.addUser(user);
             setCurrentUser(user);
             return null;
         }
     }
 
-    public AuthError attemptInitialLogin(String username, String password) {
+    public AuthError attemptLiveUserRefresh(LiveUser user) {
+        liveAuthService.LiveRefreshToken(user.getRefreshToken());
+        MinecraftProfile profile = liveAuthService.GetMinecraftProfile();
+        user.setRefreshToken(liveAuthService.GetLiveRefreshToken());
+        setCurrentUser(user);
+        return null;
+    }
+
+    public AuthError attemptMojangInitialLogin(String username, String password) {
         try {
-            IAuthResponse response = gameAuthService.requestLogin(username, password, getClientToken());
+            IAuthResponse response = mojangAuthService.requestLogin(username, password, getClientToken());
 
             if (response == null) {
                 return new AuthError("Auth Error", "Invalid credentials. Invalid username or password.");
@@ -86,7 +104,7 @@ public class UserModel<UserType extends IUserType> {
                 return new AuthError(response.getError(), response.getErrorMessage());
             } else {
                 //Create an online user with the received data
-                UserType clearedUser = gameAuthService.createClearedUser(username, response);
+                IUserType clearedUser = mojangAuthService.createClearedUser(username, response);
                 setCurrentUser(clearedUser);
                 return null;
             }
@@ -96,43 +114,62 @@ public class UserModel<UserType extends IUserType> {
         }
     }
 
-    public void initAuth() {
-        UserType user = getLastUser();
+    public void attemptLiveInitialLogin(OnLiveLoggedInListener listener) {
+        String url = liveAuthService.GetOauthUrl();
+        LiveLoginBrowser browser = new LiveLoginBrowser(url, new OnLoggedInListener() {
+            @Override
+            public void onLoggedIn(Map<String, String> params) {
+                liveAuthService.LiveAuthToken(params.get("code"));
+                MinecraftProfile profile = liveAuthService.GetMinecraftProfile();
 
-        if (user != null) {
+                IUserType clearedUser = new LiveUser(profile, liveAuthService.GetMinecraftAccessToken(), liveAuthService.GetLiveRefreshToken());
+                setCurrentUser(clearedUser);
+
+                listener.onLoggedIn();
+            }
+        });
+        browser.setVisible(true);
+    }
+
+    public void initAuth() {
+        IUserType user = getLastUser();
+
+        if (user instanceof MojangUser) {
             try {
-                AuthError error = this.attemptUserRefresh(user);
+                AuthError error = this.attemptMojangUserRefresh((MojangUser) user);
 
                 if (error != null)
                     setCurrentUser(null);
             } catch (AuthenticationNetworkFailureException ex) {
-                setCurrentUser(gameAuthService.createOfflineUser(user.getDisplayName()));
+                setCurrentUser(mojangAuthService.createOfflineUser(user.getDisplayName()));
             }
+        } else if (user instanceof LiveUser) {
+            attemptLiveUserRefresh((LiveUser) user);
         } else
             setCurrentUser(null);
     }
 
-    public Collection<UserType> getUsers() {
+    public Collection<IUserType> getUsers() {
         return mUserStore.getSavedUsers();
     }
 
-    public UserType getLastUser() {
+    public IUserType getLastUser() {
         return mUserStore.getUser(mUserStore.getLastUser());
     }
 
-    public UserType getUser(String username) {
+    public IUserType getUser(String username) {
         return mUserStore.getUser(username);
     }
 
-    public void addUser(UserType user) {
+    public void addUser(IUserType user) {
         mUserStore.addUser(user);
     }
 
-    public void removeUser(UserType user) {
+    public void removeUser(IUserType user) {
         mUserStore.removeUser(user.getUsername());
     }
 
-    public void setLastUser(UserType user) {
+    public void setLastUser(IUserType user) {
         mUserStore.setLastUser(user.getUsername());
     }
 

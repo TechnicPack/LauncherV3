@@ -25,4 +25,6 @@ public interface IUserType {
     public String getUsername();
 
     public String getDisplayName();
+
+    public String getAccessToken();
 }

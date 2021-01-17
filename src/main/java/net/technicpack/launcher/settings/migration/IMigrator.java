@@ -27,5 +27,5 @@ import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 public interface IMigrator {
     String getMigrationVersion();
     String getMigratedVersion();
-    void migrate(TechnicSettings settings, IInstalledPackRepository packStore, LauncherDirectories directories, IUserStore<MojangUser> users);
+    void migrate(TechnicSettings settings, IInstalledPackRepository packStore, LauncherDirectories directories, IUserStore users);
 }
