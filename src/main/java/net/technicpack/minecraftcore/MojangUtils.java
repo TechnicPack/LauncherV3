@@ -150,6 +150,13 @@ public class MojangUtils {
 
     public static MojangVersion parseVersionJson(String json) {
         JsonObject root = JsonParser.parseString(json).getAsJsonObject();
+
+        // Safeguard in the event the version.json we get is actually the one inside a vanilla Minecraft jar
+        // (which isn't valid)
+        if (root.has("world_version") && root.has("protocol_version")) {
+            throw new IllegalArgumentException("Invalid version file, this looks like a Minecraft client jar. Are you sure you didn't place a Minecraft jar as the modpack.jar?");
+        }
+
         Class<? extends MojangVersion> versionJsonType;
         if (root.has("minimumLauncherVersion")) {
             int minLauncherVersion = root.get("minimumLauncherVersion").getAsInt();
