@@ -254,7 +254,15 @@ public class MinecraftLauncher {
                 // This is an --argument, now we check if it has a value or not
                 if (next != null && !next.startsWith("--")) {
                     // This --argument has a value, so we add that --argument value pair
-                    commands.addUnique(current, next);
+
+                    // Special case for --tweakClass to allow multiple values of it. This allows Forge and
+                    // LiteLoader to coexist
+                    if (current.equals("--tweakClass")) {
+                        commands.add(current, next);
+                    } else {
+                        commands.addUnique(current, next);
+                    }
+
                     // Consume the next element in the iterator
                     mcArgsIterator.next();
                 } else {
