@@ -2,9 +2,6 @@ package net.technicpack.minecraftcore.msa.auth;
 
 import com.google.common.base.Charsets;
 import net.technicpack.minecraftcore.MojangUtils;
-import net.technicpack.minecraftcore.live.Base64;
-import net.technicpack.minecraftcore.live.auth.request.*;
-import net.technicpack.minecraftcore.live.auth.response.*;
 import net.technicpack.minecraftcore.msa.auth.request.*;
 import net.technicpack.minecraftcore.msa.auth.response.*;
 import org.apache.commons.io.IOUtils;
@@ -18,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +39,7 @@ public class XboxAuthenticationService {
         try {
             byte[] bytes = new byte[0x40];
             SecureRandom.getInstanceStrong().nextBytes(bytes);
-            codeVerifier = Base64.encodeToString(bytes, Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE);
+            codeVerifier = Base64.getUrlEncoder().encodeToString(bytes);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
@@ -203,7 +201,7 @@ public class XboxAuthenticationService {
             Map<String, String> query = new HashMap<String, String>();
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(codeVerifier.getBytes());
-            String codeChallenge = Base64.encodeToString(hash, Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE);
+            String codeChallenge = Base64.getUrlEncoder().encodeToString(hash);
 
             query.put("code_challenge", codeChallenge);
             query.put("code_challenge_method", "S256");

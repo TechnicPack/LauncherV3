@@ -1,10 +1,9 @@
 package net.technicpack.minecraftcore.msa.auth.request;
 
-import net.technicpack.minecraftcore.live.Base64;
-
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPoint;
 import java.util.Arrays;
+import java.util.Base64;
 
 public class LiveProofKey {
     private String crv = "P-256";
@@ -28,7 +27,7 @@ public class LiveProofKey {
         if (by[0] == 0x00)
             by = Arrays.copyOfRange(by, 1, by.length);
 
-        x = Base64.encodeToString(bx, Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE);
-        y = Base64.encodeToString(by, Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE);
+        x = Base64.getUrlEncoder().encodeToString(bx);
+        y = Base64.getUrlEncoder().encodeToString(by);
     }
 }
