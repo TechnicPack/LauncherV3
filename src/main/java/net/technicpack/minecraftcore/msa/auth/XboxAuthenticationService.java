@@ -1,11 +1,12 @@
-package net.technicpack.minecraftcore.live.auth;
+package net.technicpack.minecraftcore.msa.auth;
 
 import com.google.common.base.Charsets;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.live.Base64;
 import net.technicpack.minecraftcore.live.auth.request.*;
 import net.technicpack.minecraftcore.live.auth.response.*;
-import net.technicpack.minecraftcore.mojang.auth.response.AuthResponse;
+import net.technicpack.minecraftcore.msa.auth.request.*;
+import net.technicpack.minecraftcore.msa.auth.response.*;
 import org.apache.commons.io.IOUtils;
 
 import java.io.DataOutputStream;

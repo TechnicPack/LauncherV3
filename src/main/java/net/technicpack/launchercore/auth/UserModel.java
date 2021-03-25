@@ -20,11 +20,11 @@
 package net.technicpack.launchercore.auth;
 
 import net.technicpack.launchercore.exception.AuthenticationNetworkFailureException;
-import net.technicpack.minecraftcore.live.auth.LiveLoginBrowser;
-import net.technicpack.minecraftcore.live.auth.LiveUser;
-import net.technicpack.minecraftcore.live.auth.OnLoggedInListener;
-import net.technicpack.minecraftcore.live.auth.XboxAuthenticationService;
-import net.technicpack.minecraftcore.live.auth.response.MinecraftProfile;
+import net.technicpack.minecraftcore.msa.auth.LiveLoginBrowser;
+import net.technicpack.minecraftcore.msa.auth.MsaUser;
+import net.technicpack.minecraftcore.msa.auth.OnLoggedInListener;
+import net.technicpack.minecraftcore.msa.auth.XboxAuthenticationService;
+import net.technicpack.minecraftcore.msa.auth.response.MinecraftProfile;
 import net.technicpack.minecraftcore.mojang.auth.MojangAuthenticationService;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 
@@ -38,13 +38,13 @@ public class UserModel {
     private List<IAuthListener> mAuthListeners = new LinkedList<IAuthListener>();
     private IUserStore mUserStore;
     private MojangAuthenticationService mojangAuthService;
-    private XboxAuthenticationService liveAuthService;
+    private XboxAuthenticationService msaAuthService;
 
-    public UserModel(IUserStore userStore, MojangAuthenticationService mojangAuthService, XboxAuthenticationService liveAuthService) {
+    public UserModel(IUserStore userStore, MojangAuthenticationService mojangAuthService, XboxAuthenticationService msaAuthService) {
         this.mCurrentUser = null;
         this.mUserStore = userStore;
         this.mojangAuthService = mojangAuthService;
-        this.liveAuthService = liveAuthService;
+        this.msaAuthService = msaAuthService;
     }
 
     public IUserType getCurrentUser() {
@@ -86,10 +86,10 @@ public class UserModel {
         }
     }
 
-    public AuthError attemptLiveUserRefresh(LiveUser user) {
-        liveAuthService.LiveRefreshToken(user.getRefreshToken());
-        MinecraftProfile profile = liveAuthService.GetMinecraftProfile();
-        user.setRefreshToken(liveAuthService.GetLiveRefreshToken());
+    public AuthError attemptMsaUserRefresh(MsaUser user) {
+        msaAuthService.LiveRefreshToken(user.getRefreshToken());
+        MinecraftProfile profile = msaAuthService.GetMinecraftProfile();
+        user.setRefreshToken(msaAuthService.GetLiveRefreshToken());
         setCurrentUser(user);
         return null;
     }
@@ -115,14 +115,14 @@ public class UserModel {
     }
 
     public void attemptLiveInitialLogin(OnLiveLoggedInListener listener) {
-        String url = liveAuthService.GetOauthUrl();
+        String url = msaAuthService.GetOauthUrl();
         LiveLoginBrowser browser = new LiveLoginBrowser(url, new OnLoggedInListener() {
             @Override
             public void onLoggedIn(Map<String, String> params) {
-                liveAuthService.LiveAuthToken(params.get("code"));
-                MinecraftProfile profile = liveAuthService.GetMinecraftProfile();
+                msaAuthService.LiveAuthToken(params.get("code"));
+                MinecraftProfile profile = msaAuthService.GetMinecraftProfile();
 
-                IUserType clearedUser = new LiveUser(profile, liveAuthService.GetMinecraftAccessToken(), liveAuthService.GetLiveRefreshToken());
+                IUserType clearedUser = new MsaUser(profile, msaAuthService.GetMinecraftAccessToken(), msaAuthService.GetLiveRefreshToken());
                 setCurrentUser(clearedUser);
 
                 listener.onLoggedIn();
@@ -143,8 +143,8 @@ public class UserModel {
             } catch (AuthenticationNetworkFailureException ex) {
                 setCurrentUser(mojangAuthService.createOfflineUser(user.getDisplayName()));
             }
-        } else if (user instanceof LiveUser) {
-            attemptLiveUserRefresh((LiveUser) user);
+        } else if (user instanceof MsaUser) {
+            attemptMsaUserRefresh((MsaUser) user);
         } else
             setCurrentUser(null);
     }

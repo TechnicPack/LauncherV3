@@ -1,14 +1,14 @@
-package net.technicpack.minecraftcore.live.auth;
+package net.technicpack.minecraftcore.msa.auth;
 
 import net.technicpack.launchercore.auth.IUserType;
-import net.technicpack.minecraftcore.live.auth.response.MinecraftProfile;
+import net.technicpack.minecraftcore.msa.auth.response.MinecraftProfile;
 
-public class LiveUser implements IUserType {
+public class MsaUser implements IUserType {
     private MinecraftProfile profile;
     private String accessToken;
     private String refreshToken;
 
-    public LiveUser(MinecraftProfile profile, String accessToken, String refreshToken) {
+    public MsaUser(MinecraftProfile profile, String accessToken, String refreshToken) {
         this.profile = profile;
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;

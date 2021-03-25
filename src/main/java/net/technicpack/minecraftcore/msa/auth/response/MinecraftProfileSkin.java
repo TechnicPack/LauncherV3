@@ -1,4 +1,4 @@
-package net.technicpack.minecraftcore.live.auth.response;
+package net.technicpack.minecraftcore.msa.auth.response;
 
 class MinecraftProfileSkin {
     private String id;

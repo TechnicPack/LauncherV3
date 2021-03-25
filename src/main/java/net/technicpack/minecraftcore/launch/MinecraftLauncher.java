@@ -29,7 +29,7 @@ import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.RunData;
 import net.technicpack.minecraftcore.MojangUtils;
-import net.technicpack.minecraftcore.live.auth.LiveUser;
+import net.technicpack.minecraftcore.msa.auth.MsaUser;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
@@ -142,15 +142,15 @@ public class MinecraftLauncher {
         }
         else
         {
-            LiveUser liveUser = (LiveUser) currentUser;
+            MsaUser msaUser = (MsaUser) currentUser;
 
-            params.put("auth_username", liveUser.getUsername());
-            params.put("auth_access_token", liveUser.getAccessToken());
+            params.put("auth_username", msaUser.getUsername());
+            params.put("auth_access_token", msaUser.getAccessToken());
 
-            params.put("auth_player_name", liveUser.getDisplayName());
-            params.put("auth_uuid", liveUser.getId());
+            params.put("auth_player_name", msaUser.getDisplayName());
+            params.put("auth_uuid", msaUser.getId());
 
-            params.put("profile_name", liveUser.getDisplayName());
+            params.put("profile_name", msaUser.getDisplayName());
 
             params.put("user_type", "msa");
             params.put("user_properties", "");

@@ -1,4 +1,4 @@
-package net.technicpack.minecraftcore.live.auth.request;
+package net.technicpack.minecraftcore.msa.auth.request;
 
 public class LoginWithXboxRequest {
     private String identityToken;

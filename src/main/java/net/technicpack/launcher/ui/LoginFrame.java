@@ -20,8 +20,7 @@ package net.technicpack.launcher.ui;
 
 import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launchercore.auth.OnLiveLoggedInListener;
-import net.technicpack.minecraftcore.live.auth.LiveUser;
-import net.technicpack.minecraftcore.live.auth.response.MinecraftProfile;
+import net.technicpack.minecraftcore.msa.auth.MsaUser;
 import net.technicpack.ui.controls.list.popupformatters.RoundedBorderFormatter;
 import net.technicpack.ui.controls.lang.LanguageCellRenderer;
 import net.technicpack.ui.controls.lang.LanguageCellUI;
@@ -185,8 +184,8 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
 
             if (selected instanceof MojangUser) {
                 verifyExistingMojangLogin((MojangUser) selected);
-            } else if (selected instanceof LiveUser) {
-                verifyExistingLiveLogin((LiveUser) selected);
+            } else if (selected instanceof MsaUser) {
+                verifyExistingLiveLogin((MsaUser) selected);
             } else {
                 String username = selected.toString();
 
@@ -196,8 +195,8 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
                     MojangUser mojangUser = (MojangUser) user;
                     setCurrentUser(mojangUser);
                     verifyExistingMojangLogin(mojangUser);
-                } else if (user instanceof LiveUser) {
-                    verifyExistingLiveLogin((LiveUser) user);
+                } else if (user instanceof MsaUser) {
+                    verifyExistingLiveLogin((MsaUser) user);
                 } else {
                     attemptMojangLogin(username);
                 }
@@ -252,8 +251,8 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         }
     }
 
-    private void verifyExistingLiveLogin(LiveUser liveUser) {
-        userModel.attemptLiveUserRefresh(liveUser);
+    private void verifyExistingLiveLogin(MsaUser msaUser) {
+        userModel.attemptMsaUserRefresh(msaUser);
     }
 
     private void attemptMojangLogin(String name) {

@@ -1,4 +1,4 @@
-package net.technicpack.minecraftcore.live.auth.request;
+package net.technicpack.minecraftcore.msa.auth.request;
 
 import java.security.interfaces.ECPublicKey;
 

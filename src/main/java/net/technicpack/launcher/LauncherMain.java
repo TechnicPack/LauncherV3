@@ -67,9 +67,8 @@ import net.technicpack.launchercore.modpacks.resources.resourcetype.LogoResource
 import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.minecraftcore.launch.MinecraftLauncher;
-import net.technicpack.minecraftcore.live.auth.XboxAuthenticationService;
+import net.technicpack.minecraftcore.msa.auth.XboxAuthenticationService;
 import net.technicpack.minecraftcore.mojang.auth.MojangAuthenticationService;
-import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.IPlatformSearchApi;
 import net.technicpack.platform.PlatformPackInfoRepository;

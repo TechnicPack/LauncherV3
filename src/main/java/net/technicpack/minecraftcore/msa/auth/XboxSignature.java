@@ -1,4 +1,4 @@
-package net.technicpack.minecraftcore.live.auth;
+package net.technicpack.minecraftcore.msa.auth;
 
 import sun.security.util.DerInputStream;
 import sun.security.util.DerValue;
