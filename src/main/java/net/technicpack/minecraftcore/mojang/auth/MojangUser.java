@@ -26,6 +26,7 @@ import net.technicpack.minecraftcore.mojang.auth.io.UserProperties;
 import net.technicpack.minecraftcore.mojang.auth.response.AuthResponse;
 
 public class MojangUser implements IUserType {
+    public static final String MOJANG_USER_TYPE = "mojang";
     private String username;
     private String accessToken;
     private String clientToken;
@@ -62,6 +63,11 @@ public class MojangUser implements IUserType {
         } else {
             this.userProperties = response.getUser().getUserProperties();
         }
+    }
+
+    @Override
+    public String getUserType() {
+        return MOJANG_USER_TYPE;
     }
 
     public String getId() {

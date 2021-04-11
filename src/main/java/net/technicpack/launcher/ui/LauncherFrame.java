@@ -66,7 +66,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 
-public class LauncherFrame extends DraggableFrame implements IRelocalizableResource, IAuthListener<MojangUser> {
+public class LauncherFrame extends DraggableFrame implements IRelocalizableResource, IAuthListener {
 
     private static final int FRAME_WIDTH = 1194;
     private static final int FRAME_HEIGHT = 718;
@@ -109,7 +109,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     public static final String TAB_NEWS = "news";
 
     private ResourceLoader resources;
-    private final UserModel<MojangUser> userModel;
+    private final UserModel userModel;
     private final ImageRepository<IUserType> skinRepository;
     private final TechnicSettings settings;
     private final ImageRepository<ModpackModel> iconRepo;
@@ -662,7 +662,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     }
 
     @Override
-    public void userChanged(MojangUser mojangUser) {
+    public void userChanged(IUserType mojangUser) {
         if (mojangUser == null)
             this.setVisible(false);
         else {
@@ -682,7 +682,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         }
     }
 
-    public void setupPlayButtonText(ModpackModel modpack, MojangUser user) {
+    public void setupPlayButtonText(ModpackModel modpack, IUserType user) {
         playButton.setEnabled(true);
         playButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
 

@@ -18,7 +18,13 @@
 
 package net.technicpack.launcher.ui;
 
+import com.google.api.client.auth.oauth2.Credential;
 import net.technicpack.launcher.LauncherMain;
+import net.technicpack.minecraftcore.microsoft.auth.MicrosoftAuthenticator;
+import net.technicpack.minecraftcore.microsoft.auth.MicrosoftUser;
+import net.technicpack.minecraftcore.microsoft.auth.model.MinecraftProfile;
+import net.technicpack.minecraftcore.microsoft.auth.model.XboxMinecraftResponse;
+import net.technicpack.minecraftcore.microsoft.auth.model.XboxResponse;
 import net.technicpack.ui.controls.list.popupformatters.RoundedBorderFormatter;
 import net.technicpack.ui.controls.lang.LanguageCellRenderer;
 import net.technicpack.ui.controls.lang.LanguageCellUI;
@@ -44,19 +50,18 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.plaf.metal.MetalComboBoxUI;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Locale;
 import java.util.logging.Level;
 
-public class LoginFrame extends DraggableFrame implements IRelocalizableResource, KeyListener, IAuthListener<MojangUser> {
+public class LoginFrame extends DraggableFrame implements IRelocalizableResource, KeyListener, IAuthListener {
     private ResourceLoader resources;
     private ImageRepository<IUserType> skinRepository;
-    private UserModel<MojangUser> userModel;
+    private UserModel userModel;
     private TechnicSettings settings;
 
     private JTextField name;
@@ -66,7 +71,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     private JComboBox languages;
 
     private static final int FRAME_WIDTH = 347;
-    private static final int FRAME_HEIGHT = 409;
+    private static final int FRAME_HEIGHT = 429;
 
     public LoginFrame(ResourceLoader resources, TechnicSettings settings, UserModel userModel, ImageRepository<IUserType> skinRepository) {
         this.skinRepository = skinRepository;
@@ -117,13 +122,13 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         if (nameSelect.getSelectedItem() == null || nameSelect.getSelectedItem().equals("")) {
             clearCurrentUser();
         } else if (nameSelect.getSelectedItem() instanceof MojangUser) {
-            setCurrentUser((MojangUser)nameSelect.getSelectedItem());
+            setCurrentUser((IUserType)nameSelect.getSelectedItem());
         }
     }
 
     protected void toggleRemember() {
         if (!rememberAccount.isSelected() && nameSelect.isVisible() && nameSelect.getSelectedItem() instanceof MojangUser) {
-            forgetUser((MojangUser)nameSelect.getSelectedItem());
+            forgetUser((IUserType)nameSelect.getSelectedItem());
         }
     }
 
@@ -146,15 +151,15 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     @Override
     public void keyReleased(KeyEvent e) {
         if (e.getSource() == rememberAccount && e.getKeyCode() == KeyEvent.VK_ENTER) {
-            attemptLogin();
+            attemptMojangLogin();
         }
     }
 
     protected void refreshUsers() {
-        Collection<MojangUser> mojangUserAccounts = userModel.getUsers();
-        MojangUser lastMojangUser = userModel.getLastUser();
+        Collection<IUserType> users = userModel.getUsers();
+        IUserType lastUser = userModel.getLastUser();
 
-        if (mojangUserAccounts.size() == 0) {
+        if (users.size() == 0) {
             name.setVisible(true);
             nameSelect.setVisible(false);
             clearCurrentUser();
@@ -163,20 +168,20 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
             nameSelect.setVisible(true);
             nameSelect.removeAllItems();
 
-            for (MojangUser account : mojangUserAccounts) {
+            for (IUserType account : users) {
                 nameSelect.addItem(account);
             }
 
             nameSelect.addItem(null);
 
-            if (lastMojangUser == null)
-                lastMojangUser = mojangUserAccounts.iterator().next();
+            if (lastUser == null)
+                lastUser = users.iterator().next();
 
-            setCurrentUser(lastMojangUser);
+            setCurrentUser(lastUser);
         }
     }
 
-    protected void attemptLogin() {
+    protected void attemptMojangLogin() {
         if (nameSelect.isVisible()) {
             Object selected = nameSelect.getSelectedItem();
 
@@ -185,13 +190,13 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
             } else {
                 String username = selected.toString();
 
-                MojangUser mojangUser = userModel.getUser(username);
+                IUserType user = userModel.getUser(username);
 
-                if (mojangUser == null)
+                if (user == null)
                     attemptNewLogin(username);
                 else {
-                    setCurrentUser(mojangUser);
-                    verifyExistingLogin(mojangUser);
+                    setCurrentUser(user);
+                    verifyExistingLogin(user);
                 }
             }
         } else {
@@ -199,16 +204,50 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         }
     }
 
-    private void verifyExistingLogin(MojangUser mojangUser) {
-        MojangUser loginMojangUser = mojangUser;
+    protected void attemptMicrosoftLogin() {
+        MicrosoftAuthenticator microsoftAuthenticator;
+        try {
+            microsoftAuthenticator = new MicrosoftAuthenticator();
+            Credential credential = microsoftAuthenticator.getOAuthCredential("test");
+
+            microsoftAuthenticator.authenticateOAuth(credential);
+
+            XboxResponse xboxResponse = microsoftAuthenticator.authenticateXbox(credential);
+            XboxResponse xstsResponse = microsoftAuthenticator.authenticateXSTS(xboxResponse);
+            XboxMinecraftResponse xboxMinecraftResponse = microsoftAuthenticator.authenticateMinecraftXbox(xstsResponse);
+            MinecraftProfile profile = microsoftAuthenticator.getMinecraftProfile(xboxMinecraftResponse);
+            System.out.println(profile);
+            microsoftAuthenticator.updateCredentialStore(profile.name, credential);
+            MicrosoftUser microsoftUser = new MicrosoftUser(xboxMinecraftResponse, profile);
+            userModel.setCurrentUser(microsoftUser);
+            userModel.setLastUser(microsoftUser);
+            setCurrentUser(microsoftUser);
+            if (rememberAccount.isSelected()) {
+                userModel.addUser(userModel.getCurrentUser());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void verifyExistingLogin(IUserType user) {
+        IUserType loginUser = user;
+        //TODO: Assume a microsoft login is good for now
+        if (user instanceof MicrosoftUser) {
+            userModel.setCurrentUser(user);
+            userModel.setLastUser(user);
+            setCurrentUser(user);
+            userModel.addUser(user);
+            return;
+        }
         boolean rejected = false;
 
         try {
-            UserModel.AuthError error = userModel.attemptUserRefresh(mojangUser);
+            UserModel.AuthError error = userModel.attemptUserRefresh(user);
 
             if (error != null) {
                 JOptionPane.showMessageDialog(this, error.getErrorDescription(), error.getError(), JOptionPane.ERROR_MESSAGE);
-                loginMojangUser = null;
+                loginUser = null;
                 rejected = true;
             }
         } catch (AuthenticationNetworkFailureException ex) {
@@ -223,23 +262,23 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
 
                 //This is the last time we'll have access to the user's real username, so we should set the last-used
                 //username now
-                userModel.setLastUser(mojangUser);
+                userModel.setLastUser(user);
 
                 //Create offline user
-                loginMojangUser = new MojangUser(mojangUser.getDisplayName());
+                loginUser = new MojangUser(user.getDisplayName());
             } else {
                 //Use clicked 'no', so just pull the ripcord and get back to the UI
-                loginMojangUser = null;
+                loginUser = null;
             }
         }
 
-        if (loginMojangUser == null) {
+        if (loginUser == null) {
             //If we actually failed to validate, we should remove the user from the list of saved users
             //and refresh the user list
             if (rejected) {
-                userModel.removeUser(mojangUser);
+                userModel.removeUser(user);
                 refreshUsers();
-                setCurrentUser(mojangUser.getUsername());
+                setCurrentUser(user.getUsername());
             }
         }
     }
@@ -265,8 +304,8 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         nameSelect.setSelectedItem("");
     }
 
-    protected void setCurrentUser(MojangUser mojangUser) {
-        if (mojangUser == null) {
+    protected void setCurrentUser(IUserType user) {
+        if (user == null) {
             clearCurrentUser();
             return;
         }
@@ -277,7 +316,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         password.setBorder(new RoundBorder(LauncherFrame.COLOR_SCROLL_THUMB, 1, 10));
         rememberAccount.setSelected(true);
 
-        nameSelect.setSelectedItem(mojangUser);
+        nameSelect.setSelectedItem(user);
     }
 
     protected void setCurrentUser(String user) {
@@ -293,7 +332,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         rememberAccount.setSelected(true);
     }
 
-    protected void forgetUser(MojangUser mojangUser) {
+    protected void forgetUser(IUserType mojangUser) {
         userModel.removeUser(mojangUser);
         refreshUsers();
     }
@@ -316,12 +355,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         closeButton.setBorder(BorderFactory.createEmptyBorder());
         closeButton.setIcon(resources.getIcon("close.png"));
         closeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        closeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                closeButtonClicked();
-            }
-        });
+        closeButton.addActionListener(e -> closeButtonClicked());
         closeButton.setFocusable(false);
         add(closeButton, new GridBagConstraints(2,0,1,1, 0.0, 0.0, GridBagConstraints.NORTHEAST, GridBagConstraints.NONE, new Insets(7,0,0,7),0,0));
 
@@ -364,12 +398,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         nameSelect.setEditor(userEditor);
         userEditor.addKeyListener(this);
         nameSelect.setUI(new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0)), resources, LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
-        nameSelect.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                changeUser();
-            }
-        });
+        nameSelect.addActionListener(e -> changeUser());
 
         add(nameSelect, new GridBagConstraints(0, 3, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(3, 20, 0, 20), 4, 4));
 
@@ -395,12 +424,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         password.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
         password.addKeyListener(this);
         password.setEchoChar('*');
-        password.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                attemptLogin();
-            }
-        });
+        password.addActionListener(e -> attemptMojangLogin());
         password.setCaretColor(LauncherFrame.COLOR_BUTTON_BLUE);
         add(password, new GridBagConstraints(0, 5, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(3, 20, 0, 20), 4, 17));
 
@@ -417,29 +441,29 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         rememberAccount.addKeyListener(this);
         rememberAccount.setSelectedIcon(resources.getIcon("checkbox_closed.png"));
         rememberAccount.setIcon(resources.getIcon("checkbox_open.png"));
-        rememberAccount.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                toggleRemember();
-            }
-        });
+        rememberAccount.addActionListener(e -> toggleRemember());
         rememberAccount.setFocusPainted(false);
         add(rememberAccount, new GridBagConstraints(1,6,2,1,1.0,0.0, GridBagConstraints.EAST, GridBagConstraints.BOTH, new Insets(24,20,0,20),0,0));
 
-        //Login button
-        RoundedButton button = new RoundedButton(resources.getString("login.button"));
-        button.setBorder(BorderFactory.createEmptyBorder(5,17,10,17));
-        button.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        button.setContentAreaFilled(false);
-        button.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        button.setHoverForeground(LauncherFrame.COLOR_BLUE);
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                attemptLogin();
-            }
-        });
-        add(button, new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(24,20,0,0),0,0));
+        // Mojang login button
+        RoundedButton mojangLogin = new RoundedButton(resources.getString("login.button"));
+        mojangLogin.setBorder(BorderFactory.createEmptyBorder(5,17,10,17));
+        mojangLogin.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+        mojangLogin.setContentAreaFilled(false);
+        mojangLogin.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        mojangLogin.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        mojangLogin.addActionListener(e -> attemptMojangLogin());
+        add(mojangLogin, new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(24,20,0,0),0,0));
+
+        // Microsoft login button
+        RoundedButton microsoftLogin = new RoundedButton(resources.getString("login.microsoft"));
+        microsoftLogin.setBorder(BorderFactory.createEmptyBorder(5,17,10,17));
+        microsoftLogin.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+        microsoftLogin.setContentAreaFilled(false);
+        microsoftLogin.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        microsoftLogin.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        microsoftLogin.addActionListener(e -> attemptMicrosoftLogin());
+        add(microsoftLogin, new GridBagConstraints(0, 7, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(24,20,0,0),0,0));
 
         add(Box.createVerticalGlue(), new GridBagConstraints(0, 8, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
 
@@ -478,12 +502,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         languages.setRenderer(new LanguageCellRenderer(resources, "globe.png", LauncherFrame.COLOR_SELECTOR_BACK, LauncherFrame.COLOR_WHITE_TEXT));
         languages.setEditable(false);
         languages.setFocusable(false);
-        languages.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                languageChanged();
-            }
-        });
+        languages.addActionListener(e -> languageChanged());
         linkPane.add(languages);
 
         linkPane.add(Box.createHorizontalGlue());
@@ -494,12 +513,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         termsLink.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         termsLink.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         termsLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        termsLink.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                visitTerms();
-            }
-        });
+        termsLink.addActionListener(e -> visitTerms());
         linkPane.add(termsLink);
         linkPane.add(Box.createHorizontalStrut(8));
 
@@ -536,7 +550,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     }
 
     @Override
-    public void userChanged(MojangUser mojangUser) {
+    public void userChanged(IUserType mojangUser) {
         if (mojangUser == null) {
             this.setVisible(true);
             refreshUsers();

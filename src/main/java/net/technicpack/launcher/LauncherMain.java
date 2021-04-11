@@ -378,7 +378,7 @@ public class LauncherMain {
         javaVersionFile.enumerateVersions(javaVersions);
         javaVersions.selectVersion(settings.getJavaVersion(), settings.getJavaBitness());
 
-        IUserStore<MojangUser> users = TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json"));
+        IUserStore users = TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json"));
         UserModel userModel = new UserModel(users, new AuthenticationService());
 
         IModpackResourceType iconType = new IconResourceType();
@@ -442,7 +442,7 @@ public class LauncherMain {
         userModel.addAuthListener(login);
         userModel.addAuthListener(new IAuthListener() {
             @Override
-            public void userChanged(Object user) {
+            public void userChanged(IUserType user) {
                 if (user == null)
                     splash.dispose();
             }

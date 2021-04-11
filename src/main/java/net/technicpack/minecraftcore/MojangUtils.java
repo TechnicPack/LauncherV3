@@ -23,6 +23,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.technicpack.launcher.io.IUserTypeInstanceCreator;
+import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.minecraftcore.mojang.auth.io.UserProperties;
 import net.technicpack.minecraftcore.mojang.auth.io.UserPropertiesAdapter;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
@@ -81,6 +83,7 @@ public class MojangUtils {
         builder.registerTypeAdapter(UserProperties.class, new UserPropertiesAdapter());
         builder.registerTypeAdapter(ArgumentList.class, new ArgumentListAdapter());
         builder.registerTypeAdapter(Rule.class, new RuleAdapter());
+        builder.registerTypeAdapter(IUserType.class, new IUserTypeInstanceCreator());
         builder.enableComplexMapKeySerialization();
         uglyGson = builder.create();
 

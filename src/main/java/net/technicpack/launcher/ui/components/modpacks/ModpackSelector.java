@@ -65,7 +65,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ModpackSelector extends TintablePanel implements IModpackContainer, IAuthListener<IUserType>, IRelocalizableResource {
+public class ModpackSelector extends TintablePanel implements IModpackContainer, IAuthListener, IRelocalizableResource {
     private ResourceLoader resources;
     private PackLoader packLoader;
     private IPackSource technicSolder;

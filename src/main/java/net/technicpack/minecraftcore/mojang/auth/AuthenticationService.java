@@ -37,78 +37,79 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class AuthenticationService implements IGameAuthService<MojangUser> {
-	private static final String AUTH_SERVER = "https://authserver.mojang.com/";
+    private static final String AUTH_SERVER = "https://authserver.mojang.com/";
 
-	public AuthResponse requestRefresh(MojangUser mojangUser) throws AuthenticationNetworkFailureException {
-		RefreshRequest refreshRequest = new RefreshRequest(mojangUser.getAccessToken(), mojangUser.getClientToken());
-		String data = MojangUtils.getGson().toJson(refreshRequest);
+    public AuthResponse requestRefresh(MojangUser mojangUser) throws AuthenticationNetworkFailureException {
+        RefreshRequest refreshRequest = new RefreshRequest(mojangUser.getAccessToken(), mojangUser.getClientToken());
+        String data = MojangUtils.getGson().toJson(refreshRequest);
 
-		AuthResponse response;
-		try {
-			String returned = postJson(AUTH_SERVER + "refresh", data);
-			response = MojangUtils.getGson().fromJson(returned, AuthResponse.class);
-		} catch (IOException e) {
-			throw new AuthenticationNetworkFailureException("authserver.mojang.com", e);
-		}
+        AuthResponse response;
+        try {
+            String returned = postJson(AUTH_SERVER + "refresh", data);
+            response = MojangUtils.getGson().fromJson(returned, AuthResponse.class);
+        } catch (IOException e) {
+            throw new AuthenticationNetworkFailureException("authserver.mojang.com", e);
+        }
 
-		return response;
-	}
+        return response;
+    }
 
-	private String postJson(String url, String data) throws IOException {
-		byte[] rawData = data.getBytes(StandardCharsets.UTF_8);
-		HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-		connection.setUseCaches(false);
-		connection.setDoOutput(true);
-		connection.setDoInput(true);
-		connection.setConnectTimeout(15000);
-		connection.setReadTimeout(15000);
-		connection.setRequestMethod("POST");
-		connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-		connection.setRequestProperty("Content-Length", Integer.toString(rawData.length));
-		connection.setRequestProperty("Content-Language", "en-US");
+    private String postJson(String url, String data) throws IOException {
+        byte[] rawData = data.getBytes(StandardCharsets.UTF_8);
+        HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+        connection.setUseCaches(false);
+        connection.setDoOutput(true);
+        connection.setDoInput(true);
+        connection.setConnectTimeout(15000);
+        connection.setReadTimeout(15000);
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+        connection.setRequestProperty("Content-Length", Integer.toString(rawData.length));
+        connection.setRequestProperty("Content-Language", "en-US");
 
-		DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
-		writer.write(rawData);
-		writer.flush();
-		writer.close();
+        DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
+        writer.write(rawData);
+        writer.flush();
+        writer.close();
 
-		InputStream stream = null;
+        InputStream stream = null;
         String returnable = null;
-		try {
-			stream = connection.getInputStream();
+        try {
+            stream = connection.getInputStream();
             returnable = IOUtils.toString(stream, Charsets.UTF_8);
-		} catch (IOException e) {
-			stream = connection.getErrorStream();
+        } catch (IOException e) {
+            stream = connection.getErrorStream();
 
-			if (stream == null) {
-				throw e;
-			}
-		} finally {
+            if (stream == null) {
+                throw e;
+            }
+        } finally {
             try {
                 if (stream != null)
                     stream.close();
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
 
         return returnable;
-	}
+    }
 
-	public AuthResponse requestLogin(String username, String password, String clientToken) throws AuthenticationNetworkFailureException {
-		AuthRequest request = new AuthRequest(username, password, clientToken);
-		String data = MojangUtils.getGson().toJson(request);
+    public AuthResponse requestLogin(String username, String password, String clientToken) throws AuthenticationNetworkFailureException {
+        AuthRequest request = new AuthRequest(username, password, clientToken);
+        String data = MojangUtils.getGson().toJson(request);
 
-		AuthResponse response;
-		try {
-			String returned = postJson(AUTH_SERVER + "authenticate", data);
-			response = MojangUtils.getGson().fromJson(returned, AuthResponse.class);
-		} catch (IOException e) {
-			throw new AuthenticationNetworkFailureException("authserver.mojang.com", e);
-		}
-		return response;
-	}
+        AuthResponse response;
+        try {
+            String returned = postJson(AUTH_SERVER + "authenticate", data);
+            response = MojangUtils.getGson().fromJson(returned, AuthResponse.class);
+        } catch (IOException e) {
+            throw new AuthenticationNetworkFailureException("authserver.mojang.com", e);
+        }
+        return response;
+    }
 
     public MojangUser createClearedUser(String username, IAuthResponse response) {
-        return new MojangUser(username, (AuthResponse)response);
+        return new MojangUser(username, (AuthResponse) response);
     }
 
     public MojangUser createOfflineUser(String displayName) {

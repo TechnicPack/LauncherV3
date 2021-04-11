@@ -37,7 +37,7 @@ public class UserWidget extends JPanel implements IImageJobListener<MojangUser> 
 
     private JLabel userName;
     private JLabel avatar;
-    private MojangUser currentMojangUser;
+    private IUserType currentMojangUser;
 
     public UserWidget(ResourceLoader resources, ImageRepository<IUserType> skinRepository) {
         this.skinRepository = skinRepository;
@@ -96,11 +96,11 @@ public class UserWidget extends JPanel implements IImageJobListener<MojangUser> 
             this.add(staticText);
     }
 
-    public void setUser(MojangUser mojangUser) {
+    public void setUser(IUserType mojangUser) {
         currentMojangUser = mojangUser;
         userName.setText(mojangUser.getDisplayName());
 
-        ImageJob<MojangUser> job = skinRepository.startImageJob(currentMojangUser);
+        ImageJob<IUserType> job = skinRepository.startImageJob(currentMojangUser);
         job.addJobListener(this);
         refreshFace(job.getImage());
     }

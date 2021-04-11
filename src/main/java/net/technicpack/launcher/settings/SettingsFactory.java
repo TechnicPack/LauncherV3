@@ -61,7 +61,7 @@ public class SettingsFactory {
         return settings;
     }
 
-    public static void migrateSettings(TechnicSettings settings, IInstalledPackRepository packStore, LauncherDirectories directories, IUserStore<MojangUser> users, List<IMigrator> migrators) {
+    public static void migrateSettings(TechnicSettings settings, IInstalledPackRepository packStore, LauncherDirectories directories, IUserStore users, List<IMigrator> migrators) {
         for(IMigrator migrator : migrators) {
             String version = settings.getLauncherSettingsVersion();
             boolean bothNull = version == null && migrator.getMigrationVersion() == null;
