@@ -20,6 +20,8 @@
 package net.technicpack.minecraftcore.mojang.auth;
 
 import net.technicpack.launchercore.auth.IUserType;
+import net.technicpack.launchercore.auth.UserModel;
+import net.technicpack.launchercore.exception.AuthenticationException;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.auth.io.Profile;
 import net.technicpack.minecraftcore.mojang.auth.io.UserProperties;
@@ -35,8 +37,10 @@ public class MojangUser implements IUserType {
     private UserProperties userProperties;
     private transient boolean isOffline;
 
+    private AuthenticationService gameAuthService;
+
     public MojangUser() {
-        isOffline = false;
+        this.isOffline = false;
     }
 
     //This constructor is used to build a user for offline mode
@@ -53,6 +57,11 @@ public class MojangUser implements IUserType {
     public MojangUser(String username, AuthResponse response) {
         this.isOffline = false;
         this.username = username;
+        this.gameAuthService = new AuthenticationService();
+        refreshToken(response);
+    }
+
+    private void refreshToken(AuthResponse response) {
         this.accessToken = response.getAccessToken();
         this.clientToken = response.getClientToken();
         this.displayName = response.getSelectedProfile().getName();
@@ -63,6 +72,11 @@ public class MojangUser implements IUserType {
         } else {
             this.userProperties = response.getUser().getUserProperties();
         }
+    }
+
+    @Override
+    public void login() throws AuthenticationException {
+        refreshToken(gameAuthService.requestRefresh(this));
     }
 
     @Override
@@ -116,5 +130,10 @@ public class MojangUser implements IUserType {
     public void mergeUserProperties(MojangUser mergeUser) {
         if (this.userProperties != null && mergeUser.userProperties != null)
             this.userProperties.merge(mergeUser.userProperties);
+    }
+
+    @Override
+    public String toString() {
+        return getDisplayName();
     }
 }

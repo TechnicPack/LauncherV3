@@ -21,32 +21,14 @@ package net.technicpack.launchercore.exception;
 
 import java.io.IOException;
 
-public class AuthenticationNetworkFailureException extends IOException {
-    private Throwable cause;
+public class AuthenticationException extends IOException {
     private static final long serialVersionUID = 5887385045789342851L;
 
-    private String targetSite;
-
-    public AuthenticationNetworkFailureException(String targetSite) {
-        this.targetSite = targetSite;
+    public AuthenticationException(String message) {
+        super(message);
     }
 
-    public AuthenticationNetworkFailureException(String targetSite, Throwable cause) {
-        this(targetSite);
-        this.cause = cause;
-    }
-
-    @Override
-    public String getMessage() {
-        return "An error was raised while attempting to communicate with " + targetSite + ".";
-    }
-
-    @Override
-    public synchronized Throwable getCause() {
-        return cause;
-    }
-
-    public String getTargetSite() {
-        return targetSite;
+    public AuthenticationException(String message, Throwable cause) {
+        super (message, cause);
     }
 }

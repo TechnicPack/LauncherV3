@@ -22,7 +22,8 @@ package net.technicpack.minecraftcore.mojang.auth;
 import com.google.common.base.Charsets;
 import net.technicpack.launchercore.auth.IAuthResponse;
 import net.technicpack.launchercore.auth.IGameAuthService;
-import net.technicpack.launchercore.exception.AuthenticationNetworkFailureException;
+import net.technicpack.launchercore.exception.AuthenticationException;
+import net.technicpack.launchercore.exception.SessionException;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.auth.request.AuthRequest;
 import net.technicpack.minecraftcore.mojang.auth.request.RefreshRequest;
@@ -39,7 +40,7 @@ import java.nio.charset.StandardCharsets;
 public class AuthenticationService implements IGameAuthService<MojangUser> {
     private static final String AUTH_SERVER = "https://authserver.mojang.com/";
 
-    public AuthResponse requestRefresh(MojangUser mojangUser) throws AuthenticationNetworkFailureException {
+    public AuthResponse requestRefresh(MojangUser mojangUser) throws AuthenticationException {
         RefreshRequest refreshRequest = new RefreshRequest(mojangUser.getAccessToken(), mojangUser.getClientToken());
         String data = MojangUtils.getGson().toJson(refreshRequest);
 
@@ -47,8 +48,15 @@ public class AuthenticationService implements IGameAuthService<MojangUser> {
         try {
             String returned = postJson(AUTH_SERVER + "refresh", data);
             response = MojangUtils.getGson().fromJson(returned, AuthResponse.class);
+            if (response == null) {
+                throw new SessionException("Session Error");
+            }
+            if (response.hasError()) {
+                throw new AuthenticationException(response.getError());
+            }
         } catch (IOException e) {
-            throw new AuthenticationNetworkFailureException("authserver.mojang.com", e);
+            throw new AuthenticationException(
+                    "An error was raised while attempting to communicate with " + AUTH_SERVER + ".", e);
         }
 
         return response;
@@ -94,7 +102,7 @@ public class AuthenticationService implements IGameAuthService<MojangUser> {
         return returnable;
     }
 
-    public AuthResponse requestLogin(String username, String password, String clientToken) throws AuthenticationNetworkFailureException {
+    public AuthResponse requestLogin(String username, String password, String clientToken) throws AuthenticationException {
         AuthRequest request = new AuthRequest(username, password, clientToken);
         String data = MojangUtils.getGson().toJson(request);
 
@@ -103,7 +111,7 @@ public class AuthenticationService implements IGameAuthService<MojangUser> {
             String returned = postJson(AUTH_SERVER + "authenticate", data);
             response = MojangUtils.getGson().fromJson(returned, AuthResponse.class);
         } catch (IOException e) {
-            throw new AuthenticationNetworkFailureException("authserver.mojang.com", e);
+            throw new AuthenticationException("authserver.mojang.com", e);
         }
         return response;
     }

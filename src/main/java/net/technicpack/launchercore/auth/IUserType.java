@@ -19,6 +19,8 @@
 
 package net.technicpack.launchercore.auth;
 
+import net.technicpack.launchercore.exception.AuthenticationException;
+
 public interface IUserType {
     String getUserType();
 
@@ -33,4 +35,6 @@ public interface IUserType {
     String getSessionId();
 
     boolean isOffline();
+
+    void login() throws AuthenticationException;
 }

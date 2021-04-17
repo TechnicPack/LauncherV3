@@ -19,7 +19,7 @@
 
 package net.technicpack.launchercore.auth;
 
-import net.technicpack.launchercore.exception.AuthenticationNetworkFailureException;
+import net.technicpack.launchercore.exception.AuthenticationException;
 import net.technicpack.minecraftcore.mojang.auth.AuthenticationService;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 
@@ -61,7 +61,7 @@ public class UserModel {
         }
     }
 
-    public AuthError attemptUserRefresh(IUserType user) throws AuthenticationNetworkFailureException {
+    public AuthError attemptUserRefresh(IUserType user) throws AuthenticationException {
         if (user instanceof MojangUser) {
             IAuthResponse response = gameAuthService.requestRefresh((MojangUser) user);
             if (response == null) {
@@ -98,9 +98,10 @@ public class UserModel {
                 setCurrentUser(clearedUser);
                 return null;
             }
-        } catch (AuthenticationNetworkFailureException ex) {
+        } catch (AuthenticationException ex) {
             ex.printStackTrace();
-            return new AuthError("Auth Servers Inaccessible", "An error occurred while attempting to reach " + ex.getTargetSite());
+            //TODO FIX me
+            return new AuthError("Auth Servers Inaccessible", "An error occurred while attempting to reach site.");
         }
     }
 
@@ -113,7 +114,7 @@ public class UserModel {
 
                 if (error != null)
                     setCurrentUser(null);
-            } catch (AuthenticationNetworkFailureException ex) {
+            } catch (AuthenticationException ex) {
                 setCurrentUser(gameAuthService.createOfflineUser(user.getDisplayName()));
             }
         } else
@@ -148,7 +149,7 @@ public class UserModel {
         return mUserStore.getClientToken();
     }
 
-    public class AuthError {
+    public static class AuthError {
         private String mError;
         private String mErrorDescription;
 

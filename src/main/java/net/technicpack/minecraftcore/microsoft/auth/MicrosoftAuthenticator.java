@@ -29,7 +29,7 @@ public class MicrosoftAuthenticator {
     private static final String SCOPE = "XboxLive.signin";
     private static final String TOKEN_SERVER_URL = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
     private static final String AUTHORIZATION_SERVER_URL =
-            "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize?prompt=select_account";
+            "https://login.live.com/oauth20_authorize.srf?prompt=select_account&cobrandid=8058f65d-ce06-4c30-9559-473c9275a65d";
     private static FileDataStoreFactory DATA_STORE_FACTORY;
 
     // XBOX
@@ -40,8 +40,23 @@ public class MicrosoftAuthenticator {
     private static final String MINECRAFT_AUTH_URL = "https://api.minecraftservices.com/authentication/login_with_xbox";
     private static final String MINECRAFT_PROFILE_URL = "https://api.minecraftservices.com/minecraft/profile";
 
-    public MicrosoftAuthenticator() throws IOException {
-        DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR);
+    public MicrosoftAuthenticator() {
+        try {
+            DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to setup credential store.", e);
+        }
+    }
+
+    public XboxMinecraftResponse getAuthTokenFromUsername(String username) throws IOException {
+        Credential credential = getOAuthCredential(username);
+
+        authenticateOAuth(credential);
+
+        XboxResponse xboxResponse = authenticateXbox(credential);
+        XboxResponse xstsResponse = authenticateXSTS(xboxResponse);
+        return authenticateMinecraftXbox(xstsResponse);
     }
 
     public Credential getOAuthCredential(String username) throws IOException {
