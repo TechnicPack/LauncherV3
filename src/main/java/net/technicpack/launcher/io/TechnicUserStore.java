@@ -36,7 +36,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 public class TechnicUserStore implements IUserStore {
-    private String clientToken = "5f8b309f-ad5f-49bf-877a-8b94afd75b9f";
+    private String clientToken = UUID.randomUUID().toString();
     private Map<String, IUserType> savedUsers = new HashMap<>();
     private String lastUser;
     private transient File usersFile;

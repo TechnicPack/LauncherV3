@@ -77,7 +77,7 @@ public class MicrosoftAuthenticator {
         LocalServerReceiver receiver =
                 new LocalServerReceiver.Builder()
                         .setHost("localhost")
-                        .setPort(8080)
+                        .setPort(0)
                         .setCallbackPath("/")
                         .build();
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize(username);
