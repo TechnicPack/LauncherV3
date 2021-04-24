@@ -36,5 +36,5 @@ public interface IUserType {
 
     boolean isOffline();
 
-    void login() throws AuthenticationException;
+    void login(UserModel userModel) throws AuthenticationException;
 }

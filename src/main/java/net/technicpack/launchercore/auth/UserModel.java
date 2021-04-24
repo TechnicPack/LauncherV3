@@ -20,8 +20,10 @@
 package net.technicpack.launchercore.auth;
 
 import net.technicpack.launchercore.exception.AuthenticationException;
-import net.technicpack.minecraftcore.mojang.auth.AuthenticationService;
-import net.technicpack.minecraftcore.mojang.auth.MojangUser;
+import net.technicpack.launchercore.exception.ResponseException;
+import net.technicpack.launchercore.exception.SessionException;
+import net.technicpack.minecraftcore.microsoft.auth.MicrosoftAuthenticator;
+import net.technicpack.minecraftcore.mojang.auth.MojangAuthenticator;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -31,12 +33,14 @@ public class UserModel {
     private IUserType mCurrentUser = null;
     private List<IAuthListener> mAuthListeners = new LinkedList<>();
     private IUserStore mUserStore;
-    private AuthenticationService gameAuthService;
+    private MojangAuthenticator mojangAuthenticator;
+    private MicrosoftAuthenticator microsoftAuthenticator;
 
-    public UserModel(IUserStore userStore, AuthenticationService gameAuthService) {
+    public UserModel(IUserStore userStore, MojangAuthenticator mojangAuthenticator, MicrosoftAuthenticator microsoftAuthenticator) {
         this.mCurrentUser = null;
         this.mUserStore = userStore;
-        this.gameAuthService = gameAuthService;
+        this.mojangAuthenticator = mojangAuthenticator;
+        this.microsoftAuthenticator = microsoftAuthenticator;
     }
 
     public IUserType getCurrentUser() {
@@ -61,64 +65,24 @@ public class UserModel {
         }
     }
 
-    public AuthError attemptUserRefresh(IUserType user) throws AuthenticationException {
-        if (user instanceof MojangUser) {
-            IAuthResponse response = gameAuthService.requestRefresh((MojangUser) user);
-            if (response == null) {
-                mUserStore.removeUser(user.getUsername());
-                return new AuthError("Session Error", "Please log in again.");
-            } else if (response.getError() != null) {
-                mUserStore.removeUser(user.getUsername());
-                return new AuthError(response.getError(), response.getErrorMessage());
-            } else {
-                //Refresh user from response
-                user = gameAuthService.createClearedUser(user.getUsername(), response);
-                mUserStore.addUser(user);
-                setCurrentUser(user);
-                return null;
-            }
-        } else {
-            addUser(user);
-            setCurrentUser(user);
-            return null;
-        }
-    }
-
-    public AuthError attemptInitialLogin(String username, String password) {
-        try {
-            IAuthResponse response = gameAuthService.requestLogin(username, password, getClientToken());
-
-            if (response == null) {
-                return new AuthError("Auth Error", "Invalid credentials. Invalid username or password.");
-            } else if (response.getError() != null) {
-                return new AuthError(response.getError(), response.getErrorMessage());
-            } else {
-                //Create an online user with the received data
-                IUserType clearedUser = gameAuthService.createClearedUser(username, response);
-                setCurrentUser(clearedUser);
-                return null;
-            }
-        } catch (AuthenticationException ex) {
-            ex.printStackTrace();
-            //TODO FIX me
-            return new AuthError("Auth Servers Inaccessible", "An error occurred while attempting to reach site.");
-        }
-    }
-
-    public void initAuth() {
+    public void startupAuth() {
         IUserType user = getLastUser();
 
-        if (user != null) {
-            try {
-                AuthError error = this.attemptUserRefresh(user);
-
-                if (error != null)
-                    setCurrentUser(null);
-            } catch (AuthenticationException ex) {
-                setCurrentUser(gameAuthService.createOfflineUser(user.getDisplayName()));
-            }
-        } else
+        if (user == null) {
             setCurrentUser(null);
+            return;
+        }
+
+        try {
+            //TODO: Double check this init login
+            user.login(this);
+            setCurrentUser(user);
+        } catch (SessionException | ResponseException ex) {
+            setCurrentUser(null);
+        } catch (AuthenticationException ex) {
+            //TODO: This should handle offline users for Microsoft accounts
+            setCurrentUser(mojangAuthenticator.createOfflineUser(user.getDisplayName()));
+        }
     }
 
     public Collection<IUserType> getUsers() {
@@ -145,25 +109,11 @@ public class UserModel {
         mUserStore.setLastUser(user.getUsername());
     }
 
-    public String getClientToken() {
-        return mUserStore.getClientToken();
+    public MicrosoftAuthenticator getMicrosoftAuthenticator() {
+        return microsoftAuthenticator;
     }
 
-    public static class AuthError {
-        private String mError;
-        private String mErrorDescription;
-
-        public AuthError(String error, String errorDescription) {
-            this.mError = error;
-            this.mErrorDescription = errorDescription;
-        }
-
-        public String getError() {
-            return mError;
-        }
-
-        public String getErrorDescription() {
-            return mErrorDescription;
-        }
+    public MojangAuthenticator getMojangAuthenticator() {
+        return mojangAuthenticator;
     }
 }

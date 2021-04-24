@@ -18,15 +18,11 @@
 
 package net.technicpack.launcher.ui;
 
-import com.google.api.client.auth.oauth2.Credential;
 import net.technicpack.launcher.LauncherMain;
+import net.technicpack.launchercore.exception.MicrosoftAuthException;
 import net.technicpack.launchercore.exception.ResponseException;
 import net.technicpack.launchercore.exception.SessionException;
-import net.technicpack.minecraftcore.microsoft.auth.MicrosoftAuthenticator;
 import net.technicpack.minecraftcore.microsoft.auth.MicrosoftUser;
-import net.technicpack.minecraftcore.microsoft.auth.model.MinecraftProfile;
-import net.technicpack.minecraftcore.microsoft.auth.model.XboxMinecraftResponse;
-import net.technicpack.minecraftcore.microsoft.auth.model.XboxResponse;
 import net.technicpack.ui.controls.list.popupformatters.RoundedBorderFormatter;
 import net.technicpack.ui.controls.lang.LanguageCellRenderer;
 import net.technicpack.ui.controls.lang.LanguageCellUI;
@@ -54,12 +50,11 @@ import javax.swing.plaf.metal.MetalComboBoxUI;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Locale;
-import java.util.UUID;
 import java.util.logging.Level;
 
+import static javax.swing.JOptionPane.ERROR_MESSAGE;
 import static javax.swing.JOptionPane.showMessageDialog;
 
 public class LoginFrame extends DraggableFrame implements IRelocalizableResource, KeyListener, IAuthListener {
@@ -78,7 +73,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     private JComboBox<IUserType> nameSelect;
     private JCheckBox rememberAccount;
     private JPasswordField password;
-    private JComboBox languages;
+    private JComboBox<LanguageItem> languages;
 
     private static final int FRAME_WIDTH = 347;
     private static final int FRAME_HEIGHT = 399;
@@ -142,7 +137,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
 
         initComponents();
 
-        refreshUsers();
+        refreshSelectedUsers();
 
         EventQueue.invokeLater(() -> {
             invalidate();
@@ -151,10 +146,10 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     }
 
     @Override
-    public void userChanged(IUserType mojangUser) {
-        if (mojangUser == null) {
+    public void userChanged(IUserType user) {
+        if (user == null) {
             this.setVisible(true);
-            refreshUsers();
+            refreshSelectedUsers();
 
             if (nameSelect.isVisible())
                 nameSelect.grabFocus();
@@ -211,6 +206,9 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         selectLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         add(selectLabel, new GridBagConstraints(0, 2, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10,20,0,20), 0,0));
 
+        // TODO: No accounts login information text label
+
+        // TODO: See browser information text label
         // Setup account select box
         nameSelect = new JComboBox<>();
 
@@ -395,8 +393,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         DesktopUtils.browseUrl("https://www.technicpack.net/terms");
     }
 
-
-    protected void refreshUsers() {
+    protected void refreshSelectedUsers() {
         Collection<IUserType> users = userModel.getUsers();
         IUserType lastUser = userModel.getLastUser();
 
@@ -422,47 +419,21 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
 
     protected void login() {
         if (username.isVisible()) {
-            attemptNewLogin(username.getText());
+            newMojangLogin(username.getText());
             return;
         }
 
         IUserType user = (IUserType) nameSelect.getSelectedItem();
 
+        // Can't login with a null user. This should never be hit.
         if (user == null) {
-            //TODO: This should be truly exceptional?
+            Utils.getLogger().log(Level.WARNING, "Attempted to login with a null user.");
             return;
         }
 
-        try {
-            user.login();
-        } catch (SessionException e) {
-            showMessageDialog(
-                    this, "Please login again.", e.getMessage(), JOptionPane.ERROR_MESSAGE);
-            userModel.removeUser(user);
-        } catch (ResponseException e) {
-            showMessageDialog(
-                    this, e.getMessage(), e.getError(), JOptionPane.ERROR_MESSAGE);
-            userModel.removeUser(user);
-        } catch (AuthenticationException e) {
-            Utils.getLogger().log(Level.SEVERE, e.getMessage(), e);
-
-            //Couldn't reach auth server- if we're running silently (we just started up and have a user session ready to roll)
-            //Go ahead and just play offline automatically, like the minecraft client does.  If we're running loud (user
-            //is actually at the login UI clicking the login button), give them a choice.
-            if (JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(this,
-                    "The auth servers at Minecraft.net are inaccessible.  Would you like to play offline?",
-                    "Offline Play", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE)) {
-
-                //This is the last time we'll have access to the user's real username, so we should set the last-used
-                //username now
-                userModel.setLastUser(user);
-            }
-        }
-
-        userModel.addUser(user);
-        userModel.setCurrentUser(user);
-        setCurrentUser(user);
+        login(user);
     }
+
 
     protected void addMojangAccount() {
         setMojangLoginVisibility(true);
@@ -472,26 +443,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     }
 
     protected void addMicrosoftAccount() {
-        MicrosoftAuthenticator microsoftAuthenticator;
-        try {
-            microsoftAuthenticator = new MicrosoftAuthenticator();
-            Credential credential = microsoftAuthenticator.getOAuthCredential(UUID.randomUUID().toString());
-
-            microsoftAuthenticator.authenticateOAuth(credential);
-
-            XboxResponse xboxResponse = microsoftAuthenticator.authenticateXbox(credential);
-            XboxResponse xstsResponse = microsoftAuthenticator.authenticateXSTS(xboxResponse);
-            XboxMinecraftResponse xboxMinecraftResponse = microsoftAuthenticator.authenticateMinecraftXbox(xstsResponse);
-            MinecraftProfile profile = microsoftAuthenticator.getMinecraftProfile(xboxMinecraftResponse);
-            System.out.println(profile);
-            microsoftAuthenticator.updateCredentialStore(profile.name, credential);
-            MicrosoftUser microsoftUser = new MicrosoftUser(xboxMinecraftResponse, profile);
-            userModel.setCurrentUser(microsoftUser);
-            userModel.addUser(userModel.getCurrentUser());
-            setCurrentUser(microsoftUser);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        newMicrosoftLogin();
     }
 
     protected void clearCurrentUser() {
@@ -521,7 +473,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
 
     protected void forgetUser(IUserType mojangUser) {
         userModel.removeUser(mojangUser);
-        refreshUsers();
+        refreshSelectedUsers();
     }
 
     protected void languageChanged() {
@@ -548,14 +500,86 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         addMicrosoft.setVisible(visible);
     }
 
-    private void attemptNewLogin(String name) {
-        UserModel.AuthError error = userModel.attemptInitialLogin(name, new String(this.password.getPassword()));
+    private void login(IUserType user) {
+        try {
+            user.login(userModel);
+        } catch (SessionException e) {
+            showMessageDialog(
+                    this, "Please log in again for user " + user.getDisplayName(),
+                    e.getMessage(), ERROR_MESSAGE);
+            userModel.removeUser(user);
+        } catch (ResponseException e) {
+            showMessageDialog(
+                    this, e.getMessage(), e.getError(), ERROR_MESSAGE);
+            userModel.removeUser(user);
+        } catch (AuthenticationException e) {
+            Utils.getLogger().log(Level.SEVERE, e.getMessage(), e);
 
-        if (error != null) {
-            showMessageDialog(this, error.getErrorDescription(), error.getError(), JOptionPane.ERROR_MESSAGE);
-        } else {
-            userModel.addUser(userModel.getCurrentUser());
-            setCurrentUser(userModel.getCurrentUser());
+            //Couldn't reach auth server- if we're running silently (we just started up and have a user session ready to roll)
+            //Go ahead and just play offline automatically, like the minecraft client does.  If we're running loud (user
+            //is actually at the login UI clicking the login button), give them a choice.
+            if (JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(this,
+                    "The auth servers at Minecraft.net are inaccessible.  Would you like to play offline?",
+                    "Offline Play", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE)) {
+
+                // This is the last time we'll have access to the user's real username,
+                // so we should set the last-used username now
+                userModel.setLastUser(user);
+            }
+        }
+
+        userModel.addUser(user);
+        userModel.setCurrentUser(user);
+        setCurrentUser(user);
+    }
+
+    private void newMicrosoftLogin() {
+        setAccountSelectVisibility(false);
+        setAddAccountVisibility(false);
+        // TODO: Setup info message + cancel flow
+
+        try {
+            MicrosoftUser microsoftUser = userModel.getMicrosoftAuthenticator().loginNewUser();
+            userModel.addUser(microsoftUser);
+            userModel.setCurrentUser(microsoftUser);
+            setCurrentUser(microsoftUser);
+        } catch (MicrosoftAuthException e) {
+            switch (e.getType()) {
+                case UNDERAGE:
+                    showMessageDialog(this,
+                            "Your Xbox account is under 18 and will need to be added to a Family to play this game.",
+                            "Under 18 Error", ERROR_MESSAGE);
+                    break;
+                case NO_XBOX_ACCOUNT:
+                    showMessageDialog(this,
+                            "You don't have an Xbox account associated with this Microsoft account.",
+                            "No Xbox Account", ERROR_MESSAGE);
+                    break;
+                case NO_MINECRAFT:
+                    showMessageDialog(this,
+                            "This account has not purchased Minecraft.", "No Minecraft", ERROR_MESSAGE);
+                    break;
+                default:
+                    e.printStackTrace();
+                    showMessageDialog(this, e.getMessage(), "Add Microsoft Account Failed", ERROR_MESSAGE);
+            }
+        } finally {
+            setAccountSelectVisibility(!userModel.getUsers().isEmpty());
+            setAddAccountVisibility(true);
+        }
+    }
+    private void newMojangLogin(String name) {
+        try {
+            MojangUser newUser;
+            newUser = userModel.getMojangAuthenticator().loginNewUser(name, new String(this.password.getPassword()));
+            userModel.addUser(newUser);
+            userModel.setCurrentUser(newUser);
+            setCurrentUser(newUser);
+        } catch(ResponseException e) {
+            showMessageDialog(this, e.getMessage(), e.getError(), ERROR_MESSAGE);
+        } catch (AuthenticationException e) {
+            //TODO: What else is uncaught here?
+            e.printStackTrace();
         }
     }
 }

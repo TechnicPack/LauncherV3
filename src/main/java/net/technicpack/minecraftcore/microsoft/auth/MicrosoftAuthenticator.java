@@ -10,22 +10,27 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
+import net.technicpack.launchercore.exception.AuthenticationException;
+import net.technicpack.launchercore.exception.MicrosoftAuthException;
+import net.technicpack.launchercore.exception.SessionException;
 import net.technicpack.minecraftcore.microsoft.auth.model.*;
+import net.technicpack.utilslib.Utils;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.UUID;
+import java.util.logging.Level;
 
-/**
- *
- */
+import static net.technicpack.launchercore.exception.MicrosoftAuthException.ExceptionType.*;
+
 public class MicrosoftAuthenticator {
     private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
     private static final JsonFactory JSON_FACTORY = new GsonFactory();
-    private static HttpRequestFactory requestFactory;
+    private final HttpRequestFactory REQUEST_FACTORY;
 
     // OAUTH
-    private static final File DATA_STORE_DIR = new File(System.getProperty("user.home"), ".msauthtest/auth");
+    private static final String TECHNIC_CLIENT_ID = "5f8b309f-ad5f-49bf-877a-8b94afd75b9f";
     private static final String SCOPE = "XboxLive.signin";
     private static final String TOKEN_SERVER_URL = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
     private static final String AUTHORIZATION_SERVER_URL =
@@ -40,96 +45,187 @@ public class MicrosoftAuthenticator {
     private static final String MINECRAFT_AUTH_URL = "https://api.minecraftservices.com/authentication/login_with_xbox";
     private static final String MINECRAFT_PROFILE_URL = "https://api.minecraftservices.com/minecraft/profile";
 
-    public MicrosoftAuthenticator() {
+    public MicrosoftAuthenticator(File dataStore) {
+        REQUEST_FACTORY = HTTP_TRANSPORT.createRequestFactory(
+                request -> request.setParser(new JsonObjectParser(JSON_FACTORY))
+        );
+
         try {
-            DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR);
+            DATA_STORE_FACTORY = new FileDataStoreFactory(dataStore);
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to setup credential store.", e);
         }
     }
 
-    public XboxMinecraftResponse getAuthTokenFromUsername(String username) throws IOException {
-        Credential credential = getOAuthCredential(username);
-
-        authenticateOAuth(credential);
+    public MicrosoftUser loginNewUser() throws MicrosoftAuthException {
+        Credential credential = getOAuthCredential(UUID.randomUUID().toString());
 
         XboxResponse xboxResponse = authenticateXbox(credential);
-        XboxResponse xstsResponse = authenticateXSTS(xboxResponse);
-        return authenticateMinecraftXbox(xstsResponse);
+        XboxResponse xstsResponse = authenticateXSTS(xboxResponse.token);
+        XboxMinecraftResponse xboxMinecraftResponse = authenticateMinecraftXbox(xstsResponse);
+        MinecraftProfile profile = getMinecraftProfile(xboxMinecraftResponse);
+
+        updateCredentialStore(profile.name, credential);
+
+        return new MicrosoftUser(xboxResponse, xboxMinecraftResponse, profile);
     }
 
-    public Credential getOAuthCredential(String username) throws IOException {
-        AuthorizationCodeFlow flow =
-            new AuthorizationCodeFlow.Builder(
-                    BearerToken.authorizationHeaderAccessMethod(),
-                    HTTP_TRANSPORT,
-                    JSON_FACTORY,
-                    new GenericUrl(TOKEN_SERVER_URL),
-                    new ClientParametersAuthentication(
-                            "5f8b309f-ad5f-49bf-877a-8b94afd75b9f",
-                            ""),
-                    "5f8b309f-ad5f-49bf-877a-8b94afd75b9f",
-                    AUTHORIZATION_SERVER_URL)
-                    .setScopes(Collections.singletonList(SCOPE))
-                    .setDataStoreFactory(DATA_STORE_FACTORY)
-                    .build();
+    public XboxMinecraftResponse refreshSession(MicrosoftUser user) throws AuthenticationException {
+        // We have an xbox token still, so we should be able to just refresh.
+        if (user.getXboxExpiresInSeconds() > 60) {
+            return authenticateMinecraftXbox(authenticateXSTS(user.getXboxAccessToken()));
+        }
+
+        Credential credential = loadExistingCredential(user.getUsername());
+
+        // Somehow our xbox token is expired but our OAuth token is still good.
+        if (isOauthCredentialActive(credential)) {
+            XboxResponse xboxResponse = authenticateXbox(credential);
+            return authenticateMinecraftXbox(authenticateXSTS(xboxResponse.token));
+        }
+
+        // Session is expired now, no saving it
+        throw new SessionException("Microsoft login expired or missing.");
+    }
+
+    private Credential getOAuthCredential(String username) throws MicrosoftAuthException {
         LocalServerReceiver receiver =
                 new LocalServerReceiver.Builder()
-                        .setHost("localhost")
-                        .setPort(0)
-                        .setCallbackPath("/")
-                        .build();
-        return new AuthorizationCodeInstalledApp(flow, receiver).authorize(username);
+                        .setHost("localhost").setPort(0).setCallbackPath("/").build();
+
+        try {
+            AuthorizationCodeFlow flow = buildFlow();
+            return new AuthorizationCodeInstalledApp(flow, receiver).authorize(username);
+        } catch (IOException exception) {
+            throw new MicrosoftAuthException(OAUTH, "Failed to get OAuth authorization", exception);
+        }
     }
 
-    public void authenticateOAuth(Credential credential) {
-        requestFactory = HTTP_TRANSPORT.createRequestFactory(
-                request -> {
-                    credential.initialize(request);
-                    request.setParser(new JsonObjectParser(JSON_FACTORY));
-                }
-        );
+    private boolean isOauthCredentialActive(Credential credential) {
+        return credential != null
+                && (credential.getRefreshToken() != null ||
+                credential.getExpiresInSeconds() != null ||
+                credential.getExpiresInSeconds() > 60);
     }
 
-    public XboxResponse authenticateXbox(Credential credential) throws IOException {
+    private Credential loadExistingCredential(String username) throws MicrosoftAuthException {
+        AuthorizationCodeFlow flow;
+
+        try {
+            flow = buildFlow();
+            return flow.loadCredential(username);
+        } catch (IOException exception) {
+            //TODO Handle gracefully
+            throw new MicrosoftAuthException(OAUTH, "Failed to load from credential store.");
+        }
+    }
+
+    private XboxResponse authenticateXbox(Credential credential) throws MicrosoftAuthException {
         XboxAuthRequest xboxAuthRequest = new XboxAuthRequest(credential.getAccessToken());
 
         HttpContent httpContent = new JsonHttpContent(JSON_FACTORY, xboxAuthRequest);
-        HttpRequest request = requestFactory.buildPostRequest(new GenericUrl(XBOX_AUTH_URL), httpContent);
-        return request.execute().parseAs(XboxResponse.class);
+        HttpRequest request = buildPostRequest(XBOX_AUTH_URL, httpContent);
+        request.setInterceptor(credential);
+        request.setUnsuccessfulResponseHandler(credential);
+
+        try {
+            return request.execute().parseAs(XboxResponse.class);
+        } catch (IOException e) {
+            throw new MicrosoftAuthException(XBOX, "Failed to get Xbox Authentication.", e);
+        }
     }
 
-    public XboxResponse authenticateXSTS(XboxResponse xboxResponse) throws IOException {
-        XSTSRequest xstsRequest = new XSTSRequest(xboxResponse.token);
-//        System.out.println(JSON_FACTORY.toPrettyString(xstsRequest));
+    private XboxResponse authenticateXSTS(String token) throws MicrosoftAuthException {
+        XSTSRequest xstsRequest = new XSTSRequest(token);
 
         HttpContent httpContent = new JsonHttpContent(JSON_FACTORY, xstsRequest);
-        HttpRequest request = requestFactory.buildPostRequest(new GenericUrl(XBOX_XSTS_URL), httpContent);
-        return request.execute().parseAs(XboxResponse.class);
+        HttpRequest request = buildPostRequest(XBOX_XSTS_URL, httpContent);
+
+        try {
+            HttpResponse httpResponse = request.execute();
+            if (httpResponse.getStatusCode() == HttpStatusCodes.STATUS_CODE_UNAUTHORIZED) {
+                XSTSUnauthorized unauthorized = httpResponse.parseAs(XSTSUnauthorized.class);
+                throw new MicrosoftAuthException(unauthorized.getExceptionType(), "Failed to get XSTS authentication.");
+            }
+            return httpResponse.parseAs(XboxResponse.class);
+        } catch (IOException e) {
+            throw new MicrosoftAuthException(XSTS, "Failed to get XSTS authentication.", e);
+        }
     }
 
-    public XboxMinecraftResponse authenticateMinecraftXbox(XboxResponse xstsResponse) throws IOException {
+    private XboxMinecraftResponse authenticateMinecraftXbox(XboxResponse xstsResponse) throws MicrosoftAuthException {
         XboxMinecraftRequest xboxMinecraftRequest = new XboxMinecraftRequest(xstsResponse);
-//        System.out.println(JSON_FACTORY.toPrettyString(xboxMinecraftRequest));
 
         HttpContent httpContent = new JsonHttpContent(JSON_FACTORY, xboxMinecraftRequest);
-        HttpRequest request = requestFactory.buildPostRequest(new GenericUrl(MINECRAFT_AUTH_URL), httpContent);
-        return request.execute().parseAs(XboxMinecraftResponse.class);
+        HttpRequest request = buildPostRequest(MINECRAFT_AUTH_URL, httpContent);
+
+        try {
+            return request.execute().parseAs(XboxMinecraftResponse.class);
+        } catch (IOException e) {
+            throw new MicrosoftAuthException(XBOX_MINECRAFT, "Failed to authenticate with Xbox for Minecraft.", e);
+        }
     }
 
-    public MinecraftProfile getMinecraftProfile(XboxMinecraftResponse xboxMinecraftResponse) throws IOException {
+    private MinecraftProfile getMinecraftProfile(XboxMinecraftResponse xboxMinecraftResponse) throws MicrosoftAuthException {
 
-        HttpRequest request = requestFactory.buildGetRequest(new GenericUrl(MINECRAFT_PROFILE_URL));
-        request.setInterceptor(null); // It still had the OAuth interceptor that overwrites the authorization
+        HttpRequest request = buildGetRequest(MINECRAFT_PROFILE_URL);
+        // Remove the OAuth interceptor while doing this step.
+        request.setInterceptor(null);
         String authorization = xboxMinecraftResponse.getAuthorization();
         request.setHeaders(request.getHeaders().setAuthorization(authorization));
 
-        return request.execute().parseAs(MinecraftProfile.class);
+        try {
+            HttpResponse httpResponse = request.execute();
+            MinecraftProfile minecraftProfile = httpResponse.parseAs(MinecraftProfile.class);
+            if (minecraftProfile == null) {
+                MinecraftError minecraftError = httpResponse.parseAs(MinecraftError.class);
+                throw new MicrosoftAuthException(NO_MINECRAFT, "Minecraft Account Error: " + minecraftError.error);
+            }
+            return request.execute().parseAs(MinecraftProfile.class);
+        } catch (IOException e) {
+            throw new MicrosoftAuthException(MINECRAFT_PROFILE, "Failed to load minecraft profile.", e);
+        }
     }
 
-    public void updateCredentialStore(String username, Credential credential) throws IOException {
-        DATA_STORE_FACTORY.getDataStore(StoredCredential.DEFAULT_DATA_STORE_ID)
-                .set(username, new StoredCredential(credential));
+    private AuthorizationCodeFlow buildFlow() throws IOException {
+        return new AuthorizationCodeFlow.Builder(
+                        BearerToken.authorizationHeaderAccessMethod(),
+                        HTTP_TRANSPORT,
+                        JSON_FACTORY,
+                        new GenericUrl(TOKEN_SERVER_URL),
+                        new ClientParametersAuthentication(TECHNIC_CLIENT_ID, null),
+                        TECHNIC_CLIENT_ID,
+                        AUTHORIZATION_SERVER_URL)
+                        .setScopes(Collections.singletonList(SCOPE))
+                        .setDataStoreFactory(DATA_STORE_FACTORY)
+//                            .enablePKCE() TODO: Figure out PKCE
+                        .build();
+    }
+
+    private void updateCredentialStore(String username, Credential credential) {
+        try {
+            DATA_STORE_FACTORY.getDataStore(StoredCredential.DEFAULT_DATA_STORE_ID)
+                    .set(username, new StoredCredential(credential));
+        } catch (IOException e) {
+            e.printStackTrace();
+            Utils.getLogger().log(Level.WARNING, "Failed to save user credential to the data store.");
+        }
+    }
+
+    private HttpRequest buildGetRequest(String url) throws MicrosoftAuthException {
+        try {
+            return REQUEST_FACTORY.buildGetRequest(new GenericUrl(url));
+        } catch (IOException e) {
+            throw new MicrosoftAuthException(REQUEST, "Failed to build get request.", e);
+        }
+    }
+
+    private HttpRequest buildPostRequest(String url, HttpContent httpContent) throws MicrosoftAuthException {
+        try {
+            return REQUEST_FACTORY.buildPostRequest(new GenericUrl(url), httpContent);
+        } catch (IOException e) {
+            throw new MicrosoftAuthException(REQUEST, "Failed to build post request.", e);
+        }
     }
 }

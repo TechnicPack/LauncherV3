@@ -41,7 +41,6 @@ import net.technicpack.launcher.ui.LoginFrame;
 import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launchercore.TechnicConstants;
-import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.auth.UserModel;
@@ -67,8 +66,8 @@ import net.technicpack.launchercore.modpacks.resources.resourcetype.LogoResource
 import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.minecraftcore.launch.MinecraftLauncher;
-import net.technicpack.minecraftcore.mojang.auth.AuthenticationService;
-import net.technicpack.minecraftcore.mojang.auth.MojangUser;
+import net.technicpack.minecraftcore.microsoft.auth.MicrosoftAuthenticator;
+import net.technicpack.minecraftcore.mojang.auth.MojangAuthenticator;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.IPlatformSearchApi;
 import net.technicpack.platform.PlatformPackInfoRepository;
@@ -97,7 +96,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.InetAddress;
@@ -243,25 +241,9 @@ public class LauncherMain {
         System.setOut(new PrintStream(new LoggerOutputStream(console, Level.INFO, logger), true));
         System.setErr(new PrintStream(new LoggerOutputStream(console, Level.SEVERE, logger), true));
 
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread t, Throwable e) {
-                e.printStackTrace();
-                logger.log(Level.SEVERE, "Unhandled Exception in " + t, e);
-
-//                if (errorDialog == null) {
-//                    LauncherFrame frame = null;
-//
-//                    try {
-//                        frame = Launcher.getFrame();
-//                    } catch (Exception ex) {
-//                        //This can happen if we have a very early crash- before Launcher initializes
-//                    }
-//
-//                    errorDialog = new ErrorDialog(frame, e);
-//                    errorDialog.setVisible(true);
-//                }
-            }
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+            e.printStackTrace();
+            logger.log(Level.SEVERE, "Unhandled Exception in " + t, e);
         });
     }
 
@@ -352,15 +334,12 @@ public class LauncherMain {
         System.setProperty("xr.load.xml-reader", "org.ccil.cowan.tagsoup.Parser");
 
         //Remove all log files older than a week
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Iterator<File> files = FileUtils.iterateFiles(new File(directories.getLauncherDirectory(), "logs"), new String[] {"log"}, false);
-                while (files.hasNext()) {
-                    File logFile = files.next();
-                    if (logFile.exists() && (new DateTime(logFile.lastModified())).isBefore(DateTime.now().minusWeeks(1))) {
-                        logFile.delete();
-                    }
+        new Thread(() -> {
+            Iterator<File> files = FileUtils.iterateFiles(new File(directories.getLauncherDirectory(), "logs"), new String[] {"log"}, false);
+            while (files.hasNext()) {
+                File logFile = files.next();
+                if (logFile.exists() && (new DateTime(logFile.lastModified())).isBefore(DateTime.now().minusWeeks(1))) {
+                    logFile.delete();
                 }
             }
         }).start();
@@ -378,21 +357,24 @@ public class LauncherMain {
         javaVersionFile.enumerateVersions(javaVersions);
         javaVersions.selectVersion(settings.getJavaVersion(), settings.getJavaBitness());
 
-        IUserStore users = TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json"));
-        UserModel userModel = new UserModel(users, new AuthenticationService());
+        TechnicUserStore users = TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json"));
+        MicrosoftAuthenticator microsoftAuthenticator =
+                new MicrosoftAuthenticator(new File(directories.getLauncherDirectory(), "oauth"));
+        MojangAuthenticator mojangAuthenticator = new MojangAuthenticator(users.getClientToken());
+        UserModel userModel = new UserModel(users, mojangAuthenticator, microsoftAuthenticator);
 
         IModpackResourceType iconType = new IconResourceType();
         IModpackResourceType logoType = new LogoResourceType();
         IModpackResourceType backgroundType = new BackgroundResourceType();
 
         PackResourceMapper iconMapper = new PackResourceMapper(directories, resources.getImage("icon.png"), iconType);
-        ImageRepository<ModpackModel> iconRepo = new ImageRepository<ModpackModel>(iconMapper, new PackImageStore(iconType));
-        ImageRepository<ModpackModel> logoRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, resources.getImage("modpack/ModImageFiller.png"), logoType), new PackImageStore(logoType));
-        ImageRepository<ModpackModel> backgroundRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, null, backgroundType), new PackImageStore(backgroundType));
+        ImageRepository<ModpackModel> iconRepo = new ImageRepository<>(iconMapper, new PackImageStore(iconType));
+        ImageRepository<ModpackModel> logoRepo = new ImageRepository<>(new PackResourceMapper(directories, resources.getImage("modpack/ModImageFiller.png"), logoType), new PackImageStore(logoType));
+        ImageRepository<ModpackModel> backgroundRepo = new ImageRepository<>(new PackResourceMapper(directories, null, backgroundType), new PackImageStore(backgroundType));
 
-        ImageRepository<IUserType> skinRepo = new ImageRepository<IUserType>(new TechnicFaceMapper(directories, resources), new MinotarFaceImageStore("https://minotar.net/"));
+        ImageRepository<IUserType> skinRepo = new ImageRepository<>(new TechnicFaceMapper(directories, resources), new MinotarFaceImageStore("https://minotar.net/"));
 
-        ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<AuthorshipInfo>(new TechnicAvatarMapper(directories, resources), new WebAvatarImageStore());
+        ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<>(new TechnicAvatarMapper(directories, resources), new WebAvatarImageStore());
 
         HttpSolderApi httpSolder = new HttpSolderApi(settings.getClientId());
         ISolderApi solder = new CachedSolderApi(directories, httpSolder, 60 * 60);
@@ -427,28 +409,22 @@ public class LauncherMain {
         final LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, selector, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo, platform, directories, packStore, startupParameters, discoverInfoPanel, javaVersions, javaVersionFile, buildNumber, discordApi);
         userModel.addAuthListener(frame);
 
-        ActionListener listener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                splash.dispose();
-                if (settings.getLaunchToModpacks())
-                    frame.selectTab("modpacks");
-            }
+        ActionListener listener = e -> {
+            splash.dispose();
+            if (settings.getLaunchToModpacks())
+                frame.selectTab("modpacks");
         };
 
         discoverInfoPanel.setLoadListener(listener);
 
         LoginFrame login = new LoginFrame(resources, settings, userModel, skinRepo);
         userModel.addAuthListener(login);
-        userModel.addAuthListener(new IAuthListener() {
-            @Override
-            public void userChanged(IUserType user) {
-                if (user == null)
-                    splash.dispose();
-            }
+        userModel.addAuthListener(user -> {
+            if (user == null)
+                splash.dispose();
         });
 
-        userModel.initAuth();
+        userModel.startupAuth();
 
         Utils.sendTracking("runLauncher", "run", buildNumber.getBuildNumber(), settings.getClientId());
     }

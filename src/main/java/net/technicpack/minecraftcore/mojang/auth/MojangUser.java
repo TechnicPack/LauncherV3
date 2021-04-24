@@ -37,8 +37,6 @@ public class MojangUser implements IUserType {
     private UserProperties userProperties;
     private transient boolean isOffline;
 
-    private AuthenticationService gameAuthService;
-
     public MojangUser() {
         this.isOffline = false;
     }
@@ -57,7 +55,6 @@ public class MojangUser implements IUserType {
     public MojangUser(String username, AuthResponse response) {
         this.isOffline = false;
         this.username = username;
-        this.gameAuthService = new AuthenticationService();
         refreshToken(response);
     }
 
@@ -75,8 +72,8 @@ public class MojangUser implements IUserType {
     }
 
     @Override
-    public void login() throws AuthenticationException {
-        refreshToken(gameAuthService.requestRefresh(this));
+    public void login(UserModel userModel) throws AuthenticationException {
+        refreshToken(userModel.getMojangAuthenticator().requestRefresh(this));
     }
 
     @Override
@@ -114,10 +111,6 @@ public class MojangUser implements IUserType {
 
     public String getSessionId() {
         return "token:" + accessToken + ":" + profile.getId();
-    }
-
-    public void rotateAccessToken(String newToken) {
-        this.accessToken = newToken;
     }
 
     public String getUserPropertiesAsJson() {

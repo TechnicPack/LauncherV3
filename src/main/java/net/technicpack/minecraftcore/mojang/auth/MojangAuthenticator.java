@@ -20,9 +20,9 @@
 package net.technicpack.minecraftcore.mojang.auth;
 
 import com.google.common.base.Charsets;
-import net.technicpack.launchercore.auth.IAuthResponse;
-import net.technicpack.launchercore.auth.IGameAuthService;
+
 import net.technicpack.launchercore.exception.AuthenticationException;
+import net.technicpack.launchercore.exception.ResponseException;
 import net.technicpack.launchercore.exception.SessionException;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.auth.request.AuthRequest;
@@ -37,8 +37,35 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-public class AuthenticationService implements IGameAuthService<MojangUser> {
+public class MojangAuthenticator {
     private static final String AUTH_SERVER = "https://authserver.mojang.com/";
+    private final String clientToken;
+
+    public MojangAuthenticator(String clientToken) {
+        this.clientToken = clientToken;
+    }
+
+    public MojangUser loginNewUser(String username, String password) throws AuthenticationException {
+        AuthRequest request = new AuthRequest(username, password, clientToken);
+        String data = MojangUtils.getGson().toJson(request);
+
+        AuthResponse response;
+        try {
+            String returned = postJson(AUTH_SERVER + "authenticate", data);
+            response = MojangUtils.getGson().fromJson(returned, AuthResponse.class);
+            if (response == null) {
+                throw new ResponseException("Auth Error", "Invalid credentials. Invalid username or password.");
+            }
+            if (response.hasError()) {
+                throw new ResponseException(response.getError(), response.getErrorMessage());
+            }
+        } catch (IOException e) {
+            throw new AuthenticationException(
+                    "An error was raised while attempting to communicate with " + AUTH_SERVER + ".", e);
+        }
+
+        return new MojangUser(username, response);
+    }
 
     public AuthResponse requestRefresh(MojangUser mojangUser) throws AuthenticationException {
         RefreshRequest refreshRequest = new RefreshRequest(mojangUser.getAccessToken(), mojangUser.getClientToken());
@@ -52,7 +79,7 @@ public class AuthenticationService implements IGameAuthService<MojangUser> {
                 throw new SessionException("Session Error");
             }
             if (response.hasError()) {
-                throw new AuthenticationException(response.getError());
+                throw new ResponseException(response.getError(), response.getErrorMessage());
             }
         } catch (IOException e) {
             throw new AuthenticationException(
@@ -100,24 +127,6 @@ public class AuthenticationService implements IGameAuthService<MojangUser> {
         }
 
         return returnable;
-    }
-
-    public AuthResponse requestLogin(String username, String password, String clientToken) throws AuthenticationException {
-        AuthRequest request = new AuthRequest(username, password, clientToken);
-        String data = MojangUtils.getGson().toJson(request);
-
-        AuthResponse response;
-        try {
-            String returned = postJson(AUTH_SERVER + "authenticate", data);
-            response = MojangUtils.getGson().fromJson(returned, AuthResponse.class);
-        } catch (IOException e) {
-            throw new AuthenticationException("authserver.mojang.com", e);
-        }
-        return response;
-    }
-
-    public MojangUser createClearedUser(String username, IAuthResponse response) {
-        return new MojangUser(username, (AuthResponse) response);
     }
 
     public MojangUser createOfflineUser(String displayName) {
