@@ -56,6 +56,8 @@ public class MicrosoftUser implements IUserType {
     public String getAccessToken() {
         return accessToken;
     }
+
+    @Override
     public String getSessionId() {
         return "token:" + accessToken + ":" + getId();
     }
@@ -65,12 +67,23 @@ public class MicrosoftUser implements IUserType {
         return false;
     }
 
+    @Override
+    public void login(UserModel userModel) throws AuthenticationException {
+        userModel.getMicrosoftAuthenticator().refreshSession(this);
+    }
+
     public String getXboxAccessToken() {
         return xboxAccessToken;
     }
 
-    private void refreshToken(XboxMinecraftResponse authResponse) {
+    public void updateXboxToken(XboxResponse xboxResponse) {
+        this.xboxAccessToken = xboxResponse.token;
+        this.xboxTokenValidUntil = Instant.parse(xboxResponse.notAfter).getEpochSecond();
+    }
+
+    public void updateAuthToken(XboxMinecraftResponse authResponse) {
         this.accessToken = authResponse.accessToken;
+        this.minecraftTokenValidUntil = (System.currentTimeMillis() / 1000) + authResponse.expiresIn;
     }
 
     public long getXboxExpiresInSeconds() {
@@ -81,11 +94,6 @@ public class MicrosoftUser implements IUserType {
         return minecraftTokenValidUntil - (System.currentTimeMillis() / 1000);
     }
 
-    @Override
-    public void login(UserModel userModel) throws AuthenticationException {
-        MicrosoftAuthenticator authenticator = userModel.getMicrosoftAuthenticator();
-        refreshToken(authenticator.refreshSession(this));
-    }
 
     @Override
     public String toString() {

@@ -71,10 +71,13 @@ public class MicrosoftAuthenticator {
         return new MicrosoftUser(xboxResponse, xboxMinecraftResponse, profile);
     }
 
-    public XboxMinecraftResponse refreshSession(MicrosoftUser user) throws AuthenticationException {
+    public void refreshSession(MicrosoftUser user) throws AuthenticationException {
         // We have an xbox token still, so we should be able to just refresh.
         if (user.getXboxExpiresInSeconds() > 60) {
-            return authenticateMinecraftXbox(authenticateXSTS(user.getXboxAccessToken()));
+            XboxResponse xstsResponse = authenticateXSTS(user.getXboxAccessToken());
+            XboxMinecraftResponse authResponse = authenticateMinecraftXbox(xstsResponse);
+            user.updateAuthToken(authResponse);
+            return;
         }
 
         Credential credential = loadExistingCredential(user.getUsername());
@@ -82,7 +85,10 @@ public class MicrosoftAuthenticator {
         // Somehow our xbox token is expired but our OAuth token is still good.
         if (isOauthCredentialActive(credential)) {
             XboxResponse xboxResponse = authenticateXbox(credential);
-            return authenticateMinecraftXbox(authenticateXSTS(xboxResponse.token));
+            user.updateXboxToken(xboxResponse);
+            XboxMinecraftResponse authResponse = authenticateMinecraftXbox(authenticateXSTS(xboxResponse.token));
+            user.updateAuthToken(authResponse);
+            return;
         }
 
         // Session is expired now, no saving it

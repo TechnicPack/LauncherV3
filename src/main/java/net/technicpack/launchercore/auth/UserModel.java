@@ -74,8 +74,8 @@ public class UserModel {
         }
 
         try {
-            //TODO: Double check this init login
             user.login(this);
+            addUser(user);
             setCurrentUser(user);
         } catch (SessionException | ResponseException ex) {
             setCurrentUser(null);

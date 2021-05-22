@@ -70,6 +70,8 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     private JLabel selectLabel;
     private JLabel usernameLabel;
     private JLabel passwordLabel;
+    private JLabel addAccounts;
+    private JLabel visitBrowser;
     private JComboBox<IUserType> nameSelect;
     private JCheckBox rememberAccount;
     private JPasswordField password;
@@ -206,9 +208,16 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         selectLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         add(selectLabel, new GridBagConstraints(0, 2, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10,20,0,20), 0,0));
 
-        // TODO: No accounts login information text label
+//        addAccounts = new JLabel(resources.getString("login.instructions"));
+//        addAccounts.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+//        addAccounts.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+//        add(addAccounts, new GridBagConstraints(0, 2, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+//
+//        visitBrowser = new JLabel(resources.getString("login.checkbrowser"));
+//        visitBrowser.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+//        visitBrowser.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+//        add(visitBrowser,  new GridBagConstraints(0, 2, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
-        // TODO: See browser information text label
         // Setup account select box
         nameSelect = new JComboBox<>();
 
@@ -503,15 +512,18 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     private void login(IUserType user) {
         try {
             user.login(userModel);
+            userModel.addUser(user);
+            userModel.setCurrentUser(user);
+            setCurrentUser(user);
         } catch (SessionException e) {
             showMessageDialog(
                     this, "Please log in again for user " + user.getDisplayName(),
                     e.getMessage(), ERROR_MESSAGE);
-            userModel.removeUser(user);
+            forgetUser(user);
         } catch (ResponseException e) {
             showMessageDialog(
                     this, e.getMessage(), e.getError(), ERROR_MESSAGE);
-            userModel.removeUser(user);
+            forgetUser(user);
         } catch (AuthenticationException e) {
             Utils.getLogger().log(Level.SEVERE, e.getMessage(), e);
 
@@ -527,10 +539,6 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
                 userModel.setLastUser(user);
             }
         }
-
-        userModel.addUser(user);
-        userModel.setCurrentUser(user);
-        setCurrentUser(user);
     }
 
     private void newMicrosoftLogin() {
