@@ -200,8 +200,7 @@ public class MicrosoftAuthenticator {
 
         try {
             HttpResponse httpResponse = request.execute();
-            MinecraftProfile minecraftProfile = httpResponse.parseAs(MinecraftProfile.class);
-            if (minecraftProfile == null) {
+            if (httpResponse.getStatusCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
                 MinecraftError minecraftError = httpResponse.parseAs(MinecraftError.class);
                 throw new MicrosoftAuthException(NO_MINECRAFT, "Minecraft Account Error: " + minecraftError.error);
             }
