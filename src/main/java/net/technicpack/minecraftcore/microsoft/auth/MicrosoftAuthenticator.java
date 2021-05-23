@@ -150,6 +150,9 @@ public class MicrosoftAuthenticator {
         HttpContent httpContent = new JsonHttpContent(JSON_FACTORY, xstsRequest);
         HttpRequest request = buildPostRequest(XBOX_XSTS_URL, httpContent);
 
+        // Don't throw on 401, that way we can handle the 401s we expect.
+        request.setThrowExceptionOnExecuteError(false);
+
         try {
             Utils.getLogger().log(Level.INFO, request.getHeaders().toString());
             Utils.getLogger().log(Level.INFO, JSON_FACTORY.toString(xstsRequest));
