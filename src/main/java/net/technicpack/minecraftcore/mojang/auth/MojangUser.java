@@ -29,6 +29,8 @@ import net.technicpack.minecraftcore.mojang.auth.response.AuthResponse;
 
 public class MojangUser implements IUserType {
     public static final String MOJANG_USER_TYPE = "mojang";
+    private static final String LEGACY = "legacy";
+
     private String username;
     private String accessToken;
     private String clientToken;
@@ -114,7 +116,11 @@ public class MojangUser implements IUserType {
         return "token:" + accessToken + ":" + profile.getId();
     }
 
-    public String getUserPropertiesAsJson() {
+    public String getMCUserType() {
+        return getProfile().isLegacy() ? LEGACY : MOJANG_USER_TYPE;
+    }
+
+    public String getUserProperties() {
         if (this.userProperties != null)
             return MojangUtils.getUglyGson().toJson(this.userProperties);
         else

@@ -154,15 +154,8 @@ public class MinecraftLauncher {
         params.put("game_assets", targetAssets);
         params.put("assets_root", targetAssets);
         params.put("assets_index_name", assetsKey);
-
-        if (user instanceof MojangUser) {
-            params.put("user_type", ((MojangUser) user).getProfile().isLegacy() ? "legacy" : "mojang");
-            params.put("user_properties", ((MojangUser) user).getUserPropertiesAsJson());
-        } else if (user instanceof MicrosoftUser) {
-            params.put("user_type", "msa");
-            params.put("user_properties", "{}");
-        }
-
+        params.put("user_type", user.getMCUserType());
+        params.put("user_properties", user.getUserProperties());
 
         params.put("launcher_name", "technic");
         params.put("launcher_version", "4." + buildNumber.getBuildNumber());

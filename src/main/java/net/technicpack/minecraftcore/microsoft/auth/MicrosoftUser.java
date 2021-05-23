@@ -11,6 +11,8 @@ import java.time.Instant;
 
 public class MicrosoftUser implements IUserType {
     public static final String MICROSOFT_USER_TYPE = "microsoft";
+    private static final String MC_MS_USER_TYPE = "msa";
+
     private String id;
     private String username;
     private String xboxAccessToken;
@@ -58,6 +60,16 @@ public class MicrosoftUser implements IUserType {
     @Override
     public String getSessionId() {
         return "token:" + accessToken + ":" + getId();
+    }
+
+    @Override
+    public String getMCUserType() {
+        return MC_MS_USER_TYPE;
+    }
+
+    @Override
+    public String getUserProperties() {
+        return "{}";
     }
 
     @Override

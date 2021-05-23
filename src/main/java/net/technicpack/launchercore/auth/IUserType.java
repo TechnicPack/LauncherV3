@@ -34,6 +34,10 @@ public interface IUserType {
 
     String getSessionId();
 
+    String getMCUserType();
+
+    String getUserProperties();
+
     boolean isOffline();
 
     void login(UserModel userModel) throws AuthenticationException;
