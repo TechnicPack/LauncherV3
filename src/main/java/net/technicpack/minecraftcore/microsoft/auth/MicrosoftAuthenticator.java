@@ -20,7 +20,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.UUID;
+import java.util.logging.Handler;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import static net.technicpack.launchercore.exception.MicrosoftAuthException.ExceptionType.*;
 
@@ -46,6 +49,22 @@ public class MicrosoftAuthenticator {
     private static final String MINECRAFT_PROFILE_URL = "https://api.minecraftservices.com/minecraft/profile";
 
     public MicrosoftAuthenticator(File dataStore) {
+        Logger.getLogger(HttpTransport.class.getName()).setLevel(Level.ALL);
+        Logger.getLogger(HttpTransport.class.getName()).addHandler(new Handler() {
+            @Override
+            public void publish(LogRecord record) {
+                Utils.getLogger().log(Level.INFO, record.getMessage());
+            }
+
+            @Override
+            public void flush() {
+            }
+
+            @Override
+            public void close() throws SecurityException {
+
+            }
+        });
         REQUEST_FACTORY = HTTP_TRANSPORT.createRequestFactory(
                 request -> request.setParser(new JsonObjectParser(JSON_FACTORY))
         );
@@ -135,6 +154,8 @@ public class MicrosoftAuthenticator {
         HttpRequest request = buildPostRequest(XBOX_AUTH_URL, httpContent);
         request.setInterceptor(credential);
         request.setUnsuccessfulResponseHandler(credential);
+        request.setLoggingEnabled(true);
+        request.setCurlLoggingEnabled(true);
 
         try {
             return request.execute().parseAs(XboxResponse.class);
@@ -152,21 +173,24 @@ public class MicrosoftAuthenticator {
 
         // Don't throw on 401, that way we can handle the 401s we expect.
         request.setThrowExceptionOnExecuteError(false);
+        request.setLoggingEnabled(true);
+        request.setCurlLoggingEnabled(true);
 
         try {
-            Utils.getLogger().log(Level.INFO, request.getHeaders().toString());
-            Utils.getLogger().log(Level.INFO, JSON_FACTORY.toString(xstsRequest));
+//            Utils.getLogger().log(Level.INFO, request.getHeaders().toString());
+//            Utils.getLogger().log(Level.INFO, JSON_FACTORY.toString(xstsRequest));
 
             HttpResponse httpResponse = request.execute();
-            String responseString = httpResponse.parseAsString();
+            httpResponse.setLoggingEnabled(true);
 
-            Utils.getLogger().log(Level.INFO, "XSTS status code: " + httpResponse.getStatusCode());
-            Utils.getLogger().log(Level.INFO, responseString);
             if (httpResponse.getStatusCode() == HttpStatusCodes.STATUS_CODE_UNAUTHORIZED) {
-                XSTSUnauthorized unauthorized = JSON_FACTORY.fromString(responseString, XSTSUnauthorized.class);
+                XSTSUnauthorized unauthorized = httpResponse.parseAs(XSTSUnauthorized.class);
                 throw new MicrosoftAuthException(unauthorized.getExceptionType(), "Failed to get XSTS authentication.");
+            } else if (httpResponse.getStatusCode() == HttpStatusCodes.STATUS_CODE_OK) {
+                return httpResponse.parseAs(XboxResponse.class);
+            } else {
+                throw new HttpResponseException(httpResponse);
             }
-            return JSON_FACTORY.fromString(responseString, XboxResponse.class);
         } catch (IOException e) {
             Utils.getLogger().log(Level.SEVERE, "Failed to get XSTS authentication.", e);
             throw new MicrosoftAuthException(XSTS, "Failed to get XSTS authentication.", e);
@@ -178,6 +202,8 @@ public class MicrosoftAuthenticator {
 
         HttpContent httpContent = new JsonHttpContent(JSON_FACTORY, xboxMinecraftRequest);
         HttpRequest request = buildPostRequest(MINECRAFT_AUTH_URL, httpContent);
+        request.setLoggingEnabled(true);
+        request.setCurlLoggingEnabled(true);
 
         try {
             return request.execute().parseAs(XboxMinecraftResponse.class);
@@ -197,14 +223,21 @@ public class MicrosoftAuthenticator {
 
         // Profile API returns 404 when it returns a response for no purchased account
         request.setThrowExceptionOnExecuteError(false);
+        request.setLoggingEnabled(true);
+        request.setCurlLoggingEnabled(true);
 
         try {
             HttpResponse httpResponse = request.execute();
+            httpResponse.setLoggingEnabled(true);
+
             if (httpResponse.getStatusCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
                 MinecraftError minecraftError = httpResponse.parseAs(MinecraftError.class);
                 throw new MicrosoftAuthException(NO_MINECRAFT, "Minecraft Account Error: " + minecraftError.error);
+            } else if (httpResponse.getStatusCode() == HttpStatusCodes.STATUS_CODE_OK) {
+                return request.execute().parseAs(MinecraftProfile.class);
+            } else {
+                throw new HttpResponseException(httpResponse);
             }
-            return request.execute().parseAs(MinecraftProfile.class);
         } catch (IOException e) {
             Utils.getLogger().log(Level.SEVERE, "Failed to load minecraft profile.", e);
             throw new MicrosoftAuthException(MINECRAFT_PROFILE, "Failed to load minecraft profile.", e);
