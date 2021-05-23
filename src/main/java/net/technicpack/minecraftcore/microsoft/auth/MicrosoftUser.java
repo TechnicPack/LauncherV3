@@ -1,5 +1,6 @@
 package net.technicpack.minecraftcore.microsoft.auth;
 
+import net.technicpack.launcher.io.IUserTypeInstanceCreator;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.exception.AuthenticationException;
@@ -10,8 +11,7 @@ import net.technicpack.minecraftcore.microsoft.auth.model.XboxResponse;
 import java.time.Instant;
 
 public class MicrosoftUser implements IUserType {
-    public static final String MICROSOFT_USER_TYPE = "microsoft";
-    private static final String MC_MS_USER_TYPE = "msa";
+    public static final String MC_MS_USER_TYPE = "msa";
 
     private String id;
     private String username;
@@ -34,7 +34,7 @@ public class MicrosoftUser implements IUserType {
 
     @Override
     public String getUserType() {
-        return MICROSOFT_USER_TYPE;
+        return MC_MS_USER_TYPE;
     }
 
     @Override
