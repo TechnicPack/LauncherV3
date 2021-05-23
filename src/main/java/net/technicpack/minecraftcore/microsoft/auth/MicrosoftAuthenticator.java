@@ -103,8 +103,9 @@ public class MicrosoftAuthenticator {
         try {
             AuthorizationCodeFlow flow = buildFlow();
             return new AuthorizationCodeInstalledApp(flow, receiver).authorize(username);
-        } catch (IOException exception) {
-            throw new MicrosoftAuthException(OAUTH, "Failed to get OAuth authorization", exception);
+        } catch (IOException e) {
+            Utils.getLogger().log(Level.SEVERE, "Failed to get OAuth authorization", e);
+            throw new MicrosoftAuthException(OAUTH, "Failed to get OAuth authorization", e);
         }
     }
 
@@ -121,8 +122,8 @@ public class MicrosoftAuthenticator {
         try {
             flow = buildFlow();
             return flow.loadCredential(username);
-        } catch (IOException exception) {
-            //TODO Handle gracefully
+        } catch (IOException e) {
+            Utils.getLogger().log(Level.SEVERE, "Failed to load from credential store.", e);
             throw new MicrosoftAuthException(OAUTH, "Failed to load from credential store.");
         }
     }
@@ -138,6 +139,7 @@ public class MicrosoftAuthenticator {
         try {
             return request.execute().parseAs(XboxResponse.class);
         } catch (IOException e) {
+            Utils.getLogger().log(Level.SEVERE, "Failed to get Xbox authentication.", e);
             throw new MicrosoftAuthException(XBOX, "Failed to get Xbox Authentication.", e);
         }
     }
@@ -156,6 +158,7 @@ public class MicrosoftAuthenticator {
             }
             return httpResponse.parseAs(XboxResponse.class);
         } catch (IOException e) {
+            Utils.getLogger().log(Level.SEVERE, "Failed to get XSTS authentication.", e);
             throw new MicrosoftAuthException(XSTS, "Failed to get XSTS authentication.", e);
         }
     }
@@ -169,6 +172,7 @@ public class MicrosoftAuthenticator {
         try {
             return request.execute().parseAs(XboxMinecraftResponse.class);
         } catch (IOException e) {
+            Utils.getLogger().log(Level.SEVERE, "Failed to authenticate with Xbox for Minecraft.", e);
             throw new MicrosoftAuthException(XBOX_MINECRAFT, "Failed to authenticate with Xbox for Minecraft.", e);
         }
     }
@@ -190,6 +194,7 @@ public class MicrosoftAuthenticator {
             }
             return request.execute().parseAs(MinecraftProfile.class);
         } catch (IOException e) {
+            Utils.getLogger().log(Level.SEVERE, "Failed to load minecraft profile.", e);
             throw new MicrosoftAuthException(MINECRAFT_PROFILE, "Failed to load minecraft profile.", e);
         }
     }
