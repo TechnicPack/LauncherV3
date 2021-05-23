@@ -26,10 +26,8 @@ public class MicrosoftUser implements IUserType {
         this();
         this.id = profile.id;
         this.username = profile.name;
-        this.accessToken = authResponse.accessToken;
-        this.xboxAccessToken = xboxResponse.token;
-        this.xboxTokenValidUntil = Instant.parse(xboxResponse.notAfter).getEpochSecond();
-        this.minecraftTokenValidUntil = (System.currentTimeMillis() / 1000) + authResponse.expiresIn;
+        updateXboxToken(xboxResponse);
+        updateAuthToken(authResponse);
     }
 
     @Override
@@ -93,7 +91,6 @@ public class MicrosoftUser implements IUserType {
     public long getMinecraftExpiresInSeconds() {
         return minecraftTokenValidUntil - (System.currentTimeMillis() / 1000);
     }
-
 
     @Override
     public String toString() {
