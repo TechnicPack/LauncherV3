@@ -151,6 +151,9 @@ public class MicrosoftAuthenticator {
         HttpRequest request = buildPostRequest(XBOX_XSTS_URL, httpContent);
 
         try {
+            Utils.getLogger().log(Level.INFO, request.getHeaders().toString());
+            Utils.getLogger().log(Level.INFO, JSON_FACTORY.toString(xstsRequest));
+
             HttpResponse httpResponse = request.execute();
             if (httpResponse.getStatusCode() == HttpStatusCodes.STATUS_CODE_UNAUTHORIZED) {
                 XSTSUnauthorized unauthorized = httpResponse.parseAs(XSTSUnauthorized.class);
