@@ -155,11 +155,15 @@ public class MicrosoftAuthenticator {
             Utils.getLogger().log(Level.INFO, JSON_FACTORY.toString(xstsRequest));
 
             HttpResponse httpResponse = request.execute();
+            String responseString = httpResponse.parseAsString();
+
+            Utils.getLogger().log(Level.INFO, "XSTS status code: " + httpResponse.getStatusCode());
+            Utils.getLogger().log(Level.INFO, responseString);
             if (httpResponse.getStatusCode() == HttpStatusCodes.STATUS_CODE_UNAUTHORIZED) {
-                XSTSUnauthorized unauthorized = httpResponse.parseAs(XSTSUnauthorized.class);
+                XSTSUnauthorized unauthorized = JSON_FACTORY.fromString(responseString, XSTSUnauthorized.class);
                 throw new MicrosoftAuthException(unauthorized.getExceptionType(), "Failed to get XSTS authentication.");
             }
-            return httpResponse.parseAs(XboxResponse.class);
+            return JSON_FACTORY.fromString(responseString, XboxResponse.class);
         } catch (IOException e) {
             Utils.getLogger().log(Level.SEVERE, "Failed to get XSTS authentication.", e);
             throw new MicrosoftAuthException(XSTS, "Failed to get XSTS authentication.", e);
