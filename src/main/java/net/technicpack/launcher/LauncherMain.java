@@ -424,7 +424,7 @@ public class LauncherMain {
                 splash.dispose();
         });
 
-        login.startupAuth();
+        userModel.startupAuth();
 
         Utils.sendTracking("runLauncher", "run", buildNumber.getBuildNumber(), settings.getClientId());
     }
