@@ -29,6 +29,7 @@ import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.RunData;
 import net.technicpack.minecraftcore.MojangUtils;
+import net.technicpack.minecraftcore.microsoft.auth.MicrosoftUser;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
@@ -157,6 +158,9 @@ public class MinecraftLauncher {
         if (user instanceof MojangUser) {
             params.put("user_type", ((MojangUser) user).getProfile().isLegacy() ? "legacy" : "mojang");
             params.put("user_properties", ((MojangUser) user).getUserPropertiesAsJson());
+        } else if (user instanceof MicrosoftUser) {
+            params.put("user_type", "msa");
+            params.put("user_properties", "{}");
         }
 
 
