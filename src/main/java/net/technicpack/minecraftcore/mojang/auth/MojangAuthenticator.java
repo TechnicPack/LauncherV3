@@ -76,7 +76,7 @@ public class MojangAuthenticator {
             String returned = postJson(AUTH_SERVER + "refresh", data);
             response = MojangUtils.getGson().fromJson(returned, AuthResponse.class);
             if (response == null) {
-                throw new SessionException("Session Error");
+                throw new SessionException("Session Error. Try logging in again.");
             }
             if (response.hasError()) {
                 throw new ResponseException(response.getError(), response.getErrorMessage());
