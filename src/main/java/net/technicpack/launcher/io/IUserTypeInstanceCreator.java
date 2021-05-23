@@ -37,7 +37,7 @@ public class IUserTypeInstanceCreator implements JsonDeserializer<IUserType>, Js
             return userElement;        }
         if (src instanceof MicrosoftUser) {
             JsonElement userElement = MojangUtils.getGson().toJsonTree(src);
-            userElement.getAsJsonObject().addProperty("userType", BETA_MS_USER_TYPE);
+            userElement.getAsJsonObject().addProperty("userType", MicrosoftUser.MC_MS_USER_TYPE);
             return userElement;
         }
         return null;

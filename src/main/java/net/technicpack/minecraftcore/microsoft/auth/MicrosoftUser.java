@@ -1,6 +1,5 @@
 package net.technicpack.minecraftcore.microsoft.auth;
 
-import net.technicpack.launcher.io.IUserTypeInstanceCreator;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.exception.AuthenticationException;
