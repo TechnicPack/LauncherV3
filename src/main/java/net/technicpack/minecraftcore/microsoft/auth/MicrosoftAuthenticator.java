@@ -195,6 +195,9 @@ public class MicrosoftAuthenticator {
         String authorization = xboxMinecraftResponse.getAuthorization();
         request.setHeaders(request.getHeaders().setAuthorization(authorization));
 
+        // Profile API returns 404 when it returns a response for no purchased account
+        request.setThrowExceptionOnExecuteError(false);
+
         try {
             HttpResponse httpResponse = request.execute();
             MinecraftProfile minecraftProfile = httpResponse.parseAs(MinecraftProfile.class);
