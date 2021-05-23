@@ -19,9 +19,6 @@
 
 package net.technicpack.launchercore.auth;
 
-import net.technicpack.launchercore.exception.AuthenticationException;
-import net.technicpack.launchercore.exception.ResponseException;
-import net.technicpack.launchercore.exception.SessionException;
 import net.technicpack.minecraftcore.microsoft.auth.MicrosoftAuthenticator;
 import net.technicpack.minecraftcore.mojang.auth.MojangAuthenticator;
 
@@ -62,26 +59,6 @@ public class UserModel {
     protected void triggerAuthListeners() {
         for (IAuthListener listener : mAuthListeners) {
             listener.userChanged(this.mCurrentUser);
-        }
-    }
-
-    public void startupAuth() {
-        IUserType user = getLastUser();
-
-        if (user == null) {
-            setCurrentUser(null);
-            return;
-        }
-
-        try {
-            user.login(this);
-            addUser(user);
-            setCurrentUser(user);
-        } catch (SessionException | ResponseException ex) {
-            setCurrentUser(null);
-        } catch (AuthenticationException ex) {
-            //TODO: This should handle offline users for Microsoft accounts
-            setCurrentUser(mojangAuthenticator.createOfflineUser(user.getDisplayName()));
         }
     }
 

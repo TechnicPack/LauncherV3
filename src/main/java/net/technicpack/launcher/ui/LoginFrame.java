@@ -509,6 +509,17 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         addMicrosoft.setVisible(visible);
     }
 
+    public void startupAuth() {
+        IUserType user = userModel.getLastUser();
+
+        if (user == null) {
+            setCurrentUser(null);
+            return;
+        }
+
+        login(user);
+    }
+
     private void login(IUserType user) {
         try {
             user.login(userModel);
