@@ -49,22 +49,22 @@ public class MicrosoftAuthenticator {
     private static final String MINECRAFT_PROFILE_URL = "https://api.minecraftservices.com/minecraft/profile";
 
     public MicrosoftAuthenticator(File dataStore) {
-        Logger.getLogger(HttpTransport.class.getName()).setLevel(Level.ALL);
-        Logger.getLogger(HttpTransport.class.getName()).addHandler(new Handler() {
-            @Override
-            public void publish(LogRecord record) {
-                Utils.getLogger().log(Level.INFO, record.getMessage());
-            }
-
-            @Override
-            public void flush() {
-            }
-
-            @Override
-            public void close() throws SecurityException {
-
-            }
-        });
+//        Logger.getLogger(HttpTransport.class.getName()).setLevel(Level.ALL);
+//        Logger.getLogger(HttpTransport.class.getName()).addHandler(new Handler() {
+//            @Override
+//            public void publish(LogRecord record) {
+//                Utils.getLogger().log(Level.INFO, record.getMessage());
+//            }
+//
+//            @Override
+//            public void flush() {
+//            }
+//
+//            @Override
+//            public void close() throws SecurityException {
+//
+//            }
+//        });
         REQUEST_FACTORY = HTTP_TRANSPORT.createRequestFactory(
                 request -> request.setParser(new JsonObjectParser(JSON_FACTORY))
         );
