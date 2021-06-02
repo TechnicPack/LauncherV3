@@ -54,8 +54,15 @@ public class LanguageCellRenderer  extends JLabel implements ListCellRenderer {
         setFont(((LanguageItem)value).getLanguageResources().getFont(ResourceLoader.FONT_OPENSANS, list.getFont().getSize()));
         setText(value.toString());
 
-        if (globe != null)
-            setIcon((!isSelected && list.getSelectedValue().equals(value))?globe:null);
+        Object selectedValue = list.getSelectedValue();
+
+        if (globe != null) {
+            if (!isSelected && selectedValue != null && selectedValue.equals(value)) {
+                setIcon(globe);
+            } else {
+                setIcon(null);
+            }
+        }
 
         return this;
     }
