@@ -21,7 +21,7 @@ package net.technicpack.launchercore.exception;
 
 import java.io.IOException;
 
-public class AuthenticationException extends IOException {
+public class AuthenticationException extends Exception {
     private static final long serialVersionUID = 5887385045789342851L;
 
     public AuthenticationException(String message) {
