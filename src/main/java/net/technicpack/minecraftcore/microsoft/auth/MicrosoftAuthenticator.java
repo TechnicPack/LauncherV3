@@ -18,6 +18,7 @@ import net.technicpack.utilslib.Utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
 import java.util.logging.Handler;
@@ -34,7 +35,7 @@ public class MicrosoftAuthenticator {
 
     // OAUTH
     private static final String TECHNIC_CLIENT_ID = "5f8b309f-ad5f-49bf-877a-8b94afd75b9f";
-    private static final String SCOPE = "XboxLive.signin";
+    private static final String[] SCOPES = { "XboxLive.signin", "XboxLive.offline_access" };
     private static final String TOKEN_SERVER_URL = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
     private static final String AUTHORIZATION_SERVER_URL =
             "https://login.live.com/oauth20_authorize.srf?prompt=select_account&cobrandid=8058f65d-ce06-4c30-9559-473c9275a65d";
@@ -253,7 +254,7 @@ public class MicrosoftAuthenticator {
                         new ClientParametersAuthentication(TECHNIC_CLIENT_ID, null),
                         TECHNIC_CLIENT_ID,
                         AUTHORIZATION_SERVER_URL)
-                        .setScopes(Collections.singletonList(SCOPE))
+                        .setScopes(Arrays.asList(SCOPES))
                         .setDataStoreFactory(DATA_STORE_FACTORY)
 //                            .enablePKCE() TODO: Figure out PKCE
                         .build();
