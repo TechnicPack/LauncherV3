@@ -565,7 +565,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
                     break;
                 case NO_MINECRAFT:
                     showMessageDialog(this,
-                            "This account has not purchased Minecraft.", "No Minecraft", ERROR_MESSAGE);
+                            "This account has not purchased Minecraft Java Edition.", "No Minecraft", ERROR_MESSAGE);
                     break;
                 default:
                     e.printStackTrace();
