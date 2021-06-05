@@ -560,8 +560,10 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
                     break;
                 case NO_XBOX_ACCOUNT:
                     showMessageDialog(this,
-                            "You don't have an Xbox account associated with this Microsoft account.",
+                            "You don't have an Xbox account associated with this Microsoft account.\n" +
+                            "Please login at minecraft.net and set up an Xbox account, then try to login here again.",
                             "No Xbox Account", ERROR_MESSAGE);
+                    DesktopUtils.browseUrl("https://www.minecraft.net/login");
                     break;
                 case NO_MINECRAFT:
                     showMessageDialog(this,
