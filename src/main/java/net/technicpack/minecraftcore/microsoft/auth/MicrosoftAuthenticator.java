@@ -4,7 +4,7 @@ import com.google.api.client.auth.oauth2.*;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.http.*;
-import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.http.apache.ApacheHttpTransport.Builder;
 import com.google.api.client.http.json.JsonHttpContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
@@ -18,9 +18,7 @@ import net.technicpack.utilslib.Utils;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.UUID;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -30,7 +28,7 @@ import java.util.logging.Logger;
 import static net.technicpack.launchercore.exception.MicrosoftAuthException.ExceptionType.*;
 
 public class MicrosoftAuthenticator {
-    private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
+    private static final HttpTransport HTTP_TRANSPORT = (new Builder()).build();
     private static final JsonFactory JSON_FACTORY = new GsonFactory();
     private final HttpRequestFactory REQUEST_FACTORY;
 
@@ -186,13 +184,6 @@ public class MicrosoftAuthenticator {
             httpResponse.setLoggingEnabled(true);
 
             if (httpResponse.getStatusCode() == HttpStatusCodes.STATUS_CODE_UNAUTHORIZED) {
-                // This is weird but if we don't do this then parseAs will throw an NPE because the response body is null
-                try (InputStream httpResponseContent = httpResponse.getContent()) {
-                    if (httpResponseContent == null) {
-                        throw new MicrosoftAuthException(NO_XBOX_ACCOUNT, "No Xbox account");
-                    }
-                }
-
                 XSTSUnauthorized unauthorized = httpResponse.parseAs(XSTSUnauthorized.class);
                 throw new MicrosoftAuthException(unauthorized.getExceptionType(), "Failed to get XSTS authentication.");
             } else if (httpResponse.getStatusCode() == HttpStatusCodes.STATUS_CODE_OK) {
