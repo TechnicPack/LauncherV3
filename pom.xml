@@ -117,11 +117,6 @@
             <artifactId>google-http-client-gson</artifactId>
             <version>1.39.2-sp.1</version>
         </dependency>
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.2</version>
-        </dependency>
     </dependencies>
 
     <!-- Build configuration -->
