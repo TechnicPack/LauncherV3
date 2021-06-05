@@ -555,8 +555,8 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
             switch (e.getType()) {
                 case UNDERAGE:
                     showMessageDialog(this,
-                            "Your Xbox account is under 18 and will need to be added to a Family to play this game.",
-                            "Under 18 Error", ERROR_MESSAGE);
+                            "Your Xbox account is underage and will need to be added to a Family to play this game.",
+                            "Underage Error", ERROR_MESSAGE);
                     break;
                 case NO_XBOX_ACCOUNT:
                     showMessageDialog(this,
