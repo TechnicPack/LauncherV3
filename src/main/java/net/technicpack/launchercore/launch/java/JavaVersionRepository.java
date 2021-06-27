@@ -42,20 +42,21 @@ public class JavaVersionRepository {
         loadedVersions.put(null, version);
     }
 
-    public void addVersion(IJavaVersion version) {
+    public boolean addVersion(IJavaVersion version) {
         if (!version.verify())
-            return;
+            return false;
 
         File path = version.getJavaPath();
-        String versionText = version.getVersionNumber();
 
         if (versionCache.contains(version))
-            return;
+            return false;
 
         loadedVersions.put(path, version);
         versionCache.add(version);
         if (selectedVersion == null)
             selectedVersion = version;
+
+        return true;
     }
 
     public IJavaVersion getBest64BitVersion() {
