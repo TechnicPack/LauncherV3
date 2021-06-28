@@ -14,6 +14,7 @@ import net.technicpack.launchercore.exception.AuthenticationException;
 import net.technicpack.launchercore.exception.MicrosoftAuthException;
 import net.technicpack.launchercore.exception.SessionException;
 import net.technicpack.minecraftcore.microsoft.auth.model.*;
+import net.technicpack.utilslib.DesktopUtils;
 import net.technicpack.utilslib.Utils;
 
 import java.io.File;
@@ -121,7 +122,7 @@ public class MicrosoftAuthenticator {
 
         try {
             AuthorizationCodeFlow flow = buildFlow();
-            return new AuthorizationCodeInstalledApp(flow, receiver).authorize(username);
+            return new AuthorizationCodeInstalledApp(flow, receiver, DesktopUtils::browseUrl).authorize(username);
         } catch (IOException e) {
             Utils.getLogger().log(Level.SEVERE, "Failed to get OAuth authorization", e);
             throw new MicrosoftAuthException(OAUTH, "Failed to get OAuth authorization", e);

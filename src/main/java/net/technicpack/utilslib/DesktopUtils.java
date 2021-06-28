@@ -32,8 +32,16 @@ public class DesktopUtils {
         try {
             if (url.startsWith("mailto:"))
                 Desktop.getDesktop().mail(new URI(url));
-            else
-                Desktop.getDesktop().browse(new URI(url));
+            else {
+                if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
+                    Desktop.getDesktop().browse(new URI(url));
+                else if(OperatingSystem.getOperatingSystem() == OperatingSystem.LINUX)
+                    Runtime.getRuntime().exec(new String[]{"xdg-open", url});
+                else if(OperatingSystem.getOperatingSystem() == OperatingSystem.OSX)
+                    Runtime.getRuntime().exec(new String[]{"open", url});
+                else
+                    JOptionPane.showMessageDialog(null, "Unable to open browser, please visit the URL:\n" + url, "Unable to open browser", JOptionPane.ERROR_MESSAGE);
+            }
         } catch (IOException ex) {
             //Thrown by Desktop.browse() - just log & ignore
             Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
