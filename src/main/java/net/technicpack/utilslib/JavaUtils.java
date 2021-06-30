@@ -22,7 +22,8 @@ package net.technicpack.utilslib;
 public class JavaUtils {
     public static boolean is64Bit() {
         String architecture = System.getProperty("os.arch");
-        return architecture.equals("x86_64") || architecture.equals("amd64");
+        // x64 on old Java; x64 on new Java; ARM64
+        return architecture.equals("x86_64") || architecture.equals("amd64") || architecture.equals("aarch64");
     }
 
     public static String getJavaBitness() {
