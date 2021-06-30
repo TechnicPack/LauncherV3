@@ -34,12 +34,28 @@ import java.io.File;
 public class WinRegistryJavaSource implements IVersionSource {
     @Override
     public void enumerateVersions(JavaVersionRepository repository) {
-        enumerateRegistryForBitness(repository, "32");
-        enumerateRegistryForBitness(repository, "64");
+        // Oracle
+        enumerateRegistryForBitness(repository, "32", "Software\\JavaSoft", "JavaHome");
+        enumerateRegistryForBitness(repository, "64", "Software\\JavaSoft", "JavaHome");
+
+        // AdoptOpenJDK
+        enumerateRegistryForBitness(repository, "32", "Software\\AdoptOpenJDK", "Path");
+        enumerateRegistryForBitness(repository, "64", "Software\\AdoptOpenJDK", "Path");
+
+        // Microsoft
+        enumerateRegistryForBitness(repository, "64", "Software\\Microsoft\\JDK", "Path");
+
+        // Azul Zulu
+        enumerateRegistryForBitness(repository, "32", "Software\\Azul Systems\\Zulu", "InstallationPath");
+        enumerateRegistryForBitness(repository, "64", "Software\\Azul Systems\\Zulu", "InstallationPath");
+
+        // BellSoft Liberica
+        enumerateRegistryForBitness(repository, "32", "Software\\BellSoft\\Liberica", "InstallationPath");
+        enumerateRegistryForBitness(repository, "64", "Software\\BellSoft\\Liberica", "InstallationPath");
     }
 
-    public void enumerateRegistryForBitness(JavaVersionRepository repository, String bitness) {
-        String output = Utils.getProcessOutput("reg","query","HKEY_LOCAL_MACHINE\\Software\\JavaSoft\\","/f","Home","/t","REG_SZ","/s","/reg:"+bitness);
+    private void enumerateRegistryForBitness(JavaVersionRepository repository, String bitness, String keyPath, String keyName) {
+        String output = Utils.getProcessOutput("reg", "query", "HKEY_LOCAL_MACHINE\\" + keyPath, "/f", keyName, "/t", "REG_SZ", "/s", "/reg:" + bitness);
 
         if (output == null || output.isEmpty())
             return;
