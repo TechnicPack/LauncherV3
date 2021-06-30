@@ -44,9 +44,6 @@ public class JavaVersionItem {
 
         String bitness = (javaVersion.is64Bit())?resourceLoader.getString("launcheroptions.java.64bit"):resourceLoader.getString("launcheroptions.java.32bit");
 
-        if (isOpenJDK())
-            return "OpenJDK " + version + " " + bitness;
-        else
-            return version + " " + bitness;
+        return (isOpenJDK() ? "OpenJDK" : "Oracle") + " "  + version + " " + bitness;
     }
 }
