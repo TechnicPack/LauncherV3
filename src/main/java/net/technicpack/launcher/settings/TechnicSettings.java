@@ -45,6 +45,7 @@ public class TechnicSettings implements ILaunchOptions {
     private String clientId = UUID.randomUUID().toString();
     private String directory;
     private String javaArgs;
+    private String wrapperCommand;
     private int latestNewsArticle;
     private boolean launchToModpacks;
     private String javaVersion = "default";
@@ -175,6 +176,14 @@ public class TechnicSettings implements ILaunchOptions {
     public String getJavaArgs() { return javaArgs; }
     public void setJavaArgs(String args) { javaArgs = args; }
 
+    public String getWrapperCommand() {
+        return wrapperCommand;
+    }
+
+    public void setWrapperCommand(String wrapperCommand) {
+        this.wrapperCommand = wrapperCommand;
+    }
+
     public void save() {
         String json = Utils.getGson().toJson(this);
 
@@ -194,6 +203,4 @@ public class TechnicSettings implements ILaunchOptions {
         if (!technicRoot.exists())
             technicRoot.mkdirs();
     }
-
-
 }

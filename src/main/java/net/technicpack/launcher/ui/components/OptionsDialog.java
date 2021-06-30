@@ -116,6 +116,24 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         }
     };
 
+    private DocumentListener wrapperCommandListener = new DocumentListener() {
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            changeWrapperCommand();
+        }
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            changeWrapperCommand();
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            changeWrapperCommand();
+        }
+    };
+
+
     JComboBox versionSelect;
     JComboBox memSelect;
     JTextArea javaArgs;
@@ -133,6 +151,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     JComboBox windowSelect;
     JTextField widthInput;
     JTextField heightInput;
+    JTextField wrapperCommand;
 
     public OptionsDialog(final Frame owner, final TechnicSettings settings, final ResourceLoader resourceLoader, final StartupParameters params, final JavaVersionRepository javaVersions, final FileJavaSource fileJavaSource, final IBuildNumber buildNumber) {
         super(owner);
@@ -153,6 +172,11 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
     protected void changeJavaArgs() {
         settings.setJavaArgs(javaArgs.getText().trim());
+        settings.save();
+    }
+
+    protected void changeWrapperCommand() {
+        settings.setWrapperCommand(wrapperCommand.getText().trim());
         settings.save();
     }
 
@@ -331,6 +355,10 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         javaArgs.getDocument().removeDocumentListener(javaArgsListener);
         javaArgs.setText(settings.getJavaArgs());
         javaArgs.getDocument().addDocumentListener(javaArgsListener);
+
+        wrapperCommand.getDocument().removeDocumentListener(wrapperCommandListener);
+        wrapperCommand.setText(settings.getWrapperCommand());
+        wrapperCommand.getDocument().addDocumentListener(wrapperCommandListener);
 
         installField.setText(settings.getTechnicRoot().getAbsolutePath());
         clientId.setText(settings.getClientId());
@@ -1138,10 +1166,25 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         panel.add(javaArgs, new GridBagConstraints(1, 2, 6, 2, 0, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 6, 80), 0, 0));
 
+        JLabel wrapperCmdLabel = new JLabel(resources.getString("launcheroptions.java.wrapper"));
+        wrapperCmdLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+        wrapperCmdLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        panel.add(wrapperCmdLabel, new GridBagConstraints(0, 4, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 60, 0, 0), 0, 0));
+
+        wrapperCommand = new JTextField("");
+        wrapperCommand.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+        wrapperCommand.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        wrapperCommand.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        wrapperCommand.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
+        wrapperCommand.setCaretColor(LauncherFrame.COLOR_BUTTON_BLUE);
+        wrapperCommand.setSelectionColor(LauncherFrame.COLOR_BUTTON_BLUE);
+        wrapperCommand.setSelectedTextColor(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        panel.add(wrapperCommand, new GridBagConstraints(1, 4, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
+
         JLabel autoApprovalLabel = new JLabel(resources.getString("launcheroptions.java.autoApprove"));
         autoApprovalLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         autoApprovalLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        panel.add(autoApprovalLabel, new GridBagConstraints(0, 4, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 20, 0, 0), 0, 0));
+        panel.add(autoApprovalLabel, new GridBagConstraints(0, 5, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 20, 0, 0), 0, 0));
 
         askFirstBox = new JCheckBox("", false);
         askFirstBox.setOpaque(false);
@@ -1151,9 +1194,9 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         askFirstBox.setSelectedIcon(resources.getIcon("checkbox_closed.png"));
         askFirstBox.setIcon(resources.getIcon("checkbox_open.png"));
         askFirstBox.setFocusPainted(false);
-        panel.add(askFirstBox, new GridBagConstraints(1, 4, 6, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(8, 16, 8, 8), 0, 0));
+        panel.add(askFirstBox, new GridBagConstraints(1, 5, 6, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(8, 16, 8, 8), 0, 0));
 
-        panel.add(Box.createGlue(), new GridBagConstraints(4, 5, 1, 1, 1, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
+        panel.add(Box.createGlue(), new GridBagConstraints(4, 6, 1, 1, 1, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
     }
 
     @Override

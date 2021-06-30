@@ -103,6 +103,13 @@ public class MinecraftLauncher {
 
     private List<String> buildCommands(ModpackModel pack, long memory, MojangVersion version, LaunchOptions options) {
         LaunchCommandCollector commands = new LaunchCommandCollector();
+
+        // Wrapper command (optirun, etc)
+        String wrapperCommand = options.getOptions().getWrapperCommand();
+        if (!wrapperCommand.isEmpty()) {
+            commands.addRaw(wrapperCommand);
+        }
+
         commands.addRaw(javaVersions.getSelectedPath());
 
         OperatingSystem operatingSystem = OperatingSystem.getOperatingSystem();
