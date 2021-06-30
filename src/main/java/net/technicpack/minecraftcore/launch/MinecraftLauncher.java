@@ -158,6 +158,13 @@ public class MinecraftLauncher {
         params.put("launcher_name", "technic");
         params.put("launcher_version", "4." + buildNumber.getBuildNumber());
 
+        // Prepend custom JVM arguments
+        String customJvmArgs = options.getOptions().getJavaArgs();
+        if (!customJvmArgs.isEmpty()) {
+            customJvmArgs = customJvmArgs.replaceAll("[\\r\\n]", " ");
+            commands.addRaw(customJvmArgs);
+        }
+
         // build jvm args
         String launchJavaVersion = javaVersions.getSelectedVersion().getVersionNumber();
         ArgumentList jvmArgs = version.getJavaArguments();

@@ -152,7 +152,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     }
 
     protected void changeJavaArgs() {
-        settings.setJavaArgs(javaArgs.getText());
+        settings.setJavaArgs(javaArgs.getText().trim());
         settings.save();
     }
 
