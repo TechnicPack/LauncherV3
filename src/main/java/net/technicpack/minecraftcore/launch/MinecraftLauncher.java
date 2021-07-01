@@ -37,6 +37,7 @@ import net.technicpack.platform.IPlatformApi;
 import net.technicpack.utilslib.JavaUtils;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 
 import java.io.File;
@@ -106,7 +107,7 @@ public class MinecraftLauncher {
 
         // Wrapper command (optirun, etc)
         String wrapperCommand = options.getOptions().getWrapperCommand();
-        if (wrapperCommand != null && !wrapperCommand.isEmpty()) {
+        if (StringUtils.isNotEmpty(wrapperCommand)) {
             commands.addRaw(wrapperCommand);
         }
 
@@ -167,7 +168,7 @@ public class MinecraftLauncher {
 
         // Prepend custom JVM arguments
         String customJvmArgs = options.getOptions().getJavaArgs();
-        if (customJvmArgs != null && !customJvmArgs.isEmpty()) {
+        if (StringUtils.isNotEmpty(customJvmArgs)) {
             customJvmArgs = customJvmArgs.replaceAll("[\\r\\n]", " ");
             commands.addRaw(customJvmArgs);
         }
@@ -194,15 +195,6 @@ public class MinecraftLauncher {
 
         if (!RunData.isJavaVersionAtLeast(launchJavaVersion, "1.8"))
             commands.add("-XX:MaxPermSize=" + permSize + "m");
-
-        if (memory >= 4096) {
-            if (RunData.isJavaVersionAtLeast(launchJavaVersion, "1.7")) {
-                commands.add("-XX:+UseG1GC");
-                commands.add("-XX:MaxGCPauseMillis=4");
-            } else {
-                commands.add("-XX:+UseConcMarkSweepGC");
-            }
-        }
 
         commands.addUnique("-Djava.library.path=" + nativesDir);
         // Tell forge 1.5 to download from our mirror instead

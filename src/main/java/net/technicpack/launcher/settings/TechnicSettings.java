@@ -173,7 +173,13 @@ public class TechnicSettings implements ILaunchOptions {
 
     public String getClientId() { return clientId; }
 
-    public String getJavaArgs() { return javaArgs; }
+    public String getJavaArgs() {
+        if (javaArgs == null || javaArgs.isEmpty()) {
+            // These are the default JVM args in the vanilla launcher
+            javaArgs = "-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M";
+        }
+        return javaArgs;
+    }
     public void setJavaArgs(String args) { javaArgs = args; }
 
     public String getWrapperCommand() {
