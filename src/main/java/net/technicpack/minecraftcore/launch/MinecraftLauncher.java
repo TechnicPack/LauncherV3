@@ -106,7 +106,7 @@ public class MinecraftLauncher {
 
         // Wrapper command (optirun, etc)
         String wrapperCommand = options.getOptions().getWrapperCommand();
-        if (!wrapperCommand.isEmpty()) {
+        if (wrapperCommand != null && !wrapperCommand.isEmpty()) {
             commands.addRaw(wrapperCommand);
         }
 
@@ -167,7 +167,7 @@ public class MinecraftLauncher {
 
         // Prepend custom JVM arguments
         String customJvmArgs = options.getOptions().getJavaArgs();
-        if (!customJvmArgs.isEmpty()) {
+        if (customJvmArgs != null && !customJvmArgs.isEmpty()) {
             customJvmArgs = customJvmArgs.replaceAll("[\\r\\n]", " ");
             commands.addRaw(customJvmArgs);
         }
