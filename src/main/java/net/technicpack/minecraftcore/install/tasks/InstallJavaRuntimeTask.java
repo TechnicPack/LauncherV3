@@ -95,6 +95,9 @@ public class InstallJavaRuntimeTask implements IInstallTask {
             if (runtimeFile.getType() == JavaRuntimeFileType.FILE) {
                 File target = new File(runtimeRoot, path);
 
+                // Apparently the Mac Java 8 JRE spec doesn't have any directory entries, so we have to create them regardless
+                target.getParentFile().mkdirs();
+
                 Download download = runtimeFile.getDownloads().getRaw();
 
                 IFileVerifier verifier = new SHA1FileVerifier(download.getSha1());
