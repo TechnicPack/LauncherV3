@@ -31,6 +31,7 @@ import net.technicpack.launchercore.modpacks.RunData;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
+import net.technicpack.minecraftcore.mojang.version.io.JavaVersion;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import net.technicpack.platform.IPlatformApi;
@@ -42,6 +43,7 @@ import org.apache.commons.text.StringSubstitutor;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -111,7 +113,15 @@ public class MinecraftLauncher {
             commands.addRaw(wrapperCommand);
         }
 
-        commands.addRaw(javaVersions.getSelectedPath());
+        JavaVersion javaVersion = version.getJavaVersion();
+
+        if (javaVersion != null && !options.getOptions().shouldDisableMojangJava()) {
+            File runtimeRoot = new File(directories.getRuntimesDirectory(), javaVersion.getComponent());
+            Path javaExecutable = runtimeRoot.toPath().resolve("bin").resolve(OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS ? "javaw.exe" : "java");
+            commands.addRaw(javaExecutable.toString());
+        } else {
+            commands.addRaw(javaVersions.getSelectedPath());
+        }
 
         OperatingSystem operatingSystem = OperatingSystem.getOperatingSystem();
         String nativesDir = new File(pack.getBinDir(), "natives").getAbsolutePath();

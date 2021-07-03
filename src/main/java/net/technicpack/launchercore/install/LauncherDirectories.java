@@ -21,12 +21,14 @@ package net.technicpack.launchercore.install;
 
 import java.io.File;
 
-public abstract class LauncherDirectories {
-    public abstract File getLauncherDirectory();
+public interface LauncherDirectories {
+    File getLauncherDirectory();
 
-    public abstract File getCacheDirectory();
+    File getCacheDirectory();
 
-    public abstract File getAssetsDirectory();
+    File getAssetsDirectory();
 
-    public abstract File getModpacksDirectory();
+    File getModpacksDirectory();
+
+    File getRuntimesDirectory();
 }

@@ -44,6 +44,7 @@ public class CompleteVersion implements MojangVersion {
     private AssetIndex assetIndex;
     private GameDownloads downloads;
     private String inheritsFrom;
+    private JavaVersion javaVersion;
     private transient boolean areAssetsVirtual;
     private transient boolean mapToResources;
 
@@ -176,6 +177,11 @@ public class CompleteVersion implements MojangVersion {
     @Override
     public void addLibrary(Library library) {
         libraries.add(library);
+    }
+
+    @Override
+    public JavaVersion getJavaVersion() {
+        return javaVersion;
     }
 
     @Override

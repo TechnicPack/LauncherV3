@@ -152,6 +152,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     JTextField widthInput;
     JTextField heightInput;
     JTextField wrapperCommand;
+    JCheckBox disableMojangJava;
 
     public OptionsDialog(final Frame owner, final TechnicSettings settings, final ResourceLoader resourceLoader, final StartupParameters params, final JavaVersionRepository javaVersions, final FileJavaSource fileJavaSource, final IBuildNumber buildNumber) {
         super(owner);
@@ -193,6 +194,11 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
     protected void changeAskFirst() {
         settings.setAutoAcceptModpackRequirements(!askFirstBox.isSelected());
+        settings.save();
+    }
+
+    protected void changeDisableMojangJava() {
+        settings.setDisableMojangJava(disableMojangJava.isSelected());
         settings.save();
     }
 
@@ -380,6 +386,16 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             @Override
             public void actionPerformed(ActionEvent e) {
                 changeAskFirst();
+            }
+        });
+
+        for (ActionListener listener : disableMojangJava.getActionListeners())
+            disableMojangJava.removeActionListener(listener);
+        disableMojangJava.setSelected(settings.shouldDisableMojangJava());
+        disableMojangJava.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeDisableMojangJava();
             }
         });
 
@@ -1196,7 +1212,22 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         askFirstBox.setFocusPainted(false);
         panel.add(askFirstBox, new GridBagConstraints(1, 5, 6, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(8, 16, 8, 8), 0, 0));
 
-        panel.add(Box.createGlue(), new GridBagConstraints(4, 6, 1, 1, 1, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
+        JLabel disableMojangJavaLabel = new JLabel(resources.getString("launcheroptions.java.disableMojangJava"));
+        disableMojangJavaLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+        disableMojangJavaLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        panel.add(disableMojangJavaLabel, new GridBagConstraints(0, 6, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 20, 0, 0), 0, 0));
+
+        disableMojangJava = new JCheckBox("", false);
+        disableMojangJava.setOpaque(false);
+        disableMojangJava.setHorizontalAlignment(SwingConstants.RIGHT);
+        disableMojangJava.setBorder(BorderFactory.createEmptyBorder());
+        disableMojangJava.setIconTextGap(0);
+        disableMojangJava.setSelectedIcon(resources.getIcon("checkbox_closed.png"));
+        disableMojangJava.setIcon(resources.getIcon("checkbox_open.png"));
+        disableMojangJava.setFocusPainted(false);
+        panel.add(disableMojangJava, new GridBagConstraints(1, 6, 6, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(8, 16, 8, 8), 0, 0));
+
+        panel.add(Box.createGlue(), new GridBagConstraints(4, 7, 1, 1, 1, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
     }
 
     @Override

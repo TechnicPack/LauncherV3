@@ -41,6 +41,7 @@ import net.technicpack.launchercore.modpacks.RunData;
 import net.technicpack.launchercore.modpacks.resources.PackResourceMapper;
 import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.launchercore.util.LaunchAction;
+import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.install.tasks.*;
 import net.technicpack.minecraftcore.launch.LaunchOptions;
 import net.technicpack.minecraftcore.launch.MinecraftLauncher;
@@ -133,14 +134,16 @@ public class Installer {
                             throw new PackNotAvailableOfflineException(pack.getDisplayName());
                         }
 
+                        boolean usingMojangJava = version.getJavaVersion() != null && !settings.shouldDisableMojangJava();
+
                         JavaVersionRepository javaVersions = launcher.getJavaVersions();
                         Memory memoryObj = Memory.getClosestAvailableMemory(Memory.getMemoryFromId(settings.getMemory()), javaVersions.getSelectedVersion().is64Bit());
                         long memory = memoryObj.getMemoryMB();
                         String versionNumber = javaVersions.getSelectedVersion().getVersionNumber();
                         RunData data = pack.getRunData();
 
-                        if (data != null && !data.isRunDataValid(memory, versionNumber)) {
-                            FixRunDataDialog dialog = new FixRunDataDialog(frame, resources, data, javaVersions, memoryObj, !settings.shouldAutoAcceptModpackRequirements());
+                        if (data != null && !data.isRunDataValid(memory, versionNumber, usingMojangJava)) {
+                            FixRunDataDialog dialog = new FixRunDataDialog(frame, resources, data, javaVersions, memoryObj, !settings.shouldAutoAcceptModpackRequirements(), usingMojangJava);
                             dialog.setVisible(true);
                             if (dialog.getResult() == FixRunDataDialog.Result.ACCEPT) {
                                 memoryObj = dialog.getRecommendedMemory();
@@ -155,7 +158,7 @@ public class Installer {
                                 return;
                         }
 
-                        if (RunData.isJavaVersionAtLeast(versionNumber, "1.9")) {
+                        if (!usingMojangJava && RunData.isJavaVersionAtLeast(versionNumber, "1.9")) {
                             int result = JOptionPane.showConfirmDialog(frame, resources.getString("launcher.jverwarning", versionNumber), resources.getString("launcher.jverwarning.title"), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                             if (result != JOptionPane.YES_OPTION)
                                 return;
@@ -289,6 +292,8 @@ public class Installer {
         TaskGroup examineIndex = new TaskGroup(resources.getString("install.message.examiningindex"));
         TaskGroup verifyingAssets = new TaskGroup(resources.getString("install.message.verifyassets"));
         TaskGroup installingAssets = new TaskGroup(resources.getString("install.message.installassets"));
+        TaskGroup examineJava = new TaskGroup("Examining Java runtime...");
+        TaskGroup downloadJava = new TaskGroup("Downloading Java runtime...");
 
         queue.addTask(examineModpackData);
         queue.addTask(verifyingFiles);
@@ -305,6 +310,8 @@ public class Installer {
         queue.addTask(examineIndex);
         queue.addTask(verifyingAssets);
         queue.addTask(installingAssets);
+        queue.addTask(examineJava);
+        queue.addTask(downloadJava);
         if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX)
             queue.addTask(new CopyDylibJnilibTask(modpack));
 
@@ -403,6 +410,8 @@ public class Installer {
         checkVersionFile.addTask(new VerifyVersionFilePresentTask(modpack, minecraft, versionBuilder));
         examineVersionFile.addTask(new HandleVersionFileTask(modpack, directories, checkNonMavenLibs, grabLibs, installingLibs, installingLibs, versionBuilder));
         examineVersionFile.addTask(new EnsureAssetsIndexTask(directories.getAssetsDirectory(), modpack, installingMinecraft, examineIndex, verifyingAssets, installingAssets, installingAssets));
+
+        examineJava.addTask(new EnsureJavaRuntimeManifestTask(directories.getRuntimesDirectory(), modpack, examineJava, downloadJava));
 
         if (doFullInstall || (installedVersion != null && installedVersion.isLegacy()))
             installingMinecraft.addTask(new InstallMinecraftIfNecessaryTask(modpack, minecraft, directories.getCacheDirectory()));

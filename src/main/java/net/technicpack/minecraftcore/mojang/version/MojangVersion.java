@@ -76,4 +76,6 @@ public interface MojangVersion {
     public void setAssetsMapToResources(boolean mapToResources);
 
     public void addLibrary(Library library);
+
+    public JavaVersion getJavaVersion();
 }

@@ -19,6 +19,11 @@
 
 package net.technicpack.minecraftcore;
 
+import com.google.api.client.http.*;
+import com.google.api.client.http.apache.ApacheHttpTransport.Builder;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.JsonObjectParser;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -27,12 +32,9 @@ import net.technicpack.launcher.io.IUserTypeInstanceCreator;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.minecraftcore.mojang.auth.io.UserProperties;
 import net.technicpack.minecraftcore.mojang.auth.io.UserPropertiesAdapter;
+import net.technicpack.minecraftcore.mojang.java.JavaRuntimes;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
-import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
-import net.technicpack.minecraftcore.mojang.version.io.CompleteVersionV21;
-import net.technicpack.minecraftcore.mojang.version.io.Library;
-import net.technicpack.minecraftcore.mojang.version.io.Rule;
-import net.technicpack.minecraftcore.mojang.version.io.RuleAdapter;
+import net.technicpack.minecraftcore.mojang.version.io.*;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentListAdapter;
 import net.technicpack.utilslib.DateTypeAdapter;
@@ -51,12 +53,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MojangUtils {
+    private static final HttpTransport HTTP_TRANSPORT = (new Builder()).build();
+    private static final JsonFactory JSON_FACTORY = new GsonFactory();
+    private static final HttpRequestFactory REQUEST_FACTORY;
+
     /** @deprecated Uses old S3 bucket */
     public static final String baseURL = "https://s3.amazonaws.com/Minecraft.Download/";
     public static final String assetsIndexes = baseURL + "indexes/";
     public static final String versions = baseURL + "versions/";
 
     public static final String assets = "https://resources.download.minecraft.net/";
+
+    public static final String RUNTIMES_URL = "https://launchermeta.mojang.com/v1/products/java-runtime/2ec0cc96c44e5a76b9c8b7c39df7210883d12871/all.json";
+    private static JavaRuntimes javaRuntimes;
 
     /** @deprecated Uses old S3 bucket */
     public static String getOldVersionDownload(String version) {
@@ -93,6 +102,10 @@ public class MojangUtils {
         versionJsonVersions = new TreeMap<Integer, Class<? extends MojangVersion>>();
         versionJsonVersions.put(0, CompleteVersion.class);
         versionJsonVersions.put(21, CompleteVersionV21.class);
+
+        REQUEST_FACTORY = HTTP_TRANSPORT.createRequestFactory(
+                request -> request.setParser(new JsonObjectParser(JSON_FACTORY))
+        );
     }
 
     public static Gson getGson() {
@@ -238,5 +251,20 @@ public class MojangUtils {
         final String mcVersion = getMinecraftVersion(version);
 
         return !mcVersion.equals("1.12.2");
+    }
+
+    public static JavaRuntimes getJavaRuntimes() {
+        if (javaRuntimes != null)
+            return javaRuntimes;
+
+        try {
+            HttpRequest request = REQUEST_FACTORY.buildGetRequest(new GenericUrl(RUNTIMES_URL));
+            HttpResponse httpResponse = request.execute();
+            javaRuntimes = gson.fromJson(httpResponse.parseAsString(), JavaRuntimes.class);
+            return javaRuntimes;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

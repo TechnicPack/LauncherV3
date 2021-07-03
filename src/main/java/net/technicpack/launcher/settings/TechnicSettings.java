@@ -61,6 +61,7 @@ public class TechnicSettings implements ILaunchOptions {
     private int windowWidth = 0;
     private int windowHeight = 0;
     private boolean enableStencilBuffer = true;
+    private boolean disableMojangJava = false;
 
     public File getFilePath() { return this.settingsFile; }
     public void setFilePath(File settingsFile) {
@@ -188,6 +189,14 @@ public class TechnicSettings implements ILaunchOptions {
 
     public void setWrapperCommand(String wrapperCommand) {
         this.wrapperCommand = wrapperCommand;
+    }
+
+    public boolean shouldDisableMojangJava() {
+        return disableMojangJava;
+    }
+
+    public void setDisableMojangJava(boolean disableMojangJava) {
+        this.disableMojangJava = disableMojangJava;
     }
 
     public void save() {

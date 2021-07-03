@@ -55,8 +55,8 @@ public class RunData {
         return getMemory() <= memory;
     }
 
-    public boolean isRunDataValid(long memory, String java) {
-        return isMemoryValid(memory) && isJavaValid(java);
+    public boolean isRunDataValid(long memory, String java, boolean usingMojangJava) {
+        return isMemoryValid(memory) && (usingMojangJava || isJavaValid(java));
     }
 
     public IJavaVersion getValidJavaVersion(JavaVersionRepository repository) {

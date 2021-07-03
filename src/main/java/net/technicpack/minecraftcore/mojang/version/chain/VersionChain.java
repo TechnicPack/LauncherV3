@@ -224,8 +224,17 @@ public class VersionChain implements MojangVersion {
         chain.get(0).addLibrary(library);
     }
 
+    @Override
+    public JavaVersion getJavaVersion() {
+        for (MojangVersion version : chain) {
+            if (version.getJavaVersion() != null)
+                return version.getJavaVersion();
+        }
+
+        return null;
+    }
+
     public void addVersionToChain(MojangVersion version) {
         chain.add(version);
     }
-
 }

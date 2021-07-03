@@ -8,4 +8,5 @@ public interface ILaunchOptions {
     boolean shouldUseStencilBuffer();
     String getWrapperCommand();
     String getJavaArgs();
+    boolean shouldDisableMojangJava();
 }
