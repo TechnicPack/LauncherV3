@@ -19,6 +19,7 @@
 
 package net.technicpack.minecraftcore.install.tasks;
 
+import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.install.ITasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.DownloadFileTask;
@@ -66,9 +67,18 @@ public class EnsureJavaRuntimeManifestTask implements IInstallTask {
 
         JavaVersion wantedRuntime = version.getJavaVersion();
 
-        JavaRuntimes availableRuntimes = MojangUtils.getJavaRuntimes();
+        if (wantedRuntime == null) {
+            // Nothing to do here, this version doesn't have a Mojang JRE
+            return;
+        }
 
         final String runtimeName = wantedRuntime.getComponent();
+
+        JavaRuntimes availableRuntimes = MojangUtils.getJavaRuntimes();
+
+        if (availableRuntimes == null) {
+            throw new DownloadException("Failed to get Mojang JRE information");
+        }
 
         JavaRuntime runtime = availableRuntimes.getRuntimeForCurrentOS(runtimeName);
 
