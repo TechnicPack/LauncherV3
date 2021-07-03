@@ -76,7 +76,6 @@ public class MojangUser implements IUserType {
     @Override
     public void login(UserModel userModel) throws AuthenticationException {
         refreshToken(userModel.getMojangAuthenticator().requestRefresh(this));
-        userModel.addUser(this);
     }
 
     @Override
