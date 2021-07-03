@@ -170,7 +170,9 @@ public class MinecraftLauncher {
         String customJvmArgs = options.getOptions().getJavaArgs();
         if (StringUtils.isNotEmpty(customJvmArgs)) {
             customJvmArgs = customJvmArgs.replaceAll("[\\r\\n]", " ");
-            commands.addRaw(customJvmArgs);
+            for (String customJvmArg : customJvmArgs.split("[ ]+")) {
+                commands.addRaw(customJvmArg);
+            }
         }
 
         // build jvm args
