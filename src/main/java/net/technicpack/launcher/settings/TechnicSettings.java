@@ -40,7 +40,7 @@ public class TechnicSettings implements ILaunchOptions {
     private int memory;
     private LaunchAction launchAction = LaunchAction.HIDE;
     private String buildStream = STABLE;
-    private boolean showConsole;
+    private boolean showConsole = true;
     private String languageCode = "default";
     private String clientId = UUID.randomUUID().toString();
     private String directory;
