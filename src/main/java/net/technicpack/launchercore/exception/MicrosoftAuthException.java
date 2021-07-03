@@ -3,16 +3,16 @@ package net.technicpack.launchercore.exception;
 /**
  *
  */
-public class MicrosoftAuthException extends AuthenticationException {
+public class MicrosoftAuthException extends ResponseException {
     private final ExceptionType type;
 
     public MicrosoftAuthException(ExceptionType type, String message) {
-        super(message);
+        super("Auth Error", message);
         this.type = type;
     }
 
     public MicrosoftAuthException(ExceptionType type, String message, Throwable cause) {
-        super(message, cause);
+        super("Auth Error", message, cause);
         this.type = type;
     }
 

@@ -12,6 +12,11 @@ public class ResponseException extends AuthenticationException {
         this.error = error;
     }
 
+    public ResponseException(String error, String errorMessage, Throwable cause) {
+        super(errorMessage, cause);
+        this.error = error;
+    }
+
     public String getError() {
         return error;
     }

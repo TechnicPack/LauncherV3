@@ -21,10 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.UUID;
-import java.util.logging.Handler;
 import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 
 import static net.technicpack.launchercore.exception.MicrosoftAuthException.ExceptionType.*;
 
@@ -86,39 +83,44 @@ public class MicrosoftAuthenticator {
         XboxMinecraftResponse xboxMinecraftResponse = authenticateMinecraftXbox(xstsResponse);
         MinecraftProfile profile = getMinecraftProfile(xboxMinecraftResponse);
 
+        // TODO: what happens if the user changes their Minecraft username?
         updateCredentialStore(profile.name, credential);
 
-        return new MicrosoftUser(xboxResponse, xboxMinecraftResponse, profile);
+        return new MicrosoftUser(xboxMinecraftResponse, profile);
     }
 
     public void refreshSession(MicrosoftUser user) throws AuthenticationException {
-        // We have an xbox token still, so we should be able to just refresh.
-        if (user.getXboxExpiresInSeconds() > 60) {
-            XboxResponse xstsResponse = authenticateXSTS(user.getXboxAccessToken());
-            XboxMinecraftResponse authResponse = authenticateMinecraftXbox(xstsResponse);
-            user.updateAuthToken(authResponse);
-            return;
-        }
-
+        // Refresh the OAuth token (should last 90 inactive days, indefinitely otherwise).
+        // If it fails then we bail.
         Credential credential = loadExistingCredential(user.getUsername());
 
-        // Somehow our xbox token is expired but our OAuth token is still good.
-        if (isOauthCredentialActive(credential)) {
-            XboxResponse xboxResponse = authenticateXbox(credential);
-            user.updateXboxToken(xboxResponse);
-            XboxMinecraftResponse authResponse = authenticateMinecraftXbox(authenticateXSTS(xboxResponse.token));
-            user.updateAuthToken(authResponse);
-            return;
+        try {
+            if (!credential.refreshToken()) {
+                // Refresh request failed
+                throw new SessionException("Microsoft login expired or is invalid");
+            }
+        } catch (IOException e) {
+            // A 4xx was received
+            throw new SessionException("Microsoft login expired or is invalid", e);
         }
 
-        // Session is expired now, no saving it
-        throw new SessionException("Microsoft login expired or missing.");
+        // Store the updated credential in the filesystem
+        updateCredentialStore(user.getUsername(), credential);
+
+        // Request the Xbox token
+        XboxResponse xboxResponse = authenticateXbox(credential);
+
+        // Request the XSTS token
+        XboxResponse xstsResponse = authenticateXSTS(xboxResponse.token);
+
+        // Request the Mojang token and store it (in memory)
+        XboxMinecraftResponse xboxMinecraftResponse = authenticateMinecraftXbox(xstsResponse);
+        user.updateAuthToken(xboxMinecraftResponse);
     }
 
     private Credential getOAuthCredential(String username) throws MicrosoftAuthException {
-        LocalServerReceiver receiver =
-                new LocalServerReceiver.Builder()
-                        .setHost("localhost").setPort(0).setCallbackPath("/").build();
+        LocalServerReceiver receiver = new LocalServerReceiver.Builder()
+                .setHost("localhost").setPort(0).setCallbackPath("/").build();
 
         try {
             AuthorizationCodeFlow flow = buildFlow();
@@ -127,13 +129,6 @@ public class MicrosoftAuthenticator {
             Utils.getLogger().log(Level.SEVERE, "Failed to get OAuth authorization", e);
             throw new MicrosoftAuthException(OAUTH, "Failed to get OAuth authorization", e);
         }
-    }
-
-    private boolean isOauthCredentialActive(Credential credential) {
-        return credential != null
-                && (credential.getRefreshToken() != null ||
-                credential.getExpiresInSeconds() != null ||
-                credential.getExpiresInSeconds() > 60);
     }
 
     private Credential loadExistingCredential(String username) throws MicrosoftAuthException {
@@ -153,16 +148,24 @@ public class MicrosoftAuthenticator {
 
         HttpContent httpContent = new JsonHttpContent(JSON_FACTORY, xboxAuthRequest);
         HttpRequest request = buildPostRequest(XBOX_AUTH_URL, httpContent);
-        request.setInterceptor(credential);
-        request.setUnsuccessfulResponseHandler(credential);
+        request.setThrowExceptionOnExecuteError(false);
         request.setLoggingEnabled(true);
         request.setCurlLoggingEnabled(true);
 
+        HttpResponse httpResponse = null;
         try {
-            return request.execute().parseAs(XboxResponse.class);
+            httpResponse = request.execute();
+            return httpResponse.parseAs(XboxResponse.class);
         } catch (IOException e) {
             Utils.getLogger().log(Level.SEVERE, "Failed to get Xbox authentication.", e);
-            throw new MicrosoftAuthException(XBOX, "Failed to get Xbox Authentication.", e);
+            throw new MicrosoftAuthException(XBOX, "Failed to get Xbox authentication.", e);
+        } finally {
+            if (httpResponse != null) {
+                try {
+                    httpResponse.disconnect();
+                } catch (IOException ignored) {
+                }
+            }
         }
     }
 
@@ -177,24 +180,30 @@ public class MicrosoftAuthenticator {
         request.setLoggingEnabled(true);
         request.setCurlLoggingEnabled(true);
 
+        HttpResponse httpResponse = null;
         try {
-//            Utils.getLogger().log(Level.INFO, request.getHeaders().toString());
-//            Utils.getLogger().log(Level.INFO, JSON_FACTORY.toString(xstsRequest));
-
-            HttpResponse httpResponse = request.execute();
+            httpResponse = request.execute();
             httpResponse.setLoggingEnabled(true);
 
-            if (httpResponse.getStatusCode() == HttpStatusCodes.STATUS_CODE_UNAUTHORIZED) {
-                XSTSUnauthorized unauthorized = httpResponse.parseAs(XSTSUnauthorized.class);
-                throw new MicrosoftAuthException(unauthorized.getExceptionType(), "Failed to get XSTS authentication.");
-            } else if (httpResponse.getStatusCode() == HttpStatusCodes.STATUS_CODE_OK) {
-                return httpResponse.parseAs(XboxResponse.class);
-            } else {
-                throw new HttpResponseException(httpResponse);
+            switch (httpResponse.getStatusCode()) {
+                case HttpStatusCodes.STATUS_CODE_UNAUTHORIZED:
+                    XSTSUnauthorized unauthorized = httpResponse.parseAs(XSTSUnauthorized.class);
+                    throw new MicrosoftAuthException(unauthorized.getExceptionType(), "Failed to get XSTS authentication.");
+                case HttpStatusCodes.STATUS_CODE_OK:
+                    return httpResponse.parseAs(XboxResponse.class);
+                default:
+                    throw new HttpResponseException(httpResponse);
             }
         } catch (IOException e) {
             Utils.getLogger().log(Level.SEVERE, "Failed to get XSTS authentication.", e);
             throw new MicrosoftAuthException(XSTS, "Failed to get XSTS authentication.", e);
+        } finally {
+            if (httpResponse != null) {
+                try {
+                    httpResponse.disconnect();
+                } catch (IOException ignored) {
+                }
+            }
         }
     }
 
@@ -206,19 +215,25 @@ public class MicrosoftAuthenticator {
         request.setLoggingEnabled(true);
         request.setCurlLoggingEnabled(true);
 
+        HttpResponse httpResponse = null;
         try {
-            return request.execute().parseAs(XboxMinecraftResponse.class);
+            httpResponse = request.execute();
+            return httpResponse.parseAs(XboxMinecraftResponse.class);
         } catch (IOException e) {
             Utils.getLogger().log(Level.SEVERE, "Failed to authenticate with Xbox for Minecraft.", e);
             throw new MicrosoftAuthException(XBOX_MINECRAFT, "Failed to authenticate with Xbox for Minecraft.", e);
+        } finally {
+            if (httpResponse != null) {
+                try {
+                    httpResponse.disconnect();
+                } catch (IOException ignored) {
+                }
+            }
         }
     }
 
     private MinecraftProfile getMinecraftProfile(XboxMinecraftResponse xboxMinecraftResponse) throws MicrosoftAuthException {
-
         HttpRequest request = buildGetRequest(MINECRAFT_PROFILE_URL);
-        // Remove the OAuth interceptor while doing this step.
-        request.setInterceptor(null);
         String authorization = xboxMinecraftResponse.getAuthorization();
         request.setHeaders(request.getHeaders().setAuthorization(authorization));
 
@@ -227,21 +242,30 @@ public class MicrosoftAuthenticator {
         request.setLoggingEnabled(true);
         request.setCurlLoggingEnabled(true);
 
+        HttpResponse httpResponse = null;
         try {
-            HttpResponse httpResponse = request.execute();
+            httpResponse = request.execute();
             httpResponse.setLoggingEnabled(true);
 
-            if (httpResponse.getStatusCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
-                MinecraftError minecraftError = httpResponse.parseAs(MinecraftError.class);
-                throw new MicrosoftAuthException(NO_MINECRAFT, "Minecraft Account Error: " + minecraftError.error);
-            } else if (httpResponse.getStatusCode() == HttpStatusCodes.STATUS_CODE_OK) {
-                return request.execute().parseAs(MinecraftProfile.class);
-            } else {
-                throw new HttpResponseException(httpResponse);
+            switch (httpResponse.getStatusCode()) {
+                case HttpStatusCodes.STATUS_CODE_NOT_FOUND:
+                    MinecraftError minecraftError = httpResponse.parseAs(MinecraftError.class);
+                    throw new MicrosoftAuthException(NO_MINECRAFT, "Minecraft Account Error: " + minecraftError.error);
+                case HttpStatusCodes.STATUS_CODE_OK:
+                    return httpResponse.parseAs(MinecraftProfile.class);
+                default:
+                    throw new HttpResponseException(httpResponse);
             }
         } catch (IOException e) {
             Utils.getLogger().log(Level.SEVERE, "Failed to load minecraft profile.", e);
             throw new MicrosoftAuthException(MINECRAFT_PROFILE, "Failed to load minecraft profile.", e);
+        } finally {
+            if (httpResponse != null) {
+                try {
+                    httpResponse.disconnect();
+                } catch (IOException ignored) {
+                }
+            }
         }
     }
 
