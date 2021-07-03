@@ -25,6 +25,7 @@ import net.technicpack.launchercore.exception.SessionException;
 import net.technicpack.minecraftcore.microsoft.auth.MicrosoftAuthenticator;
 import net.technicpack.minecraftcore.mojang.auth.MojangAuthenticator;
 
+import javax.swing.JOptionPane;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -79,6 +80,7 @@ public class UserModel {
             setCurrentUser(user);
         } catch (SessionException | ResponseException ex) {
             setCurrentUser(null);
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Login Error", JOptionPane.ERROR_MESSAGE);
         } catch (AuthenticationException ex) {
             //TODO: This should handle offline users for Microsoft accounts
             setCurrentUser(mojangAuthenticator.createOfflineUser(user.getDisplayName()));
