@@ -399,6 +399,14 @@ public class Installer {
                 }
             }
 
+            // Remove the runData file between updates/reinstall as well
+            File runData = new File(modpack.getBinDir(), "runData");
+            if (runData.exists()) {
+                if (!runData.delete()) {
+                    throw new CacheDeleteException(runData.getAbsolutePath());
+                }
+            }
+
             examineModpackData.addTask(new CleanupAndExtractModpackTask(modpack, modpackData, verifyingFiles, downloadingMods, installingMods));
         }
 
