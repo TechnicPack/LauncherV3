@@ -589,6 +589,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
             showMessageDialog(this, e.getMessage(), e.getError(), ERROR_MESSAGE);
         } catch (AuthenticationException e) {
             //TODO: What else is uncaught here?
+            showMessageDialog(this, e.getMessage(), "Authentication error", ERROR_MESSAGE);
             e.printStackTrace();
         }
     }

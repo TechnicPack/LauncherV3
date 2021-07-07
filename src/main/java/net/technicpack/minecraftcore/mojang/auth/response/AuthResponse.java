@@ -54,6 +54,11 @@ public class AuthResponse extends Response implements IAuthResponse {
     }
 
     @Override
+    public boolean hasError() {
+        return getError() != null;
+    }
+
+    @Override
     public String getError() {
         String error = super.getError();
 
