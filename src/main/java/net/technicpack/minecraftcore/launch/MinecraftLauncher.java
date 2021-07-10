@@ -117,7 +117,14 @@ public class MinecraftLauncher {
 
         if (javaVersion != null && !options.getOptions().shouldDisableMojangJava()) {
             File runtimeRoot = new File(directories.getRuntimesDirectory(), javaVersion.getComponent());
-            Path javaExecutable = runtimeRoot.toPath().resolve("bin").resolve(OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS ? "javaw.exe" : "java");
+            Path javaExecutable;
+            if (OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS) {
+                javaExecutable = runtimeRoot.toPath().resolve("bin/javaw.exe");
+            } else if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX) {
+                javaExecutable = runtimeRoot.toPath().resolve("jre.bundle/Contents/Home/bin/java");
+            } else {
+                javaExecutable = runtimeRoot.toPath().resolve("bin/java");
+            }
             commands.addRaw(javaExecutable.toString());
         } else {
             commands.addRaw(javaVersions.getSelectedPath());
