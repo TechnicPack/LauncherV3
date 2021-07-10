@@ -76,17 +76,28 @@ public class MicrosoftAuthenticator {
     }
 
     public MicrosoftUser loginNewUser() throws MicrosoftAuthException {
-        Credential credential = getOAuthCredential(UUID.randomUUID().toString());
+        String tempCredentialId = UUID.randomUUID().toString();
+        try {
+            Credential credential = getOAuthCredential(tempCredentialId);
 
-        XboxResponse xboxResponse = authenticateXbox(credential);
-        XboxResponse xstsResponse = authenticateXSTS(xboxResponse.token);
-        XboxMinecraftResponse xboxMinecraftResponse = authenticateMinecraftXbox(xstsResponse);
-        MinecraftProfile profile = getMinecraftProfile(xboxMinecraftResponse);
+            XboxResponse xboxResponse = authenticateXbox(credential);
+            XboxResponse xstsResponse = authenticateXSTS(xboxResponse.token);
+            XboxMinecraftResponse xboxMinecraftResponse = authenticateMinecraftXbox(xstsResponse);
+            MinecraftProfile profile = getMinecraftProfile(xboxMinecraftResponse);
 
-        // TODO: what happens if the user changes their Minecraft username?
-        updateCredentialStore(profile.name, credential);
+            // TODO: what happens if the user changes their Minecraft username?
+            updateCredentialStore(profile.name, credential);
+            try {
+                DATA_STORE_FACTORY.getDataStore(StoredCredential.DEFAULT_DATA_STORE_ID).delete(tempCredentialId);
+            } catch (IOException unhandled) { }
 
-        return new MicrosoftUser(xboxMinecraftResponse, profile);
+            return new MicrosoftUser(xboxMinecraftResponse, profile);
+        } catch (MicrosoftAuthException exception) {
+            try {
+                DATA_STORE_FACTORY.getDataStore(StoredCredential.DEFAULT_DATA_STORE_ID).delete(tempCredentialId);
+            } catch (IOException unhandled) { }
+            throw exception;
+        }
     }
 
     public void refreshSession(MicrosoftUser user) throws AuthenticationException {
