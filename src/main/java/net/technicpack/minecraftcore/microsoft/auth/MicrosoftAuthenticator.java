@@ -76,28 +76,19 @@ public class MicrosoftAuthenticator {
     }
 
     public MicrosoftUser loginNewUser() throws MicrosoftAuthException {
-        String tempCredentialId = UUID.randomUUID().toString();
-        try {
-            Credential credential = getOAuthCredential(tempCredentialId);
+        final String tempCredentialId = UUID.randomUUID().toString();
 
-            XboxResponse xboxResponse = authenticateXbox(credential);
-            XboxResponse xstsResponse = authenticateXSTS(xboxResponse.token);
-            XboxMinecraftResponse xboxMinecraftResponse = authenticateMinecraftXbox(xstsResponse);
-            MinecraftProfile profile = getMinecraftProfile(xboxMinecraftResponse);
+        Credential credential = getOAuthCredential(tempCredentialId);
 
-            // TODO: what happens if the user changes their Minecraft username?
-            updateCredentialStore(profile.name, credential);
-            try {
-                DATA_STORE_FACTORY.getDataStore(StoredCredential.DEFAULT_DATA_STORE_ID).delete(tempCredentialId);
-            } catch (IOException unhandled) { }
+        XboxResponse xboxResponse = authenticateXbox(credential);
+        XboxResponse xstsResponse = authenticateXSTS(xboxResponse.token);
+        XboxMinecraftResponse xboxMinecraftResponse = authenticateMinecraftXbox(xstsResponse);
+        MinecraftProfile profile = getMinecraftProfile(xboxMinecraftResponse);
 
-            return new MicrosoftUser(xboxMinecraftResponse, profile);
-        } catch (MicrosoftAuthException exception) {
-            try {
-                DATA_STORE_FACTORY.getDataStore(StoredCredential.DEFAULT_DATA_STORE_ID).delete(tempCredentialId);
-            } catch (IOException unhandled) { }
-            throw exception;
-        }
+        // TODO: what happens if the user changes their Minecraft username?
+        updateCredentialStore(profile.name, credential);
+
+        return new MicrosoftUser(xboxMinecraftResponse, profile);
     }
 
     public void refreshSession(MicrosoftUser user) throws AuthenticationException {
@@ -297,6 +288,10 @@ public class MicrosoftAuthenticator {
 
     private void updateCredentialStore(String username, Credential credential) {
         try {
+            // Remove all the other credentials
+            DATA_STORE_FACTORY.getDataStore(StoredCredential.DEFAULT_DATA_STORE_ID).clear();
+
+            // Store the new one
             DATA_STORE_FACTORY.getDataStore(StoredCredential.DEFAULT_DATA_STORE_ID)
                     .set(username, new StoredCredential(credential));
         } catch (IOException e) {
