@@ -29,13 +29,14 @@ import java.util.Map;
 
 public class TaskGroup implements IWeightedTasksQueue, IInstallTask {
     private final String groupName;
-    private final LinkedList<IInstallTask> taskList = new LinkedList<IInstallTask>();
-    private final Map<IInstallTask, Float> taskWeights = new HashMap<IInstallTask, Float>();
+    private final LinkedList<IInstallTask> taskList = new LinkedList<>();
+    private final Map<IInstallTask, Float> taskWeights = new HashMap<>();
 
     private float totalWeight = 0;
+    private float completedWeight = 0;
 
-    private int taskProgress = 0;
     private String fileName = "";
+    private IInstallTask currentTask;
 
     public TaskGroup(String name) {
         this.groupName = name;
@@ -48,43 +49,46 @@ public class TaskGroup implements IWeightedTasksQueue, IInstallTask {
 
     @Override
     public float getTaskProgress() {
-
-        if (taskList.size() == 0)
+        if (taskList.isEmpty())
             return 0;
         if (totalWeight == 0)
             return 0;
 
-        float completedWeight = 0;
-        for (int i = 0; i < taskProgress; i++) {
-            IInstallTask task = taskList.get(i);
-            if (taskWeights.containsKey(task)) {
-                completedWeight += taskWeights.get(task);
-            }
-        }
-
         float finishedTasksProgress = (completedWeight / totalWeight);
-        IInstallTask currentTask = taskList.get(taskProgress);
-        float currentTaskProgress = (currentTask.getTaskProgress() / 100.0f);
+        float currentTaskProgress;
 
-        float currentTaskWeight = 1;
-        if (taskWeights.containsKey(currentTask))
-            currentTaskWeight = taskWeights.get(currentTask);
+        if (currentTask == null) {
+            currentTaskProgress = 0;
+        } else {
+            float currentTaskWeight = taskWeights.get(currentTask);
 
-        currentTaskProgress *= (currentTaskWeight / totalWeight);
+            currentTaskProgress = (currentTask.getTaskProgress() / 100.0f) * (currentTaskWeight / totalWeight);
+        }
 
         return (finishedTasksProgress + currentTaskProgress) * 100.0f;
     }
 
     @Override
     public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
-        while (taskProgress < taskList.size()) {
+        while (!taskList.isEmpty()) {
             if (Thread.interrupted())
                 throw new InterruptedException();
-            IInstallTask currentTask = taskList.get(taskProgress);
+            // Get next task
+            currentTask = taskList.removeFirst();
+            // Get the task weight (normally 1, but it's filesize for downloads)
+            float currentTaskWeight = taskWeights.get(currentTask);
+            // Get task description
             fileName = currentTask.getTaskDescription();
-            currentTask.runTask(queue);
+            // Update the progress visually before it runs
             queue.refreshProgress();
-            taskProgress++;
+            // Run the actual taskz
+            currentTask.runTask(queue);
+            // Update the completed task weight
+            completedWeight += currentTaskWeight;
+            // Unset the current task so progress doesn't jump back when it re-renders after the task is done
+            currentTask = null;
+            // Update the progress visually after it's done running
+            queue.refreshProgress();
         }
     }
 

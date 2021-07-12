@@ -21,6 +21,7 @@ package net.technicpack.minecraftcore.install.tasks;
 
 import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.install.ITasksQueue;
+import net.technicpack.launchercore.install.IWeightedTasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.DownloadFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
@@ -42,9 +43,9 @@ public class EnsureJavaRuntimeManifestTask implements IInstallTask {
     private final File runtimesDirectory;
     private final ModpackModel modpack;
     private final ITasksQueue examineJavaQueue;
-    private final ITasksQueue downloadJavaQueue;
+    private final IWeightedTasksQueue downloadJavaQueue;
 
-    public EnsureJavaRuntimeManifestTask(File runtimesDirectory, ModpackModel modpack, ITasksQueue examineJavaQueue, ITasksQueue downloadJavaQueue) {
+    public EnsureJavaRuntimeManifestTask(File runtimesDirectory, ModpackModel modpack, ITasksQueue examineJavaQueue, IWeightedTasksQueue downloadJavaQueue) {
         this.runtimesDirectory = runtimesDirectory;
         this.modpack = modpack;
         this.examineJavaQueue = examineJavaQueue;

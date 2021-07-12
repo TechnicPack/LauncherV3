@@ -20,6 +20,7 @@
 package net.technicpack.launchercore.install.tasks;
 
 import net.technicpack.launchercore.install.ITasksQueue;
+import net.technicpack.launchercore.install.IWeightedTasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.utilslib.IZipFileFilter;
@@ -27,30 +28,35 @@ import net.technicpack.utilslib.IZipFileFilter;
 import java.io.File;
 import java.io.IOException;
 
-public class EnsureFileTask<TaskQueue extends ITasksQueue> implements IInstallTask {
+public class EnsureFileTask implements IInstallTask {
     private final File cacheLocation;
     private final File zipExtractLocation;
     private final String sourceUrl;
     private final String friendlyFileName;
     private final IFileVerifier fileVerifier;
-    private final TaskQueue downloadTaskQueue;
-    private final TaskQueue copyTaskQueue;
+    private final IWeightedTasksQueue downloadTaskQueue;
+    private final ITasksQueue copyTaskQueue;
     private final IZipFileFilter filter;
     private boolean executable;
+    private long filesize;
 
-    public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, TaskQueue downloadTaskQueue, TaskQueue copyTaskQueue) {
-        this(fileLocation, fileVerifier, zipExtractLocation, sourceUrl, fileLocation.getName(), downloadTaskQueue, copyTaskQueue, null);
+    public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, IWeightedTasksQueue downloadTaskQueue, ITasksQueue copyTaskQueue) {
+        this(fileLocation, fileVerifier, zipExtractLocation, sourceUrl, fileLocation.getName(), downloadTaskQueue, copyTaskQueue, null, -1);
     }
 
-    public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, TaskQueue downloadTaskQueue, TaskQueue copyTaskQueue, IZipFileFilter filter) {
-        this(fileLocation, fileVerifier, zipExtractLocation, sourceUrl, fileLocation.getName(), downloadTaskQueue, copyTaskQueue, filter);
+    public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, IWeightedTasksQueue downloadTaskQueue, ITasksQueue copyTaskQueue, IZipFileFilter filter) {
+        this(fileLocation, fileVerifier, zipExtractLocation, sourceUrl, fileLocation.getName(), downloadTaskQueue, copyTaskQueue, filter, -1);
     }
 
-    public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, String friendlyFileName, TaskQueue downloadTaskQueue, TaskQueue copyTaskQueue) {
-        this(fileLocation, fileVerifier, zipExtractLocation, sourceUrl, friendlyFileName, downloadTaskQueue, copyTaskQueue, null);
+    public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, IWeightedTasksQueue downloadTaskQueue, ITasksQueue copyTaskQueue, IZipFileFilter filter, long filesize) {
+        this(fileLocation, fileVerifier, zipExtractLocation, sourceUrl, fileLocation.getName(), downloadTaskQueue, copyTaskQueue, filter, filesize);
     }
 
-    public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, String friendlyFileName, TaskQueue downloadTaskQueue, TaskQueue copyTaskQueue, IZipFileFilter fileFilter) {
+    public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, String friendlyFileName, IWeightedTasksQueue downloadTaskQueue, ITasksQueue copyTaskQueue, long filesize) {
+        this(fileLocation, fileVerifier, zipExtractLocation, sourceUrl, friendlyFileName, downloadTaskQueue, copyTaskQueue, null, filesize);
+    }
+
+    public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, String friendlyFileName, IWeightedTasksQueue downloadTaskQueue, ITasksQueue copyTaskQueue, IZipFileFilter fileFilter, long filesize) {
         this.cacheLocation = fileLocation;
         this.zipExtractLocation = zipExtractLocation;
         this.sourceUrl = sourceUrl;
@@ -59,6 +65,7 @@ public class EnsureFileTask<TaskQueue extends ITasksQueue> implements IInstallTa
         this.downloadTaskQueue = downloadTaskQueue;
         this.copyTaskQueue = copyTaskQueue;
         this.filter = fileFilter;
+        this.filesize = filesize;
     }
 
     @Override
@@ -80,12 +87,14 @@ public class EnsureFileTask<TaskQueue extends ITasksQueue> implements IInstallTa
             downloadFile(this.downloadTaskQueue, this.sourceUrl, this.cacheLocation, this.fileVerifier, this.friendlyFileName);
     }
 
-    public void unzipFile(TaskQueue taskQueue, File zipLocation, File targetLocation, IZipFileFilter filter) {
+    public void unzipFile(ITasksQueue taskQueue, File zipLocation, File targetLocation, IZipFileFilter filter) {
         taskQueue.addNextTask(new UnzipFileTask(zipLocation, targetLocation, filter));
     }
 
-    public void downloadFile(TaskQueue taskQueue, String sourceUrl, File targetLocation, IFileVerifier verifier, String fileName) {
-        taskQueue.addNextTask(new DownloadFileTask(sourceUrl, targetLocation, verifier, fileName, this.executable));
+    public void downloadFile(IWeightedTasksQueue taskQueue, String sourceUrl, File targetLocation, IFileVerifier verifier, String fileName) {
+        // For downloads that we don't know the size, we assume 1 MB (so we can show *some* progress)
+        long size = this.filesize > 0 ? this.filesize : (1024 * 1024);
+        taskQueue.addNextTask(new DownloadFileTask(sourceUrl, targetLocation, verifier, fileName, this.executable), size);
     }
 
     public void setExecutable(boolean executable) {
