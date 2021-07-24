@@ -131,7 +131,7 @@ public class HandleVersionFileTask implements IInstallTask {
             if (!is1_12_2) {
                 Library forgeWrapper = new Library();
                 // TODO: add hash validation
-                forgeWrapper.setName("io.github.zekerzhayard:ForgeWrapper:1.5.0");
+                forgeWrapper.setName("io.github.zekerzhayard:ForgeWrapper:1.5.1");
 
                 version.addLibrary(forgeWrapper);
 
