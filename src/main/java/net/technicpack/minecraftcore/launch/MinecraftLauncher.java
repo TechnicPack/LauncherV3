@@ -115,7 +115,7 @@ public class MinecraftLauncher {
 
         JavaVersion javaVersion = version.getJavaVersion();
 
-        if (javaVersion != null && !options.getOptions().shouldDisableMojangJava()) {
+        if (javaVersion != null && options.getOptions().shouldUseMojangJava()) {
             File runtimeRoot = new File(directories.getRuntimesDirectory(), javaVersion.getComponent());
             Path javaExecutable;
             if (OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS) {

@@ -26,7 +26,6 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -55,13 +54,13 @@ public class TechnicSettings implements ILaunchOptions {
      */
     private boolean javaBitness = true;
 
-    private String launcherSettingsVersion = "0";
+    private String launcherSettingsVersion = "1";
 
     private WindowType windowType = WindowType.DEFAULT;
     private int windowWidth = 0;
     private int windowHeight = 0;
     private boolean enableStencilBuffer = true;
-    private boolean disableMojangJava = false;
+    private boolean useMojangJava = true;
 
     public File getFilePath() { return this.settingsFile; }
     public void setFilePath(File settingsFile) {
@@ -191,12 +190,12 @@ public class TechnicSettings implements ILaunchOptions {
         this.wrapperCommand = wrapperCommand;
     }
 
-    public boolean shouldDisableMojangJava() {
-        return disableMojangJava;
+    public boolean shouldUseMojangJava() {
+        return useMojangJava;
     }
 
-    public void setDisableMojangJava(boolean disableMojangJava) {
-        this.disableMojangJava = disableMojangJava;
+    public void setUseMojangJava(boolean useMojangJava) {
+        this.useMojangJava = useMojangJava;
     }
 
     public void save() {
