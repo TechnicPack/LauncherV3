@@ -23,7 +23,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.install.ITasksQueue;
-import net.technicpack.launchercore.install.IWeightedTasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.CopyFileTask;
 import net.technicpack.launchercore.install.tasks.EnsureFileTask;
@@ -44,7 +43,7 @@ public class InstallMinecraftAssetsTask implements IInstallTask {
     private final String assetsDirectory;
     private final File assetsIndex;
     private final ITasksQueue checkAssetsQueue;
-    private final IWeightedTasksQueue downloadAssetsQueue;
+    private final ITasksQueue downloadAssetsQueue;
     private final ITasksQueue copyAssetsQueue;
 
     private final static String virtualField = "virtual";
@@ -53,7 +52,7 @@ public class InstallMinecraftAssetsTask implements IInstallTask {
     private final static String sizeField = "size";
     private final static String hashField = "hash";
 
-    public InstallMinecraftAssetsTask(ModpackModel modpack, String assetsDirectory, File assetsIndex, ITasksQueue checkAssetsQueue, IWeightedTasksQueue downloadAssetsQueue, ITasksQueue copyAssetsQueue) {
+    public InstallMinecraftAssetsTask(ModpackModel modpack, String assetsDirectory, File assetsIndex, ITasksQueue checkAssetsQueue, ITasksQueue downloadAssetsQueue, ITasksQueue copyAssetsQueue) {
         this.modpack = modpack;
         this.assetsDirectory = assetsDirectory;
         this.assetsIndex = assetsIndex;
@@ -122,7 +121,7 @@ public class InstallMinecraftAssetsTask implements IInstallTask {
             else if (mapToResources)
                 target = new File(modpack.getResourcesDir(), friendlyName);
 
-            checkAssetsQueue.addTask(new EnsureFileTask(location, new FileSizeVerifier(size), null, url, hash, downloadAssetsQueue, copyAssetsQueue, size));
+            checkAssetsQueue.addTask(new EnsureFileTask(location, new FileSizeVerifier(size), null, url, hash, downloadAssetsQueue, copyAssetsQueue));
 
             if (target != null && !target.exists()) {
                 (new File(target.getParent())).mkdirs();

@@ -292,7 +292,7 @@ public class Installer {
         TaskGroup verifyingAssets = new TaskGroup(resources.getString("install.message.verifyassets"));
         TaskGroup installingAssets = new TaskGroup(resources.getString("install.message.installassets"));
         TaskGroup examineJava = new TaskGroup("Examining Java runtime...");
-        TaskGroup downloadJava = new TaskGroup("Downloading Java runtime: %s");
+        TaskGroup downloadJava = new TaskGroup("Downloading Java runtime...");
 
         queue.addTask(examineModpackData);
         queue.addTask(verifyingFiles);

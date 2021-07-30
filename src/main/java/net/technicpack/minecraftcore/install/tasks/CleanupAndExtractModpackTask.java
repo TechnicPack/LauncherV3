@@ -21,7 +21,6 @@ package net.technicpack.minecraftcore.install.tasks;
 
 import net.technicpack.launchercore.exception.CacheDeleteException;
 import net.technicpack.launchercore.install.ITasksQueue;
-import net.technicpack.launchercore.install.IWeightedTasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.EnsureFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
@@ -41,10 +40,10 @@ public class CleanupAndExtractModpackTask implements IInstallTask {
 	private final ModpackModel pack;
 	private final Modpack modpack;
     private final ITasksQueue checkModQueue;
-    private final IWeightedTasksQueue downloadModQueue;
+    private final ITasksQueue downloadModQueue;
     private final ITasksQueue copyModQueue;
 
-	public CleanupAndExtractModpackTask(ModpackModel pack, Modpack modpack, ITasksQueue checkModQueue, IWeightedTasksQueue downloadModQueue, ITasksQueue copyModQueue) {
+	public CleanupAndExtractModpackTask(ModpackModel pack, Modpack modpack, ITasksQueue checkModQueue, ITasksQueue downloadModQueue, ITasksQueue copyModQueue) {
 		this.pack = pack;
 		this.modpack = modpack;
         this.checkModQueue = checkModQueue;
@@ -109,10 +108,7 @@ public class CleanupAndExtractModpackTask implements IInstallTask {
             else
                 verifier = new ValidZipFileVerifier();
 
-            long filesize = mod.getFilesize();
-
-            // The filesize is -1 if unset (it's an optional field)
-			checkModQueue.addTask(new EnsureFileTask(cache, verifier, packOutput, url, downloadModQueue, copyModQueue, zipFilter, filesize));
+			checkModQueue.addTask(new EnsureFileTask(cache, verifier, packOutput, url, downloadModQueue, copyModQueue, zipFilter));
 		}
 
 		copyModQueue.addTask(new CleanupModpackCacheTask(this.pack, modpack));

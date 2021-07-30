@@ -21,7 +21,6 @@ package net.technicpack.minecraftcore.install.tasks;
 
 import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.install.ITasksQueue;
-import net.technicpack.launchercore.install.IWeightedTasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.EnsureFileTask;
 import net.technicpack.launchercore.install.tasks.EnsureLinkedFileTask;
@@ -45,9 +44,9 @@ public class InstallJavaRuntimeTask implements IInstallTask {
     private final File runtimeManifestFile;
     private final String runtimeName;
     private final ITasksQueue examineJavaQueue;
-    private final IWeightedTasksQueue downloadJavaQueue;
+    private final ITasksQueue downloadJavaQueue;
 
-    public InstallJavaRuntimeTask(ModpackModel modpack, File runtimesDirectory, File runtimeManifestFile, String runtimeName, ITasksQueue examineJavaQueue, IWeightedTasksQueue downloadJavaQueue) {
+    public InstallJavaRuntimeTask(ModpackModel modpack, File runtimesDirectory, File runtimeManifestFile, String runtimeName, ITasksQueue examineJavaQueue, ITasksQueue downloadJavaQueue) {
         this.modpack = modpack;
         this.runtimesDirectory = runtimesDirectory;
         this.runtimeManifestFile = runtimeManifestFile;
@@ -99,12 +98,11 @@ public class InstallJavaRuntimeTask implements IInstallTask {
                 // Apparently the Mac Java 8 JRE spec doesn't have any directory entries, so we have to create them regardless
                 target.getParentFile().mkdirs();
 
-                // TODO: Implement LZMA downloads
                 Download download = runtimeFile.getDownloads().getRaw();
 
                 IFileVerifier verifier = new SHA1FileVerifier(download.getSha1());
 
-                EnsureFileTask ensureFileTask = new EnsureFileTask(target, verifier, null, download.getUrl(), downloadJavaQueue, null, null, download.getSize());
+                EnsureFileTask ensureFileTask = new EnsureFileTask(target, verifier, null, download.getUrl(), downloadJavaQueue, null);
                 ensureFileTask.setExecutable(runtimeFile.isExecutable());
 
                 examineJavaQueue.addTask(ensureFileTask);

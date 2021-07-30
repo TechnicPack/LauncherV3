@@ -21,7 +21,6 @@ package net.technicpack.minecraftcore.install.tasks;
 
 import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.install.ITasksQueue;
-import net.technicpack.launchercore.install.IWeightedTasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
@@ -40,14 +39,14 @@ public class HandleVersionFileTask implements IInstallTask {
     private final ModpackModel pack;
     private final LauncherDirectories directories;
     private final ITasksQueue checkLibraryQueue;
-    private final IWeightedTasksQueue downloadLibraryQueue;
+    private final ITasksQueue downloadLibraryQueue;
     private final ITasksQueue copyLibraryQueue;
     private final ITasksQueue checkNonMavenLibsQueue;
     private final MojangVersionBuilder versionBuilder;
 
     private String libraryName;
 
-    public HandleVersionFileTask(ModpackModel pack, LauncherDirectories directories, ITasksQueue checkNonMavenLibsQueue, ITasksQueue checkLibraryQueue, IWeightedTasksQueue downloadLibraryQueue, ITasksQueue copyLibraryQueue, MojangVersionBuilder versionBuilder) {
+    public HandleVersionFileTask(ModpackModel pack, LauncherDirectories directories, ITasksQueue checkNonMavenLibsQueue, ITasksQueue checkLibraryQueue, ITasksQueue downloadLibraryQueue, ITasksQueue copyLibraryQueue, MojangVersionBuilder versionBuilder) {
         this.pack = pack;
         this.directories = directories;
         this.checkLibraryQueue = checkLibraryQueue;

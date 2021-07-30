@@ -1,7 +1,6 @@
 package net.technicpack.minecraftcore.install.tasks;
 
 import net.technicpack.launchercore.install.ITasksQueue;
-import net.technicpack.launchercore.install.IWeightedTasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.tasks.EnsureFileTask;
@@ -21,12 +20,12 @@ import java.io.IOException;
 public class InstallVersionLibTask extends ListenerTask {
     private Library library;
     private ITasksQueue grabQueue;
-    private IWeightedTasksQueue downloadLibraryQueue;
+    private ITasksQueue downloadLibraryQueue;
     private ITasksQueue copyLibraryQueue;
     private ModpackModel pack;
     private LauncherDirectories directories;
 
-    public InstallVersionLibTask(Library library, ITasksQueue grabQueue, IWeightedTasksQueue downloadLibraryQueue, ITasksQueue copyLibraryQueue, ModpackModel pack, LauncherDirectories directories) {
+    public InstallVersionLibTask(Library library, ITasksQueue grabQueue, ITasksQueue downloadLibraryQueue, ITasksQueue copyLibraryQueue, ModpackModel pack, LauncherDirectories directories) {
         this.library = library;
         this.downloadLibraryQueue = downloadLibraryQueue;
         this.copyLibraryQueue = copyLibraryQueue;

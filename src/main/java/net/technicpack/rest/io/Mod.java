@@ -23,7 +23,6 @@ package net.technicpack.rest.io;
 public class Mod extends Resource {
     private String name;
     private String version;
-    private long filesize = -1;
 
     public Mod() {
 
@@ -43,10 +42,6 @@ public class Mod extends Resource {
         return version;
     }
 
-    public long getFilesize() {
-        return filesize;
-    }
-
     @Override
     public String toString() {
         return "Mod{" +
@@ -54,7 +49,6 @@ public class Mod extends Resource {
                 ", version='" + version + '\'' +
                 ", url='" + getUrl() + '\'' +
                 ", md5='" + getMd5() + '\'' +
-                ", filesize='" + filesize + '\'' +
                 '}';
     }
 }

@@ -20,7 +20,6 @@
 package net.technicpack.minecraftcore.install.tasks;
 
 import net.technicpack.launchercore.install.ITasksQueue;
-import net.technicpack.launchercore.install.IWeightedTasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.DownloadFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
@@ -43,10 +42,10 @@ public class EnsureAssetsIndexTask implements IInstallTask {
     private final ITasksQueue downloadIndexQueue;
     private final ITasksQueue examineIndexQueue;
     private final ITasksQueue checkAssetsQueue;
-    private final IWeightedTasksQueue downloadAssetsQueue;
+    private final ITasksQueue downloadAssetsQueue;
     private final ITasksQueue installAssetsQueue;
 
-    public EnsureAssetsIndexTask(File assetsDirectory, ModpackModel modpack, ITasksQueue downloadIndexQueue, ITasksQueue examineIndexQueue, ITasksQueue checkAssetsQueue, IWeightedTasksQueue downloadAssetsQueue, ITasksQueue installAssetsQueue) {
+    public EnsureAssetsIndexTask(File assetsDirectory, ModpackModel modpack, ITasksQueue downloadIndexQueue, ITasksQueue examineIndexQueue, ITasksQueue checkAssetsQueue, ITasksQueue downloadAssetsQueue, ITasksQueue installAssetsQueue) {
         this.assetsDirectory = assetsDirectory;
         this.modpack = modpack;
         this.downloadIndexQueue = downloadIndexQueue;
