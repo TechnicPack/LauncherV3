@@ -41,7 +41,6 @@ import net.technicpack.launcher.ui.LoginFrame;
 import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launchercore.TechnicConstants;
-import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.exception.DownloadException;
@@ -136,6 +135,7 @@ public class LauncherMain {
     };
 
     private static IBuildNumber buildNumber;
+    private static RotatingFileHandler currentFileHandler;
 
     public static void main(String[] argv) {
         try {
@@ -218,19 +218,13 @@ public class LauncherMain {
     private static void setupLogging(LauncherDirectories directories, ResourceLoader resources) {
         System.out.println("Setting up logging");
         final Logger logger = Utils.getLogger();
-        File logDirectory = new File(directories.getLauncherDirectory(), "logs");
-        if (!logDirectory.exists()) {
-            logDirectory.mkdir();
-        }
-        File logs = new File(logDirectory, "techniclauncher_%D.log");
-        RotatingFileHandler fileHandler = new RotatingFileHandler(logs.getPath());
-
-        fileHandler.setFormatter(new BuildLogFormatter(buildNumber.getBuildNumber()));
+        setupLogFile(directories);
 
         for (Handler h : logger.getHandlers()) {
-            logger.removeHandler(h);
+            if(h != currentFileHandler) {
+                logger.removeHandler(h);
+            }
         }
-        logger.addHandler(fileHandler);
         logger.setUseParentHandlers(false);
 
         LauncherMain.consoleFrame = new ConsoleFrame(2500, resources.getImage("icon.png"));
@@ -245,6 +239,29 @@ public class LauncherMain {
             e.printStackTrace();
             logger.log(Level.SEVERE, "Unhandled Exception in " + t, e);
         });
+    }
+
+    public static void setupLogFile(LauncherDirectories directories) {
+        final Logger logger = Utils.getLogger();
+        File logDirectory = new File(directories.getLauncherDirectory(), "logs");
+        if (!logDirectory.exists()) {
+            logDirectory.mkdir();
+        }
+        File logs = new File(logDirectory, "techniclauncher_%D.log");
+        RotatingFileHandler fileHandler = new RotatingFileHandler(logs.getPath());
+
+        fileHandler.setFormatter(new BuildLogFormatter(buildNumber.getBuildNumber()));
+
+        logger.addHandler(fileHandler);
+        if(currentFileHandler != null) {
+            logger.removeHandler(currentFileHandler);
+            try {
+                currentFileHandler.close();
+            } catch(SecurityException ex) {
+                logger.log(Level.WARNING, "Closing old log file failed: ", ex);
+            }
+        }
+        currentFileHandler = fileHandler;
     }
 
     private static void runStartupDebug() {

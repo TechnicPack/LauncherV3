@@ -182,9 +182,11 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
                             newRoot.mkdirs();
 
                         FileUtils.copyDirectory(oldRoot, newRoot);
+                        LauncherMain.setupLogFile(new TechnicLauncherDirectories(newRoot));
+                        Utils.getLogger().info("Log file location changed");
                         FileUtils.deleteDirectory(oldRoot);
                     } catch (IOException ex) {
-                        Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ",ex);
+                        Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ", ex);
                     }
                 }
 
