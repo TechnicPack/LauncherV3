@@ -46,8 +46,6 @@ public interface PackInfo {
 
     List<String> getBuilds();
 
-    boolean shouldForceDirectory();
-
     ArrayList<FeedItem> getFeed();
 
     String getDescription();

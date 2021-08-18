@@ -238,33 +238,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             modpackSelector.forceRefresh();
         }
 
-        if (requiresInstall) {
-            try {
-                if (pack.getPackInfo().shouldForceDirectory() && FilenameUtils.directoryContains(directories.getLauncherDirectory().getCanonicalPath(), pack.getInstalledDirectory().getCanonicalPath())) {
-                    JFileChooser chooser = new JFileChooser(directories.getLauncherDirectory());
-                    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                    chooser.setCurrentDirectory(directories.getLauncherDirectory());
-                    int result = chooser.showOpenDialog(this);
-
-                    if (result == JFileChooser.APPROVE_OPTION) {
-                        File file = chooser.getSelectedFile();
-
-                        if (file.list().length > 0) {
-                            JOptionPane.showMessageDialog(this, resources.getString("modpackoptions.move.errortext"), resources.getString("modpackoptions.move.errortitle"), JOptionPane.WARNING_MESSAGE);
-                            return;
-                        } else if (FileUtils.directoryContains(directories.getLauncherDirectory(), file)) {
-                            JOptionPane.showMessageDialog(this, resources.getString("launcher.launch.requiresmove"), resources.getString("launcher.launch.requiretitle"), JOptionPane.WARNING_MESSAGE);
-                            return;
-                        }
-
-                        pack.setInstalledDirectory(file);
-                    }
-                }
-            } catch (IOException ex) {
-                Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
-            }
-        }
-
         boolean forceInstall = false;
         Version installedVersion = pack.getInstalledVersion();
 

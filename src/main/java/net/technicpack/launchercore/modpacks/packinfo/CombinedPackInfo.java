@@ -129,14 +129,6 @@ public class CombinedPackInfo implements PackInfo {
     }
 
     @Override
-    public boolean shouldForceDirectory() {
-        if (platformPackInfo != null)
-            return platformPackInfo.shouldForceDirectory();
-
-        return false;
-    }
-
-    @Override
     public ArrayList<FeedItem> getFeed() {
         if (platformPackInfo != null)
             return platformPackInfo.getFeed();

@@ -109,12 +109,6 @@ public class SolderPackInfo extends RestObject implements PackInfo {
     public String getDiscordId() { return null; }
 
     @Override
-    public boolean shouldForceDirectory() {
-        //TODO: This is not really implemented properly
-        return false;
-    }
-
-    @Override
     public ArrayList<FeedItem> getFeed() {
         return null;
     }
