@@ -96,6 +96,10 @@ public class MicrosoftAuthenticator {
         // If it fails then we bail.
         Credential credential = loadExistingCredential(user.getUsername());
 
+        if (credential == null) {
+            throw new SessionException("Microsoft login expired or is invalid");
+        }
+
         try {
             if (!credential.refreshToken()) {
                 // Refresh request failed
