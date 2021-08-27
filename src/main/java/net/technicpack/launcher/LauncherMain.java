@@ -178,6 +178,9 @@ public class LauncherMain {
         resources.setSupportedLanguages(supportedLanguages);
         resources.setLocale(settings.getLanguageCode());
 
+        // Sanity check
+        checkIfRunningInsideOneDrive(directories.getLauncherDirectory());
+
         if (params.getBuildNumber() != null && !params.getBuildNumber().isEmpty())
             buildNumber = new CommandLineBuildNumber(params);
         else
@@ -212,6 +215,27 @@ public class LauncherMain {
             //JOptionPane.showMessageDialog(null, resources.getString("launcher.updateerror.download", pack.getDisplayName(), e.getMessage()), resources.getString("launcher.installerror.title"), JOptionPane.WARNING_MESSAGE);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private static void checkIfRunningInsideOneDrive(File launcherRoot) {
+        if (OperatingSystem.getOperatingSystem() != OperatingSystem.WINDOWS) {
+            return;
+        }
+
+        Path launcherRootPath = launcherRoot.toPath();
+
+        for (String varName : new String[]{"OneDrive", "OneDriveConsumer"}) {
+            String varValue = System.getenv(varName);
+            if (varValue == null || varValue.isEmpty()) {
+                continue;
+            }
+
+            Path oneDrivePath = new File(varValue).toPath();
+
+            if (launcherRootPath.startsWith(oneDrivePath)) {
+                JOptionPane.showMessageDialog(null, "Technic Launcher cannot run inside OneDrive. Please move it out of OneDrive, in the launcher settings.", "Cannot run inside OneDrive", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
