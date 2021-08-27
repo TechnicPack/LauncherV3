@@ -60,6 +60,8 @@ public class ProcessMonitorThread extends Thread {
             }
         }
 
+        System.out.println("Process exited with error code " + process.getProcess().exitValue());
+
         if (process.getExitListener() != null) {
             process.getExitListener().onProcessExit();
         }
