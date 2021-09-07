@@ -94,7 +94,7 @@ public class Download implements Runnable {
 
             InputStream in = getConnectionInputStream(conn);
 
-            size = conn.getContentLength();
+            size = conn.getContentLengthLong();
             outFile = new File(outPath);
             outFile.delete();
 
