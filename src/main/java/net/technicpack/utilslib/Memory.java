@@ -21,6 +21,7 @@ package net.technicpack.utilslib;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
+import java.util.logging.Level;
 
 public class Memory {
     public static final Memory[] memoryOptions = {
@@ -55,8 +56,11 @@ public class Memory {
             OperatingSystemMXBean osInfo = ManagementFactory.getOperatingSystemMXBean();
             if (osInfo instanceof com.sun.management.OperatingSystemMXBean) {
                 maxMemory = ((com.sun.management.OperatingSystemMXBean) osInfo).getTotalPhysicalMemorySize() / 1024 / 1024;
+            } else {
+                Utils.getLogger().log(Level.SEVERE, "Failed to detect physical memory: incorrect instance type " + osInfo.getClass().getName());
             }
         } catch (Throwable t) {
+            Utils.getLogger().log(Level.SEVERE, "Failed to detect physical memory", t);
         }
         return Math.max(512, maxMemory);
     }
