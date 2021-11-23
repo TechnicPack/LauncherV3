@@ -406,6 +406,14 @@ public class Installer {
                 }
             }
 
+            // Remove the bin/modpack.jar file
+            File modpackJar = new File(modpack.getBinDir(), "modpack.jar");
+            if (modpackJar.exists()) {
+                if (!modpackJar.delete()) {
+                    throw new CacheDeleteException(modpackJar.getAbsolutePath());
+                }
+            }
+
             examineModpackData.addTask(new CleanupAndExtractModpackTask(modpack, modpackData, verifyingFiles, downloadingMods, installingMods));
         }
 
