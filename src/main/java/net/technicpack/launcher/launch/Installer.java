@@ -407,6 +407,8 @@ public class Installer {
             }
 
             // Remove the bin/modpack.jar file
+            // This prevents issues when upgrading a modpack between a version that has a modpack.jar, and
+            // one that doesn't. One example of this is updating BareBonesPack from a Forge to a Fabric build.
             File modpackJar = new File(modpack.getBinDir(), "modpack.jar");
             if (modpackJar.exists()) {
                 if (!modpackJar.delete()) {
