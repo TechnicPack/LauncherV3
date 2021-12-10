@@ -176,7 +176,8 @@ public class TechnicSettings implements ILaunchOptions {
     public String getJavaArgs() {
         if (javaArgs == null || javaArgs.isEmpty()) {
             // These are the default JVM args in the vanilla launcher
-            javaArgs = "-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M";
+            // -Dlog4j2.formatMsgNoLookups=true is used to handle a log4j zero-day
+            return "-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M -Dlog4j2.formatMsgNoLookups=true";
         }
         return javaArgs;
     }
