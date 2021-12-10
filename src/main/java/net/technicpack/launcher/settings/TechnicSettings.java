@@ -184,7 +184,7 @@ public class TechnicSettings implements ILaunchOptions {
         return javaArgs;
     }
     public void setJavaArgs(String args) {
-        if (args.equalsIgnoreCase(DEFAULT_JAVA_ARGS)) {
+        if (args != null && args.equalsIgnoreCase(DEFAULT_JAVA_ARGS)) {
             javaArgs = null;
         } else {
             javaArgs = args;
