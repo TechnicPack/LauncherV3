@@ -46,6 +46,12 @@ public class ResetJvmArgsIfDefaultString implements IMigrator {
     public void migrate(TechnicSettings settings, IInstalledPackRepository packStore, LauncherDirectories directories, IUserStore users) {
         // If the JVM flags are set to the default string we set it to null/empty string so we can change the defaults
         // in the future.
+
+        // Null check
+        if (settings.getJavaArgs() == null) {
+            return;
+        }
+
         if (settings.getJavaArgs().equalsIgnoreCase("-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M")
                 || settings.getJavaArgs().equalsIgnoreCase(TechnicSettings.DEFAULT_JAVA_ARGS)) {
             settings.setJavaArgs(null);
