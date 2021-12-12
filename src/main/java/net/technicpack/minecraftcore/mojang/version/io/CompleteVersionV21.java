@@ -25,6 +25,7 @@ import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused"})
 public class CompleteVersionV21 implements MojangVersion {
@@ -181,6 +182,11 @@ public class CompleteVersionV21 implements MojangVersion {
 	@Override
 	public JavaVersion getJavaVersion() {
 		return javaVersion;
+	}
+
+	@Override
+	public void removeLibrary(String libraryName) {
+		libraries = libraries.stream().filter(library -> !library.getName().equals(libraryName)).collect(Collectors.toList());
 	}
 
 	@Override

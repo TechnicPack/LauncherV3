@@ -30,6 +30,8 @@ import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
 import net.technicpack.minecraftcore.mojang.version.builder.FileVersionBuilder;
 import net.technicpack.minecraftcore.mojang.version.builder.retrievers.ZipFileRetriever;
+import net.technicpack.minecraftcore.mojang.version.io.Artifact;
+import net.technicpack.minecraftcore.mojang.version.io.Downloads;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
 
 import java.io.File;
@@ -166,6 +168,75 @@ public class HandleVersionFileTask implements IInstallTask {
             }
 
             if (isLegacy && library.getName().startsWith("net.minecraft:launchwrapper")) {
+                continue;
+            }
+
+            // Log4j vulnerability patch - CVE-2021-44228
+            // A hotfixed version of 2.0-beta9 for MC 1.7 - 1.12
+            // And version 2.15.0 for >= 1.12
+            if (library.isLog4j()) {
+                final String[] libNameParts = library.getName().split(":");
+                // org.apache.logging.log4j:log4j-core:2.0-beta9
+                // org.apache.logging.log4j    log4j-core        2.0-beta9
+                // Determine what version we need
+                String log4jVersion = "2.15.0";
+                if (libNameParts[2].equals("2.0-beta9")) {
+                    log4jVersion = "2.0-beta9-fixed";
+                }
+                String sha1;
+                int size;
+                String artifactName = libNameParts[1];
+                switch (log4jVersion) {
+                    case "2.15.0":
+                        switch (artifactName) {
+                            case "log4j-api":
+                                sha1 = "42319af9991a86b4475ab3316633a3d03e2d29e1";
+                                size = 301805;
+                                break;
+                            case "log4j-core":
+                                sha1 = "9bd89149d5083a2a3ab64dcc88b0227da14152ec";
+                                size = 1789769;
+                                break;
+                            case "log4j-slf4j18-impl":
+                                sha1 = "7c3f5758e86e1668929e907a5609a83671e21b30";
+                                size = 21222;
+                                break;
+                            default:
+                                throw new RuntimeException("Unknown log4j artifact " + artifactName + ", cannot continue");
+                        }
+                        break;
+                    case "2.0-beta9-fixed":
+                        switch (artifactName) {
+                            case "log4j-api":
+                                sha1 = "b61eaf2e64d8b0277e188262a8b771bbfa1502b3";
+                                size = 107347;
+                                break;
+                            case "log4j-core":
+                                sha1 = "677991ea2d7426f76309a73739cecf609679492c";
+                                size = 677588;
+                                break;
+                            default:
+                                throw new RuntimeException("Unknown log4j artifact " + artifactName + ", cannot continue");
+                        }
+                        break;
+                    default:
+                        throw new RuntimeException("Unknown log4j version " + log4jVersion + ", cannot continue");
+                }
+                String url = String.format("https://mirror.technicpack.net/Technic/lib/org/apache/logging/log4j/%1$s/%2$s/%1$s-%2$s.jar", artifactName, log4jVersion);
+                Library fixedLog4j = new Library();
+                fixedLog4j.setName("org.apache.logging.log4j:" + artifactName + ":" + log4jVersion);
+                Artifact artifact = new Artifact(url, sha1, size);
+                Downloads downloads = new Downloads();
+                downloads.setArtifact(artifact);
+                fixedLog4j.setDownloads(downloads);
+
+                // Add fixed lib
+                version.addLibrary(fixedLog4j);
+                checkLibraryQueue.addTask(new InstallVersionLibTask(fixedLog4j, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
+
+                // Remove unpatched lib
+                version.removeLibrary(library.getName());
+
                 continue;
             }
 

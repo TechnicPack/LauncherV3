@@ -234,6 +234,13 @@ public class VersionChain implements MojangVersion {
         return null;
     }
 
+    @Override
+    public void removeLibrary(String libraryName) {
+        for (MojangVersion version : chain) {
+            version.removeLibrary(libraryName);
+        }
+    }
+
     public void addVersionToChain(MojangVersion version) {
         chain.add(version);
     }

@@ -221,4 +221,11 @@ public class Library {
         return name.startsWith("net.minecraftforge:forge:") || name.startsWith("net.minecraftforge:minecraftforge:");
     }
 
+    public boolean isLog4j() {
+        return name.startsWith("org.apache.logging.log4j:");
+    }
+
+    public void setDownloads(Downloads downloads) {
+        this.downloads = downloads;
+    }
 }

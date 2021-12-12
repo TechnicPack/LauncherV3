@@ -35,8 +35,7 @@ public class TechnicSettings implements ILaunchOptions {
     public static final String BETA = "beta";
 
     // These are the default JVM args in the vanilla launcher
-    // -Dlog4j2.formatMsgNoLookups=true is used to handle a log4j zero-day
-    public static final String DEFAULT_JAVA_ARGS = "-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M -Dlog4j2.formatMsgNoLookups=true";
+    public static final String DEFAULT_JAVA_ARGS = "-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M";
 
     private transient File settingsFile;
     private transient File technicRoot;

@@ -14,4 +14,8 @@ public class Downloads {
     public Artifact getClassifier(String key) {
         return classifiers.get(key);
     }
+
+    public void setArtifact(Artifact artifact) {
+        this.artifact = artifact;
+    }
 }
