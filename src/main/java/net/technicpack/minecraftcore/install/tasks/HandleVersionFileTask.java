@@ -173,13 +173,13 @@ public class HandleVersionFileTask implements IInstallTask {
 
             // Log4j vulnerability patch - CVE-2021-44228
             // A hotfixed version of 2.0-beta9 for MC 1.7 - 1.12
-            // And version 2.15.0 for >= 1.12
+            // And version 2.16.0 for >= 1.12
             if (library.isLog4j()) {
                 final String[] libNameParts = library.getName().split(":");
                 // org.apache.logging.log4j:log4j-core:2.0-beta9
                 // org.apache.logging.log4j    log4j-core        2.0-beta9
                 // Determine what version we need
-                String log4jVersion = "2.15.0";
+                String log4jVersion = "2.16.0";
                 if (libNameParts[2].equals("2.0-beta9")) {
                     log4jVersion = "2.0-beta9-fixed";
                 }
@@ -187,19 +187,19 @@ public class HandleVersionFileTask implements IInstallTask {
                 int size;
                 String artifactName = libNameParts[1];
                 switch (log4jVersion) {
-                    case "2.15.0":
+                    case "2.16.0":
                         switch (artifactName) {
                             case "log4j-api":
-                                sha1 = "42319af9991a86b4475ab3316633a3d03e2d29e1";
-                                size = 301805;
+                                sha1 = "f821a18687126c2e2f227038f540e7953ad2cc8c";
+                                size = 301892;
                                 break;
                             case "log4j-core":
-                                sha1 = "9bd89149d5083a2a3ab64dcc88b0227da14152ec";
-                                size = 1789769;
+                                sha1 = "539a445388aee52108700f26d9644989e7916e7c";
+                                size = 1789565;
                                 break;
                             case "log4j-slf4j18-impl":
-                                sha1 = "7c3f5758e86e1668929e907a5609a83671e21b30";
-                                size = 21222;
+                                sha1 = "0c880a059056df5725f5d8d1035276d9749eba6d";
+                                size = 21249;
                                 break;
                             default:
                                 throw new RuntimeException("Unknown log4j artifact " + artifactName + ", cannot continue");
