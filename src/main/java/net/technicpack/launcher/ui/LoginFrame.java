@@ -256,16 +256,6 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         login.addActionListener(e -> login());
         add(login, new GridBagConstraints(0, 6, GridBagConstraints.REMAINDER, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(12,20,0,20),0,0));
 
-        // Add mojang account button
-        addMojang = new RoundedButton(resources.getString("login.addmojang"));
-        addMojang.setBorder(BorderFactory.createEmptyBorder(5,17,10,17));
-        addMojang.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        addMojang.setContentAreaFilled(false);
-        addMojang.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        addMojang.setHoverForeground(LauncherFrame.COLOR_BLUE);
-        addMojang.addActionListener(e -> addMojangAccount());
-        add(addMojang, new GridBagConstraints(0, 7, GridBagConstraints.REMAINDER, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(50,20,0,20),0,0));
-
         // Microsoft login button
         addMicrosoft = new RoundedButton(resources.getString("login.addmicrosoft"));
         addMicrosoft.setBorder(BorderFactory.createEmptyBorder(5,17,10,17));
@@ -274,7 +264,17 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         addMicrosoft.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         addMicrosoft.setHoverForeground(LauncherFrame.COLOR_BLUE);
         addMicrosoft.addActionListener(e -> addMicrosoftAccount());
-        add(addMicrosoft, new GridBagConstraints(0, 8, GridBagConstraints.REMAINDER, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(12,20,0,20),0,0));
+        add(addMicrosoft, new GridBagConstraints(0, 7, GridBagConstraints.REMAINDER, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(50,20,0,20),0,0));
+
+        // Add mojang account button
+        addMojang = new RoundedButton(resources.getString("login.addmojang"));
+        addMojang.setBorder(BorderFactory.createEmptyBorder(5,17,10,17));
+        addMojang.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
+        addMojang.setContentAreaFilled(false);
+        addMojang.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        addMojang.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        addMojang.addActionListener(e -> addMojangAccount());
+        add(addMojang, new GridBagConstraints(0, 8, GridBagConstraints.REMAINDER, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(12,20,0,20),0,0));
 
         // Mojang username label
         usernameLabel = new JLabel(resources.getString("login.username"));
