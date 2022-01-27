@@ -89,12 +89,17 @@ public class VersionChain implements MojangVersion {
 
     @Override
     public ArgumentList getJavaArguments() {
+        ArgumentList.Builder allArguments = new ArgumentList.Builder();
+
         for (MojangVersion version : chain) {
-            if (version.getJavaArguments() != null)
-                return version.getJavaArguments();
+            if (version.getJavaArguments() != null) {
+                for (Argument arg : version.getJavaArguments().getArguments()) {
+                    allArguments.addArgument(arg);
+                }
+            }
         }
 
-        return null;
+        return allArguments.build();
     }
 
     @Override
