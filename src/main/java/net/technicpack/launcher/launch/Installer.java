@@ -117,7 +117,7 @@ public class Installer {
                     InstallTasksQueue<MojangVersion> tasksQueue = new InstallTasksQueue<MojangVersion>(listener);
                     MojangVersionBuilder versionBuilder = createVersionBuilder(pack, tasksQueue);
 
-                    if (!pack.isLocalOnly() && build != null && !build.isEmpty()) {
+                    if (build != null && !build.isEmpty()) {
                         buildTasksQueue(tasksQueue, resources, pack, build, doFullInstall, versionBuilder);
 
                         version = installer.installPack(tasksQueue, pack, build);
