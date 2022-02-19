@@ -33,10 +33,14 @@ public class DesktopUtils {
             if (url.startsWith("mailto:"))
                 Desktop.getDesktop().mail(new URI(url));
             else {
-                if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
-                    Desktop.getDesktop().browse(new URI(url));
-                else if(OperatingSystem.getOperatingSystem() == OperatingSystem.LINUX)
+                // https://github.com/TechnicPack/LauncherV3/issues/193
+                // https://gist.github.com/vorburger/6b8863be11f0474f10f8515cd196f35a
+                // Under (some?) Linux, Desktop.getDesktop().browse() seems to "freeze" (deadlock) if the AWT-EventQueue is subsequently blocked.
+                // But xdg-open seems to work more reliably - so if on Linux (check first), we prefer using that.
+                if(OperatingSystem.getOperatingSystem() == OperatingSystem.LINUX)
                     Runtime.getRuntime().exec(new String[]{"xdg-open", url});
+                else if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
+                    Desktop.getDesktop().browse(new URI(url));
                 else if(OperatingSystem.getOperatingSystem() == OperatingSystem.OSX)
                     Runtime.getRuntime().exec(new String[]{"open", url});
                 else
