@@ -7,7 +7,8 @@ import net.technicpack.launchercore.exception.MicrosoftAuthException;
  *
  */
 public class XboxMinecraftRequest {
-    @Key(value="identityToken") private String identityToken;
+    @Key(value="xtoken") private String identityToken;
+    @Key(value="platform") final private String platform = "PC_LAUNCHER";
 
     public XboxMinecraftRequest(XboxResponse xstsResponse) throws MicrosoftAuthException {
         identityToken = "XBL3.0 x=" + xstsResponse.getUserhash() + ";" + xstsResponse.token;

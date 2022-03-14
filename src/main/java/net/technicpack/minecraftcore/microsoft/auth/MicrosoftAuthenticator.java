@@ -43,7 +43,7 @@ public class MicrosoftAuthenticator {
     private static final String XBOX_XSTS_URL = "https://xsts.auth.xboxlive.com/xsts/authorize";
 
     // MINECRAFT
-    private static final String MINECRAFT_AUTH_URL = "https://api.minecraftservices.com/authentication/login_with_xbox";
+    private static final String MINECRAFT_AUTH_URL = "https://api.minecraftservices.com/launcher/login";
     private static final String MINECRAFT_PROFILE_URL = "https://api.minecraftservices.com/minecraft/profile";
 
     public MicrosoftAuthenticator(File dataStore) {
