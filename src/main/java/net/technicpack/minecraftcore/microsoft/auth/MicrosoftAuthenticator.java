@@ -31,7 +31,7 @@ public class MicrosoftAuthenticator {
     private final HttpRequestFactory REQUEST_FACTORY;
 
     // OAUTH
-    private static final String TECHNIC_CLIENT_ID = "5f8b309f-ad5f-49bf-877a-8b94afd75b9f";
+    private static final String TECHNIC_CLIENT_ID = "8dfabc1d-38a9-42d8-bc08-677dbc60fe65";
     private static final String[] SCOPES = { "XboxLive.signin", "XboxLive.offline_access" };
     private static final String TOKEN_SERVER_URL = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
     private static final String AUTHORIZATION_SERVER_URL =
