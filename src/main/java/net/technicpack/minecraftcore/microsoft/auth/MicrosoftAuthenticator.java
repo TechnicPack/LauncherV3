@@ -126,7 +126,7 @@ public class MicrosoftAuthenticator {
 
     private Credential getOAuthCredential(String username) throws MicrosoftAuthException {
         LocalServerReceiver receiver = new LocalServerReceiver.Builder()
-                .setHost("localhost").setPort(0).setCallbackPath("/").build();
+                .setHost("localhost").setPort(-1).setCallbackPath("/").build();
 
         try {
             AuthorizationCodeFlow flow = buildFlow();
