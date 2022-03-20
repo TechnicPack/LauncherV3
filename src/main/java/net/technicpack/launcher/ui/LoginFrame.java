@@ -452,6 +452,26 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     }
 
     protected void addMicrosoftAccount() {
+        // Java version check for the Xbox auth certificate, which requires Java >= 8u91
+        final String javaVersion = System.getProperty("java.version");
+        if (javaVersion.startsWith("1.8.0_") && Integer.parseInt(javaVersion.substring("1.8.0_".length())) < 91) {
+            Utils.getLogger().log(Level.SEVERE, "Aborting MSA login, Java version is too old");
+
+            final String steps = "Your Java version is too old for MSA login, and needs to updated. Follow these steps:\n\n"+
+                    "1) Close Technic Launcher. It should not be running!\n" +
+                    "2) Open http://java.com/en/download/manual.jsp in your web browser\n" +
+                    "3) Download the one that says Windows Offline (64-Bit)\n" +
+                    "4) After the download is complete, you must install it. You can do so by double clicking on the icon to run it.\n" +
+                    "5) After it installs start up Technic Launcher again and try to login.\n\n"+
+                    "When you close this message, the http://java.com/en/download/manual.jsp page will open automatically.";
+
+            JOptionPane.showMessageDialog(null, steps, "Java version too old for MSA login", ERROR_MESSAGE);
+
+            DesktopUtils.browseUrl("http://java.com/en/download/manual.jsp");
+
+            return;
+        }
+
         newMicrosoftLogin();
     }
 
