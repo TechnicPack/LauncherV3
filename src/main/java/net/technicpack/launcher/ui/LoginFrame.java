@@ -454,7 +454,12 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     protected void addMicrosoftAccount() {
         // Java version check for the Xbox auth certificate, which requires Java >= 8u91
         final String javaVersion = System.getProperty("java.version");
-        if (javaVersion.startsWith("1.8.0_") && Integer.parseInt(javaVersion.substring("1.8.0_".length())) < 91) {
+        final String[] javaVersionParts = javaVersion.split("[._-]");
+        // 1.8.0_201-1-ojdkbuild
+        // 1  8  0  201  1  ojdkbuild
+        // 1.8.0_91
+        // 1  8  0  91
+        if (javaVersionParts.length >= 4 && javaVersion.startsWith("1.8.0_") && Integer.parseInt(javaVersionParts[3]) < 91) {
             Utils.getLogger().log(Level.SEVERE, "Aborting MSA login, Java version is too old");
 
             final String steps = "Your Java version is too old for MSA login, and needs to updated. Follow these steps:\n\n"+
