@@ -8,6 +8,6 @@ updates:
     assignees:
       - "Pyker"
     ignore:
-      - dependency-name: 'maven-shade-plugin'
+      - dependency-name: 'org.apache.maven.plugins:maven-shade-plugin'
         versions:
           - '3.3.0' # Broken, see https://issues.apache.org/jira/browse/MSHADE-417
