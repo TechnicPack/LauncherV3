@@ -325,7 +325,7 @@ public class MinecraftLauncher {
 
         // if MC < 1.6, we inject LegacyWrapper
         // HACK
-        boolean isLegacy = MojangUtils.isLegacyVersion(version.getId());
+        boolean isLegacy = MojangUtils.isLegacyVersion(version.getParentVersion());
 
         final boolean hasModernForge = MojangUtils.hasModernForge(version);
         final String[] versionIdParts = version.getId().split("-");

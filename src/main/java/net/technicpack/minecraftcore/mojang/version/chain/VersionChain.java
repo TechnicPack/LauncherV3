@@ -221,7 +221,7 @@ public class VersionChain implements MojangVersion {
 
     @Override
     public String getParentVersion() {
-        return null;
+        return chain.get(chain.size() - 1).getId();
     }
 
     @Override

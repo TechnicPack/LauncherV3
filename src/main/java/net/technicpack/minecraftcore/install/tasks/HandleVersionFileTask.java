@@ -81,7 +81,7 @@ public class HandleVersionFileTask implements IInstallTask {
 
         // if MC < 1.6, we inject LegacyWrapper
         // HACK
-        boolean isLegacy = MojangUtils.isLegacyVersion(version.getId());
+        boolean isLegacy = MojangUtils.isLegacyVersion(version.getParentVersion());
 
         if (isLegacy) {
             Library legacyWrapper = new Library();
