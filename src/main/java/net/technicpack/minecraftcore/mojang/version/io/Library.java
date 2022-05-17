@@ -39,7 +39,7 @@ public class Library {
         "https://mirror.technicpack.net/Technic/lib/",
     };
     private static final Pattern GRADLE_PATTERN = Pattern.compile("^([^:@]+):([^:@]+):([^:@]+)(?::([^:@]+))?(?:@([^:@]+))?$");
-    private static final Pattern FORGE_MAVEN_ROOT = Pattern.compile("^https://files\\.minecraftforge\\.net/maven/(.+)$");
+    private static final Pattern FORGE_MAVEN_ROOT = Pattern.compile("^https://(?:files\\.minecraftforge\\.net/maven|maven\\.minecraftforge\\.net)/(.+)$");
 
     // JSON fields
     private String name;

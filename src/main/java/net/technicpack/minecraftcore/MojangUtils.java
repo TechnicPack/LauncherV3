@@ -194,18 +194,6 @@ public class MojangUtils {
     }
 
     public static boolean hasModernForge(MojangVersion version) {
-        boolean foundForge = false;
-        for (Library library : version.getLibrariesForOS()) {
-            if (library.isForge()) {
-                foundForge = true;
-                break;
-            }
-        }
-
-        if (!foundForge) {
-            return false;
-        }
-
         Pattern p = Pattern.compile("^(?<mc>[0-9.]+)-forge-(?<forge>[0-9.]+)$");
         Matcher m = p.matcher(version.getId());
 

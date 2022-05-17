@@ -30,7 +30,6 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.RunData;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
-import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
 import net.technicpack.minecraftcore.mojang.version.io.JavaVersion;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
@@ -72,10 +71,6 @@ public class MinecraftLauncher {
 
     public JavaVersionRepository getJavaVersions() {
         return javaVersions;
-    }
-
-    public GameProcess launch(ModpackModel pack, int memory, LaunchOptions options, CompleteVersion version) throws IOException {
-        return launch(pack, memory, options, null, version);
     }
 
     public GameProcess launch(ModpackModel pack, long memory, LaunchOptions options, ProcessExitListener exitListener, MojangVersion version) throws IOException {
@@ -206,11 +201,16 @@ public class MinecraftLauncher {
 
         // build jvm args
         String launchJavaVersion = javaVersions.getSelectedVersion().getVersionNumber();
-        ArgumentList jvmArgs = version.getJavaArguments();
 
-        if (jvmArgs != null) {
-            for (String arg : jvmArgs.resolve(options.getOptions(), paramDereferencer)) {
-                commands.add(arg);
+        // Ignore JVM args for Forge 1.13+, ForgeWrapper handles those
+        // FIXME: HACK: This likely breaks some things as it will also skip vanilla JVM args
+        if (!MojangUtils.hasModernForge(version)) {
+            ArgumentList jvmArgs = version.getJavaArguments();
+
+            if (jvmArgs != null) {
+                for (String arg : jvmArgs.resolve(options.getOptions(), paramDereferencer)) {
+                    commands.add(arg);
+                }
             }
         }
 
@@ -259,8 +259,13 @@ public class MinecraftLauncher {
         if (operatingSystem.equals(OperatingSystem.OSX)) {
             commands.add("-Xdock:icon=" + options.getIconPath());
             commands.add("-Xdock:name=" + pack.getDisplayName());
+
+            // Add -XstartOnFirstThread for Mac on LWJGL 3
+            boolean hasLwjgl3 = version.getLibrariesForOS().stream().anyMatch(library -> library.getName().startsWith("org.lwjgl:lwjgl:"));
+            if (hasLwjgl3) {
+                commands.addUnique("-XstartOnFirstThread");
+            }
         } else if (operatingSystem.equals(OperatingSystem.WINDOWS)) {
-            // I have no idea if this helps technic or not.
             commands.addUnique("-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump");
         }
 
@@ -342,6 +347,7 @@ public class MinecraftLauncher {
             // or at least only do it if the users are sticking with modpack.jar
             if (library.isForge()) {
                 if (hasModernForge) {
+                    // TODO: Use removeLibrary in HandleVersionFileTask to remove this mess
                     if (!is1_12_2 && !library.getName().endsWith(":launcher")) {
                         continue;
                     } else if (is1_12_2 && !library.getName().endsWith(":universal")) {
@@ -367,7 +373,7 @@ public class MinecraftLauncher {
             result.append(file.getAbsolutePath());
         }
 
-        // Add the modpack.jar to the classpath, if it exists and minecraftforge is not a library already
+        // Add the modpack.jar to the classpath, if it exists and the modpack isn't running Forge 1.13+
         if (!(MojangUtils.hasModernForge(version))) {
             File modpack = new File(pack.getBinDir(), "modpack.jar");
             if (modpack.exists()) {
@@ -379,7 +385,13 @@ public class MinecraftLauncher {
         }
 
         // Add the minecraft jar to the classpath
-        File minecraft = new File(pack.getBinDir(), "minecraft.jar");
+        File minecraft;
+        // FIXME: HACK: Feed the unchanged Minecraft jar if it's Forge 1.13+
+        if (MojangUtils.hasModernForge(version)) {
+            minecraft = new File(directories.getCacheDirectory(), "minecraft_" + version.getParentVersion() + ".jar");
+        } else {
+            minecraft = new File(pack.getBinDir(), "minecraft.jar");
+        }
         if (!minecraft.exists()) {
             throw new RuntimeException("Minecraft not installed for this pack: " + pack);
         }

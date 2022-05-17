@@ -103,25 +103,34 @@ public class HandleVersionFileTask implements IInstallTask {
         if (hasModernForge) {
             File profileJson = new File(pack.getBinDir(), "install_profile.json");
             ZipFileRetriever zipVersionRetriever = new ZipFileRetriever(new File(pack.getBinDir(), "modpack.jar"));
-            MojangVersion profileVersion = new FileVersionBuilder(profileJson, zipVersionRetriever, null).buildVersionFromKey("install_profile");
+            MojangVersion installerVersion = new FileVersionBuilder(profileJson, zipVersionRetriever, null).buildVersionFromKey("install_profile");
 
             final String[] versionIdParts = version.getId().split("-", 3);
             final boolean is1_12_2 = versionIdParts[0].equals("1.12.2");
 
-            for (Library library : profileVersion.getLibrariesForOS()) {
+            for (Library library : installerVersion.getLibrariesForOS()) {
                 if (library.isForge()) {
                     // For Forge 1.12.2 > 2847, we have to inject the universal jar as a dependency
                     if (is1_12_2) {
                         library.setName(library.getName() + ":universal");
+                        // TODO: actually set the artifact URL
                         library.setUrl("https://files.minecraftforge.net/maven/");
 
                         // Add the mutated library
                         version.addLibrary(library);
 
                         checkLibraryQueue.addTask(new InstallVersionLibTask(library, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
+                        continue;
                     }
+                }
 
-                    // We normally skip Forge because Forge specifies itself as a dependency, for some reason
+                // For Forge 1.13+, the URL for the universal jar isn't set, so we set one here
+                // TODO: better way to get library name parts
+                if (library.getName().startsWith("net.minecraftforge:forge:") && library.getName().endsWith(":universal") && !is1_12_2) {
+                    // TODO: actually set the artifact URL
+                    library.setUrl("https://files.minecraftforge.net/maven/");
+
+                    checkLibraryQueue.addTask(new InstallVersionLibTask(library, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
                     continue;
                 }
 
@@ -132,26 +141,20 @@ public class HandleVersionFileTask implements IInstallTask {
             if (!is1_12_2) {
                 Library forgeWrapper = new Library();
                 // TODO: add hash validation
-                forgeWrapper.setName("io.github.zekerzhayard:ForgeWrapper:1.5.1");
+                forgeWrapper.setName("io.github.zekerzhayard:ForgeWrapper:1.5.4");
 
                 version.addLibrary(forgeWrapper);
 
                 version.setMainClass("io.github.zekerzhayard.forgewrapper.installer.Main");
 
                 for (Library library : version.getLibrariesForOS()) {
-                    if (library.isForge()) {
-                        Library forgeLauncher = new Library();
-                        forgeLauncher.setName(library.getName() + ":launcher");
-                        forgeLauncher.setUrl("https://files.minecraftforge.net/maven/");
+                    // This is for Forge 1.13+, up to 1.17 (not inclusive)
+                    if (library.getName().startsWith("net.minecraftforge:forge:")) {
+                        // Correct the classifier and URL
+                        library.setName(library.getName() + ":launcher");
+                        library.setUrl("https://files.minecraftforge.net/maven/");
 
-                        version.addLibrary(forgeLauncher);
-                        checkLibraryQueue.addTask(new InstallVersionLibTask(forgeLauncher, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
-
-                        Library forgeUniversal = new Library();
-                        forgeUniversal.setName(library.getName() + ":universal");
-                        forgeUniversal.setUrl("https://files.minecraftforge.net/maven/");
-
-                        checkLibraryQueue.addTask(new InstallVersionLibTask(forgeUniversal, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
+                        checkLibraryQueue.addTask(new InstallVersionLibTask(library, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
 
                         break;
                     }
@@ -164,6 +167,7 @@ public class HandleVersionFileTask implements IInstallTask {
             // HACK - Please let us get rid of this when we move to actually hosting forge,
             // or at least only do it if the users are sticking with modpack.jar
             if (library.isForge()) {
+                // TODO: use removeLibrary
                 continue;
             }
 
