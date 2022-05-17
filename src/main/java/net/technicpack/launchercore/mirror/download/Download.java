@@ -107,7 +107,7 @@ public class Download implements Runnable {
                 Thread progress = new MonitorThread(Thread.currentThread(), rbc);
                 progress.start();
 
-                fos.getChannel().transferFrom(rbc, 0, size > 0 ? size : Integer.MAX_VALUE);
+                fos.getChannel().transferFrom(rbc, 0, size > 0 ? size : Long.MAX_VALUE);
 
                 in.close();
                 rbc.close();

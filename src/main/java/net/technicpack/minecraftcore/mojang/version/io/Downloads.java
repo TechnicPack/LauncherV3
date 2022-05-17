@@ -7,6 +7,12 @@ public class Downloads {
     private Artifact artifact;
     private Map<String, Artifact> classifiers;
 
+    public Downloads() {}
+
+    public Downloads(String artifactUrl, String artifactSha1, long artifactSize) {
+        artifact = new Artifact(artifactUrl, artifactSha1, artifactSize);
+    }
+
     public Artifact getArtifact() {
         return artifact;
     }

@@ -57,6 +57,18 @@ public class Library {
     private transient String gradleClassifier;
     private transient String gradleExtension = "jar";
 
+    public Library() {}
+
+    public Library(String name) {
+        setName(name);
+    }
+
+    public Library(String name, String artifactUrl, String artifactSha1, int artifactSize) {
+        setName(name);
+
+        downloads = new Downloads(artifactUrl, artifactSha1, artifactSize);
+    }
+
     public String getUrl() {
         return url;
     }
@@ -71,6 +83,9 @@ public class Library {
 
     public void setName(String name) {
         this.name = name;
+
+        // Trigger name reparse to update the gradle info
+        parseName();
     }
 
     public List<Rule> getRules() {
@@ -85,15 +100,19 @@ public class Library {
         return extract;
     }
 
-    private void parseName() {
+    private void ensureNameIsParsed() {
         // Don't reparse if it's already been parsed
         if (gradleGroupId != null)
             return;
 
+        parseName();
+    }
+
+    private void parseName() {
         Matcher m = GRADLE_PATTERN.matcher(name);
 
         if (!m.matches()) {
-            throw new IllegalStateException("Cannot parse empty gradle specifier");
+            throw new IllegalStateException("Cannot parse invalid gradle specifier");
         }
 
         gradleGroupId = m.group(1);
@@ -103,6 +122,24 @@ public class Library {
         String extension = m.group(5);
         if (extension != null && !extension.isEmpty())
             gradleExtension = extension;
+    }
+
+    public String getGradleGroup() {
+        ensureNameIsParsed();
+
+        return gradleGroupId;
+    }
+
+    public String getGradleArtifact() {
+        ensureNameIsParsed();
+
+        return gradleArtifactId;
+    }
+
+    public String getGradleClassifier() {
+        ensureNameIsParsed();
+
+        return gradleClassifier;
     }
 
     public boolean isForCurrentOS() {
@@ -126,7 +163,7 @@ public class Library {
         }
 
         // Make sure the gradle specifier is parsed
-        parseName();
+        ensureNameIsParsed();
 
         String filename = getArtifactFilename(nativeClassifier);
 
@@ -139,7 +176,7 @@ public class Library {
         }
 
         // Make sure the gradle specifier is parsed
-        parseName();
+        ensureNameIsParsed();
 
         String filename = gradleArtifactId + '-' + gradleVersion;
 
@@ -223,6 +260,10 @@ public class Library {
 
     public boolean isLog4j() {
         return name.startsWith("org.apache.logging.log4j:");
+    }
+
+    public Downloads getDownloads() {
+        return downloads;
     }
 
     public void setDownloads(Downloads downloads) {

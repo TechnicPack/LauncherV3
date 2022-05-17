@@ -4,9 +4,11 @@ package net.technicpack.minecraftcore.mojang.version.io;
 public class Artifact {
     private String url;
     private String sha1;
-    private Integer size;
+    private long size;
 
-    public Artifact(String url, String sha1, Integer size) {
+    private Artifact() {}
+
+    public Artifact(String url, String sha1, long size) {
         this.url = url;
         this.sha1 = sha1;
         this.size = size;
@@ -20,7 +22,11 @@ public class Artifact {
         return sha1;
     }
 
-    public Integer getSize() {
+    public long getSize() {
         return size;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

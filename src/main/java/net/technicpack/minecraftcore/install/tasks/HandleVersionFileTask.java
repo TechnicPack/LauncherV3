@@ -84,9 +84,12 @@ public class HandleVersionFileTask implements IInstallTask {
         boolean isLegacy = MojangUtils.isLegacyVersion(version.getParentVersion());
 
         if (isLegacy) {
-            Library legacyWrapper = new Library();
-            legacyWrapper.setName("net.technicpack:legacywrapper:1.2.1");
-            legacyWrapper.setUrl("https://mirror.technicpack.net/Technic/lib/");
+            Library legacyWrapper = new Library(
+                    "net.technicpack:legacywrapper:1.2.1",
+                    "https://mirror.technicpack.net/Technic/lib/net/technicpack/legacywrapper/1.2.1/legacywrapper-1.2.1.jar",
+                    "741cbc946421a5a59188a51108e1ce5cb5674681",
+                    77327
+            );
 
             version.addLibrary(legacyWrapper);
 
@@ -113,8 +116,9 @@ public class HandleVersionFileTask implements IInstallTask {
                     // For Forge 1.12.2 > 2847, we have to inject the universal jar as a dependency
                     if (is1_12_2) {
                         library.setName(library.getName() + ":universal");
-                        // TODO: actually set the artifact URL
-                        library.setUrl("https://files.minecraftforge.net/maven/");
+                        Downloads downloads = library.getDownloads();
+                        Artifact artifact = downloads.getArtifact();
+                        artifact.setUrl("https://files.minecraftforge.net/maven/" + library.getArtifactPath());
 
                         // Add the mutated library
                         version.addLibrary(library);
@@ -125,10 +129,13 @@ public class HandleVersionFileTask implements IInstallTask {
                 }
 
                 // For Forge 1.13+, the URL for the universal jar isn't set, so we set one here
-                // TODO: better way to get library name parts
-                if (library.getName().startsWith("net.minecraftforge:forge:") && library.getName().endsWith(":universal") && !is1_12_2) {
-                    // TODO: actually set the artifact URL
-                    library.setUrl("https://files.minecraftforge.net/maven/");
+                if (library.getGradleGroup().equals("net.minecraftforge")
+                        && library.getGradleArtifact().equals("forge")
+                        && library.getGradleClassifier().equals("universal")
+                        && !is1_12_2) {
+                    Downloads downloads = library.getDownloads();
+                    Artifact artifact = downloads.getArtifact();
+                    artifact.setUrl("https://files.minecraftforge.net/maven/" + library.getArtifactPath());
 
                     checkLibraryQueue.addTask(new InstallVersionLibTask(library, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
                     continue;
@@ -139,9 +146,12 @@ public class HandleVersionFileTask implements IInstallTask {
 
             // For Forge 1.13+, we inject our ForgeWrapper as a dependency and launch it through that
             if (!is1_12_2) {
-                Library forgeWrapper = new Library();
-                // TODO: add hash validation
-                forgeWrapper.setName("io.github.zekerzhayard:ForgeWrapper:1.5.4");
+                Library forgeWrapper = new Library(
+                        "io.github.zekerzhayard:ForgeWrapper:1.5.5",
+                        "https://mirror.technicpack.net/Technic/lib/io/github/zekerzhayard/ForgeWrapper/1.5.5/ForgeWrapper-1.5.5.jar",
+                        "566dfd60aacffaa02884614835f1151d36f1f985",
+                        34331
+                );
 
                 version.addLibrary(forgeWrapper);
 
@@ -227,12 +237,12 @@ public class HandleVersionFileTask implements IInstallTask {
                         throw new RuntimeException("Unknown log4j version " + log4jVersion + ", cannot continue");
                 }
                 String url = String.format("https://mirror.technicpack.net/Technic/lib/org/apache/logging/log4j/%1$s/%2$s/%1$s-%2$s.jar", artifactName, log4jVersion);
-                Library fixedLog4j = new Library();
-                fixedLog4j.setName("org.apache.logging.log4j:" + artifactName + ":" + log4jVersion);
-                Artifact artifact = new Artifact(url, sha1, size);
-                Downloads downloads = new Downloads();
-                downloads.setArtifact(artifact);
-                fixedLog4j.setDownloads(downloads);
+                Library fixedLog4j = new Library(
+                        "org.apache.logging.log4j:" + artifactName + ":" + log4jVersion,
+                        url,
+                        sha1,
+                        size
+                );
 
                 // Add fixed lib
                 version.addLibrary(fixedLog4j);
