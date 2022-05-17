@@ -233,7 +233,7 @@ public class Library {
                 // Check if this URL is in Minecraft Forge's Maven repo and add ours as a primary mirror
                 Matcher m = FORGE_MAVEN_ROOT.matcher(artifactUrl);
                 if (m.matches())
-                    possibleUrls.add(TechnicConstants.technicForgeRepo + m.group(1));
+                    possibleUrls.add(TechnicConstants.technicLibRepo + m.group(1));
 
                 possibleUrls.add(artifactUrl);
             }

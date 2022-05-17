@@ -19,6 +19,7 @@
 
 package net.technicpack.minecraftcore.install.tasks;
 
+import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.install.ITasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
@@ -86,7 +87,7 @@ public class HandleVersionFileTask implements IInstallTask {
         if (isLegacy) {
             Library legacyWrapper = new Library(
                     "net.technicpack:legacywrapper:1.2.1",
-                    "https://mirror.technicpack.net/Technic/lib/net/technicpack/legacywrapper/1.2.1/legacywrapper-1.2.1.jar",
+                    TechnicConstants.technicLibRepo + "net/technicpack/legacywrapper/1.2.1/legacywrapper-1.2.1.jar",
                     "741cbc946421a5a59188a51108e1ce5cb5674681",
                     77327
             );
@@ -148,7 +149,7 @@ public class HandleVersionFileTask implements IInstallTask {
             if (!is1_12_2) {
                 Library forgeWrapper = new Library(
                         "io.github.zekerzhayard:ForgeWrapper:1.5.5",
-                        "https://mirror.technicpack.net/Technic/lib/io/github/zekerzhayard/ForgeWrapper/1.5.5/ForgeWrapper-1.5.5.jar",
+                        TechnicConstants.technicLibRepo + "io/github/zekerzhayard/ForgeWrapper/1.5.5/ForgeWrapper-1.5.5.jar",
                         "566dfd60aacffaa02884614835f1151d36f1f985",
                         34331
                 );
@@ -236,7 +237,7 @@ public class HandleVersionFileTask implements IInstallTask {
                     default:
                         throw new RuntimeException("Unknown log4j version " + log4jVersion + ", cannot continue");
                 }
-                String url = String.format("https://mirror.technicpack.net/Technic/lib/org/apache/logging/log4j/%1$s/%2$s/%1$s-%2$s.jar", artifactName, log4jVersion);
+                String url = String.format(TechnicConstants.technicLibRepo + "org/apache/logging/log4j/%1$s/%2$s/%1$s-%2$s.jar", artifactName, log4jVersion);
                 Library fixedLog4j = new Library(
                         "org.apache.logging.log4j:" + artifactName + ":" + log4jVersion,
                         url,
