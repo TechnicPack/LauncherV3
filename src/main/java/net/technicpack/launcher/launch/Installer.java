@@ -312,7 +312,7 @@ public class Installer {
         queue.addTask(examineJava);
         queue.addTask(downloadJava);
         if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX)
-            queue.addTask(new CopyDylibJnilibTask(modpack));
+            queue.addTask(new RenameJnilibToDylibTask(modpack));
 
         // Add FML libs
         String fmlLibsZip;

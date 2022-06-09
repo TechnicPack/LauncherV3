@@ -22,22 +22,22 @@ package net.technicpack.minecraftcore.install.tasks;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.utilslib.MD5Utils;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 
-public class CopyDylibJnilibTask implements IInstallTask {
+public class RenameJnilibToDylibTask implements IInstallTask {
     private ModpackModel modpack;
 
-    public CopyDylibJnilibTask(ModpackModel modpack) {
+    public RenameJnilibToDylibTask(ModpackModel modpack) {
         this.modpack = modpack;
     }
 
     @Override
     public String getTaskDescription() {
-        return "Copying OSX natives";
+        return "Fixing OSX natives";
     }
 
     @Override
@@ -47,43 +47,27 @@ public class CopyDylibJnilibTask implements IInstallTask {
 
     @Override
     public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
-        File dylib = new File(new File(modpack.getBinDir(), "natives"), "liblwjgl.dylib");
-        File jnilib = new File(new File(modpack.getBinDir(), "natives"), "liblwjgl.jnilib");
+        // Rename all *.jnilib natives to *.dylib
+        // This is required due to https://bugs.openjdk.org/browse/JDK-8127215
 
-        File betterLib = getBetterLib(dylib, jnilib);
+        final File nativesDir = new File(modpack.getBinDir(), "natives");
 
-        if (!betterLib.exists())
-            return;
+        Iterator<File> filesIterator = FileUtils.iterateFiles(nativesDir, new String[]{"jnilib"}, true);
+        while (filesIterator.hasNext()) {
+            File file = filesIterator.next();
 
-        File worseLib = dylib;
+            if (!file.getName().endsWith(".jnilib")) {
+                continue;
+            }
 
-        if (worseLib.equals(betterLib))
-            worseLib = jnilib;
+            final String filename = file.getName();
+            final String newFilename = filename.substring(0, filename.length() - ".jnilib".length()) + ".dylib";
 
-        if (betterLib.exists() && worseLib.exists()) {
-            String betterMd5 = MD5Utils.getMD5(betterLib);
+            File newFile = new File(file.getParentFile(), newFilename);
 
-            if (MD5Utils.checkMD5(worseLib, betterMd5))
-                return;
+            if (!file.renameTo(newFile)) {
+                throw new IOException("Failed to rename " + file.getAbsolutePath() + " to " + newFile.getAbsolutePath());
+            };
         }
-        FileUtils.copyFile(betterLib, worseLib);
-    }
-
-    private File getBetterLib(File file1, File file2) {
-        boolean file1Exists = file1.exists();
-        boolean file2Exists = file2.exists();
-        if (!file1Exists && !file2Exists)
-            return file1;
-
-        if (file1Exists && !file2Exists)
-            return file1;
-
-        if (!file1Exists && file2Exists)
-            return file2;
-
-        if (file1.lastModified() > file2.lastModified())
-            return file1;
-        else
-            return file2;
     }
 }
