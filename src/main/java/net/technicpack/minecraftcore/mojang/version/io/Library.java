@@ -55,7 +55,7 @@ public class Library {
     private transient String gradleArtifactId;
     private transient String gradleVersion;
     private transient String gradleClassifier;
-    private transient String gradleExtension = "jar";
+    private transient String gradleExtension;
 
     public Library() {}
 
@@ -120,8 +120,11 @@ public class Library {
         gradleVersion = m.group(3);
         gradleClassifier = m.group(4);
         String extension = m.group(5);
-        if (extension != null && !extension.isEmpty())
+        if (extension != null && !extension.isEmpty()) {
             gradleExtension = extension;
+        } else {
+            gradleExtension = "jar";
+        }
     }
 
     public String getGradleGroup() {
