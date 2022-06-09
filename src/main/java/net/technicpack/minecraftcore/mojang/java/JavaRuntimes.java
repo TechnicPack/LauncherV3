@@ -16,6 +16,9 @@ public class JavaRuntimes {
     @SerializedName("mac-os")
     private Map<String, List<JavaRuntime>> mac;
 
+    @SerializedName("mac-os-arm64")
+    private Map<String, List<JavaRuntime>> macArm64;
+
     @SerializedName("windows-x64")
     private Map<String, List<JavaRuntime>> windows64;
     @SerializedName("windows-x86")
@@ -30,6 +33,10 @@ public class JavaRuntimes {
 
                 return windows32;
             case OSX:
+                if (JavaUtils.isArm64()) {
+                    return macArm64;
+                }
+
                 return mac;
             case LINUX:
                 if (JavaUtils.is64Bit()) {
