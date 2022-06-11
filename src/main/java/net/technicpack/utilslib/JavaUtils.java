@@ -37,10 +37,4 @@ public class JavaUtils {
     public static String getJavaBitness() {
         return is64Bit() ? "64" : "32";
     }
-
-    public static boolean isArm64() {
-        String architecture = System.getProperty("os.arch");
-
-        return architecture.equals("aarch64");
-    }
 }
