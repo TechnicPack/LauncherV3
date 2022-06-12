@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 import net.technicpack.utilslib.JavaUtils;
 import net.technicpack.utilslib.OperatingSystem;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +16,9 @@ public class JavaRuntimes {
 
     @SerializedName("mac-os")
     private Map<String, List<JavaRuntime>> mac;
+
+    @SerializedName("mac-os-arm64")
+    private Map<String, List<JavaRuntime>> macArm64;
 
     @SerializedName("windows-x64")
     private Map<String, List<JavaRuntime>> windows64;
@@ -30,6 +34,18 @@ public class JavaRuntimes {
 
                 return windows32;
             case OSX:
+                if (JavaUtils.isArm64()) {
+                    // Combine the arm64 and x64 entries, with the arm64 ones taking precedence
+                    Map<String, List<JavaRuntime>> combinedMac = new HashMap<>(mac);
+                    macArm64.forEach((key, value) -> {
+                        if (!value.isEmpty()) {
+                            combinedMac.put(key, value);
+                        }
+                    });
+
+                    return combinedMac;
+                }
+
                 return mac;
             case LINUX:
                 if (JavaUtils.is64Bit()) {
