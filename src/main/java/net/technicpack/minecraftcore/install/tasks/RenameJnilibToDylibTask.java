@@ -52,6 +52,11 @@ public class RenameJnilibToDylibTask implements IInstallTask {
 
         final File nativesDir = new File(modpack.getBinDir(), "natives");
 
+        // Some versions don't have natives. Drop out immediately if that's the case
+        if (!nativesDir.exists()) {
+            return;
+        }
+
         Iterator<File> filesIterator = FileUtils.iterateFiles(nativesDir, new String[]{"jnilib"}, true);
         while (filesIterator.hasNext()) {
             File file = filesIterator.next();
