@@ -198,6 +198,22 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     }
 
     protected void changeUseMojangJava() {
+        if (!useMojangJava.isSelected()) {
+            int result = JOptionPane.showConfirmDialog(
+                    this,
+                    resources.getString("launcheroptions.java.mojangJreWarning.text"),
+                    resources.getString("launcheroptions.java.mojangJreWarning.title"),
+                    JOptionPane.YES_NO_CANCEL_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            if (result != JOptionPane.YES_OPTION) {
+                // Reset to current value
+                useMojangJava.setSelected(settings.shouldUseMojangJava());
+                return;
+            }
+        }
+
         settings.setUseMojangJava(useMojangJava.isSelected());
         settings.save();
     }
@@ -392,11 +408,8 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         for (ActionListener listener : useMojangJava.getActionListeners())
             useMojangJava.removeActionListener(listener);
         useMojangJava.setSelected(settings.shouldUseMojangJava());
-        useMojangJava.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                changeUseMojangJava();
-            }
+        useMojangJava.addActionListener(e -> {
+            changeUseMojangJava();
         });
 
         for (ActionListener listener : launchToModpacks.getActionListeners())
