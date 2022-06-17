@@ -101,7 +101,7 @@ public class InstallJavaRuntimeTask implements IInstallTask {
         manifest.getFiles().forEach((path, runtimeFile) -> {
             // We're only interested in the files right now
             if (runtimeFile.getType() == JavaRuntimeFileType.FILE) {
-                File target = new File(runtimeRoot, "../../../"+path);
+                File target = new File(runtimeRoot, path);
 
                 ensurePathIsSafe(runtimeRoot, target);
 
