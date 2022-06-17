@@ -65,6 +65,12 @@ public class InstallJavaRuntimeTask implements IInstallTask {
         return 0;
     }
 
+    private void ensurePathIsSafe(File root, File target) {
+        if (!target.toPath().normalize().startsWith(root.toPath())) {
+            throw new RuntimeException("JRE entry attempted to be placed outside of JRE root folder: " + target.getAbsolutePath());
+        }
+    }
+
     @Override
     public void runTask(InstallTasksQueue queue) throws IOException {
         String json = FileUtils.readFileToString(runtimeManifestFile, StandardCharsets.UTF_8);
@@ -74,10 +80,9 @@ public class InstallJavaRuntimeTask implements IInstallTask {
             throw new DownloadException("The Java runtime manifest is invalid.");
         }
 
-        // TODO: Check runtime isn't downloaded/installed outside of its directory
-
         // Create the runtime directory if it doesn't exist
         File runtimeRoot = new File(runtimesDirectory, runtimeName);
+        ensurePathIsSafe(runtimesDirectory, runtimeRoot);
         runtimeRoot.mkdirs();
 
         // First, create the dirs
@@ -85,6 +90,9 @@ public class InstallJavaRuntimeTask implements IInstallTask {
             // We're only interested in the dirs for now
             if (runtimeFile.getType() == JavaRuntimeFileType.DIRECTORY) {
                 File dir = new File(runtimeRoot, path);
+
+                ensurePathIsSafe(runtimeRoot, dir);
+
                 dir.mkdirs();
             }
         });
@@ -93,7 +101,9 @@ public class InstallJavaRuntimeTask implements IInstallTask {
         manifest.getFiles().forEach((path, runtimeFile) -> {
             // We're only interested in the files right now
             if (runtimeFile.getType() == JavaRuntimeFileType.FILE) {
-                File target = new File(runtimeRoot, path);
+                File target = new File(runtimeRoot, "../../../"+path);
+
+                ensurePathIsSafe(runtimeRoot, target);
 
                 // Apparently the Mac Java 8 JRE spec doesn't have any directory entries, so we have to create them regardless
                 target.getParentFile().mkdirs();
@@ -114,7 +124,10 @@ public class InstallJavaRuntimeTask implements IInstallTask {
             // We're only interested in links right now
             if (runtimeFile.getType() == JavaRuntimeFileType.LINK) {
                 File link = new File(runtimeRoot, path);
+                ensurePathIsSafe(runtimeRoot, link);
+
                 File target = new File(link, runtimeFile.getTarget());
+                ensurePathIsSafe(runtimeRoot, target);
 
                 // We add it to the download queue so it runs after all the files exist
                 downloadJavaQueue.addTask(new EnsureLinkedFileTask(link, target));
