@@ -101,7 +101,7 @@ public class SearchResultPackInfo implements PackInfo {
     }
 
     @Override
-    public Integer getDownloads() {
+    public Integer getInstalls() {
         return null;
     }
 

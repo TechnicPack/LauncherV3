@@ -52,7 +52,7 @@ public interface PackInfo {
 
     Integer getRuns();
 
-    Integer getDownloads();
+    Integer getInstalls();
 
     Integer getLikes();
 

@@ -117,7 +117,7 @@ public class SolderPackInfo extends RestObject implements PackInfo {
     }
 
     @Override
-    public Integer getDownloads() {
+    public Integer getInstalls() {
         return null;
     }
 

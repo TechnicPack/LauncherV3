@@ -152,9 +152,9 @@ public class CombinedPackInfo implements PackInfo {
     }
 
     @Override
-    public Integer getDownloads() {
+    public Integer getInstalls() {
         if (platformPackInfo != null)
-            return platformPackInfo.getDownloads();
+            return platformPackInfo.getInstalls();
 
         return null;
     }

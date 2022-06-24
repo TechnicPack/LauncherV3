@@ -288,11 +288,11 @@ public class ModpackModel {
         return packInfo.getRuns();
     }
 
-    public Integer getDownloads() {
+    public Integer getInstalls() {
         if (packInfo == null)
             return null;
 
-        return packInfo.getDownloads();
+        return packInfo.getInstalls();
     }
 
     public RunData getRunData() {

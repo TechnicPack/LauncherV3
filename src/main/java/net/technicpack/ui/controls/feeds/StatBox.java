@@ -93,8 +93,10 @@ public class StatBox extends JButton {
         this.add(fieldLabel);
     }
 
-    private String buildValueStr(Integer value) {        if (value == null)
+    private String buildValueStr(Integer value) {
+        if (value == null) {
             return "??";
+        }
 
         if (value >= 1000000000) {
             return buildShortenedStr((value+50000000)/100000000,"B");

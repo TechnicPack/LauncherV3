@@ -44,7 +44,7 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
     private String description;
     private Integer ratings;
     private Integer runs;
-    private Integer downloads;
+    private Integer installs;
     private boolean isServer;
     private boolean isOfficial;
     private String discordServerId;
@@ -155,8 +155,8 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
         return runs;
     }
 
-    public Integer getDownloads() {
-        return downloads;
+    public Integer getInstalls() {
+        return installs;
     }
 
     public boolean isServerPack() { return isServer; }

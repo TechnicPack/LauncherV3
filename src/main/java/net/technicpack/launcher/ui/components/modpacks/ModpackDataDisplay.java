@@ -53,7 +53,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
 
     private StatBox ratings;
     private StatBox runs;
-    private StatBox downloads;
+    private StatBox installs;
 
     private JPanel discordPanel;
     private JButton discordLabel;
@@ -99,7 +99,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
                 statBoxes.add(ratings, 0);
         }
         ratings.setValue(modpack.getLikes());
-        downloads.setValue(modpack.getDownloads());
+        installs.setValue(modpack.getInstalls());
         runs.setValue(modpack.getRuns());
 
         ImageJob<ModpackModel> job = logoRepo.startImageJob(modpack);
@@ -174,11 +174,11 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         ratings.addActionListener(listener);
         statBoxes.add(ratings);
 
-        downloads = new StatBox(resources, resources.getString("launcher.packstats.downloads"), null);
-        downloads.setBackground(LauncherFrame.COLOR_FEEDITEM_BACK);
-        downloads.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        downloads.addActionListener(listener);
-        statBoxes.add(downloads);
+        installs = new StatBox(resources, resources.getString("launcher.packstats.installs"), null);
+        installs.setBackground(LauncherFrame.COLOR_FEEDITEM_BACK);
+        installs.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        installs.addActionListener(listener);
+        statBoxes.add(installs);
 
         runs = new StatBox(resources, resources.getString("launcher.packstats.runs"), null);
         runs.setBackground(LauncherFrame.COLOR_FEEDITEM_BACK);
