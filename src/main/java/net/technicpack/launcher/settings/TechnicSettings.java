@@ -183,7 +183,9 @@ public class TechnicSettings implements ILaunchOptions {
         return javaArgs;
     }
     public void setJavaArgs(String args) {
-        args = args.replaceAll("-Xmx\\d+[kKmMgG]? ?", "");
+        if (args != null) {
+            args = args.replaceAll("-Xmx\\d+[kKmMgG]? ?", "");
+        }
         if (args != null && args.equalsIgnoreCase(DEFAULT_JAVA_ARGS)) {
             javaArgs = null;
         } else {
