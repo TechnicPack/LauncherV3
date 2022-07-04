@@ -186,6 +186,7 @@ public class TechnicSettings implements ILaunchOptions {
         if (args != null && args.equalsIgnoreCase(DEFAULT_JAVA_ARGS)) {
             javaArgs = null;
         } else {
+            args = args.replaceAll("-Xmx\d[kKmMgG]? ", "");
             javaArgs = args;
         }
     }
