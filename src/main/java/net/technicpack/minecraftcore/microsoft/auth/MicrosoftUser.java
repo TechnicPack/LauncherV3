@@ -14,7 +14,7 @@ public class MicrosoftUser implements IUserType {
 
     private String id;
     private String username;
-    private String accessToken;
+    private String accessToken = "0";
 
     public MicrosoftUser() {
     }

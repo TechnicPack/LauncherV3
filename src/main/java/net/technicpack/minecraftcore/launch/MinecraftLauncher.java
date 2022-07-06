@@ -83,7 +83,22 @@ public class MinecraftLauncher {
             full.append(part);
             first = false;
         }
-        Utils.getLogger().info("Running " + full.toString().replace(userModel.getCurrentUser().getAccessToken(), "redacted"));
+
+        // This will never be null
+        final String userAccessToken = userModel.getCurrentUser().getAccessToken();
+
+        // Censor the user access token from the logs
+        // A value of "0" means offline mode, and shouldn't be censored
+        String censoredCommand;
+
+        if (!userAccessToken.equals("0")) {
+            censoredCommand = full.toString().replace(userAccessToken, "USER_ACCESS_TOKEN");
+        } else {
+            censoredCommand = full.toString();
+        }
+
+        Utils.getLogger().info("Running " + censoredCommand);
+
         ProcessBuilder processBuilder = new ProcessBuilder(commands).directory(pack.getInstalledDirectory()).redirectErrorStream(true);
         Map<String, String> envVars = processBuilder.environment();
         for (String badVar : BAD_ENV_VARS) envVars.remove(badVar);
@@ -100,7 +115,7 @@ public class MinecraftLauncher {
 
             throw e;
         }
-        GameProcess mcProcess = new GameProcess(commands, process);
+        GameProcess mcProcess = new GameProcess(commands, process, userAccessToken);
         if (exitListener != null) mcProcess.setExitListener(exitListener);
 
         platformApi.incrementPackRuns(pack.getName());

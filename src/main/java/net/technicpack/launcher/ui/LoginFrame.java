@@ -562,6 +562,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
                 // This is the last time we'll have access to the user's real username,
                 // so we should set the last-used username now
                 userModel.setLastUser(user);
+                userModel.setCurrentUser(new MojangUser(user.getDisplayName()));
             }
         }
     }
