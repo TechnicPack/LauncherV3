@@ -50,7 +50,7 @@ public class TechnicSettings implements ILaunchOptions {
     private String wrapperCommand;
     private int latestNewsArticle;
     private boolean launchToModpacks;
-    private String javaVersion = "default";
+    private String javaVersion = "64bit";
     private boolean autoAcceptRequirements = false;
     /**
      * 64 bit if true, 32 bit if false

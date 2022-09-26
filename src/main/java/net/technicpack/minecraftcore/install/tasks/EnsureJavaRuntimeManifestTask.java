@@ -26,6 +26,7 @@ import net.technicpack.launchercore.install.tasks.DownloadFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.SHA1FileVerifier;
+import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.java.JavaRuntime;
@@ -41,12 +42,14 @@ public class EnsureJavaRuntimeManifestTask implements IInstallTask {
 
     private final File runtimesDirectory;
     private final ModpackModel modpack;
+    private final JavaVersionRepository javaVersionRepository;
     private final ITasksQueue examineJavaQueue;
     private final ITasksQueue downloadJavaQueue;
 
-    public EnsureJavaRuntimeManifestTask(File runtimesDirectory, ModpackModel modpack, ITasksQueue examineJavaQueue, ITasksQueue downloadJavaQueue) {
+    public EnsureJavaRuntimeManifestTask(File runtimesDirectory, ModpackModel modpack, JavaVersionRepository javaVersionRepository, ITasksQueue examineJavaQueue, ITasksQueue downloadJavaQueue) {
         this.runtimesDirectory = runtimesDirectory;
         this.modpack = modpack;
+        this.javaVersionRepository = javaVersionRepository;
         this.examineJavaQueue = examineJavaQueue;
         this.downloadJavaQueue = downloadJavaQueue;
     }
@@ -80,7 +83,7 @@ public class EnsureJavaRuntimeManifestTask implements IInstallTask {
             throw new DownloadException("Failed to get Mojang JRE information");
         }
 
-        JavaRuntime runtime = availableRuntimes.getRuntimeForCurrentOS(runtimeName);
+        JavaRuntime runtime = availableRuntimes.getRuntimeForCurrentOS(runtimeName, javaVersionRepository);
 
         Download manifest = runtime.getManifest();
 
