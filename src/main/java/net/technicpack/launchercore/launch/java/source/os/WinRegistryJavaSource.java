@@ -42,6 +42,14 @@ public class WinRegistryJavaSource implements IVersionSource {
         enumerateRegistryForBitness(repository, "32", "Software\\AdoptOpenJDK", "Path");
         enumerateRegistryForBitness(repository, "64", "Software\\AdoptOpenJDK", "Path");
 
+        // Eclipse Foundation
+        enumerateRegistryForBitness(repository, "32", "Software\\Eclipse Foundation", "Path");
+        enumerateRegistryForBitness(repository, "64", "Software\\Eclipse Foundation", "Path");
+
+        // Eclipse Adoptium
+        enumerateRegistryForBitness(repository, "32", "Software\\Eclipse Adoptium", "Path");
+        enumerateRegistryForBitness(repository, "64", "Software\\Eclipse Adoptium", "Path");
+
         // Microsoft
         enumerateRegistryForBitness(repository, "64", "Software\\Microsoft\\JDK", "Path");
 
