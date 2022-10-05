@@ -40,6 +40,7 @@ public class JavaVersionRepository {
         IJavaVersion version = new CurrentJavaVersion();
         selectedVersion = version;
         loadedVersions.put(null, version);
+        versionCache.add(version);
     }
 
     public boolean addVersion(IJavaVersion version) {
