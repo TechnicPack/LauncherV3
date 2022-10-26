@@ -74,7 +74,7 @@ public class Installer {
     protected final PackResourceMapper packIconMapper;
     protected final StartupParameters startupParameters;
     protected final LauncherDirectories directories;
-    protected Object cancelLock = new Object();
+    protected final Object cancelLock = new Object();
     protected boolean isCancelledByUser = false;
 
     private Thread runningThread;
