@@ -139,6 +139,12 @@ public class Library {
         return gradleArtifactId;
     }
 
+    public String getGradleVersion() {
+        ensureNameIsParsed();
+
+        return gradleVersion;
+    }
+
     public String getGradleClassifier() {
         ensureNameIsParsed();
 

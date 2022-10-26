@@ -34,6 +34,7 @@ import net.technicpack.minecraftcore.mojang.version.builder.retrievers.ZipFileRe
 import net.technicpack.minecraftcore.mojang.version.io.Artifact;
 import net.technicpack.minecraftcore.mojang.version.io.Downloads;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 
 import java.io.File;
 import java.io.IOException;
@@ -189,7 +190,8 @@ public class HandleVersionFileTask implements IInstallTask {
             // Log4j vulnerability patch - CVE-2021-44228
             // A hotfixed version of 2.0-beta9 for MC 1.7 - 1.12
             // And version 2.16.0 for >= 1.12
-            if (library.isLog4j()) {
+            // If log4j is at least 2.16.0, we have nothing to do here, since it isn't vulnerable
+            if (library.isLog4j() && (new ComparableVersion(library.getGradleVersion())).compareTo(new ComparableVersion("2.16.0")) < 0) {
                 final String[] libNameParts = library.getName().split(":");
                 // org.apache.logging.log4j:log4j-core:2.0-beta9
                 // org.apache.logging.log4j    log4j-core        2.0-beta9
