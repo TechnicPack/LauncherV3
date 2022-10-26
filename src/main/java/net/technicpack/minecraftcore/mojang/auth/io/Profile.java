@@ -23,7 +23,7 @@ package net.technicpack.minecraftcore.mojang.auth.io;
 public class Profile {
 	private String id;
 	private String name;
-	private boolean legacy;
+	private boolean legacy = false;
 
     public Profile() {
 
