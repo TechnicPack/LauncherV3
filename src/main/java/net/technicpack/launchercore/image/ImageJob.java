@@ -122,23 +122,24 @@ public class ImageJob<T> {
                         }
                     }
 
-                    if (existingImage != null)
+                    if (existingImage != null) {
                         setImage(existingImage);
+                    } else {
+                     if (store.canDownloadImage(jobData, imageLocation) && (existingImage == null || mapper.shouldDownloadImage(jobData))) {
+                         if (imageLocation != null && !imageLocation.getParentFile().exists())
+                                imageLocation.getParentFile().mkdirs();
 
-                    if (store.canDownloadImage(jobData, imageLocation) && (existingImage == null || mapper.shouldDownloadImage(jobData))) {
-                        if (imageLocation != null && !imageLocation.getParentFile().exists())
-                            imageLocation.getParentFile().mkdirs();
+                            store.downloadImage(jobData, imageLocation);
 
-                        store.downloadImage(jobData, imageLocation);
+                         try {
+                                BufferedImage newImage = ImageIO.read(imageLocation);
 
-                        try {
-                            BufferedImage newImage = ImageIO.read(imageLocation);
-
-                            if (newImage != null)
-                                setImage(newImage);
-                        } catch (IOException ex) {
-                            //Again- probably something wrong with the image, so we'll just show the default
-                        }
+                             if (newImage != null)
+                                  setImage(newImage);
+                           } catch (IOException ex) {
+                               //Again- probably something wrong with the image, so we'll just show the default
+                         }
+                       }
                     }
                 } finally {
                     if (canRetry)
