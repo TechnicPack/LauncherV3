@@ -147,8 +147,14 @@ public class Installer {
                             if (dialog.getResult() == FixRunDataDialog.Result.ACCEPT) {
                                 memoryObj = dialog.getRecommendedMemory();
                                 memory = memoryObj.getMemoryMB();
+                                settings.setMemory(memoryObj.getSettingsId());
+
                                 IJavaVersion recommendedJavaVersion = dialog.getRecommendedJavaVersion();
-                                javaVersions.selectVersion(recommendedJavaVersion.getVersionNumber(), recommendedJavaVersion.is64Bit());
+                                if (recommendedJavaVersion != null) {
+                                    javaVersions.selectVersion(recommendedJavaVersion.getVersionNumber(), recommendedJavaVersion.is64Bit());
+                                    settings.setJavaVersion(recommendedJavaVersion.getVersionNumber());
+                                    settings.setJavaBitness(recommendedJavaVersion.is64Bit());
+                                }
 
                                 if (dialog.shouldRemember()) {
                                     settings.setAutoAcceptModpackRequirements(true);
