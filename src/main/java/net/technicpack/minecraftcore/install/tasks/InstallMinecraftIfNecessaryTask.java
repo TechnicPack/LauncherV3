@@ -56,7 +56,7 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask {
 	public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
 		super.runTask(queue);
 
-		MojangVersion version = ((InstallTasksQueue<MojangVersion>)queue).getMetadata();
+		MojangVersion version = queue.getMetadata();
 
 		String url;
 		GameDownloads dls = version.getDownloads();

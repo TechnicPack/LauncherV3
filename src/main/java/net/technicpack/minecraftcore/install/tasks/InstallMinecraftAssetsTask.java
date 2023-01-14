@@ -30,7 +30,6 @@ import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.install.verifiers.FileSizeVerifier;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
-import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -90,8 +89,8 @@ public class InstallMinecraftAssetsTask implements IInstallTask {
         if (obj.get(mapToResourcesField) != null)
             mapToResources = obj.get(mapToResourcesField).getAsBoolean();
 
-        ((InstallTasksQueue<MojangVersion>)queue).getMetadata().setAreAssetsVirtual(isVirtual);
-        ((InstallTasksQueue<MojangVersion>)queue).getMetadata().setAssetsMapToResources(mapToResources);
+        queue.getMetadata().setAreAssetsVirtual(isVirtual);
+        queue.getMetadata().setAssetsMapToResources(mapToResources);
 
         JsonObject allObjects = obj.get(objectsField).getAsJsonObject();
 
@@ -99,7 +98,7 @@ public class InstallMinecraftAssetsTask implements IInstallTask {
             throw new DownloadException("The assets json file was invalid.");
         }
 
-        String assetsKey = ((InstallTasksQueue<MojangVersion>)queue).getMetadata().getAssetsKey();
+        String assetsKey = queue.getMetadata().getAssetsKey();
         if (assetsKey == null || assetsKey.isEmpty())
             assetsKey = "legacy";
 

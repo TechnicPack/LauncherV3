@@ -68,7 +68,7 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipException;
 
 public class Installer {
-    protected final ModpackInstaller<MojangVersion> installer;
+    protected final ModpackInstaller installer;
     protected final MinecraftLauncher launcher;
     protected final TechnicSettings settings;
     protected final PackResourceMapper packIconMapper;
@@ -114,7 +114,7 @@ public class Installer {
                 try {
                     MojangVersion version = null;
 
-                    InstallTasksQueue<MojangVersion> tasksQueue = new InstallTasksQueue<>(listener);
+                    InstallTasksQueue tasksQueue = new InstallTasksQueue(listener);
                     MojangVersionBuilder versionBuilder = createVersionBuilder(pack, tasksQueue);
 
                     if (build != null && !build.isEmpty()) {

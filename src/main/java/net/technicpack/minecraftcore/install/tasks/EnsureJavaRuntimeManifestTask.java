@@ -66,7 +66,7 @@ public class EnsureJavaRuntimeManifestTask implements IInstallTask {
 
     @Override
     public void runTask(InstallTasksQueue queue) throws IOException {
-        MojangVersion version = ((InstallTasksQueue<MojangVersion>)queue).getMetadata();
+        MojangVersion version = queue.getMetadata();
 
         JavaVersion wantedRuntime = version.getJavaVersion();
 

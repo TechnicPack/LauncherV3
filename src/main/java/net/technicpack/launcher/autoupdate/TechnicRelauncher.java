@@ -80,7 +80,7 @@ public class TechnicRelauncher extends Relauncher {
 
     @Override
     public InstallTasksQueue buildMoverTasks() {
-        InstallTasksQueue<Object> queue = new InstallTasksQueue<>(null);
+        InstallTasksQueue queue = new InstallTasksQueue(null);
 
         queue.addTask(new MoveLauncherPackage(resources.getString("updater.mover"), new File(parameters.getMoveTarget()), this));
         queue.addTask(new LaunchLauncherMode(resources.getString("updater.finallaunch"), this, parameters.getMoveTarget(), parameters.isLegacyMover()));
@@ -101,7 +101,7 @@ public class TechnicRelauncher extends Relauncher {
         screen.setLocationRelativeTo(null);
         screen.setVisible(true);
 
-        InstallTasksQueue<Object> queue = new InstallTasksQueue<>(screen.getProgressBar());
+        InstallTasksQueue queue = new InstallTasksQueue(screen.getProgressBar());
 
         ArrayList<IInstallTask> postDownloadTasks = new ArrayList<>();
         postDownloadTasks.add(new LaunchMoverMode(resources.getString("updater.launchmover"), getTempLauncher(), this));
