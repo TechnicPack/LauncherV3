@@ -62,6 +62,7 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -287,9 +288,8 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         }
 
         if (selectedWidget == null || selectedWidget.getModpack() == null || !allModpacks.containsKey(selectedWidget.getModpack().getName())) {
-            java.util.List<ModpackWidget> sortedPacks = new LinkedList<>();
-            sortedPacks.addAll(allModpacks.values());
-            Collections.sort(sortedPacks, new Comparator<ModpackWidget>() {
+            List<ModpackWidget> sortedPacks = new LinkedList<>(allModpacks.values());
+            sortedPacks.sort(new Comparator<ModpackWidget>() {
                 @Override
                 public int compare(ModpackWidget o1, ModpackWidget o2) {
                     int priorityCompare = Integer.compare(o2.getModpack().getPriority(), o1.getModpack().getPriority());
@@ -387,9 +387,8 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
 
         GridBagConstraints constraints = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0), 0,0);
 
-        java.util.List<ModpackWidget> sortedPacks = new LinkedList<>();
-        sortedPacks.addAll(allModpacks.values());
-        Collections.sort(sortedPacks, new Comparator<ModpackWidget>() {
+        List<ModpackWidget> sortedPacks = new LinkedList<>(allModpacks.values());
+        sortedPacks.sort(new Comparator<ModpackWidget>() {
             @Override
             public int compare(ModpackWidget o1, ModpackWidget o2) {
                 int priorityCompare = Integer.compare(o2.getModpack().getPriority(), o1.getModpack().getPriority());

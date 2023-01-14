@@ -124,7 +124,7 @@ public class NewsSelector extends JPanel {
             circle.setVisible(false);
         }
 
-        Collections.sort(news.getArticles(), new Comparator<NewsArticle>() {
+        news.getArticles().sort(new Comparator<NewsArticle>() {
             @Override
             public int compare(NewsArticle o1, NewsArticle o2) {
                 if (o1.getDate().getTime() > o2.getDate().getTime())
