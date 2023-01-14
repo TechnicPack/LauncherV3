@@ -292,7 +292,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
             Collections.sort(sortedPacks, new Comparator<ModpackWidget>() {
                 @Override
                 public int compare(ModpackWidget o1, ModpackWidget o2) {
-                    int priorityCompare = (new Integer(o2.getModpack().getPriority())).compareTo(new Integer(o1.getModpack().getPriority()));
+                    int priorityCompare = Integer.compare(o2.getModpack().getPriority(), o1.getModpack().getPriority());
                     if (priorityCompare != 0)
                         return priorityCompare;
                     else if (o1.getModpack().getDisplayName() == null && o2.getModpack().getDisplayName() == null)
@@ -393,7 +393,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         Collections.sort(sortedPacks, new Comparator<ModpackWidget>() {
             @Override
             public int compare(ModpackWidget o1, ModpackWidget o2) {
-                int priorityCompare = (new Integer(o2.getModpack().getPriority())).compareTo(new Integer(o1.getModpack().getPriority()));
+                int priorityCompare = Integer.compare(o2.getModpack().getPriority(), o1.getModpack().getPriority());
                 if (priorityCompare != 0)
                     return priorityCompare;
                 else if (o1.getModpack().getDisplayName() == null && o2.getModpack().getDisplayName() == null)
