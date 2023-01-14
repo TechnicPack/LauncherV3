@@ -25,6 +25,7 @@ import org.apache.commons.compress.archivers.zip.ZipFile;
 
 import java.io.*;
 import java.nio.channels.ClosedByInterruptException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.logging.Level;
@@ -66,7 +67,7 @@ public class ZipUtils {
         byte[] buffer = new byte[2048];
 
         try (BufferedInputStream inputStream = new BufferedInputStream(zipFile.getInputStream(entry));
-             BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(outputFile))) {
+             BufferedOutputStream outputStream = new BufferedOutputStream(Files.newOutputStream(outputFile.toPath()))) {
             int length;
             while ((length = inputStream.read(buffer, 0, buffer.length)) != -1) {
                 outputStream.write(buffer, 0, length);

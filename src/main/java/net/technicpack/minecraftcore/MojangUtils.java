@@ -34,7 +34,10 @@ import net.technicpack.minecraftcore.mojang.auth.io.UserProperties;
 import net.technicpack.minecraftcore.mojang.auth.io.UserPropertiesAdapter;
 import net.technicpack.minecraftcore.mojang.java.JavaRuntimes;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
-import net.technicpack.minecraftcore.mojang.version.io.*;
+import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
+import net.technicpack.minecraftcore.mojang.version.io.CompleteVersionV21;
+import net.technicpack.minecraftcore.mojang.version.io.Rule;
+import net.technicpack.minecraftcore.mojang.version.io.RuleAdapter;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentListAdapter;
 import net.technicpack.utilslib.DateTypeAdapter;
@@ -42,9 +45,9 @@ import net.technicpack.utilslib.LowerCaseEnumTypeAdapterFactory;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -125,7 +128,7 @@ public class MojangUtils {
             String fileName = jarFile.getName();
             String fileNameLastPart = fileName.substring(fileName.lastIndexOf(File.separator));
 
-            JarOutputStream jos = new JarOutputStream(new FileOutputStream(output));
+            JarOutputStream jos = new JarOutputStream(Files.newOutputStream(output.toPath()));
             Enumeration<JarEntry> entries = jarFile.entries();
 
             while (entries.hasMoreElements()) {
