@@ -32,7 +32,7 @@ public enum OperatingSystem {
     private final String name;
     private final String[] aliases;
 
-    private OperatingSystem(String name, String[] aliases) {
+    OperatingSystem(String name, String[] aliases) {
         this.name = name;
         this.aliases = aliases;
     }

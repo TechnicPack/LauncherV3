@@ -31,7 +31,7 @@ public enum ReleaseType {
 	private static final Map<String, ReleaseType> lookup = new HashMap<>();
 	private final String name;
 
-	private ReleaseType(String name) {
+	ReleaseType(String name) {
 		this.name = name;
 	}
 
