@@ -46,7 +46,7 @@ public class Download implements Runnable {
     private File outFile = null;
     private Exception exception = null;
 
-    private Object timeoutLock = new Object();
+    private final Object timeoutLock = new Object();
     private boolean isTimedOut = false;
 
     public Download(URL url, String name, String outPath) throws MalformedURLException {
