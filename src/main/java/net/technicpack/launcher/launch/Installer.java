@@ -223,8 +223,6 @@ public class Installer {
                 } catch (BuildInaccessibleException e) {
                     e.printStackTrace();
                     JOptionPane.showMessageDialog(frame, e.getMessage(), resources.getString("launcher.installerror.title"), JOptionPane.WARNING_MESSAGE);
-                } catch (IOException e) {
-                    e.printStackTrace();
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {

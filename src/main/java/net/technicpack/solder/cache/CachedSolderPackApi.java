@@ -129,8 +129,7 @@ public class CachedSolderPackApi implements ISolderPackApi {
 
             if (rootInfoCache != null)
                 rootInfoCache.setLocal();
-        } catch (IOException ex) {
-        } catch (JsonSyntaxException ex) {
+        } catch (IOException | JsonSyntaxException ex) {
         }
     }
 

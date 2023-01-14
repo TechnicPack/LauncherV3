@@ -157,9 +157,7 @@ public class ModpackCachePlatformApi implements IPlatformApi {
             }
 
             return info;
-        } catch (IOException ex) {
-            return null;
-        } catch (JsonSyntaxException ex) {
+        } catch (IOException | JsonSyntaxException ex) {
             return null;
         }
     }

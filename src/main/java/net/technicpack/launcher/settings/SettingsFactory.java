@@ -88,10 +88,7 @@ public class SettingsFactory {
                 settings.setFilePath(settingsFile);
 
             return settings;
-        } catch (JsonSyntaxException e) {
-            Utils.getLogger().log(Level.WARNING, "Unable to load version from " + settingsFile);
-            return null;
-        } catch (IOException e) {
+        } catch (JsonSyntaxException | IOException e) {
             Utils.getLogger().log(Level.WARNING, "Unable to load version from " + settingsFile);
             return null;
         }

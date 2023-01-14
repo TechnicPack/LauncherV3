@@ -32,8 +32,6 @@ public class SHA1Utils {
     public static String getSHA1(File file) {
         try {
             return new DigestUtils(SHA_1).digestAsHex(file);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }

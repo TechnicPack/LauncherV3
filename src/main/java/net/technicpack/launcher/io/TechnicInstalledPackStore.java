@@ -61,10 +61,7 @@ public class TechnicInstalledPackStore implements IInstalledPackRepository {
                 return parsedList;
             } else
                 return new TechnicInstalledPackStore(jsonFile);
-        } catch (JsonSyntaxException e) {
-            Utils.getLogger().log(Level.WARNING, "Unable to load installedPacks from " + jsonFile);
-            return new TechnicInstalledPackStore(jsonFile);
-        } catch (IOException e) {
+        } catch (JsonSyntaxException | IOException e) {
             Utils.getLogger().log(Level.WARNING, "Unable to load installedPacks from " + jsonFile);
             return new TechnicInstalledPackStore(jsonFile);
         }

@@ -231,8 +231,6 @@ public class Utils {
                     md5 = eTag;
                 }
             }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }

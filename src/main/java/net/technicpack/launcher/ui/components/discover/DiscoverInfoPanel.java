@@ -190,8 +190,6 @@ public class DiscoverInfoPanel extends TiledBackground {
                 FileUtils.writeByteArrayToFile(localCache, data);
                 return doc;
             }
-        } catch (MalformedURLException ex) {
-            ex.printStackTrace();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
