@@ -149,7 +149,7 @@ public class Download implements Runnable {
     }
 
     protected InputStream getConnectionInputStream(final URLConnection urlconnection) throws DownloadException {
-        final AtomicReference<InputStream> is = new AtomicReference<InputStream>();
+        final AtomicReference<InputStream> is = new AtomicReference<>();
 
         for (int j = 0; (j < 3) && (is.get() == null); j++) {
             StreamThread stream = new StreamThread(urlconnection, is);

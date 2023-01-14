@@ -100,7 +100,7 @@ public class CompleteVersionV21 implements MojangVersion {
 
 	@Override
 	public List<Library> getLibrariesForOS() {
-		List<Library> libraryList = new ArrayList<Library>(libraries.size());
+		List<Library> libraryList = new ArrayList<>(libraries.size());
 		for (Library library : libraries) {
 			if (library.isForCurrentOS()) {
 				libraryList.add(library);

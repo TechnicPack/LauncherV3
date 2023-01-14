@@ -40,7 +40,7 @@ public class PackLoadJob implements Runnable {
     private Collection<IPackSource> packSources;
     private IModpackContainer container;
     private boolean doLoadRepository;
-    private Map<String, ModpackModel> processedModpacks = new HashMap<String, ModpackModel>();
+    private Map<String, ModpackModel> processedModpacks = new HashMap<>();
 
     private boolean isCancelled = false;
 
@@ -85,7 +85,7 @@ public class PackLoadJob implements Runnable {
             threadCount++;
         if (packSources != null)
             threadCount += packSources.size();
-        Collection<Thread> threads = new ArrayList<Thread>(threadCount);
+        Collection<Thread> threads = new ArrayList<>(threadCount);
 
         if (doLoadRepository) {
             for (final String packName : packRepository.getPackNames()) {

@@ -58,7 +58,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
     private JPanel discordPanel;
     private JButton discordLabel;
     private JButton countLabel;
-    private java.util.List<JButton> discordButtons = new ArrayList<JButton>(3);
+    private java.util.List<JButton> discordButtons = new ArrayList<>(3);
 
     private String packSiteUrl;
 

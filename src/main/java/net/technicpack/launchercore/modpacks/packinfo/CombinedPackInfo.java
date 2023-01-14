@@ -125,7 +125,7 @@ public class CombinedPackInfo implements PackInfo {
         if (platformPackInfo != null)
             return platformPackInfo.getBuilds();
 
-        return new ArrayList<String>(0);
+        return new ArrayList<>(0);
     }
 
     @Override

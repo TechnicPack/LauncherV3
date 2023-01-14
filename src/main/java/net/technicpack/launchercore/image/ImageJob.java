@@ -37,14 +37,14 @@ public class ImageJob<T> {
     protected boolean canRetry = true;
     private AtomicReference<BufferedImage> imageReference;
 
-    private Collection<IImageJobListener<T>> jobListeners = new LinkedList<IImageJobListener<T>>();
+    private Collection<IImageJobListener<T>> jobListeners = new LinkedList<>();
     private Thread imageThread;
 
     public ImageJob(IImageMapper<T> mapper, IImageStore<T> store) {
         this.mapper = mapper;
         this.store = store;
 
-        imageReference = new AtomicReference<BufferedImage>();
+        imageReference = new AtomicReference<>();
         imageReference.set(mapper.getDefaultImage());
     }
 

@@ -31,7 +31,7 @@ import java.util.*;
 public class SearchResultPackSource implements IPackSource {
     private IPlatformSearchApi platformApi;
     private String searchTerms;
-    private Map<String, Integer> resultPriorities = new HashMap<String, Integer>();
+    private Map<String, Integer> resultPriorities = new HashMap<>();
 
     public SearchResultPackSource(IPlatformSearchApi platformApi, String searchTerms) {
         this.platformApi = platformApi;
@@ -55,7 +55,7 @@ public class SearchResultPackSource implements IPackSource {
             return Collections.emptySet();
         }
 
-        ArrayList<PackInfo> resultPacks = new ArrayList<PackInfo>(results.getResults().length);
+        ArrayList<PackInfo> resultPacks = new ArrayList<>(results.getResults().length);
 
         int priority = 100;
         for (SearchResult result : results.getResults()) {

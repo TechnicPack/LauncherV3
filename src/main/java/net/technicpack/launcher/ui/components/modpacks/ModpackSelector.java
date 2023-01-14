@@ -82,7 +82,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
     private FindMoreWidget findMoreWidget;
 
     private MemoryModpackContainer defaultPacks = new MemoryModpackContainer();
-    private Map<String, ModpackWidget> allModpacks = new HashMap<String, ModpackWidget>();
+    private Map<String, ModpackWidget> allModpacks = new HashMap<>();
     private ModpackWidget selectedWidget;
     private PackLoadJob currentLoadJob;
     private Timer currentSearchTimer;
@@ -287,7 +287,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         }
 
         if (selectedWidget == null || selectedWidget.getModpack() == null || !allModpacks.containsKey(selectedWidget.getModpack().getName())) {
-            java.util.List<ModpackWidget> sortedPacks = new LinkedList<ModpackWidget>();
+            java.util.List<ModpackWidget> sortedPacks = new LinkedList<>();
             sortedPacks.addAll(allModpacks.values());
             Collections.sort(sortedPacks, new Comparator<ModpackWidget>() {
                 @Override
@@ -388,7 +388,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
 
         GridBagConstraints constraints = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0), 0,0);
 
-        java.util.List<ModpackWidget> sortedPacks = new LinkedList<ModpackWidget>();
+        java.util.List<ModpackWidget> sortedPacks = new LinkedList<>();
         sortedPacks.addAll(allModpacks.values());
         Collections.sort(sortedPacks, new Comparator<ModpackWidget>() {
             @Override
@@ -441,7 +441,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
             detectFilterChanges();
 
         if (user != null) {
-            ArrayList<IPackSource> sources = new ArrayList<IPackSource>(1);
+            ArrayList<IPackSource> sources = new ArrayList<>(1);
             sources.add(technicSolder);
             defaultPacks.addPassthroughContainer(this);
             packLoader.createRepositoryLoadJob(defaultPacks, sources, null, true);
@@ -452,7 +452,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         lastFilterContents = "THIS IS A TERRIBLE HACK I'M BASICALLY FORCING A REFRESH BUT WITHOUT DOING ANY WORK";
         defaultPacks.clear();
         detectFilterChanges();
-        ArrayList<IPackSource> sources = new ArrayList<IPackSource>(1);
+        ArrayList<IPackSource> sources = new ArrayList<>(1);
         sources.add(technicSolder);
         packLoader.createRepositoryLoadJob(defaultPacks, sources, null, true);
     }
@@ -532,7 +532,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
                             if (slugMatcher.find()) {
                                 findMoreUrl = localSearchUrl;
                                 findMoreWidget.setWidgetData(resources.getString("launcher.packselector.api"));
-                                ArrayList<IPackSource> source = new ArrayList<IPackSource>(1);
+                                ArrayList<IPackSource> source = new ArrayList<>(1);
                                 source.add(new SinglePlatformSource(platformApi, solderApi, slug));
                                 currentLoadJob = packLoader.createRepositoryLoadJob(ModpackSelector.this, source, null, false);
                                 return;
@@ -550,7 +550,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
                 findMoreUrl = "https://www.technicpack.net/modpacks?q="+encodedSearch;
                 findMoreWidget.setWidgetData(resources.getString("launcher.packselector.more"));
 
-                ArrayList<IPackSource> sources = new ArrayList<IPackSource>(2);
+                ArrayList<IPackSource> sources = new ArrayList<>(2);
                 sources.add(new NameFilterPackSource(defaultPacks, localSearchTag));
                 sources.add(new SearchResultPackSource(platformSearchApi, localSearchTag));
                 currentLoadJob = packLoader.createRepositoryLoadJob(ModpackSelector.this, sources, null, false);

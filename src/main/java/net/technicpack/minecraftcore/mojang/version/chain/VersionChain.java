@@ -33,7 +33,7 @@ public class VersionChain implements MojangVersion {
     private List<MojangVersion> chain;
 
     public VersionChain(MojangVersion rootVersion) {
-        chain = new LinkedList<MojangVersion>();
+        chain = new LinkedList<>();
         chain.add(rootVersion);
     }
 
@@ -104,7 +104,7 @@ public class VersionChain implements MojangVersion {
 
     @Override
     public List<Library> getLibraries() {
-        List<Library> allLibraries = new LinkedList<Library>();
+        List<Library> allLibraries = new LinkedList<>();
 
         for (MojangVersion version : chain) {
             if (version.getLibraries() != null)
@@ -116,7 +116,7 @@ public class VersionChain implements MojangVersion {
 
     @Override
     public List<Library> getLibrariesForOS() {
-        List<Library> allLibraries = new LinkedList<Library>();
+        List<Library> allLibraries = new LinkedList<>();
 
         for (int i = chain.size() - 1; i >= 0; i--) {
             MojangVersion version = chain.get(i);
@@ -159,7 +159,7 @@ public class VersionChain implements MojangVersion {
 
     @Override
     public List<Rule> getRules() {
-        List<Rule> allRules = new LinkedList<Rule>();
+        List<Rule> allRules = new LinkedList<>();
 
         for (MojangVersion version : chain) {
             if (version.getRules() != null)

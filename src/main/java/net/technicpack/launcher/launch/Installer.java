@@ -114,7 +114,7 @@ public class Installer {
                 try {
                     MojangVersion version = null;
 
-                    InstallTasksQueue<MojangVersion> tasksQueue = new InstallTasksQueue<MojangVersion>(listener);
+                    InstallTasksQueue<MojangVersion> tasksQueue = new InstallTasksQueue<>(listener);
                     MojangVersionBuilder versionBuilder = createVersionBuilder(pack, tasksQueue);
 
                     if (build != null && !build.isEmpty()) {
@@ -445,7 +445,7 @@ public class Installer {
         ZipFileRetriever zipVersionRetriever = new ZipFileRetriever(new File(modpack.getBinDir(), "modpack.jar"));
         HttpFileRetriever fallbackVersionRetriever = new HttpFileRetriever(TechnicConstants.technicVersions, tasksQueue.getDownloadListener());
 
-        ArrayList<MojangVersionRetriever> fallbackRetrievers = new ArrayList<MojangVersionRetriever>(1);
+        ArrayList<MojangVersionRetriever> fallbackRetrievers = new ArrayList<>(1);
         fallbackRetrievers.add(fallbackVersionRetriever);
 
         File versionJson = new File(modpack.getBinDir(), "version.json");

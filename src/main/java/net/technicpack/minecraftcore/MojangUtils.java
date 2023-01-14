@@ -99,7 +99,7 @@ public class MojangUtils {
         builder.setPrettyPrinting();
         gson = builder.create();
 
-        versionJsonVersions = new TreeMap<Integer, Class<? extends MojangVersion>>();
+        versionJsonVersions = new TreeMap<>();
         versionJsonVersions.put(0, CompleteVersion.class);
         versionJsonVersions.put(21, CompleteVersionV21.class);
 
