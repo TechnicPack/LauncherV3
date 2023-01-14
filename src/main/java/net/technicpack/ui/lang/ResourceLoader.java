@@ -204,8 +204,7 @@ public class ResourceLoader {
     private Locale matchClosestSupportedLocale(Locale definiteLocale) {
         Locale bestSupportedLocale = null;
         int bestLocaleScore = 0;
-        for (int i = 0; i < locales.length; i++) {
-            Locale testLocale = locales[i];
+        for (Locale testLocale : locales) {
             int testScore = 0;
 
             if (testLocale.getLanguage().equals(definiteLocale.getLanguage())) {

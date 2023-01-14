@@ -120,7 +120,7 @@ public class ModpackCachePlatformApi implements IPlatformApi {
     private boolean isDead(String packSlug) {
         Boolean isDead = deadPacks.getIfPresent(packSlug);
 
-        if (isDead != null && isDead.booleanValue())
+        if (isDead != null && isDead)
             return true;
 
         return false;
