@@ -55,13 +55,13 @@ public abstract class Relauncher {
         return getRunningPath(getMainClass());
     }
 
-    public static String getRunningPath(Class clazz) throws UnsupportedEncodingException {
+    public static String getRunningPath(Class<?> clazz) throws UnsupportedEncodingException {
         String path = clazz.getProtectionDomain().getCodeSource().getLocation().getPath();
         path = path.replace("+", URLEncoder.encode("+", "UTF-8"));
         return URLDecoder.decode(path, "UTF-8");
     }
 
-    protected abstract Class getMainClass();
+    protected abstract Class<?> getMainClass();
     public abstract String getUpdateText();
     public abstract boolean isUpdateOnly();
     public abstract boolean isMover();

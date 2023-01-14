@@ -353,7 +353,7 @@ public class Installer {
         }
 
         if (!fmlLibsZip.isEmpty()) {
-            verifyingFiles.addTask(new EnsureFileTask(new File(directories.getCacheDirectory(), fmlLibsZip), new ValidZipFileVerifier(), modpackFmlLibDir, TechnicConstants.technicFmlLibRepo + fmlLibsZip, installingLibs, installingLibs));
+            verifyingFiles.addTask(new EnsureFileTask<>(new File(directories.getCacheDirectory(), fmlLibsZip), new ValidZipFileVerifier(), modpackFmlLibDir, TechnicConstants.technicFmlLibRepo + fmlLibsZip, installingLibs, installingLibs));
         }
 
         if (!fmlLibs.isEmpty()) {
@@ -367,7 +367,7 @@ public class Installer {
                 File target = new File(modpackFmlLibDir, name);
 
                 if (!target.exists() || (verifier != null && !verifier.isFileValid(target)) ) {
-                    verifyingFiles.addTask(new EnsureFileTask(cached, verifier, null, TechnicConstants.technicFmlLibRepo + name, installingLibs, installingLibs));
+                    verifyingFiles.addTask(new EnsureFileTask<>(cached, verifier, null, TechnicConstants.technicFmlLibRepo + name, installingLibs, installingLibs));
                     installingLibs.addTask(new CopyFileTask(cached, target));
                 }
             });

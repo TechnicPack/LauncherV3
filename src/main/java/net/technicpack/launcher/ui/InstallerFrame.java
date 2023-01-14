@@ -69,8 +69,8 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
     private RoundedButton portableInstallButton;
     private StartupParameters params;
 
-    private JComboBox standardLanguages;
-    private JComboBox portableLanguages;
+    private JComboBox<LanguageItem> standardLanguages;
+    private JComboBox<LanguageItem> portableLanguages;
 
     private TechnicSettings settings;
 
@@ -481,7 +481,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
             defaultLocaleText = defaultLocaleText.concat(" (" + resources.getString("launcheroptions.language.unavailable") + ")");
         }
 
-        standardLanguages = new JComboBox();
+        standardLanguages = new JComboBox<>();
         standardLanguages.addItem(new LanguageItem(ResourceLoader.DEFAULT_LOCALE, defaultLocaleText, resources));
         for (int i = 0; i < LauncherMain.supportedLanguages.length; i++) {
             standardLanguages.addItem(new LanguageItem(resources.getCodeFromLocale(LauncherMain.supportedLanguages[i]), LauncherMain.supportedLanguages[i].getDisplayName(LauncherMain.supportedLanguages[i]), resources.getVariant(LauncherMain.supportedLanguages[i])));
@@ -578,7 +578,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
             defaultLocaleText = defaultLocaleText.concat(" (" + resources.getString("launcheroptions.language.unavailable") + ")");
         }
 
-        portableLanguages = new JComboBox();
+        portableLanguages = new JComboBox<>();
         portableLanguages.addItem(new LanguageItem(ResourceLoader.DEFAULT_LOCALE, defaultLocaleText, resources));
         for (int i = 0; i < LauncherMain.supportedLanguages.length; i++) {
             portableLanguages.addItem(new LanguageItem(resources.getCodeFromLocale(LauncherMain.supportedLanguages[i]), LauncherMain.supportedLanguages[i].getDisplayName(LauncherMain.supportedLanguages[i]), resources.getVariant(LauncherMain.supportedLanguages[i])));

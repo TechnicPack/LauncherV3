@@ -26,7 +26,7 @@ import net.technicpack.ui.listitems.LanguageItem;
 import javax.swing.*;
 import java.awt.*;
 
-public class LanguageCellRenderer  extends JLabel implements ListCellRenderer {
+public class LanguageCellRenderer  extends JLabel implements ListCellRenderer<LanguageItem> {
 
     private ResourceLoader resources;
     private ImageIcon globe;
@@ -49,10 +49,10 @@ public class LanguageCellRenderer  extends JLabel implements ListCellRenderer {
     }
 
     @Override
-    public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+    public Component getListCellRendererComponent(JList list, LanguageItem value, int index, boolean isSelected, boolean cellHasFocus) {
         setForeground(this.foreground);
         setBackground(this.background);
-        setFont(((LanguageItem)value).getLanguageResources().getFont(ResourceLoader.FONT_OPENSANS, list.getFont().getSize()));
+        setFont(value.getLanguageResources().getFont(ResourceLoader.FONT_OPENSANS, list.getFont().getSize()));
         setText(value.toString());
 
         Object selectedValue = list.getSelectedValue();

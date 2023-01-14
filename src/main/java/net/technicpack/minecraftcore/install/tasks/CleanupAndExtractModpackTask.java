@@ -108,7 +108,7 @@ public class CleanupAndExtractModpackTask implements IInstallTask {
             else
                 verifier = new ValidZipFileVerifier();
 
-			checkModQueue.addTask(new EnsureFileTask(cache, verifier, packOutput, url, downloadModQueue, copyModQueue, zipFilter));
+			checkModQueue.addTask(new EnsureFileTask<>(cache, verifier, packOutput, url, downloadModQueue, copyModQueue, zipFilter));
 		}
 
 		copyModQueue.addTask(new CleanupModpackCacheTask(this.pack, modpack));

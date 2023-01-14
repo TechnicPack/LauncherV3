@@ -134,12 +134,12 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     };
 
 
-    JComboBox versionSelect;
-    JComboBox memSelect;
+    JComboBox<JavaVersionItem> versionSelect;
+    JComboBox<Memory> memSelect;
     JTextArea javaArgs;
-    JComboBox streamSelect;
-    JComboBox launchSelect;
-    JComboBox langSelect;
+    JComboBox<StreamItem> streamSelect;
+    JComboBox<OnLaunchItem> launchSelect;
+    JComboBox<LanguageItem> langSelect;
     JTextField installField;
     JTextField clientId;
     JCheckBox showConsole;
@@ -147,8 +147,8 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     StartupParameters params;
     Component ramWarning;
     JCheckBox askFirstBox;
-    JComboBox useStencil;
-    JComboBox windowSelect;
+    JComboBox<String> useStencil;
+    JComboBox<String> windowSelect;
     JTextField widthInput;
     JTextField heightInput;
     JTextField wrapperCommand;
@@ -782,7 +782,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         panel.add(streamLabel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
         // Setup stream select box
-        streamSelect = new JComboBox();
+        streamSelect = new JComboBox<>();
 
         if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
             streamSelect.setUI(new MetalComboBoxUI());
@@ -798,7 +798,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         Object child = streamSelect.getAccessibleContext().getAccessibleChild(0);
         BasicComboPopup popup = (BasicComboPopup)child;
-        JList list = popup.getList();
+        JList<Object> list = popup.getList();
         list.setSelectionForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         list.setSelectionBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
         list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
@@ -811,7 +811,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         langLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(langLabel, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
-        langSelect = new JComboBox();
+        langSelect = new JComboBox<>();
 
         if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
             langSelect.setUI(new MetalComboBoxUI());
@@ -840,7 +840,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         launchLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(launchLabel, new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
-        launchSelect = new JComboBox();
+        launchSelect = new JComboBox<>();
 
         if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
             launchSelect.setUI(new MetalComboBoxUI());
@@ -1001,7 +1001,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         streamLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(streamLabel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
-        windowSelect = new JComboBox();
+        windowSelect = new JComboBox<>();
 
         if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
             windowSelect.setUI(new MetalComboBoxUI());
@@ -1017,7 +1017,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         Object child = windowSelect.getAccessibleContext().getAccessibleChild(0);
         BasicComboPopup popup = (BasicComboPopup)child;
-        JList list = popup.getList();
+        JList<Object> list = popup.getList();
         list.setSelectionForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         list.setSelectionBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
         list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
@@ -1058,7 +1058,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         useStencilField.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(useStencilField, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(10, 40, 0, 0), 0, 0));
 
-        useStencil = new JComboBox();
+        useStencil = new JComboBox<>();
 
         if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
             useStencil.setUI(new MetalComboBoxUI());
@@ -1111,7 +1111,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         versionLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(versionLabel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 60, 0, 0), 0, 0));
 
-        versionSelect = new JComboBox();
+        versionSelect = new JComboBox<>();
 
         if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
             versionSelect.setUI(new MetalComboBoxUI());
@@ -1128,7 +1128,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         Object child = versionSelect.getAccessibleContext().getAccessibleChild(0);
         BasicComboPopup popup = (BasicComboPopup)child;
-        JList list = popup.getList();
+        JList<Object> list = popup.getList();
         list.setSelectionForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         list.setSelectionBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
         list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
@@ -1153,7 +1153,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         memLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(memLabel, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 60, 0, 0), 0, 0));
 
-        memSelect = new JComboBox();
+        memSelect = new JComboBox<>();
 
         if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
             memSelect.setUI(new MetalComboBoxUI());

@@ -38,13 +38,13 @@ class ImageLoadQueue {
     private static final ImageLoadItem KILL_SWITCH = new ImageLoadItem(null, null, null, -1, -1);
 
     // list of items to be loaded
-    private final java.util.LinkedList _loadQueue;
+    private final LinkedList<ImageLoadItem> _loadQueue;
 
     /**
      * Intantiates a new queue.
      */
     public ImageLoadQueue() {
-        this._loadQueue = new LinkedList();
+        this._loadQueue = new LinkedList<>();
     }
 
     /**
