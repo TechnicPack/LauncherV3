@@ -110,9 +110,9 @@ public class StatBox extends JButton {
 
     private String buildShortenedStr(int value, String suffix) {
         if (value > 100) {
-            return Integer.toString(value/10)+suffix;
+            return value / 10 +suffix;
         } else {
-            return Float.toString((float)value/10.0f)+suffix;
+            return (float) value / 10.0f +suffix;
         }
     }
 }

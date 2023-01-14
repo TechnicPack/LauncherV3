@@ -289,7 +289,7 @@ public class LauncherMain {
                 String ips = inetAddresses.stream().map(InetAddress::getHostAddress).collect(Collectors.joining(", "));
                 Utils.getLogger().info(domain + " resolves to [" + ips + "]");
             } catch (UnknownHostException ex) {
-                Utils.getLogger().log(Level.SEVERE, "Failed to resolve " + domain + ": " + ex.toString());
+                Utils.getLogger().log(Level.SEVERE, "Failed to resolve " + domain + ": " + ex);
             }
         }
     }

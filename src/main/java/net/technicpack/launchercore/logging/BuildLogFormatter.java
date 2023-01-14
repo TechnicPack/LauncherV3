@@ -50,7 +50,7 @@ public class BuildLogFormatter extends Formatter {
         if (record.getThrown() != null) {
             StringWriter writer = new StringWriter();
             record.getThrown().printStackTrace(new PrintWriter(writer));
-            builder.append(writer.toString());
+            builder.append(writer);
         }
 
         return builder.toString();
