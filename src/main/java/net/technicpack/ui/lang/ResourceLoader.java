@@ -282,7 +282,7 @@ public class ResourceLoader {
         // Create the area around the circle to cut out
         Area cutOutArea = new Area(new Rectangle(0, 0, outputImage.getWidth(), outputImage.getHeight()));
 
-        int diameter = (outputImage.getWidth() < outputImage.getHeight())?outputImage.getWidth():outputImage.getHeight();
+        int diameter = Math.min(outputImage.getWidth(), outputImage.getHeight());
         cutOutArea.subtract(new Area(new Ellipse2D.Float((outputImage.getWidth() - diameter) / 2, (outputImage.getHeight() - diameter) / 2, diameter, diameter)));
 
         // Set the fill color to an opaque color
@@ -328,7 +328,6 @@ public class ResourceLoader {
     }
 
     public void unregisterResource(IRelocalizableResource resource) {
-        if (resources.contains(resource))
-            resources.remove(resource);
+        resources.remove(resource);
     }
 }

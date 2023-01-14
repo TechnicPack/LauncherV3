@@ -56,9 +56,7 @@ public class SettingsFactory {
 
         File installedSettingsDir = OperatingSystem.getOperatingSystem().getUserDirectoryForApp("technic");
 
-        TechnicSettings settings = tryGetSettings(installedSettingsDir);
-
-        return settings;
+        return tryGetSettings(installedSettingsDir);
     }
 
     public static void migrateSettings(TechnicSettings settings, IInstalledPackRepository packStore, LauncherDirectories directories, IUserStore users, List<IMigrator> migrators) {

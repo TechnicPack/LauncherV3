@@ -72,7 +72,7 @@ public class RenameJnilibToDylibTask implements IInstallTask {
 
             if (!file.renameTo(newFile)) {
                 throw new IOException("Failed to rename " + file.getAbsolutePath() + " to " + newFile.getAbsolutePath());
-            };
+            }
         }
     }
 }

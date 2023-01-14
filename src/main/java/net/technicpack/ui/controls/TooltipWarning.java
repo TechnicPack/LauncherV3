@@ -115,10 +115,9 @@ public class TooltipWarning extends JLabel {
             return new Dimension(248, startY+4);
         }
 
-        private void drawTextUgly(String text, Graphics2D g2)
+        private void drawTextUgly(String textToDraw, Graphics2D g2)
         {
             // Ugly code to wrap text
-            String textToDraw = text;
             String[] arr = textToDraw.split(" ");
             int nIndex = 0;
             int startX = 4;

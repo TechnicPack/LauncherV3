@@ -176,8 +176,7 @@ public class UserCellEditor implements ComboBoxEditor, DocumentListener, IImageJ
     @Override
     public void jobComplete(ImageJob<IUserType> job) {
         IUserType mojangUser = job.getJobData();
-        if (headMap.containsKey(mojangUser.getUsername()))
-            headMap.remove(mojangUser.getUsername());
+        headMap.remove(mojangUser.getUsername());
 
         headMap.put(mojangUser.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
         this.parentPanel.revalidate();

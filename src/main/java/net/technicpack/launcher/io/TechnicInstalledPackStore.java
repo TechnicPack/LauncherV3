@@ -75,11 +75,9 @@ public class TechnicInstalledPackStore implements IInstalledPackRepository {
 
         //HACK: "And that's why.... you don't put view data in the model."
         /////////// - J. Walter Weatherman, Software Developer
-        if (installedPacks.containsKey("addpack"))
-            installedPacks.remove("addpack");
+        installedPacks.remove("addpack");
 
-        if (byIndex.contains("addpack"))
-            byIndex.remove("addpack");
+        byIndex.remove("addpack");
     }
 
     @Override

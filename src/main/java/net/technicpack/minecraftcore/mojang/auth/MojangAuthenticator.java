@@ -59,8 +59,6 @@ public class MojangAuthenticator {
             if (response.hasError()) {
                 throw new ResponseException(response.getError(), response.getErrorMessage());
             }
-        } catch (ResponseException e) {
-            throw e;
         }  catch (IOException e) {
             throw new AuthenticationException(
                     "An error was raised while attempting to communicate with " + AUTH_SERVER + ".", e);

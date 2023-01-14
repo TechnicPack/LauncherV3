@@ -55,7 +55,7 @@ public class FixRunDataDialog extends LauncherDialog {
 
     @Override
     public void setVisible(boolean visible) {
-        if ((recommendedVersion != null && recommendedMemory != null && javaVersionRepository.getSelectedVersion().equals(recommendedVersion) && attemptedMemory.getMemoryMB() == recommendedMemory.getMemoryMB()) ||
+        if ((recommendedMemory != null && javaVersionRepository.getSelectedVersion().equals(recommendedVersion) && attemptedMemory.getMemoryMB() == recommendedMemory.getMemoryMB()) ||
                 (!shouldAskFirst && recommendedMemory != null && recommendedVersion != null)) {
             result = Result.ACCEPT;
             dispose();
