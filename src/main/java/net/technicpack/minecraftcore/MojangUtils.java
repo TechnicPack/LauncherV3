@@ -121,8 +121,7 @@ public class MojangUtils {
                 "MOJANG_C.SF",
                 "CODESIGN.RSA",
                 "CODESIGN.SF" };
-        JarFile jarFile = new JarFile(minecraft);
-        try {
+        try (JarFile jarFile = new JarFile(minecraft)) {
             String fileName = jarFile.getName();
             String fileNameLastPart = fileName.substring(fileName.lastIndexOf(File.separator));
 
@@ -149,8 +148,6 @@ public class MojangUtils {
                 jos.closeEntry();
             }
             jos.close();
-        } finally {
-            jarFile.close();
         }
 
     }
