@@ -153,10 +153,10 @@ public abstract class Relauncher {
             commands.add(launchPath);
         commands.addAll(Arrays.asList(args));
 
-        String command = "";
+        StringBuilder command = new StringBuilder();
 
         for (String token : commands) {
-            command += token + " ";
+            command.append(token).append(" ");
         }
 
         Utils.getLogger().info("Launching command: '" + command + "'");

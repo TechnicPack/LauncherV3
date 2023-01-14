@@ -96,13 +96,9 @@ public class ResourceLoader {
             this.launcherAssets = null;
         else
             this.launcherAssets = new File(directories.getAssetsDirectory(), "launcher");
-        dottedResourcePath = "";
-        slashResourcePath = "";
 
-        for (String pathToken : resourcesPath) {
-            dottedResourcePath += pathToken + ".";
-            slashResourcePath += "/" + pathToken;
-        }
+        dottedResourcePath = String.join(".", resourcesPath) + ".";
+        slashResourcePath = "/" + String.join("/", resourcesPath);
 
         Locale defaultLocale = Locale.getDefault();
         this.defaultLocale = matchClosestSupportedLocale(defaultLocale);

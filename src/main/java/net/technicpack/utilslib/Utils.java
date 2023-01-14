@@ -173,7 +173,7 @@ public class Utils {
                     try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                         String line;
                         while ((line = bufferedReader.readLine()) != null) {
-                            response.append(line + "\n");
+                            response.append(line).append("\n");
                         }
                     } catch (IOException ex) {
                         //Don't let other process' problems concern us
