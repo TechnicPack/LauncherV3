@@ -23,7 +23,6 @@ import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.exception.PermissionDeniedException;
 import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.utilslib.Utils;
-import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.net.*;

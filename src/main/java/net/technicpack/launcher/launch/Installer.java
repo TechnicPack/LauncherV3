@@ -61,7 +61,6 @@ import net.technicpack.utilslib.Utils;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Pattern;

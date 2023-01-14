@@ -5,9 +5,6 @@ import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.exception.AuthenticationException;
 import net.technicpack.minecraftcore.microsoft.auth.model.MinecraftProfile;
 import net.technicpack.minecraftcore.microsoft.auth.model.XboxMinecraftResponse;
-import net.technicpack.minecraftcore.microsoft.auth.model.XboxResponse;
-
-import java.time.Instant;
 
 public class MicrosoftUser implements IUserType {
     public static final String MC_MS_USER_TYPE = "msa";

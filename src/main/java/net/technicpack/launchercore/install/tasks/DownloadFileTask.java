@@ -24,7 +24,6 @@ import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.utilslib.Utils;
 
-import javax.swing.JFileChooser;
 import java.io.File;
 import java.io.IOException;
 

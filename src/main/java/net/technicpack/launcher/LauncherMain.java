@@ -42,7 +42,6 @@ import net.technicpack.launcher.ui.LoginFrame;
 import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launchercore.TechnicConstants;
-import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.exception.DownloadException;

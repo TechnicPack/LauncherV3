@@ -24,7 +24,6 @@ import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.modpacks.InstalledPack;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
-import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.NewsArticle;
 import net.technicpack.rest.RestfulAPIException;

@@ -20,8 +20,6 @@
 package net.technicpack.rest;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import net.technicpack.launchercore.TechnicConstants;
 import org.apache.commons.io.IOUtils;
@@ -30,8 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
 public class RestObject {
     private static final Gson gson = new Gson();

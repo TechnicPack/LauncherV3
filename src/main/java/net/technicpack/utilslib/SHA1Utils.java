@@ -22,7 +22,6 @@ package net.technicpack.utilslib;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_1;

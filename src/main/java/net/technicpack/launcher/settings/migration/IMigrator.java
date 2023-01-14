@@ -22,7 +22,6 @@ import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
-import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 
 public interface IMigrator {
     String getMigrationVersion();
