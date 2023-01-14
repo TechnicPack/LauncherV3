@@ -43,14 +43,14 @@ public class TooltipWarning extends JLabel {
         return tooltip;
     }
 
-    private class WarningTooltip extends JToolTip {
+    private static class WarningTooltip extends JToolTip {
 
         public WarningTooltip() {
             setUI(new WarningTooltipUI());
         }
     }
 
-    private class WarningTooltipUI extends MetalToolTipUI {
+    private static class WarningTooltipUI extends MetalToolTipUI {
 
         @Override
         public void paint(Graphics g, JComponent c) {

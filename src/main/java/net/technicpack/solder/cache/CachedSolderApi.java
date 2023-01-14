@@ -41,7 +41,7 @@ public class CachedSolderApi implements ISolderApi {
     private DateTime lastSolderPull = new DateTime(0);
     private int cacheInSeconds;
 
-    private class CacheTuple {
+    private static class CacheTuple {
         private String root;
         private String slug;
         private String url;
