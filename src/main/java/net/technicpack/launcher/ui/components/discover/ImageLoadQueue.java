@@ -89,7 +89,7 @@ class ImageLoadQueue {
                     " requested item, but queue is shutting down; returning kill switch.");
             return KILL_SWITCH;
         } else {
-            ImageLoadItem item = (ImageLoadItem) _loadQueue.removeLast();
+            ImageLoadItem item = _loadQueue.removeLast();
 
             XRLog.general(Level.FINE, "Thread " + Thread.currentThread().getName() +
                     " pulled item " + item._uri + " from queue, " + (_loadQueue.size() - 1) + " remaining");

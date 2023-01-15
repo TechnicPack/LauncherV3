@@ -444,7 +444,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             versionSelect.setSelectedIndex(1);
         else {
             for (int i = 2; i < versionSelect.getItemCount(); i++) {
-                if (((JavaVersionItem)versionSelect.getItemAt(i)).getVersionNumber().equals(settingsVersion) && ((JavaVersionItem)versionSelect.getItemAt(i)).is64Bit() == settingsBitness) {
+                if (versionSelect.getItemAt(i).getVersionNumber().equals(settingsVersion) && versionSelect.getItemAt(i).is64Bit() == settingsBitness) {
                     versionSelect.setSelectedIndex(i);
                     break;
                 }

@@ -112,8 +112,8 @@ public class FeedItemView extends JButton {
         int nIndex = 0;
         int startX = 4;
         int startY = 3;
-        int lineSize = (int)g2.getFontMetrics().getHeight();
-        int elipsisSize = (int)g2.getFontMetrics().stringWidth("...");
+        int lineSize = g2.getFontMetrics().getHeight();
+        int elipsisSize = g2.getFontMetrics().stringWidth("...");
 
         while ( nIndex < arr.length )
         {

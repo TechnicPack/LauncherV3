@@ -134,12 +134,12 @@ public class DiscoverResourceLoader extends ImageResourceLoader {
             return new ImageResource(resource.getImageUri(), AWTFSImage.createImage(ImageUtils.scaleImage(newImg, width, height)));
         } else {
             CacheKey key = new CacheKey(uri, width, height);
-            ImageResource ir = (ImageResource) _imageCache.get(key);
+            ImageResource ir = _imageCache.get(key);
             if (ir == null) {
                 // not loaded, or not loaded at target size
 
                 // loaded a base size?
-                ir = (ImageResource) _imageCache.get(new CacheKey(uri, -1, -1));
+                ir = _imageCache.get(new CacheKey(uri, -1, -1));
 
                 // no: loaded
                 if (ir == null) {

@@ -88,7 +88,7 @@ public class TooltipWarning extends JLabel {
             int nIndex = 0;
             int startX = 4;
             int startY = 3;
-            int lineSize = (int)tooltip.getFontMetrics(tooltip.getFont()).getHeight();
+            int lineSize = tooltip.getFontMetrics(tooltip.getFont()).getHeight();
 
             while ( nIndex < arr.length )
             {
@@ -123,7 +123,7 @@ public class TooltipWarning extends JLabel {
             int nIndex = 0;
             int startX = 4;
             int startY = 3;
-            int lineSize = (int)g2.getFontMetrics().getHeight();
+            int lineSize = g2.getFontMetrics().getHeight();
 
             while ( nIndex < arr.length )
             {

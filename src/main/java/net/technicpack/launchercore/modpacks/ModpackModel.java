@@ -308,7 +308,7 @@ public class ModpackModel {
             return null;
         }
 
-        return (RunData)Utils.getGson().fromJson(runData, RunData.class);
+        return Utils.getGson().fromJson(runData, RunData.class);
     }
 
     public File getInstalledDirectory() {
