@@ -24,7 +24,7 @@ public enum LaunchAction {
     NOTHING("Stay Open");
     private final String display;
 
-    private LaunchAction(String s) {
+    LaunchAction(String s) {
         this.display = s;
     }
 

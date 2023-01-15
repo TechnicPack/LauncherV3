@@ -94,6 +94,6 @@ public class InstallVersionLibTask extends ListenerTask {
         if (library.getExtract() != null)
             filter = new ExtractRulesFileFilter(library.getExtract());
 
-        grabQueue.addTask(new EnsureFileTask(cache, verifier, extractDirectory, url, downloadLibraryQueue, copyLibraryQueue, filter));
+        grabQueue.addTask(new EnsureFileTask<>(cache, verifier, extractDirectory, url, downloadLibraryQueue, copyLibraryQueue, filter));
     }
 }

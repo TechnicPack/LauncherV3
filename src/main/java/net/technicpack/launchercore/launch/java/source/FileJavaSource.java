@@ -37,7 +37,7 @@ import java.util.List;
  */
 public class FileJavaSource implements IVersionSource {
     private transient File loadedFile;
-    private List<FileBasedJavaVersion> versions = new ArrayList<FileBasedJavaVersion>();
+    private List<FileBasedJavaVersion> versions = new ArrayList<>();
 
     protected FileJavaSource(File loadFile) {
         this.loadedFile = loadFile;

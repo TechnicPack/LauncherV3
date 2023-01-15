@@ -28,7 +28,7 @@ public class DiscoverResourceLoader extends ImageResourceLoader {
             XRLog.general(Level.FINE, "No-op repaint requested");
         }
     };
-    private final Map _imageCache;
+    private final Map<CacheKey, ImageResource> _imageCache;
 
     private final ImageLoadQueue _loadQueue;
 
@@ -60,7 +60,7 @@ public class DiscoverResourceLoader extends ImageResourceLoader {
 
         // note we do *not* override removeEldestEntry() here--users of this class must call shrinkImageCache().
         // that's because we don't know when is a good time to flush the cache
-        this._imageCache = new LinkedHashMap(cacheSize, 0.75f, true);
+        this._imageCache = new LinkedHashMap<>(cacheSize, 0.75f, true);
     }
 
     public static ImageResource loadImageResourceFromUri(final String uri) {
@@ -112,7 +112,7 @@ public class DiscoverResourceLoader extends ImageResourceLoader {
 
     public synchronized void shrink() {
         int ovr = _imageCache.size() - _imageCacheCapacity;
-        Iterator it = _imageCache.keySet().iterator();
+        Iterator<?> it = _imageCache.keySet().iterator();
         while (it.hasNext() && ovr-- > 0) {
             it.next();
             it.remove();
@@ -134,12 +134,12 @@ public class DiscoverResourceLoader extends ImageResourceLoader {
             return new ImageResource(resource.getImageUri(), AWTFSImage.createImage(ImageUtils.scaleImage(newImg, width, height)));
         } else {
             CacheKey key = new CacheKey(uri, width, height);
-            ImageResource ir = (ImageResource) _imageCache.get(key);
+            ImageResource ir = _imageCache.get(key);
             if (ir == null) {
                 // not loaded, or not loaded at target size
 
                 // loaded a base size?
-                ir = (ImageResource) _imageCache.get(new CacheKey(uri, -1, -1));
+                ir = _imageCache.get(new CacheKey(uri, -1, -1));
 
                 // no: loaded
                 if (ir == null) {

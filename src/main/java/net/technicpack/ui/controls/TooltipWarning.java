@@ -43,14 +43,14 @@ public class TooltipWarning extends JLabel {
         return tooltip;
     }
 
-    private class WarningTooltip extends JToolTip {
+    private static class WarningTooltip extends JToolTip {
 
         public WarningTooltip() {
             setUI(new WarningTooltipUI());
         }
     }
 
-    private class WarningTooltipUI extends MetalToolTipUI {
+    private static class WarningTooltipUI extends MetalToolTipUI {
 
         @Override
         public void paint(Graphics g, JComponent c) {
@@ -88,7 +88,7 @@ public class TooltipWarning extends JLabel {
             int nIndex = 0;
             int startX = 4;
             int startY = 3;
-            int lineSize = (int)tooltip.getFontMetrics(tooltip.getFont()).getHeight();
+            int lineSize = tooltip.getFontMetrics(tooltip.getFont()).getHeight();
 
             while ( nIndex < arr.length )
             {
@@ -115,15 +115,14 @@ public class TooltipWarning extends JLabel {
             return new Dimension(248, startY+4);
         }
 
-        private void drawTextUgly(String text, Graphics2D g2)
+        private void drawTextUgly(String textToDraw, Graphics2D g2)
         {
             // Ugly code to wrap text
-            String textToDraw = text;
             String[] arr = textToDraw.split(" ");
             int nIndex = 0;
             int startX = 4;
             int startY = 3;
-            int lineSize = (int)g2.getFontMetrics().getHeight();
+            int lineSize = g2.getFontMetrics().getHeight();
 
             while ( nIndex < arr.length )
             {

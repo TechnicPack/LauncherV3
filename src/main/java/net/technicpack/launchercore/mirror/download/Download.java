@@ -23,7 +23,6 @@ import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.exception.PermissionDeniedException;
 import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.utilslib.Utils;
-import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.net.*;
@@ -47,7 +46,7 @@ public class Download implements Runnable {
     private File outFile = null;
     private Exception exception = null;
 
-    private Object timeoutLock = new Object();
+    private final Object timeoutLock = new Object();
     private boolean isTimedOut = false;
 
     public Download(URL url, String name, String outPath) throws MalformedURLException {
@@ -132,7 +131,6 @@ public class Download implements Runnable {
             }
         } catch (ClosedByInterruptException ex) {
             result = Result.FAILURE;
-            return;
         } catch (PermissionDeniedException e) {
             exception = e;
             result = Result.PERMISSION_DENIED;
@@ -149,7 +147,7 @@ public class Download implements Runnable {
     }
 
     protected InputStream getConnectionInputStream(final URLConnection urlconnection) throws DownloadException {
-        final AtomicReference<InputStream> is = new AtomicReference<InputStream>();
+        final AtomicReference<InputStream> is = new AtomicReference<>();
 
         for (int j = 0; (j < 3) && (is.get() == null); j++) {
             StreamThread stream = new StreamThread(urlconnection, is);

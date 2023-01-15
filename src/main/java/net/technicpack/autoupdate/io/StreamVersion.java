@@ -28,7 +28,7 @@ import java.util.List;
 public class StreamVersion extends RestObject {
     private int build;
     private StreamUrls url;
-    private List<LauncherResource> resources = new ArrayList<LauncherResource>();
+    private List<LauncherResource> resources = new ArrayList<>();
 
     public int getBuild() {
         return build;

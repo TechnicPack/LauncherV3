@@ -39,7 +39,7 @@ public class DiscoverLinkListener extends LinkListener {
 
     private IPlatformApi platform;
     private ModpackSelector modpackSelector;
-    private List<Box> mousedLinks = new LinkedList<Box>();
+    private List<Box> mousedLinks = new LinkedList<>();
     private Box _previouslyHovered;
 
     public DiscoverLinkListener(IPlatformApi platform, ModpackSelector modpackSelector ) {

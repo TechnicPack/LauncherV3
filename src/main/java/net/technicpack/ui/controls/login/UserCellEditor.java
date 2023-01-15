@@ -48,9 +48,9 @@ public class UserCellEditor implements ComboBoxEditor, DocumentListener, IImageJ
     private CardLayout layout;
 
     private Object currentObject;
-    private HashMap<String, Icon> headMap = new HashMap<String, Icon>();
+    private HashMap<String, Icon> headMap = new HashMap<>();
 
-    Collection<ActionListener> actionListeners = new HashSet<ActionListener>();
+    Collection<ActionListener> actionListeners = new HashSet<>();
     private ImageRepository<IUserType> mSkinRepo;
 
     private static final String USER = "user";
@@ -176,8 +176,7 @@ public class UserCellEditor implements ComboBoxEditor, DocumentListener, IImageJ
     @Override
     public void jobComplete(ImageJob<IUserType> job) {
         IUserType mojangUser = job.getJobData();
-        if (headMap.containsKey(mojangUser.getUsername()))
-            headMap.remove(mojangUser.getUsername());
+        headMap.remove(mojangUser.getUsername());
 
         headMap.put(mojangUser.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
         this.parentPanel.revalidate();

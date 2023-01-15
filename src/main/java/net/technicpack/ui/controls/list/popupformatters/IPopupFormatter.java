@@ -21,5 +21,5 @@ package net.technicpack.ui.controls.list.popupformatters;
 import javax.swing.plaf.basic.BasicComboPopup;
 
 public interface IPopupFormatter {
-    public void formatPopup(BasicComboPopup popup);
+    void formatPopup(BasicComboPopup popup);
 }

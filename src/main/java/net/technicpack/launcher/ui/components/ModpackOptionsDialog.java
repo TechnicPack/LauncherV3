@@ -53,7 +53,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
     private JRadioButton recommended;
     private JRadioButton latest;
     private JRadioButton manual;
-    private JComboBox manualBuildList;
+    private JComboBox<PackBuildItem> manualBuildList;
     private JFileChooser chooser;
 
     public ModpackOptionsDialog(Frame owner, LauncherDirectories directories, ModpackModel modpack, ResourceLoader resources) {
@@ -316,13 +316,13 @@ public class ModpackOptionsDialog extends LauncherDialog {
         centerPanel.add(Box.createHorizontalStrut(20), new GridBagConstraints(0, 6, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0,0));
         centerPanel.add(Box.createHorizontalStrut(20), new GridBagConstraints(1, 6, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0,0));
 
-        manualBuildList = new JComboBox();
+        manualBuildList = new JComboBox<>();
 
         if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
             manualBuildList.setUI(new MetalComboBoxUI());
         }
 
-        AdvancedCellRenderer renderer = new AdvancedCellRenderer();
+        AdvancedCellRenderer<PackBuildItem> renderer = new AdvancedCellRenderer<>();
         renderer.setUnselectedBackgroundColor(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
         renderer.setUnselectedForegroundColor(LauncherFrame.COLOR_BUTTON_BLUE);
         renderer.setSelectedForegroundColor(LauncherFrame.COLOR_BUTTON_BLUE);
@@ -344,7 +344,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
 
         Object child = manualBuildList.getAccessibleContext().getAccessibleChild(0);
         BasicComboPopup popup = (BasicComboPopup)child;
-        JList list = popup.getList();
+        JList<Object> list = popup.getList();
         list.setSelectionForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         list.setSelectionBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
         list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);

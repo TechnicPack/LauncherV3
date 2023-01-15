@@ -21,19 +21,20 @@ package net.technicpack.launchercore.install;
 
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.util.DownloadListener;
+import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 
 import java.io.IOException;
 import java.util.LinkedList;
 
-public class InstallTasksQueue<Metadata> implements ITasksQueue {
+public class InstallTasksQueue implements ITasksQueue {
     private DownloadListener listener;
     private LinkedList<IInstallTask> tasks;
     private IInstallTask currentTask;
-    private Metadata metadata;
+    private MojangVersion metadata;
 
     public InstallTasksQueue(DownloadListener listener) {
         this.listener = listener;
-        this.tasks = new LinkedList<IInstallTask>();
+        this.tasks = new LinkedList<>();
         this.currentTask = null;
     }
 
@@ -62,7 +63,7 @@ public class InstallTasksQueue<Metadata> implements ITasksQueue {
         return this.listener;
     }
 
-    public void setMetadata(Metadata metadata) { this.metadata = metadata; }
+    public void setMetadata(MojangVersion metadata) { this.metadata = metadata; }
 
-    public Metadata getMetadata() { return this.metadata; }
+    public MojangVersion getMetadata() { return this.metadata; }
 }

@@ -46,7 +46,6 @@ import net.technicpack.ui.controls.feeds.CountCircle;
 import net.technicpack.ui.controls.installation.ProgressBar;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserType;
-import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.install.Version;
@@ -55,16 +54,10 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.utilslib.DesktopUtils;
-import net.technicpack.utilslib.Utils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
-import java.io.IOException;
-import java.util.logging.Level;
 
 public class LauncherFrame extends DraggableFrame implements IRelocalizableResource, IAuthListener {
 

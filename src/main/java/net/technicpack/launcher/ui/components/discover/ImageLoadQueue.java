@@ -38,13 +38,13 @@ class ImageLoadQueue {
     private static final ImageLoadItem KILL_SWITCH = new ImageLoadItem(null, null, null, -1, -1);
 
     // list of items to be loaded
-    private final java.util.LinkedList _loadQueue;
+    private final LinkedList<ImageLoadItem> _loadQueue;
 
     /**
      * Intantiates a new queue.
      */
     public ImageLoadQueue() {
-        this._loadQueue = new LinkedList();
+        this._loadQueue = new LinkedList<>();
     }
 
     /**
@@ -89,7 +89,7 @@ class ImageLoadQueue {
                     " requested item, but queue is shutting down; returning kill switch.");
             return KILL_SWITCH;
         } else {
-            ImageLoadItem item = (ImageLoadItem) _loadQueue.removeLast();
+            ImageLoadItem item = _loadQueue.removeLast();
 
             XRLog.general(Level.FINE, "Thread " + Thread.currentThread().getName() +
                     " pulled item " + item._uri + " from queue, " + (_loadQueue.size() - 1) + " remaining");

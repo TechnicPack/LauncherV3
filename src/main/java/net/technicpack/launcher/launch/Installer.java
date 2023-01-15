@@ -61,14 +61,13 @@ import net.technicpack.utilslib.Utils;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 import java.util.zip.ZipException;
 
 public class Installer {
-    protected final ModpackInstaller<MojangVersion> installer;
+    protected final ModpackInstaller installer;
     protected final MinecraftLauncher launcher;
     protected final TechnicSettings settings;
     protected final PackResourceMapper packIconMapper;
@@ -114,7 +113,7 @@ public class Installer {
                 try {
                     MojangVersion version = null;
 
-                    InstallTasksQueue<MojangVersion> tasksQueue = new InstallTasksQueue<MojangVersion>(listener);
+                    InstallTasksQueue tasksQueue = new InstallTasksQueue(listener);
                     MojangVersionBuilder versionBuilder = createVersionBuilder(pack, tasksQueue);
 
                     if (build != null && !build.isEmpty()) {
@@ -223,8 +222,6 @@ public class Installer {
                 } catch (BuildInaccessibleException e) {
                     e.printStackTrace();
                     JOptionPane.showMessageDialog(frame, e.getMessage(), resources.getString("launcher.installerror.title"), JOptionPane.WARNING_MESSAGE);
-                } catch (IOException e) {
-                    e.printStackTrace();
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -353,7 +350,7 @@ public class Installer {
         }
 
         if (!fmlLibsZip.isEmpty()) {
-            verifyingFiles.addTask(new EnsureFileTask(new File(directories.getCacheDirectory(), fmlLibsZip), new ValidZipFileVerifier(), modpackFmlLibDir, TechnicConstants.technicFmlLibRepo + fmlLibsZip, installingLibs, installingLibs));
+            verifyingFiles.addTask(new EnsureFileTask<>(new File(directories.getCacheDirectory(), fmlLibsZip), new ValidZipFileVerifier(), modpackFmlLibDir, TechnicConstants.technicFmlLibRepo + fmlLibsZip, installingLibs, installingLibs));
         }
 
         if (!fmlLibs.isEmpty()) {
@@ -367,7 +364,7 @@ public class Installer {
                 File target = new File(modpackFmlLibDir, name);
 
                 if (!target.exists() || (verifier != null && !verifier.isFileValid(target)) ) {
-                    verifyingFiles.addTask(new EnsureFileTask(cached, verifier, null, TechnicConstants.technicFmlLibRepo + name, installingLibs, installingLibs));
+                    verifyingFiles.addTask(new EnsureFileTask<>(cached, verifier, null, TechnicConstants.technicFmlLibRepo + name, installingLibs, installingLibs));
                     installingLibs.addTask(new CopyFileTask(cached, target));
                 }
             });
@@ -445,7 +442,7 @@ public class Installer {
         ZipFileRetriever zipVersionRetriever = new ZipFileRetriever(new File(modpack.getBinDir(), "modpack.jar"));
         HttpFileRetriever fallbackVersionRetriever = new HttpFileRetriever(TechnicConstants.technicVersions, tasksQueue.getDownloadListener());
 
-        ArrayList<MojangVersionRetriever> fallbackRetrievers = new ArrayList<MojangVersionRetriever>(1);
+        ArrayList<MojangVersionRetriever> fallbackRetrievers = new ArrayList<>(1);
         fallbackRetrievers.add(fallbackVersionRetriever);
 
         File versionJson = new File(modpack.getBinDir(), "version.json");

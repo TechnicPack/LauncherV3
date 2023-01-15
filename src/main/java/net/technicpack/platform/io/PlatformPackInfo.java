@@ -49,7 +49,7 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
     private boolean isOfficial;
     private String discordServerId;
 
-    private ArrayList<FeedItem> feed = new ArrayList<FeedItem>();
+    private ArrayList<FeedItem> feed = new ArrayList<>();
 
     private transient boolean isLocal = false;
 
@@ -119,7 +119,7 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
             return new ArrayList<>(0);
         }
 
-        List<String> builds = new ArrayList<String>();
+        List<String> builds = new ArrayList<>();
         builds.add(version);
         return builds;
     }

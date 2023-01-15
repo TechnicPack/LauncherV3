@@ -45,14 +45,11 @@ public class SolderPackSource implements IPackSource {
 
     @Override
     public Collection<PackInfo> getPublicPacks() {
-        LinkedList<PackInfo> returnValue = new LinkedList<PackInfo>();
+        LinkedList<PackInfo> returnValue = new LinkedList<>();
 
         try {
             Collection<SolderPackInfo> packs = solder.getPublicSolderPacks(baseUrl);
-
-            for (SolderPackInfo info : packs) {
-                returnValue.add(info);
-            }
+            returnValue.addAll(packs);
         } catch (RestfulAPIException ex) {
             Utils.getLogger().log(Level.WARNING, "Unable to load technic modpacks", ex);
         }

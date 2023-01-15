@@ -35,7 +35,6 @@ import org.joda.time.Seconds;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
@@ -129,8 +128,7 @@ public class CachedSolderPackApi implements ISolderPackApi {
 
             if (rootInfoCache != null)
                 rootInfoCache.setLocal();
-        } catch (IOException ex) {
-        } catch (JsonSyntaxException ex) {
+        } catch (IOException | JsonSyntaxException ex) {
         }
     }
 
@@ -142,7 +140,6 @@ public class CachedSolderPackApi implements ISolderPackApi {
         try {
             FileUtils.writeStringToFile(cacheFile, packCache, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            return;
         }
     }
 
@@ -152,7 +149,7 @@ public class CachedSolderPackApi implements ISolderPackApi {
 
         Boolean isDead = deadBuildCache.getIfPresent(build);
 
-        if (isDead != null && isDead.booleanValue())
+        if (isDead != null && isDead)
             return null;
 
         Modpack modpack = buildCache.getIfPresent(build);

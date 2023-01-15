@@ -95,7 +95,7 @@ public class ProgressBar extends JLabel implements DownloadListener {
         g2d.setFont(getFont());
         int textY = y + ((height - g2d.getFontMetrics().getHeight()) / 2) + g2d.getFontMetrics().getAscent();
         int pct = (int)(progressPct * 100);
-        String pctText = Integer.toString(pct) + "%";
+        String pctText = pct + "%";
 
         int textX = (x+width) - (height/4) - g2d.getFontMetrics().stringWidth(pctText);
         g2d.drawString(pctText, textX, textY);

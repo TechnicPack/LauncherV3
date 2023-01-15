@@ -30,7 +30,6 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.AssetIndex;
-import net.technicpack.rest.io.Modpack;
 
 import java.io.File;
 import java.io.IOException;
@@ -67,7 +66,7 @@ public class EnsureAssetsIndexTask implements IInstallTask {
 
     @Override
     public void runTask(InstallTasksQueue queue) throws IOException {
-        MojangVersion version = ((InstallTasksQueue<MojangVersion>)queue).getMetadata();
+        MojangVersion version = queue.getMetadata();
 
         String assetKey = version.getAssetsKey();
         if (assetKey == null || assetKey.isEmpty()) {

@@ -38,9 +38,7 @@ public class HttpDiscordApi implements IDiscordApi {
                     Server server = get();
 
                     callback.serverGetCallback(modpack, server);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
                 }
             }

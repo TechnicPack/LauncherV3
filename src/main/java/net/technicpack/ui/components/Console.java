@@ -95,8 +95,7 @@ public class Console {
                     int offset = consoleFrame.getDocument().getLength();
                     consoleFrame.getDocument().insertString(offset, writeText, writeAttributes);
                     consoleFrame.setCaretPosition(consoleFrame.getDocument().getLength());
-                } catch (BadLocationException ble) {
-                } catch (NullPointerException npe) {
+                } catch (BadLocationException | NullPointerException ble) {
                 }
             }
         });

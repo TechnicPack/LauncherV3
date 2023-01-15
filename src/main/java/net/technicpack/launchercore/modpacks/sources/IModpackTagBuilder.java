@@ -22,5 +22,5 @@ package net.technicpack.launchercore.modpacks.sources;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 
 public interface IModpackTagBuilder {
-    public Iterable<String> getModpackTags(ModpackModel modpack);
+    Iterable<String> getModpackTags(ModpackModel modpack);
 }

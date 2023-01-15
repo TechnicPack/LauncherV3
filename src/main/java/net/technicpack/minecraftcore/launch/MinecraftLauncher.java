@@ -157,7 +157,7 @@ public class MinecraftLauncher {
         String cpString = buildClassPath(pack, version);
 
         // build arg parameter map
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> params = new HashMap<>();
         IUserType user = userModel.getCurrentUser();
         File gameDirectory = pack.getInstalledDirectory();
         ILaunchOptions launchOpts = options.getOptions();

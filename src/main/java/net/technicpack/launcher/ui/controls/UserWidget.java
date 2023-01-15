@@ -21,7 +21,6 @@ package net.technicpack.launcher.ui.controls;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launchercore.auth.IUserType;
-import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.image.ImageRepository;
@@ -31,7 +30,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class UserWidget extends JPanel implements IImageJobListener<MojangUser> {
+public class UserWidget extends JPanel implements IImageJobListener<IUserType> {
 
     private ImageRepository<IUserType> skinRepository;
 
@@ -110,7 +109,7 @@ public class UserWidget extends JPanel implements IImageJobListener<MojangUser> 
     }
 
     @Override
-    public void jobComplete(ImageJob<MojangUser> job) {
+    public void jobComplete(ImageJob<IUserType> job) {
         if (job.getJobData() == currentMojangUser)
             refreshFace(job.getImage());
     }

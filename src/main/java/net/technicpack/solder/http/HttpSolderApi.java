@@ -34,7 +34,7 @@ import java.util.Map;
 
 public class HttpSolderApi implements ISolderApi {
     private String clientId;
-    private final Map<String, String> mirrorUrls = new HashMap<String, String>();
+    private final Map<String, String> mirrorUrls = new HashMap<>();
 
     public HttpSolderApi(String clientId) {
         this.clientId = clientId;
@@ -64,7 +64,7 @@ public class HttpSolderApi implements ISolderApi {
 
     @Override
     public Collection<SolderPackInfo> internalGetPublicSolderPacks(String solderRoot, ISolderApi packFactory) throws RestfulAPIException {
-        LinkedList<SolderPackInfo> allPackApis = new LinkedList<SolderPackInfo>();
+        LinkedList<SolderPackInfo> allPackApis = new LinkedList<>();
         String allPacksUrl = solderRoot + "modpack?include=full&cid=" + clientId;
 
         FullModpacks technic = RestObject.getRestObject(FullModpacks.class, allPacksUrl);

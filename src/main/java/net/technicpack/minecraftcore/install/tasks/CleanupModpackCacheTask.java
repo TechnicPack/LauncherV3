@@ -58,7 +58,7 @@ public class CleanupModpackCacheTask implements IInstallTask {
 			return;
 		}
 
-		Set<String> keepFiles = new HashSet<String>(modpack.getMods().size() + 1);
+		Set<String> keepFiles = new HashSet<>(modpack.getMods().size() + 1);
 		for (Mod mod : modpack.getMods()) {
 			String version = mod.getVersion();
 

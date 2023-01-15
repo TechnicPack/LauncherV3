@@ -41,7 +41,7 @@ public class CachedSolderApi implements ISolderApi {
     private DateTime lastSolderPull = new DateTime(0);
     private int cacheInSeconds;
 
-    private class CacheTuple {
+    private static class CacheTuple {
         private String root;
         private String slug;
         private String url;
@@ -119,7 +119,7 @@ public class CachedSolderApi implements ISolderApi {
         }
 
         if (Seconds.secondsBetween(lastSolderPull, DateTime.now()).isLessThan(Seconds.seconds(cacheInSeconds / 10)))
-            return new ArrayList<SolderPackInfo>(0);
+            return new ArrayList<>(0);
 
         try {
             cachedPublicPacks = innerApi.internalGetPublicSolderPacks(solderRoot, this);

@@ -137,7 +137,7 @@ public class Utils {
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(con.getInputStream()));
             String inputLine;
-            StringBuffer response = new StringBuffer();
+            StringBuilder response = new StringBuilder();
 
             while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine);
@@ -173,7 +173,7 @@ public class Utils {
                     try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                         String line;
                         while ((line = bufferedReader.readLine()) != null) {
-                            response.append(line + "\n");
+                            response.append(line).append("\n");
                         }
                     } catch (IOException ex) {
                         //Don't let other process' problems concern us
@@ -231,8 +231,6 @@ public class Utils {
                     md5 = eTag;
                 }
             }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }

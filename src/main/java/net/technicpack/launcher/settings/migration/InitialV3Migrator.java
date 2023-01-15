@@ -24,7 +24,6 @@ import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.modpacks.InstalledPack;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
-import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.NewsArticle;
 import net.technicpack.rest.RestfulAPIException;
@@ -67,7 +66,7 @@ public class InitialV3Migrator implements IMigrator {
             //Just kill the exception & go with ID 0
         }
 
-        List<ModpackModel> deletePacks = new LinkedList<ModpackModel>();
+        List<ModpackModel> deletePacks = new LinkedList<>();
         for (String packName : packStore.getPackNames()) {
             InstalledPack pack = packStore.getInstalledPacks().get(packName);
             ModpackModel model = new ModpackModel(pack, null, packStore, directories);

@@ -42,7 +42,6 @@ import net.technicpack.launcher.ui.LoginFrame;
 import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launchercore.TechnicConstants;
-import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.exception.DownloadException;
@@ -289,7 +288,7 @@ public class LauncherMain {
                 String ips = inetAddresses.stream().map(InetAddress::getHostAddress).collect(Collectors.joining(", "));
                 Utils.getLogger().info(domain + " resolves to [" + ips + "]");
             } catch (UnknownHostException ex) {
-                Utils.getLogger().log(Level.SEVERE, "Failed to resolve " + domain + ": " + ex.toString());
+                Utils.getLogger().log(Level.SEVERE, "Failed to resolve " + domain + ": " + ex);
             }
         }
     }
@@ -416,7 +415,7 @@ public class LauncherMain {
         IInstalledPackRepository packStore = TechnicInstalledPackStore.load(new File(directories.getLauncherDirectory(), "installedPacks"));
         IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(platform, solder);
 
-        ArrayList<IMigrator> migrators = new ArrayList<IMigrator>(1);
+        ArrayList<IMigrator> migrators = new ArrayList<>(1);
         migrators.add(new InitialV3Migrator(platform));
         migrators.add(new ResetJvmArgsIfDefaultString());
         SettingsFactory.migrateSettings(settings, packStore, directories, users, migrators);

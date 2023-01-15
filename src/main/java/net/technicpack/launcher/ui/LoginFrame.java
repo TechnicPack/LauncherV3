@@ -342,7 +342,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
 
         linkPane.add(Box.createHorizontalStrut(8));
 
-        languages = new JComboBox();
+        languages = new JComboBox<>();
         String defaultLocaleText = resources.getString("launcheroptions.language.default");
         if (!resources.isDefaultLocaleSupported()) {
             defaultLocaleText = defaultLocaleText.concat(" (" + resources.getString("launcheroptions.language.unavailable") + ")");

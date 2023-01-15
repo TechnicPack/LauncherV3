@@ -36,7 +36,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.logging.Level;
 
@@ -124,15 +123,10 @@ public class NewsSelector extends JPanel {
             circle.setVisible(false);
         }
 
-        Collections.sort(news.getArticles(), new Comparator<NewsArticle>() {
+        news.getArticles().sort(new Comparator<NewsArticle>() {
             @Override
             public int compare(NewsArticle o1, NewsArticle o2) {
-                if (o1.getDate().getTime() > o2.getDate().getTime())
-                    return -1;
-                else if (o1.getDate().getTime() < o2.getDate().getTime())
-                    return 1;
-                else
-                    return 0;
+                return Long.compare(o2.getDate().getTime(), o1.getDate().getTime());
             }
         });
 

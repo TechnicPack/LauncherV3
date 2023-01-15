@@ -27,37 +27,37 @@ import java.util.List;
 
 public interface MojangVersion {
 
-    public String getId();
+    String getId();
 
-    public ReleaseType getType();
+    ReleaseType getType();
 
-    public void setType(ReleaseType releaseType);
+    void setType(ReleaseType releaseType);
 
-    public Date getUpdatedTime();
+    Date getUpdatedTime();
 
-    public void setUpdatedTime(Date updatedTime);
+    void setUpdatedTime(Date updatedTime);
 
-    public Date getReleaseTime();
+    Date getReleaseTime();
 
-    public void setReleaseTime(Date releaseTime);
+    void setReleaseTime(Date releaseTime);
 
-    public ArgumentList getMinecraftArguments();
+    ArgumentList getMinecraftArguments();
 
-    public ArgumentList getJavaArguments();
+    ArgumentList getJavaArguments();
 
-    public List<Library> getLibraries();
+    List<Library> getLibraries();
 
-    public List<Library> getLibrariesForOS();
+    List<Library> getLibrariesForOS();
 
-    public String getMainClass();
+    String getMainClass();
 
-    public void setMainClass(String mainClass);
+    void setMainClass(String mainClass);
 
-    public int getMinimumLauncherVersion();
+    int getMinimumLauncherVersion();
 
-    public String getIncompatibilityReason();
+    String getIncompatibilityReason();
 
-    public List<Rule> getRules();
+    List<Rule> getRules();
 
     String getAssetsKey();
 
@@ -65,19 +65,19 @@ public interface MojangVersion {
 
     GameDownloads getDownloads();
 
-    public String getParentVersion();
+    String getParentVersion();
 
-    public boolean getAreAssetsVirtual();
+    boolean getAreAssetsVirtual();
 
-    public void setAreAssetsVirtual(boolean areAssetsVirtual);
+    void setAreAssetsVirtual(boolean areAssetsVirtual);
 
-    public boolean getAssetsMapToResources();
+    boolean getAssetsMapToResources();
 
-    public void setAssetsMapToResources(boolean mapToResources);
+    void setAssetsMapToResources(boolean mapToResources);
 
-    public void addLibrary(Library library);
+    void addLibrary(Library library);
 
-    public JavaVersion getJavaVersion();
+    JavaVersion getJavaVersion();
 
-    public void removeLibrary(String libraryName);
+    void removeLibrary(String libraryName);
 }

@@ -32,13 +32,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.logging.Level;
 
 public class ResourceLoader {
-    private Collection<IRelocalizableResource> resources = new LinkedList<IRelocalizableResource>();
+    private Collection<IRelocalizableResource> resources = new LinkedList<>();
     private ResourceBundle stringData;
     private Locale currentLocale;
     private String dottedResourcePath;
@@ -53,7 +52,7 @@ public class ResourceLoader {
     public static final String FONT_OPENSANS = "OpenSans+Cyberbit.ttf";
     public static final String FONT_RALEWAY = "Raleway+FireflySung.ttf";
 
-    public static final Map<String, Font> fontCache = new HashMap<String, Font>();
+    public static final Map<String, Font> fontCache = new HashMap<>();
 
     public static final Font fallbackFont = new Font("Arial", Font.PLAIN, 12);
 
@@ -97,13 +96,9 @@ public class ResourceLoader {
             this.launcherAssets = null;
         else
             this.launcherAssets = new File(directories.getAssetsDirectory(), "launcher");
-        dottedResourcePath = "";
-        slashResourcePath = "";
 
-        for (String pathToken : resourcesPath) {
-            dottedResourcePath += pathToken + ".";
-            slashResourcePath += "/" + pathToken;
-        }
+        dottedResourcePath = String.join(".", resourcesPath) + ".";
+        slashResourcePath = "/" + String.join("/", resourcesPath);
 
         Locale defaultLocale = Locale.getDefault();
         this.defaultLocale = matchClosestSupportedLocale(defaultLocale);
@@ -204,8 +199,7 @@ public class ResourceLoader {
     private Locale matchClosestSupportedLocale(Locale definiteLocale) {
         Locale bestSupportedLocale = null;
         int bestLocaleScore = 0;
-        for (int i = 0; i < locales.length; i++) {
-            Locale testLocale = locales[i];
+        for (Locale testLocale : locales) {
             int testScore = 0;
 
             if (testLocale.getLanguage().equals(definiteLocale.getLanguage())) {
@@ -282,7 +276,7 @@ public class ResourceLoader {
         // Create the area around the circle to cut out
         Area cutOutArea = new Area(new Rectangle(0, 0, outputImage.getWidth(), outputImage.getHeight()));
 
-        int diameter = (outputImage.getWidth() < outputImage.getHeight())?outputImage.getWidth():outputImage.getHeight();
+        int diameter = Math.min(outputImage.getWidth(), outputImage.getHeight());
         cutOutArea.subtract(new Area(new Ellipse2D.Float((outputImage.getWidth() - diameter) / 2, (outputImage.getHeight() - diameter) / 2, diameter, diameter)));
 
         // Set the fill color to an opaque color
@@ -328,7 +322,6 @@ public class ResourceLoader {
     }
 
     public void unregisterResource(IRelocalizableResource resource) {
-        if (resources.contains(resource))
-            resources.remove(resource);
+        resources.remove(resource);
     }
 }

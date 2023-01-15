@@ -76,8 +76,8 @@ public class RoundBorder extends AbstractBorder {
             int bottomLineY = height - thickness;
 
             RoundRectangle2D.Double bubble = new RoundRectangle2D.Double(
-                    0 + strokePad,
-                    0 + strokePad,
+                    strokePad,
+                    strokePad,
                     width - thickness - 1,
                     bottomLineY,
                     radii,

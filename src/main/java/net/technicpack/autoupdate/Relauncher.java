@@ -55,13 +55,13 @@ public abstract class Relauncher {
         return getRunningPath(getMainClass());
     }
 
-    public static String getRunningPath(Class clazz) throws UnsupportedEncodingException {
+    public static String getRunningPath(Class<?> clazz) throws UnsupportedEncodingException {
         String path = clazz.getProtectionDomain().getCodeSource().getLocation().getPath();
         path = path.replace("+", URLEncoder.encode("+", "UTF-8"));
         return URLDecoder.decode(path, "UTF-8");
     }
 
-    protected abstract Class getMainClass();
+    protected abstract Class<?> getMainClass();
     public abstract String getUpdateText();
     public abstract boolean isUpdateOnly();
     public abstract boolean isMover();
@@ -138,7 +138,7 @@ public abstract class Relauncher {
         }
 
         ProcessBuilder processBuilder = new ProcessBuilder();
-        ArrayList<String> commands = new ArrayList<String>();
+        ArrayList<String> commands = new ArrayList<>();
         if (!launchPath.endsWith(".exe")) {
             commands.add(OperatingSystem.getJavaDir());
             commands.add("-Xmx256m");
@@ -153,10 +153,10 @@ public abstract class Relauncher {
             commands.add(launchPath);
         commands.addAll(Arrays.asList(args));
 
-        String command = "";
+        StringBuilder command = new StringBuilder();
 
         for (String token : commands) {
-            command += token + " ";
+            command.append(token).append(" ");
         }
 
         Utils.getLogger().info("Launching command: '" + command + "'");
@@ -175,22 +175,22 @@ public abstract class Relauncher {
     }
 
     public String[] buildMoverArgs() throws UnsupportedEncodingException {
-        List<String> outArgs = new ArrayList<String>();
+        List<String> outArgs = new ArrayList<>();
         outArgs.add("-movetarget");
         outArgs.add(getRunningPath());
         outArgs.add("-moveronly");
         outArgs.addAll(Arrays.asList(getLaunchArgs()));
-        return outArgs.toArray(new String[outArgs.size()]);
+        return outArgs.toArray(new String[0]);
     }
 
     public String[] buildLauncherArgs(boolean isLegacy) {
-        List<String> outArgs = new ArrayList<String>();
+        List<String> outArgs = new ArrayList<>();
         if (!isLegacy)
             outArgs.add("-launcheronly");
         else
             outArgs.add("-launcher");
         outArgs.addAll(Arrays.asList(getLaunchArgs()));
         outArgs.remove("-moveronly");
-        return outArgs.toArray(new String[outArgs.size()]);
+        return outArgs.toArray(new String[0]);
     }
 }

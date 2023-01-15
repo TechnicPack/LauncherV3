@@ -23,14 +23,12 @@ import net.technicpack.launcher.settings.migration.IMigrator;
 import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
-import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.logging.Level;
@@ -56,9 +54,7 @@ public class SettingsFactory {
 
         File installedSettingsDir = OperatingSystem.getOperatingSystem().getUserDirectoryForApp("technic");
 
-        TechnicSettings settings = tryGetSettings(installedSettingsDir);
-
-        return settings;
+        return tryGetSettings(installedSettingsDir);
     }
 
     public static void migrateSettings(TechnicSettings settings, IInstalledPackRepository packStore, LauncherDirectories directories, IUserStore users, List<IMigrator> migrators) {
@@ -90,10 +86,7 @@ public class SettingsFactory {
                 settings.setFilePath(settingsFile);
 
             return settings;
-        } catch (JsonSyntaxException e) {
-            Utils.getLogger().log(Level.WARNING, "Unable to load version from " + settingsFile);
-            return null;
-        } catch (IOException e) {
+        } catch (JsonSyntaxException | IOException e) {
             Utils.getLogger().log(Level.WARNING, "Unable to load version from " + settingsFile);
             return null;
         }

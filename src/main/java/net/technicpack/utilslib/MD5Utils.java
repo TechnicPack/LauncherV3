@@ -23,7 +23,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class MD5Utils {
@@ -34,8 +33,6 @@ public class MD5Utils {
             String md5 = DigestUtils.md5Hex(fis);
             fis.close();
             return md5;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }

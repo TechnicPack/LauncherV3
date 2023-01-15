@@ -104,16 +104,15 @@ public class FeedItemView extends JButton {
         g2d.setClip(oldClip);
     }
 
-    private void drawTextUgly(String text, Graphics2D g2, int maxY)
+    private void drawTextUgly(String textToDraw, Graphics2D g2, int maxY)
     {
         // Ugly code to wrap text
-        String textToDraw = text;
         String[] arr = textToDraw.split(" ");
         int nIndex = 0;
         int startX = 4;
         int startY = 3;
-        int lineSize = (int)g2.getFontMetrics().getHeight();
-        int elipsisSize = (int)g2.getFontMetrics().stringWidth("...");
+        int lineSize = g2.getFontMetrics().getHeight();
+        int elipsisSize = g2.getFontMetrics().stringWidth("...");
 
         while ( nIndex < arr.length )
         {

@@ -29,8 +29,8 @@ import java.util.Map;
 
 public class TaskGroup implements IWeightedTasksQueue, IInstallTask {
     private final String groupName;
-    private final LinkedList<IInstallTask> taskList = new LinkedList<IInstallTask>();
-    private final Map<IInstallTask, Float> taskWeights = new HashMap<IInstallTask, Float>();
+    private final LinkedList<IInstallTask> taskList = new LinkedList<>();
+    private final Map<IInstallTask, Float> taskWeights = new HashMap<>();
 
     private float totalWeight = 0;
 

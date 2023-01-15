@@ -112,7 +112,7 @@ public class InstallJavaRuntimeTask implements IInstallTask {
 
                 IFileVerifier verifier = new SHA1FileVerifier(download.getSha1());
 
-                EnsureFileTask ensureFileTask = new EnsureFileTask(target, verifier, null, download.getUrl(), downloadJavaQueue, null);
+                EnsureFileTask<?> ensureFileTask = new EnsureFileTask<>(target, verifier, null, download.getUrl(), downloadJavaQueue, null);
                 ensureFileTask.setExecutable(runtimeFile.isExecutable());
 
                 examineJavaQueue.addTask(ensureFileTask);

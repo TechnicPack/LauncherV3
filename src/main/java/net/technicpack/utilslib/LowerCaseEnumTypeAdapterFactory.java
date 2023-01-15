@@ -36,12 +36,12 @@ public class LowerCaseEnumTypeAdapterFactory implements TypeAdapterFactory {
 
     @SuppressWarnings("unchecked")
     public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-        Class rawType = type.getRawType();
+        Class<? super T> rawType = type.getRawType();
         if (!rawType.isEnum()) {
             return null;
         }
 
-        final Map<String, T> lowercaseToConstant = new HashMap<String, T>();
+        final Map<String, T> lowercaseToConstant = new HashMap<>();
         for (Object constant : rawType.getEnumConstants()) {
             lowercaseToConstant.put(toLowercase(constant), (T) constant);
         }

@@ -23,7 +23,7 @@ public class NameFilterPackSource implements IPackSource {
 
     @Override
     public Collection<PackInfo> getPublicPacks() {
-        LinkedList<PackInfo> info = new LinkedList<PackInfo>();
+        LinkedList<PackInfo> info = new LinkedList<>();
 
         for (ModpackModel modpack : baseModpacks.getModpacks()) {
             if (modpack.getDisplayName().toUpperCase().contains(filterTerms)) {

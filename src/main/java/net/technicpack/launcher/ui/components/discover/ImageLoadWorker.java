@@ -60,7 +60,7 @@ class ImageLoadWorker extends Thread {
                 }
                 final ImageResource ir = ImageResourceLoader.loadImageResourceFromUri(loadItem._uri);
                 FSImage awtfsImage = ir.getImage();
-                BufferedImage newImg = (BufferedImage) ((AWTFSImage) awtfsImage).getImage();
+                BufferedImage newImg = ((AWTFSImage) awtfsImage).getImage();
                 XRLog.load(Level.FINE, this + ", loaded " + loadItem._uri);
 
                 loadItem._imageResourceLoader.loaded(ir, newImg.getWidth(), newImg.getHeight());

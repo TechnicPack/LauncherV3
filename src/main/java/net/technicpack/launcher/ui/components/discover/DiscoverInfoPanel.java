@@ -40,7 +40,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 public class DiscoverInfoPanel extends TiledBackground {
@@ -190,8 +189,6 @@ public class DiscoverInfoPanel extends TiledBackground {
                 FileUtils.writeByteArrayToFile(localCache, data);
                 return doc;
             }
-        } catch (MalformedURLException ex) {
-            ex.printStackTrace();
         } catch (IOException ex) {
             ex.printStackTrace();
         }

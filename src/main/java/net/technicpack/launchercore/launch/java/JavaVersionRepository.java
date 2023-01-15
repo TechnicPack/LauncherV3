@@ -32,8 +32,8 @@ import java.util.Map;
  * Represents a repository of all the versions of java available to launch games with.
  */
 public class JavaVersionRepository {
-    private Map<File, IJavaVersion> loadedVersions = new HashMap<File, IJavaVersion>();
-    private Collection<IJavaVersion> versionCache = new LinkedList<IJavaVersion>();
+    private Map<File, IJavaVersion> loadedVersions = new HashMap<>();
+    private Collection<IJavaVersion> versionCache = new LinkedList<>();
     private IJavaVersion selectedVersion;
 
     public JavaVersionRepository() {

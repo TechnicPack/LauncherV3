@@ -25,21 +25,21 @@ import java.util.Map;
 public class ImageRepository<T> {
     private IImageMapper<T> mapper;
     private IImageStore<T> store;
-    private Map<String, ImageJob> allJobs = new HashMap<String, ImageJob>();
+    private Map<String, ImageJob<T>> allJobs = new HashMap<>();
 
     public ImageRepository(IImageMapper<T> mapper, IImageStore<T> store) {
         this.mapper = mapper;
         this.store = store;
     }
 
-    public ImageJob startImageJob(T key) {
+    public ImageJob<T> startImageJob(T key) {
         String jobKey = store.getJobKey(key);
 
         ImageJob<T> job = null;
         if (allJobs.containsKey(jobKey))
             job = allJobs.get(jobKey);
         else {
-            job = new ImageJob<T>(mapper, store);
+            job = new ImageJob<>(mapper, store);
             allJobs.put(jobKey, job);
         }
 

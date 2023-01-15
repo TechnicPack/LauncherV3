@@ -21,15 +21,7 @@ package net.technicpack.launcher.settings.migration;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.install.LauncherDirectories;
-import net.technicpack.launchercore.modpacks.InstalledPack;
-import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
-import net.technicpack.platform.IPlatformApi;
-import net.technicpack.platform.io.NewsArticle;
-import net.technicpack.rest.RestfulAPIException;
-
-import java.util.LinkedList;
-import java.util.List;
 
 public class ResetJvmArgsIfDefaultString implements IMigrator {
     @Override
