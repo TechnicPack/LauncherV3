@@ -148,7 +148,6 @@ public class ResourceLoader {
 
     public String getString(String stringKey, String... replacements) {
         String outString = stringData.getString(stringKey);
-        outString = new String(outString.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
 
         for (int i = 0; i < replacements.length; i++) {
             String find = String.format("{%d}", i);
