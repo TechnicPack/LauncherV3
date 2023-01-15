@@ -132,7 +132,6 @@ public class Download implements Runnable {
             }
         } catch (ClosedByInterruptException ex) {
             result = Result.FAILURE;
-            return;
         } catch (PermissionDeniedException e) {
             exception = e;
             result = Result.PERMISSION_DENIED;

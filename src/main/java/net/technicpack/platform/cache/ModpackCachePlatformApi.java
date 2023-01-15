@@ -172,7 +172,6 @@ public class ModpackCachePlatformApi implements IPlatformApi {
         try {
             FileUtils.writeStringToFile(cacheFile, packCache, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            return;
         }
     }
 

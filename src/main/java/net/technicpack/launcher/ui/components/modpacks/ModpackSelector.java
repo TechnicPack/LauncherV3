@@ -368,7 +368,6 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
 
                     } catch (RestfulAPIException ex) {
                         ex.printStackTrace();
-                        return;
                     }
                 }
             };

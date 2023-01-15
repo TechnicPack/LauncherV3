@@ -142,7 +142,6 @@ public class CachedSolderPackApi implements ISolderPackApi {
         try {
             FileUtils.writeStringToFile(cacheFile, packCache, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            return;
         }
     }
 

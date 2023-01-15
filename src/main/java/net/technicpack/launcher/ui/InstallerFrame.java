@@ -206,10 +206,8 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
                     String currentPath = relauncher.getRunningPath();
                     relauncher.launch(currentPath, params.getArgs());
                     System.exit(0);
-                    return;
                 } catch (UnsupportedEncodingException ex) {
                     ex.printStackTrace();
-                    return;
                 }
             }
         });
