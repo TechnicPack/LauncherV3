@@ -93,7 +93,7 @@ public class CleanupAndExtractModpackTask implements IInstallTask {
 			String version = mod.getVersion();
 
 			String name;
-			if (version != null) {
+			if (version != null && !version.isEmpty()) {
 				name = mod.getName() + "-" + version + ".zip";
 			} else {
 				name = mod.getName() + ".zip";
