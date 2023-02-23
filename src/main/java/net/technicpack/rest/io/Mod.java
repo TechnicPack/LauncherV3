@@ -53,10 +53,14 @@ public class Mod extends Resource {
             filename = name + ".zip";
         }
 
+        if (filename.contains("/") || filename.contains("\\")) {
+            throw new IOException("Invalid mod cache filename: " + filename);
+        }
+
         File filePath = new File(cacheDir, filename);
 
         if (!filePath.toPath().normalize().startsWith(cacheDir.toPath())) {
-            throw new IOException("Unsafe mod path detected (" + filePath + ") with base " + cacheDir);
+            throw new IOException("Unsafe mod cache path detected (" + filePath + ") with base " + cacheDir);
         }
 
         return filePath;
