@@ -86,20 +86,13 @@ public class CleanupAndExtractModpackTask implements IInstallTask {
 
 		IZipFileFilter zipFilter = new ModpackZipFilter(this.pack);
 
+		final File cacheDir = pack.getCacheDir();
+
 		for (Mod mod : modpack.getMods()) {
 			String url = mod.getUrl();
 			String md5 = mod.getMd5();
 
-			String version = mod.getVersion();
-
-			String name;
-			if (version != null && !version.isEmpty()) {
-				name = mod.getName() + "-" + version + ".zip";
-			} else {
-				name = mod.getName() + ".zip";
-			}
-
-			File cache = new File(this.pack.getCacheDir(), name);
+			File cacheFile = mod.generateSafeCacheFile(cacheDir);
 
             IFileVerifier verifier = null;
 
@@ -108,7 +101,7 @@ public class CleanupAndExtractModpackTask implements IInstallTask {
             else
                 verifier = new ValidZipFileVerifier();
 
-			checkModQueue.addTask(new EnsureFileTask(cache, verifier, packOutput, url, downloadModQueue, copyModQueue, zipFilter));
+			checkModQueue.addTask(new EnsureFileTask(cacheFile, verifier, packOutput, url, downloadModQueue, copyModQueue, zipFilter));
 		}
 
 		copyModQueue.addTask(new CleanupModpackCacheTask(this.pack, modpack));
