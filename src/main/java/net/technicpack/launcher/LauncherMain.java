@@ -281,7 +281,7 @@ public class LauncherMain {
                 "minecraft.net", "session.minecraft.net", "textures.minecraft.net", "libraries.minecraft.net",
                 "authserver.mojang.com", "account.mojang.com", "www.technicpack.net", "launcher.technicpack.net",
                 "api.technicpack.net", "mirror.technicpack.net", "solder.technicpack.net", "files.minecraftforge.net",
-                "user.auth.xboxlive.com", "xsts.auth.xboxlive.com", "api.minecraftservices.com",
+                "user.auth.xboxlive.com", "xsts.auth.xboxlive.com", "api.minecraftservices.com", "launchermeta.mojang.com",
         };
         for (String domain : domains) {
             try {
