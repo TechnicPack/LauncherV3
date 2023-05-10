@@ -29,7 +29,11 @@ public class DownloadException extends IOException {
 
     public DownloadException(String message, Throwable cause) {
         this.cause = cause;
-        this.message = message;
+        if (cause != null) {
+            this.message = message + ":\n" + cause.getMessage();
+        } else {
+            this.message = message;
+        }
     }
 
     public DownloadException(Throwable cause) {

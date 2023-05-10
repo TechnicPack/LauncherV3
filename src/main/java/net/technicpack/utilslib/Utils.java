@@ -258,7 +258,7 @@ public class Utils {
                 if (Thread.interrupted())
                     throw new InterruptedException();
 
-                System.err.println("Download of " + url + " Failed!");
+                System.err.println("Download of " + url + " Failed! " + download.getException());
                 if (listener != null) {
                     listener.stateChanged("Download failed, retries remaining: " + tries, 0F);
                 }
@@ -270,7 +270,7 @@ public class Utils {
             }
         }
         if (outputFile == null) {
-            throw new DownloadException("Failed to download " + url, download != null ? download.getException() : null);
+            throw new DownloadException("Failed to download " + url, download.getException());
         }
         if (cache != null) {
             FileUtils.copyFile(outputFile, cache);
