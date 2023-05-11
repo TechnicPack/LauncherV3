@@ -229,18 +229,19 @@ public class MinecraftLauncher {
             }
         }
 
-        int permSize = 128;
-        if (memory >= (1024 * 6)) {
-            permSize = 512;
-        } else if (memory >= 2048) {
-            permSize = 256;
-        }
-
         commands.addRaw("-Xms" + memory + "m");
         commands.addRaw("-Xmx" + memory + "m");
 
-        if (!RunData.isJavaVersionAtLeast(launchJavaVersion, "1.8"))
+        if (!RunData.isJavaVersionAtLeast(launchJavaVersion, "1.8")) {
+            int permSize = 128;
+            if (memory >= (1024 * 6)) {
+                permSize = 512;
+            } else if (memory >= 2048) {
+                permSize = 256;
+            }
+
             commands.add("-XX:MaxPermSize=" + permSize + "m");
+        }
 
         commands.addUnique("-Djava.library.path=" + nativesDir);
         // Tell forge 1.5 to download from our mirror instead
