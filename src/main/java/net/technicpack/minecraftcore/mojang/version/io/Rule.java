@@ -67,11 +67,29 @@ public class Rule {
         }
         if (rule.has("features")) {
             JsonObject features = rule.get("features").getAsJsonObject();
-            if (features.has("has_custom_resolution")) {
-                conditions.add(new CustomResolutionCondition(features.get("has_custom_resolution").getAsBoolean()));
-            }
-            if (features.has("is_demo_user")) {
-                conditions.add(new DemoCondition(features.get("is_demo_user").getAsBoolean()));
+            for (String feature : features.keySet()) {
+                switch (feature) {
+                    case "has_custom_resolution":
+                        conditions.add(new CustomResolutionCondition(features.get("has_custom_resolution").getAsBoolean()));
+                        break;
+                    case "is_demo_user":
+                        conditions.add(new DemoUserCondition(features.get("is_demo_user").getAsBoolean()));
+                        break;
+                    case "has_quick_plays_support":
+                        conditions.add(new QuickPlaysSupportCondition(features.get("has_quick_plays_support").getAsBoolean()));
+                        break;
+                    case "is_quick_play_singleplayer":
+                        conditions.add(new QuickPlaySingleplayerCondition(features.get("is_quick_play_singleplayer").getAsBoolean()));
+                        break;
+                    case "is_quick_play_multiplayer":
+                        conditions.add(new QuickPlayMultiplayerCondition(features.get("is_quick_play_multiplayer").getAsBoolean()));
+                        break;
+                    case "is_quick_play_realms":
+                        conditions.add(new QuickPlayRealmsCondition(features.get("is_quick_play_realms").getAsBoolean()));
+                        break;
+                    default:
+                        throw new JsonParseException("Unknown feature: " + feature);
+                }
             }
         }
     }
@@ -166,11 +184,11 @@ public class Rule {
 
     }
 
-    private static class DemoCondition implements RuleCondition {
+    private static class DemoUserCondition implements RuleCondition {
 
         private final boolean shouldBeDemoUser;
 
-        DemoCondition(boolean shouldBeDemoUser) {
+        DemoUserCondition(boolean shouldBeDemoUser) {
             this.shouldBeDemoUser = shouldBeDemoUser;
         }
 
@@ -182,6 +200,86 @@ public class Rule {
         @Override
         public void serialize(JsonObject root) {
             getFeatures(root).addProperty("is_demo_user", shouldBeDemoUser);
+        }
+
+    }
+
+    private static class QuickPlaysSupportCondition implements RuleCondition {
+
+        private final boolean shouldHaveQuickPlaysSupport;
+
+        QuickPlaysSupportCondition(boolean shouldHaveQuickPlaysSupport) {
+            this.shouldHaveQuickPlaysSupport = shouldHaveQuickPlaysSupport;
+        }
+
+        @Override
+        public boolean test(ILaunchOptions opts) {
+            return !shouldHaveQuickPlaysSupport;
+        }
+
+        @Override
+        public void serialize(JsonObject root) {
+            getFeatures(root).addProperty("has_quick_plays_support", shouldHaveQuickPlaysSupport);
+        }
+
+    }
+
+    private static class QuickPlaySingleplayerCondition implements RuleCondition {
+
+        private final boolean shouldQuickPlayBeSingleplayer;
+
+        QuickPlaySingleplayerCondition(boolean shouldQuickPlayBeSingleplayer) {
+            this.shouldQuickPlayBeSingleplayer = shouldQuickPlayBeSingleplayer;
+        }
+
+        @Override
+        public boolean test(ILaunchOptions opts) {
+            return !shouldQuickPlayBeSingleplayer;
+        }
+
+        @Override
+        public void serialize(JsonObject root) {
+            getFeatures(root).addProperty("is_quick_play_singleplayer", shouldQuickPlayBeSingleplayer);
+        }
+
+    }
+
+    private static class QuickPlayMultiplayerCondition implements RuleCondition {
+
+        private final boolean shouldQuickPlayBeMultiplayer;
+
+        QuickPlayMultiplayerCondition(boolean shouldQuickPlayBeMultiplayer) {
+            this.shouldQuickPlayBeMultiplayer = shouldQuickPlayBeMultiplayer;
+        }
+
+        @Override
+        public boolean test(ILaunchOptions opts) {
+            return !shouldQuickPlayBeMultiplayer;
+        }
+
+        @Override
+        public void serialize(JsonObject root) {
+            getFeatures(root).addProperty("is_quick_play_multiplayer", shouldQuickPlayBeMultiplayer);
+        }
+
+    }
+
+    private static class QuickPlayRealmsCondition implements RuleCondition {
+
+        private final boolean shouldQuickPlayBeRealms;
+
+        QuickPlayRealmsCondition(boolean shouldQuickPlayBeRealms) {
+            this.shouldQuickPlayBeRealms = shouldQuickPlayBeRealms;
+        }
+
+        @Override
+        public boolean test(ILaunchOptions opts) {
+            return !shouldQuickPlayBeRealms;
+        }
+
+        @Override
+        public void serialize(JsonObject root) {
+            getFeatures(root).addProperty("is_quick_play_realms", shouldQuickPlayBeRealms);
         }
 
     }
