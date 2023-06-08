@@ -38,6 +38,8 @@ public class DesktopUtils {
                 // But xdg-open seems to work more reliably - so if on Linux (check first), we prefer using that.
                 if(OperatingSystem.getOperatingSystem() == OperatingSystem.LINUX)
                     Runtime.getRuntime().exec(new String[]{"xdg-open", url});
+                else if (OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS)
+                    Runtime.getRuntime().exec(new String[]{"explorer", url});
                 else if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
                     Desktop.getDesktop().browse(new URI(url));
                 else if(OperatingSystem.getOperatingSystem() == OperatingSystem.OSX)
