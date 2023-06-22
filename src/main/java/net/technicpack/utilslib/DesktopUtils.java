@@ -29,33 +29,37 @@ import java.util.logging.Level;
 
 public class DesktopUtils {
     public static void browseUrl(String url) {
-        try {
-            if (url.startsWith("mailto:"))
-                Desktop.getDesktop().mail(new URI(url));
-            else {
-                // https://github.com/TechnicPack/LauncherV3/issues/245
-                // Under (some?) Linux, Desktop.getDesktop().browse() seems to "freeze" (deadlock) if the AWT-EventQueue is subsequently blocked.
-                // But xdg-open seems to work more reliably - so if on Linux (check first), we prefer using that.
-                if(OperatingSystem.getOperatingSystem() == OperatingSystem.LINUX)
-                    Runtime.getRuntime().exec(new String[]{"xdg-open", url});
-                else if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
-                    Desktop.getDesktop().browse(new URI(url));
-                else if(OperatingSystem.getOperatingSystem() == OperatingSystem.OSX)
-                    Runtime.getRuntime().exec(new String[]{"open", url});
-                else
-                    JOptionPane.showMessageDialog(null, "Unable to open browser, please visit the URL:\n" + url, "Unable to open browser", JOptionPane.ERROR_MESSAGE);
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                try {
+                    if (url.startsWith("mailto:"))
+                        Desktop.getDesktop().mail(new URI(url));
+                    else {
+                        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
+                            Desktop.getDesktop().browse(new URI(url));
+                        else if (OperatingSystem.getOperatingSystem() == OperatingSystem.LINUX)
+                            new ProcessBuilder("xdg-open", url).start();
+                        else if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX)
+                            new ProcessBuilder("open", url).start();
+                        else
+                            SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Unable to open browser, please visit the URL:\n" + url, "Unable to open browser", JOptionPane.ERROR_MESSAGE));
+                    }
+                } catch (IOException ex) {
+                    //Thrown by Desktop.browse() - just log & ignore
+                    Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+                } catch (URISyntaxException ex) {
+                    //If we got a bogus URL from the internet, then this will throw.  Log & Ignore
+                    Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+                } catch (RuntimeException ex) {
+                    //browse() throws a bunch of runtime exceptions if you give it bad input
+                    //WHICH IS AWESOME
+                    Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+                }
+
+                return null;
             }
-        } catch (IOException ex) {
-            //Thrown by Desktop.browse() - just log & ignore
-            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
-        } catch (URISyntaxException ex) {
-            //If we got a bogus URL from the internet, then this will throw.  Log & Ignore
-            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
-        } catch (RuntimeException ex) {
-            //browse() throws a bunch of runtime exceptions if you give it bad input
-            //WHICH IS AWESOME
-            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
-        }
+        }.execute();
     }
 
     public static void open(final File file) {
