@@ -618,9 +618,6 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
                         showMessageDialog(parent,
                                 "This account has not purchased Minecraft Java Edition.", "No Minecraft", ERROR_MESSAGE);
                         break;
-                    case INTERRUPTED:
-                        Utils.getLogger().log(Level.INFO, "User cancelled MSA login", e);
-                        break;
                     default:
                         e.printStackTrace();
                         showMessageDialog(parent, e.getMessage(), "Add Microsoft Account Failed", ERROR_MESSAGE);
