@@ -45,6 +45,7 @@ public class MicrosoftAuthenticator {
     // MINECRAFT
     private static final String MINECRAFT_AUTH_URL = "https://api.minecraftservices.com/launcher/login";
     private static final String MINECRAFT_PROFILE_URL = "https://api.minecraftservices.com/minecraft/profile";
+    private LocalServerReceiver receiver;
 
     public MicrosoftAuthenticator(File dataStore) {
 //        Logger.getLogger(HttpTransport.class.getName()).setLevel(Level.ALL);
@@ -125,7 +126,7 @@ public class MicrosoftAuthenticator {
     }
 
     private Credential getOAuthCredential(String username) throws MicrosoftAuthException {
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder()
+        receiver = new LocalServerReceiver.Builder()
                 .setHost("localhost").setPort(-1).setCallbackPath("/").build();
 
         try {
@@ -134,6 +135,14 @@ public class MicrosoftAuthenticator {
         } catch (IOException e) {
             Utils.getLogger().log(Level.SEVERE, "Failed to get OAuth authorization", e);
             throw new MicrosoftAuthException(OAUTH, "Failed to get OAuth authorization", e);
+        }
+    }
+
+    public void stopReceiver() {
+        try {
+            receiver.stop();
+        } catch (IOException e) {
+            Utils.getLogger().log(Level.SEVERE, "Failed to stop receiver", e);
         }
     }
 

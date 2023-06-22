@@ -65,6 +65,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
 
     private RoundedButton addMojang;
     private RoundedButton addMicrosoft;
+    private RoundedButton cancelMsa;
     private RoundedButton login;
     private JTextField username;
     private JLabel selectLabel;
@@ -76,6 +77,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     private JCheckBox rememberAccount;
     private JPasswordField password;
     private JComboBox<LanguageItem> languages;
+    private MsaLoginSwingWorker msaLoginSwingWorker;
 
     private static final int FRAME_WIDTH = 347;
     private static final int FRAME_HEIGHT = 399;
@@ -265,6 +267,17 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         addMicrosoft.setHoverForeground(LauncherFrame.COLOR_BLUE);
         addMicrosoft.addActionListener(e -> addMicrosoftAccount());
         add(addMicrosoft, new GridBagConstraints(0, 7, GridBagConstraints.REMAINDER, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(50,20,0,20),0,0));
+
+        // Microsoft cancel button
+        cancelMsa = new RoundedButton(resources.getString("login.cancel"));
+        cancelMsa.setBorder(BorderFactory.createEmptyBorder(5, 17, 10, 17));
+        cancelMsa.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+        cancelMsa.setContentAreaFilled(false);
+        cancelMsa.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        cancelMsa.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        cancelMsa.setVisible(false);
+        cancelMsa.addActionListener(e -> cancelMsaLogin());
+        add(cancelMsa, new GridBagConstraints(0, 8, GridBagConstraints.REMAINDER, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(50,20,0,20),0,0));
 
         // Add mojang account button
         addMojang = new RoundedButton(resources.getString("login.addmojang"));
@@ -480,6 +493,12 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         newMicrosoftLogin();
     }
 
+    protected void cancelMsaLogin() {
+        if (msaLoginSwingWorker != null && !msaLoginSwingWorker.isDone()) {
+            userModel.getMicrosoftAuthenticator().stopReceiver();
+        }
+    }
+
     protected void clearCurrentUser() {
         password.setText("");
         password.setEditable(true);
@@ -613,6 +632,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
 
         @Override
         protected void done() {
+            cancelMsa.setVisible(false);
             setAccountSelectVisibility(!userModel.getUsers().isEmpty());
             setAddAccountVisibility(true);
         }
@@ -621,9 +641,13 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     private void newMicrosoftLogin() {
         setAccountSelectVisibility(false);
         setAddAccountVisibility(false);
-        // TODO: Setup info message + cancel flow
+        // TODO: Setup info message
+        cancelMsa.setVisible(true);
 
-        new MsaLoginSwingWorker(this).execute();
+        if (msaLoginSwingWorker == null || msaLoginSwingWorker.isDone()) {
+            msaLoginSwingWorker = new MsaLoginSwingWorker(this);
+            msaLoginSwingWorker.execute();
+        }
     }
     private void newMojangLogin(String name) {
         try {
