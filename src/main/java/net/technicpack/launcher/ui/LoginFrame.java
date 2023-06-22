@@ -567,42 +567,63 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         }
     }
 
+    private class MsaLoginSwingWorker extends SwingWorker<Void, Void> {
+        private final JFrame parent;
+
+        public MsaLoginSwingWorker(JFrame parent) {
+            this.parent = parent;
+        }
+
+        @Override
+        protected Void doInBackground() {
+            try {
+                MicrosoftUser microsoftUser = userModel.getMicrosoftAuthenticator().loginNewUser();
+                userModel.addUser(microsoftUser);
+                userModel.setCurrentUser(microsoftUser);
+                setCurrentUser(microsoftUser);
+            } catch (MicrosoftAuthException e) {
+                switch (e.getType()) {
+                    case UNDERAGE:
+                        showMessageDialog(parent,
+                                "Your Xbox account is underage and will need to be added to a Family to play this game.",
+                                "Underage Error", ERROR_MESSAGE);
+                        break;
+                    case NO_XBOX_ACCOUNT:
+                        showMessageDialog(parent,
+                                "You don't have an Xbox account associated with this Microsoft account.\n" +
+                                        "Please login at minecraft.net and set up an Xbox account, then try to login here again.",
+                                "No Xbox Account", ERROR_MESSAGE);
+                        DesktopUtils.browseUrl("https://www.minecraft.net/login");
+                        break;
+                    case NO_MINECRAFT:
+                        showMessageDialog(parent,
+                                "This account has not purchased Minecraft Java Edition.", "No Minecraft", ERROR_MESSAGE);
+                        break;
+                    case INTERRUPTED:
+                        Utils.getLogger().log(Level.INFO, "User cancelled MSA login", e);
+                        break;
+                    default:
+                        e.printStackTrace();
+                        showMessageDialog(parent, e.getMessage(), "Add Microsoft Account Failed", ERROR_MESSAGE);
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void done() {
+            setAccountSelectVisibility(!userModel.getUsers().isEmpty());
+            setAddAccountVisibility(true);
+        }
+    }
+
     private void newMicrosoftLogin() {
         setAccountSelectVisibility(false);
         setAddAccountVisibility(false);
         // TODO: Setup info message + cancel flow
 
-        try {
-            MicrosoftUser microsoftUser = userModel.getMicrosoftAuthenticator().loginNewUser();
-            userModel.addUser(microsoftUser);
-            userModel.setCurrentUser(microsoftUser);
-            setCurrentUser(microsoftUser);
-        } catch (MicrosoftAuthException e) {
-            switch (e.getType()) {
-                case UNDERAGE:
-                    showMessageDialog(this,
-                            "Your Xbox account is underage and will need to be added to a Family to play this game.",
-                            "Underage Error", ERROR_MESSAGE);
-                    break;
-                case NO_XBOX_ACCOUNT:
-                    showMessageDialog(this,
-                            "You don't have an Xbox account associated with this Microsoft account.\n" +
-                            "Please login at minecraft.net and set up an Xbox account, then try to login here again.",
-                            "No Xbox Account", ERROR_MESSAGE);
-                    DesktopUtils.browseUrl("https://www.minecraft.net/login");
-                    break;
-                case NO_MINECRAFT:
-                    showMessageDialog(this,
-                            "This account has not purchased Minecraft Java Edition.", "No Minecraft", ERROR_MESSAGE);
-                    break;
-                default:
-                    e.printStackTrace();
-                    showMessageDialog(this, e.getMessage(), "Add Microsoft Account Failed", ERROR_MESSAGE);
-            }
-        } finally {
-            setAccountSelectVisibility(!userModel.getUsers().isEmpty());
-            setAddAccountVisibility(true);
-        }
+        new MsaLoginSwingWorker(this).execute();
     }
     private void newMojangLogin(String name) {
         try {
