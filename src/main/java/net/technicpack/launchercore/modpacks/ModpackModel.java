@@ -418,18 +418,25 @@ public class ModpackModel {
         installedDirectory = targetDirectory;
         String path = installedDirectory.getAbsolutePath();
 
-        if (path.equals(directories.getModpacksDirectory().getAbsolutePath())) {
-            installedPack.setDirectory(InstalledPack.MODPACKS_DIR);
-        } else if (path.equals(directories.getLauncherDirectory().getAbsolutePath())) {
-            installedPack.setDirectory(InstalledPack.LAUNCHER_DIR);
-        } else if (path.startsWith(directories.getModpacksDirectory().getAbsolutePath())) {
-            installedPack.setDirectory(InstalledPack.MODPACKS_DIR + path.substring(directories.getModpacksDirectory().getAbsolutePath().length() + 1));
-        } else if (path.startsWith(directories.getLauncherDirectory().getAbsolutePath())) {
-            installedPack.setDirectory(InstalledPack.LAUNCHER_DIR + path.substring(directories.getLauncherDirectory().getAbsolutePath().length() + 1));
-        } else
-            installedPack.setDirectory(path);
+        String newInstalledPackDir;
 
-        save();
+        if (path.equals(directories.getModpacksDirectory().getAbsolutePath())) {
+            newInstalledPackDir = InstalledPack.MODPACKS_DIR;
+        } else if (path.equals(directories.getLauncherDirectory().getAbsolutePath())) {
+            newInstalledPackDir = InstalledPack.LAUNCHER_DIR;
+        } else if (path.startsWith(directories.getModpacksDirectory().getAbsolutePath())) {
+            newInstalledPackDir = InstalledPack.MODPACKS_DIR + path.substring(directories.getModpacksDirectory().getAbsolutePath().length() + 1);
+        } else if (path.startsWith(directories.getLauncherDirectory().getAbsolutePath())) {
+            newInstalledPackDir = InstalledPack.LAUNCHER_DIR + path.substring(directories.getLauncherDirectory().getAbsolutePath().length() + 1);
+        } else {
+            newInstalledPackDir = path;
+        }
+
+        // Only need to save if we've actually changed the raw directory
+        if (!newInstalledPackDir.equals(installedPack.getDirectory())) {
+            installedPack.setDirectory(newInstalledPackDir);
+            save();
+        }
     }
 
     public void save() {
@@ -451,8 +458,13 @@ public class ModpackModel {
     }
 
     public void select() {
-        installedPackRepository.setSelectedSlug(getName());
-        installedPackRepository.save();
+        String oldSelected = installedPackRepository.getSelectedSlug();
+        String name = getName();
+
+        if (oldSelected != null && !oldSelected.equals(name)) {
+            installedPackRepository.setSelectedSlug(name);
+            installedPackRepository.save();
+        }
     }
 
     public Collection<String> getTags() {
