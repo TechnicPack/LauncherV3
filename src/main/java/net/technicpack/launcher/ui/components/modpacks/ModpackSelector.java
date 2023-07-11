@@ -322,57 +322,57 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         if (modpackInfoPanel != null)
             modpackInfoPanel.setModpack(widget.getModpack());
 
-            final ModpackWidget refreshWidget = selectedWidget;
-            Thread thread = new Thread("Modpack redownload " + selectedWidget.getModpack().getDisplayName()) {
-                @Override
-                public void run() {
-                    try {
-                        PlatformPackInfo updatedInfo = platformApi.getPlatformPackInfo(refreshWidget.getModpack().getName());
-                        PackInfo infoToUse = updatedInfo;
+        final ModpackWidget refreshWidget = selectedWidget;
+        Thread thread = new Thread("Modpack redownload " + selectedWidget.getModpack().getDisplayName()) {
+            @Override
+            public void run() {
+                try {
+                    PlatformPackInfo updatedInfo = platformApi.getPlatformPackInfo(refreshWidget.getModpack().getName());
+                    PackInfo infoToUse = updatedInfo;
 
-                        if (updatedInfo != null && updatedInfo.hasSolder()) {
-                            try {
-                                ISolderPackApi solderPack = solderApi.getSolderPack(updatedInfo.getSolder(), updatedInfo.getName(), solderApi.getMirrorUrl(updatedInfo.getSolder()));
-                                infoToUse = new CombinedPackInfo(solderPack.getPackInfo(), updatedInfo);
-                            } catch (RestfulAPIException ex) {
-                            }
+                    if (updatedInfo != null && updatedInfo.hasSolder()) {
+                        try {
+                            ISolderPackApi solderPack = solderApi.getSolderPack(updatedInfo.getSolder(), updatedInfo.getName(), solderApi.getMirrorUrl(updatedInfo.getSolder()));
+                            infoToUse = new CombinedPackInfo(solderPack.getPackInfo(), updatedInfo);
+                        } catch (RestfulAPIException ex) {
                         }
-
-                        if (infoToUse != null)
-                            refreshWidget.getModpack().setPackInfo(infoToUse);
-
-                        EventQueue.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (modpackInfoPanel != null)
-                                    modpackInfoPanel.setModpackIfSame(refreshWidget.getModpack());
-
-                                if (refreshWidget.getModpack().hasRecommendedUpdate()) {
-                                    refreshWidget.setToolTipText(resources.getString("launcher.packselector.updatetip"));
-                                } else {
-                                    refreshWidget.setToolTipText(null);
-                                }
-
-                                iconRepo.refreshRetry(refreshWidget.getModpack());
-                                refreshWidget.updateFromPack(iconRepo.startImageJob(refreshWidget.getModpack()));
-
-                                EventQueue.invokeLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        revalidate();
-                                        repaint();
-                                    }
-                                });
-                            }
-                        });
-
-                    } catch (RestfulAPIException ex) {
-                        ex.printStackTrace();
-                        return;
                     }
+
+                    if (infoToUse != null)
+                        refreshWidget.getModpack().setPackInfo(infoToUse);
+
+                    EventQueue.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (modpackInfoPanel != null)
+                                modpackInfoPanel.setModpackIfSame(refreshWidget.getModpack());
+
+                            if (refreshWidget.getModpack().hasRecommendedUpdate()) {
+                                refreshWidget.setToolTipText(resources.getString("launcher.packselector.updatetip"));
+                            } else {
+                                refreshWidget.setToolTipText(null);
+                            }
+
+                            iconRepo.refreshRetry(refreshWidget.getModpack());
+                            refreshWidget.updateFromPack(iconRepo.startImageJob(refreshWidget.getModpack()));
+
+                            EventQueue.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    revalidate();
+                                    repaint();
+                                }
+                            });
+                        }
+                    });
+
+                } catch (RestfulAPIException ex) {
+                    ex.printStackTrace();
+                    return;
                 }
-            };
-            thread.start();
+            }
+        };
+        thread.start();
     }
 
     protected void rebuildUI() {
