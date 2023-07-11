@@ -458,10 +458,17 @@ public class ModpackModel {
     }
 
     public void select() {
-        String oldSelected = installedPackRepository.getSelectedSlug();
+        String storedSelection = installedPackRepository.getSelectedSlug();
         String name = getName();
 
-        if (oldSelected != null && !oldSelected.equals(name)) {
+        if (name == null) {
+            return;
+        }
+
+        // Only save if either of the following:
+        // - The stored selection is null (e.g. new launcher installs)
+        // - The current modpack slug is different from the stored selection
+        if (storedSelection == null || !storedSelection.equals(name)) {
             installedPackRepository.setSelectedSlug(name);
             installedPackRepository.save();
         }
