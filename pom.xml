@@ -306,8 +306,8 @@
                                         <preCp>anything</preCp>
                                     </classPath>
                                     <jre>
+                                        <path>%JAVA_HOME%;%PATH%</path>
                                         <minVersion>1.8.0</minVersion>
-                                        <maxVersion>1.8.0_999</maxVersion>
                                         <opts>
                                             <opt>-Djava.net.preferIPv4Stack=true</opt>
                                             <opt>-Dawt.useSystemAAFontSettings=lcd</opt>
