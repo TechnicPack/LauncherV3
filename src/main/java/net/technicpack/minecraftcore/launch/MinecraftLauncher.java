@@ -102,19 +102,7 @@ public class MinecraftLauncher {
         ProcessBuilder processBuilder = new ProcessBuilder(commands).directory(pack.getInstalledDirectory()).redirectErrorStream(true);
         Map<String, String> envVars = processBuilder.environment();
         for (String badVar : BAD_ENV_VARS) envVars.remove(badVar);
-        Process process = null;
-        try {
-            process = processBuilder.start();
-        } catch (Exception e) {
-            // We call the exit listener here to ensure that the launcher unhider knows the process exited, otherwise
-            // we get an infinite loop since LauncherFrame.launchCompleted() will reschedule itself if the launcher
-            // unhider considers the process is still running.
-            if (exitListener != null) {
-                exitListener.onProcessExit();
-            }
-
-            throw e;
-        }
+        Process process = processBuilder.start();
         GameProcess mcProcess = new GameProcess(commands, process, userAccessToken);
         if (exitListener != null) mcProcess.setExitListener(exitListener);
 

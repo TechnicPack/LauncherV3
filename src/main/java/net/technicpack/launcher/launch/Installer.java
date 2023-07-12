@@ -34,6 +34,7 @@ import net.technicpack.launchercore.install.Version;
 import net.technicpack.launchercore.install.tasks.*;
 import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
+import net.technicpack.launchercore.launch.GameProcess;
 import net.technicpack.launchercore.launch.java.IJavaVersion;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
@@ -109,7 +110,7 @@ public class Installer {
         installerThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                boolean everythingWorked = false;
+                GameProcess gameProcess = null;
 
                 try {
                     MojangVersion version = null;
@@ -177,7 +178,7 @@ public class Installer {
                             launcherUnhider = null;
 
                         LaunchOptions options = new LaunchOptions(pack.getDisplayName(), packIconMapper.getImageLocation(pack).getAbsolutePath(), settings);
-                        launcher.launch(pack, memory, options, launcherUnhider, version);
+                        gameProcess = launcher.launch(pack, memory, options, launcherUnhider, version);
 
                         if (launchAction == null || launchAction == LaunchAction.HIDE) {
                             frame.setVisible(false);
@@ -192,8 +193,6 @@ public class Installer {
                             System.exit(0);
                         }
                     }
-
-                    everythingWorked = true;
                 } catch (InterruptedException e) {
                     boolean cancelledByUser = false;
                     synchronized (cancelLock) {
@@ -228,7 +227,7 @@ public class Installer {
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
-                    if (!everythingWorked || !doLaunch) {
+                    if (!doLaunch || gameProcess == null || gameProcess.getProcess() == null || !gameProcess.getProcess().isAlive()) {
                         EventQueue.invokeLater(new Runnable() {
                             @Override
                             public void run() {
@@ -266,8 +265,6 @@ public class Installer {
 
     public boolean isCurrentlyRunning() {
         if (installerThread != null && installerThread.isAlive())
-            return true;
-        if (launcherUnhider != null && !launcherUnhider.hasExited())
             return true;
         return false;
     }
