@@ -304,11 +304,12 @@ public class LauncherMain {
         }
 
         try {
-            if (Integer.parseInt(javaVersion.substring("1.8.0_".length())) >= 101) {
+            final String[] javaVersionParts = javaVersion.split("[._-]");
+            if (Integer.parseInt(javaVersionParts[3]) >= 101) {
                 Utils.getLogger().log(Level.INFO, "Don't need to inject new root certificates: Java 8 is 101+ (" + javaVersion + ")");
                 return;
             }
-        } catch (final NumberFormatException e) {
+        } catch (final NumberFormatException | ArrayIndexOutOfBoundsException e) {
             Utils.getLogger().log(Level.WARNING, "Couldn't parse Java version, can't inject new root certs", e);
             return;
         }
