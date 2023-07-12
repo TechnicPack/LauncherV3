@@ -77,7 +77,7 @@ public class Installer {
     protected final Object cancelLock = new Object();
     protected boolean isCancelledByUser = false;
 
-    private Thread runningThread;
+    private Thread installerThread;
     private LauncherUnhider launcherUnhider;
 
     public Installer(StartupParameters startupParameters, LauncherDirectories directories, ModpackInstaller installer, MinecraftLauncher launcher, TechnicSettings settings, PackResourceMapper packIconMapper) {
@@ -94,7 +94,7 @@ public class Installer {
         synchronized (cancelLock) {
             isCancelledByUser = true;
         }
-        runningThread.interrupt();
+        installerThread.interrupt();
     }
 
     public void justInstall(final ResourceLoader resources, final ModpackModel pack, final String build, final boolean doFullInstall, final LauncherFrame frame, final DownloadListener listener) {
@@ -106,7 +106,7 @@ public class Installer {
     }
 
     protected void internalInstallAndRun(final ResourceLoader resources, final ModpackModel pack, final String build, final boolean doFullInstall, final LauncherFrame frame, final DownloadListener listener, final boolean doLaunch) {
-        runningThread = new Thread(new Runnable() {
+        installerThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 boolean everythingWorked = false;
@@ -261,11 +261,11 @@ public class Installer {
                 super.interrupt();
             }
         };
-        runningThread.start();
+        installerThread.start();
     }
 
     public boolean isCurrentlyRunning() {
-        if (runningThread != null && runningThread.isAlive())
+        if (installerThread != null && installerThread.isAlive())
             return true;
         if (launcherUnhider != null && !launcherUnhider.hasExited())
             return true;
