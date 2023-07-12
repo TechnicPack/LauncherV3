@@ -81,12 +81,19 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask {
 
 		File cache = new File(cacheDirectory, "minecraft_" + this.minecraftVersion + ".jar");
 
+		boolean regenerate = false;
+
 		if (!cache.exists() || !verifier.isFileValid(cache)) {
 			String output = this.pack.getCacheDir() + File.separator + "minecraft.jar";
 			Utils.downloadFile(url, cache.getName(), output, cache, verifier, this);
+			regenerate = true;
 		}
 
-		MojangUtils.copyMinecraftJar(cache, new File(this.pack.getBinDir(), "minecraft.jar"));
+		File binMinecraftJar = new File(this.pack.getBinDir(), "minecraft.jar");
+
+		if (!binMinecraftJar.exists() || regenerate) {
+			MojangUtils.copyMinecraftJar(cache, binMinecraftJar);
+		}
 	}
 
 }

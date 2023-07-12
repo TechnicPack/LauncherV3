@@ -433,8 +433,7 @@ public class Installer {
 
         examineJava.addTask(new EnsureJavaRuntimeManifestTask(directories.getRuntimesDirectory(), modpack, launcher.getJavaVersions(), examineJava, downloadJava));
 
-        if (doFullInstall || (installedVersion != null && installedVersion.isLegacy()))
-            installingMinecraft.addTask(new InstallMinecraftIfNecessaryTask(modpack, minecraft, directories.getCacheDirectory()));
+        installingMinecraft.addTask(new InstallMinecraftIfNecessaryTask(modpack, minecraft, directories.getCacheDirectory()));
     }
 
     private MojangVersionBuilder createVersionBuilder(ModpackModel modpack, InstallTasksQueue tasksQueue) {
