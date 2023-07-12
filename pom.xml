@@ -247,7 +247,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>${basedir}/src/main/assembly/app.xml</descriptor>
+                                <descriptor>${project.basedir}/src/main/assembly/app.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>
@@ -314,7 +314,7 @@
                                             <opt>-Dswing.aatext=true</opt>
                                         </opts>
                                     </jre>
-                                    <icon>${basedir}/src/main/resources/exe/icon.ico</icon>
+                                    <icon>${project.basedir}/src/main/resources/exe/icon.ico</icon>
                                     <versionInfo>
                                         <fileVersion>4.0.0.${buildNumber}</fileVersion>
                                         <txtFileVersion>4.0.0.${buildNumber}</txtFileVersion>
@@ -364,7 +364,7 @@
                                     <executable>/bin/chmod</executable>
                                     <arguments>
                                         <argument>755</argument>
-                                        <argument>${basedir}/src/main/app/Contents/MacOS/JavaAppLauncher</argument>
+                                        <argument>${project.basedir}/src/main/app/Contents/MacOS/JavaAppLauncher</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
