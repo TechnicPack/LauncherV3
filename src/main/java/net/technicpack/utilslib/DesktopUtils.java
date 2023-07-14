@@ -46,8 +46,8 @@ public class DesktopUtils {
                             SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Unable to open browser, please visit the URL:\n" + url, "Unable to open browser", JOptionPane.ERROR_MESSAGE));
                     }
                 } catch (IOException ex) {
-                    //Thrown by Desktop.browse() - just log & ignore
                     Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Unable to open browser, please visit the URL:\n" + url, "Unable to open browser", JOptionPane.ERROR_MESSAGE));
                 } catch (URISyntaxException ex) {
                     //If we got a bogus URL from the internet, then this will throw.  Log & Ignore
                     Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
