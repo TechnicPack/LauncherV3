@@ -433,7 +433,12 @@ public class Installer {
 
         examineJava.addTask(new EnsureJavaRuntimeManifestTask(directories.getRuntimesDirectory(), modpack, launcher.getJavaVersions(), examineJava, downloadJava));
 
-        installingMinecraft.addTask(new InstallMinecraftIfNecessaryTask(modpack, minecraft, directories.getCacheDirectory()));
+        // Check if we need to regenerate the Minecraft jar. This is necessary if:
+        // - A reinstall was requested (or forced, via modpack version update)
+        // - The installed version is marked as legacy
+        boolean jarRegenerationRequired = doFullInstall || (installedVersion != null && installedVersion.isLegacy());
+
+        installingMinecraft.addTask(new InstallMinecraftIfNecessaryTask(modpack, minecraft, directories.getCacheDirectory(), jarRegenerationRequired));
     }
 
     private MojangVersionBuilder createVersionBuilder(ModpackModel modpack, InstallTasksQueue tasksQueue) {

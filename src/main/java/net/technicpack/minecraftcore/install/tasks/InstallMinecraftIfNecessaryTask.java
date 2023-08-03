@@ -40,11 +40,13 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask {
 	private ModpackModel pack;
 	private String minecraftVersion;
 	private File cacheDirectory;
+	private boolean forceRegeneration;
 
-	public InstallMinecraftIfNecessaryTask(ModpackModel pack, String minecraftVersion, File cacheDirectory) {
+	public InstallMinecraftIfNecessaryTask(ModpackModel pack, String minecraftVersion, File cacheDirectory, boolean forceRegeneration) {
 		this.pack = pack;
 		this.minecraftVersion = minecraftVersion;
 		this.cacheDirectory = cacheDirectory;
+		this.forceRegeneration = forceRegeneration;
 	}
 
 	@Override
@@ -72,7 +74,7 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask {
 
 		File cache = new File(cacheDirectory, "minecraft_" + this.minecraftVersion + ".jar");
 
-		boolean regenerate = false;
+		boolean regenerate = forceRegeneration;
 
 		if (!cache.exists() || !verifier.isFileValid(cache)) {
 			String output = this.pack.getCacheDir() + File.separator + "minecraft.jar";
