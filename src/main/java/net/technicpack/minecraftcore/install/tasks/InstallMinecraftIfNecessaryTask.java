@@ -60,17 +60,14 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask {
 
 		MojangVersion version = ((InstallTasksQueue<MojangVersion>)queue).getMetadata();
 
-		String url;
 		GameDownloads dls = version.getDownloads();
-
-		IFileVerifier verifier;
 
 		if (dls == null) {
 			throw new RuntimeException("Using legacy Minecraft download! Version id = " + version.getId() + "; parent = " + version.getParentVersion());
 		}
 
-		url = dls.forClient().getUrl();
-		verifier = new SHA1FileVerifier(dls.forClient().getSha1());
+		String url = dls.forClient().getUrl();
+		IFileVerifier verifier = new SHA1FileVerifier(dls.forClient().getSha1());
 
 		File cache = new File(cacheDirectory, "minecraft_" + this.minecraftVersion + ".jar");
 
