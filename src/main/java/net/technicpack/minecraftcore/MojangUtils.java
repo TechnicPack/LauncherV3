@@ -57,25 +57,10 @@ public class MojangUtils {
     private static final JsonFactory JSON_FACTORY = new GsonFactory();
     private static final HttpRequestFactory REQUEST_FACTORY;
 
-    /** @deprecated Uses old S3 bucket */
-    public static final String baseURL = "https://s3.amazonaws.com/Minecraft.Download/";
-    public static final String assetsIndexes = baseURL + "indexes/";
-    public static final String versions = baseURL + "versions/";
-
     public static final String assets = "https://resources.download.minecraft.net/";
 
     public static final String RUNTIMES_URL = "https://launchermeta.mojang.com/v1/products/java-runtime/2ec0cc96c44e5a76b9c8b7c39df7210883d12871/all.json";
     private static JavaRuntimes javaRuntimes;
-
-    /** @deprecated Uses old S3 bucket */
-    public static String getOldVersionDownload(String version) {
-        return versions + version + "/" + version + ".jar";
-    }
-
-    /** @deprecated Uses old S3 bucket */
-    public static String getAssetsIndex(String assetsKey) {
-        return assetsIndexes + assetsKey + ".json";
-    }
 
     public static String getResourceUrl(String hash) {
         return assets + hash.substring(0, 2) + "/" + hash;
