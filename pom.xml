@@ -74,6 +74,11 @@
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.12.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>
             <version>1.10.0</version>
         </dependency>
@@ -102,9 +107,16 @@
             <artifactId>google-oauth-client</artifactId>
             <version>1.34.1</version>
         </dependency>
+        <!-- For the OAuth2 local server and installed app flow -->
         <dependency>
             <groupId>com.google.oauth-client</groupId>
             <artifactId>google-oauth-client-jetty</artifactId>
+            <version>1.34.1</version>
+        </dependency>
+        <!-- google-oauth-client-jetty depends on this -->
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client-java6</artifactId>
             <version>1.34.1</version>
         </dependency>
         <dependency>
@@ -180,10 +192,10 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
-                    <compilerArguments>
+                    <compilerArgs>
                         <O>-Xlint:all</O>
                         <O>-Xlint:-path</O>
-                    </compilerArguments>
+                    </compilerArgs>
                     <showWarnings>true</showWarnings>
                     <showDeprecation>true</showDeprecation>
                 </configuration>
