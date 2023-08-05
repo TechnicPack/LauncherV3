@@ -20,7 +20,7 @@
 package net.technicpack.minecraftcore;
 
 import com.google.api.client.http.*;
-import com.google.api.client.http.apache.ApacheHttpTransport.Builder;
+import com.google.api.client.http.apache.v2.ApacheHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.gson.GsonFactory;
@@ -34,7 +34,10 @@ import net.technicpack.minecraftcore.mojang.auth.io.UserProperties;
 import net.technicpack.minecraftcore.mojang.auth.io.UserPropertiesAdapter;
 import net.technicpack.minecraftcore.mojang.java.JavaRuntimes;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
-import net.technicpack.minecraftcore.mojang.version.io.*;
+import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
+import net.technicpack.minecraftcore.mojang.version.io.CompleteVersionV21;
+import net.technicpack.minecraftcore.mojang.version.io.Rule;
+import net.technicpack.minecraftcore.mojang.version.io.RuleAdapter;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentListAdapter;
 import net.technicpack.utilslib.DateTypeAdapter;
@@ -53,7 +56,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MojangUtils {
-    private static final HttpTransport HTTP_TRANSPORT = (new Builder()).build();
+    private static final HttpTransport HTTP_TRANSPORT = new ApacheHttpTransport();
     private static final JsonFactory JSON_FACTORY = new GsonFactory();
     private static final HttpRequestFactory REQUEST_FACTORY;
 
