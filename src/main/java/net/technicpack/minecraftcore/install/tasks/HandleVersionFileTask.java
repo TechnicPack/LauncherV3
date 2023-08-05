@@ -149,10 +149,10 @@ public class HandleVersionFileTask implements IInstallTask {
             // For Forge 1.13+, we inject our ForgeWrapper as a dependency and launch it through that
             if (!is1_12_2) {
                 Library forgeWrapper = new Library(
-                        "io.github.zekerzhayard:ForgeWrapper:1.5.5",
-                        TechnicConstants.technicLibRepo + "io/github/zekerzhayard/ForgeWrapper/1.5.5/ForgeWrapper-1.5.5.jar",
-                        "566dfd60aacffaa02884614835f1151d36f1f985",
-                        34331
+                        "io.github.zekerzhayard:ForgeWrapper:1.5.6",
+                        TechnicConstants.technicLibRepo + "io/github/zekerzhayard/ForgeWrapper/1.5.6/ForgeWrapper-1.5.6.jar",
+                        "b38d28e8b7fde13b1bc0db946a2da6760fecf98d",
+                        34715
                 );
 
                 version.addLibrary(forgeWrapper);
