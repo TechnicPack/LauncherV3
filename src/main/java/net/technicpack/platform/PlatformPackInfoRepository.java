@@ -77,7 +77,7 @@ public class PlatformPackInfoRepository implements IAuthoritativePackSource {
                 else
                     return new CombinedPackInfo(solderInfo, platformInfo);
             } catch (RestfulAPIException ex) {
-                ex.printStackTrace();
+                Utils.getLogger().log(Level.SEVERE, "Failed to query Solder for modpack " + platformInfo.getName(), ex);
                 return platformInfo;
             }
         } else {
