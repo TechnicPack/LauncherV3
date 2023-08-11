@@ -32,8 +32,7 @@ import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.ModpackInstaller;
 import net.technicpack.launchercore.install.Version;
 import net.technicpack.launchercore.install.tasks.*;
-import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
-import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
+import net.technicpack.launchercore.install.verifiers.SHA1FileVerifier;
 import net.technicpack.launchercore.launch.GameProcess;
 import net.technicpack.launchercore.launch.java.IJavaVersion;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
@@ -59,10 +58,11 @@ import net.technicpack.utilslib.Memory;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JOptionPane;
+import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Pattern;
@@ -269,7 +269,7 @@ public class Installer {
         return false;
     }
 
-    public void buildTasksQueue(InstallTasksQueue queue, ResourceLoader resources, ModpackModel modpack, String build, boolean doFullInstall, MojangVersionBuilder versionBuilder) throws CacheDeleteException, BuildInaccessibleException {
+    public void buildTasksQueue(InstallTasksQueue queue, ResourceLoader resources, ModpackModel modpack, String build, boolean doFullInstall, MojangVersionBuilder versionBuilder) throws IOException {
         PackInfo packInfo = modpack.getPackInfo();
         Modpack modpackData = packInfo.getModpack(build);
 
@@ -317,12 +317,15 @@ public class Installer {
         if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX)
             queue.addTask(new RenameJnilibToDylibTask(modpack));
 
-        // Add FML libs
-        String fmlLibsZip;
-        File modpackFmlLibDir = new File(modpack.getInstalledDirectory(), "lib");
+        // Add legacy FML libs
         HashMap<String, String> fmlLibs = new HashMap<>();
 
         switch (minecraft) {
+            case "1.3.2":
+                fmlLibs.put("argo-2.25.jar", "bb672829fde76cb163004752b86b0484bd0a7f4b");
+                fmlLibs.put("guava-12.0.1.jar", "b8e78b9af7bf45900e14c6f958486b6ca682195f");
+                fmlLibs.put("asm-all-4.0.jar", "98308890597acb64047f7e896638e0d98753ae82");
+                break;
             case "1.4":
             case "1.4.1":
             case "1.4.2":
@@ -331,36 +334,49 @@ public class Installer {
             case "1.4.5":
             case "1.4.6":
             case "1.4.7":
-                fmlLibsZip = "fml_libs.zip";
+                fmlLibs.put("argo-2.25.jar", "bb672829fde76cb163004752b86b0484bd0a7f4b");
+                fmlLibs.put("guava-12.0.1.jar", "b8e78b9af7bf45900e14c6f958486b6ca682195f");
+                fmlLibs.put("asm-all-4.0.jar", "98308890597acb64047f7e896638e0d98753ae82");
+                fmlLibs.put("bcprov-jdk15on-147.jar", "b6f5d9926b0afbde9f4dbe3db88c5247be7794bb");
                 break;
             case "1.5":
-                fmlLibsZip = "fml_libs15.zip";
-                fmlLibs.put("deobfuscation_data_1.5.zip", "dba6d410a91a855f3b84457c86a8132a");
+                fmlLibs.put("argo-small-3.2.jar", "58912ea2858d168c50781f956fa5b59f0f7c6b51");
+                fmlLibs.put("guava-14.0-rc3.jar", "931ae21fa8014c3ce686aaa621eae565fefb1a6a");
+                fmlLibs.put("asm-all-4.1.jar", "054986e962b88d8660ae4566475658469595ef58");
+                fmlLibs.put("bcprov-jdk15on-148.jar", "960dea7c9181ba0b17e8bab0c06a43f0a5f04e65");
+                fmlLibs.put("deobfuscation_data_1.5.zip", "5f7c142d53776f16304c0bbe10542014abad6af8");
+                fmlLibs.put("scala-library.jar", "458d046151ad179c85429ed7420ffb1eaf6ddf85");
                 break;
             case "1.5.1":
-                fmlLibsZip = "fml_libs15.zip";
-                fmlLibs.put("deobfuscation_data_1.5.1.zip", "c4fc2fedba60d920e4c7f9a095b2b883");
+                fmlLibs.put("argo-small-3.2.jar", "58912ea2858d168c50781f956fa5b59f0f7c6b51");
+                fmlLibs.put("guava-14.0-rc3.jar", "931ae21fa8014c3ce686aaa621eae565fefb1a6a");
+                fmlLibs.put("asm-all-4.1.jar", "054986e962b88d8660ae4566475658469595ef58");
+                fmlLibs.put("bcprov-jdk15on-148.jar", "960dea7c9181ba0b17e8bab0c06a43f0a5f04e65");
+                fmlLibs.put("deobfuscation_data_1.5.1.zip", "22e221a0d89516c1f721d6cab056a7e37471d0a6");
+                fmlLibs.put("scala-library.jar", "458d046151ad179c85429ed7420ffb1eaf6ddf85");
                 break;
             case "1.5.2":
-                fmlLibsZip = "fml_libs15.zip";
-                fmlLibs.put("deobfuscation_data_1.5.2.zip", "270d9775872cc9fa773389812cab91fe");
+                fmlLibs.put("argo-small-3.2.jar", "58912ea2858d168c50781f956fa5b59f0f7c6b51");
+                fmlLibs.put("guava-14.0-rc3.jar", "931ae21fa8014c3ce686aaa621eae565fefb1a6a");
+                fmlLibs.put("asm-all-4.1.jar", "054986e962b88d8660ae4566475658469595ef58");
+                fmlLibs.put("bcprov-jdk15on-148.jar", "960dea7c9181ba0b17e8bab0c06a43f0a5f04e65");
+                fmlLibs.put("deobfuscation_data_1.5.2.zip", "446e55cd986582c70fcf12cb27bc00114c5adfd9");
+                fmlLibs.put("scala-library.jar", "458d046151ad179c85429ed7420ffb1eaf6ddf85");
                 break;
-            default:
-                fmlLibsZip = "";
-        }
-
-        if (!fmlLibsZip.isEmpty()) {
-            verifyingFiles.addTask(new EnsureFileTask(new File(directories.getCacheDirectory(), fmlLibsZip), new ValidZipFileVerifier(), modpackFmlLibDir, TechnicConstants.technicFmlLibRepo + fmlLibsZip, installingLibs, installingLibs));
         }
 
         if (!fmlLibs.isEmpty()) {
-            fmlLibs.forEach((name, md5) -> {
-                MD5FileVerifier verifier = null;
+            File modpackFmlLibDir = new File(modpack.getInstalledDirectory(), "lib");
+            File fmlLibsCache = new File(directories.getCacheDirectory(), "fmllibs");
+            Files.createDirectories(fmlLibsCache.toPath());
 
-                if (!md5.isEmpty())
-                    verifier = new MD5FileVerifier(md5);
+            fmlLibs.forEach((name, sha1) -> {
+                SHA1FileVerifier verifier = null;
 
-                File cached = new File(directories.getCacheDirectory(), name);
+                if (!sha1.isEmpty())
+                    verifier = new SHA1FileVerifier(sha1);
+
+                File cached = new File(fmlLibsCache, name);
                 File target = new File(modpackFmlLibDir, name);
 
                 if (!target.exists() || (verifier != null && !verifier.isFileValid(target)) ) {
