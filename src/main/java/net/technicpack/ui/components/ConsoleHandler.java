@@ -19,6 +19,8 @@
 
 package net.technicpack.ui.components;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
@@ -32,7 +34,17 @@ public class ConsoleHandler extends Handler {
 
     @Override
     public void publish(LogRecord record) {
-        this.console.log(record.getMessage() + '\n', record.getLevel());
+        StringBuilder builder = new StringBuilder();
+        builder.append(record.getMessage());
+        builder.append('\n');
+
+        if (record.getThrown() != null) {
+            StringWriter writer = new StringWriter();
+            record.getThrown().printStackTrace(new PrintWriter(writer));
+            builder.append(writer);
+        }
+
+        this.console.log(builder.toString(), record.getLevel());
     }
 
     @Override
