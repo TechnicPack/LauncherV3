@@ -100,6 +100,7 @@ public class TechnicInstalledPackStore implements IInstalledPackRepository {
     @Override
     public void setSelectedSlug(String slug) {
         selected = slug;
+        save();
     }
 
     @Override

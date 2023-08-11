@@ -445,7 +445,6 @@ public class ModpackModel {
         }
 
         installedPackRepository.put(installedPack);
-        installedPackRepository.save();
     }
 
     public boolean isSelected() {
@@ -470,7 +469,6 @@ public class ModpackModel {
         // - The current modpack slug is different from the stored selection
         if (storedSelection == null || !storedSelection.equals(name)) {
             installedPackRepository.setSelectedSlug(name);
-            installedPackRepository.save();
         }
     }
 
