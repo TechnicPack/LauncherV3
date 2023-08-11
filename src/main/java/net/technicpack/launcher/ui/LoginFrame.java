@@ -422,7 +422,6 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         if (users.size() == 0) {
             setAccountSelectVisibility(false);
             setAddAccountVisibility(true);
-            login.setVisible(false);
             clearCurrentUser();
         } else {
             nameSelect.setVisible(true);
@@ -458,10 +457,9 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
 
 
     protected void addMojangAccount() {
-        setMojangLoginVisibility(true);
         setAddAccountVisibility(false);
         setAccountSelectVisibility(false);
-        login.setVisible(true);
+        setMojangLoginVisibility(true);
     }
 
     protected void addMicrosoftAccount() {
@@ -516,10 +514,9 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
             return;
         }
 
+        setMojangLoginVisibility(false);
         setAccountSelectVisibility(true);
         setAddAccountVisibility(true);
-        setMojangLoginVisibility(false);
-        login.setVisible(true);
         rememberAccount.setSelected(true);
         nameSelect.setSelectedItem(user);
     }
@@ -540,12 +537,13 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         username.setVisible(visible);
         passwordLabel.setVisible(visible);
         password.setVisible(visible);
+        login.setVisible(visible);
     }
 
     private void setAccountSelectVisibility(boolean visible) {
         selectLabel.setVisible(visible);
         nameSelect.setVisible(visible);
-
+        login.setVisible(visible);
     }
 
     private void setAddAccountVisibility(boolean visible) {
