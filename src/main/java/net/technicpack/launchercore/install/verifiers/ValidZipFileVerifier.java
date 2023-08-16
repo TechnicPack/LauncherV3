@@ -24,26 +24,16 @@ import net.technicpack.utilslib.Utils;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
-import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 public class ValidZipFileVerifier implements IFileVerifier {
     @Override
     public boolean isFileValid(File file) {
-        ZipFile zipfile = null;
-        try {
-            zipfile = new ZipFile(file);
+        try (ZipFile ignored = new ZipFile(file)) {
             return true;
         } catch (IOException e) {
-            Utils.getLogger().log(Level.WARNING, "ZIP validation failed for " + file.getAbsolutePath(), e);
+            Utils.getLogger().log(Level.WARNING, e, () -> "ZIP validation failed for " + file.getAbsolutePath());
             return false;
-        } finally {
-            try {
-                if (zipfile != null) {
-                    zipfile.close();
-                }
-            } catch (IOException e) {
-            }
         }
     }
 }
