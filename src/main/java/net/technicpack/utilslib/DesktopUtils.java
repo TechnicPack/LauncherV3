@@ -28,10 +28,20 @@ import java.net.URISyntaxException;
 import java.util.logging.Level;
 
 public class DesktopUtils {
+    private static void showBrowseUrlDialog(String url) {
+        JOptionPane.showInputDialog(null,
+                "Unable to open browser, please visit the URL manually (copy it from the box):",
+                "Unable to open browser",
+                JOptionPane.ERROR_MESSAGE,
+                null,
+                null,
+                url);
+    }
+
     public static void browseUrl(String url) {
         new SwingWorker<Void, Void>() {
             @Override
-            protected Void doInBackground() throws Exception {
+            protected Void doInBackground() {
                 try {
                     if (url.startsWith("mailto:"))
                         Desktop.getDesktop().mail(new URI(url));
@@ -43,11 +53,11 @@ public class DesktopUtils {
                         else if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX)
                             new ProcessBuilder("open", url).start();
                         else
-                            SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Unable to open browser, please visit the URL:\n" + url, "Unable to open browser", JOptionPane.ERROR_MESSAGE));
+                            SwingUtilities.invokeLater(() -> showBrowseUrlDialog(url));
                     }
                 } catch (IOException ex) {
                     Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
-                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Unable to open browser, please visit the URL:\n" + url, "Unable to open browser", JOptionPane.ERROR_MESSAGE));
+                    SwingUtilities.invokeLater(() -> showBrowseUrlDialog(url));
                 } catch (URISyntaxException ex) {
                     //If we got a bogus URL from the internet, then this will throw.  Log & Ignore
                     Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
