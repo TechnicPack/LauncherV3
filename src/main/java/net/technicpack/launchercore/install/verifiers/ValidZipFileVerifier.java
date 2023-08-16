@@ -19,8 +19,11 @@
 
 package net.technicpack.launchercore.install.verifiers;
 
+import net.technicpack.utilslib.Utils;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
@@ -31,9 +34,8 @@ public class ValidZipFileVerifier implements IFileVerifier {
         try {
             zipfile = new ZipFile(file);
             return true;
-        } catch (ZipException e) {
-            return false;
         } catch (IOException e) {
+            Utils.getLogger().log(Level.WARNING, "ZIP validation failed for " + file.getAbsolutePath(), e);
             return false;
         } finally {
             try {
