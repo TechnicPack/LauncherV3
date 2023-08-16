@@ -616,6 +616,10 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
                         showMessageDialog(parent,
                                 "This account has not purchased Minecraft Java Edition.", "No Minecraft", ERROR_MESSAGE);
                         break;
+                    case DNS:
+                        showMessageDialog(parent,
+                                "DNS failure: " + e.getMessage(), "DNS failure during authentication", ERROR_MESSAGE);
+                        break;
                     default:
                         e.printStackTrace();
                         showMessageDialog(parent, e.getMessage(), "Add Microsoft Account Failed", ERROR_MESSAGE);

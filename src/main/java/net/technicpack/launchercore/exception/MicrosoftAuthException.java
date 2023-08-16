@@ -21,6 +21,7 @@ public class MicrosoftAuthException extends ResponseException {
     }
 
     public enum ExceptionType {
+        DNS,
         REQUEST,
         OAUTH,
         XBOX,

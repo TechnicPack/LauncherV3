@@ -19,6 +19,8 @@ import net.technicpack.utilslib.Utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -313,17 +315,39 @@ public class MicrosoftAuthenticator {
         }
     }
 
-    private HttpRequest buildGetRequest(String url) throws MicrosoftAuthException {
+    /**
+     * This function ensures that the specified URL doesn't resolve to localhost/127.0.0.1.
+     * If it does, it will open a browser window with instructions on how to fix the hosts file,
+     * and it will throw a MicrosoftAuthException with a relevant error message.
+     */
+    private void ensureHostIsNotLocalhost(GenericUrl url) throws MicrosoftAuthException {
         try {
-            return REQUEST_FACTORY.buildGetRequest(new GenericUrl(url));
+            if (InetAddress.getByName(url.getHost()).getHostAddress().equals("127.0.0.1")) {
+                DesktopUtils.browseUrl("https://support.technicpack.net/hc/en-us/articles/18587630118541");
+                throw new MicrosoftAuthException(DNS, url.getHost() + " resolves to 127.0.0.1\n\nYour hosts file needs to be fixed.");
+            }
+        } catch (UnknownHostException e) {
+            throw new MicrosoftAuthException(DNS, "DNS resolution failed for " + url.getHost() + ": unknown host");
+        }
+    }
+
+    private HttpRequest buildGetRequest(String url) throws MicrosoftAuthException {
+        GenericUrl genericUrl = new GenericUrl(url);
+        ensureHostIsNotLocalhost(genericUrl);
+
+        try {
+            return REQUEST_FACTORY.buildGetRequest(genericUrl);
         } catch (IOException e) {
             throw new MicrosoftAuthException(REQUEST, "Failed to build get request.", e);
         }
     }
 
     private HttpRequest buildPostRequest(String url, HttpContent httpContent) throws MicrosoftAuthException {
+        GenericUrl genericUrl = new GenericUrl(url);
+        ensureHostIsNotLocalhost(genericUrl);
+
         try {
-            return REQUEST_FACTORY.buildPostRequest(new GenericUrl(url), httpContent);
+            return REQUEST_FACTORY.buildPostRequest(genericUrl, httpContent);
         } catch (IOException e) {
             throw new MicrosoftAuthException(REQUEST, "Failed to build post request.", e);
         }
