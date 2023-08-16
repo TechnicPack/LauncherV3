@@ -38,7 +38,7 @@ public class MicrosoftAuthenticator {
     private static final String TOKEN_SERVER_URL = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
     private static final String AUTHORIZATION_SERVER_URL =
             "https://login.live.com/oauth20_authorize.srf?prompt=select_account&cobrandid=8058f65d-ce06-4c30-9559-473c9275a65d";
-    private static FileDataStoreFactory DATA_STORE_FACTORY;
+    private final FileDataStoreFactory dataStoreFactory;
 
     // XBOX
     private static final String XBOX_AUTH_URL = "https://user.auth.xboxlive.com/user/authenticate";
@@ -71,7 +71,7 @@ public class MicrosoftAuthenticator {
         );
 
         try {
-            DATA_STORE_FACTORY = new FileDataStoreFactory(dataStore);
+            dataStoreFactory = new FileDataStoreFactory(dataStore);
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to setup credential store.", e);
@@ -296,7 +296,7 @@ public class MicrosoftAuthenticator {
                         TECHNIC_CLIENT_ID,
                         AUTHORIZATION_SERVER_URL)
                         .setScopes(Arrays.asList(SCOPES))
-                        .setDataStoreFactory(DATA_STORE_FACTORY)
+                        .setDataStoreFactory(dataStoreFactory)
 //                            .enablePKCE() TODO: Figure out PKCE
                         .build();
     }
@@ -304,10 +304,10 @@ public class MicrosoftAuthenticator {
     private void updateCredentialStore(String username, Credential credential) {
         try {
             // Remove all the other credentials
-            DATA_STORE_FACTORY.getDataStore(StoredCredential.DEFAULT_DATA_STORE_ID).clear();
+            dataStoreFactory.getDataStore(StoredCredential.DEFAULT_DATA_STORE_ID).clear();
 
             // Store the new one
-            DATA_STORE_FACTORY.getDataStore(StoredCredential.DEFAULT_DATA_STORE_ID)
+            dataStoreFactory.getDataStore(StoredCredential.DEFAULT_DATA_STORE_ID)
                     .set(username, new StoredCredential(credential));
         } catch (IOException e) {
             e.printStackTrace();
