@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 
 public class ChainVersionBuilder implements MojangVersionBuilder {
-    private static final Pattern MINECRAFT_VERSION_PATTERN = Pattern.compile("^[0-9]+(\\.[0-9]+)+$");
+    private static final Pattern MINECRAFT_VERSION_PATTERN = Pattern.compile("^\\d++(\\.\\d++)++$");
 
     private MojangVersionBuilder primaryVersionBuilder;
     private MojangVersionBuilder chainedVersionBuilder;
