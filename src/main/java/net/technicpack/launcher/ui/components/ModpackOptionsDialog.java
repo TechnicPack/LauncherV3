@@ -139,7 +139,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         int result = JOptionPane.showConfirmDialog(this, resources.getString("modpackoptions.reinstall.confirmtext"), resources.getString("modpackoptions.reinstall.confirmtitle"), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         if (result == JOptionPane.YES_OPTION) {
             modpack.resetPack();
-            refresh(modpack);
+            dispose();
         }
     }
 
