@@ -131,6 +131,11 @@ public class ModpackOptionsDialog extends LauncherDialog {
     }
 
     protected void resetPack() {
+        if (modpack.isLocalOnly()) {
+            JOptionPane.showMessageDialog(this, resources.getString("modpackoptions.reinstall.cannotoffline"), resources.getString("modpackoptions.reinstall.cannottitle"), JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         int result = JOptionPane.showConfirmDialog(this, resources.getString("modpackoptions.reinstall.confirmtext"), resources.getString("modpackoptions.reinstall.confirmtitle"), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         if (result == JOptionPane.YES_OPTION) {
             modpack.resetPack();
@@ -386,12 +391,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         } else {
             resetPack.setForeground(LauncherFrame.COLOR_GREY_TEXT);
         }
-        resetPack.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                resetPack();
-            }
-        });
+        resetPack.addActionListener(e -> resetPack());
         resetPack.setEnabled(modpack.getInstalledDirectory() != null);
         bottomButtons.add(resetPack);
 
