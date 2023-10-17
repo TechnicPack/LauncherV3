@@ -35,6 +35,7 @@ import net.technicpack.utilslib.IZipFileFilter;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class CleanupAndExtractModpackTask implements IInstallTask {
 	private final ModpackModel pack;
@@ -88,11 +89,19 @@ public class CleanupAndExtractModpackTask implements IInstallTask {
 
 		final File cacheDir = pack.getCacheDir();
 
+		ArrayList<File> processedFiles = new ArrayList<>(modpack.getMods().size());
+
 		for (Mod mod : modpack.getMods()) {
 			String url = mod.getUrl();
 			String md5 = mod.getMd5();
 
 			File cacheFile = mod.generateSafeCacheFile(cacheDir);
+
+			if (processedFiles.contains(cacheFile)) {
+				throw new IOException("Detected overlapping files for modpack " + pack.getName() + ": " + cacheFile.getName());
+			}
+
+			processedFiles.add(cacheFile);
 
             IFileVerifier verifier = null;
 
