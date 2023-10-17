@@ -53,9 +53,8 @@ public class Mod extends Resource {
             filename = name + ".zip";
         }
 
-        if (filename.contains("/") || filename.contains("\\")) {
-            throw new IOException("Invalid mod cache filename: " + filename);
-        }
+        // Sanitize filename by replacing invalid characters
+        filename = filename.replaceAll("[\\\\/:*?\"<>|]", "-");
 
         File filePath = new File(cacheDir, filename);
 
