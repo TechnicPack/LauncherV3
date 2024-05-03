@@ -207,6 +207,13 @@ public class MojangUtils {
         return false;
     }
 
+    public static boolean hasNeoForge(MojangVersion version) {
+        Pattern p = Pattern.compile("^neoforge-(?<forge>[0-9.]+)");
+        Matcher m = p.matcher(version.getId());
+
+        return m.lookingAt();
+    }
+
     public static String getMinecraftVersion(MojangVersion version) {
         final String id = version.getId();
 
@@ -214,12 +221,20 @@ public class MojangUtils {
         if (!id.contains("-"))
             return id;
 
+        // Neoforge doesn't have the mc version in the id but it's always the parent
+        if (hasNeoForge(version)) {
+            return version.getParentVersion();
+        }
+
         // For Forge, this will be "mc-forge"
         final String[] idParts = id.split("-");
         return idParts[0];
     }
 
     public static boolean requiresForgeWrapper(MojangVersion version) {
+        if (hasNeoForge(version)) {
+            return true;
+        }
         if (!hasModernForge(version)) {
             return false;
         }

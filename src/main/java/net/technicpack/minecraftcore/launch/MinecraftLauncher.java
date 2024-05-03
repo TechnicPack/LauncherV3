@@ -207,7 +207,7 @@ public class MinecraftLauncher {
 
         // Ignore JVM args for Forge 1.13+, ForgeWrapper handles those
         // FIXME: HACK: This likely breaks some things as it will also skip vanilla JVM args
-        if (!MojangUtils.hasModernForge(version)) {
+        if (!MojangUtils.hasModernForge(version) && !MojangUtils.hasNeoForge(version)) {
             ArgumentList jvmArgs = version.getJavaArguments();
 
             if (jvmArgs != null) {
@@ -334,6 +334,7 @@ public class MinecraftLauncher {
         boolean isLegacy = MojangUtils.isLegacyVersion(version.getParentVersion());
 
         final boolean hasModernForge = MojangUtils.hasModernForge(version);
+        final boolean hasNeoForge = MojangUtils.hasNeoForge(version);
         final String[] versionIdParts = version.getId().split("-");
         final boolean is1_12_2 = versionIdParts[0].equals("1.12.2");
 
@@ -359,6 +360,16 @@ public class MinecraftLauncher {
                 }
             }
 
+            if (library.isNeoForge()) {
+                if (hasNeoForge) {
+                    if (!library.getName().endsWith(":launcher")) {
+                        continue;
+                    }
+                } else {
+                    continue;
+                }
+            }
+
             if (isLegacy && library.getName().startsWith("net.minecraft:launchwrapper")) {
                 continue;
             }
@@ -368,14 +379,17 @@ public class MinecraftLauncher {
                 throw new RuntimeException("Library " + library.getName() + " not found.");
             }
 
-            if (result.length() > 1) {
-                result.append(separator);
+            // FIXME: HACK: why are there even files here twice, it seems to add libraries from both the version.json and the install_profile.json
+            if (result.indexOf(file.getAbsolutePath()) == -1) {
+                if (result.length() > 1) {
+                    result.append(separator);
+                }
+                result.append(file.getAbsolutePath());
             }
-            result.append(file.getAbsolutePath());
         }
 
         // Add the modpack.jar to the classpath, if it exists and the modpack isn't running Forge 1.13+
-        if (!(MojangUtils.hasModernForge(version))) {
+        if (!MojangUtils.hasModernForge(version) && !MojangUtils.hasNeoForge(version)) {
             File modpack = new File(pack.getBinDir(), "modpack.jar");
             if (modpack.exists()) {
                 if (result.length() > 1) {
@@ -388,7 +402,7 @@ public class MinecraftLauncher {
         // Add the minecraft jar to the classpath
         File minecraft;
         // FIXME: HACK: Feed the unchanged Minecraft jar if it's Forge 1.13+
-        if (MojangUtils.hasModernForge(version)) {
+        if (MojangUtils.hasModernForge(version) || MojangUtils.hasNeoForge(version)) {
             minecraft = new File(directories.getCacheDirectory(), "minecraft_" + version.getParentVersion() + ".jar");
         } else {
             minecraft = new File(pack.getBinDir(), "minecraft.jar");

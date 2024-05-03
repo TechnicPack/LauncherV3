@@ -267,6 +267,10 @@ public class Library {
         return name.startsWith("net.minecraftforge:forge:") || name.startsWith("net.minecraftforge:minecraftforge:");
     }
 
+    public boolean isNeoForge() {
+        return name.startsWith("net.neoforged:neoforge:") || name.startsWith("net.neoforged:forge:");
+    }
+
     public boolean isLog4j() {
         return name.startsWith("org.apache.logging.log4j:");
     }
