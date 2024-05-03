@@ -24,10 +24,7 @@ import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,6 +53,22 @@ public class Library {
     private transient String gradleVersion;
     private transient String gradleClassifier;
     private transient String gradleExtension;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Library library = (Library) o;
+        ensureNameIsParsed();
+        library.ensureNameIsParsed();
+        return Objects.equals(gradleGroupId, library.gradleGroupId) && Objects.equals(gradleArtifactId, library.gradleArtifactId) && Objects.equals(gradleClassifier, library.gradleClassifier);
+    }
+
+    @Override
+    public int hashCode() {
+        ensureNameIsParsed();
+        return Objects.hash(gradleGroupId, gradleArtifactId, gradleClassifier);
+    }
 
     public Library() {}
 

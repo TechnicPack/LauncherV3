@@ -27,6 +27,7 @@ import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class VersionChain implements MojangVersion {
 
@@ -124,7 +125,7 @@ public class VersionChain implements MojangVersion {
                 allLibraries.addAll(0, version.getLibrariesForOS());
         }
 
-        return allLibraries;
+        return allLibraries.stream().distinct().collect(Collectors.toList());
     }
 
     @Override

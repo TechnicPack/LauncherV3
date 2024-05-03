@@ -379,13 +379,10 @@ public class MinecraftLauncher {
                 throw new RuntimeException("Library " + library.getName() + " not found.");
             }
 
-            // FIXME: HACK: why are there even files here twice, it seems to add libraries from both the version.json and the install_profile.json
-            if (result.indexOf(file.getAbsolutePath()) == -1) {
-                if (result.length() > 1) {
-                    result.append(separator);
-                }
-                result.append(file.getAbsolutePath());
+            if (result.length() > 1) {
+                result.append(separator);
             }
+            result.append(file.getAbsolutePath());
         }
 
         // Add the modpack.jar to the classpath, if it exists and the modpack isn't running Forge 1.13+
