@@ -28,9 +28,22 @@ import net.technicpack.utilslib.OperatingSystem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class Rule {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Rule rule = (Rule) o;
+        return negated == rule.negated && Objects.equals(conditions, rule.conditions);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(negated, conditions);
+    }
 
     public static boolean isAllowable(List<Rule> rules, ILaunchOptions opts) {
         for (int i = rules.size() - 1; i >= 0; i--) {
@@ -143,6 +156,19 @@ public class Rule {
         }
 
         @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            OsCondition that = (OsCondition) o;
+            return Objects.equals(name, that.name) && Objects.equals(version, that.version) && Objects.equals(arch, that.arch);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, version, arch);
+        }
+
+        @Override
         public boolean test(ILaunchOptions opts) {
             String os = OperatingSystem.getOperatingSystem().getName();
             String osVersion = System.getProperty("os.version");
@@ -172,6 +198,19 @@ public class Rule {
         }
 
         @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            CustomResolutionCondition that = (CustomResolutionCondition) o;
+            return shouldHaveCustomResolution == that.shouldHaveCustomResolution;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(shouldHaveCustomResolution);
+        }
+
+        @Override
         public boolean test(ILaunchOptions opts) {
             return opts != null
                     && (opts.getLaunchWindowType() == WindowType.CUSTOM) == shouldHaveCustomResolution;
@@ -190,6 +229,19 @@ public class Rule {
 
         DemoUserCondition(boolean shouldBeDemoUser) {
             this.shouldBeDemoUser = shouldBeDemoUser;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            DemoUserCondition that = (DemoUserCondition) o;
+            return shouldBeDemoUser == that.shouldBeDemoUser;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(shouldBeDemoUser);
         }
 
         @Override
@@ -213,6 +265,19 @@ public class Rule {
         }
 
         @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            QuickPlaysSupportCondition that = (QuickPlaysSupportCondition) o;
+            return shouldHaveQuickPlaysSupport == that.shouldHaveQuickPlaysSupport;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(shouldHaveQuickPlaysSupport);
+        }
+
+        @Override
         public boolean test(ILaunchOptions opts) {
             return !shouldHaveQuickPlaysSupport;
         }
@@ -230,6 +295,19 @@ public class Rule {
 
         QuickPlaySingleplayerCondition(boolean shouldQuickPlayBeSingleplayer) {
             this.shouldQuickPlayBeSingleplayer = shouldQuickPlayBeSingleplayer;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            QuickPlaySingleplayerCondition that = (QuickPlaySingleplayerCondition) o;
+            return shouldQuickPlayBeSingleplayer == that.shouldQuickPlayBeSingleplayer;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(shouldQuickPlayBeSingleplayer);
         }
 
         @Override
@@ -253,6 +331,19 @@ public class Rule {
         }
 
         @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            QuickPlayMultiplayerCondition that = (QuickPlayMultiplayerCondition) o;
+            return shouldQuickPlayBeMultiplayer == that.shouldQuickPlayBeMultiplayer;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(shouldQuickPlayBeMultiplayer);
+        }
+
+        @Override
         public boolean test(ILaunchOptions opts) {
             return !shouldQuickPlayBeMultiplayer;
         }
@@ -270,6 +361,19 @@ public class Rule {
 
         QuickPlayRealmsCondition(boolean shouldQuickPlayBeRealms) {
             this.shouldQuickPlayBeRealms = shouldQuickPlayBeRealms;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            QuickPlayRealmsCondition that = (QuickPlayRealmsCondition) o;
+            return shouldQuickPlayBeRealms == that.shouldQuickPlayBeRealms;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(shouldQuickPlayBeRealms);
         }
 
         @Override

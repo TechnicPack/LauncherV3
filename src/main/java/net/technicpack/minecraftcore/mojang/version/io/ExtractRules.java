@@ -22,6 +22,7 @@ package net.technicpack.minecraftcore.mojang.version.io;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @SuppressWarnings({"unused"})
 public class ExtractRules {
@@ -29,6 +30,19 @@ public class ExtractRules {
 
 	public ExtractRules() {
 
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		ExtractRules that = (ExtractRules) o;
+		return Objects.equals(exclude, that.exclude);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(exclude);
 	}
 
 	public ExtractRules(String[] exclude) {

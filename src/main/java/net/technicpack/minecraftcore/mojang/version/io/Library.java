@@ -54,20 +54,23 @@ public class Library {
     private transient String gradleClassifier;
     private transient String gradleExtension;
 
+    public String getNormalizedName() {
+        return name.contains("@") ? name : name + "@jar";
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Library library = (Library) o;
-        ensureNameIsParsed();
-        library.ensureNameIsParsed();
-        return Objects.equals(gradleGroupId, library.gradleGroupId) && Objects.equals(gradleArtifactId, library.gradleArtifactId) && Objects.equals(gradleClassifier, library.gradleClassifier);
+        String normalizedNameSelf = getNormalizedName();
+        String normalizedNameOther = library.getNormalizedName();
+        return Objects.equals(normalizedNameSelf, normalizedNameOther) && Objects.equals(rules, library.rules) && Objects.equals(downloads, library.downloads) && Objects.equals(natives, library.natives) && Objects.equals(extract, library.extract) && Objects.equals(url, library.url);
     }
 
     @Override
     public int hashCode() {
-        ensureNameIsParsed();
-        return Objects.hash(gradleGroupId, gradleArtifactId, gradleClassifier);
+        return Objects.hash(getNormalizedName(), rules, downloads, natives, extract, url);
     }
 
     public Library() {}

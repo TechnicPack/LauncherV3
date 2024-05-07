@@ -1,5 +1,7 @@
 package net.technicpack.minecraftcore.mojang.version.io;
 
+import java.util.Objects;
+
 @SuppressWarnings({"unused"})
 public class Artifact {
     private String url;
@@ -12,6 +14,19 @@ public class Artifact {
         this.url = url;
         this.sha1 = sha1;
         this.size = size;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Artifact artifact = (Artifact) o;
+        return size == artifact.size && Objects.equals(url, artifact.url) && Objects.equals(sha1, artifact.sha1);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(url, sha1, size);
     }
 
     public String getUrl() {
