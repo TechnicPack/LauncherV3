@@ -101,7 +101,7 @@ public class CompleteVersion implements MojangVersion {
 
     @Override
     public List<Library> getLibrariesForOS() {
-        return libraries.stream().filter(Library::isForCurrentOS).collect(Collectors.toList());
+        return libraries.stream().filter(Library::isForCurrentOS).distinct().collect(Collectors.toList());
     }
 
     @Override
