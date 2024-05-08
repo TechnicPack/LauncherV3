@@ -47,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.logging.Level;
 
 public class MinecraftLauncher {
 
@@ -144,6 +145,8 @@ public class MinecraftLauncher {
         String nativesDir = new File(pack.getBinDir(), "natives").getAbsolutePath();
         String cpString = buildClassPath(pack, version);
 
+        Utils.getLogger().log(Level.FINE, "Classpath:\n\n" + cpString.replace(System.getProperty("path.separator"), "\n"));
+
         // build arg parameter map
         Map<String, String> params = new HashMap<String, String>();
         IUserType user = userModel.getCurrentUser();
@@ -207,7 +210,7 @@ public class MinecraftLauncher {
 
         // Ignore JVM args for Forge 1.13+, ForgeWrapper handles those
         // FIXME: HACK: This likely breaks some things as it will also skip vanilla JVM args
-        if (!MojangUtils.hasModernForge(version) && !MojangUtils.hasNeoForge(version)) {
+        if (!MojangUtils.hasModernMinecraftForge(version) && !MojangUtils.hasNeoForge(version)) {
             ArgumentList jvmArgs = version.getJavaArguments();
 
             if (jvmArgs != null) {
@@ -327,50 +330,11 @@ public class MinecraftLauncher {
 
     private String buildClassPath(ModpackModel pack, MojangVersion version) {
         StringBuilder result = new StringBuilder();
-        String separator = System.getProperty("path.separator");
+        final String separator = File.pathSeparator;
 
-        // if MC < 1.6, we inject LegacyWrapper
-        // HACK
-        boolean isLegacy = MojangUtils.isLegacyVersion(version.getParentVersion());
-
-        final boolean hasModernForge = MojangUtils.hasModernForge(version);
-        final boolean hasNeoForge = MojangUtils.hasNeoForge(version);
-        final String[] versionIdParts = version.getId().split("-");
-        final boolean is1_12_2 = versionIdParts[0].equals("1.12.2");
-
-        // Add all the libraries to the classpath.
+        // Add all the libraries to the classpath
         for (Library library : version.getLibrariesForOS()) {
             if (library.getNatives() != null) {
-                continue;
-            }
-
-            // If minecraftforge is described in the libraries, skip it
-            // HACK - Please let us get rid of this when we move to actually hosting forge,
-            // or at least only do it if the users are sticking with modpack.jar
-            if (library.isForge()) {
-                if (hasModernForge) {
-                    // TODO: Use removeLibrary in HandleVersionFileTask to remove this mess
-                    if (!is1_12_2 && !library.getName().endsWith(":launcher")) {
-                        continue;
-                    } else if (is1_12_2 && !library.getName().endsWith(":universal")) {
-                        continue;
-                    }
-                } else {
-                    continue;
-                }
-            }
-
-            if (library.isNeoForge()) {
-                if (hasNeoForge) {
-                    if (!library.getName().endsWith(":launcher")) {
-                        continue;
-                    }
-                } else {
-                    continue;
-                }
-            }
-
-            if (isLegacy && library.getName().startsWith("net.minecraft:launchwrapper")) {
                 continue;
             }
 
@@ -385,8 +349,8 @@ public class MinecraftLauncher {
             result.append(file.getAbsolutePath());
         }
 
-        // Add the modpack.jar to the classpath, if it exists and the modpack isn't running Forge 1.13+
-        if (!MojangUtils.hasModernForge(version) && !MojangUtils.hasNeoForge(version)) {
+        // Add the modpack.jar to the classpath, if it exists and the modpack isn't running modern Minecraft Forge or NeoForge
+        if (!MojangUtils.hasModernMinecraftForge(version) && !MojangUtils.hasNeoForge(version)) {
             File modpack = new File(pack.getBinDir(), "modpack.jar");
             if (modpack.exists()) {
                 if (result.length() > 1) {
@@ -398,8 +362,8 @@ public class MinecraftLauncher {
 
         // Add the minecraft jar to the classpath
         File minecraft;
-        // FIXME: HACK: Feed the unchanged Minecraft jar if it's Forge 1.13+
-        if (MojangUtils.hasModernForge(version) || MojangUtils.hasNeoForge(version)) {
+        // FIXME: HACK: Feed the unchanged Minecraft jar if it's running modern Minecraft Forge or NeoForge
+        if (MojangUtils.hasModernMinecraftForge(version) || MojangUtils.hasNeoForge(version)) {
             minecraft = new File(directories.getCacheDirectory(), "minecraft_" + version.getParentVersion() + ".jar");
         } else {
             minecraft = new File(pack.getBinDir(), "minecraft.jar");

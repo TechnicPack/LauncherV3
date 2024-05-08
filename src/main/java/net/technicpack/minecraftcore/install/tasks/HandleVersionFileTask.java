@@ -105,50 +105,77 @@ public class HandleVersionFileTask implements IInstallTask {
         // So, for Forge 1.13+ we need to use ForgeWrapper to install Forge (it performs deobfuscation at install time).
         // For Forge 1.12.2 it launches directly, as long as we inject the universal jar (it won't launch at all if
         // you try running it through ForgeWrapper).
-        final boolean hasModernForge = MojangUtils.hasModernForge(version);
+        final boolean hasModernMinecraftForge = MojangUtils.hasModernMinecraftForge(version);
 
-        if (hasModernForge) {
+        if (hasModernMinecraftForge) {
             File profileJson = new File(pack.getBinDir(), "install_profile.json");
             ZipFileRetriever zipVersionRetriever = new ZipFileRetriever(new File(pack.getBinDir(), "modpack.jar"));
             MojangVersion installerVersion = new FileVersionBuilder(profileJson, zipVersionRetriever, null).buildVersionFromKey("install_profile");
 
+            // These are for Minecraft Forge. They're invalid (but safe) with NeoForge
             final String[] versionIdParts = version.getId().split("-", 3);
             final boolean is1_12_2 = versionIdParts[0].equals("1.12.2");
 
-            for (Library library : installerVersion.getLibrariesForOS()) {
-                if (library.isForge()) {
-                    // For Forge 1.12.2 > 2847, we have to inject the universal jar as a dependency
-                    if (is1_12_2) {
+            if (is1_12_2) {
+                for (Library library : version.getLibrariesForOS()) {
+                    // For Minecraft Forge 1.12.2 > 2847, we correct the classifier for the library to "universal".
+                    // The Forge installer just grabs this jar from within itself ("maven" folder), but we grab it
+                    // directly from the Minecraft Forge Maven repo.
+                    // The Minecraft Forge universal jar is already specified in the version.json but doesn't have the
+                    // "universal" classifier, so we change the name to add the "universal" classifier (for download
+                    // purposes), generate and set the artifact url, then change the name back to not have a
+                    // classifier, effectively downloading it to the correct path and having it there ready
+                    // for launch without any modifications necessary to the classpath generation process
+                    // or version.json file.
+                    // This library is being modified in-place
+                    if (library.getGradleGroup().equals("net.minecraftforge")
+                        && library.getGradleArtifact().equals("forge")
+                        && (library.getGradleClassifier() == null || library.getGradleClassifier().isEmpty())) {
+                        // Correct the classifier to "universal"
+                        String oldName = library.getName();
                         library.setName(library.getName() + ":universal");
+
+                        // Set the download URL for the library
                         Downloads downloads = library.getDownloads();
                         Artifact artifact = downloads.getArtifact();
-                        artifact.setUrl("https://files.minecraftforge.net/maven/" + library.getArtifactPath());
+                        artifact.setUrl("https://maven.minecraftforge.net/" + library.getArtifactPath());
 
-                        // Add the mutated library
-                        version.addLibrary(library);
+                        // Revert the classifier change
+                        library.setName(oldName);
 
-                        checkLibraryQueue.addTask(new InstallVersionLibTask(library, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
-                        continue;
+                        break;
                     }
                 }
+            }
 
-                // For Forge 1.13+, the URL for the universal jar isn't set, so we set one here
+            // Process the install_profile.json (installer) libraries
+            for (Library library : installerVersion.getLibrariesForOS()) {
+                if (library.isMinecraftForge() && is1_12_2) {
+                    // Handling of the modern 1.12.2 Minecraft Forge universal jar is done above, in the version.json, rather than the install_profile.json
+                    continue;
+                }
+
+                // For Minecraft Forge 1.13+ up to 1.17, the URL for the universal jar isn't set, so we set one here
+                // For Minecraft Forge 1.17+ this has no effect, since the URL is already set
+                // For NeoForge this has no effect, since it uses the "net.neoforged" group
                 if (library.getGradleGroup().equals("net.minecraftforge")
                         && library.getGradleArtifact().equals("forge")
+                        && library.getGradleClassifier() != null
                         && library.getGradleClassifier().equals("universal")
                         && !is1_12_2) {
                     Downloads downloads = library.getDownloads();
                     Artifact artifact = downloads.getArtifact();
-                    artifact.setUrl("https://files.minecraftforge.net/maven/" + library.getArtifactPath());
 
-                    checkLibraryQueue.addTask(new InstallVersionLibTask(library, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
-                    continue;
+                    if (artifact.getUrl() == null || artifact.getUrl().isEmpty()) {
+                        // Modify the URL in-place, the altered library will get added by the rest of the logic
+                        artifact.setUrl("https://maven.minecraftforge.net/" + library.getArtifactPath());
+                    }
                 }
 
                 checkLibraryQueue.addTask(new InstallVersionLibTask(library, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
             }
 
-            // For Forge 1.13+, we inject our ForgeWrapper as a dependency and launch it through that
+            // For Minecraft Forge 1.13+ and NeoForge, we inject our ForgeWrapper as a dependency and launch it through that
             if (!is1_12_2) {
                 Library forgeWrapper = new Library(
                         "io.github.zekerzhayard:ForgeWrapper:1.6.0-technic",
@@ -157,20 +184,42 @@ public class HandleVersionFileTask implements IInstallTask {
                         34944
                 );
 
-                version.addLibrary(forgeWrapper);
+                version.prependLibrary(forgeWrapper);
 
                 version.setMainClass("io.github.zekerzhayard.forgewrapper.installer.Main");
 
                 for (Library library : version.getLibrariesForOS()) {
-                    // This is for Forge 1.13+, up to 1.17 (not inclusive)
-                    if (library.getName().startsWith("net.minecraftforge:forge:")) {
-                        // Correct the classifier and URL
+                    // This is for Minecraft Forge 1.13+, up to 1.17 (not inclusive)
+                    if (library.getGradleGroup().equals("net.minecraftforge")
+                            && library.getGradleArtifact().equals("forge")
+                            && (library.getGradleClassifier() == null || library.getGradleClassifier().isEmpty())
+                    ) {
+                        // Correct the classifier to "launcher" for the download
+                        String oldName = library.getName();
                         library.setName(library.getName() + ":launcher");
-                        library.setUrl("https://files.minecraftforge.net/maven/");
 
-                        checkLibraryQueue.addTask(new InstallVersionLibTask(library, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
+                        // Set the download URL for the library
+                        Downloads downloads = library.getDownloads();
+                        Artifact artifact = downloads.getArtifact();
+
+                        if (artifact.getUrl() == null || artifact.getUrl().isEmpty()) {
+                            // Modify the URL in-place, the altered library will get added by the rest of the logic
+                            artifact.setUrl("https://maven.minecraftforge.net/" + library.getArtifactPath());
+                        }
+
+                        // Revert the classifier change
+                        library.setName(oldName);
 
                         break;
+                    }
+
+                    // Minecraft Forge 49.0.4+ sets a "client" library (I presume it's for the finalized MC jar),
+                    // so we remove it here since we're using ForgeWrapper
+                    if (library.getGradleGroup().equals("net.minecraftforge")
+                            && library.getGradleArtifact().equals("forge")
+                            && library.getGradleClassifier() != null
+                            && library.getGradleClassifier().equals("client")) {
+                        version.removeLibrary(library.getName());
                     }
                 }
             }
@@ -180,22 +229,6 @@ public class HandleVersionFileTask implements IInstallTask {
             MojangVersion installerVersion = new FileVersionBuilder(profileJson, zipVersionRetriever, null).buildVersionFromKey("install_profile");
 
             for (Library library : installerVersion.getLibrariesForOS()) {
-                if (library.isForge()) {
-
-                }
-
-                // For Forge 1.13+, the URL for the universal jar isn't set, so we set one here
-                if (library.getGradleGroup().equals("net.neoforged")
-                        && library.getGradleArtifact().equals("neoforge")
-                        && library.getGradleClassifier().equals("universal")) {
-                    Downloads downloads = library.getDownloads();
-                    Artifact artifact = downloads.getArtifact();
-                    artifact.setUrl("https://maven.neoforged.net/releases/" + library.getArtifactPath());
-
-                    checkLibraryQueue.addTask(new InstallVersionLibTask(library, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
-                    continue;
-                }
-
                 checkLibraryQueue.addTask(new InstallVersionLibTask(library, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
             }
 
@@ -206,39 +239,26 @@ public class HandleVersionFileTask implements IInstallTask {
                     34944
             );
 
-            version.addLibrary(forgeWrapper);
+            version.prependLibrary(forgeWrapper);
 
             version.setMainClass("io.github.zekerzhayard.forgewrapper.installer.Main");
-
-            for (Library library : version.getLibrariesForOS()) {
-                // This is for Forge 1.13+, up to 1.17 (not inclusive)
-                if (library.getName().startsWith("net.neoforged:neoforge:")) {
-                    // Correct the classifier and URL
-                    library.setName(library.getName() + ":launcher");
-                    library.setUrl("https://maven.neoforged.net/releases/");
-
-                    checkLibraryQueue.addTask(new InstallVersionLibTask(library, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
-
-                    break;
-                }
-            }
-
         }
 
         for (Library library : version.getLibrariesForOS()) {
-            // If minecraftforge is described in the libraries, skip it
-            // HACK - Please let us get rid of this when we move to actually hosting forge,
-            // or at least only do it if the users are sticking with modpack.jar
-            if (library.isForge()) {
-                // TODO: use removeLibrary
+            // Skip the Minecraft Forge jar if not using modern Minecraft Forge,
+            // since it will be loaded via modpack.jar later on
+            if (library.isMinecraftForge() && !hasModernMinecraftForge) {
+                version.removeLibrary(library.getName());
                 continue;
             }
 
-            if (isLegacy && library.getName().startsWith("net.minecraft:launchwrapper")) {
+            // Remove the vanilla launchwrapper, since we use our own with some modifications
+            if (isLegacy && library.getName().startsWith("net.minecraft:launchwrapper:")) {
+                version.removeLibrary(library.getName());
                 continue;
             }
 
-            // Log4j vulnerability patch - CVE-2021-44228
+            // Log4j vulnerability patch - CVE-2021-44228 <https://nvd.nist.gov/vuln/detail/CVE-2021-44228>
             // A hotfixed version of 2.0-beta9 for MC 1.7 - 1.12
             // And version 2.16.0 for >= 1.12
             // If log4j is at least 2.16.0, we have nothing to do here, since it isn't vulnerable

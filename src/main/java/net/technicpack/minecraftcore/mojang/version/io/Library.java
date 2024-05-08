@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 public class Library {
     private static final String[] FALLBACK = {
         "https://libraries.minecraft.net/",
-        "https://files.minecraftforge.net/maven/",
+        "https://maven.minecraftforge.net/",
         "https://mirror.technicpack.net/Technic/lib/",
     };
     private static final Pattern GRADLE_PATTERN = Pattern.compile("^([^:@]+):([^:@]+):([^:@]+)(?::([^:@]+))?(?:@([^:@]+))?$");
@@ -128,7 +128,7 @@ public class Library {
         Matcher m = GRADLE_PATTERN.matcher(name);
 
         if (!m.matches()) {
-            throw new IllegalStateException("Cannot parse invalid gradle specifier");
+            throw new IllegalStateException("Cannot parse invalid gradle specifier: " + name);
         }
 
         gradleGroupId = m.group(1);
@@ -279,7 +279,7 @@ public class Library {
         throw new DownloadException("Failed to download library " + path + ": no mirror found");
     }
 
-    public boolean isForge() {
+    public boolean isMinecraftForge() {
         return name.startsWith("net.minecraftforge:forge:") || name.startsWith("net.minecraftforge:minecraftforge:");
     }
 

@@ -231,6 +231,11 @@ public class VersionChain implements MojangVersion {
     }
 
     @Override
+    public void prependLibrary(Library library) {
+        chain.get(0).prependLibrary(library);
+    }
+
+    @Override
     public JavaVersion getJavaVersion() {
         for (MojangVersion version : chain) {
             if (version.getJavaVersion() != null)

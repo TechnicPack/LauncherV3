@@ -181,7 +181,7 @@ public class MojangUtils {
         return Integer.parseInt(versionParts[0]) == 1 && Integer.parseInt(versionParts[1]) < 6;
     }
 
-    public static boolean hasModernForge(MojangVersion version) {
+    public static boolean hasModernMinecraftForge(MojangVersion version) {
         Pattern p = Pattern.compile("^(?<mc>[0-9.]+)-forge-(?<forge>[0-9.]+)$");
         Matcher m = p.matcher(version.getId());
 
@@ -235,7 +235,7 @@ public class MojangUtils {
         if (hasNeoForge(version)) {
             return true;
         }
-        if (!hasModernForge(version)) {
+        if (!hasModernMinecraftForge(version)) {
             return false;
         }
 

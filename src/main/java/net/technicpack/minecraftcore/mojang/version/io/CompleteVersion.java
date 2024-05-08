@@ -175,6 +175,11 @@ public class CompleteVersion implements MojangVersion {
     }
 
     @Override
+    public void prependLibrary(Library library) {
+        libraries.add(0, library);
+    }
+
+    @Override
     public JavaVersion getJavaVersion() {
         return javaVersion;
     }
