@@ -280,11 +280,8 @@ public class Library {
     }
 
     public boolean isMinecraftForge() {
+        // "net.minecraftforge:minecraftforge:" is used by MC 1.6.x versions
         return name.startsWith("net.minecraftforge:forge:") || name.startsWith("net.minecraftforge:minecraftforge:");
-    }
-
-    public boolean isNeoForge() {
-        return name.startsWith("net.neoforged:neoforge:") || name.startsWith("net.neoforged:forge:");
     }
 
     public boolean isLog4j() {

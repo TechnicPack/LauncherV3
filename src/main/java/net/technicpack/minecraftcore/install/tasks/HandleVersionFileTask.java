@@ -107,7 +107,7 @@ public class HandleVersionFileTask implements IInstallTask {
         // you try running it through ForgeWrapper).
         final boolean hasModernMinecraftForge = MojangUtils.hasModernMinecraftForge(version);
 
-        if (hasModernMinecraftForge) {
+        if (hasModernMinecraftForge || hasNeoForge) {
             File profileJson = new File(pack.getBinDir(), "install_profile.json");
             ZipFileRetriever zipVersionRetriever = new ZipFileRetriever(new File(pack.getBinDir(), "modpack.jar"));
             MojangVersion installerVersion = new FileVersionBuilder(profileJson, zipVersionRetriever, null).buildVersionFromKey("install_profile");
@@ -190,6 +190,7 @@ public class HandleVersionFileTask implements IInstallTask {
 
                 for (Library library : version.getLibrariesForOS()) {
                     // This is for Minecraft Forge 1.13+, up to 1.17 (not inclusive)
+                    // For NeoForge this has no effect, since it uses the "net.neoforged" group
                     if (library.getGradleGroup().equals("net.minecraftforge")
                             && library.getGradleArtifact().equals("forge")
                             && (library.getGradleClassifier() == null || library.getGradleClassifier().isEmpty())
@@ -223,25 +224,6 @@ public class HandleVersionFileTask implements IInstallTask {
                     }
                 }
             }
-        } else if (hasNeoForge) {
-            File profileJson = new File(pack.getBinDir(), "install_profile.json");
-            ZipFileRetriever zipVersionRetriever = new ZipFileRetriever(new File(pack.getBinDir(), "modpack.jar"));
-            MojangVersion installerVersion = new FileVersionBuilder(profileJson, zipVersionRetriever, null).buildVersionFromKey("install_profile");
-
-            for (Library library : installerVersion.getLibrariesForOS()) {
-                checkLibraryQueue.addTask(new InstallVersionLibTask(library, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
-            }
-
-            Library forgeWrapper = new Library(
-                    "io.github.zekerzhayard:ForgeWrapper:1.6.0-technic",
-                    TechnicConstants.technicLibRepo + "io/github/zekerzhayard/ForgeWrapper/1.6.0-technic/ForgeWrapper-1.6.0-technic.jar",
-                    "8764cbf4c7ded7ac0ad9136a0070bbfeee8813cf",
-                    34944
-            );
-
-            version.prependLibrary(forgeWrapper);
-
-            version.setMainClass("io.github.zekerzhayard.forgewrapper.installer.Main");
         }
 
         for (Library library : version.getLibrariesForOS()) {
