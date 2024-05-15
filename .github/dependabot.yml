@@ -11,3 +11,12 @@ updates:
       - dependency-name: 'org.apache.maven.plugins:maven-shade-plugin'
         versions:
           - '3.3.0' # Broken, see https://issues.apache.org/jira/browse/MSHADE-417
+    groups:
+      google-oauth-client:
+        applies-to: version-updates
+        patterns:
+        - "com.google.oauth-client:*"
+      google-http-client:
+        applies-to: version-updates
+        patterns:
+        - "com.google.http-client:*"
