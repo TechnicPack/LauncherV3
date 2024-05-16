@@ -13,8 +13,8 @@ updates:
           - '3.3.0' # Broken, see https://issues.apache.org/jira/browse/MSHADE-417
       - dependency-name: 'org.xhtmlrenderer:flying-saucer-core'
         versions:
-        - '>9.5.0' # requires Java 11
-        #- '>9.6.0' # requires Java 17
+        - '>=9.5.0' # requires Java 11
+        #- '>=9.6.0' # requires Java 17
     groups:
       google-oauth-client:
         applies-to: version-updates
