@@ -1,6 +1,7 @@
 package net.technicpack.launcher.ui.components;
 
 import net.technicpack.launcher.ui.LauncherFrame;
+import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.launch.java.IJavaVersion;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.modpacks.RunData;
@@ -8,6 +9,7 @@ import net.technicpack.ui.controls.LauncherDialog;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.borders.RoundBorder;
 import net.technicpack.ui.lang.ResourceLoader;
+import net.technicpack.utilslib.DesktopUtils;
 import net.technicpack.utilslib.Memory;
 
 import javax.swing.*;
@@ -15,6 +17,8 @@ import javax.swing.text.View;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class FixRunDataDialog extends LauncherDialog {
 
@@ -259,6 +263,22 @@ public class FixRunDataDialog extends LauncherDialog {
                             resourceLoader.getString("fixRunData.needBetterJava") +
                             "</body>" +
                             "</html>", resourceLoader.getIcon("danger_icon.png"), SwingConstants.LEFT);
+            label.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    DesktopUtils.browseUrl(TechnicConstants.javaDownloadUrl);
+                }
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                }
+            });
             label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
             centerPanel.add(label, new GridBagConstraints(0, gridBagIndex++, 1, 1, 1.0f, 0, GridBagConstraints.SOUTH, GridBagConstraints.BOTH, new Insets(0, 8, 0, 0), 0, 0));
             label.setPreferredSize(getPreferredSize(label.getText(), DIALOG_WIDTH - 5));
@@ -272,6 +292,22 @@ public class FixRunDataDialog extends LauncherDialog {
                             resourceLoader.getString("fixRunData.need64BitJava") +
                             "</body>" +
                             "</html>", resourceLoader.getIcon("danger_icon.png"), SwingConstants.LEFT);
+            label.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    DesktopUtils.browseUrl(TechnicConstants.javaDownloadUrl);
+                }
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                }
+            });
             label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
             centerPanel.add(label, new GridBagConstraints(0, gridBagIndex++, 1, 1, 1.0f, 0, GridBagConstraints.SOUTH, GridBagConstraints.BOTH, new Insets(0, 8, 0, 0), 0, 0));
             label.setPreferredSize(getPreferredSize(label.getText(), DIALOG_WIDTH - 5));
