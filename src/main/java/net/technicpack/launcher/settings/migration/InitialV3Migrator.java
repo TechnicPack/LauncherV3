@@ -50,7 +50,7 @@ public class InitialV3Migrator implements IMigrator {
     }
 
     @Override
-    public void migrate(TechnicSettings settings, IInstalledPackRepository packStore, LauncherDirectories directories, IUserStore<MojangUser> users) {
+    public void migrate(TechnicSettings settings, IInstalledPackRepository packStore, LauncherDirectories directories, IUserStore users) {
         //A fresh install/upgrade from v2 shouldn't show the latest news as being new
         int maxNewsId = 0;
 

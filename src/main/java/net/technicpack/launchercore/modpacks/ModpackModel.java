@@ -288,11 +288,11 @@ public class ModpackModel {
         return packInfo.getRuns();
     }
 
-    public Integer getDownloads() {
+    public Integer getInstalls() {
         if (packInfo == null)
             return null;
 
-        return packInfo.getDownloads();
+        return packInfo.getInstalls();
     }
 
     public RunData getRunData() {
@@ -418,18 +418,25 @@ public class ModpackModel {
         installedDirectory = targetDirectory;
         String path = installedDirectory.getAbsolutePath();
 
-        if (path.equals(directories.getModpacksDirectory().getAbsolutePath())) {
-            installedPack.setDirectory(InstalledPack.MODPACKS_DIR);
-        } else if (path.equals(directories.getLauncherDirectory().getAbsolutePath())) {
-            installedPack.setDirectory(InstalledPack.LAUNCHER_DIR);
-        } else if (path.startsWith(directories.getModpacksDirectory().getAbsolutePath())) {
-            installedPack.setDirectory(InstalledPack.MODPACKS_DIR + path.substring(directories.getModpacksDirectory().getAbsolutePath().length() + 1));
-        } else if (path.startsWith(directories.getLauncherDirectory().getAbsolutePath())) {
-            installedPack.setDirectory(InstalledPack.LAUNCHER_DIR + path.substring(directories.getLauncherDirectory().getAbsolutePath().length() + 1));
-        } else
-            installedPack.setDirectory(path);
+        String newInstalledPackDir;
 
-        save();
+        if (path.equals(directories.getModpacksDirectory().getAbsolutePath())) {
+            newInstalledPackDir = InstalledPack.MODPACKS_DIR;
+        } else if (path.equals(directories.getLauncherDirectory().getAbsolutePath())) {
+            newInstalledPackDir = InstalledPack.LAUNCHER_DIR;
+        } else if (path.startsWith(directories.getModpacksDirectory().getAbsolutePath())) {
+            newInstalledPackDir = InstalledPack.MODPACKS_DIR + path.substring(directories.getModpacksDirectory().getAbsolutePath().length() + 1);
+        } else if (path.startsWith(directories.getLauncherDirectory().getAbsolutePath())) {
+            newInstalledPackDir = InstalledPack.LAUNCHER_DIR + path.substring(directories.getLauncherDirectory().getAbsolutePath().length() + 1);
+        } else {
+            newInstalledPackDir = path;
+        }
+
+        // Only need to save if we've actually changed the raw directory
+        if (!newInstalledPackDir.equals(installedPack.getDirectory())) {
+            installedPack.setDirectory(newInstalledPackDir);
+            save();
+        }
     }
 
     public void save() {
@@ -438,7 +445,6 @@ public class ModpackModel {
         }
 
         installedPackRepository.put(installedPack);
-        installedPackRepository.save();
     }
 
     public boolean isSelected() {
@@ -451,8 +457,19 @@ public class ModpackModel {
     }
 
     public void select() {
-        installedPackRepository.setSelectedSlug(getName());
-        installedPackRepository.save();
+        String storedSelection = installedPackRepository.getSelectedSlug();
+        String name = getName();
+
+        if (name == null) {
+            return;
+        }
+
+        // Only save if either of the following:
+        // - The stored selection is null (e.g. new launcher installs)
+        // - The current modpack slug is different from the stored selection
+        if (storedSelection == null || !storedSelection.equals(name)) {
+            installedPackRepository.setSelectedSlug(name);
+        }
     }
 
     public Collection<String> getTags() {

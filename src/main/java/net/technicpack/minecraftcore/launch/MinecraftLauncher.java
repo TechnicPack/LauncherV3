@@ -20,6 +20,7 @@
 package net.technicpack.minecraftcore.launch;
 
 import net.technicpack.autoupdate.IBuildNumber;
+import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.launch.GameProcess;
@@ -28,23 +29,25 @@ import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.RunData;
 import net.technicpack.minecraftcore.MojangUtils;
-import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
-import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
+import net.technicpack.minecraftcore.mojang.version.io.JavaVersion;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.utilslib.JavaUtils;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.logging.Level;
 
 public class MinecraftLauncher {
 
@@ -55,7 +58,7 @@ public class MinecraftLauncher {
 
     private final LauncherDirectories directories;
     private final IPlatformApi platformApi;
-    private final UserModel<MojangUser> userModel;
+    private final UserModel userModel;
     private final JavaVersionRepository javaVersions;
     private final IBuildNumber buildNumber;
 
@@ -71,10 +74,6 @@ public class MinecraftLauncher {
         return javaVersions;
     }
 
-    public GameProcess launch(ModpackModel pack, int memory, LaunchOptions options, CompleteVersion version) throws IOException {
-        return launch(pack, memory, options, null, version);
-    }
-
     public GameProcess launch(ModpackModel pack, long memory, LaunchOptions options, ProcessExitListener exitListener, MojangVersion version) throws IOException {
         List<String> commands = buildCommands(pack, memory, version, options);
         StringBuilder full = new StringBuilder();
@@ -85,12 +84,27 @@ public class MinecraftLauncher {
             full.append(part);
             first = false;
         }
-        Utils.getLogger().info("Running " + full.toString().replace(userModel.getCurrentUser().getAccessToken(), "redacted"));
+
+        // This will never be null
+        final String userAccessToken = userModel.getCurrentUser().getAccessToken();
+
+        // Censor the user access token from the logs
+        // A value of "0" means offline mode, and shouldn't be censored
+        String censoredCommand;
+
+        if (!userAccessToken.equals("0")) {
+            censoredCommand = full.toString().replace(userAccessToken, "USER_ACCESS_TOKEN");
+        } else {
+            censoredCommand = full.toString();
+        }
+
+        Utils.getLogger().info("Running " + censoredCommand);
+
         ProcessBuilder processBuilder = new ProcessBuilder(commands).directory(pack.getInstalledDirectory()).redirectErrorStream(true);
         Map<String, String> envVars = processBuilder.environment();
         for (String badVar : BAD_ENV_VARS) envVars.remove(badVar);
         Process process = processBuilder.start();
-        GameProcess mcProcess = new GameProcess(commands, process);
+        GameProcess mcProcess = new GameProcess(commands, process, userAccessToken);
         if (exitListener != null) mcProcess.setExitListener(exitListener);
 
         platformApi.incrementPackRuns(pack.getName());
@@ -103,26 +117,50 @@ public class MinecraftLauncher {
 
     private List<String> buildCommands(ModpackModel pack, long memory, MojangVersion version, LaunchOptions options) {
         LaunchCommandCollector commands = new LaunchCommandCollector();
-        commands.addRaw(javaVersions.getSelectedPath());
+
+        // Wrapper command (optirun, etc)
+        String wrapperCommand = options.getOptions().getWrapperCommand();
+        if (StringUtils.isNotEmpty(wrapperCommand)) {
+            commands.addRaw(wrapperCommand);
+        }
+
+        JavaVersion javaVersion = version.getJavaVersion();
+
+        if (javaVersion != null && options.getOptions().shouldUseMojangJava()) {
+            File runtimeRoot = new File(directories.getRuntimesDirectory(), javaVersion.getComponent());
+            Path javaExecutable;
+            if (OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS) {
+                javaExecutable = runtimeRoot.toPath().resolve("bin/javaw.exe");
+            } else if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX) {
+                javaExecutable = runtimeRoot.toPath().resolve("jre.bundle/Contents/Home/bin/java");
+            } else {
+                javaExecutable = runtimeRoot.toPath().resolve("bin/java");
+            }
+            commands.addRaw(javaExecutable.toString());
+        } else {
+            commands.addRaw(javaVersions.getSelectedPath());
+        }
 
         OperatingSystem operatingSystem = OperatingSystem.getOperatingSystem();
         String nativesDir = new File(pack.getBinDir(), "natives").getAbsolutePath();
         String cpString = buildClassPath(pack, version);
 
+        Utils.getLogger().log(Level.FINE, "Classpath:\n\n" + cpString.replace(System.getProperty("path.separator"), "\n"));
+
         // build arg parameter map
         Map<String, String> params = new HashMap<String, String>();
-        MojangUser mojangUser = userModel.getCurrentUser();
+        IUserType user = userModel.getCurrentUser();
         File gameDirectory = pack.getInstalledDirectory();
         ILaunchOptions launchOpts = options.getOptions();
 
-        params.put("auth_username", mojangUser.getUsername());
-        params.put("auth_session", mojangUser.getSessionId());
-        params.put("auth_access_token", mojangUser.getAccessToken());
+        params.put("auth_username", user.getUsername());
+        params.put("auth_session", user.getSessionId());
+        params.put("auth_access_token", user.getAccessToken());
 
-        params.put("auth_player_name", mojangUser.getDisplayName());
-        params.put("auth_uuid", mojangUser.getProfile().getId());
+        params.put("auth_player_name", user.getDisplayName());
+        params.put("auth_uuid", user.getId());
 
-        params.put("profile_name", mojangUser.getDisplayName());
+        params.put("profile_name", user.getDisplayName());
         params.put("version_name", version.getId());
         params.put("version_type", version.getType().getName());
 
@@ -152,50 +190,51 @@ public class MinecraftLauncher {
         params.put("game_assets", targetAssets);
         params.put("assets_root", targetAssets);
         params.put("assets_index_name", assetsKey);
-        params.put("user_type", mojangUser.getProfile().isLegacy() ? "legacy" : "mojang");
-        params.put("user_properties", mojangUser.getUserPropertiesAsJson());
+        params.put("user_type", user.getMCUserType());
+        params.put("user_properties", user.getUserProperties());
 
         params.put("launcher_name", "technic");
         params.put("launcher_version", "4." + buildNumber.getBuildNumber());
 
-        // build jvm args
-        String launchJavaVersion = javaVersions.getSelectedVersion().getVersionNumber();
-        ArgumentList jvmArgs = version.getJavaArguments();
-
-        if (jvmArgs != null) {
-            for (String arg : jvmArgs.resolve(options.getOptions(), paramDereferencer)) {
-                commands.add(arg);
+        // Prepend custom JVM arguments
+        String customJvmArgs = options.getOptions().getJavaArgs();
+        if (StringUtils.isNotEmpty(customJvmArgs)) {
+            customJvmArgs = customJvmArgs.replaceAll("[\\r\\n]", " ");
+            for (String customJvmArg : customJvmArgs.split("[ ]+")) {
+                commands.addRaw(customJvmArg);
             }
         }
 
-        int permSize = 128;
-        if (memory >= (1024 * 6)) {
-            permSize = 512;
-        } else if (memory >= 2048) {
-            permSize = 256;
+        // build jvm args
+        String launchJavaVersion = javaVersions.getSelectedVersion().getVersionNumber();
+
+        // Ignore JVM args for Forge 1.13+, ForgeWrapper handles those
+        // FIXME: HACK: This likely breaks some things as it will also skip vanilla JVM args
+        if (!MojangUtils.hasModernMinecraftForge(version) && !MojangUtils.hasNeoForge(version)) {
+            ArgumentList jvmArgs = version.getJavaArguments();
+
+            if (jvmArgs != null) {
+                for (String arg : jvmArgs.resolve(options.getOptions(), paramDereferencer)) {
+                    commands.add(arg);
+                }
+            }
         }
 
-        // So in 1.8 permgen autoscales- only problem, it doesn't do it based on RAM allocation like we do, instead
-        // It has a SEPARATE heap for permgen that is by default unbounded by anything.  Result: instead of 2GB
-        // with 256m set aside for permgen, you have a whole 2GB PLUS however much permgen uses.
         commands.addRaw("-Xms" + memory + "m");
         commands.addRaw("-Xmx" + memory + "m");
 
-        if (!RunData.isJavaVersionAtLeast(launchJavaVersion, "1.8"))
-            commands.add("-XX:MaxPermSize=" + permSize + "m");
-
-        if (memory >= 4096) {
-            if (RunData.isJavaVersionAtLeast(launchJavaVersion, "1.7")) {
-                commands.add("-XX:+UseG1GC");
-                commands.add("-XX:MaxGCPauseMillis=4");
-            } else {
-                commands.add("-XX:+UseConcMarkSweepGC");
+        if (!RunData.isJavaVersionAtLeast(launchJavaVersion, "1.8")) {
+            int permSize = 128;
+            if (memory >= (1024 * 6)) {
+                permSize = 512;
+            } else if (memory >= 2048) {
+                permSize = 256;
             }
+
+            commands.add("-XX:MaxPermSize=" + permSize + "m");
         }
 
         commands.addUnique("-Djava.library.path=" + nativesDir);
-        // Tell forge 1.5 to download from our mirror instead
-        commands.addUnique("-Dfml.core.libraries.mirror=http://mirror.technicpack.net/Technic/lib/fml/%s");
 
         // This is required because we strip META-INF from the minecraft.jar
         commands.addUnique("-Dfml.ignoreInvalidMinecraftCertificates=true");
@@ -224,8 +263,13 @@ public class MinecraftLauncher {
         if (operatingSystem.equals(OperatingSystem.OSX)) {
             commands.add("-Xdock:icon=" + options.getIconPath());
             commands.add("-Xdock:name=" + pack.getDisplayName());
+
+            // Add -XstartOnFirstThread for Mac on LWJGL 3
+            boolean hasLwjgl3 = version.getLibrariesForOS().stream().anyMatch(library -> library.getName().startsWith("org.lwjgl:lwjgl:"));
+            if (hasLwjgl3) {
+                commands.addUnique("-XstartOnFirstThread");
+            }
         } else if (operatingSystem.equals(OperatingSystem.WINDOWS)) {
-            // I have no idea if this helps technic or not.
             commands.addUnique("-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump");
         }
 
@@ -256,7 +300,15 @@ public class MinecraftLauncher {
                 // This is an --argument, now we check if it has a value or not
                 if (next != null && !next.startsWith("--")) {
                     // This --argument has a value, so we add that --argument value pair
-                    commands.addUnique(current, next);
+
+                    // Special case for --tweakClass to allow multiple values of it. This allows Forge and
+                    // LiteLoader to coexist
+                    if (current.equals("--tweakClass")) {
+                        commands.add(current, next);
+                    } else {
+                        commands.addUnique(current, next);
+                    }
+
                     // Consume the next element in the iterator
                     mcArgsIterator.next();
                 } else {
@@ -278,38 +330,11 @@ public class MinecraftLauncher {
 
     private String buildClassPath(ModpackModel pack, MojangVersion version) {
         StringBuilder result = new StringBuilder();
-        String separator = System.getProperty("path.separator");
+        final String separator = File.pathSeparator;
 
-        // if MC < 1.6, we inject LegacyWrapper
-        // HACK
-        boolean isLegacy = MojangUtils.isLegacyVersion(version.getId());
-
-        final boolean hasModernForge = MojangUtils.hasModernForge(version);
-        final String[] versionIdParts = version.getId().split("-");
-        final boolean is1_12_2 = versionIdParts[0].equals("1.12.2");
-
-        // Add all the libraries to the classpath.
+        // Add all the libraries to the classpath
         for (Library library : version.getLibrariesForOS()) {
             if (library.getNatives() != null) {
-                continue;
-            }
-
-            // If minecraftforge is described in the libraries, skip it
-            // HACK - Please let us get rid of this when we move to actually hosting forge,
-            // or at least only do it if the users are sticking with modpack.jar
-            if (library.isForge()) {
-                if (hasModernForge) {
-                    if (!is1_12_2 && !library.getName().endsWith(":launcher")) {
-                        continue;
-                    } else if (is1_12_2 && !library.getName().endsWith(":universal")) {
-                        continue;
-                    }
-                } else {
-                    continue;
-                }
-            }
-
-            if (isLegacy && library.getName().startsWith("net.minecraft:launchwrapper")) {
                 continue;
             }
 
@@ -324,8 +349,8 @@ public class MinecraftLauncher {
             result.append(file.getAbsolutePath());
         }
 
-        // Add the modpack.jar to the classpath, if it exists and minecraftforge is not a library already
-        if (!(MojangUtils.hasModernForge(version))) {
+        // Add the modpack.jar to the classpath, if it exists and the modpack isn't running modern Minecraft Forge or NeoForge
+        if (!MojangUtils.hasModernMinecraftForge(version) && !MojangUtils.hasNeoForge(version)) {
             File modpack = new File(pack.getBinDir(), "modpack.jar");
             if (modpack.exists()) {
                 if (result.length() > 1) {
@@ -336,7 +361,13 @@ public class MinecraftLauncher {
         }
 
         // Add the minecraft jar to the classpath
-        File minecraft = new File(pack.getBinDir(), "minecraft.jar");
+        File minecraft;
+        // FIXME: HACK: Feed the unchanged Minecraft jar if it's running modern Minecraft Forge or NeoForge
+        if (MojangUtils.hasModernMinecraftForge(version) || MojangUtils.hasNeoForge(version)) {
+            minecraft = new File(directories.getCacheDirectory(), "minecraft_" + version.getParentVersion() + ".jar");
+        } else {
+            minecraft = new File(pack.getBinDir(), "minecraft.jar");
+        }
         if (!minecraft.exists()) {
             throw new RuntimeException("Minecraft not installed for this pack: " + pack);
         }

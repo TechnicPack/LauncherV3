@@ -20,6 +20,7 @@ package net.technicpack.launcher.io;
 
 import com.google.gson.JsonSyntaxException;
 import net.technicpack.launchercore.auth.IUserStore;
+import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.utilslib.Utils;
@@ -27,7 +28,6 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,9 +35,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
-public class TechnicUserStore implements IUserStore<MojangUser> {
+public class TechnicUserStore implements IUserStore {
     private String clientToken = UUID.randomUUID().toString();
-    private Map<String, MojangUser> savedUsers = new HashMap<String, MojangUser>();
+    private Map<String, IUserType> savedUsers = new HashMap<>();
     private String lastUser;
     private transient File usersFile;
 
@@ -62,9 +62,7 @@ public class TechnicUserStore implements IUserStore<MojangUser> {
                 newModel.setUserFile(userFile);
                 return newModel;
             }
-        } catch (JsonSyntaxException e) {
-            Utils.getLogger().log(Level.WARNING, "Unable to load users from " + userFile);
-        } catch (IOException e) {
+        } catch (JsonSyntaxException | IOException e) {
             Utils.getLogger().log(Level.WARNING, "Unable to load users from " + userFile);
         }
 
@@ -85,12 +83,14 @@ public class TechnicUserStore implements IUserStore<MojangUser> {
         }
     }
 
-    public void addUser(MojangUser mojangUser) {
-        if (savedUsers.containsKey(mojangUser.getUsername())) {
-            MojangUser oldUser = savedUsers.get(mojangUser.getUsername());
-            mojangUser.mergeUserProperties(oldUser);
+    public void addUser(IUserType user) {
+        if (savedUsers.containsKey(user.getUsername())) {
+            IUserType oldUser = savedUsers.get(user.getUsername());
+            if (oldUser instanceof MojangUser && user instanceof MojangUser) {
+                ((MojangUser) user).mergeUserProperties((MojangUser) oldUser);
+            }
         }
-        savedUsers.put(mojangUser.getUsername(), mojangUser);
+        savedUsers.put(user.getUsername(), user);
         save();
     }
 
@@ -99,7 +99,7 @@ public class TechnicUserStore implements IUserStore<MojangUser> {
         save();
     }
 
-    public MojangUser getUser(String accountName) {
+    public IUserType getUser(String accountName) {
         return savedUsers.get(accountName);
     }
 
@@ -111,7 +111,7 @@ public class TechnicUserStore implements IUserStore<MojangUser> {
         return savedUsers.keySet();
     }
 
-    public Collection<MojangUser> getSavedUsers() {
+    public Collection<IUserType> getSavedUsers() {
         return savedUsers.values();
     }
 

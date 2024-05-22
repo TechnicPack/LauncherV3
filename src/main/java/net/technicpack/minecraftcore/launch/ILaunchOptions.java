@@ -6,4 +6,7 @@ public interface ILaunchOptions {
     int getCustomWidth();
     int getCustomHeight();
     boolean shouldUseStencilBuffer();
+    String getWrapperCommand();
+    String getJavaArgs();
+    boolean shouldUseMojangJava();
 }

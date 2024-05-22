@@ -22,7 +22,7 @@ package net.technicpack.ui.controls.list;
 import javax.swing.*;
 import java.awt.*;
 
-public class AdvancedCellRenderer extends JLabel implements ListCellRenderer {
+public class AdvancedCellRenderer<T> extends JLabel implements ListCellRenderer<T> {
 
     private Color selectedBackground;
     private Color selectedForeground;
@@ -46,7 +46,8 @@ public class AdvancedCellRenderer extends JLabel implements ListCellRenderer {
     public void setUnselectedForegroundColor(Color color) { unselectedForeground = color; }
 
     @Override
-    public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+    public Component getListCellRendererComponent(
+            JList<? extends T> list, T value, int index, boolean isSelected, boolean cellHasFocus) {
         if (isSelected) {
             setBackground(getSelectedBackgroundColor());
             setForeground(getSelectedForegroundColor());

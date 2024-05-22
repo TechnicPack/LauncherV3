@@ -26,21 +26,31 @@ import java.io.InputStreamReader;
 public class ProcessMonitorThread extends Thread {
 
     private final GameProcess process;
+    private final String userAccessToken;
 
-    public ProcessMonitorThread(GameProcess process) {
+    public ProcessMonitorThread(GameProcess process, String userAccessToken) {
         super("ProcessMonitorThread");
         this.process = process;
+        // Used for censoring the access token in the logs
+        this.userAccessToken = userAccessToken;
     }
 
     public void run() {
         InputStreamReader reader = new InputStreamReader(this.process.getProcess().getInputStream());
         BufferedReader buf = new BufferedReader(reader);
         String line = null;
+        String censoredLine;
 
         while (true) {
             try {
                 while ((line = buf.readLine()) != null) {
-                    System.out.println(" " + line);
+                    if (userAccessToken.equals("0")) {
+                        censoredLine = line;
+                    } else {
+                        censoredLine = line.replace(userAccessToken, "USER_ACCESS_TOKEN");
+                    }
+
+                    System.out.println(" " + censoredLine);
                 }
             } catch (IOException ex) {
 //				Logger.getLogger(ProcessMonitorThread.class.getName()).log(Level.SEVERE, null, ex);
@@ -59,6 +69,8 @@ public class ProcessMonitorThread extends Thread {
                 }
             }
         }
+
+        System.out.println("Process exited with code " + process.getProcess().exitValue());
 
         if (process.getExitListener() != null) {
             process.getExitListener().onProcessExit();

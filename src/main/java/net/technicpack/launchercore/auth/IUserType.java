@@ -19,10 +19,26 @@
 
 package net.technicpack.launchercore.auth;
 
+import net.technicpack.launchercore.exception.AuthenticationException;
+
 public interface IUserType {
-    public String getId();
+    String getUserType();
 
-    public String getUsername();
+    String getId();
 
-    public String getDisplayName();
+    String getUsername();
+
+    String getDisplayName();
+
+    String getAccessToken();
+
+    String getSessionId();
+
+    String getMCUserType();
+
+    String getUserProperties();
+
+    boolean isOffline();
+
+    void login(UserModel userModel) throws AuthenticationException;
 }

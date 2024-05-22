@@ -69,26 +69,21 @@ public class EnsureAssetsIndexTask implements IInstallTask {
     public void runTask(InstallTasksQueue queue) throws IOException {
         MojangVersion version = ((InstallTasksQueue<MojangVersion>)queue).getMetadata();
 
-        String assetKey = version.getAssetsKey();
-        if (assetKey == null || assetKey.isEmpty()) {
-            assetKey = "legacy";
-        }
-
-        String assetsUrl;
         AssetIndex assetIndex = version.getAssetIndex();
-        if (assetIndex != null) {
-            assetsUrl = assetIndex.getUrl();
-        } else {
-            assetsUrl = MojangUtils.getAssetsIndex(assetKey);
+
+        if (assetIndex == null) {
+            throw new RuntimeException("No asset index detected, cannot continue");
         }
 
-        File output = new File(assetsDirectory + File.separator + "indexes", assetKey + ".json");
+        String assetsUrl = assetIndex.getUrl();
+
+        File output = new File(assetsDirectory + File.separator + "indexes", assetIndex.getId() + ".json");
 
         (new File(output.getParent())).mkdirs();
 
         IFileVerifier fileVerifier;
 
-        if (assetIndex != null && assetIndex.getSha1() != null)
+        if (assetIndex.getSha1() != null)
             fileVerifier = new SHA1FileVerifier(assetIndex.getSha1());
         else
             fileVerifier = new ValidJsonFileVerifier(MojangUtils.getGson());

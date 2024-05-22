@@ -63,7 +63,7 @@ public class ConsoleFrame extends JFrame implements MouseListener {
         this.debugAttributes = new SimpleAttributeSet();
         StyleConstants.setForeground(debugAttributes, Color.DARK_GRAY);
 
-        setSize(new Dimension(650, 400));
+        setSize(new Dimension(896, 504));
         buildUI();
 
         this.setIconImage(frameIcon);

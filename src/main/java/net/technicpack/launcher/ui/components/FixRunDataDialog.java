@@ -30,10 +30,11 @@ public class FixRunDataDialog extends LauncherDialog {
 
     private final ResourceLoader resourceLoader;
 
-    private final RunData runData;
-    private final JavaVersionRepository javaVersionRepository;
-    private final Memory attemptedMemory;
-    private final boolean shouldAskFirst;
+    private RunData runData;
+    private JavaVersionRepository javaVersionRepository;
+    private Memory attemptedMemory;
+    private boolean shouldAskFirst;
+    private final boolean usingMojangJava;
 
     private IJavaVersion recommendedVersion;
     private Memory recommendedMemory;
@@ -47,13 +48,14 @@ public class FixRunDataDialog extends LauncherDialog {
         CANCEL
     }
 
-    public FixRunDataDialog(Frame owner, ResourceLoader resourceLoader, RunData runData, JavaVersionRepository javaVersionRepository, Memory attemptedMemory, boolean shouldAskFirst) {
+    public FixRunDataDialog(Frame owner, ResourceLoader resourceLoader, RunData runData, JavaVersionRepository javaVersionRepository, Memory attemptedMemory, boolean shouldAskFirst, boolean usingMojangJava) {
         super(owner);
         this.runData = runData;
         this.javaVersionRepository = javaVersionRepository;
         this.attemptedMemory = attemptedMemory;
         this.resourceLoader = resourceLoader;
         this.shouldAskFirst = shouldAskFirst;
+        this.usingMojangJava = usingMojangJava;
 
         recommendSettings();
         initComponents();
@@ -90,7 +92,9 @@ public class FixRunDataDialog extends LauncherDialog {
     }
 
     protected void recommendSettings() {
-        if (!runData.isJavaValid(javaVersionRepository.getSelectedVersion().getVersionNumber())) {
+        if (usingMojangJava) {
+            recommendedVersion = null;
+        } else if (!runData.isJavaValid(javaVersionRepository.getSelectedVersion().getVersionNumber())) {
             recommendedVersion = runData.getValidJavaVersion(javaVersionRepository);
         } else {
             recommendedVersion = javaVersionRepository.getSelectedVersion();
@@ -144,7 +148,7 @@ public class FixRunDataDialog extends LauncherDialog {
         label.setPreferredSize(getPreferredSize(label.getText(), DIALOG_WIDTH-5));
 
         buildSuccessFailPanels(centerPanel, font.getFamily());
-        boolean isFailure = recommendedMemory == null || recommendedVersion == null;
+        boolean isFailure = recommendedMemory == null || (!usingMojangJava && recommendedVersion == null);
 
         int gridBagIndex = 3;
         if (isFailure) {
@@ -211,7 +215,7 @@ public class FixRunDataDialog extends LauncherDialog {
 
     private void buildSuccessFailPanels(JPanel centerPanel, String fontFamily) {
         boolean memorySuccess = runData.isMemoryValid(attemptedMemory.getMemoryMB());
-        boolean javaSuccess = runData.isJavaValid(javaVersionRepository.getSelectedVersion().getVersionNumber());
+        boolean javaSuccess = usingMojangJava || runData.isJavaValid(javaVersionRepository.getSelectedVersion().getVersionNumber());
 
         String memRequirement = resourceLoader.getString("fixRunData.reqMemory", runData.getMemoryObject().toString());
         String javaRequirement = resourceLoader.getString("fixRunData.reqJava", runData.getJava());
@@ -247,7 +251,7 @@ public class FixRunDataDialog extends LauncherDialog {
         centerPanel.add(label, new GridBagConstraints(0, gridBagIndex++, 1, 1, 1.0f, 0, GridBagConstraints.SOUTH, GridBagConstraints.BOTH, new Insets(8,0,4,0), 0,0));
         label.setPreferredSize(getPreferredSize(label.getText(), DIALOG_WIDTH-5));
 
-        boolean javaVersionGood = recommendedVersion != null;
+        boolean javaVersionGood = usingMojangJava || recommendedVersion != null;
         boolean memoryGood = recommendedMemory != null;
         boolean requires64Bit = runData.getMemory() > Memory.MAX_32_BIT_MEMORY;
         boolean has64Bit = javaVersionRepository.getBest64BitVersion() != null;
@@ -259,8 +263,7 @@ public class FixRunDataDialog extends LauncherDialog {
         if (getBetterJava) {
             label = new JLabel(
                     "<html>" +
-                            "<head><link rel=\"stylesheet\" type=\"text/css\" href=\"https://www.technicpack.net/assets/css/launcher.css\" /></head>" +
-                            "<body style=\"font-family:" + fontFamily + ";font-size:11px;font-color:#D0D0D0\">" +
+                            "<head><style type=\"text/css\">a{color:#309aeb}body{font-family: " + fontFamily + ";font-size:11px;color:#D0D0D0}</style></head><body>" +
                             resourceLoader.getString("fixRunData.needBetterJava") +
                             "</body>" +
                             "</html>", resourceLoader.getIcon("danger_icon.png"), SwingConstants.LEFT);
@@ -282,7 +285,7 @@ public class FixRunDataDialog extends LauncherDialog {
         if (get64BitJava) {
             label = new JLabel(
                     "<html>" +
-                            "<head><link rel=\"stylesheet\" type=\"text/css\" href=\"https://www.technicpack.net/assets/css/launcher.css\" /></head>" +
+                            "<head><style type=\"text/css\">a{color:#309aeb}body{font-family:" + fontFamily + ";font-size:11px;color:#D0D0D0}</style></head><body>"+
                             "<body style=\"font-family:" + fontFamily + ";font-size:11px;font-color:#D0D0D0\">" +
                             resourceLoader.getString("fixRunData.need64BitJava") +
                             "</body>" +

@@ -35,8 +35,6 @@ public class ZipFileRetriever implements MojangVersionRetriever {
 
     @Override
     public void retrieveVersion(File target, String key) throws IOException, InterruptedException {
-        boolean didExtract = false;
-
         if (zip.exists()) {
             ZipUtils.extractFile(zip, target.getParentFile(), target.getName());
         }

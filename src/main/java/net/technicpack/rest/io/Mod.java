@@ -19,6 +19,9 @@
 
 package net.technicpack.rest.io;
 
+import java.io.File;
+import java.io.IOException;
+
 @SuppressWarnings({"unused"})
 public class Mod extends Resource {
     private String name;
@@ -40,6 +43,26 @@ public class Mod extends Resource {
 
     public String getVersion() {
         return version;
+    }
+
+    public File generateSafeCacheFile(File cacheDir) throws IOException {
+        String filename;
+        if (version != null && !version.isEmpty()) {
+            filename = name + "-" + version + ".zip";
+        } else {
+            filename = name + ".zip";
+        }
+
+        // Sanitize filename by replacing invalid characters
+        filename = filename.replaceAll("[\\\\/:*?\"<>|]", "-");
+
+        File filePath = new File(cacheDir, filename);
+
+        if (!filePath.toPath().normalize().startsWith(cacheDir.toPath())) {
+            throw new IOException("Unsafe mod cache path detected (" + filePath + ") with base " + cacheDir);
+        }
+
+        return filePath;
     }
 
     @Override

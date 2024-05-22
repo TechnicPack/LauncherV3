@@ -86,11 +86,6 @@ public class SearchResultPackInfo implements PackInfo {
     }
 
     @Override
-    public boolean shouldForceDirectory() {
-        return false;
-    }
-
-    @Override
     public ArrayList<FeedItem> getFeed() {
         return new ArrayList<FeedItem>();
     }
@@ -106,7 +101,7 @@ public class SearchResultPackInfo implements PackInfo {
     }
 
     @Override
-    public Integer getDownloads() {
+    public Integer getInstalls() {
         return null;
     }
 

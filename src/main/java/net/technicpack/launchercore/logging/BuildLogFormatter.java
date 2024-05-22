@@ -45,7 +45,9 @@ public class BuildLogFormatter extends Formatter {
         builder.append(record.getLevel().getName().toUpperCase(Locale.ENGLISH));
         builder.append("] ");
         builder.append(formatMessage(record));
-        builder.append('\n');
+        if (builder.charAt(builder.length() - 1) != '\n') {
+            builder.append('\n');
+        }
 
         if (record.getThrown() != null) {
             StringWriter writer = new StringWriter();

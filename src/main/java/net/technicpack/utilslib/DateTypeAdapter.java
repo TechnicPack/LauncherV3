@@ -32,10 +32,12 @@ public class DateTypeAdapter
         implements JsonDeserializer<Date>, JsonSerializer<Date> {
     private final DateFormat enUsFormat;
     private final DateFormat iso8601Format;
+    private final DateFormat iso8601NanosFormat;
 
     public DateTypeAdapter() {
         this.enUsFormat = DateFormat.getDateTimeInstance(2, 2, Locale.US);
         this.iso8601Format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+        this.iso8601NanosFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS");
     }
 
     public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
@@ -60,11 +62,15 @@ public class DateTypeAdapter
                     return this.iso8601Format.parse(json.getAsString());
                 } catch (ParseException localParseException1) {
                     try {
-                        String cleaned = json.getAsString().replace("Z", "+00:00");
-                        cleaned = cleaned.substring(0, 22) + cleaned.substring(23);
-                        return this.iso8601Format.parse(cleaned);
-                    } catch (Exception e) {
-                        throw new JsonSyntaxException("Invalid date: " + json.getAsString(), e);
+                        return this.iso8601NanosFormat.parse(json.getAsString());
+                    } catch (ParseException localParseException2) {
+                        try {
+                            String cleaned = json.getAsString().replace("Z", "+00:00");
+                            cleaned = cleaned.substring(0, 22) + cleaned.substring(23);
+                            return this.iso8601Format.parse(cleaned);
+                        } catch (Exception e) {
+                            throw new JsonSyntaxException("Invalid date: " + json.getAsString(), e);
+                        }
                     }
                 }
             }

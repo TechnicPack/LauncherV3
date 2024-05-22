@@ -27,11 +27,11 @@ public class GameProcess {
     private ProcessExitListener exitListener;
     private final ProcessMonitorThread monitorThread;
 
-    public GameProcess(List<String> commands, Process process) {
+    public GameProcess(List<String> commands, Process process, String userAccessToken) {
         this.commands = commands;
         this.process = process;
 
-        this.monitorThread = new ProcessMonitorThread(this);
+        this.monitorThread = new ProcessMonitorThread(this, userAccessToken);
         this.monitorThread.start();
     }
 

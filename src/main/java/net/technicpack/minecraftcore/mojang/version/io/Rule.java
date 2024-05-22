@@ -28,9 +28,22 @@ import net.technicpack.utilslib.OperatingSystem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class Rule {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Rule rule = (Rule) o;
+        return negated == rule.negated && Objects.equals(conditions, rule.conditions);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(negated, conditions);
+    }
 
     public static boolean isAllowable(List<Rule> rules, ILaunchOptions opts) {
         for (int i = rules.size() - 1; i >= 0; i--) {
@@ -67,11 +80,29 @@ public class Rule {
         }
         if (rule.has("features")) {
             JsonObject features = rule.get("features").getAsJsonObject();
-            if (features.has("has_custom_resolution")) {
-                conditions.add(new CustomResolutionCondition(features.get("has_custom_resolution").getAsBoolean()));
-            }
-            if (features.has("is_demo_user")) {
-                conditions.add(new DemoCondition(features.get("is_demo_user").getAsBoolean()));
+            for (String feature : features.keySet()) {
+                switch (feature) {
+                    case "has_custom_resolution":
+                        conditions.add(new CustomResolutionCondition(features.get("has_custom_resolution").getAsBoolean()));
+                        break;
+                    case "is_demo_user":
+                        conditions.add(new DemoUserCondition(features.get("is_demo_user").getAsBoolean()));
+                        break;
+                    case "has_quick_plays_support":
+                        conditions.add(new QuickPlaysSupportCondition(features.get("has_quick_plays_support").getAsBoolean()));
+                        break;
+                    case "is_quick_play_singleplayer":
+                        conditions.add(new QuickPlaySingleplayerCondition(features.get("is_quick_play_singleplayer").getAsBoolean()));
+                        break;
+                    case "is_quick_play_multiplayer":
+                        conditions.add(new QuickPlayMultiplayerCondition(features.get("is_quick_play_multiplayer").getAsBoolean()));
+                        break;
+                    case "is_quick_play_realms":
+                        conditions.add(new QuickPlayRealmsCondition(features.get("is_quick_play_realms").getAsBoolean()));
+                        break;
+                    default:
+                        throw new JsonParseException("Unknown feature: " + feature);
+                }
             }
         }
     }
@@ -125,6 +156,19 @@ public class Rule {
         }
 
         @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            OsCondition that = (OsCondition) o;
+            return Objects.equals(name, that.name) && Objects.equals(version, that.version) && Objects.equals(arch, that.arch);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, version, arch);
+        }
+
+        @Override
         public boolean test(ILaunchOptions opts) {
             String os = OperatingSystem.getOperatingSystem().getName();
             String osVersion = System.getProperty("os.version");
@@ -154,6 +198,19 @@ public class Rule {
         }
 
         @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            CustomResolutionCondition that = (CustomResolutionCondition) o;
+            return shouldHaveCustomResolution == that.shouldHaveCustomResolution;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(shouldHaveCustomResolution);
+        }
+
+        @Override
         public boolean test(ILaunchOptions opts) {
             return opts != null
                     && (opts.getLaunchWindowType() == WindowType.CUSTOM) == shouldHaveCustomResolution;
@@ -166,12 +223,25 @@ public class Rule {
 
     }
 
-    private static class DemoCondition implements RuleCondition {
+    private static class DemoUserCondition implements RuleCondition {
 
         private final boolean shouldBeDemoUser;
 
-        DemoCondition(boolean shouldBeDemoUser) {
+        DemoUserCondition(boolean shouldBeDemoUser) {
             this.shouldBeDemoUser = shouldBeDemoUser;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            DemoUserCondition that = (DemoUserCondition) o;
+            return shouldBeDemoUser == that.shouldBeDemoUser;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(shouldBeDemoUser);
         }
 
         @Override
@@ -182,6 +252,138 @@ public class Rule {
         @Override
         public void serialize(JsonObject root) {
             getFeatures(root).addProperty("is_demo_user", shouldBeDemoUser);
+        }
+
+    }
+
+    private static class QuickPlaysSupportCondition implements RuleCondition {
+
+        private final boolean shouldHaveQuickPlaysSupport;
+
+        QuickPlaysSupportCondition(boolean shouldHaveQuickPlaysSupport) {
+            this.shouldHaveQuickPlaysSupport = shouldHaveQuickPlaysSupport;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            QuickPlaysSupportCondition that = (QuickPlaysSupportCondition) o;
+            return shouldHaveQuickPlaysSupport == that.shouldHaveQuickPlaysSupport;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(shouldHaveQuickPlaysSupport);
+        }
+
+        @Override
+        public boolean test(ILaunchOptions opts) {
+            return !shouldHaveQuickPlaysSupport;
+        }
+
+        @Override
+        public void serialize(JsonObject root) {
+            getFeatures(root).addProperty("has_quick_plays_support", shouldHaveQuickPlaysSupport);
+        }
+
+    }
+
+    private static class QuickPlaySingleplayerCondition implements RuleCondition {
+
+        private final boolean shouldQuickPlayBeSingleplayer;
+
+        QuickPlaySingleplayerCondition(boolean shouldQuickPlayBeSingleplayer) {
+            this.shouldQuickPlayBeSingleplayer = shouldQuickPlayBeSingleplayer;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            QuickPlaySingleplayerCondition that = (QuickPlaySingleplayerCondition) o;
+            return shouldQuickPlayBeSingleplayer == that.shouldQuickPlayBeSingleplayer;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(shouldQuickPlayBeSingleplayer);
+        }
+
+        @Override
+        public boolean test(ILaunchOptions opts) {
+            return !shouldQuickPlayBeSingleplayer;
+        }
+
+        @Override
+        public void serialize(JsonObject root) {
+            getFeatures(root).addProperty("is_quick_play_singleplayer", shouldQuickPlayBeSingleplayer);
+        }
+
+    }
+
+    private static class QuickPlayMultiplayerCondition implements RuleCondition {
+
+        private final boolean shouldQuickPlayBeMultiplayer;
+
+        QuickPlayMultiplayerCondition(boolean shouldQuickPlayBeMultiplayer) {
+            this.shouldQuickPlayBeMultiplayer = shouldQuickPlayBeMultiplayer;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            QuickPlayMultiplayerCondition that = (QuickPlayMultiplayerCondition) o;
+            return shouldQuickPlayBeMultiplayer == that.shouldQuickPlayBeMultiplayer;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(shouldQuickPlayBeMultiplayer);
+        }
+
+        @Override
+        public boolean test(ILaunchOptions opts) {
+            return !shouldQuickPlayBeMultiplayer;
+        }
+
+        @Override
+        public void serialize(JsonObject root) {
+            getFeatures(root).addProperty("is_quick_play_multiplayer", shouldQuickPlayBeMultiplayer);
+        }
+
+    }
+
+    private static class QuickPlayRealmsCondition implements RuleCondition {
+
+        private final boolean shouldQuickPlayBeRealms;
+
+        QuickPlayRealmsCondition(boolean shouldQuickPlayBeRealms) {
+            this.shouldQuickPlayBeRealms = shouldQuickPlayBeRealms;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            QuickPlayRealmsCondition that = (QuickPlayRealmsCondition) o;
+            return shouldQuickPlayBeRealms == that.shouldQuickPlayBeRealms;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(shouldQuickPlayBeRealms);
+        }
+
+        @Override
+        public boolean test(ILaunchOptions opts) {
+            return !shouldQuickPlayBeRealms;
+        }
+
+        @Override
+        public void serialize(JsonObject root) {
+            getFeatures(root).addProperty("is_quick_play_realms", shouldQuickPlayBeRealms);
         }
 
     }

@@ -27,6 +27,7 @@ import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class VersionChain implements MojangVersion {
 
@@ -89,12 +90,17 @@ public class VersionChain implements MojangVersion {
 
     @Override
     public ArgumentList getJavaArguments() {
+        ArgumentList.Builder allArguments = new ArgumentList.Builder();
+
         for (MojangVersion version : chain) {
-            if (version.getJavaArguments() != null)
-                return version.getJavaArguments();
+            if (version.getJavaArguments() != null) {
+                for (Argument arg : version.getJavaArguments().getArguments()) {
+                    allArguments.addArgument(arg);
+                }
+            }
         }
 
-        return null;
+        return allArguments.build();
     }
 
     @Override
@@ -119,7 +125,7 @@ public class VersionChain implements MojangVersion {
                 allLibraries.addAll(0, version.getLibrariesForOS());
         }
 
-        return allLibraries;
+        return allLibraries.stream().distinct().collect(Collectors.toList());
     }
 
     @Override
@@ -216,7 +222,7 @@ public class VersionChain implements MojangVersion {
 
     @Override
     public String getParentVersion() {
-        return null;
+        return chain.get(chain.size() - 1).getId();
     }
 
     @Override
@@ -224,8 +230,29 @@ public class VersionChain implements MojangVersion {
         chain.get(0).addLibrary(library);
     }
 
+    @Override
+    public void prependLibrary(Library library) {
+        chain.get(0).prependLibrary(library);
+    }
+
+    @Override
+    public JavaVersion getJavaVersion() {
+        for (MojangVersion version : chain) {
+            if (version.getJavaVersion() != null)
+                return version.getJavaVersion();
+        }
+
+        return null;
+    }
+
+    @Override
+    public void removeLibrary(String libraryName) {
+        for (MojangVersion version : chain) {
+            version.removeLibrary(libraryName);
+        }
+    }
+
     public void addVersionToChain(MojangVersion version) {
         chain.add(version);
     }
-
 }

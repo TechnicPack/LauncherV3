@@ -20,12 +20,27 @@
 package net.technicpack.utilslib;
 
 public class JavaUtils {
+    /**
+     * Determine if the current OS is 64-bit.
+     * If we're in a 32-bit Java runtime, then this will always return false.
+     */
     public static boolean is64Bit() {
         String architecture = System.getProperty("os.arch");
-        return architecture.equals("x86_64") || architecture.equals("amd64");
+        // x64 on old Java; x64 on new Java; ARM64
+        return architecture.equals("x86_64") || architecture.equals("amd64") || architecture.equals("aarch64");
     }
 
+    /**
+     * Determine the bitness of the current OS (64 or 32).
+     * If we're in a 32-bit Java runtime, this will always return 32.
+     */
     public static String getJavaBitness() {
         return is64Bit() ? "64" : "32";
+    }
+
+    public static boolean isArm64() {
+        String architecture = System.getProperty("os.arch");
+
+        return architecture.equals("aarch64");
     }
 }

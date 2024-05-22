@@ -40,11 +40,13 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask {
 	private ModpackModel pack;
 	private String minecraftVersion;
 	private File cacheDirectory;
+	private boolean forceRegeneration;
 
-	public InstallMinecraftIfNecessaryTask(ModpackModel pack, String minecraftVersion, File cacheDirectory) {
+	public InstallMinecraftIfNecessaryTask(ModpackModel pack, String minecraftVersion, File cacheDirectory, boolean forceRegeneration) {
 		this.pack = pack;
 		this.minecraftVersion = minecraftVersion;
 		this.cacheDirectory = cacheDirectory;
+		this.forceRegeneration = forceRegeneration;
 	}
 
 	@Override
@@ -58,35 +60,30 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask {
 
 		MojangVersion version = ((InstallTasksQueue<MojangVersion>)queue).getMetadata();
 
-		String url;
 		GameDownloads dls = version.getDownloads();
 
-		IFileVerifier verifier = null;
-
-		if (dls != null) {
-			url = dls.forClient().getUrl(); // TODO maybe use the sha1 sum?
-			verifier = new SHA1FileVerifier(dls.forClient().getSha1());
-		} else {
-			url = MojangUtils.getOldVersionDownload(this.minecraftVersion);
-			Utils.getLogger().log(Level.SEVERE, "Using legacy Minecraft download! Version id = " + version.getId() + "; parent = " + version.getParentVersion());
-
-			String md5 = Utils.getETag(url);
-
-			if (md5 != null && !md5.isEmpty()) {
-				verifier = new MD5FileVerifier(md5);
-			} else {
-				verifier = new ValidZipFileVerifier();
-			}
+		if (dls == null) {
+			throw new RuntimeException("Using legacy Minecraft download! Version id = " + version.getId() + "; parent = " + version.getParentVersion());
 		}
 
+		String url = dls.forClient().getUrl();
+		IFileVerifier verifier = new SHA1FileVerifier(dls.forClient().getSha1());
+
 		File cache = new File(cacheDirectory, "minecraft_" + this.minecraftVersion + ".jar");
+
+		boolean regenerate = forceRegeneration;
 
 		if (!cache.exists() || !verifier.isFileValid(cache)) {
 			String output = this.pack.getCacheDir() + File.separator + "minecraft.jar";
 			Utils.downloadFile(url, cache.getName(), output, cache, verifier, this);
+			regenerate = true;
 		}
 
-		MojangUtils.copyMinecraftJar(cache, new File(this.pack.getBinDir(), "minecraft.jar"));
+		File binMinecraftJar = new File(this.pack.getBinDir(), "minecraft.jar");
+
+		if (!binMinecraftJar.exists() || regenerate) {
+			MojangUtils.copyMinecraftJar(cache, binMinecraftJar);
+		}
 	}
 
 }

@@ -116,6 +116,24 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         }
     };
 
+    private DocumentListener wrapperCommandListener = new DocumentListener() {
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            changeWrapperCommand();
+        }
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            changeWrapperCommand();
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            changeWrapperCommand();
+        }
+    };
+
+
     JComboBox versionSelect;
     JComboBox memSelect;
     JTextArea javaArgs;
@@ -133,6 +151,8 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     JComboBox windowSelect;
     JTextField widthInput;
     JTextField heightInput;
+    JTextField wrapperCommand;
+    JCheckBox useMojangJava;
 
     public OptionsDialog(final Frame owner, final TechnicSettings settings, final ResourceLoader resourceLoader, final StartupParameters params, final JavaVersionRepository javaVersions, final FileJavaSource fileJavaSource, final IBuildNumber buildNumber) {
         super(owner);
@@ -152,7 +172,12 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     }
 
     protected void changeJavaArgs() {
-        settings.setJavaArgs(javaArgs.getText());
+        settings.setJavaArgs(javaArgs.getText().trim());
+        settings.save();
+    }
+
+    protected void changeWrapperCommand() {
+        settings.setWrapperCommand(wrapperCommand.getText().trim());
         settings.save();
     }
 
@@ -169,6 +194,27 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
     protected void changeAskFirst() {
         settings.setAutoAcceptModpackRequirements(!askFirstBox.isSelected());
+        settings.save();
+    }
+
+    protected void changeUseMojangJava() {
+        if (!useMojangJava.isSelected()) {
+            int result = JOptionPane.showConfirmDialog(
+                    this,
+                    resources.getString("launcheroptions.java.mojangJreWarning.text"),
+                    resources.getString("launcheroptions.java.mojangJreWarning.title"),
+                    JOptionPane.YES_NO_CANCEL_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            if (result != JOptionPane.YES_OPTION) {
+                // Reset to current value
+                useMojangJava.setSelected(settings.shouldUseMojangJava());
+                return;
+            }
+        }
+
+        settings.setUseMojangJava(useMojangJava.isSelected());
         settings.save();
     }
 
@@ -332,6 +378,10 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         javaArgs.setText(settings.getJavaArgs());
         javaArgs.getDocument().addDocumentListener(javaArgsListener);
 
+        wrapperCommand.getDocument().removeDocumentListener(wrapperCommandListener);
+        wrapperCommand.setText(settings.getWrapperCommand());
+        wrapperCommand.getDocument().addDocumentListener(wrapperCommandListener);
+
         installField.setText(settings.getTechnicRoot().getAbsolutePath());
         clientId.setText(settings.getClientId());
 
@@ -353,6 +403,13 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             public void actionPerformed(ActionEvent e) {
                 changeAskFirst();
             }
+        });
+
+        for (ActionListener listener : useMojangJava.getActionListeners())
+            useMojangJava.removeActionListener(listener);
+        useMojangJava.setSelected(settings.shouldUseMojangJava());
+        useMojangJava.addActionListener(e -> {
+            changeUseMojangJava();
         });
 
         for (ActionListener listener : launchToModpacks.getActionListeners())
@@ -672,7 +729,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         about.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
 
         String linkText = "<a href=\"https://github.com/TechnicPack/\">"+resources.getString("launcheroptions.about.linktext")+"</a>";
-        String aboutText = "<html><head><link rel=\"stylesheet\" type=\"text/css\" href=\"https://www.technicpack.net/assets/css/launcher.css\" /></head><body style=\"font-family: "+resources.getFont(ResourceLoader.FONT_OPENSANS, 12).getFamily()+";color:#D0D0D0\">";
+        String aboutText = "<html><head><style type=\"text/css\">a{color:#309aeb}body{font-family: "+resources.getFont(ResourceLoader.FONT_OPENSANS, 12).getFamily()+";color:#D0D0D0}</style></head><body>";
         aboutText += "<p>" + resources.getString("launcheroptions.about.copyright", buildNumber.getBuildNumber(), linkText) + "</p>";
         aboutText += "<p>" + resources.getString("launcheroptions.about.romainguy") + "</p>";
         aboutText += "<p>" + resources.getString("launcheroptions.about.summary") + "</p>";
@@ -1138,10 +1195,25 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         panel.add(javaArgs, new GridBagConstraints(1, 2, 6, 2, 0, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 6, 80), 0, 0));
 
+        JLabel wrapperCmdLabel = new JLabel(resources.getString("launcheroptions.java.wrapper"));
+        wrapperCmdLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+        wrapperCmdLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        panel.add(wrapperCmdLabel, new GridBagConstraints(0, 4, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 60, 0, 0), 0, 0));
+
+        wrapperCommand = new JTextField("");
+        wrapperCommand.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+        wrapperCommand.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        wrapperCommand.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        wrapperCommand.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
+        wrapperCommand.setCaretColor(LauncherFrame.COLOR_BUTTON_BLUE);
+        wrapperCommand.setSelectionColor(LauncherFrame.COLOR_BUTTON_BLUE);
+        wrapperCommand.setSelectedTextColor(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        panel.add(wrapperCommand, new GridBagConstraints(1, 4, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
+
         JLabel autoApprovalLabel = new JLabel(resources.getString("launcheroptions.java.autoApprove"));
         autoApprovalLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         autoApprovalLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        panel.add(autoApprovalLabel, new GridBagConstraints(0, 4, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 20, 0, 0), 0, 0));
+        panel.add(autoApprovalLabel, new GridBagConstraints(0, 5, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 20, 0, 0), 0, 0));
 
         askFirstBox = new JCheckBox("", false);
         askFirstBox.setOpaque(false);
@@ -1151,9 +1223,24 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         askFirstBox.setSelectedIcon(resources.getIcon("checkbox_closed.png"));
         askFirstBox.setIcon(resources.getIcon("checkbox_open.png"));
         askFirstBox.setFocusPainted(false);
-        panel.add(askFirstBox, new GridBagConstraints(1, 4, 6, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(8, 16, 8, 8), 0, 0));
+        panel.add(askFirstBox, new GridBagConstraints(1, 5, 6, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(8, 16, 8, 8), 0, 0));
 
-        panel.add(Box.createGlue(), new GridBagConstraints(4, 5, 1, 1, 1, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
+        JLabel useMojangJavaLabel = new JLabel(resources.getString("launcheroptions.java.useMojangJava"));
+        useMojangJavaLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+        useMojangJavaLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        panel.add(useMojangJavaLabel, new GridBagConstraints(0, 6, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 20, 0, 0), 0, 0));
+
+        useMojangJava = new JCheckBox("", false);
+        useMojangJava.setOpaque(false);
+        useMojangJava.setHorizontalAlignment(SwingConstants.RIGHT);
+        useMojangJava.setBorder(BorderFactory.createEmptyBorder());
+        useMojangJava.setIconTextGap(0);
+        useMojangJava.setSelectedIcon(resources.getIcon("checkbox_closed.png"));
+        useMojangJava.setIcon(resources.getIcon("checkbox_open.png"));
+        useMojangJava.setFocusPainted(false);
+        panel.add(useMojangJava, new GridBagConstraints(1, 6, 6, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(8, 16, 8, 8), 0, 0));
+
+        panel.add(Box.createGlue(), new GridBagConstraints(4, 7, 1, 1, 1, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
     }
 
     @Override

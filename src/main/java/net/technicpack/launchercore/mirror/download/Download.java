@@ -88,13 +88,17 @@ public class Download implements Runnable {
                 }
             }
 
-            if (responseFamily != 2) {
+            if (response == 429) {
+                throw new DownloadException("The download is being rate limited (HTTP 429). Try again later.");
+            } else if (response == 404) {
+                throw new DownloadException("The specified URL does not exist (HTTP 404).");
+            } else if (responseFamily != 2) {
                 throw new DownloadException("The server issued a " + response + " response code.");
             }
 
             InputStream in = getConnectionInputStream(conn);
 
-            size = conn.getContentLength();
+            size = conn.getContentLengthLong();
             outFile = new File(outPath);
             outFile.delete();
 
@@ -107,7 +111,7 @@ public class Download implements Runnable {
                 Thread progress = new MonitorThread(Thread.currentThread(), rbc);
                 progress.start();
 
-                fos.getChannel().transferFrom(rbc, 0, size > 0 ? size : Integer.MAX_VALUE);
+                fos.getChannel().transferFrom(rbc, 0, size > 0 ? size : Long.MAX_VALUE);
 
                 in.close();
                 rbc.close();

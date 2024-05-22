@@ -98,12 +98,22 @@ public class ModpackOptionsDialog extends LauncherDialog {
         if (manualBuildList.getItemCount() == 0)
             return;
 
+        // Nothing is selected, try to set it to the currently installed modpack build
+        // (could be an actual build string (like "1.0"), "recommended" or "latest")
         if (manualBuildList.getSelectedItem() == null)
             manualBuildList.setSelectedItem(new PackBuildItem(modpack.getBuild(), resources, modpack));
+
+        // Still nothing is selected, try to fallback to the recommended build
         if (manualBuildList.getSelectedItem() == null)
             manualBuildList.setSelectedItem(new PackBuildItem(modpack.getRecommendedBuild(), resources, modpack));
 
-        this.modpack.setBuild(((PackBuildItem)manualBuildList.getSelectedItem()).getBuildNumber());
+        // Still nothing is selected, and both the currently installed and recommended builds couldn't be selected,
+        // so we try to select the first available one (we already know there's at least 1 build available)
+        if (manualBuildList.getSelectedIndex() == -1) {
+            manualBuildList.setSelectedIndex(0);
+        }
+
+        this.modpack.setBuild(((PackBuildItem) manualBuildList.getSelectedItem()).getBuildNumber());
         manualBuildList.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
         manualBuildList.setEnabled(true);
     }
@@ -121,10 +131,15 @@ public class ModpackOptionsDialog extends LauncherDialog {
     }
 
     protected void resetPack() {
+        if (modpack.isLocalOnly()) {
+            JOptionPane.showMessageDialog(this, resources.getString("modpackoptions.reinstall.cannotoffline"), resources.getString("modpackoptions.reinstall.cannottitle"), JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         int result = JOptionPane.showConfirmDialog(this, resources.getString("modpackoptions.reinstall.confirmtext"), resources.getString("modpackoptions.reinstall.confirmtitle"), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         if (result == JOptionPane.YES_OPTION) {
             modpack.resetPack();
-            refresh(modpack);
+            dispose();
         }
     }
 
@@ -376,12 +391,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         } else {
             resetPack.setForeground(LauncherFrame.COLOR_GREY_TEXT);
         }
-        resetPack.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                resetPack();
-            }
-        });
+        resetPack.addActionListener(e -> resetPack());
         resetPack.setEnabled(modpack.getInstalledDirectory() != null);
         bottomButtons.add(resetPack);
 

@@ -26,7 +26,6 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -35,31 +34,36 @@ public class TechnicSettings implements ILaunchOptions {
     public static final String STABLE = "stable";
     public static final String BETA = "beta";
 
+    // These are the default JVM args in the vanilla launcher
+    public static final String DEFAULT_JAVA_ARGS = "-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M";
+
     private transient File settingsFile;
     private transient File technicRoot;
     private int memory;
     private LaunchAction launchAction = LaunchAction.HIDE;
     private String buildStream = STABLE;
-    private boolean showConsole;
+    private boolean showConsole = true;
     private String languageCode = "default";
     private String clientId = UUID.randomUUID().toString();
     private String directory;
     private String javaArgs;
+    private String wrapperCommand;
     private int latestNewsArticle;
     private boolean launchToModpacks;
-    private String javaVersion = "default";
+    private String javaVersion = "64bit";
     private boolean autoAcceptRequirements = false;
     /**
      * 64 bit if true, 32 bit if false
      */
     private boolean javaBitness = true;
 
-    private String launcherSettingsVersion = "0";
+    private String launcherSettingsVersion = "2";
 
     private WindowType windowType = WindowType.DEFAULT;
     private int windowWidth = 0;
     private int windowHeight = 0;
     private boolean enableStencilBuffer = true;
+    private boolean useMojangJava = true;
 
     public File getFilePath() { return this.settingsFile; }
     public void setFilePath(File settingsFile) {
@@ -172,8 +176,35 @@ public class TechnicSettings implements ILaunchOptions {
 
     public String getClientId() { return clientId; }
 
-    public String getJavaArgs() { return javaArgs; }
-    public void setJavaArgs(String args) { javaArgs = args; }
+    public String getJavaArgs() {
+        if (javaArgs == null || javaArgs.isEmpty()) {
+            return DEFAULT_JAVA_ARGS;
+        }
+        return javaArgs;
+    }
+    public void setJavaArgs(String args) {
+        if (args != null && args.equalsIgnoreCase(DEFAULT_JAVA_ARGS)) {
+            javaArgs = null;
+        } else {
+            javaArgs = args;
+        }
+    }
+
+    public String getWrapperCommand() {
+        return wrapperCommand;
+    }
+
+    public void setWrapperCommand(String wrapperCommand) {
+        this.wrapperCommand = wrapperCommand;
+    }
+
+    public boolean shouldUseMojangJava() {
+        return useMojangJava;
+    }
+
+    public void setUseMojangJava(boolean useMojangJava) {
+        this.useMojangJava = useMojangJava;
+    }
 
     public void save() {
         String json = Utils.getGson().toJson(this);
@@ -194,6 +225,4 @@ public class TechnicSettings implements ILaunchOptions {
         if (!technicRoot.exists())
             technicRoot.mkdirs();
     }
-
-
 }

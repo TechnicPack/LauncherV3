@@ -66,7 +66,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 
-public class LauncherFrame extends DraggableFrame implements IRelocalizableResource, IAuthListener<MojangUser> {
+public class LauncherFrame extends DraggableFrame implements IRelocalizableResource, IAuthListener {
 
     private static final int FRAME_WIDTH = 1194;
     private static final int FRAME_HEIGHT = 718;
@@ -109,7 +109,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     public static final String TAB_NEWS = "news";
 
     private ResourceLoader resources;
-    private final UserModel<MojangUser> userModel;
+    private final UserModel userModel;
     private final ImageRepository<IUserType> skinRepository;
     private final TechnicSettings settings;
     private final ImageRepository<ModpackModel> iconRepo;
@@ -236,33 +236,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             requiresInstall = true;
             pack.save();
             modpackSelector.forceRefresh();
-        }
-
-        if (requiresInstall) {
-            try {
-                if (pack.getPackInfo().shouldForceDirectory() && FilenameUtils.directoryContains(directories.getLauncherDirectory().getCanonicalPath(), pack.getInstalledDirectory().getCanonicalPath())) {
-                    JFileChooser chooser = new JFileChooser(directories.getLauncherDirectory());
-                    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                    chooser.setCurrentDirectory(directories.getLauncherDirectory());
-                    int result = chooser.showOpenDialog(this);
-
-                    if (result == JFileChooser.APPROVE_OPTION) {
-                        File file = chooser.getSelectedFile();
-
-                        if (file.list().length > 0) {
-                            JOptionPane.showMessageDialog(this, resources.getString("modpackoptions.move.errortext"), resources.getString("modpackoptions.move.errortitle"), JOptionPane.WARNING_MESSAGE);
-                            return;
-                        } else if (FileUtils.directoryContains(directories.getLauncherDirectory(), file)) {
-                            JOptionPane.showMessageDialog(this, resources.getString("launcher.launch.requiresmove"), resources.getString("launcher.launch.requiretitle"), JOptionPane.WARNING_MESSAGE);
-                            return;
-                        }
-
-                        pack.setInstalledDirectory(file);
-                    }
-                }
-            } catch (IOException ex) {
-                Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
-            }
         }
 
         boolean forceInstall = false;
@@ -615,11 +588,14 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         installProgressPlaceholder = Box.createHorizontalGlue();
         footer.add(installProgressPlaceholder);
 
-        JLabel buildCtrl = new JLabel(resources.getString("launcher.build.text", buildNumber.getBuildNumber(), resources.getString("launcher.build." + settings.getBuildStream())));
-        buildCtrl.setForeground(COLOR_WHITE_TEXT);
-        buildCtrl.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
+        JButton buildCtrl = new JButton(resources.getIcon("akliz-logo.png"));
+        buildCtrl.setBorder(BorderFactory.createEmptyBorder());
+        buildCtrl.setContentAreaFilled(false);
         buildCtrl.setHorizontalTextPosition(SwingConstants.RIGHT);
         buildCtrl.setHorizontalAlignment(SwingConstants.RIGHT);
+        buildCtrl.setFocusable(false);
+        buildCtrl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        buildCtrl.addActionListener(e -> DesktopUtils.browseUrl("https://www.akliz.net/technic"));
         footer.add(buildCtrl);
 
         getRootPane().getContentPane().add(footer, BorderLayout.PAGE_END);
@@ -659,7 +635,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     }
 
     @Override
-    public void userChanged(MojangUser mojangUser) {
+    public void userChanged(IUserType mojangUser) {
         if (mojangUser == null)
             this.setVisible(false);
         else {
@@ -679,7 +655,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         }
     }
 
-    public void setupPlayButtonText(ModpackModel modpack, MojangUser user) {
+    public void setupPlayButtonText(ModpackModel modpack, IUserType user) {
         playButton.setEnabled(true);
         playButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
 

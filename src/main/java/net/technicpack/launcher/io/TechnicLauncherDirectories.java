@@ -22,7 +22,7 @@ import net.technicpack.launchercore.install.LauncherDirectories;
 
 import java.io.File;
 
-public class TechnicLauncherDirectories extends LauncherDirectories {
+public class TechnicLauncherDirectories implements LauncherDirectories {
     private File workDir;
 
     public TechnicLauncherDirectories(File rootDir) {
@@ -61,5 +61,14 @@ public class TechnicLauncherDirectories extends LauncherDirectories {
             modpacks.mkdirs();
 
         return modpacks;
+    }
+
+    public File getRuntimesDirectory() {
+        File runtimes = new File(getLauncherDirectory(), "runtimes");
+
+        if (!runtimes.exists())
+            runtimes.mkdirs();
+
+        return runtimes;
     }
 }

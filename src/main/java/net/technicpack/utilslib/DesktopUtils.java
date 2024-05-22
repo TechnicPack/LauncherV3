@@ -28,23 +28,48 @@ import java.net.URISyntaxException;
 import java.util.logging.Level;
 
 public class DesktopUtils {
+    private static void showBrowseUrlDialog(String url) {
+        JOptionPane.showInputDialog(null,
+                "Unable to open browser, please visit the URL manually (copy it from the box):",
+                "Unable to open browser",
+                JOptionPane.ERROR_MESSAGE,
+                null,
+                null,
+                url);
+    }
+
     public static void browseUrl(String url) {
-        try {
-            if (url.startsWith("mailto:"))
-                Desktop.getDesktop().mail(new URI(url));
-            else
-                Desktop.getDesktop().browse(new URI(url));
-        } catch (IOException ex) {
-            //Thrown by Desktop.browse() - just log & ignore
-            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
-        } catch (URISyntaxException ex) {
-            //If we got a bogus URL from the internet, then this will throw.  Log & Ignore
-            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
-        } catch (RuntimeException ex) {
-            //browse() throws a bunch of runtime exceptions if you give it bad input
-            //WHICH IS AWESOME
-            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
-        }
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() {
+                try {
+                    if (url.startsWith("mailto:"))
+                        Desktop.getDesktop().mail(new URI(url));
+                    else {
+                        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
+                            Desktop.getDesktop().browse(new URI(url));
+                        else if (OperatingSystem.getOperatingSystem() == OperatingSystem.LINUX)
+                            new ProcessBuilder("xdg-open", url).start();
+                        else if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX)
+                            new ProcessBuilder("open", url).start();
+                        else
+                            SwingUtilities.invokeLater(() -> showBrowseUrlDialog(url));
+                    }
+                } catch (IOException ex) {
+                    Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+                    SwingUtilities.invokeLater(() -> showBrowseUrlDialog(url));
+                } catch (URISyntaxException ex) {
+                    //If we got a bogus URL from the internet, then this will throw.  Log & Ignore
+                    Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+                } catch (RuntimeException ex) {
+                    //browse() throws a bunch of runtime exceptions if you give it bad input
+                    //WHICH IS AWESOME
+                    Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+                }
+
+                return null;
+            }
+        }.execute();
     }
 
     public static void open(final File file) {

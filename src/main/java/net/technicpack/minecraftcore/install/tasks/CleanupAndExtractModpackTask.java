@@ -25,15 +25,17 @@ import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.EnsureFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.minecraftcore.install.tasks.CleanupModpackCacheTask;
+import net.technicpack.minecraftcore.install.ModpackZipFilter;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.Mod;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
+import net.technicpack.utilslib.IZipFileFilter;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class CleanupAndExtractModpackTask implements IInstallTask {
 	private final ModpackModel pack;
@@ -82,20 +84,24 @@ public class CleanupAndExtractModpackTask implements IInstallTask {
 		}
 
 		File packOutput = this.pack.getInstalledDirectory();
+
+		IZipFileFilter zipFilter = new ModpackZipFilter(this.pack);
+
+		final File cacheDir = pack.getCacheDir();
+
+		ArrayList<File> processedFiles = new ArrayList<>(modpack.getMods().size());
+
 		for (Mod mod : modpack.getMods()) {
 			String url = mod.getUrl();
 			String md5 = mod.getMd5();
 
-			String version = mod.getVersion();
+			File cacheFile = mod.generateSafeCacheFile(cacheDir);
 
-			String name;
-			if (version != null) {
-				name = mod.getName() + "-" + version + ".zip";
-			} else {
-				name = mod.getName() + ".zip";
+			if (processedFiles.contains(cacheFile)) {
+				throw new IOException("Detected overlapping files for modpack " + pack.getName() + ": " + cacheFile.getName());
 			}
 
-			File cache = new File(this.pack.getCacheDir(), name);
+			processedFiles.add(cacheFile);
 
             IFileVerifier verifier = null;
 
@@ -104,7 +110,7 @@ public class CleanupAndExtractModpackTask implements IInstallTask {
             else
                 verifier = new ValidZipFileVerifier();
 
-			checkModQueue.addTask(new EnsureFileTask(cache, verifier, packOutput, url, downloadModQueue, copyModQueue));
+			checkModQueue.addTask(new EnsureFileTask(cacheFile, verifier, packOutput, url, downloadModQueue, copyModQueue, zipFilter));
 		}
 
 		copyModQueue.addTask(new CleanupModpackCacheTask(this.pack, modpack));

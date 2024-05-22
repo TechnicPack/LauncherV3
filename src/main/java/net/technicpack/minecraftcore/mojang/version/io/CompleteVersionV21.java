@@ -25,6 +25,7 @@ import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused"})
 public class CompleteVersionV21 implements MojangVersion {
@@ -43,6 +44,7 @@ public class CompleteVersionV21 implements MojangVersion {
 	private AssetIndex assetIndex;
 	private GameDownloads downloads;
 	private String inheritsFrom;
+	private JavaVersion javaVersion;
 	private transient boolean areAssetsVirtual;
 	private transient boolean mapToResources;
 
@@ -98,13 +100,7 @@ public class CompleteVersionV21 implements MojangVersion {
 
 	@Override
 	public List<Library> getLibrariesForOS() {
-		List<Library> libraryList = new ArrayList<Library>(libraries.size());
-		for (Library library : libraries) {
-			if (library.isForCurrentOS()) {
-				libraryList.add(library);
-			}
-		}
-		return libraryList;
+		return libraries.stream().filter(Library::isForCurrentOS).distinct().collect(Collectors.toList());
 	}
 
 	@Override
@@ -175,6 +171,21 @@ public class CompleteVersionV21 implements MojangVersion {
 	@Override
 	public void addLibrary(Library library) {
 		libraries.add(library);
+	}
+
+	@Override
+	public void prependLibrary(Library library) {
+		libraries.add(0, library);
+	}
+
+	@Override
+	public JavaVersion getJavaVersion() {
+		return javaVersion;
+	}
+
+	@Override
+	public void removeLibrary(String libraryName) {
+		libraries = libraries.stream().filter(library -> !library.getName().equals(libraryName)).collect(Collectors.toList());
 	}
 
 	@Override

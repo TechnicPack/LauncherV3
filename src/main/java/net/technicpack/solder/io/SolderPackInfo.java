@@ -35,13 +35,6 @@ public class SolderPackInfo extends RestObject implements PackInfo {
 
     private String name;
     private String display_name;
-    private String url;
-    private String icon;
-    private String icon_md5;
-    private String logo;
-    private String logo_md5;
-    private String background;
-    private String background_md5;
     private String recommended;
     private String latest;
     private List<String> builds;
@@ -109,12 +102,6 @@ public class SolderPackInfo extends RestObject implements PackInfo {
     public String getDiscordId() { return null; }
 
     @Override
-    public boolean shouldForceDirectory() {
-        //TODO: This is not really implemented properly
-        return false;
-    }
-
-    @Override
     public ArrayList<FeedItem> getFeed() {
         return null;
     }
@@ -130,7 +117,7 @@ public class SolderPackInfo extends RestObject implements PackInfo {
     }
 
     @Override
-    public Integer getDownloads() {
+    public Integer getInstalls() {
         return null;
     }
 
@@ -175,10 +162,6 @@ public class SolderPackInfo extends RestObject implements PackInfo {
         return "SolderPackInfo{" +
                 "name='" + name + '\'' +
                 ", display_name='" + display_name + '\'' +
-                ", url='" + url + '\'' +
-                ", icon_md5='" + icon_md5 + '\'' +
-                ", logo_md5='" + logo_md5 + '\'' +
-                ", background_md5='" + background_md5 + '\'' +
                 ", recommended='" + recommended + '\'' +
                 ", latest='" + latest + '\'' +
                 ", builds=" + builds +

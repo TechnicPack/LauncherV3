@@ -24,10 +24,7 @@ import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,11 +32,11 @@ import java.util.regex.Pattern;
 public class Library {
     private static final String[] FALLBACK = {
         "https://libraries.minecraft.net/",
-        "https://files.minecraftforge.net/maven/",
-        "http://mirror.technicpack.net/Technic/lib/",
+        "https://maven.minecraftforge.net/",
+        "https://mirror.technicpack.net/Technic/lib/",
     };
     private static final Pattern GRADLE_PATTERN = Pattern.compile("^([^:@]+):([^:@]+):([^:@]+)(?::([^:@]+))?(?:@([^:@]+))?$");
-    private static final Pattern FORGE_MAVEN_ROOT = Pattern.compile("^https://files\\.minecraftforge\\.net/maven/(.+)$");
+    private static final Pattern FORGE_MAVEN_ROOT = Pattern.compile("^https://(?:files\\.minecraftforge\\.net/maven|maven\\.minecraftforge\\.net)/(.+)$");
 
     // JSON fields
     private String name;
@@ -55,7 +52,38 @@ public class Library {
     private transient String gradleArtifactId;
     private transient String gradleVersion;
     private transient String gradleClassifier;
-    private transient String gradleExtension = "jar";
+    private transient String gradleExtension;
+
+    public String getNormalizedName() {
+        return name.contains("@") ? name : name + "@jar";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Library library = (Library) o;
+        String normalizedNameSelf = getNormalizedName();
+        String normalizedNameOther = library.getNormalizedName();
+        return Objects.equals(normalizedNameSelf, normalizedNameOther) && Objects.equals(rules, library.rules) && Objects.equals(downloads, library.downloads) && Objects.equals(natives, library.natives) && Objects.equals(extract, library.extract) && Objects.equals(url, library.url);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getNormalizedName(), rules, downloads, natives, extract, url);
+    }
+
+    public Library() {}
+
+    public Library(String name) {
+        setName(name);
+    }
+
+    public Library(String name, String artifactUrl, String artifactSha1, int artifactSize) {
+        setName(name);
+
+        downloads = new Downloads(artifactUrl, artifactSha1, artifactSize);
+    }
 
     public String getUrl() {
         return url;
@@ -71,6 +99,9 @@ public class Library {
 
     public void setName(String name) {
         this.name = name;
+
+        // Trigger name reparse to update the gradle info
+        parseName();
     }
 
     public List<Rule> getRules() {
@@ -85,15 +116,19 @@ public class Library {
         return extract;
     }
 
-    private void parseName() {
+    private void ensureNameIsParsed() {
         // Don't reparse if it's already been parsed
         if (gradleGroupId != null)
             return;
 
+        parseName();
+    }
+
+    private void parseName() {
         Matcher m = GRADLE_PATTERN.matcher(name);
 
         if (!m.matches()) {
-            throw new IllegalStateException("Cannot parse empty gradle specifier");
+            throw new IllegalStateException("Cannot parse invalid gradle specifier: " + name);
         }
 
         gradleGroupId = m.group(1);
@@ -101,8 +136,35 @@ public class Library {
         gradleVersion = m.group(3);
         gradleClassifier = m.group(4);
         String extension = m.group(5);
-        if (extension != null && !extension.isEmpty())
+        if (extension != null && !extension.isEmpty()) {
             gradleExtension = extension;
+        } else {
+            gradleExtension = "jar";
+        }
+    }
+
+    public String getGradleGroup() {
+        ensureNameIsParsed();
+
+        return gradleGroupId;
+    }
+
+    public String getGradleArtifact() {
+        ensureNameIsParsed();
+
+        return gradleArtifactId;
+    }
+
+    public String getGradleVersion() {
+        ensureNameIsParsed();
+
+        return gradleVersion;
+    }
+
+    public String getGradleClassifier() {
+        ensureNameIsParsed();
+
+        return gradleClassifier;
     }
 
     public boolean isForCurrentOS() {
@@ -126,7 +188,7 @@ public class Library {
         }
 
         // Make sure the gradle specifier is parsed
-        parseName();
+        ensureNameIsParsed();
 
         String filename = getArtifactFilename(nativeClassifier);
 
@@ -139,7 +201,7 @@ public class Library {
         }
 
         // Make sure the gradle specifier is parsed
-        parseName();
+        ensureNameIsParsed();
 
         String filename = gradleArtifactId + '-' + gradleVersion;
 
@@ -196,7 +258,7 @@ public class Library {
                 // Check if this URL is in Minecraft Forge's Maven repo and add ours as a primary mirror
                 Matcher m = FORGE_MAVEN_ROOT.matcher(artifactUrl);
                 if (m.matches())
-                    possibleUrls.add(TechnicConstants.technicForgeRepo + m.group(1));
+                    possibleUrls.add(TechnicConstants.technicLibRepo + m.group(1));
 
                 possibleUrls.add(artifactUrl);
             }
@@ -217,8 +279,20 @@ public class Library {
         throw new DownloadException("Failed to download library " + path + ": no mirror found");
     }
 
-    public boolean isForge() {
+    public boolean isMinecraftForge() {
+        // "net.minecraftforge:minecraftforge:" is used by MC 1.6.x versions
         return name.startsWith("net.minecraftforge:forge:") || name.startsWith("net.minecraftforge:minecraftforge:");
     }
 
+    public boolean isLog4j() {
+        return name.startsWith("org.apache.logging.log4j:");
+    }
+
+    public Downloads getDownloads() {
+        return downloads;
+    }
+
+    public void setDownloads(Downloads downloads) {
+        this.downloads = downloads;
+    }
 }

@@ -22,10 +22,10 @@ package net.technicpack.launchercore;
 import net.technicpack.autoupdate.IBuildNumber;
 
 public class TechnicConstants {
-    public static final String technicURL = "http://mirror.technicpack.net/Technic/";
+    public static final String technicURL = "https://mirror.technicpack.net/Technic/";
     public static final String technicVersions = technicURL + "version/";
     public static final String technicFmlLibRepo = technicURL + "lib/fml/";
-    public static final String technicForgeRepo = technicURL + "lib/";
+    public static final String technicLibRepo = technicURL + "lib/";
     public static final String javaDownloadURL = "https://www.java.com/en/download/manual.jsp";
 
     private static IBuildNumber buildNumber;

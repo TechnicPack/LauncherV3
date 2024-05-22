@@ -21,6 +21,7 @@ package net.technicpack.utilslib;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
+import java.util.logging.Level;
 
 public class Memory {
     public static final Memory[] memoryOptions = {
@@ -45,6 +46,14 @@ public class Memory {
             (new Memory(14336, "14 GB", 16)),
             (new Memory(15360, "15 GB", 17)),
             (new Memory(16384, "16 GB", 18)),
+            (new Memory(17408, "17 GB", 21)),
+            (new Memory(18432, "18 GB", 22)),
+            (new Memory(19456, "19 GB", 23)),
+            (new Memory(20480, "20 GB", 24)),
+            (new Memory(21504, "21 GB", 25)),
+            (new Memory(22528, "22 GB", 26)),
+            (new Memory(23552, "23 GB", 27)),
+            (new Memory(24576, "24 GB", 28)),
     };
     public static final Memory DEFAULT_MEM = memoryOptions[2];
     public static final int MAX_32_BIT_MEMORY = 1024;
@@ -55,8 +64,11 @@ public class Memory {
             OperatingSystemMXBean osInfo = ManagementFactory.getOperatingSystemMXBean();
             if (osInfo instanceof com.sun.management.OperatingSystemMXBean) {
                 maxMemory = ((com.sun.management.OperatingSystemMXBean) osInfo).getTotalPhysicalMemorySize() / 1024 / 1024;
+            } else {
+                Utils.getLogger().log(Level.SEVERE, "Failed to detect physical memory: incorrect instance type " + osInfo.getClass().getName());
             }
         } catch (Throwable t) {
+            Utils.getLogger().log(Level.SEVERE, "Failed to detect physical memory", t);
         }
         return Math.max(512, maxMemory);
     }

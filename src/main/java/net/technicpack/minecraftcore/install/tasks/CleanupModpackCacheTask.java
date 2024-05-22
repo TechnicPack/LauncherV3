@@ -52,32 +52,24 @@ public class CleanupModpackCacheTask implements IInstallTask {
 
 	@Override
 	public void runTask(InstallTasksQueue queue) throws IOException {
-		File[] files = this.pack.getCacheDir().listFiles();
+		final File cacheDir = pack.getCacheDir();
+
+		File[] files = cacheDir.listFiles();
 
 		if (files == null) {
 			return;
 		}
 
-		Set<String> keepFiles = new HashSet<String>(modpack.getMods().size() + 1);
+		Set<File> keepFiles = new HashSet<>(modpack.getMods().size());
 		for (Mod mod : modpack.getMods()) {
-			String version = mod.getVersion();
-
-			String name;
-			if (version != null) {
-				name = mod.getName() + "-" + version + ".zip";
-			} else {
-				name = mod.getName() + ".zip";
-			}
-
-			keepFiles.add(name);
+			keepFiles.add(mod.generateSafeCacheFile(cacheDir));
 		}
-		keepFiles.add("minecraft.jar");
 
 		for (File file : files) {
-			String fileName = file.getName();
-			if (keepFiles.contains(fileName)) {
+			if (keepFiles.contains(file)) {
 				continue;
 			}
+
 			FileUtils.deleteQuietly(file);
 		}
 	}

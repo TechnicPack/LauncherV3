@@ -35,13 +35,13 @@ import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.settings.migration.IMigrator;
 import net.technicpack.launcher.settings.migration.InitialV3Migrator;
+import net.technicpack.launcher.settings.migration.ResetJvmArgsIfDefaultString;
 import net.technicpack.launcher.ui.InstallerFrame;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.LoginFrame;
 import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launchercore.TechnicConstants;
-import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.auth.UserModel;
@@ -67,8 +67,8 @@ import net.technicpack.launchercore.modpacks.resources.resourcetype.LogoResource
 import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.minecraftcore.launch.MinecraftLauncher;
-import net.technicpack.minecraftcore.mojang.auth.AuthenticationService;
-import net.technicpack.minecraftcore.mojang.auth.MojangUser;
+import net.technicpack.minecraftcore.microsoft.auth.MicrosoftAuthenticator;
+import net.technicpack.minecraftcore.mojang.auth.MojangAuthenticator;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.IPlatformSearchApi;
 import net.technicpack.platform.PlatformPackInfoRepository;
@@ -97,7 +97,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.InetAddress;
@@ -180,6 +179,9 @@ public class LauncherMain {
         resources.setSupportedLanguages(supportedLanguages);
         resources.setLocale(settings.getLanguageCode());
 
+        // Sanity check
+        checkIfRunningInsideOneDrive(directories.getLauncherDirectory());
+
         if (params.getBuildNumber() != null && !params.getBuildNumber().isEmpty())
             buildNumber = new CommandLineBuildNumber(params);
         else
@@ -198,7 +200,12 @@ public class LauncherMain {
             //This is probably a debug build or something, build number is invalid
         }
 
-        Relauncher launcher = new TechnicRelauncher(new HttpUpdateStream("http://api.technicpack.net/launcher/"), settings.getBuildStream()+"4", build, directories, resources, params);
+        // These 2 need to happen *before* the launcher or the updater run so we have valuable debug information and so
+        // we can properly use websites that use Let's Encrypt (and other current certs not supported by old Java versions)
+        runStartupDebug();
+        injectNewRootCerts();
+
+        Relauncher launcher = new TechnicRelauncher(new HttpUpdateStream("https://api.technicpack.net/launcher/"), settings.getBuildStream()+"4", build, directories, resources, params);
 
         try {
             if (launcher.runAutoUpdater())
@@ -209,6 +216,27 @@ public class LauncherMain {
             //JOptionPane.showMessageDialog(null, resources.getString("launcher.updateerror.download", pack.getDisplayName(), e.getMessage()), resources.getString("launcher.installerror.title"), JOptionPane.WARNING_MESSAGE);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private static void checkIfRunningInsideOneDrive(File launcherRoot) {
+        if (OperatingSystem.getOperatingSystem() != OperatingSystem.WINDOWS) {
+            return;
+        }
+
+        Path launcherRootPath = launcherRoot.toPath();
+
+        for (String varName : new String[]{"OneDrive", "OneDriveConsumer"}) {
+            String varValue = System.getenv(varName);
+            if (varValue == null || varValue.isEmpty()) {
+                continue;
+            }
+
+            Path oneDrivePath = new File(varValue).toPath();
+
+            if (launcherRootPath.startsWith(oneDrivePath)) {
+                JOptionPane.showMessageDialog(null, "Technic Launcher cannot run inside OneDrive. Please move it out of OneDrive, in the launcher settings.", "Cannot run inside OneDrive", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
@@ -238,52 +266,24 @@ public class LauncherMain {
         System.setOut(new PrintStream(new LoggerOutputStream(console, Level.INFO, logger), true));
         System.setErr(new PrintStream(new LoggerOutputStream(console, Level.SEVERE, logger), true));
 
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread t, Throwable e) {
-                e.printStackTrace();
-                logger.log(Level.SEVERE, "Unhandled Exception in " + t, e);
-
-//                if (errorDialog == null) {
-//                    LauncherFrame frame = null;
-//
-//                    try {
-//                        frame = Launcher.getFrame();
-//                    } catch (Exception ex) {
-//                        //This can happen if we have a very early crash- before Launcher initializes
-//                    }
-//
-//                    errorDialog = new ErrorDialog(frame, e);
-//                    errorDialog.setVisible(true);
-//                }
-            }
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+            e.printStackTrace();
+            logger.log(Level.SEVERE, "Unhandled Exception in " + t, e);
         });
     }
 
-    private static void startLauncher(final TechnicSettings settings, StartupParameters startupParameters, final LauncherDirectories directories, ResourceLoader resources) {
-        UIManager.put( "ComboBox.disabledBackground", LauncherFrame.COLOR_FORMELEMENT_INTERNAL );
-        UIManager.put( "ComboBox.disabledForeground", LauncherFrame.COLOR_GREY_TEXT );
-        System.setProperty("xr.load.xml-reader", "org.ccil.cowan.tagsoup.Parser");
-
-        //Remove all log files older than a week
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Iterator<File> files = FileUtils.iterateFiles(new File(directories.getLauncherDirectory(), "logs"), new String[] {"log"}, false);
-                while (files.hasNext()) {
-                    File logFile = files.next();
-                    if (logFile.exists() && (new DateTime(logFile.lastModified())).isBefore(DateTime.now().minusWeeks(1))) {
-                        logFile.delete();
-                    }
-                }
-            }
-        }).start();
-
+    private static void runStartupDebug() {
         // Startup debug messages
         Utils.getLogger().info("OS: " + System.getProperty("os.name").toLowerCase(Locale.ENGLISH));
         Utils.getLogger().info("Identified as "+ OperatingSystem.getOperatingSystem().getName());
         Utils.getLogger().info("Java: " + System.getProperty("java.version") + " " + JavaUtils.getJavaBitness() + "-bit (" + System.getProperty("os.arch") + ")");
-        final String[] domains = {"minecraft.net", "session.minecraft.net", "textures.minecraft.net", "libraries.minecraft.net", "authserver.mojang.com", "account.mojang.com", "technicpack.net", "launcher.technicpack.net", "api.technicpack.net", "mirror.technicpack.net", "solder.technicpack.net", "files.minecraftforge.net"};
+        final String[] domains = {
+                "minecraft.net", "session.minecraft.net", "textures.minecraft.net", "libraries.minecraft.net",
+                "account.mojang.com", "www.technicpack.net", "launcher.technicpack.net", "api.technicpack.net",
+                "mirror.technicpack.net", "solder.technicpack.net", "files.minecraftforge.net",
+                "user.auth.xboxlive.com", "xsts.auth.xboxlive.com", "api.minecraftservices.com",
+                "launchermeta.mojang.com", "piston-meta.mojang.com",
+        };
         for (String domain : domains) {
             try {
                 Collection<InetAddress> inetAddresses = Arrays.asList(InetAddress.getAllByName(domain));
@@ -293,110 +293,23 @@ public class LauncherMain {
                 Utils.getLogger().log(Level.SEVERE, "Failed to resolve " + domain + ": " + ex.toString());
             }
         }
-
-        final SplashScreen splash = new SplashScreen(resources.getImage("launch_splash.png"), 0);
-        Color bg = LauncherFrame.COLOR_FORMELEMENT_INTERNAL;
-        splash.getContentPane().setBackground(new Color (bg.getRed(),bg.getGreen(),bg.getBlue(),255));
-        splash.pack();
-        splash.setLocationRelativeTo(null);
-        splash.setVisible(true);
-
-        // Inject new root certs for compatibility with older Java versions that don't have them
-        injectNewRootCerts();
-
-        JavaVersionRepository javaVersions = new JavaVersionRepository();
-        (new InstalledJavaSource()).enumerateVersions(javaVersions);
-        FileJavaSource javaVersionFile = FileJavaSource.load(new File(settings.getTechnicRoot(), "javaVersions.json"));
-        javaVersionFile.enumerateVersions(javaVersions);
-        javaVersions.selectVersion(settings.getJavaVersion(), settings.getJavaBitness());
-
-        IUserStore<MojangUser> users = TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json"));
-        UserModel userModel = new UserModel(users, new AuthenticationService());
-
-        IModpackResourceType iconType = new IconResourceType();
-        IModpackResourceType logoType = new LogoResourceType();
-        IModpackResourceType backgroundType = new BackgroundResourceType();
-
-        PackResourceMapper iconMapper = new PackResourceMapper(directories, resources.getImage("icon.png"), iconType);
-        ImageRepository<ModpackModel> iconRepo = new ImageRepository<ModpackModel>(iconMapper, new PackImageStore(iconType));
-        ImageRepository<ModpackModel> logoRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, resources.getImage("modpack/ModImageFiller.png"), logoType), new PackImageStore(logoType));
-        ImageRepository<ModpackModel> backgroundRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, null, backgroundType), new PackImageStore(backgroundType));
-
-        ImageRepository<IUserType> skinRepo = new ImageRepository<IUserType>(new TechnicFaceMapper(directories, resources), new MinotarFaceImageStore("https://minotar.net/"));
-
-        ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<AuthorshipInfo>(new TechnicAvatarMapper(directories, resources), new WebAvatarImageStore());
-
-        HttpSolderApi httpSolder = new HttpSolderApi(settings.getClientId());
-        ISolderApi solder = new CachedSolderApi(directories, httpSolder, 60 * 60);
-        HttpPlatformApi httpPlatform = new HttpPlatformApi("http://api.technicpack.net/", buildNumber.getBuildNumber());
-
-        IPlatformApi platform = new ModpackCachePlatformApi(httpPlatform, 60 * 60, directories);
-        IPlatformSearchApi platformSearch = new HttpPlatformSearchApi("http://api.technicpack.net/", buildNumber.getBuildNumber());
-
-        IInstalledPackRepository packStore = TechnicInstalledPackStore.load(new File(directories.getLauncherDirectory(), "installedPacks"));
-        IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(platform, solder);
-
-        ArrayList<IMigrator> migrators = new ArrayList<IMigrator>(1);
-        migrators.add(new InitialV3Migrator(platform));
-        SettingsFactory.migrateSettings(settings, packStore, directories, users, migrators);
-
-        PackLoader packList = new PackLoader(directories, packStore, packInfoRepository);
-        ModpackSelector selector = new ModpackSelector(resources, packList, new SolderPackSource("http://solder.technicpack.net/api/", solder), solder, platform, platformSearch, iconRepo);
-        selector.setBorder(BorderFactory.createEmptyBorder());
-        userModel.addAuthListener(selector);
-
-        resources.registerResource(selector);
-
-        DiscoverInfoPanel discoverInfoPanel = new DiscoverInfoPanel(resources, startupParameters.getDiscoverUrl(), platform, directories, selector);
-
-        MinecraftLauncher launcher = new MinecraftLauncher(platform, directories, userModel, javaVersions, buildNumber);
-        ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());
-        Installer installer = new Installer(startupParameters, directories, modpackInstaller, launcher, settings, iconMapper);
-
-        IDiscordApi discordApi = new HttpDiscordApi("https://discord.com/api/");
-        discordApi = new CacheDiscordApi(discordApi, 600, 60);
-
-        final LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, selector, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo, platform, directories, packStore, startupParameters, discoverInfoPanel, javaVersions, javaVersionFile, buildNumber, discordApi);
-        userModel.addAuthListener(frame);
-
-        ActionListener listener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                splash.dispose();
-                if (settings.getLaunchToModpacks())
-                    frame.selectTab("modpacks");
-            }
-        };
-
-        discoverInfoPanel.setLoadListener(listener);
-
-        LoginFrame login = new LoginFrame(resources, settings, userModel, skinRepo);
-        userModel.addAuthListener(login);
-        userModel.addAuthListener(new IAuthListener() {
-            @Override
-            public void userChanged(Object user) {
-                if (user == null)
-                    splash.dispose();
-            }
-        });
-
-        userModel.initAuth();
-
-        Utils.sendTracking("runLauncher", "run", buildNumber.getBuildNumber(), settings.getClientId());
     }
 
     private static void injectNewRootCerts() {
         // Adapted from Forge installer
         final String javaVersion = System.getProperty("java.version");
-        if (javaVersion == null || !javaVersion.startsWith("1.8.0_"))
+        if (javaVersion == null || !javaVersion.startsWith("1.8.0_")) {
+            Utils.getLogger().log(Level.INFO, "Don't need to inject new root certificates: Java is newer than 8 (" + javaVersion + ")");
             return;
+        }
 
         try {
-            if (Integer.parseInt(javaVersion.substring("1.8.0_".length())) >= 101) {
-                Utils.getLogger().log(Level.INFO, "Don't need to inject new root certificates");
+            final String[] javaVersionParts = javaVersion.split("[._-]");
+            if (Integer.parseInt(javaVersionParts[3]) >= 101) {
+                Utils.getLogger().log(Level.INFO, "Don't need to inject new root certificates: Java 8 is 101+ (" + javaVersion + ")");
                 return;
             }
-        } catch (final NumberFormatException e) {
+        } catch (final NumberFormatException | ArrayIndexOutOfBoundsException e) {
             Utils.getLogger().log(Level.WARNING, "Couldn't parse Java version, can't inject new root certs", e);
             return;
         }
@@ -445,5 +358,107 @@ public class LauncherMain {
             Utils.getLogger().log(Level.WARNING, "Failed to inject new root certificates. Problems might happen");
             e.printStackTrace();
         }
+    }
+
+    private static void startLauncher(final TechnicSettings settings, StartupParameters startupParameters, final LauncherDirectories directories, ResourceLoader resources) {
+        UIManager.put( "ComboBox.disabledBackground", LauncherFrame.COLOR_FORMELEMENT_INTERNAL );
+        UIManager.put( "ComboBox.disabledForeground", LauncherFrame.COLOR_GREY_TEXT );
+        System.setProperty("xr.load.xml-reader", "org.ccil.cowan.tagsoup.Parser");
+
+        //Remove all log files older than a week
+        new Thread(() -> {
+            Iterator<File> files = FileUtils.iterateFiles(new File(directories.getLauncherDirectory(), "logs"), new String[] {"log"}, false);
+            while (files.hasNext()) {
+                File logFile = files.next();
+                if (logFile.exists() && (new DateTime(logFile.lastModified())).isBefore(DateTime.now().minusWeeks(1))) {
+                    logFile.delete();
+                }
+            }
+        }).start();
+
+        final SplashScreen splash = new SplashScreen(resources.getImage("launch_splash.png"), 0);
+        Color bg = LauncherFrame.COLOR_FORMELEMENT_INTERNAL;
+        splash.getContentPane().setBackground(new Color (bg.getRed(),bg.getGreen(),bg.getBlue(),255));
+        splash.pack();
+        splash.setLocationRelativeTo(null);
+        splash.setVisible(true);
+
+        JavaVersionRepository javaVersions = new JavaVersionRepository();
+        (new InstalledJavaSource()).enumerateVersions(javaVersions);
+        FileJavaSource javaVersionFile = FileJavaSource.load(new File(settings.getTechnicRoot(), "javaVersions.json"));
+        javaVersionFile.enumerateVersions(javaVersions);
+        javaVersions.selectVersion(settings.getJavaVersion(), settings.getJavaBitness());
+
+        TechnicUserStore users = TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json"));
+        MicrosoftAuthenticator microsoftAuthenticator =
+                new MicrosoftAuthenticator(new File(directories.getLauncherDirectory(), "oauth"));
+        MojangAuthenticator mojangAuthenticator = new MojangAuthenticator(users.getClientToken());
+        UserModel userModel = new UserModel(users, mojangAuthenticator, microsoftAuthenticator);
+
+        IModpackResourceType iconType = new IconResourceType();
+        IModpackResourceType logoType = new LogoResourceType();
+        IModpackResourceType backgroundType = new BackgroundResourceType();
+
+        PackResourceMapper iconMapper = new PackResourceMapper(directories, resources.getImage("icon.png"), iconType);
+        ImageRepository<ModpackModel> iconRepo = new ImageRepository<>(iconMapper, new PackImageStore(iconType));
+        ImageRepository<ModpackModel> logoRepo = new ImageRepository<>(new PackResourceMapper(directories, resources.getImage("modpack/ModImageFiller.png"), logoType), new PackImageStore(logoType));
+        ImageRepository<ModpackModel> backgroundRepo = new ImageRepository<>(new PackResourceMapper(directories, null, backgroundType), new PackImageStore(backgroundType));
+
+        ImageRepository<IUserType> skinRepo = new ImageRepository<>(new TechnicFaceMapper(directories, resources), new MinotarFaceImageStore("https://minotar.net/"));
+
+        ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<>(new TechnicAvatarMapper(directories, resources), new WebAvatarImageStore());
+
+        HttpSolderApi httpSolder = new HttpSolderApi(settings.getClientId());
+        ISolderApi solder = new CachedSolderApi(directories, httpSolder, 60 * 60);
+        HttpPlatformApi httpPlatform = new HttpPlatformApi("https://api.technicpack.net/", buildNumber.getBuildNumber());
+
+        IPlatformApi platform = new ModpackCachePlatformApi(httpPlatform, 60 * 60, directories);
+        IPlatformSearchApi platformSearch = new HttpPlatformSearchApi("https://api.technicpack.net/", buildNumber.getBuildNumber());
+
+        IInstalledPackRepository packStore = TechnicInstalledPackStore.load(new File(directories.getLauncherDirectory(), "installedPacks"));
+        IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(platform, solder);
+
+        ArrayList<IMigrator> migrators = new ArrayList<IMigrator>(1);
+        migrators.add(new InitialV3Migrator(platform));
+        migrators.add(new ResetJvmArgsIfDefaultString());
+        SettingsFactory.migrateSettings(settings, packStore, directories, users, migrators);
+
+        PackLoader packList = new PackLoader(directories, packStore, packInfoRepository);
+        ModpackSelector selector = new ModpackSelector(resources, packList, new SolderPackSource("https://solder.technicpack.net/api/", solder), solder, platform, platformSearch, iconRepo);
+        selector.setBorder(BorderFactory.createEmptyBorder());
+        userModel.addAuthListener(selector);
+
+        resources.registerResource(selector);
+
+        DiscoverInfoPanel discoverInfoPanel = new DiscoverInfoPanel(resources, startupParameters.getDiscoverUrl(), platform, directories, selector);
+
+        MinecraftLauncher launcher = new MinecraftLauncher(platform, directories, userModel, javaVersions, buildNumber);
+        ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());
+        Installer installer = new Installer(startupParameters, directories, modpackInstaller, launcher, settings, iconMapper);
+
+        IDiscordApi discordApi = new HttpDiscordApi("https://discord.com/api/");
+        discordApi = new CacheDiscordApi(discordApi, 600, 60);
+
+        final LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, selector, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo, platform, directories, packStore, startupParameters, discoverInfoPanel, javaVersions, javaVersionFile, buildNumber, discordApi);
+        userModel.addAuthListener(frame);
+
+        ActionListener listener = e -> {
+            splash.dispose();
+            if (settings.getLaunchToModpacks())
+                frame.selectTab("modpacks");
+        };
+
+        discoverInfoPanel.setLoadListener(listener);
+
+        LoginFrame login = new LoginFrame(resources, settings, userModel, skinRepo);
+        userModel.addAuthListener(login);
+        userModel.addAuthListener(user -> {
+            if (user == null)
+                splash.dispose();
+        });
+
+        userModel.startupAuth();
+
+        Utils.sendTracking("runLauncher", "run", buildNumber.getBuildNumber(), settings.getClientId());
     }
 }

@@ -47,8 +47,10 @@ public class FileJavaSource implements IVersionSource {
 
     @Override
     public void enumerateVersions(JavaVersionRepository repository) {
-        for(FileBasedJavaVersion version : versions) {
-            repository.addVersion(version);
+        // Add all valid Java runtimes to the repository, and remove any invalid ones
+        // If any were removed, then we save the cleaned up list
+        if (versions.removeIf(version -> !repository.addVersion(version))) {
+            save();
         }
     }
 

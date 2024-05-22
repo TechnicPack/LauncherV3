@@ -20,12 +20,17 @@
 package net.technicpack.minecraftcore.mojang.auth;
 
 import net.technicpack.launchercore.auth.IUserType;
+import net.technicpack.launchercore.auth.UserModel;
+import net.technicpack.launchercore.exception.AuthenticationException;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.auth.io.Profile;
 import net.technicpack.minecraftcore.mojang.auth.io.UserProperties;
 import net.technicpack.minecraftcore.mojang.auth.response.AuthResponse;
 
 public class MojangUser implements IUserType {
+    public static final String MOJANG_USER_TYPE = "mojang";
+    private static final String LEGACY = "legacy";
+
     private String username;
     private String accessToken;
     private String clientToken;
@@ -35,7 +40,7 @@ public class MojangUser implements IUserType {
     private transient boolean isOffline;
 
     public MojangUser() {
-        isOffline = false;
+        this.isOffline = false;
     }
 
     //This constructor is used to build a user for offline mode
@@ -52,6 +57,10 @@ public class MojangUser implements IUserType {
     public MojangUser(String username, AuthResponse response) {
         this.isOffline = false;
         this.username = username;
+        refreshToken(response);
+    }
+
+    private void refreshToken(AuthResponse response) {
         this.accessToken = response.getAccessToken();
         this.clientToken = response.getClientToken();
         this.displayName = response.getSelectedProfile().getName();
@@ -62,6 +71,16 @@ public class MojangUser implements IUserType {
         } else {
             this.userProperties = response.getUser().getUserProperties();
         }
+    }
+
+    @Override
+    public void login(UserModel userModel) throws AuthenticationException {
+        refreshToken(userModel.getMojangAuthenticator().requestRefresh(this));
+    }
+
+    @Override
+    public String getUserType() {
+        return MOJANG_USER_TYPE;
     }
 
     public String getId() {
@@ -96,11 +115,11 @@ public class MojangUser implements IUserType {
         return "token:" + accessToken + ":" + profile.getId();
     }
 
-    public void rotateAccessToken(String newToken) {
-        this.accessToken = newToken;
+    public String getMCUserType() {
+        return getProfile().isLegacy() ? LEGACY : MOJANG_USER_TYPE;
     }
 
-    public String getUserPropertiesAsJson() {
+    public String getUserProperties() {
         if (this.userProperties != null)
             return MojangUtils.getUglyGson().toJson(this.userProperties);
         else
@@ -110,5 +129,10 @@ public class MojangUser implements IUserType {
     public void mergeUserProperties(MojangUser mergeUser) {
         if (this.userProperties != null && mergeUser.userProperties != null)
             this.userProperties.merge(mergeUser.userProperties);
+    }
+
+    @Override
+    public String toString() {
+        return getDisplayName();
     }
 }

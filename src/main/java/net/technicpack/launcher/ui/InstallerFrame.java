@@ -96,7 +96,9 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         this.params = params;
         this.mainFrame = mainFrame;
 
-        mainFrame.setVisible(false);
+        if (mainFrame != null) {
+            mainFrame.setVisible(false);
+        }
 
         addGlassPane();
 

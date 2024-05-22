@@ -31,7 +31,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 
-public class UserCellRenderer extends AdvancedCellRenderer implements ListCellRenderer, IImageJobListener<IUserType> {
+public class UserCellRenderer extends AdvancedCellRenderer<IUserType> implements ListCellRenderer<IUserType>, IImageJobListener<IUserType> {
     private Icon addUserIcon;
 
     private ImageRepository<IUserType> mSkinRepo;
@@ -39,7 +39,7 @@ public class UserCellRenderer extends AdvancedCellRenderer implements ListCellRe
     private static final int ICON_WIDTH = 32;
     private static final int ICON_HEIGHT = 32;
 
-    private HashMap<String, Icon> headMap = new HashMap<String, Icon>();
+    private HashMap<String, Icon> headMap = new HashMap<>();
 
     public UserCellRenderer(ResourceLoader resources, ImageRepository<IUserType> skinRepo) {
         this.mSkinRepo = skinRepo;
@@ -47,35 +47,19 @@ public class UserCellRenderer extends AdvancedCellRenderer implements ListCellRe
     }
 
     @Override
-    public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-        super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+    public Component getListCellRendererComponent(JList<? extends IUserType> list, IUserType user, int index, boolean isSelected, boolean cellHasFocus) {
+        super.getListCellRendererComponent(list, user, index, isSelected, cellHasFocus);
 
-        if (value instanceof IUserType) {
-            IUserType mojangUser = (IUserType) value;
-            this.setText(mojangUser.getDisplayName());
-            this.setIconTextGap(8);
+        if (!headMap.containsKey(user.getUsername())) {
+            ImageJob<IUserType> job = mSkinRepo.startImageJob(user);
+            job.addJobListener(this);
+            headMap.put(user.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
+        }
 
-            if (!headMap.containsKey(mojangUser.getUsername())) {
-                ImageJob<IUserType> job = mSkinRepo.startImageJob(mojangUser);
-                job.addJobListener(this);
-                headMap.put(mojangUser.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
-            }
+        Icon head = headMap.get(user.getUsername());
 
-            Icon head = headMap.get(mojangUser.getUsername());
-
-            if (head != null) {
-                this.setIcon(head);
-            }
-        } else if (value == null) {
-            this.setText("Add New User");
-            this.setIconTextGap(8);
-
-            if (addUserIcon != null) {
-                this.setIcon(addUserIcon);
-            }
-        } else {
-            this.setIconTextGap(0);
-            this.setText(value.toString());
+        if (head != null) {
+            this.setIcon(head);
         }
 
         return this;
@@ -83,11 +67,10 @@ public class UserCellRenderer extends AdvancedCellRenderer implements ListCellRe
 
     @Override
     public void jobComplete(ImageJob<IUserType> job) {
-        IUserType mojangUser = job.getJobData();
-        if (headMap.containsKey(mojangUser.getUsername()))
-            headMap.remove(mojangUser.getUsername());
+        IUserType user = job.getJobData();
+        headMap.remove(user.getUsername());
 
-        headMap.put(mojangUser.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
+        headMap.put(user.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
 
         this.invalidate();
     }

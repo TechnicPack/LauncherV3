@@ -32,8 +32,8 @@ import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.ModpackInstaller;
 import net.technicpack.launchercore.install.Version;
 import net.technicpack.launchercore.install.tasks.*;
-import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
-import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
+import net.technicpack.launchercore.install.verifiers.SHA1FileVerifier;
+import net.technicpack.launchercore.launch.GameProcess;
 import net.technicpack.launchercore.launch.java.IJavaVersion;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
@@ -58,10 +58,11 @@ import net.technicpack.utilslib.Memory;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JOptionPane;
+import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Pattern;
@@ -74,10 +75,10 @@ public class Installer {
     protected final PackResourceMapper packIconMapper;
     protected final StartupParameters startupParameters;
     protected final LauncherDirectories directories;
-    protected Object cancelLock = new Object();
+    protected final Object cancelLock = new Object();
     protected boolean isCancelledByUser = false;
 
-    private Thread runningThread;
+    private Thread installerThread;
     private LauncherUnhider launcherUnhider;
 
     public Installer(StartupParameters startupParameters, LauncherDirectories directories, ModpackInstaller installer, MinecraftLauncher launcher, TechnicSettings settings, PackResourceMapper packIconMapper) {
@@ -94,7 +95,7 @@ public class Installer {
         synchronized (cancelLock) {
             isCancelledByUser = true;
         }
-        runningThread.interrupt();
+        installerThread.interrupt();
     }
 
     public void justInstall(final ResourceLoader resources, final ModpackModel pack, final String build, final boolean doFullInstall, final LauncherFrame frame, final DownloadListener listener) {
@@ -106,10 +107,10 @@ public class Installer {
     }
 
     protected void internalInstallAndRun(final ResourceLoader resources, final ModpackModel pack, final String build, final boolean doFullInstall, final LauncherFrame frame, final DownloadListener listener, final boolean doLaunch) {
-        runningThread = new Thread(new Runnable() {
+        installerThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                boolean everythingWorked = false;
+                GameProcess gameProcess = null;
 
                 try {
                     MojangVersion version = null;
@@ -117,7 +118,7 @@ public class Installer {
                     InstallTasksQueue<MojangVersion> tasksQueue = new InstallTasksQueue<MojangVersion>(listener);
                     MojangVersionBuilder versionBuilder = createVersionBuilder(pack, tasksQueue);
 
-                    if (!pack.isLocalOnly() && build != null && !build.isEmpty()) {
+                    if (build != null && !build.isEmpty()) {
                         buildTasksQueue(tasksQueue, resources, pack, build, doFullInstall, versionBuilder);
 
                         version = installer.installPack(tasksQueue, pack, build);
@@ -133,20 +134,28 @@ public class Installer {
                             throw new PackNotAvailableOfflineException(pack.getDisplayName());
                         }
 
+                        boolean usingMojangJava = version.getJavaVersion() != null && settings.shouldUseMojangJava();
+
                         JavaVersionRepository javaVersions = launcher.getJavaVersions();
                         Memory memoryObj = Memory.getClosestAvailableMemory(Memory.getMemoryFromId(settings.getMemory()), javaVersions.getSelectedVersion().is64Bit());
                         long memory = memoryObj.getMemoryMB();
                         String versionNumber = javaVersions.getSelectedVersion().getVersionNumber();
                         RunData data = pack.getRunData();
 
-                        if (data != null && !data.isRunDataValid(memory, versionNumber)) {
-                            FixRunDataDialog dialog = new FixRunDataDialog(frame, resources, data, javaVersions, memoryObj, !settings.shouldAutoAcceptModpackRequirements());
+                        if (data != null && !data.isRunDataValid(memory, versionNumber, usingMojangJava)) {
+                            FixRunDataDialog dialog = new FixRunDataDialog(frame, resources, data, javaVersions, memoryObj, !settings.shouldAutoAcceptModpackRequirements(), usingMojangJava);
                             dialog.setVisible(true);
                             if (dialog.getResult() == FixRunDataDialog.Result.ACCEPT) {
                                 memoryObj = dialog.getRecommendedMemory();
                                 memory = memoryObj.getMemoryMB();
+                                settings.setMemory(memoryObj.getSettingsId());
+
                                 IJavaVersion recommendedJavaVersion = dialog.getRecommendedJavaVersion();
-                                javaVersions.selectVersion(recommendedJavaVersion.getVersionNumber(), recommendedJavaVersion.is64Bit());
+                                if (recommendedJavaVersion != null) {
+                                    javaVersions.selectVersion(recommendedJavaVersion.getVersionNumber(), recommendedJavaVersion.is64Bit());
+                                    settings.setJavaVersion(recommendedJavaVersion.getVersionNumber());
+                                    settings.setJavaBitness(recommendedJavaVersion.is64Bit());
+                                }
 
                                 if (dialog.shouldRemember()) {
                                     settings.setAutoAcceptModpackRequirements(true);
@@ -155,7 +164,7 @@ public class Installer {
                                 return;
                         }
 
-                        if (RunData.isJavaVersionAtLeast(versionNumber, "1.9")) {
+                        if (!usingMojangJava && RunData.isJavaVersionAtLeast(versionNumber, "1.9")) {
                             int result = JOptionPane.showConfirmDialog(frame, resources.getString("launcher.jverwarning", versionNumber), resources.getString("launcher.jverwarning.title"), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                             if (result != JOptionPane.YES_OPTION)
                                 return;
@@ -169,7 +178,7 @@ public class Installer {
                             launcherUnhider = null;
 
                         LaunchOptions options = new LaunchOptions(pack.getDisplayName(), packIconMapper.getImageLocation(pack).getAbsolutePath(), settings);
-                        launcher.launch(pack, memory, options, launcherUnhider, version);
+                        gameProcess = launcher.launch(pack, memory, options, launcherUnhider, version);
 
                         if (launchAction == null || launchAction == LaunchAction.HIDE) {
                             frame.setVisible(false);
@@ -184,8 +193,6 @@ public class Installer {
                             System.exit(0);
                         }
                     }
-
-                    everythingWorked = true;
                 } catch (InterruptedException e) {
                     boolean cancelledByUser = false;
                     synchronized (cancelLock) {
@@ -220,7 +227,7 @@ public class Installer {
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
-                    if (!everythingWorked || !doLaunch) {
+                    if (!doLaunch || gameProcess == null || gameProcess.getProcess() == null || !gameProcess.getProcess().isAlive()) {
                         EventQueue.invokeLater(new Runnable() {
                             @Override
                             public void run() {
@@ -253,18 +260,16 @@ public class Installer {
                 super.interrupt();
             }
         };
-        runningThread.start();
+        installerThread.start();
     }
 
     public boolean isCurrentlyRunning() {
-        if (runningThread != null && runningThread.isAlive())
-            return true;
-        if (launcherUnhider != null && !launcherUnhider.hasExited())
+        if (installerThread != null && installerThread.isAlive())
             return true;
         return false;
     }
 
-    public void buildTasksQueue(InstallTasksQueue queue, ResourceLoader resources, ModpackModel modpack, String build, boolean doFullInstall, MojangVersionBuilder versionBuilder) throws CacheDeleteException, BuildInaccessibleException {
+    public void buildTasksQueue(InstallTasksQueue queue, ResourceLoader resources, ModpackModel modpack, String build, boolean doFullInstall, MojangVersionBuilder versionBuilder) throws IOException {
         PackInfo packInfo = modpack.getPackInfo();
         Modpack modpackData = packInfo.getModpack(build);
 
@@ -289,6 +294,8 @@ public class Installer {
         TaskGroup examineIndex = new TaskGroup(resources.getString("install.message.examiningindex"));
         TaskGroup verifyingAssets = new TaskGroup(resources.getString("install.message.verifyassets"));
         TaskGroup installingAssets = new TaskGroup(resources.getString("install.message.installassets"));
+        TaskGroup examineJava = new TaskGroup("Examining Java runtime...");
+        TaskGroup downloadJava = new TaskGroup("Downloading Java runtime...");
 
         queue.addTask(examineModpackData);
         queue.addTask(verifyingFiles);
@@ -305,15 +312,20 @@ public class Installer {
         queue.addTask(examineIndex);
         queue.addTask(verifyingAssets);
         queue.addTask(installingAssets);
+        queue.addTask(examineJava);
+        queue.addTask(downloadJava);
         if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX)
-            queue.addTask(new CopyDylibJnilibTask(modpack));
+            queue.addTask(new RenameJnilibToDylibTask(modpack));
 
-        // Add FML libs
-        String fmlLibsZip;
-        File modpackFmlLibDir = new File(modpack.getInstalledDirectory(), "lib");
+        // Add legacy FML libs
         HashMap<String, String> fmlLibs = new HashMap<>();
 
         switch (minecraft) {
+            case "1.3.2":
+                fmlLibs.put("argo-2.25.jar", "bb672829fde76cb163004752b86b0484bd0a7f4b");
+                fmlLibs.put("guava-12.0.1.jar", "b8e78b9af7bf45900e14c6f958486b6ca682195f");
+                fmlLibs.put("asm-all-4.0.jar", "98308890597acb64047f7e896638e0d98753ae82");
+                break;
             case "1.4":
             case "1.4.1":
             case "1.4.2":
@@ -322,36 +334,49 @@ public class Installer {
             case "1.4.5":
             case "1.4.6":
             case "1.4.7":
-                fmlLibsZip = "fml_libs.zip";
+                fmlLibs.put("argo-2.25.jar", "bb672829fde76cb163004752b86b0484bd0a7f4b");
+                fmlLibs.put("guava-12.0.1.jar", "b8e78b9af7bf45900e14c6f958486b6ca682195f");
+                fmlLibs.put("asm-all-4.0.jar", "98308890597acb64047f7e896638e0d98753ae82");
+                fmlLibs.put("bcprov-jdk15on-147.jar", "b6f5d9926b0afbde9f4dbe3db88c5247be7794bb");
                 break;
             case "1.5":
-                fmlLibsZip = "fml_libs15.zip";
-                fmlLibs.put("deobfuscation_data_1.5.zip", "dba6d410a91a855f3b84457c86a8132a");
+                fmlLibs.put("argo-small-3.2.jar", "58912ea2858d168c50781f956fa5b59f0f7c6b51");
+                fmlLibs.put("guava-14.0-rc3.jar", "931ae21fa8014c3ce686aaa621eae565fefb1a6a");
+                fmlLibs.put("asm-all-4.1.jar", "054986e962b88d8660ae4566475658469595ef58");
+                fmlLibs.put("bcprov-jdk15on-148.jar", "960dea7c9181ba0b17e8bab0c06a43f0a5f04e65");
+                fmlLibs.put("deobfuscation_data_1.5.zip", "5f7c142d53776f16304c0bbe10542014abad6af8");
+                fmlLibs.put("scala-library.jar", "458d046151ad179c85429ed7420ffb1eaf6ddf85");
                 break;
             case "1.5.1":
-                fmlLibsZip = "fml_libs15.zip";
-                fmlLibs.put("deobfuscation_data_1.5.1.zip", "c4fc2fedba60d920e4c7f9a095b2b883");
+                fmlLibs.put("argo-small-3.2.jar", "58912ea2858d168c50781f956fa5b59f0f7c6b51");
+                fmlLibs.put("guava-14.0-rc3.jar", "931ae21fa8014c3ce686aaa621eae565fefb1a6a");
+                fmlLibs.put("asm-all-4.1.jar", "054986e962b88d8660ae4566475658469595ef58");
+                fmlLibs.put("bcprov-jdk15on-148.jar", "960dea7c9181ba0b17e8bab0c06a43f0a5f04e65");
+                fmlLibs.put("deobfuscation_data_1.5.1.zip", "22e221a0d89516c1f721d6cab056a7e37471d0a6");
+                fmlLibs.put("scala-library.jar", "458d046151ad179c85429ed7420ffb1eaf6ddf85");
                 break;
             case "1.5.2":
-                fmlLibsZip = "fml_libs15.zip";
-                fmlLibs.put("deobfuscation_data_1.5.2.zip", "270d9775872cc9fa773389812cab91fe");
+                fmlLibs.put("argo-small-3.2.jar", "58912ea2858d168c50781f956fa5b59f0f7c6b51");
+                fmlLibs.put("guava-14.0-rc3.jar", "931ae21fa8014c3ce686aaa621eae565fefb1a6a");
+                fmlLibs.put("asm-all-4.1.jar", "054986e962b88d8660ae4566475658469595ef58");
+                fmlLibs.put("bcprov-jdk15on-148.jar", "960dea7c9181ba0b17e8bab0c06a43f0a5f04e65");
+                fmlLibs.put("deobfuscation_data_1.5.2.zip", "446e55cd986582c70fcf12cb27bc00114c5adfd9");
+                fmlLibs.put("scala-library.jar", "458d046151ad179c85429ed7420ffb1eaf6ddf85");
                 break;
-            default:
-                fmlLibsZip = "";
-        }
-
-        if (!fmlLibsZip.isEmpty()) {
-            verifyingFiles.addTask(new EnsureFileTask(new File(directories.getCacheDirectory(), fmlLibsZip), new ValidZipFileVerifier(), modpackFmlLibDir, TechnicConstants.technicFmlLibRepo + fmlLibsZip, installingLibs, installingLibs));
         }
 
         if (!fmlLibs.isEmpty()) {
-            fmlLibs.forEach((name, md5) -> {
-                MD5FileVerifier verifier = null;
+            File modpackFmlLibDir = new File(modpack.getInstalledDirectory(), "lib");
+            File fmlLibsCache = new File(directories.getCacheDirectory(), "fmllibs");
+            Files.createDirectories(fmlLibsCache.toPath());
 
-                if (!md5.isEmpty())
-                    verifier = new MD5FileVerifier(md5);
+            fmlLibs.forEach((name, sha1) -> {
+                SHA1FileVerifier verifier = null;
 
-                File cached = new File(directories.getCacheDirectory(), name);
+                if (!sha1.isEmpty())
+                    verifier = new SHA1FileVerifier(sha1);
+
+                File cached = new File(fmlLibsCache, name);
                 File target = new File(modpackFmlLibDir, name);
 
                 if (!target.exists() || (verifier != null && !verifier.isFileValid(target)) ) {
@@ -392,6 +417,24 @@ public class Installer {
                 }
             }
 
+            // Remove the runData file between updates/reinstall as well
+            File runData = new File(modpack.getBinDir(), "runData");
+            if (runData.exists()) {
+                if (!runData.delete()) {
+                    throw new CacheDeleteException(runData.getAbsolutePath());
+                }
+            }
+
+            // Remove the bin/modpack.jar file
+            // This prevents issues when upgrading a modpack between a version that has a modpack.jar, and
+            // one that doesn't. One example of this is updating BareBonesPack from a Forge to a Fabric build.
+            File modpackJar = new File(modpack.getBinDir(), "modpack.jar");
+            if (modpackJar.exists()) {
+                if (!modpackJar.delete()) {
+                    throw new CacheDeleteException(modpackJar.getAbsolutePath());
+                }
+            }
+
             examineModpackData.addTask(new CleanupAndExtractModpackTask(modpack, modpackData, verifyingFiles, downloadingMods, installingMods));
         }
 
@@ -404,8 +447,14 @@ public class Installer {
         examineVersionFile.addTask(new HandleVersionFileTask(modpack, directories, checkNonMavenLibs, grabLibs, installingLibs, installingLibs, versionBuilder));
         examineVersionFile.addTask(new EnsureAssetsIndexTask(directories.getAssetsDirectory(), modpack, installingMinecraft, examineIndex, verifyingAssets, installingAssets, installingAssets));
 
-        if (doFullInstall || (installedVersion != null && installedVersion.isLegacy()))
-            installingMinecraft.addTask(new InstallMinecraftIfNecessaryTask(modpack, minecraft, directories.getCacheDirectory()));
+        examineJava.addTask(new EnsureJavaRuntimeManifestTask(directories.getRuntimesDirectory(), modpack, launcher.getJavaVersions(), examineJava, downloadJava));
+
+        // Check if we need to regenerate the Minecraft jar. This is necessary if:
+        // - A reinstall was requested (or forced, via modpack version update)
+        // - The installed version is marked as legacy
+        boolean jarRegenerationRequired = doFullInstall || (installedVersion != null && installedVersion.isLegacy());
+
+        installingMinecraft.addTask(new InstallMinecraftIfNecessaryTask(modpack, minecraft, directories.getCacheDirectory(), jarRegenerationRequired));
     }
 
     private MojangVersionBuilder createVersionBuilder(ModpackModel modpack, InstallTasksQueue tasksQueue) {

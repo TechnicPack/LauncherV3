@@ -19,16 +19,23 @@
 
 package net.technicpack.minecraftcore;
 
+import com.google.api.client.http.*;
+import com.google.api.client.http.apache.v2.ApacheHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.JsonObjectParser;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.technicpack.launcher.io.IUserTypeInstanceCreator;
+import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.minecraftcore.mojang.auth.io.UserProperties;
 import net.technicpack.minecraftcore.mojang.auth.io.UserPropertiesAdapter;
+import net.technicpack.minecraftcore.mojang.java.JavaRuntimes;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
 import net.technicpack.minecraftcore.mojang.version.io.CompleteVersionV21;
-import net.technicpack.minecraftcore.mojang.version.io.Library;
 import net.technicpack.minecraftcore.mojang.version.io.Rule;
 import net.technicpack.minecraftcore.mojang.version.io.RuleAdapter;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
@@ -49,22 +56,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MojangUtils {
-    /** @deprecated Uses old S3 bucket */
-    public static final String baseURL = "https://s3.amazonaws.com/Minecraft.Download/";
-    public static final String assetsIndexes = baseURL + "indexes/";
-    public static final String versions = baseURL + "versions/";
+    private static final HttpTransport HTTP_TRANSPORT = new ApacheHttpTransport();
+    private static final JsonFactory JSON_FACTORY = new GsonFactory();
+    private static final HttpRequestFactory REQUEST_FACTORY;
 
     public static final String assets = "https://resources.download.minecraft.net/";
 
-    /** @deprecated Uses old S3 bucket */
-    public static String getOldVersionDownload(String version) {
-        return versions + version + "/" + version + ".jar";
-    }
-
-    /** @deprecated Uses old S3 bucket */
-    public static String getAssetsIndex(String assetsKey) {
-        return assetsIndexes + assetsKey + ".json";
-    }
+    public static final String RUNTIMES_URL = "https://launchermeta.mojang.com/v1/products/java-runtime/2ec0cc96c44e5a76b9c8b7c39df7210883d12871/all.json";
+    private static JavaRuntimes javaRuntimes;
 
     public static String getResourceUrl(String hash) {
         return assets + hash.substring(0, 2) + "/" + hash;
@@ -81,6 +80,7 @@ public class MojangUtils {
         builder.registerTypeAdapter(UserProperties.class, new UserPropertiesAdapter());
         builder.registerTypeAdapter(ArgumentList.class, new ArgumentListAdapter());
         builder.registerTypeAdapter(Rule.class, new RuleAdapter());
+        builder.registerTypeAdapter(IUserType.class, new IUserTypeInstanceCreator());
         builder.enableComplexMapKeySerialization();
         uglyGson = builder.create();
 
@@ -90,6 +90,10 @@ public class MojangUtils {
         versionJsonVersions = new TreeMap<Integer, Class<? extends MojangVersion>>();
         versionJsonVersions.put(0, CompleteVersion.class);
         versionJsonVersions.put(21, CompleteVersionV21.class);
+
+        REQUEST_FACTORY = HTTP_TRANSPORT.createRequestFactory(
+                request -> request.setParser(new JsonObjectParser(JSON_FACTORY))
+        );
     }
 
     public static Gson getGson() {
@@ -150,6 +154,13 @@ public class MojangUtils {
 
     public static MojangVersion parseVersionJson(String json) {
         JsonObject root = JsonParser.parseString(json).getAsJsonObject();
+
+        // Safeguard in the event the version.json we get is actually the one inside a vanilla Minecraft jar
+        // (which isn't valid)
+        if (root.has("world_version") && root.has("protocol_version")) {
+            throw new IllegalArgumentException("Invalid version file, this looks like a Minecraft client jar. Are you sure you didn't place a Minecraft jar as the modpack.jar?");
+        }
+
         Class<? extends MojangVersion> versionJsonType;
         if (root.has("minimumLauncherVersion")) {
             int minLauncherVersion = root.get("minimumLauncherVersion").getAsInt();
@@ -170,19 +181,7 @@ public class MojangUtils {
         return Integer.parseInt(versionParts[0]) == 1 && Integer.parseInt(versionParts[1]) < 6;
     }
 
-    public static boolean hasModernForge(MojangVersion version) {
-        boolean foundForge = false;
-        for (Library library : version.getLibrariesForOS()) {
-            if (library.isForge()) {
-                foundForge = true;
-                break;
-            }
-        }
-
-        if (!foundForge) {
-            return false;
-        }
-
+    public static boolean hasModernMinecraftForge(MojangVersion version) {
         Pattern p = Pattern.compile("^(?<mc>[0-9.]+)-forge-(?<forge>[0-9.]+)$");
         Matcher m = p.matcher(version.getId());
 
@@ -208,6 +207,13 @@ public class MojangUtils {
         return false;
     }
 
+    public static boolean hasNeoForge(MojangVersion version) {
+        Pattern p = Pattern.compile("^neoforge-(?<forge>[0-9.]+)");
+        Matcher m = p.matcher(version.getId());
+
+        return m.lookingAt();
+    }
+
     public static String getMinecraftVersion(MojangVersion version) {
         final String id = version.getId();
 
@@ -215,18 +221,41 @@ public class MojangUtils {
         if (!id.contains("-"))
             return id;
 
+        // Neoforge doesn't have the mc version in the id but it's always the parent
+        if (hasNeoForge(version)) {
+            return version.getParentVersion();
+        }
+
         // For Forge, this will be "mc-forge"
         final String[] idParts = id.split("-");
         return idParts[0];
     }
 
     public static boolean requiresForgeWrapper(MojangVersion version) {
-        if (!hasModernForge(version)) {
+        if (hasNeoForge(version)) {
+            return true;
+        }
+        if (!hasModernMinecraftForge(version)) {
             return false;
         }
 
         final String mcVersion = getMinecraftVersion(version);
 
         return !mcVersion.equals("1.12.2");
+    }
+
+    public static JavaRuntimes getJavaRuntimes() {
+        if (javaRuntimes != null)
+            return javaRuntimes;
+
+        try {
+            HttpRequest request = REQUEST_FACTORY.buildGetRequest(new GenericUrl(RUNTIMES_URL));
+            HttpResponse httpResponse = request.execute();
+            javaRuntimes = gson.fromJson(httpResponse.parseAsString(), JavaRuntimes.class);
+            return javaRuntimes;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

@@ -46,15 +46,13 @@ public interface PackInfo {
 
     List<String> getBuilds();
 
-    boolean shouldForceDirectory();
-
     ArrayList<FeedItem> getFeed();
 
     String getDescription();
 
     Integer getRuns();
 
-    Integer getDownloads();
+    Integer getInstalls();
 
     Integer getLikes();
 

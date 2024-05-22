@@ -44,8 +44,7 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
     private String description;
     private Integer ratings;
     private Integer runs;
-    private Integer downloads;
-    private boolean forceDir;
+    private Integer installs;
     private boolean isServer;
     private boolean isOfficial;
     private String discordServerId;
@@ -105,11 +104,6 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
     }
 
     @Override
-    public boolean shouldForceDirectory() {
-        return forceDir;
-    }
-
-    @Override
     public ArrayList<FeedItem> getFeed() {
         return feed;
     }
@@ -161,8 +155,8 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
         return runs;
     }
 
-    public Integer getDownloads() {
-        return downloads;
+    public Integer getInstalls() {
+        return installs;
     }
 
     public boolean isServerPack() { return isServer; }
@@ -208,7 +202,6 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
                 ", forge='" + forge + '\'' +
                 ", version='" + version + '\'' +
                 ", solder='" + solder + '\'' +
-                ", forceDir=" + forceDir +
                 '}';
     }
 }

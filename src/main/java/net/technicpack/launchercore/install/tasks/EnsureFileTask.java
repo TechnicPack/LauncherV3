@@ -36,6 +36,7 @@ public class EnsureFileTask<TaskQueue extends ITasksQueue> implements IInstallTa
     private final TaskQueue downloadTaskQueue;
     private final TaskQueue copyTaskQueue;
     private final IZipFileFilter filter;
+    private boolean executable;
 
     public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, TaskQueue downloadTaskQueue, TaskQueue copyTaskQueue) {
         this(fileLocation, fileVerifier, zipExtractLocation, sourceUrl, fileLocation.getName(), downloadTaskQueue, copyTaskQueue, null);
@@ -84,6 +85,10 @@ public class EnsureFileTask<TaskQueue extends ITasksQueue> implements IInstallTa
     }
 
     public void downloadFile(TaskQueue taskQueue, String sourceUrl, File targetLocation, IFileVerifier verifier, String fileName) {
-        taskQueue.addNextTask(new DownloadFileTask(sourceUrl, targetLocation, verifier, fileName));
+        taskQueue.addNextTask(new DownloadFileTask(sourceUrl, targetLocation, verifier, fileName, this.executable));
+    }
+
+    public void setExecutable(boolean executable) {
+        this.executable = executable;
     }
 }

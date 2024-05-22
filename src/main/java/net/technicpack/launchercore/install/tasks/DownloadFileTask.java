@@ -24,6 +24,7 @@ import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.utilslib.Utils;
 
+import javax.swing.JFileChooser;
 import java.io.File;
 import java.io.IOException;
 
@@ -32,6 +33,7 @@ public class DownloadFileTask extends ListenerTask {
     private File destination;
     private String taskDescription;
     private IFileVerifier fileVerifier;
+    private final boolean executable;
 
     protected File getDestination() { return destination; }
 
@@ -40,10 +42,15 @@ public class DownloadFileTask extends ListenerTask {
     }
 
     public DownloadFileTask(String url, File destination, IFileVerifier verifier, String taskDescription) {
+        this(url, destination, verifier, taskDescription, false);
+    }
+
+    public DownloadFileTask(String url, File destination, IFileVerifier verifier, String taskDescription, boolean executable) {
         this.url = url;
         this.destination = destination;
-        this.taskDescription = taskDescription;
         this.fileVerifier = verifier;
+        this.taskDescription = taskDescription;
+        this.executable = executable;
     }
 
     @Override
@@ -59,6 +66,12 @@ public class DownloadFileTask extends ListenerTask {
 
         if (!this.destination.exists()) {
             throw new DownloadException("Failed to download " + this.destination.getName() + ".");
+        }
+
+        if (this.executable) {
+            if (!this.destination.setExecutable(this.executable)) {
+                throw new DownloadException("Failed to set " + this.destination.getName() + " as executable");
+            }
         }
     }
 }
