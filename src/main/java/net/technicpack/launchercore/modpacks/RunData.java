@@ -3,6 +3,11 @@ package net.technicpack.launchercore.modpacks;
 import net.technicpack.launchercore.launch.java.IJavaVersion;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.utilslib.Memory;
+import net.technicpack.utilslib.Utils;
+
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.logging.Level;
 
 @SuppressWarnings({"unused"})
 public class RunData {
@@ -12,6 +17,7 @@ public class RunData {
     public RunData() {}
 
     public String getJava() { return java; }
+
     public long getMemory() {
         try {
             return Long.parseLong(memory);
@@ -95,6 +101,9 @@ public class RunData {
                 return setting;
         }
 
-        return null;
+        // Handle case where modpack specifies more memory than is possible for the launcher
+        Memory maxMemoryOption = Arrays.stream(Memory.memoryOptions).max(Comparator.comparingLong(Memory::getMemoryMB)).orElseThrow(() -> new RuntimeException("No memory options available"));
+        Utils.getLogger().log(Level.WARNING, "Invalid runData memory value specified (" + memory + " MB); using maximum possible instead (" + maxMemoryOption.getMemoryMB() + " MB)");
+        return maxMemoryOption;
     }
 }
