@@ -9,8 +9,8 @@ import net.technicpack.ui.controls.LauncherDialog;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.borders.RoundBorder;
 import net.technicpack.ui.lang.ResourceLoader;
+import net.technicpack.utilslib.DesktopUtils;
 import net.technicpack.utilslib.Memory;
-import net.technicpack.utilslib.Utils;
 
 import javax.swing.*;
 import javax.swing.text.View;
@@ -19,10 +19,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.logging.Level;
 
 public class FixRunDataDialog extends LauncherDialog {
 
@@ -270,11 +266,17 @@ public class FixRunDataDialog extends LauncherDialog {
             label.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    try {
-                        Desktop.getDesktop().browse(new URI(TechnicConstants.javaDownloadURL));
-                    } catch (URISyntaxException | IOException ex) {
-                        Utils.getLogger().log(Level.WARNING, ex.getMessage(), ex);
-                    }
+                    DesktopUtils.browseUrl(TechnicConstants.javaDownloadURL);
+                }
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                 }
             });
             label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
@@ -293,11 +295,17 @@ public class FixRunDataDialog extends LauncherDialog {
             label.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    try {
-                        Desktop.getDesktop().browse(new URI(TechnicConstants.javaDownloadURL));
-                    } catch (URISyntaxException | IOException ex) {
-                        Utils.getLogger().log(Level.WARNING, ex.getMessage(), ex);
-                    }
+                    DesktopUtils.browseUrl(TechnicConstants.javaDownloadURL);
+                }
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                 }
             });
             label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
