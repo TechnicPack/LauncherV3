@@ -24,7 +24,7 @@ public class FixRunDataDialog extends LauncherDialog {
 
     private static final int DIALOG_WIDTH = 620;
 
-    private final ResourceLoader resourceLoader;
+    private ResourceLoader resourceLoader;
 
     private RunData runData;
     private JavaVersionRepository javaVersionRepository;
@@ -444,11 +444,9 @@ public class FixRunDataDialog extends LauncherDialog {
         return isSuccess?"req_success.png":(hasRecommended?"req_warning.png":"req_failed.png");
     }
 
-    /**
-     * Returns the preferred size to set a component at in order to render
-     * an html string.  You can specify the size of one dimension.
-     */
-    private static final JLabel resizer = new JLabel();
+    /**Returns the preferred size to set a component at in order to render
+     * an html string.  You can specify the size of one dimension.*/
+    private static JLabel resizer = new JLabel();
     private java.awt.Dimension getPreferredSize(String html, int width) {
         resizer.setText(html);
 
