@@ -26,7 +26,7 @@ public class TechnicConstants {
     public static final String technicVersions = technicURL + "version/";
     public static final String technicFmlLibRepo = technicURL + "lib/fml/";
     public static final String technicLibRepo = technicURL + "lib/";
-    public static final String javaDownloadURL = "https://www.java.com/en/download/manual.jsp";
+    public static final String javaDownloadUrl = "https://www.java.com/en/download/manual.jsp";
 
     private static IBuildNumber buildNumber;
     private static String userAgent;
