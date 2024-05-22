@@ -101,8 +101,9 @@ public class RunData {
                 return setting;
         }
 
+        // Handle case where modpack specifies more memory than is possible for the launcher
         Memory maxMemoryOption = Arrays.stream(Memory.memoryOptions).max(Comparator.comparingLong(Memory::getMemoryMB)).orElseThrow(() -> new RuntimeException("No memory options available"));
-        Utils.getLogger().log(Level.WARNING, "Cannot find memory option for " + memory + " MB using maximum possible option with " + maxMemoryOption.getMemoryMB() + " MB instead");
+        Utils.getLogger().log(Level.WARNING, "Invalid runData memory value specified (" + memory + " MB); using maximum possible instead (" + maxMemoryOption.getMemoryMB() + " MB)");
         return maxMemoryOption;
     }
 }
