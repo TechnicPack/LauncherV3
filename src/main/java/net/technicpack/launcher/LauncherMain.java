@@ -305,8 +305,8 @@ public class LauncherMain {
 
         try {
             final String[] javaVersionParts = javaVersion.split("[._-]");
-            if (Integer.parseInt(javaVersionParts[3]) >= 101) {
-                Utils.getLogger().log(Level.INFO, "Don't need to inject new root certificates: Java 8 is 101+ (" + javaVersion + ")");
+            if (Integer.parseInt(javaVersionParts[3]) >= 141) {
+                Utils.getLogger().log(Level.INFO, "Don't need to inject new root certificates: Java 8 is 141+ (" + javaVersion + ")");
                 return;
             }
         } catch (final NumberFormatException | ArrayIndexOutOfBoundsException e) {
