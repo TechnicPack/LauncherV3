@@ -423,7 +423,7 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
-                        <version>3.3.0</version>
+                        <version>3.4.1</version>
                         <executions>
                             <!-- chmod executable ... while japp plugin produces the correct
                                 permissions, jar/unjar operation resets 'x' flag, so the app becomes non-executable.
