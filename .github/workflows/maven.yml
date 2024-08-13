@@ -24,7 +24,7 @@ jobs:
     - name: Calculate build number
       run: echo "BUILD_NUMBER=$(($RUN_ID + 900))" >> "$GITHUB_ENV"
       env:
-        RUN_ID: ${{ github.run_id }}
+        RUN_ID: ${{ github.run_number }}
     - name: Set up JDK 8
       uses: actions/setup-java@v4
       with:
@@ -36,7 +36,7 @@ jobs:
     - name: Archive artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: launcher
+        name: launcher-${{ env.BUILD_NUMBER }}
         path: target/launcher-*
         compression-level: 0
 
