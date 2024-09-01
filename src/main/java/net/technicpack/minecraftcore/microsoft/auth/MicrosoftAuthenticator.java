@@ -19,6 +19,7 @@ import net.technicpack.utilslib.Utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StreamCorruptedException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -136,6 +137,23 @@ public class MicrosoftAuthenticator {
         try {
             AuthorizationCodeFlow flow = buildFlow();
             return new AuthorizationCodeInstalledApp(flow, receiver, DesktopUtils::browseUrl).authorize(username);
+        } catch (StreamCorruptedException e) {
+            // Data store is corrupt, so we're going to purge it and try again
+            Utils.getLogger().log(Level.SEVERE, "Data store is corrupt, purging", e);
+
+            File dataDir = dataStoreFactory.getDataDirectory();
+            if (dataDir != null && dataDir.exists()) {
+                File[] files = dataDir.listFiles();
+                if (files != null) {
+                    for (File file : files) {
+                        if (!file.delete()) {
+                            Utils.getLogger().log(Level.SEVERE, "Failed to delete " + file.getAbsolutePath());
+                        }
+                    }
+                }
+            }
+
+            return getOAuthCredential(username);
         } catch (IOException e) {
             Utils.getLogger().log(Level.SEVERE, "Failed to get OAuth authorization", e);
             throw new MicrosoftAuthException(OAUTH, "Failed to get OAuth authorization", e);
@@ -312,8 +330,7 @@ public class MicrosoftAuthenticator {
             dataStoreFactory.getDataStore(StoredCredential.DEFAULT_DATA_STORE_ID)
                     .set(username, new StoredCredential(credential));
         } catch (IOException e) {
-            e.printStackTrace();
-            Utils.getLogger().log(Level.WARNING, "Failed to save user credential to the data store.");
+            Utils.getLogger().log(Level.WARNING, "Failed to save user credential to the data store.", e);
         }
     }
 
