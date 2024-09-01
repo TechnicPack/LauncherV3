@@ -18,25 +18,21 @@
 
 package net.technicpack.launcher.io;
 
+import com.google.common.collect.Maps;
 import com.google.gson.JsonSyntaxException;
 import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.minecraftcore.MojangUtils;
-import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 
 public class TechnicUserStore implements IUserStore {
-    private String clientToken = UUID.randomUUID().toString();
     private Map<String, IUserType> savedUsers = new HashMap<>();
     private String lastUser;
     private transient File usersFile;
@@ -59,6 +55,7 @@ public class TechnicUserStore implements IUserStore {
             TechnicUserStore newModel = MojangUtils.getGson().fromJson(json, TechnicUserStore.class);
 
             if (newModel != null) {
+                newModel.cleanupSavedUsers();
                 newModel.setUserFile(userFile);
                 return newModel;
             }
@@ -84,12 +81,6 @@ public class TechnicUserStore implements IUserStore {
     }
 
     public void addUser(IUserType user) {
-        if (savedUsers.containsKey(user.getUsername())) {
-            IUserType oldUser = savedUsers.get(user.getUsername());
-            if (oldUser instanceof MojangUser && user instanceof MojangUser) {
-                ((MojangUser) user).mergeUserProperties((MojangUser) oldUser);
-            }
-        }
         savedUsers.put(user.getUsername(), user);
         save();
     }
@@ -101,10 +92,6 @@ public class TechnicUserStore implements IUserStore {
 
     public IUserType getUser(String accountName) {
         return savedUsers.get(accountName);
-    }
-
-    public String getClientToken() {
-        return clientToken;
     }
 
     public Collection<String> getUsers() {
@@ -122,5 +109,9 @@ public class TechnicUserStore implements IUserStore {
 
     public String getLastUser() {
         return lastUser;
+    }
+
+    private void cleanupSavedUsers() {
+        savedUsers.values().removeAll(Collections.singleton(null));
     }
 }

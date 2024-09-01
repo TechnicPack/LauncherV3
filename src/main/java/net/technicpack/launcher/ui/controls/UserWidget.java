@@ -21,7 +21,6 @@ package net.technicpack.launcher.ui.controls;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launchercore.auth.IUserType;
-import net.technicpack.minecraftcore.mojang.auth.MojangUser;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.image.ImageRepository;
@@ -31,13 +30,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class UserWidget extends JPanel implements IImageJobListener<MojangUser> {
+public class UserWidget extends JPanel implements IImageJobListener<IUserType> {
 
     private ImageRepository<IUserType> skinRepository;
 
     private JLabel userName;
     private JLabel avatar;
-    private IUserType currentMojangUser;
+    private IUserType currentUser;
 
     public UserWidget(ResourceLoader resources, ImageRepository<IUserType> skinRepository) {
         this.skinRepository = skinRepository;
@@ -79,7 +78,7 @@ public class UserWidget extends JPanel implements IImageJobListener<MojangUser> 
         staticText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         staticText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
 
-        if (preText.length() > 0)
+        if (!preText.isEmpty())
             this.add(staticText);
 
         userName = new JLabel("");
@@ -92,15 +91,15 @@ public class UserWidget extends JPanel implements IImageJobListener<MojangUser> 
         staticText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         staticText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
 
-        if (postText.length() > 0)
+        if (!postText.isEmpty())
             this.add(staticText);
     }
 
-    public void setUser(IUserType mojangUser) {
-        currentMojangUser = mojangUser;
-        userName.setText(mojangUser.getDisplayName());
+    public void setUser(IUserType user) {
+        currentUser = user;
+        userName.setText(user.getDisplayName());
 
-        ImageJob<IUserType> job = skinRepository.startImageJob(currentMojangUser);
+        ImageJob<IUserType> job = skinRepository.startImageJob(currentUser);
         job.addJobListener(this);
         refreshFace(job.getImage());
     }
@@ -110,8 +109,8 @@ public class UserWidget extends JPanel implements IImageJobListener<MojangUser> 
     }
 
     @Override
-    public void jobComplete(ImageJob<MojangUser> job) {
-        if (job.getJobData() == currentMojangUser)
+    public void jobComplete(ImageJob<IUserType> job) {
+        if (job.getJobData() == currentUser)
             refreshFace(job.getImage());
     }
 }

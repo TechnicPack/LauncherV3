@@ -23,7 +23,6 @@ import net.technicpack.launchercore.exception.AuthenticationException;
 import net.technicpack.launchercore.exception.ResponseException;
 import net.technicpack.launchercore.exception.SessionException;
 import net.technicpack.minecraftcore.microsoft.auth.MicrosoftAuthenticator;
-import net.technicpack.minecraftcore.mojang.auth.MojangAuthenticator;
 
 import javax.swing.JOptionPane;
 import java.util.Collection;
@@ -34,13 +33,11 @@ public class UserModel {
     private IUserType mCurrentUser = null;
     private List<IAuthListener> mAuthListeners = new LinkedList<>();
     private IUserStore mUserStore;
-    private MojangAuthenticator mojangAuthenticator;
     private MicrosoftAuthenticator microsoftAuthenticator;
 
-    public UserModel(IUserStore userStore, MojangAuthenticator mojangAuthenticator, MicrosoftAuthenticator microsoftAuthenticator) {
+    public UserModel(IUserStore userStore, MicrosoftAuthenticator microsoftAuthenticator) {
         this.mCurrentUser = null;
         this.mUserStore = userStore;
-        this.mojangAuthenticator = mojangAuthenticator;
         this.microsoftAuthenticator = microsoftAuthenticator;
     }
 
@@ -83,7 +80,9 @@ public class UserModel {
             JOptionPane.showMessageDialog(null, ex.getMessage(), "Login Error", JOptionPane.ERROR_MESSAGE);
         } catch (AuthenticationException ex) {
             //TODO: This should handle offline users for Microsoft accounts
-            setCurrentUser(mojangAuthenticator.createOfflineUser(user.getDisplayName()));
+
+            setCurrentUser(null);
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Login Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -93,10 +92,6 @@ public class UserModel {
 
     public IUserType getLastUser() {
         return mUserStore.getUser(mUserStore.getLastUser());
-    }
-
-    public IUserType getUser(String username) {
-        return mUserStore.getUser(username);
     }
 
     public void addUser(IUserType user) {
@@ -115,7 +110,4 @@ public class UserModel {
         return microsoftAuthenticator;
     }
 
-    public MojangAuthenticator getMojangAuthenticator() {
-        return mojangAuthenticator;
-    }
 }

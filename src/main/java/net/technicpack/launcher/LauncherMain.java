@@ -42,7 +42,6 @@ import net.technicpack.launcher.ui.LoginFrame;
 import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launchercore.TechnicConstants;
-import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.exception.DownloadException;
@@ -68,7 +67,6 @@ import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.minecraftcore.launch.MinecraftLauncher;
 import net.technicpack.minecraftcore.microsoft.auth.MicrosoftAuthenticator;
-import net.technicpack.minecraftcore.mojang.auth.MojangAuthenticator;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.IPlatformSearchApi;
 import net.technicpack.platform.PlatformPackInfoRepository;
@@ -392,8 +390,7 @@ public class LauncherMain {
         TechnicUserStore users = TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json"));
         MicrosoftAuthenticator microsoftAuthenticator =
                 new MicrosoftAuthenticator(new File(directories.getLauncherDirectory(), "oauth"));
-        MojangAuthenticator mojangAuthenticator = new MojangAuthenticator(users.getClientToken());
-        UserModel userModel = new UserModel(users, mojangAuthenticator, microsoftAuthenticator);
+        UserModel userModel = new UserModel(users, microsoftAuthenticator);
 
         IModpackResourceType iconType = new IconResourceType();
         IModpackResourceType logoType = new LogoResourceType();

@@ -28,8 +28,6 @@ public interface IUserStore {
 
     IUserType getUser(String username);
 
-    String getClientToken();
-
     Collection<String> getUsers();
 
     Collection<IUserType> getSavedUsers();

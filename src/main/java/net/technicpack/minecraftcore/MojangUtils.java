@@ -30,8 +30,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.technicpack.launcher.io.IUserTypeInstanceCreator;
 import net.technicpack.launchercore.auth.IUserType;
-import net.technicpack.minecraftcore.mojang.auth.io.UserProperties;
-import net.technicpack.minecraftcore.mojang.auth.io.UserPropertiesAdapter;
 import net.technicpack.minecraftcore.mojang.java.JavaRuntimes;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
@@ -70,24 +68,20 @@ public class MojangUtils {
     }
 
     private static final Gson gson;
-    private static final Gson uglyGson;
     private static final NavigableMap<Integer, Class<? extends MojangVersion>> versionJsonVersions;
 
     static {
         GsonBuilder builder = new GsonBuilder();
         builder.registerTypeAdapterFactory(new LowerCaseEnumTypeAdapterFactory());
         builder.registerTypeAdapter(Date.class, new DateTypeAdapter());
-        builder.registerTypeAdapter(UserProperties.class, new UserPropertiesAdapter());
         builder.registerTypeAdapter(ArgumentList.class, new ArgumentListAdapter());
         builder.registerTypeAdapter(Rule.class, new RuleAdapter());
         builder.registerTypeAdapter(IUserType.class, new IUserTypeInstanceCreator());
         builder.enableComplexMapKeySerialization();
-        uglyGson = builder.create();
-
         builder.setPrettyPrinting();
         gson = builder.create();
 
-        versionJsonVersions = new TreeMap<Integer, Class<? extends MojangVersion>>();
+        versionJsonVersions = new TreeMap<>();
         versionJsonVersions.put(0, CompleteVersion.class);
         versionJsonVersions.put(21, CompleteVersionV21.class);
 
@@ -98,10 +92,6 @@ public class MojangUtils {
 
     public static Gson getGson() {
         return gson;
-    }
-
-    public static Gson getUglyGson() {
-        return uglyGson;
     }
 
     public static void copyMinecraftJar(File minecraft, File output) throws IOException {
