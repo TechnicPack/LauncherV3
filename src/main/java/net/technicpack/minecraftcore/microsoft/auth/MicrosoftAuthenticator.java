@@ -108,9 +108,11 @@ public class MicrosoftAuthenticator {
                 // Refresh request failed
                 throw new SessionException("Microsoft login expired or is invalid");
             }
-        } catch (IOException e) {
+        } catch (TokenResponseException e) {
             // A 4xx was received
             throw new SessionException("Microsoft login expired or is invalid", e);
+        } catch (IOException e) {
+            throw new AuthenticationException("Failed to refresh session", e);
         }
 
         // Store the updated credential in the filesystem

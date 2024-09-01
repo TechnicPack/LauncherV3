@@ -16,14 +16,26 @@ public class MicrosoftUser implements IUserType {
     private String username;
     private String accessToken = "0";
 
-    public MicrosoftUser() {
-    }
+    private transient boolean isOffline = false;
+
+    @SuppressWarnings("unused") // Gson constructor
+    private MicrosoftUser() {}
 
     public MicrosoftUser(XboxMinecraftResponse authResponse, MinecraftProfile profile) {
-        this();
         this.id = profile.id;
         this.username = profile.name;
         updateAuthToken(authResponse);
+    }
+
+    /**
+     * Constructor for offline mode
+     * @param id Minecraft player UUID
+     * @param username Minecraft username
+     */
+    public MicrosoftUser(String id, String username) {
+        this.id = id;
+        this.username = username;
+        this.isOffline = true;
     }
 
     @Override
@@ -53,7 +65,7 @@ public class MicrosoftUser implements IUserType {
 
     @Override
     public String getSessionId() {
-        return "token:" + accessToken + ":" + getId();
+        return "token:" + accessToken + ":" + id;
     }
 
     @Override
@@ -68,7 +80,7 @@ public class MicrosoftUser implements IUserType {
 
     @Override
     public boolean isOffline() {
-        return false;
+        return isOffline;
     }
 
     @Override

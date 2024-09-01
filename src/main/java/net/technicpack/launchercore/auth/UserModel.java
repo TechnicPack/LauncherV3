@@ -23,11 +23,14 @@ import net.technicpack.launchercore.exception.AuthenticationException;
 import net.technicpack.launchercore.exception.ResponseException;
 import net.technicpack.launchercore.exception.SessionException;
 import net.technicpack.minecraftcore.microsoft.auth.MicrosoftAuthenticator;
+import net.technicpack.minecraftcore.microsoft.auth.MicrosoftUser;
+import net.technicpack.utilslib.Utils;
 
 import javax.swing.JOptionPane;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
 
 public class UserModel {
     private IUserType mCurrentUser = null;
@@ -79,10 +82,10 @@ public class UserModel {
             setCurrentUser(null);
             JOptionPane.showMessageDialog(null, ex.getMessage(), "Login Error", JOptionPane.ERROR_MESSAGE);
         } catch (AuthenticationException ex) {
-            //TODO: This should handle offline users for Microsoft accounts
-
-            setCurrentUser(null);
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "Login Error", JOptionPane.ERROR_MESSAGE);
+            Utils.getLogger().log(Level.SEVERE, "Authentication error, running in offline mode", ex);
+            JOptionPane.showMessageDialog(null, "Due to an authentication error, you're playing in offline mode.\n\nUntil you are properly logged in you won't be able to connect to multiplayer servers.", "Offline mode", JOptionPane.WARNING_MESSAGE);
+            // Create offline mode user
+            setCurrentUser(new MicrosoftUser(user.getId(), user.getUsername()));
         }
     }
 

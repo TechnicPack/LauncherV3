@@ -431,6 +431,13 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
             forgetUser(user);
         } catch (AuthenticationException e) {
             Utils.getLogger().log(Level.SEVERE, e.getMessage(), e);
+
+            if (JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(this,
+                    "The auth servers are inaccessible. Would you like to play in offline mode?",
+                    "Offline mode", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE)) {
+                userModel.setLastUser(user);
+                userModel.setCurrentUser(new MicrosoftUser(user.getId(), user.getUsername()));
+            }
         }
     }
 
@@ -449,6 +456,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
                 userModel.setCurrentUser(microsoftUser);
                 setCurrentUser(microsoftUser);
             } catch (MicrosoftAuthException e) {
+                Utils.getLogger().log(Level.SEVERE, e.getMessage(), e);
                 switch (e.getType()) {
                     case UNDERAGE:
                         showMessageDialog(parent,
@@ -471,7 +479,6 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
                                 "DNS failure: " + e.getMessage(), "DNS failure during authentication", ERROR_MESSAGE);
                         break;
                     default:
-                        e.printStackTrace();
                         showMessageDialog(parent, e.getMessage(), "Add Microsoft Account Failed", ERROR_MESSAGE);
                 }
             }
