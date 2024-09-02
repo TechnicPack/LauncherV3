@@ -20,7 +20,7 @@
 package net.technicpack.minecraftcore;
 
 import com.google.api.client.http.*;
-import com.google.api.client.http.apache.v2.ApacheHttpTransport;
+import com.google.api.client.http.apache.v5.Apache5HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.gson.GsonFactory;
@@ -54,7 +54,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MojangUtils {
-    private static final HttpTransport HTTP_TRANSPORT = new ApacheHttpTransport();
+    private static final HttpTransport HTTP_TRANSPORT = new Apache5HttpTransport();
     private static final JsonFactory JSON_FACTORY = new GsonFactory();
     private static final HttpRequestFactory REQUEST_FACTORY;
 

@@ -119,26 +119,34 @@
             <artifactId>google-oauth-client-java6</artifactId>
             <version>1.36.0</version>
         </dependency>
+
         <dependency>
             <groupId>com.google.http-client</groupId>
             <artifactId>google-http-client</artifactId>
-            <version>1.44.2</version>
+            <version>1.45.0</version>
         </dependency>
         <!-- For the current Apache HTTP client -->
         <dependency>
             <groupId>com.google.http-client</groupId>
-            <artifactId>google-http-client-apache-v2</artifactId>
-            <version>1.44.2</version>
+            <artifactId>google-http-client-apache-v5</artifactId>
+            <version>1.45.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.http-client</groupId>
             <artifactId>google-http-client-gson</artifactId>
-            <version>1.44.2</version>
+            <version>1.45.0</version>
+        </dependency>
+        <!-- Required to silence logging error from Apache HttpClient v5 -->
+        <!-- https://www.slf4j.org/codes.html#StaticLoggerBinder -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.16</version>
         </dependency>
         <dependency>
-            <groupId>org.jboss.logging</groupId>
-            <artifactId>commons-logging-jboss-logging</artifactId>
-            <version>1.0.0.Final</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>2.0.16</version>
         </dependency>
     </dependencies>
 
