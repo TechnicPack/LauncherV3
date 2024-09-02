@@ -25,6 +25,7 @@ import org.apache.commons.compress.archivers.zip.ZipFile;
 
 import java.io.*;
 import java.nio.channels.ClosedByInterruptException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.logging.Level;
@@ -36,10 +37,7 @@ public class ZipUtils {
             return false;
         }
 
-        ZipFile zipFile = null;
-
-        try {
-            zipFile = new ZipFile(zip);
+        try (ZipFile zipFile = ZipFile.builder().setFile(zip).get()) {
             ZipArchiveEntry entry = zipFile.getEntry(fileName);
             if (entry == null) {
                 Utils.getLogger().log(Level.WARNING, "File " + fileName + " not found in " + zip.getAbsolutePath());
@@ -62,10 +60,6 @@ public class ZipUtils {
         } catch (IOException e) {
             Utils.getLogger().log(Level.WARNING, "Error extracting file " + fileName + " from " + zip.getAbsolutePath());
             return false;
-        } finally {
-            if (zipFile != null) {
-                zipFile.close();
-            }
         }
     }
 
@@ -73,7 +67,7 @@ public class ZipUtils {
         byte[] buffer = new byte[2048];
 
         try (BufferedInputStream inputStream = new BufferedInputStream(zipFile.getInputStream(entry));
-             BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(outputFile))) {
+             BufferedOutputStream outputStream = new BufferedOutputStream(Files.newOutputStream(outputFile.toPath()))) {
             int length;
             while ((length = inputStream.read(buffer, 0, buffer.length)) != -1) {
                 outputStream.write(buffer, 0, length);
@@ -92,24 +86,23 @@ public class ZipUtils {
             output.mkdirs();
         }
 
-        ZipFile zipFile = new ZipFile(zip);
-        ArrayList<ZipArchiveEntry> entries = Collections.list(zipFile.getEntries());
-        int size = entries.size();
+        try (ZipFile zipFile = ZipFile.builder().setFile(zip).get()) {
+            ArrayList<ZipArchiveEntry> entries = Collections.list(zipFile.getEntries());
+            int size = entries.size();
 
-        // Commons Compress doesn't seem to throw exception when ZIP files aren't valid, so we just check if they
-        // have no entries as a means of validating it, and throw a ZipException so the launcher will show the correct
-        // warning message when trying to install/update the modpack, rather than just printing it to console.
-        if (size == 0) {
-            Utils.getLogger().log(Level.SEVERE, "Zip file is empty: " + zip.getAbsolutePath());
-            zipFile.close();
-            throw new ZipException("Zip file is empty: " + zip.getAbsolutePath());
-        }
+            // Commons Compress doesn't seem to throw exception when ZIP files aren't valid, so we just check if they
+            // have no entries as a means of validating it, and throw a ZipException so the launcher will show the correct
+            // warning message when trying to install/update the modpack, rather than just printing it to console.
+            if (size == 0) {
+                Utils.getLogger().log(Level.SEVERE, "Zip file is empty: " + zip.getAbsolutePath());
+                zipFile.close();
+                throw new ZipException("Zip file is empty: " + zip.getAbsolutePath());
+            }
 
-        int progress = 1;
-        try {
+            int progress = 1;
+
             for (ZipArchiveEntry entry : entries) {
-                if (Thread.interrupted())
-                    throw new InterruptedException();
+                if (Thread.interrupted()) throw new InterruptedException();
 
                 if (fileFilter == null || fileFilter.shouldExtract(entry.getName())) {
                     File outputFile = new File(output, entry.getName());
@@ -143,8 +136,6 @@ public class ZipUtils {
                 }
                 progress++;
             }
-        } finally {
-            zipFile.close();
         }
     }
 }
