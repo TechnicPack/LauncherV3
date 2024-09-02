@@ -170,17 +170,14 @@ public class Utils {
             Process process = pb.start();
             final StringBuilder response=new StringBuilder();
 
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                        String line;
-                        while ((line = bufferedReader.readLine()) != null) {
-                            response.append(line + "\n");
-                        }
-                    } catch (IOException ex) {
-                        //Don't let other process' problems concern us
+            new Thread(() -> {
+                try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        response.append(line + "\n");
                     }
+                } catch (IOException ex) {
+                    //Don't let other process' problems concern us
                 }
             }).start();
             process.waitFor();
@@ -234,8 +231,6 @@ public class Utils {
                     md5 = eTag;
                 }
             }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }

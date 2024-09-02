@@ -87,25 +87,14 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         ArrayList<FeedItem> feed = modpack.getFeed();
 
         if (feed != null) {
-            for (int i = 0; i < feed.size(); i++) {
-                FeedItem item = feed.get(i);
+            for (FeedItem item : feed) {
                 FeedItemView itemView = new FeedItemView(resources, item, avatarRepo.startImageJob(item.getAuthorship()));
-                itemView.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        clickFeedItem((FeedItemView) e.getSource(), e.getActionCommand());
-                    }
-                });
+                itemView.addActionListener(e -> clickFeedItem((FeedItemView) e.getSource(), e.getActionCommand()));
                 feedGallery.add(itemView);
             }
         }
 
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                repaint();
-            }
-        });
+        EventQueue.invokeLater(this::repaint);
     }
 
     public RoundedButton getPlayButton() {
@@ -192,23 +181,13 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         JButton leftButton = new JButton(resources.getIcon("status_left.png"));
         leftButton.setBorder(BorderFactory.createEmptyBorder());
         leftButton.setContentAreaFilled(false);
-        leftButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                clickLeftFeedButton();
-            }
-        });
+        leftButton.addActionListener(e -> clickLeftFeedButton());
         topline.add(leftButton);
 
         JButton rightButton = new JButton(resources.getIcon("status_right.png"));
         rightButton.setBorder(BorderFactory.createEmptyBorder());
         rightButton.setContentAreaFilled(false);
-        rightButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                clickRightFeedButton();
-            }
-        });
+        rightButton.addActionListener(e -> clickRightFeedButton());
         topline.add(rightButton);
 
         JLabel label = new JLabel(resources.getString("launcher.packfeed.noupdates"));
@@ -294,12 +273,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         if (job.getJobData() == modpack) {
             background.setImage(job.getImage());
 
-            EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    repaint();
-                }
-            });
+            EventQueue.invokeLater(this::repaint);
         }
     }
 }

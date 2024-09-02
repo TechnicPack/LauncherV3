@@ -59,10 +59,7 @@ public class Version {
         try {
             String json = FileUtils.readFileToString(version, StandardCharsets.UTF_8);
             return Utils.getGson().fromJson(json, Version.class);
-        } catch (JsonSyntaxException e) {
-            Utils.getLogger().log(Level.WARNING, "Unable to load version from " + version);
-            return null;
-        } catch (IOException e) {
+        } catch (JsonSyntaxException | IOException e) {
             Utils.getLogger().log(Level.WARNING, "Unable to load version from " + version);
             return null;
         }

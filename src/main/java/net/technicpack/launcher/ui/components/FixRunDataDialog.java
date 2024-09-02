@@ -199,12 +199,7 @@ public class FixRunDataDialog extends LauncherDialog {
         closeButton.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         closeButton.setContentAreaFilled(false);
         closeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        closeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                closeDialog();
-            }
-        });
+        closeButton.addActionListener(e -> closeDialog());
         closeButton.setFocusPainted(false);
         header.add(closeButton);
     }
@@ -372,12 +367,9 @@ public class FixRunDataDialog extends LauncherDialog {
         okButton.setBorder(BorderFactory.createEmptyBorder(5, 25, 5, 25));
         okButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         okButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
-        okButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                result = Result.OK;
-                dispose();
-            }
+        okButton.addActionListener(e -> {
+            result = Result.OK;
+            dispose();
         });
         buttonPanel.add(okButton);
     }
@@ -410,12 +402,9 @@ public class FixRunDataDialog extends LauncherDialog {
         cancelButton.setContentAreaFilled(false);
         cancelButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         cancelButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
-        cancelButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                result = Result.CANCEL;
-                dispose();
-            }
+        cancelButton.addActionListener(e -> {
+            result = Result.CANCEL;
+            dispose();
         });
         buttonPanel.add(cancelButton);
 
@@ -426,12 +415,9 @@ public class FixRunDataDialog extends LauncherDialog {
         okButton.setContentAreaFilled(false);
         okButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
         okButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
-        okButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                result = Result.ACCEPT;
-                dispose();
-            }
+        okButton.addActionListener(e -> {
+            result = Result.ACCEPT;
+            dispose();
         });
         buttonPanel.add(okButton);
     }

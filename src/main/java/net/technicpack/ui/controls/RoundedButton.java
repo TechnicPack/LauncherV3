@@ -40,7 +40,7 @@ public class RoundedButton extends JButton implements MouseListener {
     private boolean isClicked = false;
     private boolean shouldShowBackground = false;
 
-    private Collection<ActionListener> actionListeners = new LinkedList<ActionListener>();
+    private Collection<ActionListener> actionListeners = new LinkedList<>();
 
     public RoundedButton(String text)
     {

@@ -87,7 +87,7 @@ public class SearchResultPackInfo implements PackInfo {
 
     @Override
     public ArrayList<FeedItem> getFeed() {
-        return new ArrayList<FeedItem>();
+        return new ArrayList<>();
     }
 
     @Override

@@ -28,7 +28,7 @@ public enum ReleaseType {
 	OLD_BETA("old-beta"),
 	OLD_ALPHA("old-alpha");
 
-	private static final Map<String, ReleaseType> lookup = new HashMap<String, ReleaseType>();
+	private static final Map<String, ReleaseType> lookup = new HashMap<>();
 	private final String name;
 
 	private ReleaseType(String name) {

@@ -58,7 +58,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
     private JPanel discordPanel;
     private JButton discordLabel;
     private JButton countLabel;
-    private java.util.List<JButton> discordButtons = new ArrayList<JButton>(3);
+    private java.util.List<JButton> discordButtons = new ArrayList<>(3);
 
     private String packSiteUrl;
 
@@ -106,12 +106,9 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         job.addJobListener(this);
         packImage.setIcon(new ImageIcon(ImageUtils.scaleImage(job.getImage(), 370, 220)));
 
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                description.scrollRectToVisible(new Rectangle(new Dimension(1, 1)));
-                repaint();
-            }
+        EventQueue.invokeLater(() -> {
+            description.scrollRectToVisible(new Rectangle(new Dimension(1, 1)));
+            repaint();
         });
 
         discordPanel.setVisible(false);
@@ -141,12 +138,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         packImage.setBorder(BorderFactory.createEmptyBorder());
         packImage.setContentAreaFilled(false);
         packImage.setFocusPainted(false);
-        packImage.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                DesktopUtils.browseUrl(packSiteUrl);
-            }
-        });
+        packImage.addActionListener(e -> DesktopUtils.browseUrl(packSiteUrl));
         imagePanel.add(packImage);
 
         JPanel packInfoPanel = new JPanel();
@@ -161,12 +153,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         statBoxes.setOpaque(false);
         statBoxes.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
 
-        ActionListener listener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                DesktopUtils.browseUrl(packSiteUrl);
-            }
-        };
+        ActionListener listener = e -> DesktopUtils.browseUrl(packSiteUrl);
 
         ratings = new StatBox(resources, resources.getString("launcher.packstats.ratings"), null);
         ratings.setBackground(LauncherFrame.COLOR_LIKES_BACK);
@@ -312,12 +299,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         scrollHostPanel.setLayout(new BorderLayout());
         scrollHostPanel.add(scrollPane, BorderLayout.CENTER);
 
-        scrollPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
-            @Override
-            public void adjustmentValueChanged(final AdjustmentEvent e) {
-                ModpackDataDisplay.this.repaint();
-            }
-        });
+        scrollPane.getVerticalScrollBar().addAdjustmentListener(e -> ModpackDataDisplay.this.repaint());
 
         packInfoPanel.add(scrollHostPanel, new GridBagConstraints(0,1,4,1,1.0,1.0,GridBagConstraints.NORTH,GridBagConstraints.BOTH, new Insets(5,0,0,0),0,0));
     }
@@ -346,12 +328,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
                     for (int i = 0; i < actionListenerCount; i++) {
                         discordButton.removeActionListener(discordButton.getActionListeners()[0]);
                     }
-                    discordButton.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            DesktopUtils.browseUrl(server.getInviteLink());
-                        }
-                    });
+                    discordButton.addActionListener(e -> DesktopUtils.browseUrl(server.getInviteLink()));
                 }
             } else {
                 this.discordPanel.setVisible(false);

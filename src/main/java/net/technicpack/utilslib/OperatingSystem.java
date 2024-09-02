@@ -20,6 +20,7 @@
 package net.technicpack.utilslib;
 
 import java.io.File;
+import java.nio.file.FileSystems;
 import java.util.Locale;
 
 public enum OperatingSystem {
@@ -38,7 +39,7 @@ public enum OperatingSystem {
     }
 
     public static String getJavaDir() {
-        String separator = System.getProperty("file.separator");
+        String separator = FileSystems.getDefault().getSeparator();
         String path = System.getProperty("java.home") + separator + "bin" + separator;
 
         if (getOperatingSystem() == WINDOWS) {

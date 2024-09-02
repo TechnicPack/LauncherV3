@@ -138,7 +138,7 @@ public abstract class Relauncher {
         }
 
         ProcessBuilder processBuilder = new ProcessBuilder();
-        ArrayList<String> commands = new ArrayList<String>();
+        ArrayList<String> commands = new ArrayList<>();
         if (!launchPath.endsWith(".exe")) {
             commands.add(OperatingSystem.getJavaDir());
             commands.add("-Xmx256m");
@@ -174,7 +174,7 @@ public abstract class Relauncher {
     }
 
     public String[] buildMoverArgs() throws UnsupportedEncodingException {
-        List<String> outArgs = new ArrayList<String>();
+        List<String> outArgs = new ArrayList<>();
         outArgs.add("-movetarget");
         outArgs.add(getRunningPath());
         outArgs.add("-moveronly");
@@ -183,7 +183,7 @@ public abstract class Relauncher {
     }
 
     public String[] buildLauncherArgs(boolean isLegacy) {
-        List<String> outArgs = new ArrayList<String>();
+        List<String> outArgs = new ArrayList<>();
         if (!isLegacy)
             outArgs.add("-launcheronly");
         else

@@ -25,7 +25,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class LoggerOutputStream extends ByteArrayOutputStream {
-    private final String separator = System.getProperty("line.separator");
+    private final String separator = System.lineSeparator();
     private final Console console;
     private final Level level;
     private final Logger log;

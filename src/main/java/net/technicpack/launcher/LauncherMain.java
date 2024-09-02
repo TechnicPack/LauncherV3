@@ -415,7 +415,7 @@ public class LauncherMain {
         IInstalledPackRepository packStore = TechnicInstalledPackStore.load(new File(directories.getLauncherDirectory(), "installedPacks"));
         IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(platform, solder);
 
-        ArrayList<IMigrator> migrators = new ArrayList<IMigrator>(1);
+        ArrayList<IMigrator> migrators = new ArrayList<>(1);
         migrators.add(new InitialV3Migrator(platform));
         migrators.add(new ResetJvmArgsIfDefaultString());
         SettingsFactory.migrateSettings(settings, packStore, directories, users, migrators);

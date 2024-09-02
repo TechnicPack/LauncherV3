@@ -69,12 +69,7 @@ public class NewsInfoPanel extends JPanel implements PropertyChangeListener {
 
         authorshipInfo.setAuthorshipInfo(article.getAuthorshipInfo(), avatarRepo.startImageJob(article.getAuthorshipInfo()));
 
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                newsText.scrollRectToVisible(new Rectangle(0, 0, 1, 1));
-            }
-        });
+        EventQueue.invokeLater(() -> newsText.scrollRectToVisible(new Rectangle(0, 0, 1, 1)));
     }
 
     protected void visitCurrentItem() {
@@ -134,13 +129,10 @@ public class NewsInfoPanel extends JPanel implements PropertyChangeListener {
         newsText.setHighlighter(null);
         newsText.setAlignmentX(LEFT_ALIGNMENT);
         newsText.setContentType("text/html");
-        newsText.addHyperlinkListener(new HyperlinkListener() {
-            @Override
-            public void hyperlinkUpdate(HyperlinkEvent e) {
-                if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                    if (e.getURL() != null)
-                        DesktopUtils.browseUrl(e.getURL().toString());
-                }
+        newsText.addHyperlinkListener(e -> {
+            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                if (e.getURL() != null)
+                    DesktopUtils.browseUrl(e.getURL().toString());
             }
         });
         newsText.addComponentListener(new ComponentListener() {
@@ -190,12 +182,7 @@ public class NewsInfoPanel extends JPanel implements PropertyChangeListener {
         discussButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
         discussButton.setAlignmentX(RIGHT_ALIGNMENT);
         discussButton.setContentAreaFilled(false);
-        discussButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                visitCurrentItem();
-            }
-        });
+        discussButton.addActionListener(e -> visitCurrentItem());
         add(discussButton, new GridBagConstraints(1, 3, 1, 1, 0.0, 0.0, GridBagConstraints.SOUTHEAST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
     }
 

@@ -121,24 +121,14 @@ public class ProgressBar extends JLabel implements DownloadListener {
     }
 
     public void setProgressThreadSafe(final String progressText, final float progress) {
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                setProgress(progressText, progress/100.0f);
-            }
-        });
+        EventQueue.invokeLater(() -> setProgress(progressText, progress/100.0f));
     }
 
     public void setProgress(String progressText, float progress) {
         setText(progressText);
         this.progressPct = progress;
 
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                repaint();
-            }
-        });
+        EventQueue.invokeLater(this::repaint);
     }
 
     @Override

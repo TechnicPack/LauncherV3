@@ -26,7 +26,7 @@ import java.util.Objects;
 
 @SuppressWarnings({"unused"})
 public class ExtractRules {
-	private List<String> exclude = new ArrayList<String>();
+	private List<String> exclude = new ArrayList<>();
 
 	public ExtractRules() {
 

@@ -145,10 +145,10 @@ public class MinecraftLauncher {
         String nativesDir = new File(pack.getBinDir(), "natives").getAbsolutePath();
         String cpString = buildClassPath(pack, version);
 
-        Utils.getLogger().log(Level.FINE, "Classpath:\n\n" + cpString.replace(System.getProperty("path.separator"), "\n"));
+        Utils.getLogger().log(Level.FINE, "Classpath:\n\n" + cpString.replace(File.pathSeparator, "\n"));
 
         // build arg parameter map
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> params = new HashMap<>();
         IUserType user = userModel.getCurrentUser();
         File gameDirectory = pack.getInstalledDirectory();
         ILaunchOptions launchOpts = options.getOptions();
