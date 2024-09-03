@@ -1,6 +1,11 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
-  ]
+    "config:best-practices",
+    ":prHourlyLimitNone",
+    ":prImmediately",
+    ":semanticCommitTypeAll(build)",
+    ":separateMajorReleases"
+  ],
+  "rangeStrategy": "bump"
 }
