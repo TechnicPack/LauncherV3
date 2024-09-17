@@ -38,7 +38,7 @@ public class Modpack extends RestObject {
 
     public Modpack(PlatformPackInfo info) {
         minecraft = info.getGameVersion();
-        mods = new ArrayList<Mod>();
+        mods = new ArrayList<>();
         Mod mod = new Mod(info.getName(), info.getRecommended(), info.getUrl(), "");
         mods.add(mod);
     }

@@ -43,11 +43,6 @@ public class HorizontalGallery extends JPanel {
     }
 
     @Override
-    public Dimension getPreferredSize() {
-        return super.getPreferredSize();
-    }
-
-    @Override
     public void setBounds(int x, int y, int w, int h) {
         super.setBounds(x,y,w,h);
     }

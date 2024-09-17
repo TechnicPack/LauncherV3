@@ -89,15 +89,12 @@ public class Console {
 
         final String writeText = line.replace("\n\n", "\n");
         final AttributeSet writeAttributes = (attributes != null) ? attributes : consoleFrame.getDefaultAttributes();
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    int offset = consoleFrame.getDocument().getLength();
-                    consoleFrame.getDocument().insertString(offset, writeText, writeAttributes);
-                    consoleFrame.setCaretPosition(consoleFrame.getDocument().getLength());
-                } catch (BadLocationException ble) {
-                } catch (NullPointerException npe) {
-                }
+        SwingUtilities.invokeLater(() -> {
+            try {
+                int offset = consoleFrame.getDocument().getLength();
+                consoleFrame.getDocument().insertString(offset, writeText, writeAttributes);
+                consoleFrame.setCaretPosition(consoleFrame.getDocument().getLength());
+            } catch (BadLocationException | NullPointerException ble) {
             }
         });
     }

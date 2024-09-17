@@ -172,12 +172,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
         selectTab("discover");
 
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                LauncherMain.consoleFrame.setVisible(settings.getShowConsole());
-            }
-        });
+        EventQueue.invokeLater(() -> LauncherMain.consoleFrame.setVisible(settings.getShowConsole()));
 
         setLocationRelativeTo(null);
     }
@@ -289,12 +284,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     public void launchCompleted() {
         if (installer.isCurrentlyRunning()) {
-            EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    launchCompleted();
-                }
-            });
+            EventQueue.invokeLater(this::launchCompleted);
             return;
         }
 
@@ -360,22 +350,12 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         headerLabel.setContentAreaFilled(false);
         headerLabel.setFocusPainted(false);
         headerLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        headerLabel.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                DesktopUtils.browseUrl("https://www.technicpack.net/");
-            }
-        });
+        headerLabel.addActionListener(e -> DesktopUtils.browseUrl("https://www.technicpack.net/"));
         header.add(headerLabel);
 
         header.add(Box.createRigidArea(new Dimension(6, 0)));
 
-        ActionListener tabListener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                selectTab(e.getActionCommand());
-            }
-        };
+        ActionListener tabListener = e -> selectTab(e.getActionCommand());
 
         discoverTab = new HeaderTab(resources.getString("launcher.title.discover"), resources);
         header.add(discoverTab);
@@ -420,24 +400,14 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         minimizeButton.setContentAreaFilled(false);
         minimizeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         minimizeButton.setFocusable(false);
-        minimizeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                minimizeWindow();
-            }
-        });
+        minimizeButton.addActionListener(e -> minimizeWindow());
         windowGadgetPanel.add(minimizeButton);
 
         ImageIcon closeIcon = resources.getIcon("close.png");
         JButton closeButton = new JButton(closeIcon);
         closeButton.setBorder(BorderFactory.createEmptyBorder());
         closeButton.setContentAreaFilled(false);
-        closeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                closeWindow();
-            }
-        });
+        closeButton.addActionListener(e -> closeWindow());
         closeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         closeButton.setFocusable(false);
         windowGadgetPanel.add(closeButton);
@@ -456,12 +426,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         launcherOptionsLabel.setBorder(BorderFactory.createEmptyBorder());
         launcherOptionsLabel.setContentAreaFilled(false);
         launcherOptionsLabel.setFocusPainted(false);
-        launcherOptionsLabel.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                openLauncherOptions();
-            }
-        });
+        launcherOptionsLabel.addActionListener(e -> openLauncherOptions());
         rightHeaderPanel.add(launcherOptionsLabel);
 
         header.add(rightHeaderPanel);
@@ -476,43 +441,27 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         getRootPane().getContentPane().add(centralPanel, BorderLayout.CENTER);
         centralPanel.setLayout(new BorderLayout());
 
-        modpackPanel = new ModpackInfoPanel(resources, iconRepo, logoRepo, backgroundRepo, avatarRepo, discordApi, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                openModpackOptions((ModpackModel)e.getSource());
-            }
-        },
-        new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                refreshModpackOptions((ModpackModel)e.getSource());
-            }
-        }
+        modpackPanel = new ModpackInfoPanel(resources, iconRepo, logoRepo, backgroundRepo, avatarRepo, discordApi, e -> openModpackOptions((ModpackModel)e.getSource()),
+                e -> refreshModpackOptions((ModpackModel)e.getSource())
         );
         modpackSelector.setInfoPanel(modpackPanel);
         modpackSelector.setLauncherFrame(this);
         playButton = modpackPanel.getPlayButton();
-        playButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (e.getSource() instanceof ModpackModel) {
-                    setupPlayButtonText((ModpackModel) e.getSource(), userModel.getCurrentUser());
-                } else if (installer.isCurrentlyRunning()) {
-                    installer.cancel();
-                    setupPlayButtonText(modpackSelector.getSelectedPack(), userModel.getCurrentUser());
-                } else {
-                    launchModpack();
-                }
+        playButton.addActionListener(e -> {
+            if (e.getSource() instanceof ModpackModel) {
+                setupPlayButtonText((ModpackModel) e.getSource(), userModel.getCurrentUser());
+            } else if (installer.isCurrentlyRunning()) {
+                installer.cancel();
+                setupPlayButtonText(modpackSelector.getSelectedPack(), userModel.getCurrentUser());
+            } else {
+                launchModpack();
             }
         });
 
-        modpackPanel.getDeleteButton().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (JOptionPane.showConfirmDialog(LauncherFrame.this, resources.getString("modpackoptions.delete.confirmtext"), resources.getString("modpackoptions.delete.confirmtitle"), JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                    modpackSelector.getSelectedPack().delete();
-                    modpackSelector.forceRefresh();
-                }
+        modpackPanel.getDeleteButton().addActionListener(e -> {
+            if (JOptionPane.showConfirmDialog(LauncherFrame.this, resources.getString("modpackoptions.delete.confirmtext"), resources.getString("modpackoptions.delete.confirmtitle"), JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                modpackSelector.getSelectedPack().delete();
+                modpackSelector.forceRefresh();
             }
         });
 
@@ -561,12 +510,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         logout.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         logout.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         logout.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
-        logout.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                logout();
-            }
-        });
+        logout.addActionListener(e -> logout());
         footer.add(logout);
 
         installProgress = new ProgressBar();
@@ -618,12 +562,9 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         if (currentTabName != null)
             selectTab(currentTabName);
 
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                invalidate();
-                repaint();
-            }
+        EventQueue.invokeLater(() -> {
+            invalidate();
+            repaint();
         });
     }
 
@@ -639,12 +580,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
                 setupPlayButtonText(modpackSelector.getSelectedPack(), mojangUser);
 
             modpackSelector.forceRefresh();
-            EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    repaint();
-                }
-            });
+            EventQueue.invokeLater(this::repaint);
         }
     }
 

@@ -34,8 +34,6 @@ public class MD5Utils {
             String md5 = DigestUtils.md5Hex(fis);
             fis.close();
             return md5;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }

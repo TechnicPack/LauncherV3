@@ -33,7 +33,7 @@ public class InstallTasksQueue<Metadata> implements ITasksQueue {
 
     public InstallTasksQueue(DownloadListener listener) {
         this.listener = listener;
-        this.tasks = new LinkedList<IInstallTask>();
+        this.tasks = new LinkedList<>();
         this.currentTask = null;
     }
 

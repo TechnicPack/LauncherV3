@@ -157,21 +157,11 @@ public class ConsoleFrame extends JFrame implements MouseListener {
         public ContextMenu() {
             copy = new JMenuItem("Copy");
             add(copy);
-            copy.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    textComponent.copy();
-                }
-            });
+            copy.addActionListener(e -> textComponent.copy());
 
             clear = new JMenuItem("Clear");
             add(clear);
-            clear.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    textComponent.setText("");
-                }
-            });
+            clear.addActionListener(e -> textComponent.setText(""));
         }
     }
 }

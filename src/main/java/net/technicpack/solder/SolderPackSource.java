@@ -45,7 +45,7 @@ public class SolderPackSource implements IPackSource {
 
     @Override
     public Collection<PackInfo> getPublicPacks() {
-        LinkedList<PackInfo> returnValue = new LinkedList<PackInfo>();
+        LinkedList<PackInfo> returnValue = new LinkedList<>();
 
         try {
             Collection<SolderPackInfo> packs = solder.getPublicSolderPacks(baseUrl);

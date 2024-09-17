@@ -77,11 +77,7 @@ class ImageLoadWorker extends Thread {
 
                 // msfImage belongs to the Swing AWT thread
                 final BufferedImage newImg1 = newImg;
-                EventQueue.invokeLater(new Runnable() {
-                    public void run() {
-                        loadItem._mfsImage.setImage(loadItem._uri, newImg1, wasScaled);
-                    }
-                });
+                EventQueue.invokeLater(() -> loadItem._mfsImage.setImage(loadItem._uri, newImg1, wasScaled));
             }
         } catch (InterruptedException e) {
             //

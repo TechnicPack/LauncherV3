@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MemoryModpackContainer implements IModpackContainer {
-    private Map<String, ModpackModel> modpacks = new HashMap<String, ModpackModel>();
-    private Map<IModpackContainer, IModpackContainer> passthroughContainers = new ConcurrentHashMap<IModpackContainer, IModpackContainer>();
+    private Map<String, ModpackModel> modpacks = new HashMap<>();
+    private Map<IModpackContainer, IModpackContainer> passthroughContainers = new ConcurrentHashMap<>();
 
     public MemoryModpackContainer() {
     }

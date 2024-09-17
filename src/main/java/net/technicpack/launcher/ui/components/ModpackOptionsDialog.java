@@ -189,12 +189,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         closeButton.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         closeButton.setContentAreaFilled(false);
         closeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        closeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                closeDialog();
-            }
-        });
+        closeButton.addActionListener(e -> closeDialog());
         closeButton.setFocusPainted(false);
         header.add(closeButton);
 
@@ -233,12 +228,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         } else {
             openFolder.setForeground(LauncherFrame.COLOR_GREY_TEXT);
         }
-        openFolder.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                openFolder();
-            }
-        });
+        openFolder.addActionListener(e -> openFolder());
         centerPanel.add(openFolder, new GridBagConstraints(4, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,5,0,5), 0,0));
 
         RoundedButton moveFolder = new RoundedButton(resources.getString("modpackoptions.installfolder.move"));
@@ -253,12 +243,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         } else {
             moveFolder.setForeground(LauncherFrame.COLOR_GREY_TEXT);
         }
-        moveFolder.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                moveFolder();
-            }
-        });
+        moveFolder.addActionListener(e -> moveFolder());
         centerPanel.add(moveFolder, new GridBagConstraints(5, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,5), 0,0));
 
         centerPanel.add(Box.createVerticalStrut(15), new GridBagConstraints(0, 1, 6, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
@@ -275,12 +260,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         recommended.setSelectedIcon(resources.getIcon("radio_selected.png"));
         recommended.setFocusPainted(false);
         recommended.setOpaque(false);
-        recommended.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                selectRecommended();
-            }
-        });
+        recommended.addActionListener(e -> selectRecommended());
         centerPanel.add(recommended, new GridBagConstraints(1, 3, 5, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0,0,0,0), 0,0));
 
         latest = new JRadioButton(resources.getString("modpackoptions.version.latest"));
@@ -290,12 +270,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         latest.setSelectedIcon(resources.getIcon("radio_selected.png"));
         latest.setFocusPainted(false);
         latest.setOpaque(false);
-        latest.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                selectLatest();
-            }
-        });
+        latest.addActionListener(e -> selectLatest());
         centerPanel.add(latest, new GridBagConstraints(1, 4, 5, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0,0,0,0), 0, 0));
 
         manual = new JRadioButton(resources.getString("modpackoptions.version.manual"));
@@ -305,12 +280,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         manual.setSelectedIcon(resources.getIcon("radio_selected.png"));
         manual.setFocusPainted(false);
         manual.setOpaque(false);
-        manual.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                selectManual();
-            }
-        });
+        manual.addActionListener(e -> selectManual());
         centerPanel.add(manual, new GridBagConstraints(1, 5, 5, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0,0,0,0),0,0));
 
         ButtonGroup versionType = new ButtonGroup();
@@ -340,12 +310,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         manualBuildList.setRenderer(renderer);
         manualBuildList.setUI(new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0)), resources, LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
         manualBuildList.setFocusable(false);
-        manualBuildList.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                buildUpdated();
-            }
-        });
+        manualBuildList.addActionListener(e -> buildUpdated());
 
         Object child = manualBuildList.getAccessibleContext().getAccessibleChild(0);
         BasicComboPopup popup = (BasicComboPopup)child;
@@ -371,12 +336,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         } else {
             deletePack.setForeground(LauncherFrame.COLOR_GREY_TEXT);
         }
-        deletePack.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                deletePack();
-            }
-        });
+        deletePack.addActionListener(e -> deletePack());
         deletePack.setEnabled(modpack.getInstalledDirectory() != null);
         bottomButtons.add(deletePack);
 

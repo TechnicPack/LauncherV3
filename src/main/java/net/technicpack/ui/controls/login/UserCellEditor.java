@@ -48,9 +48,9 @@ public class UserCellEditor implements ComboBoxEditor, DocumentListener, IImageJ
     private CardLayout layout;
 
     private Object currentObject;
-    private HashMap<String, Icon> headMap = new HashMap<String, Icon>();
+    private HashMap<String, Icon> headMap = new HashMap<>();
 
-    Collection<ActionListener> actionListeners = new HashSet<ActionListener>();
+    Collection<ActionListener> actionListeners = new HashSet<>();
     private ImageRepository<IUserType> mSkinRepo;
 
     private static final String USER = "user";

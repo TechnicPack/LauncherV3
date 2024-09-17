@@ -40,7 +40,7 @@ public class PackLoadJob implements Runnable {
     private Collection<IPackSource> packSources;
     private IModpackContainer container;
     private boolean doLoadRepository;
-    private Map<String, ModpackModel> processedModpacks = new HashMap<String, ModpackModel>();
+    private Map<String, ModpackModel> processedModpacks = new HashMap<>();
 
     private boolean isCancelled = false;
 
@@ -64,12 +64,7 @@ public class PackLoadJob implements Runnable {
         if (EventQueue.isDispatchThread()) {
             isCancelled = true;
         } else {
-            EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    cancel();
-                }
-            });
+            EventQueue.invokeLater(this::cancel);
         }
     }
 
@@ -85,7 +80,7 @@ public class PackLoadJob implements Runnable {
             threadCount++;
         if (packSources != null)
             threadCount += packSources.size();
-        Collection<Thread> threads = new ArrayList<Thread>(threadCount);
+        Collection<Thread> threads = new ArrayList<>(threadCount);
 
         if (doLoadRepository) {
             for (final String packName : packRepository.getPackNames()) {
@@ -121,22 +116,12 @@ public class PackLoadJob implements Runnable {
     }
 
     protected void refreshCompleteThreadSafe() {
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                container.refreshComplete();
-            }
-        });
+        EventQueue.invokeLater(() -> container.refreshComplete());
     }
 
 
     protected void addPackThreadSafe(final InstalledPack pack, final PackInfo packInfo, final int priority) {
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                addPack(pack, packInfo, priority);
-            }
-        });
+        EventQueue.invokeLater(() -> addPack(pack, packInfo, priority));
     }
 
     protected void addPack(final InstalledPack pack, final PackInfo packInfo, final int priority) {
@@ -174,23 +159,17 @@ public class PackLoadJob implements Runnable {
 
         Runnable fillDataMethod = null;
         if (modpack.getPackInfo() == null) {
-            fillDataMethod = new Runnable() {
-                @Override
-                public void run() {
-                    PackInfo completeInfo = authoritativeSource.getPackInfo(pack);
-                    if (completeInfo != null) {
-                        addPackThreadSafe(null, completeInfo, priority);
-                    }
+            fillDataMethod = () -> {
+                PackInfo completeInfo = authoritativeSource.getPackInfo(pack);
+                if (completeInfo != null) {
+                    addPackThreadSafe(null, completeInfo, priority);
                 }
             };
         } else if (!modpack.getPackInfo().isComplete()) {
-            fillDataMethod = new Runnable() {
-                @Override
-                public void run() {
-                    PackInfo completeInfo = authoritativeSource.getCompletePackInfo(packInfo);
-                    if (completeInfo != null) {
-                        addPackThreadSafe(null, completeInfo, priority);
-                    }
+            fillDataMethod = () -> {
+                PackInfo completeInfo = authoritativeSource.getCompletePackInfo(packInfo);
+                if (completeInfo != null) {
+                    addPackThreadSafe(null, completeInfo, priority);
                 }
             };
         }

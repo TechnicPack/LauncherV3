@@ -38,8 +38,8 @@ public class TechnicInstalledPackStore implements IInstalledPackRepository {
 
     private transient File loadedFile;
 
-    private final Map<String, InstalledPack> installedPacks = new HashMap<String, InstalledPack>();
-    private final List<String> byIndex = new ArrayList<String>();
+    private final Map<String, InstalledPack> installedPacks = new HashMap<>();
+    private final List<String> byIndex = new ArrayList<>();
     private String selected = null;
 
     public TechnicInstalledPackStore(File jsonFile) {
@@ -61,10 +61,7 @@ public class TechnicInstalledPackStore implements IInstalledPackRepository {
                 return parsedList;
             } else
                 return new TechnicInstalledPackStore(jsonFile);
-        } catch (JsonSyntaxException e) {
-            Utils.getLogger().log(Level.WARNING, "Unable to load installedPacks from " + jsonFile);
-            return new TechnicInstalledPackStore(jsonFile);
-        } catch (IOException e) {
+        } catch (JsonSyntaxException | IOException e) {
             Utils.getLogger().log(Level.WARNING, "Unable to load installedPacks from " + jsonFile);
             return new TechnicInstalledPackStore(jsonFile);
         }

@@ -38,7 +38,7 @@ import java.util.*;
 import java.util.logging.Level;
 
 public class ResourceLoader {
-    private Collection<IRelocalizableResource> resources = new LinkedList<IRelocalizableResource>();
+    private Collection<IRelocalizableResource> resources = new LinkedList<>();
     private ResourceBundle stringData;
     private Locale currentLocale;
     private String dottedResourcePath;
@@ -53,7 +53,7 @@ public class ResourceLoader {
     public static final String FONT_OPENSANS = "OpenSans+Cyberbit.ttf";
     public static final String FONT_RALEWAY = "Raleway+FireflySung.ttf";
 
-    public static final Map<String, Font> fontCache = new HashMap<String, Font>();
+    public static final Map<String, Font> fontCache = new HashMap<>();
 
     public static final Font fallbackFont = new Font("Arial", Font.PLAIN, 12);
 
@@ -203,8 +203,7 @@ public class ResourceLoader {
     private Locale matchClosestSupportedLocale(Locale definiteLocale) {
         Locale bestSupportedLocale = null;
         int bestLocaleScore = 0;
-        for (int i = 0; i < locales.length; i++) {
-            Locale testLocale = locales[i];
+        for (Locale testLocale : locales) {
             int testScore = 0;
 
             if (testLocale.getLanguage().equals(definiteLocale.getLanguage())) {
