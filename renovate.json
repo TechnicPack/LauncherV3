@@ -7,5 +7,11 @@
     ":semanticCommitTypeAll(build)",
     ":separateMajorReleases"
   ],
-  "rangeStrategy": "bump"
+  "rangeStrategy": "bump",
+  "packageRules": [
+    {
+      "matchPackageNames": ["com.akathist.maven.plugins.launch4j:launch4j-maven-plugin"],
+      "changelogUrl": "https://github.com/orphan-oss/launch4j-maven-plugin/releases"
+    }
+  ]
 }
