@@ -10,6 +10,12 @@
   "rangeStrategy": "bump",
   "packageRules": [
     {
+      // Flying Saucer requires Java 11 in 9.5.0, and Java 17 in 9.6.0 (https://github.com/flyingsaucerproject/flyingsaucer?tab=readme-ov-file#getting-flying-saucer),
+      // so these changes are pending that, since we're still targeting Java 8.
+      "matchPackageNames": ["org.xhtmlrenderer:flying-saucer-core"],
+      "allowedVersions": "<9.5.0",
+    },
+    {
       "matchPackageNames": ["com.akathist.maven.plugins.launch4j:launch4j-maven-plugin"],
       "changelogUrl": "https://github.com/orphan-oss/launch4j-maven-plugin/releases"
     }
