@@ -31,4 +31,6 @@ public interface LauncherDirectories {
     File getModpacksDirectory();
 
     File getRuntimesDirectory();
+
+    File getLogsDirectory();
 }
