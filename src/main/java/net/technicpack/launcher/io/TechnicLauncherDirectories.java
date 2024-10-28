@@ -20,6 +20,7 @@ package net.technicpack.launcher.io;
 
 import net.technicpack.launchercore.install.LauncherDirectories;
 
+import javax.swing.JOptionPane;
 import java.io.File;
 
 public class TechnicLauncherDirectories implements LauncherDirectories {
@@ -29,27 +30,42 @@ public class TechnicLauncherDirectories implements LauncherDirectories {
         workDir = rootDir;
     }
 
+    private void ensureDirectory(File dir) {
+        if (dir.exists() && dir.isDirectory()) {
+            return;
+        }
+
+        if (dir.exists() && !dir.isDirectory()) {
+            if (!dir.delete()) {
+                JOptionPane.showMessageDialog(null, "Failed to create directory " + dir.getAbsolutePath() + ".\nThis is a critical error, the launcher will terminate now.", "Critical error - Technic Launcher", JOptionPane.ERROR_MESSAGE);
+                System.exit(1);
+            }
+        }
+
+        if (!dir.mkdirs()) {
+            JOptionPane.showMessageDialog(null, "Failed to create directory " + dir.getAbsolutePath() + ".\nThis is a critical error, the launcher will terminate now.", "Critical error - Technic Launcher", JOptionPane.ERROR_MESSAGE);
+            System.exit(1);
+        }
+    }
+
     public File getLauncherDirectory() {
-        if (!workDir.exists())
-            workDir.mkdirs();
+        ensureDirectory(workDir);
 
         return workDir;
     }
 
     public File getCacheDirectory() {
         File cache = new File(getLauncherDirectory(), "cache");
-        if (!cache.exists()) {
-            cache.mkdirs();
-        }
+
+        ensureDirectory(cache);
+
         return cache;
     }
 
     public File getAssetsDirectory() {
         File assets = new File(getLauncherDirectory(), "assets");
 
-        if (!assets.exists()) {
-            assets.mkdirs();
-        }
+        ensureDirectory(assets);
 
         return assets;
     }
@@ -57,8 +73,7 @@ public class TechnicLauncherDirectories implements LauncherDirectories {
     public File getModpacksDirectory() {
         File modpacks = new File(getLauncherDirectory(), "modpacks");
 
-        if (!modpacks.exists())
-            modpacks.mkdirs();
+        ensureDirectory(modpacks);
 
         return modpacks;
     }
@@ -66,9 +81,16 @@ public class TechnicLauncherDirectories implements LauncherDirectories {
     public File getRuntimesDirectory() {
         File runtimes = new File(getLauncherDirectory(), "runtimes");
 
-        if (!runtimes.exists())
-            runtimes.mkdirs();
+        ensureDirectory(runtimes);
 
         return runtimes;
+    }
+
+    public File getLogsDirectory() {
+        File logs = new File(getLauncherDirectory(), "logs");
+
+        ensureDirectory(logs);
+
+        return logs;
     }
 }
