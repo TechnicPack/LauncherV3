@@ -134,7 +134,7 @@
         <dependency>
             <groupId>com.google.http-client</groupId>
             <artifactId>google-http-client-gson</artifactId>
-            <version>1.45.0</version>
+            <version>1.45.1</version>
         </dependency>
         <!-- Required to silence logging error from Apache HttpClient v5 -->
         <!-- https://www.slf4j.org/codes.html#StaticLoggerBinder -->
