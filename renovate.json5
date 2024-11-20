@@ -18,6 +18,10 @@
     {
       "matchPackageNames": ["com.akathist.maven.plugins.launch4j:launch4j-maven-plugin"],
       "changelogUrl": "https://github.com/orphan-oss/launch4j-maven-plugin/releases"
+    },
+    {
+      "matchPackageNames": ["commons-io:commons-io"],
+      "changelogUrl": "https://commons.apache.org/proper/commons-io/changes-report.html"
     }
   ]
 }
