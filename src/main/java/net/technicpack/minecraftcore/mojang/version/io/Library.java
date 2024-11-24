@@ -34,9 +34,11 @@ public class Library {
         "https://libraries.minecraft.net/",
         "https://maven.minecraftforge.net/",
         "https://mirror.technicpack.net/Technic/lib/",
+        "https://maven.creeperhost.net/",
     };
     private static final Pattern GRADLE_PATTERN = Pattern.compile("^([^:@]+):([^:@]+):([^:@]+)(?::([^:@]+))?(?:@([^:@]+))?$");
     private static final Pattern FORGE_MAVEN_ROOT = Pattern.compile("^https://(?:files\\.minecraftforge\\.net/maven|maven\\.minecraftforge\\.net)/(.+)$");
+    private static final String MCFORGE_MAVEN_MIRROR = "https://maven.creeperhost.net/";
 
     // JSON fields
     private String name;
@@ -257,8 +259,10 @@ public class Library {
             if (artifactUrl != null && !artifactUrl.isEmpty()) {
                 // Check if this URL is in Minecraft Forge's Maven repo and add ours as a primary mirror
                 Matcher m = FORGE_MAVEN_ROOT.matcher(artifactUrl);
-                if (m.matches())
+                if (m.matches()) {
                     possibleUrls.add(TechnicConstants.technicLibRepo + m.group(1));
+                    possibleUrls.add(MCFORGE_MAVEN_MIRROR + m.group(1));
+                }
 
                 possibleUrls.add(artifactUrl);
             }
