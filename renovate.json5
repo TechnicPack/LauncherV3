@@ -22,6 +22,14 @@
     {
       "matchPackageNames": ["commons-io:commons-io"],
       "changelogUrl": "https://commons.apache.org/proper/commons-io/changes-report.html"
+    },
+    {
+      "matchPackageNames": ["com.google.oauth-client:*"],
+      "groupName": "google-oauth-client"
+    },
+    {
+      "matchPackageNames": ["com.google.http-client:*"],
+      "groupName": "google-http-client"
     }
   ]
 }
