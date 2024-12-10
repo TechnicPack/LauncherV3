@@ -49,12 +49,12 @@ public class EnsureSizedFileTask extends EnsureFileTask<IWeightedTasksQueue> {
     }
 
     @Override
-    public void unzipFile(IWeightedTasksQueue taskQueue, File zipLocation, File targetLocation, IZipFileFilter filter) {
+    protected void unzipFile(IWeightedTasksQueue taskQueue, File zipLocation, File targetLocation, IZipFileFilter filter) {
         taskQueue.addNextTask(new UnzipFileTask(zipLocation, targetLocation, filter), fileSize);
     }
 
     @Override
-    public void downloadFile(IWeightedTasksQueue taskQueue, String sourceUrl, File targetLocation, IFileVerifier verifier, String fileName) {
-        taskQueue.addNextTask(new DownloadFileTask(sourceUrl, targetLocation, verifier, fileName), fileSize);
+    protected void addDownloadTask(IWeightedTasksQueue taskQueue, DownloadFileTask downloadFileTask) {
+        taskQueue.addNextTask(downloadFileTask, fileSize);
     }
 }

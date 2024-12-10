@@ -37,6 +37,7 @@ public class EnsureFileTask<TaskQueue extends ITasksQueue> implements IInstallTa
     private final TaskQueue copyTaskQueue;
     private final IZipFileFilter filter;
     private boolean executable;
+    private String downloadDecompressor;
 
     public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, TaskQueue downloadTaskQueue, TaskQueue copyTaskQueue) {
         this(fileLocation, fileVerifier, zipExtractLocation, sourceUrl, fileLocation.getName(), downloadTaskQueue, copyTaskQueue, null);
@@ -76,19 +77,34 @@ public class EnsureFileTask<TaskQueue extends ITasksQueue> implements IInstallTa
         if (this.zipExtractLocation != null)
             unzipFile(this.copyTaskQueue, this.cacheLocation, this.zipExtractLocation, this.filter);
 
-        if (sourceUrl != null && (!this.cacheLocation.exists() || (fileVerifier != null && !fileVerifier.isFileValid(this.cacheLocation))))
-            downloadFile(this.downloadTaskQueue, this.sourceUrl, this.cacheLocation, this.fileVerifier, this.friendlyFileName);
+        if (sourceUrl != null && (!this.cacheLocation.exists() || (fileVerifier != null && !fileVerifier.isFileValid(this.cacheLocation)))) {
+            DownloadFileTask downloadFileTask = new DownloadFileTask(this.sourceUrl, this.cacheLocation, this.fileVerifier, this.friendlyFileName, this.executable);
+
+            if (this.downloadDecompressor != null) {
+                downloadFileTask.setDecompressor(this.downloadDecompressor);
+            }
+
+            this.addDownloadTask(downloadTaskQueue, downloadFileTask);
+        }
     }
 
-    public void unzipFile(TaskQueue taskQueue, File zipLocation, File targetLocation, IZipFileFilter filter) {
+    protected void unzipFile(TaskQueue taskQueue, File zipLocation, File targetLocation, IZipFileFilter filter) {
         taskQueue.addNextTask(new UnzipFileTask(zipLocation, targetLocation, filter));
     }
 
-    public void downloadFile(TaskQueue taskQueue, String sourceUrl, File targetLocation, IFileVerifier verifier, String fileName) {
-        taskQueue.addNextTask(new DownloadFileTask(sourceUrl, targetLocation, verifier, fileName, this.executable));
+    protected void addDownloadTask(TaskQueue taskQueue, DownloadFileTask downloadFileTask) {
+        taskQueue.addNextTask(downloadFileTask);
     }
 
     public void setExecutable(boolean executable) {
         this.executable = executable;
+    }
+
+    /**
+     * @see DownloadFileTask#setDecompressor(String)
+     * @param downloadDecompressor
+     */
+    public void setDownloadDecompressor(String downloadDecompressor) {
+        this.downloadDecompressor = downloadDecompressor;
     }
 }

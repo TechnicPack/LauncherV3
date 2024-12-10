@@ -58,6 +58,10 @@ public class DownloadFileTask extends ListenerTask {
         this.executable = executable;
     }
 
+    /**
+     * @param decompressor {@link CompressorStreamFactory#ALL_NAMES}
+     * @see CompressorStreamFactory#ALL_NAMES
+     */
     public void setDecompressor(String decompressor) {
         if (CompressorStreamFactory.findAvailableCompressorInputStreamProviders().containsKey(decompressor)) {
             throw new IllegalArgumentException("Decompressor " + decompressor + " is not available.");
@@ -91,6 +95,8 @@ public class DownloadFileTask extends ListenerTask {
         Utils.downloadFile(url, tempDestination.getName(), tempDestination.getAbsolutePath(), null, downloadFileVerifier, this);
 
         if (needsDecompression) {
+            Utils.getLogger().fine("Decompressing " + tempDestination.getAbsolutePath() + " using " + decompressor);
+
             try (FileInputStream fis = new FileInputStream(tempDestination);
                  CompressorInputStream cis = new CompressorStreamFactory().createCompressorInputStream(decompressor, fis);
                  FileOutputStream fos = new FileOutputStream(this.destination);

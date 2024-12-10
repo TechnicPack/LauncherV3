@@ -32,6 +32,7 @@ import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.java.JavaRuntimeFileType;
 import net.technicpack.minecraftcore.mojang.java.JavaRuntimeManifest;
 import net.technicpack.minecraftcore.mojang.version.io.Download;
+import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -108,11 +109,26 @@ public class InstallJavaRuntimeTask implements IInstallTask {
                 // Apparently the Mac Java 8 JRE spec doesn't have any directory entries, so we have to create them regardless
                 target.getParentFile().mkdirs();
 
-                Download download = runtimeFile.getDownloads().getRaw();
+                Download rawDownload = runtimeFile.getDownloads().getRaw();
+                Download lzmaDownload = runtimeFile.getDownloads().getLzma();
 
-                IFileVerifier verifier = new SHA1FileVerifier(download.getSha1());
+                IFileVerifier verifier = new SHA1FileVerifier(rawDownload.getSha1());
 
-                EnsureFileTask ensureFileTask = new EnsureFileTask(target, verifier, null, download.getUrl(), downloadJavaQueue, null);
+
+                String downloadUrl;
+                if (lzmaDownload != null) {
+                    downloadUrl = lzmaDownload.getUrl();
+                } else {
+                    downloadUrl = rawDownload.getUrl();
+                }
+
+                EnsureFileTask ensureFileTask;
+                ensureFileTask = new EnsureFileTask(target, verifier, null, downloadUrl, downloadJavaQueue, null);
+
+                if (lzmaDownload != null) {
+                    ensureFileTask.setDownloadDecompressor(CompressorStreamFactory.LZMA);
+                }
+
                 ensureFileTask.setExecutable(runtimeFile.isExecutable());
 
                 examineJavaQueue.addTask(ensureFileTask);
