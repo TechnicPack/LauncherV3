@@ -24,10 +24,14 @@ public class LauncherResource {
     private String filename;
     private String url;
     private String md5;
+    private String sha256;
+    private String zstdUrl;
 
     public LauncherResource() {}
 
     public String getFilename() { return filename; }
     public String getUrl() { return url; }
     public String getMd5() { return md5; }
+    public String getSha256() { return sha256; }
+    public String getZstdUrl() { return zstdUrl; }
 }

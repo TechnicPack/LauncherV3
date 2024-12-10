@@ -19,7 +19,7 @@
 
 package net.technicpack.launchercore.install.verifiers;
 
-import net.technicpack.utilslib.SHA1Utils;
+import net.technicpack.utilslib.CryptoUtils;
 import net.technicpack.utilslib.Utils;
 
 import java.io.File;
@@ -35,7 +35,7 @@ public class SHA1FileVerifier implements IFileVerifier {
         if (sha1Hash == null || sha1Hash.isEmpty())
             return false;
 
-        String resultSha1 = SHA1Utils.getSHA1(file);
+        String resultSha1 = CryptoUtils.getSHA1(file);
 
         boolean hashMatches = sha1Hash.equalsIgnoreCase(resultSha1);
 

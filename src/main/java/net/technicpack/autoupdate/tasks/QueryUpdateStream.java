@@ -31,7 +31,9 @@ import net.technicpack.launchercore.install.tasks.DownloadFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
+import net.technicpack.launchercore.install.verifiers.SHA256FileVerifier;
 import net.technicpack.rest.RestfulAPIException;
+import org.apache.commons.compress.compressors.CompressorStreamFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,10 +76,33 @@ public class QueryUpdateStream implements IInstallTask {
                 return;
 
             for(LauncherResource resource : version.getResources()) {
-                IFileVerifier verifier = new MD5FileVerifier(resource.getMd5());
-                File downloadFile = new File(new File(directories.getAssetsDirectory(), "launcher"), resource.getFilename());
-                if (!downloadFile.exists() || !verifier.isFileValid(downloadFile))
-                    downloadTasks.addTask(new DownloadFileTask(resource.getUrl(), downloadFile, verifier, resource.getFilename()));
+                IFileVerifier verifier;
+
+                if (resource.getSha256() != null && !resource.getSha256().isEmpty()) {
+                    verifier = new SHA256FileVerifier(resource.getSha256());
+                } else if (resource.getMd5() != null && !resource.getMd5().isEmpty()) {
+                    verifier = new MD5FileVerifier(resource.getMd5());
+                } else {
+                    verifier = null;
+                }
+
+                File targetFile = new File(new File(directories.getAssetsDirectory(), "launcher"), resource.getFilename());
+
+                if (targetFile.exists() && verifier.isFileValid(targetFile)) {
+                    continue;
+                }
+
+                DownloadFileTask downloadFileTask;
+
+                String zstdUrl = resource.getZstdUrl();
+                if (zstdUrl != null && !zstdUrl.isEmpty()) {
+                    downloadFileTask = new DownloadFileTask(zstdUrl, targetFile, verifier, resource.getFilename());
+                    downloadFileTask.setDecompressor(CompressorStreamFactory.ZSTANDARD);
+                } else {
+                    downloadFileTask = new DownloadFileTask(resource.getUrl(), targetFile, verifier, resource.getFilename());
+                }
+
+                downloadTasks.addTask(downloadFileTask);
             }
 
             if (version.getBuild() == relauncher.getCurrentBuild() || (relauncher.getStreamName().startsWith("beta") && version.getBuild() <= relauncher.getCurrentBuild()))

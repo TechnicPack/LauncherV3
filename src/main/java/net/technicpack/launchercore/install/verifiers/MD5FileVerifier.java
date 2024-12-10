@@ -19,7 +19,7 @@
 
 package net.technicpack.launchercore.install.verifiers;
 
-import net.technicpack.utilslib.MD5Utils;
+import net.technicpack.utilslib.CryptoUtils;
 import net.technicpack.utilslib.Utils;
 
 import java.io.File;
@@ -35,7 +35,7 @@ public class MD5FileVerifier implements IFileVerifier {
         if (md5Hash == null || md5Hash.isEmpty())
             return false;
 
-        String resultMD5 = MD5Utils.getMD5(file);
+        String resultMD5 = CryptoUtils.getMD5(file);
 
         boolean hashMatches = md5Hash.equalsIgnoreCase(resultMD5);
 

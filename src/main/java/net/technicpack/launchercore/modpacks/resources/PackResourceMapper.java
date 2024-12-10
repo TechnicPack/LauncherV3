@@ -24,7 +24,7 @@ import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.resources.resourcetype.IModpackResourceType;
 import net.technicpack.rest.io.Resource;
-import net.technicpack.utilslib.MD5Utils;
+import net.technicpack.utilslib.CryptoUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -50,7 +50,7 @@ public class PackResourceMapper implements IImageMapper<ModpackModel> {
         if (res.getMd5() == null || res.getMd5().isEmpty())
             return true;
 
-        return !MD5Utils.checkMD5(getImageLocation(imageKey), res.getMd5());
+        return !CryptoUtils.checkMD5(getImageLocation(imageKey), res.getMd5());
     }
 
     @Override

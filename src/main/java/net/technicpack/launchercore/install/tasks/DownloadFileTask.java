@@ -23,9 +23,13 @@ import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.utilslib.Utils;
+import org.apache.commons.compress.compressors.CompressorException;
+import org.apache.commons.compress.compressors.CompressorInputStream;
+import org.apache.commons.compress.compressors.CompressorStreamFactory;
 
-import javax.swing.JFileChooser;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class DownloadFileTask extends ListenerTask {
@@ -34,6 +38,7 @@ public class DownloadFileTask extends ListenerTask {
     private String taskDescription;
     private IFileVerifier fileVerifier;
     private final boolean executable;
+    private String decompressor;
 
     protected File getDestination() { return destination; }
 
@@ -53,6 +58,14 @@ public class DownloadFileTask extends ListenerTask {
         this.executable = executable;
     }
 
+    public void setDecompressor(String decompressor) {
+        if (CompressorStreamFactory.findAvailableCompressorInputStreamProviders().containsKey(decompressor)) {
+            throw new IllegalArgumentException("Decompressor " + decompressor + " is not available.");
+        }
+
+        this.decompressor = decompressor;
+    }
+
     @Override
     public String getTaskDescription() {
         return taskDescription;
@@ -62,7 +75,42 @@ public class DownloadFileTask extends ListenerTask {
     public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
         super.runTask(queue);
 
-        Utils.downloadFile(url, this.destination.getName(), this.destination.getAbsolutePath(), null, fileVerifier, this);
+        final boolean needsDecompression = decompressor != null;
+
+        IFileVerifier downloadFileVerifier;
+        File tempDestination;
+
+        if (needsDecompression) {
+            downloadFileVerifier = null;
+            tempDestination = new File(this.destination + ".temp");
+        } else {
+            downloadFileVerifier = fileVerifier;
+            tempDestination = this.destination;
+        }
+
+        Utils.downloadFile(url, tempDestination.getName(), tempDestination.getAbsolutePath(), null, downloadFileVerifier, this);
+
+        if (needsDecompression) {
+            try (FileInputStream fis = new FileInputStream(tempDestination);
+                 CompressorInputStream cis = new CompressorStreamFactory().createCompressorInputStream(decompressor, fis);
+                 FileOutputStream fos = new FileOutputStream(this.destination);
+            ) {
+                byte[] buffer = new byte[8096];
+                int n;
+                while ((n = cis.read(buffer)) != -1) {
+                    fos.write(buffer, 0, n);
+                }
+            } catch (CompressorException e) {
+                throw new DownloadException("Failed to decompress " + tempDestination.getName(), e);
+            }
+
+            if (this.fileVerifier.isFileValid(this.destination)) {
+                tempDestination.delete();
+            } else {
+                this.destination.delete();
+                throw new DownloadException("Failed to download " + this.destination.getName() + ".");
+            }
+        }
 
         if (!this.destination.exists()) {
             throw new DownloadException("Failed to download " + this.destination.getName() + ".");

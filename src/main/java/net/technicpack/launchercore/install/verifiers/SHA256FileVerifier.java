@@ -17,32 +17,31 @@
  * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.utilslib;
+package net.technicpack.launchercore.install.verifiers;
 
-import org.apache.commons.codec.digest.DigestUtils;
+import net.technicpack.utilslib.CryptoUtils;
+import net.technicpack.utilslib.Utils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 
-import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_1;
+public class SHA256FileVerifier implements IFileVerifier {
+    private String sha256Hash;
 
-public class SHA1Utils {
-
-    public static String getSHA1(File file) {
-        try {
-            return new DigestUtils(SHA_1).digestAsHex(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public SHA256FileVerifier(String sha256Hash) {
+        this.sha256Hash = sha256Hash;
     }
 
-    public static boolean checkSHA1(File file, String sha1) {
-        return checkSHA1(sha1, getSHA1(file));
-    }
+    public boolean isFileValid(File file) {
+        if (sha256Hash == null || sha256Hash.isEmpty())
+            return false;
 
-    public static boolean checkSHA1(String sha1, String otherSha1) {
-        return sha1.equalsIgnoreCase(otherSha1);
+        String resultSha256 = CryptoUtils.getSHA256(file);
+
+        boolean hashMatches = sha256Hash.equalsIgnoreCase(resultSha256);
+
+        if (!hashMatches)
+            Utils.getLogger().warning("SHA256 verification for " + file + " failed. Expected " + sha256Hash + ", got " + resultSha256);
+
+        return hashMatches;
     }
 }
