@@ -4,6 +4,8 @@ public class JavaVersion {
     private String component;
     private int majorVersion;
 
+    public JavaVersion() {}
+
     public String getComponent() {
         return component;
     }
