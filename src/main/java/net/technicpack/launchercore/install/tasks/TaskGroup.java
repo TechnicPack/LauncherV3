@@ -48,7 +48,6 @@ public class TaskGroup implements IWeightedTasksQueue, IInstallTask {
 
     @Override
     public float getTaskProgress() {
-
         if (taskList.size() == 0)
             return 0;
         if (totalWeight == 0)
@@ -66,9 +65,7 @@ public class TaskGroup implements IWeightedTasksQueue, IInstallTask {
         IInstallTask currentTask = taskList.get(taskProgress);
         float currentTaskProgress = (currentTask.getTaskProgress() / 100.0f);
 
-        float currentTaskWeight = 1;
-        if (taskWeights.containsKey(currentTask))
-            currentTaskWeight = taskWeights.get(currentTask);
+        float currentTaskWeight = taskWeights.getOrDefault(currentTask, 1.0f);
 
         currentTaskProgress *= (currentTaskWeight / totalWeight);
 
