@@ -13,17 +13,32 @@ import java.util.logging.Level;
 public class RunData {
     private String java;
     private String memory;
+    transient private long memoryLong = -1;
 
     public RunData() {}
 
     public String getJava() { return java; }
 
     public long getMemory() {
-        try {
-            return Long.parseLong(memory);
-        } catch (NumberFormatException ex) {
-            return 0;
+        if (memoryLong != -1) {
+            return memoryLong;
         }
+
+        if (memory == null || memory.isEmpty()) {
+            memoryLong = 0;
+        } else {
+            try {
+                if (memory.charAt(0) == '-') {
+                    throw new NumberFormatException("Invalid runData memory specified, cannot be negative");
+                }
+                memoryLong = Long.parseLong(memory);
+            } catch (NumberFormatException ex) {
+                Utils.getLogger().log(Level.WARNING, "Exception caught when parsing runData memory", ex);
+                memoryLong = 0;
+            }
+        }
+
+        return memoryLong;
     }
 
     public Memory getMemoryObject() {
