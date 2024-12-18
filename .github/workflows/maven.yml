@@ -11,6 +11,12 @@ name: Java CI with Maven
 on:
   push:
     branches: [ "master" ]
+    paths-ignore:
+      - '.gitignore'
+      - 'COPYING.txt'
+      - 'LICENSE*'
+      - 'README.md'
+      - 'renovate5.json'
   #pull_request:
   #  branches: [ "master" ]
 
