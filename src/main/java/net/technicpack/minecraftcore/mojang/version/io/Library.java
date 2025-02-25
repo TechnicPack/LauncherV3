@@ -64,15 +64,24 @@ public class Library {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+
         Library library = (Library) o;
-        String normalizedNameSelf = getNormalizedName();
-        String normalizedNameOther = library.getNormalizedName();
-        return Objects.equals(normalizedNameSelf, normalizedNameOther) && Objects.equals(rules, library.rules) && Objects.equals(downloads, library.downloads) && Objects.equals(natives, library.natives) && Objects.equals(extract, library.extract) && Objects.equals(url, library.url);
+        // Ensure Maven info is parsed since we're matching based on that
+        this.ensureNameIsParsed();
+        library.ensureNameIsParsed();
+
+        return Objects.equals(gradleGroupId, library.gradleGroupId)
+                && Objects.equals(gradleArtifactId, library.gradleArtifactId)
+                && Objects.equals(gradleClassifier, library.gradleClassifier)
+                && Objects.equals(gradleExtension, library.gradleExtension)
+                && Objects.equals(rules, library.rules)
+                && Objects.equals(natives, library.natives);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getNormalizedName(), rules, downloads, natives, extract, url);
+        ensureNameIsParsed();
+        return Objects.hash(gradleGroupId, gradleArtifactId, gradleClassifier, gradleExtension, rules, natives);
     }
 
     public Library() {}

@@ -38,8 +38,20 @@ import org.apache.maven.artifact.versioning.ComparableVersion;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class HandleVersionFileTask implements IInstallTask {
+    // Taken from https://stackoverflow.com/a/27872852
+    private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        Set<Object> seen = ConcurrentHashMap.newKeySet();
+        return t -> seen.add(keyExtractor.apply(t));
+    }
+
     private final ModpackModel pack;
     private final LauncherDirectories directories;
     private final ITasksQueue checkLibraryQueue;
@@ -149,7 +161,9 @@ public class HandleVersionFileTask implements IInstallTask {
             }
 
             // Process the install_profile.json (installer) libraries
-            for (Library library : installerVersion.getLibrariesForOS()) {
+            List<Library> dedupedInstallerLibraries = installerVersion.getLibraries().stream().filter(distinctByKey(Library::getName)).collect(Collectors.toList());
+
+            for (Library library : dedupedInstallerLibraries) {
                 if (library.isMinecraftForge() && is1_12_2) {
                     // Handling of the modern 1.12.2 Minecraft Forge universal jar is done above, in the version.json, rather than the install_profile.json
                     continue;

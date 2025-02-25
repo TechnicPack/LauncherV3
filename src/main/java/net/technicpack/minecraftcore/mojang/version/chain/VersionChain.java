@@ -112,7 +112,7 @@ public class VersionChain implements MojangVersion {
                 allLibraries.addAll(0, version.getLibraries());
         }
 
-        return allLibraries;
+        return allLibraries.stream().distinct().collect(Collectors.toList());
     }
 
     @Override
