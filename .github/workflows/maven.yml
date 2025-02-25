@@ -40,7 +40,7 @@ jobs:
     - name: Build with Maven
       run: mvn -e -P package-win,package-osx --file pom.xml --no-transfer-progress
     - name: Archive artifacts
-      uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4
+      uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
       with:
         name: launcher-${{ env.BUILD_NUMBER }}
         path: target/launcher-*
