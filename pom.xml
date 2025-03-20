@@ -135,18 +135,18 @@
         <dependency>
             <groupId>com.google.http-client</groupId>
             <artifactId>google-http-client</artifactId>
-            <version>1.45.3</version>
+            <version>1.46.3</version>
         </dependency>
         <!-- For the current Apache HTTP client -->
         <dependency>
             <groupId>com.google.http-client</groupId>
             <artifactId>google-http-client-apache-v5</artifactId>
-            <version>1.45.3</version>
+            <version>1.46.3</version>
         </dependency>
         <dependency>
             <groupId>com.google.http-client</groupId>
             <artifactId>google-http-client-gson</artifactId>
-            <version>1.45.3</version>
+            <version>1.46.3</version>
         </dependency>
         <!-- Required to silence logging error from Apache HttpClient v5 -->
         <!-- https://www.slf4j.org/codes.html#StaticLoggerBinder -->
