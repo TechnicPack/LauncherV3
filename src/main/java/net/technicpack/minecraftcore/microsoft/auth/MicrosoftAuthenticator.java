@@ -97,7 +97,7 @@ public class MicrosoftAuthenticator {
         MinecraftProfile profile = getMinecraftProfile(xboxMinecraftResponse);
 
         // TODO: what happens if the user changes their Minecraft username?
-        updateCredentialStore(profile.name, credential);
+        updateCredentialStore(profile.id, credential);
 
         return new MicrosoftUser(xboxMinecraftResponse, profile);
     }
@@ -105,7 +105,13 @@ public class MicrosoftAuthenticator {
     public void refreshSession(MicrosoftUser user) throws AuthenticationException {
         // Refresh the OAuth token (should last 90 inactive days, indefinitely otherwise).
         // If it fails then we bail.
-        Credential credential = loadExistingCredential(user.getUsername());
+        Credential credential = loadExistingCredential(user.getId());
+
+        // TODO: migration path, remove in future release
+        // Load from username as a fallback
+        if (credential == null) {
+            credential = loadExistingCredential(user.getUsername());
+        }
 
         if (credential == null) {
             throw new SessionException("Microsoft login expired or is invalid");
@@ -124,7 +130,7 @@ public class MicrosoftAuthenticator {
         }
 
         // Store the updated credential in the filesystem
-        updateCredentialStore(user.getUsername(), credential);
+        updateCredentialStore(user.getId(), credential);
 
         // Request the Xbox token
         XboxResponse xboxResponse = authenticateXbox(credential);
@@ -137,13 +143,13 @@ public class MicrosoftAuthenticator {
         user.updateAuthToken(xboxMinecraftResponse);
     }
 
-    private Credential getOAuthCredential(String username) throws MicrosoftAuthException {
+    private Credential getOAuthCredential(String id) throws MicrosoftAuthException {
         receiver = new LocalServerReceiver.Builder()
                 .setHost("localhost").setPort(-1).setCallbackPath("/").build();
 
         try {
             AuthorizationCodeFlow flow = buildFlow();
-            return new AuthorizationCodeInstalledApp(flow, receiver, DesktopUtils::browseUrl).authorize(username);
+            return new AuthorizationCodeInstalledApp(flow, receiver, DesktopUtils::browseUrl).authorize(id);
         } catch (StreamCorruptedException e) {
             // Data store is corrupt, so we're going to purge it and try again
             Utils.getLogger().log(Level.SEVERE, "Data store is corrupt, purging", e);
@@ -160,7 +166,7 @@ public class MicrosoftAuthenticator {
                 }
             }
 
-            return getOAuthCredential(username);
+            return getOAuthCredential(id);
         } catch (IOException e) {
             Utils.getLogger().log(Level.SEVERE, "Failed to get OAuth authorization", e);
             throw new MicrosoftAuthException(OAUTH, "Failed to get OAuth authorization", e);
@@ -319,14 +325,14 @@ public class MicrosoftAuthenticator {
                         .build();
     }
 
-    private void updateCredentialStore(String username, Credential credential) {
+    private void updateCredentialStore(String id, Credential credential) {
         try {
             // Remove all the other credentials
             dataStoreFactory.getDataStore(StoredCredential.DEFAULT_DATA_STORE_ID).clear();
 
             // Store the new one
             dataStoreFactory.getDataStore(StoredCredential.DEFAULT_DATA_STORE_ID)
-                    .set(username, new StoredCredential(credential));
+                    .set(id, new StoredCredential(credential));
         } catch (IOException e) {
             Utils.getLogger().log(Level.WARNING, "Failed to save user credential to the data store.", e);
         }
