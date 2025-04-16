@@ -5,9 +5,6 @@ import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.exception.AuthenticationException;
 import net.technicpack.minecraftcore.microsoft.auth.model.MinecraftProfile;
 import net.technicpack.minecraftcore.microsoft.auth.model.XboxMinecraftResponse;
-import net.technicpack.minecraftcore.microsoft.auth.model.XboxResponse;
-
-import java.time.Instant;
 
 public class MicrosoftUser implements IUserType {
     public static final String MC_MS_USER_TYPE = "msa";
@@ -22,9 +19,8 @@ public class MicrosoftUser implements IUserType {
     private MicrosoftUser() {}
 
     public MicrosoftUser(XboxMinecraftResponse authResponse, MinecraftProfile profile) {
-        this.id = profile.id;
-        this.username = profile.name;
-        updateAuthToken(authResponse);
+        setProfile(profile);
+        setAuthToken(authResponse);
     }
 
     /**
@@ -88,8 +84,13 @@ public class MicrosoftUser implements IUserType {
         userModel.getMicrosoftAuthenticator().refreshSession(this);
     }
 
-    public void updateAuthToken(XboxMinecraftResponse authResponse) {
+    public void setAuthToken(XboxMinecraftResponse authResponse) {
         this.accessToken = authResponse.accessToken;
+    }
+
+    public void setProfile(MinecraftProfile profile) {
+        this.id = profile.id;
+        this.username = profile.name;
     }
 
     @Override

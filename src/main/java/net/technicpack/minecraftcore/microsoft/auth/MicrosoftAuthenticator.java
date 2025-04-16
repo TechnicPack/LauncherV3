@@ -140,7 +140,13 @@ public class MicrosoftAuthenticator {
 
         // Request the Mojang token and store it (in memory)
         XboxMinecraftResponse xboxMinecraftResponse = authenticateMinecraftXbox(xstsResponse);
-        user.updateAuthToken(xboxMinecraftResponse);
+
+        user.setAuthToken(xboxMinecraftResponse);
+
+        // Update Minecraft profile
+        MinecraftProfile profile = getMinecraftProfile(xboxMinecraftResponse);
+
+        user.setProfile(profile);
     }
 
     private Credential getOAuthCredential(String id) throws MicrosoftAuthException {
