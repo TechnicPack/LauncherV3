@@ -319,7 +319,6 @@ public class MicrosoftAuthenticator {
                         AUTHORIZATION_SERVER_URL)
                         .setScopes(Arrays.asList(SCOPES))
                         .setDataStoreFactory(dataStoreFactory)
-//                            .enablePKCE() TODO: Figure out PKCE
                         .build();
     }
 
