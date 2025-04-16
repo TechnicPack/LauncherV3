@@ -70,7 +70,12 @@ public class MicrosoftAuthenticator {
 //            }
 //        });
         REQUEST_FACTORY = HTTP_TRANSPORT.createRequestFactory(
-                request -> request.setParser(new JsonObjectParser(JSON_FACTORY))
+                request -> {
+                    request.setParser(new JsonObjectParser(JSON_FACTORY));
+
+                    request.setLoggingEnabled(true);
+                    request.setCurlLoggingEnabled(true);
+                }
         );
 
         try {
@@ -188,8 +193,6 @@ public class MicrosoftAuthenticator {
         HttpContent httpContent = new JsonHttpContent(JSON_FACTORY, xboxAuthRequest);
         HttpRequest request = buildPostRequest(XBOX_AUTH_URL, httpContent);
         request.setThrowExceptionOnExecuteError(false);
-        request.setLoggingEnabled(true);
-        request.setCurlLoggingEnabled(true);
 
         HttpResponse httpResponse = null;
         try {
@@ -216,8 +219,6 @@ public class MicrosoftAuthenticator {
 
         // Don't throw on 401, that way we can handle the 401s we expect.
         request.setThrowExceptionOnExecuteError(false);
-        request.setLoggingEnabled(true);
-        request.setCurlLoggingEnabled(true);
 
         HttpResponse httpResponse = null;
         try {
@@ -251,8 +252,6 @@ public class MicrosoftAuthenticator {
 
         HttpContent httpContent = new JsonHttpContent(JSON_FACTORY, xboxMinecraftRequest);
         HttpRequest request = buildPostRequest(MINECRAFT_AUTH_URL, httpContent);
-        request.setLoggingEnabled(true);
-        request.setCurlLoggingEnabled(true);
 
         HttpResponse httpResponse = null;
         try {
@@ -278,8 +277,6 @@ public class MicrosoftAuthenticator {
 
         // Profile API returns 404 when it returns a response for no purchased account
         request.setThrowExceptionOnExecuteError(false);
-        request.setLoggingEnabled(true);
-        request.setCurlLoggingEnabled(true);
 
         HttpResponse httpResponse = null;
         try {
