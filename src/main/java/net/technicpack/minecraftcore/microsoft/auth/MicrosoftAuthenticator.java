@@ -337,7 +337,7 @@ public class MicrosoftAuthenticator {
             switch (httpResponse.getStatusCode()) {
                 case HttpStatusCodes.STATUS_CODE_NOT_FOUND:
                     MinecraftError minecraftError = httpResponse.parseAs(MinecraftError.class);
-                    throw new MicrosoftAuthException(NO_MINECRAFT, "Minecraft Account Error: " + minecraftError.error);
+                    throw new MicrosoftAuthException(NO_PROFILE, "Minecraft Account Error: " + minecraftError.error);
                 case HttpStatusCodes.STATUS_CODE_OK:
                     return httpResponse.parseAs(MinecraftProfile.class);
                 default:

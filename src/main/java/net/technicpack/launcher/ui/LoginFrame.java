@@ -470,6 +470,11 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
                                 "No Xbox Account", ERROR_MESSAGE);
                         DesktopUtils.browseUrl("https://www.minecraft.net/login");
                         break;
+                    case NO_PROFILE:
+                        showMessageDialog(parent, "You don't have a Minecraft profile set up yet.\nPlease open the " +
+                                "Minecraft Launcher and set up a Minecraft profile before attempting to use Technic " +
+                                "Launcher.", "No Minecraft Profile", ERROR_MESSAGE);
+                        break;
                     case NO_MINECRAFT:
                         showMessageDialog(parent,
                                 "This account has not purchased Minecraft Java Edition.", "No Minecraft", ERROR_MESSAGE);
