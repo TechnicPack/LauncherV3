@@ -50,6 +50,8 @@ public class MicrosoftAuthenticator {
     // MINECRAFT
     private static final String MINECRAFT_AUTH_URL = "https://api.minecraftservices.com/launcher/login";
     private static final String MINECRAFT_PROFILE_URL = "https://api.minecraftservices.com/minecraft/profile";
+    private static final String MINECRAFT_ENTITLEMENTS_URL = "https://api.minecraftservices.com/entitlements/license";
+
     private LocalServerReceiver receiver;
 
     public MicrosoftAuthenticator(File dataStore) {
@@ -94,6 +96,11 @@ public class MicrosoftAuthenticator {
         XboxResponse xboxResponse = authenticateXbox(credential);
         XboxResponse xstsResponse = authenticateXSTS(xboxResponse.token);
         XboxMinecraftResponse xboxMinecraftResponse = authenticateMinecraftXbox(xstsResponse);
+
+        if (!checkMinecraftOwnership(getEntitlements(xboxMinecraftResponse))) {
+            throw new MicrosoftAuthException(NO_MINECRAFT, "Microsoft account does not own Minecraft");
+        }
+
         MinecraftProfile profile = getMinecraftProfile(xboxMinecraftResponse);
 
         // TODO: what happens if the user changes their Minecraft username?
@@ -142,6 +149,11 @@ public class MicrosoftAuthenticator {
         XboxMinecraftResponse xboxMinecraftResponse = authenticateMinecraftXbox(xstsResponse);
 
         user.setAuthToken(xboxMinecraftResponse);
+
+        // Check entitlements
+        if (!checkMinecraftOwnership(getEntitlements(xboxMinecraftResponse))) {
+            throw new SessionException("Microsoft account does not own Minecraft");
+        }
 
         // Update Minecraft profile
         MinecraftProfile profile = getMinecraftProfile(xboxMinecraftResponse);
@@ -280,6 +292,33 @@ public class MicrosoftAuthenticator {
                 }
             }
         }
+    }
+
+    private Entitlements getEntitlements(XboxMinecraftResponse xboxMinecraftResponse) throws MicrosoftAuthException {
+        HttpRequest request = buildGetRequest(String.format("%s?requestId=%s", MINECRAFT_ENTITLEMENTS_URL, UUID.randomUUID()));
+        String authorization = xboxMinecraftResponse.getAuthorization();
+        request.setHeaders(request.getHeaders().setAuthorization(authorization));
+
+        HttpResponse httpResponse = null;
+        try {
+            httpResponse = request.execute();
+            return httpResponse.parseAs(Entitlements.class);
+        } catch (IOException e) {
+            Utils.getLogger().log(Level.SEVERE, "Failed to request entitlements.", e);
+            throw new MicrosoftAuthException(REQUEST, "Failed to request entitlements.", e);
+        } finally {
+            if (httpResponse != null) {
+                try {
+                    httpResponse.disconnect();
+                } catch (IOException ignored) {
+                }
+            }
+        }
+    }
+
+    private boolean checkMinecraftOwnership(Entitlements entitlements) {
+        return entitlements.items.stream().anyMatch(i -> i.name.equalsIgnoreCase("game_minecraft"))
+                && entitlements.items.stream().anyMatch(i -> i.name.equalsIgnoreCase("product_minecraft"));
     }
 
     private MinecraftProfile getMinecraftProfile(XboxMinecraftResponse xboxMinecraftResponse) throws MicrosoftAuthException {

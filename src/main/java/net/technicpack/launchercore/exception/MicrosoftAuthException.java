@@ -30,6 +30,8 @@ public class MicrosoftAuthException extends ResponseException {
         MINECRAFT_PROFILE,
         UNDERAGE,
         NO_XBOX_ACCOUNT,
-        NO_MINECRAFT
+        NO_MINECRAFT,
+        NO_PROFILE,
+        ENTITLEMENTS,
     }
 }
