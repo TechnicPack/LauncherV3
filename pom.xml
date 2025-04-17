@@ -338,6 +338,51 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                <artifactId>launch4j-maven-plugin</artifactId>
+                <version>2.5.2</version>
+                <executions>
+                    <execution>
+                        <configuration>
+                            <headerType>gui</headerType>
+                            <stayAlive>false</stayAlive>
+                            <jar>${project.build.directory}/${project.artifactId}-${project.version}.jar</jar>
+                            <outfile>${project.build.directory}/${project.artifactId}-${project.version}.exe</outfile>
+                            <classPath>
+                                <mainClass>${mainClass}</mainClass>
+                                <addDependencies>false</addDependencies>
+                                <preCp>anything</preCp>
+                            </classPath>
+                            <jre>
+                                <path>%JAVA_HOME%;%PATH%</path>
+                                <minVersion>1.8.0</minVersion>
+                                <opts>
+                                    <opt>-Djava.net.preferIPv4Stack=true</opt>
+                                    <opt>-Dawt.useSystemAAFontSettings=lcd</opt>
+                                    <opt>-Dswing.aatext=true</opt>
+                                </opts>
+                            </jre>
+                            <icon>${project.basedir}/src/main/resources/exe/icon.ico</icon>
+                            <versionInfo>
+                                <fileVersion>4.0.0.${buildNumber}</fileVersion>
+                                <txtFileVersion>4.0.0.${buildNumber}</txtFileVersion>
+                                <productVersion>4.0.0.${buildNumber}</productVersion>
+                                <txtProductVersion>4.0.0.${buildNumber}</txtProductVersion>
+                                <fileDescription>${project.name}</fileDescription>
+                                <productName>${project.name}</productName>
+                                <copyright>${project.organization.name}, ${project.organization.url}</copyright>
+                                <internalName>${project.artifactId}</internalName>
+                                <originalFilename>${project.artifactId}.exe</originalFilename>
+                            </versionInfo>
+                        </configuration>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>launch4j</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <!-- Build profiles -->
@@ -363,64 +408,6 @@
             <properties>
                 <buildNumber>${env.BUILD_NUMBER}</buildNumber>
             </properties>
-        </profile>
-        <!-- Package for Windows -->
-        <profile>
-            <id>package-win</id>
-            <activation>
-                <os>
-                    <family>windows</family>
-                </os>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.akathist.maven.plugins.launch4j</groupId>
-                        <artifactId>launch4j-maven-plugin</artifactId>
-                        <version>2.5.2</version>
-                        <executions>
-                            <execution>
-                                <configuration>
-                                    <headerType>gui</headerType>
-                                    <stayAlive>false</stayAlive>
-                                    <jar>${project.build.directory}/${project.artifactId}-${project.version}.jar</jar>
-                                    <outfile>${project.build.directory}/${project.artifactId}-${project.version}.exe</outfile>
-                                    <classPath>
-                                        <mainClass>${mainClass}</mainClass>
-                                        <addDependencies>false</addDependencies>
-                                        <preCp>anything</preCp>
-                                    </classPath>
-                                    <jre>
-                                        <path>%JAVA_HOME%;%PATH%</path>
-                                        <minVersion>1.8.0</minVersion>
-                                        <opts>
-                                            <opt>-Djava.net.preferIPv4Stack=true</opt>
-                                            <opt>-Dawt.useSystemAAFontSettings=lcd</opt>
-                                            <opt>-Dswing.aatext=true</opt>
-                                        </opts>
-                                    </jre>
-                                    <icon>${project.basedir}/src/main/resources/exe/icon.ico</icon>
-                                    <versionInfo>
-                                        <fileVersion>4.0.0.${buildNumber}</fileVersion>
-                                        <txtFileVersion>4.0.0.${buildNumber}</txtFileVersion>
-                                        <productVersion>4.0.0.${buildNumber}</productVersion>
-                                        <txtProductVersion>4.0.0.${buildNumber}</txtProductVersion>
-                                        <fileDescription>${project.name}</fileDescription>
-                                        <productName>${project.name}</productName>
-                                        <copyright>${project.organization.name}, ${project.organization.url}</copyright>
-                                        <internalName>${project.artifactId}</internalName>
-                                        <originalFilename>${project.artifactId}.exe</originalFilename>
-                                    </versionInfo>
-                                </configuration>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>launch4j</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
         </profile>
         <profile>
             <id>sign</id>
