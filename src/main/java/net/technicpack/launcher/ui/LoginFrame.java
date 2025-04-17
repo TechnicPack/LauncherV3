@@ -471,9 +471,11 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
                         DesktopUtils.browseUrl("https://www.minecraft.net/login");
                         break;
                     case NO_PROFILE:
-                        showMessageDialog(parent, "You don't have a Minecraft profile set up yet.\nPlease open the " +
-                                "Minecraft Launcher and set up a Minecraft profile before attempting to use Technic " +
-                                "Launcher.", "No Minecraft Profile", ERROR_MESSAGE);
+                        // https://www.minecraft.net/msaprofile/mygames/editprofile
+                        showMessageDialog(parent,
+                                "You don't have a Minecraft profile set up yet.\nPlease open the Minecraft Launcher " +
+                                        "or go to minecraft.net and set up a Minecraft profile before attempting to " +
+                                        "use Technic Launcher.", "No Minecraft Profile", ERROR_MESSAGE);
                         break;
                     case NO_MINECRAFT:
                         showMessageDialog(parent,
