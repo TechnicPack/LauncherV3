@@ -164,7 +164,7 @@
 
     <!-- Build configuration -->
     <build>
-        <defaultGoal>clean install</defaultGoal>
+        <defaultGoal>clean package</defaultGoal>
 
         <!-- Resources to include -->
         <resources>
