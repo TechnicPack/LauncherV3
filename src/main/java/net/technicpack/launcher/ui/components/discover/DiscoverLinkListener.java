@@ -55,11 +55,8 @@ public class DiscoverLinkListener extends LinkListener {
             String slug = uri.substring(11);
 
             String platformUri = this.platform.getPlatformUri(slug);
-            try {
-                modpackSelector.setFilter(platformUri);
-            } catch (Exception ex) {
-                //The clipboard is really temperamental if we mess with it too much, just ignore it
-            }
+
+            modpackSelector.setFilter(platformUri);
         } else
             DesktopUtils.browseUrl(uri);
     }
