@@ -117,19 +117,19 @@
         <dependency>
             <groupId>com.google.oauth-client</groupId>
             <artifactId>google-oauth-client</artifactId>
-            <version>1.37.0</version>
+            <version>1.39.0</version>
         </dependency>
         <!-- For the OAuth2 local server and installed app flow -->
         <dependency>
             <groupId>com.google.oauth-client</groupId>
             <artifactId>google-oauth-client-jetty</artifactId>
-            <version>1.37.0</version>
+            <version>1.39.0</version>
         </dependency>
         <!-- google-oauth-client-jetty depends on this -->
         <dependency>
             <groupId>com.google.oauth-client</groupId>
             <artifactId>google-oauth-client-java6</artifactId>
-            <version>1.37.0</version>
+            <version>1.39.0</version>
         </dependency>
 
         <dependency>
