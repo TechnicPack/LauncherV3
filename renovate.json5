@@ -21,7 +21,7 @@
     },
     {
       "matchPackageNames": ["commons-io:commons-io"],
-      "changelogUrl": "https://commons.apache.org/proper/commons-io/changes-report.html"
+      "changelogUrl": "https://commons.apache.org/proper/commons-io/changes.html"
     },
     {
       "matchPackageNames": ["com.google.oauth-client:*"],
