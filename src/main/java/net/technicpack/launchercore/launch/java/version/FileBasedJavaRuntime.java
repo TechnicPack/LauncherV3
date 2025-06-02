@@ -23,10 +23,7 @@ import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.utilslib.ProfilingUtils;
 import net.technicpack.utilslib.Utils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
@@ -34,13 +31,17 @@ import java.util.Objects;
 /**
  * An IJavaRuntime based on an externally-selected java executable.
  */
-public final class FileBasedJavaRuntime implements IJavaRuntime {
-    private boolean queried = false;
-    private String version;
-    private String vendor;
-    private boolean is64Bit;
-    private File javaPath;
+public final class FileBasedJavaRuntime implements IJavaRuntime, Serializable {
+    private transient boolean queried = false;
+    private transient String version;
+    private transient String vendor;
+    private transient boolean is64Bit;
+    private transient File javaPath;
     private String filePath;
+
+    private FileBasedJavaRuntime() {
+        // Empty constructor for Gson
+    }
 
     public FileBasedJavaRuntime(File javaPath) {
         if (javaPath == null) throw new IllegalArgumentException("javaPath cannot be null");
