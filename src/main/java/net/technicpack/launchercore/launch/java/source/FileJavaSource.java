@@ -22,7 +22,7 @@ package net.technicpack.launchercore.launch.java.source;
 import com.google.common.base.Charsets;
 import net.technicpack.launchercore.launch.java.IVersionSource;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
-import net.technicpack.launchercore.launch.java.version.FileBasedJavaVersion;
+import net.technicpack.launchercore.launch.java.version.FileBasedJavaRuntime;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 
@@ -37,7 +37,7 @@ import java.util.List;
  */
 public class FileJavaSource implements IVersionSource {
     private transient File loadedFile;
-    private List<FileBasedJavaVersion> versions = new ArrayList<>();
+    private List<FileBasedJavaRuntime> versions = new ArrayList<>();
 
     protected FileJavaSource(File loadFile) {
         this.loadedFile = loadFile;
@@ -54,7 +54,7 @@ public class FileJavaSource implements IVersionSource {
         }
     }
 
-    public void addVersion(FileBasedJavaVersion version) {
+    public void addVersion(FileBasedJavaRuntime version) {
         versions.add(version);
         save();
     }

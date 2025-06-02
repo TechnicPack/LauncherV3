@@ -22,7 +22,7 @@ package net.technicpack.launchercore.launch.java.source.os;
 
 import net.technicpack.launchercore.launch.java.IVersionSource;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
-import net.technicpack.launchercore.launch.java.version.FileBasedJavaVersion;
+import net.technicpack.launchercore.launch.java.version.FileBasedJavaRuntime;
 import net.technicpack.utilslib.Utils;
 
 import java.io.File;
@@ -86,7 +86,7 @@ public class WinRegistryJavaSource implements IVersionSource {
             typeIndex += "REG_SZ".length();
 
             String path = line.substring(typeIndex).trim();
-            repository.addVersion(new FileBasedJavaVersion(new File(path + File.separator + "bin" + File.separator + "javaw.exe")));
+            repository.addVersion(new FileBasedJavaRuntime(new File(path + File.separator + "bin" + File.separator + "javaw.exe")));
         }
     }
 }

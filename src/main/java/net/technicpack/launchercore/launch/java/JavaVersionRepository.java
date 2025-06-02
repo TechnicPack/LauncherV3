@@ -19,7 +19,7 @@
 
 package net.technicpack.launchercore.launch.java;
 
-import net.technicpack.launchercore.launch.java.version.CurrentJavaVersion;
+import net.technicpack.launchercore.launch.java.version.CurrentJavaRuntime;
 import net.technicpack.utilslib.OperatingSystem;
 
 import java.io.File;
@@ -32,47 +32,48 @@ import java.util.Map;
  * Represents a repository of all the versions of java available to launch games with.
  */
 public class JavaVersionRepository {
-    private Map<File, IJavaVersion> loadedVersions = new HashMap<>();
-    private Collection<IJavaVersion> versionCache = new LinkedList<>();
-    private IJavaVersion selectedVersion;
+    private Map<File, IJavaRuntime> loadedVersions = new HashMap<>();
+    private Collection<IJavaRuntime> versionCache = new LinkedList<>();
+    private IJavaRuntime selectedVersion;
 
     public JavaVersionRepository() {
-        IJavaVersion version = new CurrentJavaVersion();
-        selectedVersion = version;
-        loadedVersions.put(null, version);
-        versionCache.add(version);
+        IJavaRuntime currentVersion = new CurrentJavaRuntime();
+        selectedVersion = currentVersion;
+        loadedVersions.put(null, currentVersion);
+        versionCache.add(currentVersion);
     }
 
-    public boolean addVersion(IJavaVersion version) {
-        if (!version.verify())
+    public boolean addVersion(IJavaRuntime version) {
+        if (loadedVersions.containsKey(version.getExecutableFile()) || versionCache.contains(version))
             return false;
 
-        File path = version.getJavaPath();
-
-        if (versionCache.contains(version))
+        if (!version.isValid())
             return false;
+
+        File path = version.getExecutableFile();
 
         loadedVersions.put(path, version);
         versionCache.add(version);
+
         if (selectedVersion == null)
             selectedVersion = version;
 
         return true;
     }
 
-    public IJavaVersion getBest64BitVersion() {
-        IJavaVersion bestVersion = null;
-        for (IJavaVersion version : loadedVersions.values()) {
+    public IJavaRuntime getBest64BitVersion() {
+        IJavaRuntime bestVersion = null;
+        for (IJavaRuntime version : loadedVersions.values()) {
             if (version.is64Bit()) {
-                if (bestVersion == null || bestVersion.getVersionNumber() == null) {
+                if (bestVersion == null || bestVersion.getVersion() == null) {
                     bestVersion = version;
                     continue;
                 }
 
-                if (version.getVersionNumber() == null)
+                if (version.getVersion() == null)
                     continue;
 
-                if (version.getVersionNumber().compareTo(bestVersion.getVersionNumber()) > 0)
+                if (version.getVersion().compareTo(bestVersion.getVersion()) > 0)
                     bestVersion = version;
             }
         }
@@ -80,11 +81,11 @@ public class JavaVersionRepository {
         return bestVersion;
     }
 
-    public Collection<IJavaVersion> getVersions() {
-        return versionCache;
+    public Collection<IJavaRuntime> getVersions() {
+        return loadedVersions.values();
     }
 
-    public IJavaVersion getSelectedVersion() {
+    public IJavaRuntime getSelectedVersion() {
         return selectedVersion;
     }
 
@@ -92,21 +93,31 @@ public class JavaVersionRepository {
         selectedVersion = getVersion(version, is64Bit);
     }
 
-    public IJavaVersion getVersion(String version, boolean is64Bit) {
+    public void setSelectedVersion(IJavaRuntime version) {
+        if (version == null) throw new IllegalArgumentException("version cannot be null");
+
+        if (!loadedVersions.containsValue(version)) {
+            throw new IllegalArgumentException("version is not loaded");
+        }
+
+        selectedVersion = version;
+    }
+
+    public IJavaRuntime getVersion(String version, boolean is64Bit) {
         if (version == null || version.isEmpty() || version.equals("default")) {
             return loadedVersions.get(null);
         } else if (version.equals("64bit")) {
-            IJavaVersion best64BitVersion = getBest64BitVersion();
+            IJavaRuntime best64BitVersion = getBest64BitVersion();
             if (best64BitVersion == null)
                 best64BitVersion = loadedVersions.get(null);
             return best64BitVersion;
         } else {
-            for (IJavaVersion checkVersion : versionCache) {
-                if (version.equals(checkVersion.getVersionNumber()) && is64Bit == checkVersion.is64Bit())
+            for (IJavaRuntime checkVersion : versionCache) {
+                if (version.equals(checkVersion.getVersion()) && is64Bit == checkVersion.is64Bit())
                     return checkVersion;
             }
 
-            IJavaVersion specifiedVersion = loadedVersions.get(new File(version));
+            IJavaRuntime specifiedVersion = loadedVersions.get(new File(version));
 
             if (specifiedVersion == null) {
                 specifiedVersion = loadedVersions.get(null);
@@ -117,9 +128,9 @@ public class JavaVersionRepository {
     }
 
     public String getSelectedPath() {
-        if (selectedVersion == null || selectedVersion.getJavaPath() == null)
+        if (selectedVersion == null || selectedVersion.getExecutableFile() == null)
             return OperatingSystem.getJavaDir();
 
-        return selectedVersion.getJavaPath().getAbsolutePath();
+        return selectedVersion.getExecutableFile().getAbsolutePath();
     }
 }

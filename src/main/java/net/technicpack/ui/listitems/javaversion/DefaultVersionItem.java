@@ -19,12 +19,12 @@
 
 package net.technicpack.ui.listitems.javaversion;
 
-import net.technicpack.launchercore.launch.java.IJavaVersion;
+import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.ui.lang.ResourceLoader;
 
 public class DefaultVersionItem extends JavaVersionItem {
 
-    public DefaultVersionItem(IJavaVersion version, ResourceLoader resourceLoader) {
+    public DefaultVersionItem(IJavaRuntime version, ResourceLoader resourceLoader) {
         super(version, resourceLoader);
     }
 

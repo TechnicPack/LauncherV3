@@ -19,11 +19,11 @@
 
 package net.technicpack.ui.listitems.javaversion;
 
-import net.technicpack.launchercore.launch.java.IJavaVersion;
+import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.ui.lang.ResourceLoader;
 
 public class Best64BitVersionItem extends JavaVersionItem {
-    public Best64BitVersionItem(IJavaVersion version, ResourceLoader resourceLoader) {
+    public Best64BitVersionItem(IJavaRuntime version, ResourceLoader resourceLoader) {
         super(version, resourceLoader);
     }
 

@@ -26,7 +26,7 @@ public class JavaUtils {
      */
     public static boolean is64Bit() {
         String architecture = System.getProperty("os.arch");
-        // x64 on old Java; x64 on new Java; ARM64
+        //     x64 on old Java;                 x64 on new Java;                ARM64
         return architecture.equals("x86_64") || architecture.equals("amd64") || architecture.equals("aarch64");
     }
 

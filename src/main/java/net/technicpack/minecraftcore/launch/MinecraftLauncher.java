@@ -206,7 +206,7 @@ public class MinecraftLauncher {
         }
 
         // build jvm args
-        String launchJavaVersion = javaVersions.getSelectedVersion().getVersionNumber();
+        String launchJavaVersion = javaVersions.getSelectedVersion().getVersion();
 
         // Ignore JVM args for Forge 1.13+, ForgeWrapper handles those
         // FIXME: HACK: This likely breaks some things as it will also skip vanilla JVM args

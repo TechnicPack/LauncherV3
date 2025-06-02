@@ -26,10 +26,10 @@ import net.technicpack.minecraftcore.launch.WindowType;
 import net.technicpack.ui.listitems.javaversion.Best64BitVersionItem;
 import net.technicpack.ui.listitems.javaversion.DefaultVersionItem;
 import net.technicpack.ui.listitems.javaversion.JavaVersionItem;
-import net.technicpack.launchercore.launch.java.IJavaVersion;
+import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.launch.java.source.FileJavaSource;
-import net.technicpack.launchercore.launch.java.version.FileBasedJavaVersion;
+import net.technicpack.launchercore.launch.java.version.FileBasedJavaRuntime;
 import net.technicpack.ui.controls.TooltipWarning;
 import net.technicpack.ui.controls.lang.LanguageCellRenderer;
 import net.technicpack.ui.controls.list.SimpleButtonComboUI;
@@ -224,9 +224,10 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     }
 
     protected void changeJavaVersion() {
-        String version = ((JavaVersionItem)versionSelect.getSelectedItem()).getVersionNumber();
-        boolean is64 = ((JavaVersionItem)versionSelect.getSelectedItem()).is64Bit();
-        javaVersions.selectVersion(version, is64);
+        JavaVersionItem javaVersionItem = (JavaVersionItem)versionSelect.getSelectedItem();
+        String version = javaVersionItem.getVersionNumber();
+        boolean is64 = javaVersionItem.is64Bit();
+        javaVersions.setSelectedVersion(javaVersionItem.getJavaVersion());
         settings.setJavaVersion(version);
         settings.setJavaBitness(is64);
         settings.save();
@@ -260,25 +261,23 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
                 return;
             }
 
-            FileBasedJavaVersion chosenJava = new FileBasedJavaVersion(chooser.getSelectedFile());
-            if (!chosenJava.verify()) {
+            FileBasedJavaRuntime chosenJava = new FileBasedJavaRuntime(chooser.getSelectedFile());
+            if (!chosenJava.isValid()) {
                 JOptionPane.showMessageDialog(this, resources.getString("launcheroptions.java.badfile"));
                 return;
             }
 
-            IJavaVersion existingVersion = javaVersions.getVersion(chosenJava.getVersionNumber(), chosenJava.is64Bit());
-            if (existingVersion.getJavaPath() != null) {
+            if (!javaVersions.addVersion(chosenJava)) {
                 JOptionPane.showMessageDialog(this, resources.getString("launcheroptions.java.versionexists"));
                 return;
             }
 
             fileJavaSource.addVersion(chosenJava);
-            javaVersions.addVersion(chosenJava);
-            javaVersions.selectVersion(chosenJava.getVersionNumber(), chosenJava.is64Bit());
+            javaVersions.setSelectedVersion(chosenJava);
             JavaVersionItem item = new JavaVersionItem(chosenJava, resources);
             versionSelect.addItem(item);
             versionSelect.setSelectedItem(item);
-            settings.setJavaVersion(chosenJava.getVersionNumber());
+            settings.setJavaVersion(chosenJava.getVersion());
             settings.setJavaBitness(chosenJava.is64Bit());
             settings.save();
         }
@@ -406,11 +405,11 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         versionSelect.removeAllItems();
         versionSelect.addItem(new DefaultVersionItem(javaVersions.getVersion(null, true), resources));
 
-        IJavaVersion best64Bit = javaVersions.getBest64BitVersion();
+        IJavaRuntime best64Bit = javaVersions.getBest64BitVersion();
         if (best64Bit != null)
             versionSelect.addItem(new Best64BitVersionItem(javaVersions.getVersion("64bit", true), resources));
 
-        for (IJavaVersion version : javaVersions.getVersions()) {
+        for (IJavaRuntime version : javaVersions.getVersions()) {
             versionSelect.addItem(new JavaVersionItem(version, resources));
         }
 

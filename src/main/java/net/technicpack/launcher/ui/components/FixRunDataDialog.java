@@ -2,7 +2,7 @@ package net.technicpack.launcher.ui.components;
 
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launchercore.TechnicConstants;
-import net.technicpack.launchercore.launch.java.IJavaVersion;
+import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.modpacks.RunData;
 import net.technicpack.ui.controls.LauncherDialog;
@@ -32,7 +32,7 @@ public class FixRunDataDialog extends LauncherDialog {
     private boolean shouldAskFirst;
     private final boolean usingMojangJava;
 
-    private IJavaVersion recommendedVersion;
+    private IJavaRuntime recommendedVersion;
     private Memory recommendedMemory;
 
     private JCheckBox rememberThis;
@@ -83,14 +83,14 @@ public class FixRunDataDialog extends LauncherDialog {
         return recommendedMemory;
     }
 
-    public IJavaVersion getRecommendedJavaVersion() {
+    public IJavaRuntime getRecommendedJavaVersion() {
         return recommendedVersion;
     }
 
     protected void recommendSettings() {
         if (usingMojangJava) {
             recommendedVersion = null;
-        } else if (!runData.isJavaValid(javaVersionRepository.getSelectedVersion().getVersionNumber())) {
+        } else if (!runData.isJavaValid(javaVersionRepository.getSelectedVersion().getVersion())) {
             recommendedVersion = runData.getValidJavaVersion(javaVersionRepository);
         } else {
             recommendedVersion = javaVersionRepository.getSelectedVersion();
@@ -206,21 +206,21 @@ public class FixRunDataDialog extends LauncherDialog {
 
     private void buildSuccessFailPanels(JPanel centerPanel, String fontFamily) {
         boolean memorySuccess = runData.isMemoryValid(attemptedMemory.getMemoryMB());
-        boolean javaSuccess = usingMojangJava || runData.isJavaValid(javaVersionRepository.getSelectedVersion().getVersionNumber());
+        boolean javaSuccess = usingMojangJava || runData.isJavaValid(javaVersionRepository.getSelectedVersion().getVersion());
 
         String memRequirement = resourceLoader.getString("fixRunData.reqMemory", runData.getMemoryObject().toString());
         String javaRequirement = resourceLoader.getString("fixRunData.reqJava", runData.getJava());
 
         String currentMem = resourceLoader.getString("fixRunData.currentMemory", attemptedMemory.toString());
         String currentJavaBitness = javaVersionRepository.getSelectedVersion().is64Bit()?resourceLoader.getString("launcheroptions.java.64bit"):resourceLoader.getString("launcheroptions.java.32bit");
-        String currentJava = resourceLoader.getString("fixRunData.currentJava", javaVersionRepository.getSelectedVersion().getVersionNumber(), currentJavaBitness);
+        String currentJava = resourceLoader.getString("fixRunData.currentJava", javaVersionRepository.getSelectedVersion().getVersion(), currentJavaBitness);
 
         if (!memorySuccess && recommendedMemory != null) {
             currentMem += resourceLoader.getString("fixRunData.bestOption", recommendedMemory.toString());
         }
 
         if (!javaSuccess && recommendedVersion != null) {
-            String javaVersion = recommendedVersion.getVersionNumber();
+            String javaVersion = recommendedVersion.getVersion();
             String javaBitness = recommendedVersion.is64Bit()?resourceLoader.getString("launcheroptions.java.64bit"):resourceLoader.getString("launcheroptions.java.32bit");
             if (javaVersionRepository.getBest64BitVersion() == recommendedVersion)
                 javaVersion = resourceLoader.getString("launcheroptions.java.best64version", javaVersion + " " + javaBitness);

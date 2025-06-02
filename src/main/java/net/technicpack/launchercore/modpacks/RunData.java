@@ -1,6 +1,6 @@
 package net.technicpack.launchercore.modpacks;
 
-import net.technicpack.launchercore.launch.java.IJavaVersion;
+import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.utilslib.Memory;
 import net.technicpack.utilslib.Utils;
@@ -80,19 +80,19 @@ public class RunData {
         return isMemoryValid(memory) && (usingMojangJava || isJavaValid(java));
     }
 
-    public IJavaVersion getValidJavaVersion(JavaVersionRepository repository) {
+    public IJavaRuntime getValidJavaVersion(JavaVersionRepository repository) {
 
         boolean requires64Bit = getMemory() > Memory.MAX_32_BIT_MEMORY;
 
-        IJavaVersion best64Bit = repository.getBest64BitVersion();
-        if (best64Bit != null && isJavaValid(best64Bit.getVersionNumber()))
+        IJavaRuntime best64Bit = repository.getBest64BitVersion();
+        if (best64Bit != null && isJavaValid(best64Bit.getVersion()))
             return best64Bit;
         else if (best64Bit == null && requires64Bit)
             return null;
 
-        IJavaVersion bestVersion = null;
-        for (IJavaVersion version : repository.getVersions()) {
-            if (isJavaValid(version.getVersionNumber()) && (!requires64Bit || version.is64Bit()))
+        IJavaRuntime bestVersion = null;
+        for (IJavaRuntime version : repository.getVersions()) {
+            if (isJavaValid(version.getVersion()) && (!requires64Bit || version.is64Bit()))
                 bestVersion = version;
         }
 

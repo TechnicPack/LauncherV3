@@ -34,7 +34,7 @@ import net.technicpack.launchercore.install.Version;
 import net.technicpack.launchercore.install.tasks.*;
 import net.technicpack.launchercore.install.verifiers.SHA1FileVerifier;
 import net.technicpack.launchercore.launch.GameProcess;
-import net.technicpack.launchercore.launch.java.IJavaVersion;
+import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.RunData;
@@ -137,7 +137,7 @@ public class Installer {
                     JavaVersionRepository javaVersions = launcher.getJavaVersions();
                     Memory memoryObj = Memory.getClosestAvailableMemory(Memory.getMemoryFromId(settings.getMemory()), javaVersions.getSelectedVersion().is64Bit());
                     long memory = memoryObj.getMemoryMB();
-                    String versionNumber = javaVersions.getSelectedVersion().getVersionNumber();
+                    String versionNumber = javaVersions.getSelectedVersion().getVersion();
                     RunData data = pack.getRunData();
 
                     if (data != null && !data.isRunDataValid(memory, versionNumber, usingMojangJava)) {
@@ -148,10 +148,10 @@ public class Installer {
                             memory = memoryObj.getMemoryMB();
                             settings.setMemory(memoryObj.getSettingsId());
 
-                            IJavaVersion recommendedJavaVersion = dialog.getRecommendedJavaVersion();
+                            IJavaRuntime recommendedJavaVersion = dialog.getRecommendedJavaVersion();
                             if (recommendedJavaVersion != null) {
-                                javaVersions.selectVersion(recommendedJavaVersion.getVersionNumber(), recommendedJavaVersion.is64Bit());
-                                settings.setJavaVersion(recommendedJavaVersion.getVersionNumber());
+                                javaVersions.selectVersion(recommendedJavaVersion.getVersion(), recommendedJavaVersion.is64Bit());
+                                settings.setJavaVersion(recommendedJavaVersion.getVersion());
                                 settings.setJavaBitness(recommendedJavaVersion.is64Bit());
                             }
 

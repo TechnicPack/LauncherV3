@@ -24,10 +24,14 @@ import java.io.File;
 /**
  * This interface represents a single version of java that can be used to launch a java-based game.
  */
-public interface IJavaVersion {
-    String getVersionNumber();
-    File getJavaPath();
+public interface IJavaRuntime {
+    File getExecutableFile();
+
+    String getVersion();
+
+    String getVendor();
+
     boolean is64Bit();
-    boolean isOpenJDK();
-    boolean verify();
+
+    boolean isValid();
 }

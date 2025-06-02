@@ -1,7 +1,7 @@
 package net.technicpack.minecraftcore.mojang.java;
 
 import com.google.gson.annotations.SerializedName;
-import net.technicpack.launchercore.launch.java.IJavaVersion;
+import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.utilslib.JavaUtils;
 import net.technicpack.utilslib.OperatingSystem;
@@ -30,7 +30,7 @@ public class JavaRuntimes {
     public Map<String, List<JavaRuntime>> getRuntimesForCurrentOS(JavaVersionRepository javaVersionRepository) {
         switch (OperatingSystem.getOperatingSystem()) {
             case WINDOWS:
-                boolean hasAny64BitJre = javaVersionRepository.getVersions().stream().anyMatch(IJavaVersion::is64Bit);
+                boolean hasAny64BitJre = javaVersionRepository.getVersions().stream().anyMatch(IJavaRuntime::is64Bit);
 
                 if (hasAny64BitJre) {
                     return windows64;

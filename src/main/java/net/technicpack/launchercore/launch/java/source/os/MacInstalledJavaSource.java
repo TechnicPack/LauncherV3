@@ -21,7 +21,7 @@ package net.technicpack.launchercore.launch.java.source.os;
 
 import net.technicpack.launchercore.launch.java.IVersionSource;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
-import net.technicpack.launchercore.launch.java.version.FileBasedJavaVersion;
+import net.technicpack.launchercore.launch.java.version.FileBasedJavaRuntime;
 import net.technicpack.utilslib.Utils;
 
 import java.io.File;
@@ -29,10 +29,10 @@ import java.io.File;
 public class MacInstalledJavaSource implements IVersionSource {
     @Override
     public void enumerateVersions(JavaVersionRepository repository) {
-        repository.addVersion(new FileBasedJavaVersion(new File(getMacJava("1.6"))));
-        repository.addVersion(new FileBasedJavaVersion(new File(getMacJava("1.7"))));
-        repository.addVersion(new FileBasedJavaVersion(new File(getMacJava("1.8"))));
-        repository.addVersion(new FileBasedJavaVersion(new File ("/Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home/bin/java")));
+        repository.addVersion(new FileBasedJavaRuntime(new File(getMacJava("1.6"))));
+        repository.addVersion(new FileBasedJavaRuntime(new File(getMacJava("1.7"))));
+        repository.addVersion(new FileBasedJavaRuntime(new File(getMacJava("1.8"))));
+        repository.addVersion(new FileBasedJavaRuntime(new File ("/Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home/bin/java")));
         enumerateJavaHome(repository);
     }
 
@@ -59,7 +59,7 @@ public class MacInstalledJavaSource implements IVersionSource {
                 continue;
 
             String path = line.substring(pathIndex).trim();
-            repository.addVersion(new FileBasedJavaVersion(new File(path + File.separator + "bin" + File.separator + "java")));
+            repository.addVersion(new FileBasedJavaRuntime(new File(path + File.separator + "bin" + File.separator + "java")));
         }
     }
 }

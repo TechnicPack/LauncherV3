@@ -19,31 +19,32 @@
 
 package net.technicpack.ui.listitems.javaversion;
 
-import net.technicpack.launchercore.launch.java.IJavaVersion;
+import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.ui.lang.ResourceLoader;
 
 public class JavaVersionItem {
 
-    private IJavaVersion javaVersion;
+    private IJavaRuntime javaVersion;
     private ResourceLoader resourceLoader;
 
-    public JavaVersionItem(IJavaVersion javaVersion, ResourceLoader resourceLoader) {
+    public JavaVersionItem(IJavaRuntime javaVersion, ResourceLoader resourceLoader) {
         this.javaVersion = javaVersion;
         this.resourceLoader = resourceLoader;
     }
 
-    public String getVersionNumber() { return javaVersion.getVersionNumber(); }
+    public String getVersionNumber() { return javaVersion.getVersion(); }
     public boolean is64Bit() { return javaVersion.is64Bit(); }
-    public boolean isOpenJDK() { return javaVersion.isOpenJDK(); }
 
-    protected IJavaVersion getJavaVersion() { return javaVersion; }
+    public IJavaRuntime getJavaVersion() { return javaVersion; }
     protected ResourceLoader getResourceLoader() { return resourceLoader; }
 
     public String toString() {
-        String version = javaVersion.getVersionNumber();
+        String version = javaVersion.getVersion();
 
         String bitness = (javaVersion.is64Bit())?resourceLoader.getString("launcheroptions.java.64bit"):resourceLoader.getString("launcheroptions.java.32bit");
 
-        return (isOpenJDK() ? "OpenJDK" : "Oracle") + " "  + version + " " + bitness;
+        final String vendor = javaVersion.getVendor();
+
+        return vendor + " "  + version + " " + bitness;
     }
 }
