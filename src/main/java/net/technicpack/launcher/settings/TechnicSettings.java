@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.settings;
 
+import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.util.LaunchAction;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.launch.WindowType;
@@ -50,7 +51,7 @@ public class TechnicSettings implements ILaunchOptions {
     private String wrapperCommand;
     private int latestNewsArticle;
     private boolean launchToModpacks;
-    private String javaVersion = "64bit";
+    private String javaVersion = JavaVersionRepository.VERSION_LATEST_64BIT;
     private boolean autoAcceptRequirements = false;
     /**
      * 64 bit if true, 32 bit if false

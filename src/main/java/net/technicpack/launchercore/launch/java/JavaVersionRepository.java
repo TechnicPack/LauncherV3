@@ -32,6 +32,8 @@ import java.util.Map;
  * Represents a repository of all the versions of java available to launch games with.
  */
 public class JavaVersionRepository {
+    public static final String VERSION_DEFAULT = "default";
+    public static final String VERSION_LATEST_64BIT = "64bit";
     private Map<File, IJavaRuntime> loadedVersions = new HashMap<>();
     private Collection<IJavaRuntime> versionCache = new LinkedList<>();
     private IJavaRuntime selectedVersion;
@@ -70,10 +72,7 @@ public class JavaVersionRepository {
                     continue;
                 }
 
-                if (version.getVersion() == null)
-                    continue;
-
-                if (version.getVersion().compareTo(bestVersion.getVersion()) > 0)
+                if (version.getVersion() != null && version.getVersion().compareTo(bestVersion.getVersion()) > 0)
                     bestVersion = version;
             }
         }
@@ -103,28 +102,34 @@ public class JavaVersionRepository {
         selectedVersion = version;
     }
 
+    public IJavaRuntime getDefaultVersion() {
+        return loadedVersions.get(null);
+    }
+
     public IJavaRuntime getVersion(String version, boolean is64Bit) {
-        if (version == null || version.isEmpty() || version.equals("default")) {
+        if (version == null || version.isEmpty() || version.equals(VERSION_DEFAULT)) {
             return loadedVersions.get(null);
-        } else if (version.equals("64bit")) {
+        }
+
+        if (version.equals(VERSION_LATEST_64BIT)) {
             IJavaRuntime best64BitVersion = getBest64BitVersion();
             if (best64BitVersion == null)
                 best64BitVersion = loadedVersions.get(null);
             return best64BitVersion;
-        } else {
-            for (IJavaRuntime checkVersion : versionCache) {
-                if (version.equals(checkVersion.getVersion()) && is64Bit == checkVersion.is64Bit())
-                    return checkVersion;
-            }
-
-            IJavaRuntime specifiedVersion = loadedVersions.get(new File(version));
-
-            if (specifiedVersion == null) {
-                specifiedVersion = loadedVersions.get(null);
-            }
-
-            return specifiedVersion;
         }
+
+        for (IJavaRuntime checkVersion : versionCache) {
+            if (version.equals(checkVersion.getVersion()) && is64Bit == checkVersion.is64Bit())
+                return checkVersion;
+        }
+
+        IJavaRuntime specifiedVersion = loadedVersions.get(new File(version));
+
+        if (specifiedVersion == null) {
+            specifiedVersion = loadedVersions.get(null);
+        }
+
+        return specifiedVersion;
     }
 
     public String getSelectedPath() {

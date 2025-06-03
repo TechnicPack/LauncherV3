@@ -20,6 +20,7 @@
 package net.technicpack.ui.listitems.javaversion;
 
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
+import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.ui.lang.ResourceLoader;
 
 public class Best64BitVersionItem extends JavaVersionItem {
@@ -28,7 +29,7 @@ public class Best64BitVersionItem extends JavaVersionItem {
     }
 
     @Override
-    public String getVersionNumber() { return "64bit"; }
+    public String getVersionNumber() { return JavaVersionRepository.VERSION_LATEST_64BIT; }
 
     @Override
     public String toString() {

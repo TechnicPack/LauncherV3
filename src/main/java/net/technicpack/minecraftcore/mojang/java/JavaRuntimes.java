@@ -1,6 +1,7 @@
 package net.technicpack.minecraftcore.mojang.java;
 
 import com.google.gson.annotations.SerializedName;
+import java.util.Collections;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.utilslib.JavaUtils;
@@ -57,15 +58,16 @@ public class JavaRuntimes {
                 }
 
                 return linux32;
+            case UNKNOWN:
+            default:
+                return Collections.emptyMap();
         }
-
-        return null;
     }
 
     public JavaRuntime getRuntimeForCurrentOS(String runtimeName, JavaVersionRepository javaVersionRepository) {
         Map<String, List<JavaRuntime>> availableRuntimes = getRuntimesForCurrentOS(javaVersionRepository);
 
-        if (availableRuntimes == null) return null;
+        if (availableRuntimes == null || availableRuntimes.isEmpty()) return null;
 
         // For some reason every runtime is a list with a single entry
         return availableRuntimes.get(runtimeName).get(0);

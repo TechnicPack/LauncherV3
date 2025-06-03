@@ -134,7 +134,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     };
 
 
-    JComboBox versionSelect;
+    JComboBox<JavaVersionItem> versionSelect;
     JComboBox memSelect;
     JTextArea javaArgs;
     JComboBox streamSelect;
@@ -403,11 +403,11 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             versionSelect.removeActionListener(listener);
 
         versionSelect.removeAllItems();
-        versionSelect.addItem(new DefaultVersionItem(javaVersions.getVersion(null, true), resources));
+        versionSelect.addItem(new DefaultVersionItem(javaVersions.getDefaultVersion(), resources));
 
         IJavaRuntime best64Bit = javaVersions.getBest64BitVersion();
         if (best64Bit != null)
-            versionSelect.addItem(new Best64BitVersionItem(javaVersions.getVersion("64bit", true), resources));
+            versionSelect.addItem(new Best64BitVersionItem(best64Bit, resources));
 
         for (IJavaRuntime version : javaVersions.getVersions()) {
             versionSelect.addItem(new JavaVersionItem(version, resources));
@@ -415,13 +415,13 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         String settingsVersion = settings.getJavaVersion();
         boolean settingsBitness = settings.getJavaBitness();
-        if (settingsVersion == null || settingsVersion.isEmpty() || settingsVersion.equals("default"))
+        if (settingsVersion == null || settingsVersion.isEmpty() || settingsVersion.equals(JavaVersionRepository.VERSION_DEFAULT))
             versionSelect.setSelectedIndex(0);
-        else if (settingsVersion.equals("64bit"))
+        else if (settingsVersion.equals(JavaVersionRepository.VERSION_LATEST_64BIT))
             versionSelect.setSelectedIndex(1);
         else {
             for (int i = 2; i < versionSelect.getItemCount(); i++) {
-                if (((JavaVersionItem)versionSelect.getItemAt(i)).getVersionNumber().equals(settingsVersion) && ((JavaVersionItem)versionSelect.getItemAt(i)).is64Bit() == settingsBitness) {
+                if ((versionSelect.getItemAt(i)).getVersionNumber().equals(settingsVersion) && (versionSelect.getItemAt(i)).is64Bit() == settingsBitness) {
                     versionSelect.setSelectedIndex(i);
                     break;
                 }
@@ -1030,7 +1030,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         versionLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(versionLabel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 60, 0, 0), 0, 0));
 
-        versionSelect = new JComboBox();
+        versionSelect = new JComboBox<>();
 
         if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
             versionSelect.setUI(new MetalComboBoxUI());

@@ -66,7 +66,7 @@ public class RunData {
 
     public boolean isJavaValid(String testString) {
         String compareString = java;
-        if (compareString == null || compareString.length() == 0)
+        if (compareString == null || compareString.isEmpty())
             compareString = "1.6";
 
         return isJavaVersionAtLeast(testString, compareString);

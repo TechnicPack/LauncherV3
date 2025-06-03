@@ -363,9 +363,10 @@ public class LauncherMain {
         //Remove all log files older than a week
         new Thread(() -> {
             Iterator<File> files = FileUtils.iterateFiles(new File(directories.getLauncherDirectory(), "logs"), new String[] {"log"}, false);
+            final DateTime aWeekAgo = DateTime.now().minusWeeks(1);
             while (files.hasNext()) {
                 File logFile = files.next();
-                if (logFile.exists() && (new DateTime(logFile.lastModified())).isBefore(DateTime.now().minusWeeks(1))) {
+                if (logFile.exists() && (new DateTime(logFile.lastModified())).isBefore(aWeekAgo)) {
                     logFile.delete();
                 }
             }
