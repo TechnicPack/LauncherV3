@@ -23,6 +23,8 @@ import com.google.gson.GsonBuilder;
 import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
+import net.technicpack.launchercore.launch.java.version.FileBasedJavaRuntime;
+import net.technicpack.launchercore.launch.java.version.FileBasedJavaRuntimeAdapter;
 import net.technicpack.launchercore.mirror.download.Download;
 import net.technicpack.launchercore.util.DownloadListener;
 import org.apache.commons.io.FileUtils;
@@ -42,6 +44,7 @@ public class Utils {
     static {
         GsonBuilder builder = new GsonBuilder();
         builder.setPrettyPrinting();
+        builder.registerTypeAdapter(FileBasedJavaRuntime.class, new FileBasedJavaRuntimeAdapter());
         gson = builder.create();
 
         // Make sure we're logging everything we want to be logging

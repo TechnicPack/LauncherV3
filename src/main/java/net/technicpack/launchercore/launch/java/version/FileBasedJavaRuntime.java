@@ -39,16 +39,17 @@ public final class FileBasedJavaRuntime implements IJavaRuntime, Serializable {
     private transient File javaPath;
     private String filePath;
 
-    private FileBasedJavaRuntime() {
-        // Empty constructor for Gson
+    public FileBasedJavaRuntime(File javaPath) {
+        // Resolve to absolute paths
+        this.filePath = Objects.requireNonNull(javaPath).getAbsolutePath();
+        this.javaPath = new File(this.filePath);
     }
 
-    public FileBasedJavaRuntime(File javaPath) {
-        if (javaPath == null) throw new IllegalArgumentException("javaPath cannot be null");
+    public FileBasedJavaRuntime(String path) {
+        Path absolutePath = Paths.get(Objects.requireNonNull(path)).toAbsolutePath();
 
-        // Resolve to absolute paths
-        this.filePath = javaPath.getAbsolutePath();
-        this.javaPath = new File(this.filePath);
+        this.javaPath = absolutePath.toFile();
+        this.filePath = absolutePath.toString();
     }
 
     public File getExecutableFile() {
@@ -65,7 +66,8 @@ public final class FileBasedJavaRuntime implements IJavaRuntime, Serializable {
     private void ensureQueried() {
         if (!queried) {
             queried = true;
-            ProfilingUtils.measureTime("Querying Java runtime \"" + filePath + "\"", this::getInformationFromJavaRuntime);
+            ProfilingUtils.measureTime("Querying Java runtime \"" + filePath + "\"",
+                    this::getInformationFromJavaRuntime);
         }
     }
 
@@ -127,6 +129,10 @@ public final class FileBasedJavaRuntime implements IJavaRuntime, Serializable {
         ensureQueried();
 
         return (version != null && vendor != null);
+    }
+
+    public String getExecutablePath() {
+        return filePath;
     }
 
     @Override
