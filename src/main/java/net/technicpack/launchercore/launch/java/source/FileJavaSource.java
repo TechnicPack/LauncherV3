@@ -19,23 +19,21 @@
 
 package net.technicpack.launchercore.launch.java.source;
 
-import com.google.common.base.Charsets;
 import net.technicpack.launchercore.launch.java.IVersionSource;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.launch.java.version.FileBasedJavaRuntime;
 import net.technicpack.utilslib.Utils;
-import org.apache.commons.io.FileUtils;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 /**
  * Loads versions from an external file
  */
-public class FileJavaSource implements IVersionSource {
+public class FileJavaSource implements IVersionSource, Serializable {
     private transient File loadedFile;
     private List<FileBasedJavaRuntime> versions = new ArrayList<>();
 
@@ -60,28 +58,25 @@ public class FileJavaSource implements IVersionSource {
     }
 
     public static FileJavaSource load(File file) {
+        if (file == null || !file.exists()) return new FileJavaSource(file);
 
-        if (file == null || !file.exists())
-            return new FileJavaSource(file);
-
-        try {
-            String sourceText = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-            FileJavaSource source = Utils.getGson().fromJson(sourceText, FileJavaSource.class);
+        try (FileInputStream fis = new FileInputStream(file);
+             InputStreamReader reader = new InputStreamReader(fis, StandardCharsets.UTF_8)) {
+            FileJavaSource source = Utils.getGson().fromJson(reader, FileJavaSource.class);
             source.setLoadedFile(file);
             return source;
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Utils.getLogger().log(Level.SEVERE, "Failed to load Java versions file", ex);
             return new FileJavaSource(file);
         }
     }
 
     public void save() {
-        String data = Utils.getGson().toJson(this);
-
-        try {
-            FileUtils.write(loadedFile, data, Charsets.UTF_8);
+        try (FileOutputStream fos = new FileOutputStream(loadedFile);
+             OutputStreamWriter writer = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
+            Utils.getGson().toJson(this, writer);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Utils.getLogger().log(Level.SEVERE, "Failed to save Java versions file", ex);
         }
     }
 }
