@@ -1,13 +1,11 @@
 package net.technicpack.launchercore.launch.java.version;
 
 import com.google.gson.*;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 
-public class FileBasedJavaRuntimeAdapter implements JsonSerializer<FileBasedJavaRuntime>, JsonDeserializer<FileBasedJavaRuntime> {
+public class FileBasedJavaRuntimeAdapter implements JsonSerializer<FileBasedJavaRuntime>,
+        JsonDeserializer<FileBasedJavaRuntime> {
 
     @Override
     public JsonElement serialize(FileBasedJavaRuntime src, Type typeOfSrc, JsonSerializationContext context) {
