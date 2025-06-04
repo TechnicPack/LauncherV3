@@ -22,7 +22,6 @@ import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.ui.lang.ResourceLoader;
-import net.technicpack.ui.controls.TiledBackground;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -35,15 +34,20 @@ import org.xhtmlrenderer.swing.FSMouseListener;
 import org.xhtmlrenderer.swing.ImageResourceLoader;
 import org.xhtmlrenderer.swing.SwingReplacedElementFactory;
 
-import java.awt.*;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.logging.Level;
 
-public class DiscoverInfoPanel extends TiledBackground {
+public class DiscoverInfoPanel extends JPanel {
 
     final private XHTMLPanel panel;
     final private LauncherDirectories directories;
@@ -51,8 +55,6 @@ public class DiscoverInfoPanel extends TiledBackground {
     private ActionListener loadListener = null;
 
     public DiscoverInfoPanel(final ResourceLoader loader, String discoverUrl, final IPlatformApi platform, final LauncherDirectories directories, final ModpackSelector modpackSelector) {
-        super(loader.getImage("background_repeat2.png"));
-
         this.directories = directories;
         this.resources = loader;
 
