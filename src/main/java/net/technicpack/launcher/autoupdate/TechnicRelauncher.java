@@ -91,7 +91,7 @@ public class TechnicRelauncher extends Relauncher {
     @Override
     public InstallTasksQueue buildUpdaterTasks() {
         screen = new SplashScreen(resources.getImage("launch_splash.png"), 30);
-        Color bg = LauncherFrame.COLOR_FORMELEMENT_INTERNAL;
+        Color bg = LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL;
         screen.getContentPane().setBackground(new Color (bg.getRed(),bg.getGreen(),bg.getBlue(),255));
         screen.getProgressBar().setForeground(Color.white);
         screen.getProgressBar().setBackground(LauncherFrame.COLOR_GREEN);

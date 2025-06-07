@@ -69,7 +69,7 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipException;
 
 public class Installer {
-    protected final ModpackInstaller<MojangVersion> installer;
+    protected final ModpackInstaller installer;
     protected final MinecraftLauncher launcher;
     protected final TechnicSettings settings;
     protected final PackResourceMapper packIconMapper;

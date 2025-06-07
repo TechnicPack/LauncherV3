@@ -19,58 +19,62 @@
 
 package net.technicpack.launchercore.launch;
 
+import net.technicpack.utilslib.Utils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 public class ProcessMonitorThread extends Thread {
 
     private final GameProcess process;
     private final String userAccessToken;
+    private final Logger logger;
 
     public ProcessMonitorThread(GameProcess process, String userAccessToken) {
         super("ProcessMonitorThread");
         this.process = process;
-        // Used for censoring the access token in the logs
+        // Used for redacting the access token in the logs
         this.userAccessToken = userAccessToken;
+        this.logger = Utils.getLogger();
     }
 
+    @Override
     public void run() {
         InputStreamReader reader = new InputStreamReader(this.process.getProcess().getInputStream());
         BufferedReader buf = new BufferedReader(reader);
-        String line = null;
-        String censoredLine;
+        String line;
+        final Pattern redactPattern = Pattern.compile("(?i)" + Pattern.quote(userAccessToken));
+        final boolean shouldRedact = !userAccessToken.equals("0");
 
-        while (true) {
-            try {
-                while ((line = buf.readLine()) != null) {
-                    if (userAccessToken.equals("0")) {
-                        censoredLine = line;
-                    } else {
-                        censoredLine = line.replace(userAccessToken, "USER_ACCESS_TOKEN");
-                    }
-
-                    System.out.println(" " + censoredLine);
+        try {
+            while ((line = buf.readLine()) != null) {
+                if (shouldRedact) {
+                    line = redactPattern.matcher(line).replaceAll("USER_ACCESS_TOKEN");
                 }
-            } catch (IOException ex) {
+
+                this.logger.info(" " + line);
+            }
+        } catch (IOException ex) {
 //				Logger.getLogger(ProcessMonitorThread.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                buf.close();
+            } catch (IOException ex) {
+//					Logger.getLogger(ProcessMonitorThread.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
                 try {
-                    buf.close();
-                } catch (IOException ex) {
-//					Logger.getLogger(ProcessMonitorThread.class.getName()).log(Level.SEVERE, null, ex);
-                } finally {
-                    try {
-                        process.getProcess().waitFor();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    break;
+                    process.getProcess().waitFor();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
+//                    break;
             }
         }
 
-        System.out.println("Process exited with code " + process.getProcess().exitValue());
+        this.logger.info("Process exited with code " + process.getProcess().exitValue());
 
         if (process.getExitListener() != null) {
             process.getExitListener().onProcessExit();

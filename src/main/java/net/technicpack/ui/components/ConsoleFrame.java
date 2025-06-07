@@ -39,7 +39,7 @@ public class ConsoleFrame extends JFrame implements MouseListener {
     private final SimpleAttributeSet warnAttributes;
     private final SimpleAttributeSet debugAttributes;
     private final SimpleAttributeSet defaultAttributes = new SimpleAttributeSet();
-    private JTextComponent textComponent;
+    private JTextPane textComponent;
     private Document document;
     private int numLines;
 
@@ -87,10 +87,12 @@ public class ConsoleFrame extends JFrame implements MouseListener {
     private void buildUI() {
         this.textComponent = new JTextPane();
         textComponent.addMouseListener(this);
-        textComponent.setFont(getMonospaceFont().deriveFont(14F));
+        textComponent.setFont(getMonospaceFont());
         textComponent.setEditable(false);
+
         DefaultCaret caret = (DefaultCaret) textComponent.getCaret();
         caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+
         document = textComponent.getDocument();
         document.addDocumentListener(new LimitLinesDocumentListener(numLines, true));
         textComponent.setBackground(Color.BLACK);
@@ -110,7 +112,7 @@ public class ConsoleFrame extends JFrame implements MouseListener {
      */
     public static Font getMonospaceFont() {
         for (String fontName : monospaceFontNames) {
-            Font font = Font.decode(fontName + "-11");
+            Font font = new Font(fontName, Font.PLAIN, 14);
             if (!font.getFamily().equalsIgnoreCase("Dialog")) {
                 return font;
             }
@@ -120,6 +122,7 @@ public class ConsoleFrame extends JFrame implements MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
+        // unused
     }
 
     @Override
@@ -143,10 +146,12 @@ public class ConsoleFrame extends JFrame implements MouseListener {
 
     @Override
     public void mouseEntered(MouseEvent e) {
+        // unused
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
+        // unused
     }
 
     private class ContextMenu extends JPopupMenu {

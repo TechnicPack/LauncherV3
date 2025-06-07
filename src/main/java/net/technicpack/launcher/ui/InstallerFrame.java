@@ -43,8 +43,6 @@ import org.apache.commons.io.FileUtils;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
@@ -367,7 +365,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         header.add(closeButton);
 
         SimpleTabPane centerPanel = new SimpleTabPane();
-        centerPanel.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        centerPanel.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
         centerPanel.setForeground(LauncherFrame.COLOR_GREY_TEXT);
         centerPanel.setSelectedBackground(LauncherFrame.COLOR_BLUE);
         centerPanel.setSelectedForeground(LauncherFrame.COLOR_WHITE_TEXT);
@@ -434,7 +432,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
         standardInstallDir = new JTextField(installDir);
         standardInstallDir.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        standardInstallDir.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        standardInstallDir.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
         standardInstallDir.setHighlighter(null);
         standardInstallDir.setEditable(false);
         standardInstallDir.setCursor(null);
@@ -516,7 +514,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         portableInstallDir = new JTextField(installDir);
         portableInstallDir.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         portableInstallDir.setForeground(LauncherFrame.COLOR_BLUE);
-        portableInstallDir.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        portableInstallDir.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
         portableInstallDir.setHighlighter(null);
         portableInstallDir.setEditable(false);
         portableInstallDir.setCursor(null);

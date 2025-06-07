@@ -189,7 +189,6 @@ public class LauncherMain {
 
         setupLogging(directories, resources);
 
-        String launcherBuild = buildNumber.getBuildNumber();
         int build = -1;
 
         try {
@@ -269,9 +268,10 @@ public class LauncherMain {
 
     private static void runStartupDebug() {
         // Startup debug messages
-        Utils.getLogger().info("OS: " + System.getProperty("os.name").toLowerCase(Locale.ENGLISH));
-        Utils.getLogger().info("Identified as "+ OperatingSystem.getOperatingSystem().getName());
-        Utils.getLogger().info("Java: " + System.getProperty("java.version") + " " + JavaUtils.getJavaBitness() + "-bit (" + System.getProperty("os.arch") + ")");
+        Utils.getLogger().info(() -> String.format("OS: %s", System.getProperty("os.name").toLowerCase(Locale.ENGLISH)));
+        Utils.getLogger().info(() -> String.format("Identified as %s", OperatingSystem.getOperatingSystem().getName()));
+        Utils.getLogger().info(() -> String.format("Java: %s %s-bit (%s)", System.getProperty("java.version"), JavaUtils.JAVA_BITNESS,
+                JavaUtils.OS_ARCH));
         final String[] domains = {
                 "minecraft.net", "session.minecraft.net", "textures.minecraft.net", "libraries.minecraft.net",
                 "account.mojang.com", "www.technicpack.net", "launcher.technicpack.net", "api.technicpack.net",
@@ -283,9 +283,9 @@ public class LauncherMain {
             try {
                 Collection<InetAddress> inetAddresses = Arrays.asList(InetAddress.getAllByName(domain));
                 String ips = inetAddresses.stream().map(InetAddress::getHostAddress).collect(Collectors.joining(", "));
-                Utils.getLogger().info(domain + " resolves to [" + ips + "]");
+                Utils.getLogger().info(() -> String.format("%s resolves to [%s]", domain, ips));
             } catch (UnknownHostException ex) {
-                Utils.getLogger().log(Level.SEVERE, "Failed to resolve " + domain + ": " + ex.toString());
+                Utils.getLogger().log(Level.SEVERE, String.format("Failed to resolve %s: %s", domain, ex));
             }
         }
     }
@@ -294,14 +294,16 @@ public class LauncherMain {
         // Adapted from Forge installer
         final String javaVersion = System.getProperty("java.version");
         if (javaVersion == null || !javaVersion.startsWith("1.8.0_")) {
-            Utils.getLogger().log(Level.INFO, "Don't need to inject new root certificates: Java is newer than 8 (" + javaVersion + ")");
+            Utils.getLogger().log(Level.INFO, () -> String.format("Don't need to inject new root certificates: Java is recent enough (%s)",
+                    javaVersion));
             return;
         }
 
         try {
             final String[] javaVersionParts = javaVersion.split("[._-]");
             if (Integer.parseInt(javaVersionParts[3]) >= 141) {
-                Utils.getLogger().log(Level.INFO, "Don't need to inject new root certificates: Java 8 is 141+ (" + javaVersion + ")");
+                Utils.getLogger().log(Level.INFO, () -> String.format("Don't need to inject new root certificates: Java 8 is 141+ (%s)",
+                        javaVersion));
                 return;
             }
         } catch (final NumberFormatException | ArrayIndexOutOfBoundsException e) {
@@ -350,13 +352,12 @@ public class LauncherMain {
             HttpsURLConnection.setDefaultSSLSocketFactory(tls.getSocketFactory());
             Utils.getLogger().log(Level.INFO, "Injected new root certificates");
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | KeyManagementException e) {
-            Utils.getLogger().log(Level.WARNING, "Failed to inject new root certificates. Problems might happen");
-            e.printStackTrace();
+            Utils.getLogger().log(Level.WARNING, "Failed to inject new root certificates. Problems might happen", e);
         }
     }
 
     private static void startLauncher(final TechnicSettings settings, StartupParameters startupParameters, final LauncherDirectories directories, ResourceLoader resources) {
-        UIManager.put( "ComboBox.disabledBackground", LauncherFrame.COLOR_FORMELEMENT_INTERNAL );
+        UIManager.put( "ComboBox.disabledBackground", LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
         UIManager.put( "ComboBox.disabledForeground", LauncherFrame.COLOR_GREY_TEXT );
         System.setProperty("xr.load.xml-reader", "org.ccil.cowan.tagsoup.Parser");
 
@@ -373,7 +374,7 @@ public class LauncherMain {
         }).start();
 
         final SplashScreen splash = new SplashScreen(resources.getImage("launch_splash.png"), 0);
-        Color bg = LauncherFrame.COLOR_FORMELEMENT_INTERNAL;
+        Color bg = LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL;
         splash.getContentPane().setBackground(new Color (bg.getRed(),bg.getGreen(),bg.getBlue(),255));
         splash.pack();
         splash.setLocationRelativeTo(null);

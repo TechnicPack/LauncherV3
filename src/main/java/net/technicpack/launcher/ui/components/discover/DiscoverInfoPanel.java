@@ -72,7 +72,7 @@ public class DiscoverInfoPanel extends JPanel {
 
             @Override
             public void documentStarted() {
-
+                // Unused
             }
 
             @Override
@@ -82,7 +82,7 @@ public class DiscoverInfoPanel extends JPanel {
 
             @Override
             public void onLayoutException(Throwable throwable) {
-                throwable.printStackTrace();
+                Utils.getLogger().log(Level.SEVERE, "Discover page layout exception", throwable);
 
                 if (!hasReloaded) {
                     hasReloaded = true;
@@ -93,7 +93,7 @@ public class DiscoverInfoPanel extends JPanel {
 
             @Override
             public void onRenderException(Throwable throwable) {
-                throwable.printStackTrace();
+                Utils.getLogger().log(Level.SEVERE, "Discover page render exception", throwable);
 
                 if (!hasReloaded) {
                     hasReloaded = true;
@@ -103,8 +103,8 @@ public class DiscoverInfoPanel extends JPanel {
             }
         });
 
-        for (Object listener : panel.getMouseTrackingListeners()) {
-            panel.removeMouseTrackingListener((FSMouseListener)listener);
+        for (FSMouseListener listener : panel.getMouseTrackingListeners()) {
+            panel.removeMouseTrackingListener(listener);
         }
         panel.addMouseTrackingListener(new DiscoverLinkListener(platform, modpackSelector));
 
@@ -153,7 +153,7 @@ public class DiscoverInfoPanel extends JPanel {
         }
     }
 
-    public Document getDiscoverDocument(String url, File localCache) {
+    protected Document getDiscoverDocument(String url, File localCache) {
         //Attempt to retrieve the discover page from the live site, then a local cache, then an internal resource
         Document doc = getDiscoverDocumentFromLiveSite(url, localCache);
         if (doc != null)
@@ -168,7 +168,7 @@ public class DiscoverInfoPanel extends JPanel {
         return getDiscoverDocumentFromResource();
     }
 
-    public Document getDiscoverDocumentFromLiveSite(String url, File localCache) {
+    protected Document getDiscoverDocumentFromLiveSite(String url, File localCache) {
         try {
             HttpURLConnection conn = Utils.openHttpConnection(new URL(url));
             InputStream stream = conn.getInputStream();
@@ -186,7 +186,7 @@ public class DiscoverInfoPanel extends JPanel {
         return null;
     }
 
-    public Document getDiscoverDocumentFromLocalCache(File localCache) {
+    protected Document getDiscoverDocumentFromLocalCache(File localCache) {
         try {
             return XMLResource.load(FileUtils.openInputStream(localCache)).getDocument();
         } catch (IOException ex) {
@@ -196,7 +196,7 @@ public class DiscoverInfoPanel extends JPanel {
         return null;
     }
 
-    public Document getDiscoverDocumentFromResource() {
+    protected Document getDiscoverDocumentFromResource() {
         return XMLResource.load(resources.getResourceAsStream("/discoverFallback.html")).getDocument();
     }
 }

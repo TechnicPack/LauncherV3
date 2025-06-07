@@ -28,7 +28,7 @@ import java.util.logging.LogRecord;
 
 public class BuildLogFormatter extends Formatter {
     private final SimpleDateFormat date;
-    private String launcherBuild;
+    private final String launcherBuild;
 
     public BuildLogFormatter(String launcherBuild) {
         date = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -52,7 +52,7 @@ public class BuildLogFormatter extends Formatter {
         if (record.getThrown() != null) {
             StringWriter writer = new StringWriter();
             record.getThrown().printStackTrace(new PrintWriter(writer));
-            builder.append(writer.toString());
+            builder.append(writer.getBuffer());
         }
 
         return builder.toString();

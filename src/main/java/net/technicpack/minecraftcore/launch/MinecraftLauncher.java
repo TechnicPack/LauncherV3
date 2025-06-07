@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 public class MinecraftLauncher {
 
@@ -76,35 +77,30 @@ public class MinecraftLauncher {
 
     public GameProcess launch(ModpackModel pack, long memory, LaunchOptions options, ProcessExitListener exitListener, MojangVersion version) throws IOException {
         List<String> commands = buildCommands(pack, memory, version, options);
-        StringBuilder full = new StringBuilder();
-        boolean first = true;
-
-        for (String part : commands) {
-            if (!first) full.append(" ");
-            full.append(part);
-            first = false;
-        }
 
         // This will never be null
         final String userAccessToken = userModel.getCurrentUser().getAccessToken();
 
+        String commandStr = commands.stream().collect(Collectors.joining(" "));
+
         // Censor the user access token from the logs
         // A value of "0" means offline mode, and shouldn't be censored
-        String censoredCommand;
-
         if (!userAccessToken.equals("0")) {
-            censoredCommand = full.toString().replace(userAccessToken, "USER_ACCESS_TOKEN");
-        } else {
-            censoredCommand = full.toString();
+            commandStr = commandStr.replace(userAccessToken, "USER_ACCESS_TOKEN");
         }
 
-        Utils.getLogger().info("Running " + censoredCommand);
+        Utils.getLogger().info("Running " + commandStr);
 
-        ProcessBuilder processBuilder = new ProcessBuilder(commands).directory(pack.getInstalledDirectory()).redirectErrorStream(true);
+        ProcessBuilder processBuilder = new ProcessBuilder(commands)
+                .directory(pack.getInstalledDirectory())
+                .redirectErrorStream(true);
+
+        // Clean up environment variables that cause issues
         Map<String, String> envVars = processBuilder.environment();
         for (String badVar : BAD_ENV_VARS) envVars.remove(badVar);
+
         Process process = processBuilder.start();
-        GameProcess mcProcess = new GameProcess(commands, process, userAccessToken);
+        GameProcess mcProcess = new GameProcess(process, userAccessToken);
         if (exitListener != null) mcProcess.setExitListener(exitListener);
 
         platformApi.incrementPackRuns(pack.getName());

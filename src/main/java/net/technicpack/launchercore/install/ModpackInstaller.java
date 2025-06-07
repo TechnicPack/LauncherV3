@@ -25,7 +25,7 @@ import net.technicpack.utilslib.Utils;
 
 import java.io.IOException;
 
-public class ModpackInstaller<VersionData> {
+public class ModpackInstaller {
     private final IPlatformApi platformApi;
     private final String clientId;
 
@@ -34,7 +34,7 @@ public class ModpackInstaller<VersionData> {
         this.platformApi = platformApi;
     }
 
-    public VersionData installPack(InstallTasksQueue<VersionData> tasksQueue, ModpackModel modpack, String build) throws IOException, InterruptedException {
+    public <T> T installPack(InstallTasksQueue<T> tasksQueue, ModpackModel modpack, String build) throws IOException, InterruptedException {
         modpack.save();
         modpack.initDirectories();
 

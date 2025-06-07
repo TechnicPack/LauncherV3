@@ -121,40 +121,6 @@ public class Utils {
 
     public static boolean sendTracking(String category, String action, String label, String clientId) {
         return true;
-        /*
-        String url = "https://www.google-analytics.com/collect";
-        try {
-            URL urlObj = new URL(url);
-            HttpURLConnection con = (HttpURLConnection) urlObj.openConnection();
-            con.setRequestMethod("POST");
-
-            String urlParameters = "v=1&tid=UA-30896795-3&cid=" + clientId + "&t=event&ec=" + category + "&ea=" + action + "&el=" + label;
-
-            con.setDoOutput(true);
-            DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-            wr.writeBytes(urlParameters);
-            wr.flush();
-            wr.close();
-
-            int responseCode = con.getResponseCode();
-            Utils.getLogger().info("Analytics Response [" + category + "]: " + responseCode);
-
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(con.getInputStream()));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            }
-            in.close();
-
-
-            return true;
-        } catch (IOException e) {
-            return false;
-        }
-        */
     }
 
     /**

@@ -32,7 +32,7 @@ public class CacheDiscordApi implements IDiscordApi {
     public void retrieveServer(ModpackModel modpack, final String serverId, final IDiscordCallback callback) {
         final Boolean deadCacheValue = deadCache.getIfPresent(serverId);
 
-        if (deadCacheValue != null && deadCacheValue)
+        if (Boolean.TRUE.equals(deadCacheValue))
             return;
 
         Server cacheValue = cache.getIfPresent(serverId);

@@ -58,20 +58,6 @@ public class Console {
         }
     }
 
-    /**
-     * Log a message.
-     *
-     * @param line line
-     */
-    public void log(String line) {
-        log(line, Level.INFO);
-    }
-
-    /**
-     * Log a message given the {@link AttributeSet}.
-     *
-     * @param line       line
-     */
     public void log(String line, Level level) {
         line = "[B#" + build + "] " + line;
 

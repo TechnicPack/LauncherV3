@@ -54,8 +54,6 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -144,7 +142,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         filterContents.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         filterContents.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
         filterContents.setForeground(LauncherFrame.COLOR_BLUE);
-        filterContents.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        filterContents.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
         filterContents.setSelectedTextColor(Color.black);
         filterContents.setSelectionColor(LauncherFrame.COLOR_BUTTON_BLUE);
         filterContents.setCaretColor(LauncherFrame.COLOR_BUTTON_BLUE);

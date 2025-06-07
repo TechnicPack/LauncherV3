@@ -19,16 +19,12 @@
 
 package net.technicpack.launchercore.launch;
 
-import java.util.List;
-
 public class GameProcess {
-    private final List<String> commands;
     private final Process process;
     private ProcessExitListener exitListener;
     private final ProcessMonitorThread monitorThread;
 
-    public GameProcess(List<String> commands, Process process, String userAccessToken) {
-        this.commands = commands;
+    public GameProcess(Process process, String userAccessToken) {
         this.process = process;
 
         this.monitorThread = new ProcessMonitorThread(this, userAccessToken);

@@ -36,8 +36,6 @@ import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboPopup;
 import javax.swing.plaf.metal.MetalComboBoxUI;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Locale;
 
@@ -209,7 +207,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         installField = new JTextField("");
         installField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         installField.setForeground(LauncherFrame.COLOR_BLUE);
-        installField.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        installField.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
         installField.setHighlighter(null);
         installField.setEditable(false);
         installField.setCursor(null);
@@ -301,12 +299,12 @@ public class ModpackOptionsDialog extends LauncherDialog {
         renderer.setUnselectedBackgroundColor(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
         renderer.setUnselectedForegroundColor(LauncherFrame.COLOR_BUTTON_BLUE);
         renderer.setSelectedForegroundColor(LauncherFrame.COLOR_BUTTON_BLUE);
-        renderer.setSelectedBackgroundColor(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        renderer.setSelectedBackgroundColor(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
 
         manualBuildList.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         manualBuildList.setEditable(false);
         manualBuildList.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        manualBuildList.setBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        manualBuildList.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
         manualBuildList.setRenderer(renderer);
         manualBuildList.setUI(new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0)), resources, LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
         manualBuildList.setFocusable(false);
@@ -316,7 +314,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         BasicComboPopup popup = (BasicComboPopup)child;
         JList list = popup.getList();
         list.setSelectionForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        list.setSelectionBackground(LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+        list.setSelectionBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
         list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
 
         centerPanel.add(manualBuildList, new GridBagConstraints(2, 6, 4, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(5,0,0,0), 0,0));
