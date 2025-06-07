@@ -362,7 +362,7 @@ public class LauncherMain {
         System.setProperty("xr.load.xml-reader", "org.ccil.cowan.tagsoup.Parser");
 
         //Remove all log files older than a week
-        new Thread(() -> {
+        Thread cleanupLogsThread = new Thread(() -> {
             Iterator<File> files = FileUtils.iterateFiles(new File(directories.getLauncherDirectory(), "logs"), new String[] {"log"}, false);
             final DateTime aWeekAgo = DateTime.now().minusWeeks(1);
             while (files.hasNext()) {
@@ -371,7 +371,9 @@ public class LauncherMain {
                     logFile.delete();
                 }
             }
-        }).start();
+        });
+        cleanupLogsThread.setDaemon(true);
+        cleanupLogsThread.start();
 
         final SplashScreen splash = new SplashScreen(resources.getImage("launch_splash.png"), 0);
         Color bg = LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL;
