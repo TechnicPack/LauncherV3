@@ -101,7 +101,7 @@ public class DownloadFileTask extends ListenerTask {
                  CompressorInputStream cis = new CompressorStreamFactory().createCompressorInputStream(decompressor, fis);
                  FileOutputStream fos = new FileOutputStream(this.destination);
             ) {
-                byte[] buffer = new byte[8096];
+                byte[] buffer = new byte[65536];
                 int n;
                 while ((n = cis.read(buffer)) != -1) {
                     fos.write(buffer, 0, n);
