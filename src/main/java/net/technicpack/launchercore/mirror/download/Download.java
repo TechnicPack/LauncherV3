@@ -106,6 +106,8 @@ public class Download implements Runnable {
             outFile = new File(outPath);
             outFile.delete();
 
+            long startTime = System.nanoTime();
+
             try (ReadableByteChannel rbc = Channels.newChannel(in);
                  FileOutputStream fos = new FileOutputStream(outFile)) {
                 fos.getChannel().lock();
@@ -138,6 +140,17 @@ public class Download implements Runnable {
                     result = Result.SUCCESS;
                 }
             }
+
+            long endTime = System.nanoTime();
+
+            long durationNs = endTime - startTime;
+            double durationSeconds = durationNs / 1_000_000_000.0;
+
+            // Use actual file size for speed calc
+            long fileLength = outFile.length();
+
+            Utils.getLogger().fine(String.format("Download completed: %d bytes in %.3f seconds (%.2f MB/s)",
+                    fileLength, durationSeconds, fileLength / durationSeconds / (1024 * 1024)));
         } catch (ClosedByInterruptException ex) {
             result = Result.FAILURE;
             return;
