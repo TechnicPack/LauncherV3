@@ -81,7 +81,8 @@ public class Installer {
     private Thread installerThread;
     private LauncherUnhider launcherUnhider;
 
-    public Installer(StartupParameters startupParameters, LauncherDirectories directories, ModpackInstaller installer, MinecraftLauncher launcher, TechnicSettings settings, PackResourceMapper packIconMapper) {
+    public Installer(StartupParameters startupParameters, LauncherDirectories directories, ModpackInstaller installer,
+            MinecraftLauncher launcher, TechnicSettings settings, PackResourceMapper packIconMapper) {
         this.installer = installer;
         this.launcher = launcher;
         this.settings = settings;
@@ -98,15 +99,19 @@ public class Installer {
         installerThread.interrupt();
     }
 
-    public void justInstall(final ResourceLoader resources, final ModpackModel pack, final String build, final boolean doFullInstall, final LauncherFrame frame, final DownloadListener listener) {
+    public void justInstall(final ResourceLoader resources, final ModpackModel pack, final String build,
+            final boolean doFullInstall, final LauncherFrame frame, final DownloadListener listener) {
         internalInstallAndRun(resources, pack, build, doFullInstall, frame, listener, false);
     }
 
-    public void installAndRun(final ResourceLoader resources, final ModpackModel pack, final String build, final boolean doFullInstall, final LauncherFrame frame, final DownloadListener listener) {
+    public void installAndRun(final ResourceLoader resources, final ModpackModel pack, final String build,
+            final boolean doFullInstall, final LauncherFrame frame, final DownloadListener listener) {
         internalInstallAndRun(resources, pack, build, doFullInstall, frame, listener, true);
     }
 
-    protected void internalInstallAndRun(final ResourceLoader resources, final ModpackModel pack, final String build, final boolean doFullInstall, final LauncherFrame frame, final DownloadListener listener, final boolean doLaunch) {
+    protected void internalInstallAndRun(final ResourceLoader resources, final ModpackModel pack, final String build,
+            final boolean doFullInstall, final LauncherFrame frame, final DownloadListener listener,
+            final boolean doLaunch) {
         installerThread = new Thread(() -> {
             GameProcess gameProcess = null;
 
@@ -135,13 +140,15 @@ public class Installer {
                     boolean usingMojangJava = version.getJavaVersion() != null && settings.shouldUseMojangJava();
 
                     JavaVersionRepository javaVersions = launcher.getJavaVersions();
-                    Memory memoryObj = Memory.getClosestAvailableMemory(Memory.getMemoryFromId(settings.getMemory()), javaVersions.getSelectedVersion().is64Bit());
+                    Memory memoryObj = Memory.getClosestAvailableMemory(Memory.getMemoryFromId(settings.getMemory()),
+                            javaVersions.getSelectedVersion().is64Bit());
                     long memory = memoryObj.getMemoryMB();
                     String versionNumber = javaVersions.getSelectedVersion().getVersion();
                     RunData data = pack.getRunData();
 
                     if (data != null && !data.isRunDataValid(memory, versionNumber, usingMojangJava)) {
-                        FixRunDataDialog dialog = new FixRunDataDialog(frame, resources, data, javaVersions, memoryObj, !settings.shouldAutoAcceptModpackRequirements(), usingMojangJava);
+                        FixRunDataDialog dialog = new FixRunDataDialog(frame, resources, data, javaVersions, memoryObj,
+                                !settings.shouldAutoAcceptModpackRequirements(), usingMojangJava);
                         dialog.setVisible(true);
                         if (dialog.getResult() == FixRunDataDialog.Result.ACCEPT) {
                             memoryObj = dialog.getRecommendedMemory();
@@ -150,7 +157,8 @@ public class Installer {
 
                             IJavaRuntime recommendedJavaVersion = dialog.getRecommendedJavaVersion();
                             if (recommendedJavaVersion != null) {
-                                javaVersions.selectVersion(recommendedJavaVersion.getVersion(), recommendedJavaVersion.is64Bit());
+                                javaVersions.selectVersion(recommendedJavaVersion.getVersion(),
+                                        recommendedJavaVersion.is64Bit());
                                 settings.setJavaVersion(recommendedJavaVersion.getVersion());
                                 settings.setJavaBitness(recommendedJavaVersion.is64Bit());
                             }
@@ -163,7 +171,10 @@ public class Installer {
                     }
 
                     if (!usingMojangJava && RunData.isJavaVersionAtLeast(versionNumber, "1.9")) {
-                        int result = JOptionPane.showConfirmDialog(frame, resources.getString("launcher.jverwarning", versionNumber), resources.getString("launcher.jverwarning.title"), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                        int result = JOptionPane.showConfirmDialog(frame,
+                                resources.getString("launcher.jverwarning", versionNumber),
+                                resources.getString("launcher.jverwarning.title"), JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
                         if (result != JOptionPane.YES_OPTION)
                             return;
                     }
@@ -175,7 +186,8 @@ public class Installer {
                     } else
                         launcherUnhider = null;
 
-                    LaunchOptions options = new LaunchOptions(pack.getDisplayName(), packIconMapper.getImageLocation(pack).getAbsolutePath(), settings);
+                    LaunchOptions options = new LaunchOptions(pack.getDisplayName(),
+                            packIconMapper.getImageLocation(pack).getAbsolutePath(), settings);
                     gameProcess = launcher.launch(pack, memory, options, launcherUnhider, version);
 
                     if (launchAction == null || launchAction == LaunchAction.HIDE) {
@@ -195,7 +207,7 @@ public class Installer {
                     }
                 }
 
-                //Canceled by user
+                // Canceled by user
                 if (!cancelledByUser) {
                     if (e.getCause() != null)
                         Utils.getLogger().info("Cancelled by exception.");
@@ -205,16 +217,24 @@ public class Installer {
                 } else
                     Utils.getLogger().info("Cancelled by user.");
             } catch (PackNotAvailableOfflineException e) {
-                JOptionPane.showMessageDialog(frame, e.getMessage(), resources.getString("launcher.installerror.unavailable"), JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(frame, e.getMessage(),
+                        resources.getString("launcher.installerror.unavailable"), JOptionPane.WARNING_MESSAGE);
             } catch (DownloadException e) {
-                JOptionPane.showMessageDialog(frame, resources.getString("launcher.installerror.download", pack.getDisplayName(), e.getMessage()), resources.getString("launcher.installerror.title"), JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(frame,
+                        resources.getString("launcher.installerror.download", pack.getDisplayName(), e.getMessage()),
+                        resources.getString("launcher.installerror.title"), JOptionPane.WARNING_MESSAGE);
             } catch (ZipException e) {
-                JOptionPane.showMessageDialog(frame, resources.getString("launcher.installerror.unzip", pack.getDisplayName(), e.getMessage()), resources.getString("launcher.installerror.title"), JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(frame,
+                        resources.getString("launcher.installerror.unzip", pack.getDisplayName(), e.getMessage()),
+                        resources.getString("launcher.installerror.title"), JOptionPane.WARNING_MESSAGE);
             } catch (CacheDeleteException e) {
-                JOptionPane.showMessageDialog(frame, resources.getString("launcher.installerror.cache", pack.getDisplayName(), e.getMessage()), resources.getString("launcher.installerror.title"), JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(frame,
+                        resources.getString("launcher.installerror.cache", pack.getDisplayName(), e.getMessage()),
+                        resources.getString("launcher.installerror.title"), JOptionPane.WARNING_MESSAGE);
             } catch (BuildInaccessibleException e) {
                 e.printStackTrace();
-                JOptionPane.showMessageDialog(frame, e.getMessage(), resources.getString("launcher.installerror.title"), JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(frame, e.getMessage(), resources.getString("launcher.installerror.title"),
+                        JOptionPane.WARNING_MESSAGE);
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -223,8 +243,8 @@ public class Installer {
                 }
             }
         }) {
-            ///Interrupt is being called from a mysterious source, so unless this is a user-initiated cancel
-            ///Let's print the stack trace of the interruptor.
+            /// Interrupt is being called from a mysterious source, so unless this is a user-initiated cancel
+            /// Let's print the stack trace of the interruptor.
             @Override
             public void interrupt() {
                 boolean userCancelled = false;
@@ -236,7 +256,7 @@ public class Installer {
                 if (!userCancelled) {
                     Utils.getLogger().info("Mysterious interruption source.");
                     try {
-                        //I am a charlatan and a hack.
+                        // I am a charlatan and a hack.
                         throw new Exception("Grabbing stack trace- this isn't necessarily an error.");
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -254,7 +274,8 @@ public class Installer {
         return false;
     }
 
-    public void buildTasksQueue(InstallTasksQueue queue, ResourceLoader resources, ModpackModel modpack, String build, boolean doFullInstall, MojangVersionBuilder versionBuilder) throws IOException {
+    public void buildTasksQueue(InstallTasksQueue queue, ResourceLoader resources, ModpackModel modpack, String build,
+            boolean doFullInstall, MojangVersionBuilder versionBuilder) throws IOException {
         PackInfo packInfo = modpack.getPackInfo();
         Modpack modpackData = packInfo.getModpack(build);
 

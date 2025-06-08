@@ -31,8 +31,8 @@ public class ValidZipFileVerifier implements IFileVerifier {
     public boolean isFileValid(File file) {
         try (ZipFile ignored = new ZipFile(file)) {
             return true;
-        } catch (IOException e) {
-            Utils.getLogger().log(Level.WARNING, e, () -> "ZIP validation failed for " + file.getAbsolutePath());
+        } catch (IOException ex) {
+            Utils.getLogger().log(Level.WARNING, String.format("ZIP validation failed for %s", file.getAbsolutePath()), ex);
             return false;
         }
     }

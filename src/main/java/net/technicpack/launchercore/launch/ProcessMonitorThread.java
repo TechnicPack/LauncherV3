@@ -24,6 +24,7 @@ import net.technicpack.utilslib.Utils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -43,41 +44,37 @@ public class ProcessMonitorThread extends Thread {
 
     @Override
     public void run() {
-        InputStreamReader reader = new InputStreamReader(this.process.getProcess().getInputStream());
-        BufferedReader buf = new BufferedReader(reader);
-        String line;
         final Pattern redactPattern = Pattern.compile("(?i)" + Pattern.quote(userAccessToken));
         final boolean shouldRedact = !userAccessToken.equals("0");
 
-        try {
+        try (InputStreamReader reader = new InputStreamReader(this.process.getProcess().getInputStream());
+                BufferedReader buf = new BufferedReader(reader)) {
+            String line;
+            StringBuilder lineBuilder = new StringBuilder(1024);
             while ((line = buf.readLine()) != null) {
                 if (shouldRedact) {
                     line = redactPattern.matcher(line).replaceAll("USER_ACCESS_TOKEN");
                 }
 
-                this.logger.info(" " + line);
+                lineBuilder.setLength(0);
+                lineBuilder.append(' ').append(line);
+                this.logger.info(lineBuilder.toString());
             }
         } catch (IOException ex) {
-//				Logger.getLogger(ProcessMonitorThread.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                buf.close();
-            } catch (IOException ex) {
-//					Logger.getLogger(ProcessMonitorThread.class.getName()).log(Level.SEVERE, null, ex);
-            } finally {
-                try {
-                    process.getProcess().waitFor();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-//                    break;
-            }
+            this.logger.log(Level.SEVERE,
+                    "Error reading process output - process will continue running but output will not be logged", ex);
         }
 
-        this.logger.info("Process exited with code " + process.getProcess().exitValue());
-
-        if (process.getExitListener() != null) {
-            process.getExitListener().onProcessExit();
+        try {
+            process.getProcess().waitFor();
+            this.logger.info(String.format("Process exited with code %d", process.getProcess().exitValue()));
+        } catch (InterruptedException e) {
+            this.logger.log(Level.SEVERE, "Interrupted while waiting for process to exit", e);
+            this.interrupt();
+        } finally {
+            if (process.getExitListener() != null) {
+                process.getExitListener().onProcessExit();
+            }
         }
     }
 }

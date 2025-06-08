@@ -42,16 +42,15 @@ import net.technicpack.utilslib.DateTypeAdapter;
 import net.technicpack.utilslib.LowerCaseEnumTypeAdapterFactory;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class MojangUtils {
     private static final HttpTransport HTTP_TRANSPORT = new Apache5HttpTransport();
@@ -99,44 +98,30 @@ public class MojangUtils {
                 "MOJANG_C.SF",
                 "CODESIGN.RSA",
                 "CODESIGN.SF" };
-        try (JarFile jarFile = new JarFile(minecraft)) {
-            String fileName = jarFile.getName();
-            String fileNameLastPart = fileName.substring(fileName.lastIndexOf(File.separator));
-
-            JarOutputStream jos = new JarOutputStream(new FileOutputStream(output));
+        Pattern securityPattern = Pattern.compile(Arrays.stream(security).map(Pattern::quote).collect(Collectors.joining("|")));
+        try (JarFile jarFile = new JarFile(minecraft);
+             OutputStream out = Files.newOutputStream(output.toPath());
+             JarOutputStream jos = new JarOutputStream(out)) {
             Enumeration<JarEntry> entries = jarFile.entries();
 
             while (entries.hasMoreElements()) {
                 JarEntry entry = entries.nextElement();
-                if (containsAny(entry.getName(), security)) {
+                if (securityPattern.matcher(entry.getName()).lookingAt()) {
                     continue;
                 }
-                InputStream is = jarFile.getInputStream(entry);
-
-                //jos.putNextEntry(entry);
-                //create a new entry to avoid ZipException: invalid entry compressed size
-                jos.putNextEntry(new JarEntry(entry.getName()));
-                byte[] buffer = new byte[4096];
-                int bytesRead = 0;
-                while ((bytesRead = is.read(buffer)) != -1) {
-                    jos.write(buffer, 0, bytesRead);
+                try (InputStream is = jarFile.getInputStream(entry)) {
+                    //create a new entry to avoid ZipException: invalid entry compressed size
+                    jos.putNextEntry(new JarEntry(entry.getName()));
+                    byte[] buffer = new byte[4096];
+                    int bytesRead;
+                    while ((bytesRead = is.read(buffer)) != -1) {
+                        jos.write(buffer, 0, bytesRead);
+                    }
                 }
-                is.close();
                 jos.flush();
                 jos.closeEntry();
             }
-            jos.close();
         }
-
-    }
-
-    private static boolean containsAny(String inputString, String[] contains) {
-        for (String string : contains) {
-            if (inputString.contains(string)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public static MojangVersion parseVersionJson(String json) {

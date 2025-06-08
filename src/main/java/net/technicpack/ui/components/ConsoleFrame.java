@@ -46,7 +46,7 @@ public class ConsoleFrame extends JFrame implements MouseListener {
     /**
      * Construct the frame.
      *
-     * @param numLines     number of lines to show at a time
+     * @param numLines number of lines to show at a time
      */
     public ConsoleFrame(int numLines, Image frameIcon) {
         super("Technic Launcher Console");
@@ -94,7 +94,8 @@ public class ConsoleFrame extends JFrame implements MouseListener {
         caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
 
         document = textComponent.getDocument();
-        document.addDocumentListener(new LimitLinesDocumentListener(numLines, true));
+        document.addDocumentListener(new LimitLinesDocumentListener(numLines));
+
         textComponent.setBackground(Color.BLACK);
         textComponent.setForeground(Color.WHITE);
 
@@ -166,7 +167,7 @@ public class ConsoleFrame extends JFrame implements MouseListener {
 
             clear = new JMenuItem("Clear");
             add(clear);
-            clear.addActionListener(e -> textComponent.setText(""));
+            clear.addActionListener(e -> textComponent.setText(null));
         }
     }
 }

@@ -25,6 +25,7 @@ import net.technicpack.utilslib.Utils;
 import javax.swing.*;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import java.util.logging.Level;
 
 public class Console {
@@ -75,12 +76,14 @@ public class Console {
 
         final String writeText = line.replace("\n\n", "\n");
         final AttributeSet writeAttributes = (attributes != null) ? attributes : consoleFrame.getDefaultAttributes();
+        final Document document = consoleFrame.getDocument();
+
         SwingUtilities.invokeLater(() -> {
             try {
-                int offset = consoleFrame.getDocument().getLength();
-                consoleFrame.getDocument().insertString(offset, writeText, writeAttributes);
-                consoleFrame.setCaretPosition(consoleFrame.getDocument().getLength());
-            } catch (BadLocationException | NullPointerException ble) {
+                int offset = document.getLength();
+                document.insertString(offset, writeText, writeAttributes);
+                consoleFrame.setCaretPosition(document.getLength());
+            } catch (BadLocationException ble) {
             }
         });
     }

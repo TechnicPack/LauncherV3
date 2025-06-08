@@ -114,9 +114,10 @@ public class InstallJavaRuntimeTask implements IInstallTask {
 
                 IFileVerifier verifier = new SHA1FileVerifier(rawDownload.getSha1());
 
+                final boolean useLzma = lzmaDownload != null && !lzmaDownload.getUrl().isEmpty() && ((double) lzmaDownload.getSize() / rawDownload.getSize() <= 0.66);
 
                 String downloadUrl;
-                if (lzmaDownload != null) {
+                if (useLzma) {
                     downloadUrl = lzmaDownload.getUrl();
                 } else {
                     downloadUrl = rawDownload.getUrl();
@@ -125,7 +126,7 @@ public class InstallJavaRuntimeTask implements IInstallTask {
                 EnsureFileTask ensureFileTask;
                 ensureFileTask = new EnsureFileTask(target, verifier, null, downloadUrl, downloadJavaQueue, null);
 
-                if (lzmaDownload != null) {
+                if (useLzma) {
                     ensureFileTask.setDownloadDecompressor(CompressorStreamFactory.LZMA);
                 }
 

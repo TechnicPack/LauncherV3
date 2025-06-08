@@ -63,7 +63,8 @@ public class MinecraftLauncher {
     private final JavaVersionRepository javaVersions;
     private final IBuildNumber buildNumber;
 
-    public MinecraftLauncher(final IPlatformApi platformApi, final LauncherDirectories directories, final UserModel userModel, final JavaVersionRepository javaVersions, IBuildNumber buildNumber) {
+    public MinecraftLauncher(final IPlatformApi platformApi, final LauncherDirectories directories,
+            final UserModel userModel, final JavaVersionRepository javaVersions, IBuildNumber buildNumber) {
         this.directories = directories;
         this.platformApi = platformApi;
         this.userModel = userModel;
@@ -75,7 +76,8 @@ public class MinecraftLauncher {
         return javaVersions;
     }
 
-    public GameProcess launch(ModpackModel pack, long memory, LaunchOptions options, ProcessExitListener exitListener, MojangVersion version) throws IOException {
+    public GameProcess launch(ModpackModel pack, long memory, LaunchOptions options, ProcessExitListener exitListener,
+            MojangVersion version) throws IOException {
         List<String> commands = buildCommands(pack, memory, version, options);
 
         // This will never be null

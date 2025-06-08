@@ -223,7 +223,7 @@ public class LauncherMain {
 
         Path launcherRootPath = launcherRoot.toPath();
 
-        for (String varName : new String[]{"OneDrive", "OneDriveConsumer"}) {
+        for (String varName : new String[] { "OneDrive", "OneDriveConsumer" }) {
             String varValue = System.getenv(varName);
             if (varValue == null || varValue.isEmpty()) {
                 continue;
@@ -232,7 +232,9 @@ public class LauncherMain {
             Path oneDrivePath = new File(varValue).toPath();
 
             if (launcherRootPath.startsWith(oneDrivePath)) {
-                JOptionPane.showMessageDialog(null, "Technic Launcher cannot run inside OneDrive. Please move it out of OneDrive, in the launcher settings.", "Cannot run inside OneDrive", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null,
+                        "Technic Launcher cannot run inside OneDrive. Please move it out of OneDrive, in the launcher settings.",
+                        "Cannot run inside OneDrive", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -268,10 +270,9 @@ public class LauncherMain {
 
     private static void runStartupDebug() {
         // Startup debug messages
-        Utils.getLogger().info(() -> String.format("OS: %s", System.getProperty("os.name").toLowerCase(Locale.ENGLISH)));
-        Utils.getLogger().info(() -> String.format("Identified as %s", OperatingSystem.getOperatingSystem().getName()));
-        Utils.getLogger().info(() -> String.format("Java: %s %s-bit (%s)", System.getProperty("java.version"), JavaUtils.JAVA_BITNESS,
-                JavaUtils.OS_ARCH));
+        Utils.getLogger().info(String.format("OS: %s", System.getProperty("os.name").toLowerCase(Locale.ENGLISH)));
+        Utils.getLogger().info(String.format("Identified as %s", OperatingSystem.getOperatingSystem().getName()));
+        Utils.getLogger().info(String.format("Java: %s %s-bit (%s)", System.getProperty("java.version"), JavaUtils.JAVA_BITNESS, JavaUtils.OS_ARCH));
         final String[] domains = {
                 "minecraft.net", "session.minecraft.net", "textures.minecraft.net", "libraries.minecraft.net",
                 "account.mojang.com", "www.technicpack.net", "launcher.technicpack.net", "api.technicpack.net",
@@ -283,7 +284,7 @@ public class LauncherMain {
             try {
                 Collection<InetAddress> inetAddresses = Arrays.asList(InetAddress.getAllByName(domain));
                 String ips = inetAddresses.stream().map(InetAddress::getHostAddress).collect(Collectors.joining(", "));
-                Utils.getLogger().info(() -> String.format("%s resolves to [%s]", domain, ips));
+                Utils.getLogger().info(String.format("%s resolves to [%s]", domain, ips));
             } catch (UnknownHostException ex) {
                 Utils.getLogger().log(Level.SEVERE, String.format("Failed to resolve %s: %s", domain, ex));
             }
@@ -294,16 +295,14 @@ public class LauncherMain {
         // Adapted from Forge installer
         final String javaVersion = System.getProperty("java.version");
         if (javaVersion == null || !javaVersion.startsWith("1.8.0_")) {
-            Utils.getLogger().log(Level.INFO, () -> String.format("Don't need to inject new root certificates: Java is recent enough (%s)",
-                    javaVersion));
+            Utils.getLogger().log(Level.INFO, String.format("Don't need to inject new root certificates: Java is recent enough (%s)", javaVersion));
             return;
         }
 
         try {
             final String[] javaVersionParts = javaVersion.split("[._-]");
             if (Integer.parseInt(javaVersionParts[3]) >= 141) {
-                Utils.getLogger().log(Level.INFO, () -> String.format("Don't need to inject new root certificates: Java 8 is 141+ (%s)",
-                        javaVersion));
+                Utils.getLogger().log(Level.INFO, String.format("Don't need to inject new root certificates: Java 8 is 141+ (%s)", javaVersion));
                 return;
             }
         } catch (final NumberFormatException | ArrayIndexOutOfBoundsException e) {
@@ -313,9 +312,12 @@ public class LauncherMain {
 
         try {
             KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            final Path ksPath = Paths.get(System.getProperty("java.home"),"lib", "security", "cacerts");
-            keyStore.load(Files.newInputStream(ksPath), "changeit".toCharArray());
-            Map<String, Certificate> jdkTrustStore = Collections.list(keyStore.aliases()).stream().collect(Collectors.toMap(a -> a, (String alias) -> {
+            final Path ksPath = Paths.get(System.getProperty("java.home"), "lib", "security", "cacerts");
+            try (InputStream is = Files.newInputStream(ksPath)) {
+                keyStore.load(is, "changeit".toCharArray());
+            }
+            Map<String, Certificate> jdkTrustStore = Collections.list(keyStore.aliases()).stream().collect(Collectors.toMap(a -> a,
+                    (String alias) -> {
                 try {
                     return keyStore.getCertificate(alias);
                 } catch (KeyStoreException e) {
@@ -324,12 +326,14 @@ public class LauncherMain {
                 }
             }));
 
-            KeyStore leKS = KeyStore.getInstance(KeyStore.getDefaultType());
-            InputStream leKSFile = LauncherMain.class.getResourceAsStream("/net/technicpack/launcher/resources/technickeystore.jks");
-            leKS.load(leKSFile, "technicrootca".toCharArray());
-            Map<String, Certificate> leTrustStore = Collections.list(leKS.aliases()).stream().collect(Collectors.toMap(a -> a, (String alias) -> {
+            KeyStore technicKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            try (InputStream is = LauncherMain.class.getResourceAsStream("/net/technicpack/launcher/resources/technickeystore.jks")) {
+                technicKeyStore.load(is, "technicrootca".toCharArray());
+            }
+            Map<String, Certificate> technicTrustStore = Collections.list(technicKeyStore.aliases()).stream().collect(Collectors.toMap(a -> a,
+                    (String alias) -> {
                 try {
-                    return leKS.getCertificate(alias);
+                    return technicKeyStore.getCertificate(alias);
                 } catch (KeyStoreException e) {
                     Utils.getLogger().log(Level.WARNING, "Failed to get certificate", e);
                     return null;
@@ -341,7 +345,7 @@ public class LauncherMain {
             for (final Map.Entry<String, Certificate> entry : jdkTrustStore.entrySet()) {
                 mergedTrustStore.setCertificateEntry(entry.getKey(), entry.getValue());
             }
-            for (final Map.Entry<String , Certificate> entry : leTrustStore.entrySet()) {
+            for (final Map.Entry<String, Certificate> entry : technicTrustStore.entrySet()) {
                 mergedTrustStore.setCertificateEntry(entry.getKey(), entry.getValue());
             }
 
@@ -356,14 +360,15 @@ public class LauncherMain {
         }
     }
 
-    private static void startLauncher(final TechnicSettings settings, StartupParameters startupParameters, final LauncherDirectories directories, ResourceLoader resources) {
-        UIManager.put( "ComboBox.disabledBackground", LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        UIManager.put( "ComboBox.disabledForeground", LauncherFrame.COLOR_GREY_TEXT );
+    private static void startLauncher(final TechnicSettings settings, StartupParameters startupParameters, final LauncherDirectories directories,
+                                      ResourceLoader resources) {
+        UIManager.put("ComboBox.disabledBackground", LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
+        UIManager.put("ComboBox.disabledForeground", LauncherFrame.COLOR_GREY_TEXT);
         System.setProperty("xr.load.xml-reader", "org.ccil.cowan.tagsoup.Parser");
 
-        //Remove all log files older than a week
+        // Remove all log files older than a week
         Thread cleanupLogsThread = new Thread(() -> {
-            Iterator<File> files = FileUtils.iterateFiles(new File(directories.getLauncherDirectory(), "logs"), new String[] {"log"}, false);
+            Iterator<File> files = FileUtils.iterateFiles(new File(directories.getLauncherDirectory(), "logs"), new String[]{"log"}, false);
             final DateTime aWeekAgo = DateTime.now().minusWeeks(1);
             while (files.hasNext()) {
                 File logFile = files.next();
@@ -377,7 +382,7 @@ public class LauncherMain {
 
         final SplashScreen splash = new SplashScreen(resources.getImage("launch_splash.png"), 0);
         Color bg = LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL;
-        splash.getContentPane().setBackground(new Color (bg.getRed(),bg.getGreen(),bg.getBlue(),255));
+        splash.getContentPane().setBackground(new Color(bg.getRed(), bg.getGreen(), bg.getBlue(), 255));
         splash.pack();
         splash.setLocationRelativeTo(null);
         splash.setVisible(true);
@@ -388,9 +393,8 @@ public class LauncherMain {
         javaVersionFile.enumerateVersions(javaVersions);
         javaVersions.selectVersion(settings.getJavaVersion(), settings.getJavaBitness());
 
-        TechnicUserStore users = TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json"));
-        MicrosoftAuthenticator microsoftAuthenticator =
-                new MicrosoftAuthenticator(new File(directories.getLauncherDirectory(), "oauth"));
+        TechnicUserStore users = TechnicUserStore.load(new File(directories.getLauncherDirectory(), "users.json"));
+        MicrosoftAuthenticator microsoftAuthenticator = new MicrosoftAuthenticator(new File(directories.getLauncherDirectory(), "oauth"));
         UserModel userModel = new UserModel(users, microsoftAuthenticator);
 
         IModpackResourceType iconType = new IconResourceType();
@@ -399,12 +403,16 @@ public class LauncherMain {
 
         PackResourceMapper iconMapper = new PackResourceMapper(directories, resources.getImage("icon.png"), iconType);
         ImageRepository<ModpackModel> iconRepo = new ImageRepository<>(iconMapper, new PackImageStore(iconType));
-        ImageRepository<ModpackModel> logoRepo = new ImageRepository<>(new PackResourceMapper(directories, resources.getImage("modpack/ModImageFiller.png"), logoType), new PackImageStore(logoType));
-        ImageRepository<ModpackModel> backgroundRepo = new ImageRepository<>(new PackResourceMapper(directories, null, backgroundType), new PackImageStore(backgroundType));
+        ImageRepository<ModpackModel> logoRepo = new ImageRepository<>(new PackResourceMapper(directories,
+                resources.getImage("modpack/ModImageFiller.png"), logoType), new PackImageStore(logoType));
+        ImageRepository<ModpackModel> backgroundRepo = new ImageRepository<>(new PackResourceMapper(directories, null, backgroundType),
+                new PackImageStore(backgroundType));
 
-        ImageRepository<IUserType> skinRepo = new ImageRepository<>(new TechnicFaceMapper(directories, resources), new MinotarFaceImageStore("https://minotar.net/"));
+        ImageRepository<IUserType> skinRepo = new ImageRepository<>(new TechnicFaceMapper(directories, resources),
+                new MinotarFaceImageStore("https://minotar.net/"));
 
-        ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<>(new TechnicAvatarMapper(directories, resources), new WebAvatarImageStore());
+        ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<>(new TechnicAvatarMapper(directories, resources),
+                new WebAvatarImageStore());
 
         HttpSolderApi httpSolder = new HttpSolderApi(settings.getClientId());
         ISolderApi solder = new CachedSolderApi(directories, httpSolder, 60 * 60);
@@ -422,7 +430,8 @@ public class LauncherMain {
         SettingsFactory.migrateSettings(settings, packStore, directories, users, migrators);
 
         PackLoader packList = new PackLoader(directories, packStore, packInfoRepository);
-        ModpackSelector selector = new ModpackSelector(resources, packList, new SolderPackSource("https://solder.technicpack.net/api/", solder), solder, platform, platformSearch, iconRepo);
+        ModpackSelector selector = new ModpackSelector(resources, packList, new SolderPackSource("https://solder.technicpack.net/api/", solder),
+                solder, platform, platformSearch, iconRepo);
         selector.setBorder(BorderFactory.createEmptyBorder());
         userModel.addAuthListener(selector);
 
@@ -437,13 +446,14 @@ public class LauncherMain {
         IDiscordApi discordApi = new HttpDiscordApi("https://discord.com/api/");
         discordApi = new CacheDiscordApi(discordApi, 600, 60);
 
-        final LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, selector, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo, platform, directories, packStore, startupParameters, discoverInfoPanel, javaVersions, javaVersionFile, buildNumber, discordApi);
+        final LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, selector, iconRepo, logoRepo, backgroundRepo,
+                installer, avatarRepo, platform, directories, packStore, startupParameters, discoverInfoPanel, javaVersions, javaVersionFile,
+                buildNumber, discordApi);
         userModel.addAuthListener(frame);
 
         ActionListener listener = e -> {
             splash.dispose();
-            if (settings.getLaunchToModpacks())
-                frame.selectTab("modpacks");
+            if (settings.getLaunchToModpacks()) frame.selectTab("modpacks");
         };
 
         discoverInfoPanel.setLoadListener(listener);
@@ -451,8 +461,7 @@ public class LauncherMain {
         LoginFrame login = new LoginFrame(resources, settings, userModel, skinRepo);
         userModel.addAuthListener(login);
         userModel.addAuthListener(user -> {
-            if (user == null)
-                splash.dispose();
+            if (user == null) splash.dispose();
         });
 
         userModel.startupAuth();

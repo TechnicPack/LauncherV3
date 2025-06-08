@@ -62,38 +62,26 @@ public class DiscoverResourceLoader extends ImageResourceLoader {
     public static ImageResource loadImageResourceFromUri(final String uri) {
         if (ImageUtil.isEmbeddedBase64Image(uri)) {
             return loadEmbeddedBase64ImageResource(uri);
-        } else {
-            StreamResource sr = new StreamResource(uri);
-            InputStream is;
-            ImageResource ir = null;
-            try {
-                sr.connect();
-                is = sr.bufferedStream();
-                try {
-                    BufferedImage img = ImageIO.read(is);
-                    if (img == null) {
-                        throw new IOException("ImageIO.read() returned null");
-                    }
-                    ir = createImageResource(uri, img);
-                } catch (FileNotFoundException e) {
-                    XRLog.exception("Can't read image file; image at URI '" + uri + "' not found");
-                } catch (IOException e) {
-                    XRLog.exception("Can't read image file; unexpected problem for URI '" + uri + "'", e);
-                } finally {
-                    sr.close();
-                }
-            } catch (IOException e) {
-                // couldnt open stream at URI...
-                XRLog.exception("Can't open stream for URI '" + uri + "': " + e.getMessage());
-            }
-
-            //When we do this we return null which will raise an exception on layout/render, which
-            //will allow us to use the fallback discover page in cases when the network/site are unavailable
-//            if (ir == null) {
-//                ir = createImageResource(uri, null);
-//            }
-            return ir;
         }
+
+        ImageResource ir = null;
+
+        try (StreamResource sr = new StreamResource(uri)) {
+            sr.connect();
+            try (InputStream is = sr.bufferedStream()) {
+                BufferedImage img = ImageIO.read(is);
+                if (img == null) {
+                    throw new IOException("ImageIO.read() returned null");
+                }
+                ir = createImageResource(uri, img);
+            } catch (FileNotFoundException e) {
+                XRLog.exception("Can't read image file; image at URI '" + uri + "' not found");
+            } catch (IOException e) {
+                XRLog.exception("Can't read image file; unexpected problem for URI '" + uri + "'", e);
+            }
+        }
+
+        return ir;
     }
 
     public static ImageResource loadEmbeddedBase64ImageResource(final String uri) {
