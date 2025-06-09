@@ -566,15 +566,15 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     }
 
     @Override
-    public void userChanged(IUserType mojangUser) {
-        if (mojangUser == null)
+    public void userChanged(IUserType user) {
+        if (user == null)
             this.setVisible(false);
         else {
             this.setVisible(true);
-            userWidget.setUser(mojangUser);
+            userWidget.setUser(user);
 
             if (modpackSelector.getSelectedPack() != null)
-                setupPlayButtonText(modpackSelector.getSelectedPack(), mojangUser);
+                setupPlayButtonText(modpackSelector.getSelectedPack(), user);
 
             modpackSelector.forceRefresh();
             EventQueue.invokeLater(this::repaint);
@@ -585,10 +585,12 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         playButton.setEnabled(true);
         playButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
 
+        final boolean isUserOffline = user != null && user.isOffline();
+
         if (installer.isCurrentlyRunning()) {
             playButton.setText(resources.getString("launcher.pack.cancel"));
         } else if (modpack.getInstalledVersion() != null) {
-            if (userModel.getCurrentUser() == null || userModel.getCurrentUser().isOffline()) {
+            if (isUserOffline) {
                 playButton.setText(resources.getString("launcher.pack.launch.offline"));
             } else {
                 playButton.setText(resources.getString("launcher.pack.launch"));
@@ -596,7 +598,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             playButton.setIcon(new ImageIcon(resources.colorImage(resources.getImage("play_button.png"), LauncherFrame.COLOR_BUTTON_BLUE)));
             playButton.setHoverIcon(new ImageIcon(resources.colorImage(resources.getImage("play_button.png"), LauncherFrame.COLOR_BLUE)));
         } else {
-            if (userModel.getCurrentUser() == null || userModel.getCurrentUser().isOffline()) {
+            if (isUserOffline) {
                 playButton.setEnabled(false);
                 playButton.setForeground(LauncherFrame.COLOR_GREY_TEXT);
                 playButton.setText(resources.getString("launcher.pack.cannotinstall"));

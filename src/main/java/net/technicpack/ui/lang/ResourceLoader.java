@@ -259,7 +259,7 @@ public class ResourceLoader {
 
     public BufferedImage colorImage(BufferedImage loadImg, Color color) {
         BufferedImage img = new BufferedImage(loadImg.getWidth(), loadImg.getHeight(),
-                BufferedImage.TRANSLUCENT);
+                Transparency.TRANSLUCENT);
         Graphics2D graphics = img.createGraphics();
 
         graphics.setColor(color);

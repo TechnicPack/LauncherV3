@@ -24,7 +24,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 
 public class FileSizeVerifier implements IFileVerifier {
-    private long size;
+    private final long size;
 
     public FileSizeVerifier(long size) {
         this.size = size;
@@ -32,6 +32,6 @@ public class FileSizeVerifier implements IFileVerifier {
 
     @Override
     public boolean isFileValid(File file) {
-        return FileUtils.sizeOf(file) == size;
+        return file.length() == size;
     }
 }

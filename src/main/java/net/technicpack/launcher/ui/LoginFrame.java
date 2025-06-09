@@ -393,8 +393,8 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         nameSelect.setSelectedItem(user);
     }
 
-    protected void forgetUser(IUserType mojangUser) {
-        userModel.removeUser(mojangUser);
+    protected void forgetUser(IUserType user) {
+        userModel.removeUser(user);
         refreshSelectedUsers();
     }
 

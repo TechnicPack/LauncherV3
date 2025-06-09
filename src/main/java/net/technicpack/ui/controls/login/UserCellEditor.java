@@ -93,17 +93,17 @@ public class UserCellEditor implements ComboBoxEditor, DocumentListener, IImageJ
         currentObject = anObject;
 
         if (anObject instanceof IUserType) {
-            IUserType mojangUser = (IUserType)anObject;
-            userLabel.setText(mojangUser.getDisplayName());
+            IUserType user = (IUserType)anObject;
+            userLabel.setText(user.getDisplayName());
             userLabel.setIconTextGap(8);
 
-            if (!headMap.containsKey(mojangUser.getUsername())) {
-                ImageJob<IUserType> job = mSkinRepo.startImageJob(mojangUser);
+            if (!headMap.containsKey(user.getUsername())) {
+                ImageJob<IUserType> job = mSkinRepo.startImageJob(user);
                 job.addJobListener(this);
-                headMap.put(mojangUser.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
+                headMap.put(user.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
             }
 
-            Icon head = headMap.get(mojangUser.getUsername());
+            Icon head = headMap.get(user.getUsername());
             userLabel.setIcon(head);
 
             layout.show(parentPanel, USER);
@@ -175,11 +175,8 @@ public class UserCellEditor implements ComboBoxEditor, DocumentListener, IImageJ
 
     @Override
     public void jobComplete(ImageJob<IUserType> job) {
-        IUserType mojangUser = job.getJobData();
-        if (headMap.containsKey(mojangUser.getUsername()))
-            headMap.remove(mojangUser.getUsername());
-
-        headMap.put(mojangUser.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
+        IUserType user = job.getJobData();
+        headMap.put(user.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
         this.parentPanel.revalidate();
     }
 }
