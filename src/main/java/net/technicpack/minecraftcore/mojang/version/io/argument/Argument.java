@@ -2,6 +2,7 @@ package net.technicpack.minecraftcore.mojang.version.io.argument;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
+import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
 
 import java.util.Collections;
@@ -9,7 +10,7 @@ import java.util.List;
 
 public abstract class Argument {
 
-	public boolean doesApply(ILaunchOptions opts) {
+	public boolean doesApply(ILaunchOptions opts, IJavaRuntime runtime) {
 		return true;
 	}
 

@@ -121,9 +121,12 @@ public class Installer {
 
                 InstallTasksQueue<MojangVersion> tasksQueue = new InstallTasksQueue<>(listener);
                 MojangVersionBuilder versionBuilder = createVersionBuilder(pack, tasksQueue);
+                JavaVersionRepository javaVersions = launcher.getJavaVersions();
+
+                final boolean mojangJavaWanted = settings.shouldUseMojangJava();
 
                 if (build != null && !build.isEmpty()) {
-                    buildTasksQueue(tasksQueue, resources, pack, build, doFullInstall, versionBuilder);
+                    buildTasksQueue(tasksQueue, resources, pack, build, doFullInstall, versionBuilder, javaVersions.getSelectedVersion(), mojangJavaWanted);
 
                     version = installer.installPack(tasksQueue, pack, build);
                 } else {
@@ -138,9 +141,8 @@ public class Installer {
                         throw new PackNotAvailableOfflineException(pack.getDisplayName());
                     }
 
-                    boolean usingMojangJava = version.getJavaVersion() != null && settings.shouldUseMojangJava();
+                    boolean usingMojangJava = mojangJavaWanted && version.getMojangRuntimeInformation() != null;
 
-                    JavaVersionRepository javaVersions = launcher.getJavaVersions();
                     Memory memoryObj = Memory.getClosestAvailableMemory(Memory.getMemoryFromId(settings.getMemory()),
                             javaVersions.getSelectedVersion().is64Bit());
                     long memory = memoryObj.getMemoryMB();
@@ -269,7 +271,7 @@ public class Installer {
     }
 
     public void buildTasksQueue(InstallTasksQueue queue, ResourceLoader resources, ModpackModel modpack, String build,
-            boolean doFullInstall, MojangVersionBuilder versionBuilder) throws IOException {
+            boolean doFullInstall, MojangVersionBuilder versionBuilder, IJavaRuntime selectedJavaRuntime, boolean mojangJavaWanted) throws IOException {
         PackInfo packInfo = modpack.getPackInfo();
         Modpack modpackData = packInfo.getModpack(build);
 
@@ -312,8 +314,10 @@ public class Installer {
         queue.addTask(examineIndex);
         queue.addTask(verifyingAssets);
         queue.addTask(installingAssets);
-        queue.addTask(examineJava);
-        queue.addTask(downloadJava);
+        if (mojangJavaWanted) {
+            queue.addTask(examineJava);
+            queue.addTask(downloadJava);
+        }
         if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX)
             queue.addTask(new RenameJnilibToDylibTask(modpack));
 
@@ -444,10 +448,10 @@ public class Installer {
             rundataTaskGroup.addTask(new CheckRundataFile(modpack, modpackData, rundataTaskGroup));
 
         checkVersionFile.addTask(new VerifyVersionFilePresentTask(modpack, minecraft, versionBuilder));
-        examineVersionFile.addTask(new HandleVersionFileTask(modpack, directories, checkNonMavenLibs, grabLibs, installingLibs, installingLibs, versionBuilder));
+        examineVersionFile.addTask(new HandleVersionFileTask(modpack, directories, checkNonMavenLibs, grabLibs, installingLibs, installingLibs, versionBuilder, settings, selectedJavaRuntime));
         examineVersionFile.addTask(new EnsureAssetsIndexTask(directories.getAssetsDirectory(), modpack, installingMinecraft, examineIndex, verifyingAssets, installingAssets, installingAssets));
 
-        examineJava.addTask(new EnsureJavaRuntimeManifestTask(directories.getRuntimesDirectory(), modpack, launcher.getJavaVersions(), examineJava, downloadJava));
+        examineJava.addTask(new EnsureJavaRuntimeManifestTask(directories.getRuntimesDirectory(), modpack, examineJava, downloadJava));
 
         // Check if we need to regenerate the Minecraft jar. This is necessary if:
         // - A reinstall was requested (or forced, via modpack version update)

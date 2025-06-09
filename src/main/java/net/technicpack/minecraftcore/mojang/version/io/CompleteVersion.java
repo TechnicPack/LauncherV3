@@ -19,16 +19,18 @@
 
 package net.technicpack.minecraftcore.mojang.version.io;
 
+import net.technicpack.launchercore.launch.java.IJavaRuntime;
+import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused"})
-public class CompleteVersion implements MojangVersion {
+public class CompleteVersion implements MojangVersion, Serializable {
 
     private String id;
     private Date time;
@@ -45,9 +47,11 @@ public class CompleteVersion implements MojangVersion {
     private AssetIndex assetIndex;
     private GameDownloads downloads;
     private String inheritsFrom;
-    private JavaVersion javaVersion;
+    private VersionJavaInfo javaVersion;
+
     private transient boolean areAssetsVirtual;
     private transient boolean mapToResources;
+    private transient IJavaRuntime javaRuntime;
 
     @Override
     public String getId() {
@@ -100,8 +104,8 @@ public class CompleteVersion implements MojangVersion {
     }
 
     @Override
-    public List<Library> getLibrariesForOS() {
-        return libraries.stream().filter(Library::isForCurrentOS).distinct().collect(Collectors.toList());
+    public List<Library> getLibrariesForCurrentOS(ILaunchOptions options, IJavaRuntime runtime) {
+        return libraries.stream().filter(x -> x.isForCurrentOS(options, runtime)).distinct().collect(Collectors.toList());
     }
 
     @Override
@@ -180,13 +184,23 @@ public class CompleteVersion implements MojangVersion {
     }
 
     @Override
-    public JavaVersion getJavaVersion() {
+    public VersionJavaInfo getMojangRuntimeInformation() {
         return javaVersion;
     }
 
     @Override
     public void removeLibrary(String libraryName) {
         libraries = libraries.stream().filter(library -> !library.getName().equals(libraryName)).collect(Collectors.toList());
+    }
+
+    @Override
+    public IJavaRuntime getJavaRuntime() {
+        return javaRuntime;
+    }
+
+    @Override
+    public void setJavaRuntime(IJavaRuntime runtime) {
+        this.javaRuntime = runtime;
     }
 
     @Override

@@ -3,6 +3,7 @@ package net.technicpack.minecraftcore.mojang.version.io.argument;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.mojang.version.io.Rule;
 
@@ -19,8 +20,8 @@ public class PredicatedArgument extends Argument {
 	}
 
 	@Override
-	public boolean doesApply(ILaunchOptions opts) {
-		return Rule.isAllowable(rules, opts);
+	public boolean doesApply(ILaunchOptions opts, IJavaRuntime runtime) {
+		return Rule.isAllowable(rules, opts, runtime);
 	}
 
 	@Override

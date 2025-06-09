@@ -27,31 +27,37 @@ import net.technicpack.launchercore.install.tasks.EnsureLinkedFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.SHA1FileVerifier;
+import net.technicpack.launchercore.launch.java.IJavaRuntime;
+import net.technicpack.launchercore.launch.java.version.FileBasedJavaRuntime;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.java.JavaRuntimeFileType;
 import net.technicpack.minecraftcore.mojang.java.JavaRuntimeManifest;
+import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.Download;
+import net.technicpack.minecraftcore.mojang.version.io.VersionJavaInfo;
+import net.technicpack.utilslib.OperatingSystem;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 
 public class InstallJavaRuntimeTask implements IInstallTask {
     private final ModpackModel modpack;
     private final File runtimesDirectory;
     private final File runtimeManifestFile;
-    private final String runtimeName;
+    private final VersionJavaInfo runtimeInfo;
     private final ITasksQueue examineJavaQueue;
     private final ITasksQueue downloadJavaQueue;
 
-    public InstallJavaRuntimeTask(ModpackModel modpack, File runtimesDirectory, File runtimeManifestFile, String runtimeName, ITasksQueue examineJavaQueue, ITasksQueue downloadJavaQueue) {
+    public InstallJavaRuntimeTask(ModpackModel modpack, File runtimesDirectory, File runtimeManifestFile, VersionJavaInfo runtimeInfo, ITasksQueue examineJavaQueue, ITasksQueue downloadJavaQueue) {
         this.modpack = modpack;
         this.runtimesDirectory = runtimesDirectory;
         this.runtimeManifestFile = runtimeManifestFile;
-        this.runtimeName = runtimeName;
+        this.runtimeInfo = runtimeInfo;
         this.examineJavaQueue = examineJavaQueue;
         this.downloadJavaQueue = downloadJavaQueue;
     }
@@ -82,7 +88,7 @@ public class InstallJavaRuntimeTask implements IInstallTask {
         }
 
         // Create the runtime directory if it doesn't exist
-        File runtimeRoot = new File(runtimesDirectory, runtimeName);
+        File runtimeRoot = new File(runtimesDirectory, runtimeInfo.getComponent()).getAbsoluteFile();
         ensurePathIsSafe(runtimesDirectory, runtimeRoot);
         runtimeRoot.mkdirs();
 
@@ -150,5 +156,24 @@ public class InstallJavaRuntimeTask implements IInstallTask {
                 downloadJavaQueue.addTask(new EnsureLinkedFileTask(link, target));
             }
         });
+
+        // Set the Mojang JRE as the Java runtime associated to this modpack
+        final OperatingSystem os = OperatingSystem.getOperatingSystem();
+        final Path runtimeExecutable;
+        if (os == OperatingSystem.WINDOWS) {
+            runtimeExecutable = runtimeRoot.toPath().resolve("bin/javaw.exe");
+        } else if (os == OperatingSystem.OSX) {
+            runtimeExecutable = runtimeRoot.toPath().resolve("jre.bundle/Contents/Home/bin/java");
+        } else {
+            runtimeExecutable = runtimeRoot.toPath().resolve("bin/java");
+        }
+
+        final IJavaRuntime runtime = new FileBasedJavaRuntime(runtimeExecutable);
+
+
+        MojangVersion version = ((InstallTasksQueue<MojangVersion>) queue).getMetadata();
+
+
+        version.setJavaRuntime(runtime);
     }
 }

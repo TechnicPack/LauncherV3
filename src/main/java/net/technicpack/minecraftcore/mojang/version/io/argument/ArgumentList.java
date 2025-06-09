@@ -2,6 +2,7 @@ package net.technicpack.minecraftcore.mojang.version.io.argument;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import org.apache.commons.text.StringSubstitutor;
 
@@ -28,11 +29,11 @@ public class ArgumentList {
 		return args;
 	}
 
-	public List<String> resolve(ILaunchOptions opts, StringSubstitutor derefs) {
+	public List<String> resolve(ILaunchOptions opts, IJavaRuntime runtime, StringSubstitutor derefs) {
 		List<String> resolved = new ArrayList<>();
 		if (derefs == null) derefs = new StringSubstitutor();
 		for (Argument arg : args) {
-			if (arg.doesApply(opts)) {
+			if (arg.doesApply(opts, runtime)) {
 				for (String argStr : arg.getArgStrings()) {
 					resolved.add(derefs.replace(argStr));
 				}

@@ -30,7 +30,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.technicpack.launcher.io.IUserTypeInstanceCreator;
 import net.technicpack.launchercore.auth.IUserType;
-import net.technicpack.minecraftcore.mojang.java.JavaRuntimes;
+import net.technicpack.minecraftcore.mojang.java.JavaRuntimesIndex;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
 import net.technicpack.minecraftcore.mojang.version.io.CompleteVersionV21;
@@ -60,7 +60,7 @@ public class MojangUtils {
     public static final String assets = "https://resources.download.minecraft.net/";
 
     public static final String RUNTIMES_URL = "https://launchermeta.mojang.com/v1/products/java-runtime/2ec0cc96c44e5a76b9c8b7c39df7210883d12871/all.json";
-    private static JavaRuntimes javaRuntimes;
+    private static JavaRuntimesIndex javaRuntimesIndex;
 
     public static String getResourceUrl(String hash) {
         return assets + hash.substring(0, 2) + "/" + hash;
@@ -216,15 +216,15 @@ public class MojangUtils {
         return !mcVersion.equals("1.12.2");
     }
 
-    public static JavaRuntimes getJavaRuntimes() {
-        if (javaRuntimes != null)
-            return javaRuntimes;
+    public static JavaRuntimesIndex getJavaRuntimesIndex() {
+        if (javaRuntimesIndex != null)
+            return javaRuntimesIndex;
 
         try {
             HttpRequest request = REQUEST_FACTORY.buildGetRequest(new GenericUrl(RUNTIMES_URL));
             HttpResponse httpResponse = request.execute();
-            javaRuntimes = gson.fromJson(httpResponse.parseAsString(), JavaRuntimes.class);
-            return javaRuntimes;
+            javaRuntimesIndex = gson.fromJson(httpResponse.parseAsString(), JavaRuntimesIndex.class);
+            return javaRuntimesIndex;
         } catch (IOException e) {
             e.printStackTrace();
             return null;

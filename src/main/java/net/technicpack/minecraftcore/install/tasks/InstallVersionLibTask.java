@@ -9,8 +9,10 @@ import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
 import net.technicpack.launchercore.install.verifiers.SHA1FileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
+import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.mojang.version.ExtractRulesFileFilter;
+import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
 import net.technicpack.utilslib.*;
 
@@ -25,7 +27,8 @@ public class InstallVersionLibTask extends ListenerTask {
     private ModpackModel pack;
     private LauncherDirectories directories;
 
-    public InstallVersionLibTask(Library library, ITasksQueue grabQueue, ITasksQueue downloadLibraryQueue, ITasksQueue copyLibraryQueue, ModpackModel pack, LauncherDirectories directories) {
+    public InstallVersionLibTask(Library library, ITasksQueue grabQueue, ITasksQueue downloadLibraryQueue,
+                                 ITasksQueue copyLibraryQueue, ModpackModel pack, LauncherDirectories directories) {
         this.library = library;
         this.downloadLibraryQueue = downloadLibraryQueue;
         this.copyLibraryQueue = copyLibraryQueue;
@@ -57,7 +60,10 @@ public class InstallVersionLibTask extends ListenerTask {
             }
         }
 
-        String path = library.getArtifactPath(nativeClassifier).replace("${arch}", JavaUtils.getJavaBitness());
+        MojangVersion version = ((InstallTasksQueue<MojangVersion>) queue).getMetadata();
+        final String bitness = version.getJavaRuntime().is64Bit() ? "64" : "32" ;
+
+        String path = library.getArtifactPath(nativeClassifier).replace("${arch}", bitness);
 
         File cache = new File(directories.getCacheDirectory(), path);
         if (cache.getParentFile() != null) {
@@ -80,7 +86,7 @@ public class InstallVersionLibTask extends ListenerTask {
 
         // TODO: this causes verification to happen twice, for natives
         if (!cache.exists() || !verifier.isFileValid(cache)) {
-            url = library.getDownloadUrl(path).replace("${arch}", JavaUtils.getJavaBitness());
+            url = library.getDownloadUrl(path).replace("${arch}", bitness);
             if (sha1 == null || sha1.isEmpty()) {
                 String md5 = Utils.getETag(url);
                 if (md5 != null && !md5.isEmpty()) {

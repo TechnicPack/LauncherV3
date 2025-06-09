@@ -19,11 +19,14 @@
 
 package net.technicpack.minecraftcore.mojang.version.chain;
 
+import net.technicpack.launchercore.launch.java.IJavaRuntime;
+import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.*;
 import net.technicpack.minecraftcore.mojang.version.io.argument.Argument;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -116,13 +119,14 @@ public class VersionChain implements MojangVersion {
     }
 
     @Override
-    public List<Library> getLibrariesForOS() {
+    public List<Library> getLibrariesForCurrentOS(ILaunchOptions options, IJavaRuntime runtime) {
         List<Library> allLibraries = new LinkedList<>();
 
         for (int i = chain.size() - 1; i >= 0; i--) {
             MojangVersion version = chain.get(i);
-            if (version.getLibrariesForOS() != null)
-                allLibraries.addAll(0, version.getLibrariesForOS());
+            List<Library> librariesForCurrentOS = version.getLibrariesForCurrentOS(options, runtime);
+            if (librariesForCurrentOS != null)
+                allLibraries.addAll(0, librariesForCurrentOS);
         }
 
         return allLibraries.stream().distinct().collect(Collectors.toList());
@@ -236,10 +240,10 @@ public class VersionChain implements MojangVersion {
     }
 
     @Override
-    public JavaVersion getJavaVersion() {
+    public VersionJavaInfo getMojangRuntimeInformation() {
         for (MojangVersion version : chain) {
-            if (version.getJavaVersion() != null)
-                return version.getJavaVersion();
+            if (version.getMojangRuntimeInformation() != null)
+                return version.getMojangRuntimeInformation();
         }
 
         return null;
@@ -249,6 +253,23 @@ public class VersionChain implements MojangVersion {
     public void removeLibrary(String libraryName) {
         for (MojangVersion version : chain) {
             version.removeLibrary(libraryName);
+        }
+    }
+
+    @Override
+    public IJavaRuntime getJavaRuntime() {
+        for (MojangVersion version : chain) {
+            if (version.getJavaRuntime() != null)
+                return version.getJavaRuntime();
+        }
+
+        return null;
+    }
+
+    @Override
+    public void setJavaRuntime(IJavaRuntime runtime) {
+        for (MojangVersion version : chain) {
+            version.setJavaRuntime(runtime);
         }
     }
 

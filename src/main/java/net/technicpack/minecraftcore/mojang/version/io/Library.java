@@ -21,6 +21,8 @@ package net.technicpack.minecraftcore.mojang.version.io;
 
 import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.exception.DownloadException;
+import net.technicpack.launchercore.launch.java.IJavaRuntime;
+import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 
@@ -178,11 +180,11 @@ public class Library {
         return gradleClassifier;
     }
 
-    public boolean isForCurrentOS() {
+    public boolean isForCurrentOS(ILaunchOptions options, IJavaRuntime runtime) {
         if (rules == null) {
             return true;
         }
-        return Rule.isAllowable(rules, null);
+        return Rule.isAllowable(rules, options, runtime);
     }
 
     public boolean hasNatives() {

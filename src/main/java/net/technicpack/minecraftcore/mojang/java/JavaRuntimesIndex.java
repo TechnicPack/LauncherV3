@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class JavaRuntimes {
+public class JavaRuntimesIndex {
     @SerializedName("linux")
     private Map<String, List<JavaRuntime>> linux64;
     @SerializedName("linux-i386")
@@ -29,7 +29,7 @@ public class JavaRuntimes {
     @SerializedName("windows-x86")
     private Map<String, List<JavaRuntime>> windows32;
 
-    private JavaRuntimes() {
+    private JavaRuntimesIndex() {
         // Empty constructor for GSON
     }
 

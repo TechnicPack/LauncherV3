@@ -20,7 +20,6 @@
 package net.technicpack.launchercore.launch.java;
 
 import net.technicpack.launchercore.launch.java.version.CurrentJavaRuntime;
-import net.technicpack.utilslib.OperatingSystem;
 
 import java.io.File;
 import java.util.Collection;
@@ -132,10 +131,4 @@ public class JavaVersionRepository {
         return specifiedVersion;
     }
 
-    public String getSelectedPath() {
-        if (selectedVersion == null || selectedVersion.getExecutableFile() == null)
-            return OperatingSystem.getJavaDir();
-
-        return selectedVersion.getExecutableFile().getAbsolutePath();
-    }
 }

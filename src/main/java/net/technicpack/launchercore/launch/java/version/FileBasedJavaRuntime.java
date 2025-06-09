@@ -53,6 +53,13 @@ public final class FileBasedJavaRuntime implements IJavaRuntime, Serializable {
         this.filePath = absolutePath.toString();
     }
 
+    public FileBasedJavaRuntime(Path path) {
+        Path absolutePath = Objects.requireNonNull(path).toAbsolutePath();
+
+        this.javaPath = absolutePath.toFile();
+        this.filePath = absolutePath.toString();
+    }
+
     public File getExecutableFile() {
         return javaPath;
     }

@@ -20,6 +20,7 @@
 package net.technicpack.launchercore.launch.java.version;
 
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
+import net.technicpack.utilslib.OperatingSystem;
 
 import java.io.File;
 import java.util.Objects;
@@ -32,17 +33,20 @@ public final class CurrentJavaRuntime implements IJavaRuntime {
     private final String vendor;
     private final boolean is64Bit;
     private final String osArch;
+    private final File executableFile;
 
     public CurrentJavaRuntime() {
         this.version = System.getProperty("java.version");
         this.vendor = System.getProperty("java.vendor");
         this.osArch = System.getProperty("os.arch");
         this.is64Bit = this.osArch.contains("64");
+        this.executableFile = new File(OperatingSystem.getJavaDir()).getAbsoluteFile();
+
     }
 
     @Override
     public File getExecutableFile() {
-        return null;
+        return executableFile;
     }
 
     @Override

@@ -19,6 +19,8 @@
 
 package net.technicpack.minecraftcore.mojang.version;
 
+import net.technicpack.launchercore.launch.java.IJavaRuntime;
+import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.mojang.version.io.*;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 
@@ -47,7 +49,7 @@ public interface MojangVersion {
 
     public List<Library> getLibraries();
 
-    public List<Library> getLibrariesForOS();
+    public List<Library> getLibrariesForCurrentOS(ILaunchOptions options, IJavaRuntime runtime);
 
     public String getMainClass();
 
@@ -79,7 +81,15 @@ public interface MojangVersion {
 
     public void prependLibrary(Library library);
 
-    public JavaVersion getJavaVersion();
+    /**
+     * Get information about the Mojang JRE
+     * @return The Mojang JRE information.<br>If there isn't one associated with the version.json manifest file, null will be returned.
+     */
+    VersionJavaInfo getMojangRuntimeInformation();
 
     public void removeLibrary(String libraryName);
+
+    IJavaRuntime getJavaRuntime();
+
+    void setJavaRuntime(IJavaRuntime runtime);
 }

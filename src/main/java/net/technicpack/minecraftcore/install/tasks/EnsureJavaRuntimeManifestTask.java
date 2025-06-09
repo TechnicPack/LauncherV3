@@ -29,10 +29,10 @@ import net.technicpack.launchercore.install.verifiers.SHA1FileVerifier;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.java.JavaRuntime;
-import net.technicpack.minecraftcore.mojang.java.JavaRuntimes;
+import net.technicpack.minecraftcore.mojang.java.JavaRuntimesIndex;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.Download;
-import net.technicpack.minecraftcore.mojang.version.io.JavaVersion;
+import net.technicpack.minecraftcore.mojang.version.io.VersionJavaInfo;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,40 +65,40 @@ public class EnsureJavaRuntimeManifestTask implements IInstallTask {
     public void runTask(InstallTasksQueue queue) throws IOException {
         MojangVersion version = ((InstallTasksQueue<MojangVersion>) queue).getMetadata();
 
-        JavaVersion wantedRuntime = version.getJavaVersion();
+        VersionJavaInfo runtimeInfo = version.getMojangRuntimeInformation();
 
-        if (wantedRuntime == null) {
+        if (runtimeInfo == null) {
             // Nothing to do here, this version doesn't have a Mojang JRE
             return;
         }
 
-        final String runtimeName = wantedRuntime.getComponent();
+        final String runtimeName = runtimeInfo.getComponent();
 
-        JavaRuntimes availableRuntimes = MojangUtils.getJavaRuntimes();
+        JavaRuntimesIndex availableRuntimes = MojangUtils.getJavaRuntimesIndex();
 
         if (availableRuntimes == null) {
             throw new DownloadException("Failed to get Mojang JRE information");
         }
 
-        JavaRuntime runtime = availableRuntimes.getRuntimeForCurrentOS(runtimeName);
+        JavaRuntime manifest = availableRuntimes.getRuntimeForCurrentOS(runtimeName);
 
-        if (runtime == null) {
+        if (manifest == null) {
             throw new DownloadException("A Mojang JRE is not available for the current OS");
         }
 
-        Download manifest = runtime.getManifest();
+        Download runtimeDownload = manifest.getManifest();
 
         File output = new File(runtimesDirectory + File.separator + "manifests", runtimeName + ".json");
 
         (new File(output.getParent())).mkdirs();
 
-        IFileVerifier fileVerifier = new SHA1FileVerifier(manifest.getSha1());
+        IFileVerifier fileVerifier = new SHA1FileVerifier(runtimeDownload.getSha1());
 
         if (!output.exists() || !fileVerifier.isFileValid(output)) {
-            examineJavaQueue.addTask(new DownloadFileTask(manifest.getUrl(), output, fileVerifier));
+            examineJavaQueue.addTask(new DownloadFileTask(runtimeDownload.getUrl(), output, fileVerifier));
         }
 
-        examineJavaQueue.addTask(new InstallJavaRuntimeTask(modpack, runtimesDirectory, output, runtimeName, examineJavaQueue, downloadJavaQueue));
+        examineJavaQueue.addTask(new InstallJavaRuntimeTask(modpack, runtimesDirectory, output, runtimeInfo, examineJavaQueue, downloadJavaQueue));
     }
 
 }

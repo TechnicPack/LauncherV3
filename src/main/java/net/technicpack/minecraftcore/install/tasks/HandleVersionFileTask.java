@@ -25,8 +25,10 @@ import net.technicpack.launchercore.install.ITasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
+import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
+import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
 import net.technicpack.minecraftcore.mojang.version.builder.FileVersionBuilder;
@@ -59,10 +61,14 @@ public class HandleVersionFileTask implements IInstallTask {
     private final ITasksQueue copyLibraryQueue;
     private final ITasksQueue checkNonMavenLibsQueue;
     private final MojangVersionBuilder versionBuilder;
+    private final ILaunchOptions launchOptions;
+    private final IJavaRuntime javaRuntime;
 
     private String libraryName;
 
-    public HandleVersionFileTask(ModpackModel pack, LauncherDirectories directories, ITasksQueue checkNonMavenLibsQueue, ITasksQueue checkLibraryQueue, ITasksQueue downloadLibraryQueue, ITasksQueue copyLibraryQueue, MojangVersionBuilder versionBuilder) {
+    public HandleVersionFileTask(ModpackModel pack, LauncherDirectories directories, ITasksQueue checkNonMavenLibsQueue,
+            ITasksQueue checkLibraryQueue, ITasksQueue downloadLibraryQueue, ITasksQueue copyLibraryQueue,
+            MojangVersionBuilder versionBuilder, ILaunchOptions launchOptions, IJavaRuntime javaRuntime) {
         this.pack = pack;
         this.directories = directories;
         this.checkLibraryQueue = checkLibraryQueue;
@@ -70,6 +76,8 @@ public class HandleVersionFileTask implements IInstallTask {
         this.copyLibraryQueue = copyLibraryQueue;
         this.checkNonMavenLibsQueue = checkNonMavenLibsQueue;
         this.versionBuilder = versionBuilder;
+        this.launchOptions = launchOptions;
+        this.javaRuntime = javaRuntime;
     }
 
     @Override
@@ -92,6 +100,8 @@ public class HandleVersionFileTask implements IInstallTask {
         if (version == null) {
             throw new DownloadException("The version.json file was invalid.");
         }
+
+        version.setJavaRuntime(javaRuntime);
 
         // if MC < 1.6, we inject LegacyWrapper
         // HACK
@@ -129,7 +139,7 @@ public class HandleVersionFileTask implements IInstallTask {
             final boolean is1_12_2 = versionIdParts[0].equals("1.12.2");
 
             if (is1_12_2) {
-                for (Library library : version.getLibrariesForOS()) {
+                for (Library library : version.getLibrariesForCurrentOS(launchOptions, javaRuntime)) {
                     // For Minecraft Forge 1.12.2 > 2847, we correct the classifier for the library to "universal".
                     // The Forge installer just grabs this jar from within itself ("maven" folder), but we grab it
                     // directly from the Minecraft Forge Maven repo.
@@ -186,7 +196,8 @@ public class HandleVersionFileTask implements IInstallTask {
                     }
                 }
 
-                checkLibraryQueue.addTask(new InstallVersionLibTask(library, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
+                checkLibraryQueue.addTask(new InstallVersionLibTask(library, checkNonMavenLibsQueue,
+                        downloadLibraryQueue, copyLibraryQueue, pack, directories));
             }
 
             // For Minecraft Forge 1.13+ and NeoForge, we inject our ForgeWrapper as a dependency and launch it through that
@@ -202,7 +213,7 @@ public class HandleVersionFileTask implements IInstallTask {
 
                 version.setMainClass("io.github.zekerzhayard.forgewrapper.installer.Main");
 
-                for (Library library : version.getLibrariesForOS()) {
+                for (Library library : version.getLibrariesForCurrentOS(launchOptions, javaRuntime)) {
                     // This is for Minecraft Forge 1.13+, up to 1.17 (not inclusive)
                     // For NeoForge this has no effect, since it uses the "net.neoforged" group
                     if (library.getGradleGroup().equals("net.minecraftforge")
@@ -240,7 +251,7 @@ public class HandleVersionFileTask implements IInstallTask {
             }
         }
 
-        for (Library library : version.getLibrariesForOS()) {
+        for (Library library : version.getLibrariesForCurrentOS(launchOptions, javaRuntime)) {
             // Skip the Minecraft Forge jar if not using modern Minecraft Forge,
             // since it will be loaded via modpack.jar later on
             if (library.isMinecraftForge() && !hasModernMinecraftForge) {

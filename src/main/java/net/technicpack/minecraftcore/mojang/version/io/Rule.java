@@ -22,12 +22,14 @@ package net.technicpack.minecraftcore.mojang.version.io;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.launch.WindowType;
 import net.technicpack.utilslib.OperatingSystem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -45,10 +47,10 @@ public class Rule {
         return Objects.hash(negated, conditions);
     }
 
-    public static boolean isAllowable(List<Rule> rules, ILaunchOptions opts) {
+    public static boolean isAllowable(List<Rule> rules, ILaunchOptions options, IJavaRuntime runtime) {
         for (int i = rules.size() - 1; i >= 0; i--) {
             Rule rule = rules.get(i);
-            if (rule.isApplicable(opts)) {
+            if (rule.isApplicable(options, runtime)) {
                 return !rule.isNegated();
             }
         }
@@ -107,10 +109,10 @@ public class Rule {
         }
     }
 
-    public boolean isApplicable(ILaunchOptions opts) {
+    public boolean isApplicable(ILaunchOptions options, IJavaRuntime runtime) {
         if (conditions.isEmpty()) return true;
         for (RuleCondition condition : conditions) {
-            if (!condition.test(opts)) return false;
+            if (!condition.test(options, runtime)) return false;
         }
         return true;
     }
@@ -137,7 +139,7 @@ public class Rule {
 
     private interface RuleCondition {
 
-        boolean test(ILaunchOptions opts);
+        boolean test(ILaunchOptions opts, IJavaRuntime runtime);
 
         void serialize(JsonObject root);
 
@@ -169,10 +171,10 @@ public class Rule {
         }
 
         @Override
-        public boolean test(ILaunchOptions opts) {
+        public boolean test(ILaunchOptions opts, IJavaRuntime runtime) {
             String os = OperatingSystem.getOperatingSystem().getName();
             String osVersion = System.getProperty("os.version");
-            String archProp = System.getProperty("os.arch").toLowerCase();
+            String archProp = runtime.getOsArch().toLowerCase(Locale.ENGLISH);
             return (name == null || name.equalsIgnoreCase(os))
                     && (version == null || version.matcher(osVersion).matches())
                     && (arch == null || archProp.contains(arch.toLowerCase()));
@@ -211,7 +213,7 @@ public class Rule {
         }
 
         @Override
-        public boolean test(ILaunchOptions opts) {
+        public boolean test(ILaunchOptions opts, IJavaRuntime runtime) {
             return opts != null
                     && (opts.getLaunchWindowType() == WindowType.CUSTOM) == shouldHaveCustomResolution;
         }
@@ -245,7 +247,7 @@ public class Rule {
         }
 
         @Override
-        public boolean test(ILaunchOptions opts) {
+        public boolean test(ILaunchOptions opts, IJavaRuntime runtime) {
             return !shouldBeDemoUser;
         }
 
@@ -278,7 +280,7 @@ public class Rule {
         }
 
         @Override
-        public boolean test(ILaunchOptions opts) {
+        public boolean test(ILaunchOptions opts, IJavaRuntime runtime) {
             return !shouldHaveQuickPlaysSupport;
         }
 
@@ -311,7 +313,7 @@ public class Rule {
         }
 
         @Override
-        public boolean test(ILaunchOptions opts) {
+        public boolean test(ILaunchOptions opts, IJavaRuntime runtime) {
             return !shouldQuickPlayBeSingleplayer;
         }
 
@@ -344,7 +346,7 @@ public class Rule {
         }
 
         @Override
-        public boolean test(ILaunchOptions opts) {
+        public boolean test(ILaunchOptions opts, IJavaRuntime runtime) {
             return !shouldQuickPlayBeMultiplayer;
         }
 
@@ -377,7 +379,7 @@ public class Rule {
         }
 
         @Override
-        public boolean test(ILaunchOptions opts) {
+        public boolean test(ILaunchOptions opts, IJavaRuntime runtime) {
             return !shouldQuickPlayBeRealms;
         }
 
