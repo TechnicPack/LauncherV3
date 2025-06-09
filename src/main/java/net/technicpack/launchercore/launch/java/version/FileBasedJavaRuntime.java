@@ -35,6 +35,7 @@ public final class FileBasedJavaRuntime implements IJavaRuntime, Serializable {
     private transient boolean queried = false;
     private transient String version;
     private transient String vendor;
+    private transient String osArch;
     private transient boolean is64Bit;
     private transient File javaPath;
     private String filePath;
@@ -66,8 +67,7 @@ public final class FileBasedJavaRuntime implements IJavaRuntime, Serializable {
     private void ensureQueried() {
         if (!queried) {
             queried = true;
-            ProfilingUtils.measureTime("Querying Java runtime \"" + filePath + "\"",
-                    this::getInformationFromJavaRuntime);
+            ProfilingUtils.measureTime(String.format("Querying Java runtime \"%s\"", filePath), this::getInformationFromJavaRuntime);
         }
     }
 
@@ -87,8 +87,6 @@ public final class FileBasedJavaRuntime implements IJavaRuntime, Serializable {
         String data = Utils.getProcessOutput(javaBinaryPath.toString(), "-XshowSettings:properties", "-version");
 
         if (data == null) return;
-
-        String osArch = null;
 
         try (BufferedReader reader = new BufferedReader(new StringReader(data))) {
             String line;
@@ -114,6 +112,13 @@ public final class FileBasedJavaRuntime implements IJavaRuntime, Serializable {
         ensureQueried();
 
         return vendor;
+    }
+
+    @Override
+    public String getOsArch() {
+        ensureQueried();
+
+        return osArch;
     }
 
     public boolean is64Bit() {

@@ -65,6 +65,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.zip.ZipException;
 
@@ -254,13 +255,8 @@ public class Installer {
                 }
 
                 if (!userCancelled) {
-                    Utils.getLogger().info("Mysterious interruption source.");
-                    try {
-                        // I am a charlatan and a hack.
-                        throw new Exception("Grabbing stack trace- this isn't necessarily an error.");
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
+                    // Grab stack trace for this mysterious interruption
+                    Utils.getLogger().log(Level.WARNING, "Mysterious interruption source.", new Exception("Stack trace"));
                 }
                 super.interrupt();
             }
@@ -269,9 +265,7 @@ public class Installer {
     }
 
     public boolean isCurrentlyRunning() {
-        if (installerThread != null && installerThread.isAlive())
-            return true;
-        return false;
+        return installerThread != null && installerThread.isAlive();
     }
 
     public void buildTasksQueue(InstallTasksQueue queue, ResourceLoader resources, ModpackModel modpack, String build,

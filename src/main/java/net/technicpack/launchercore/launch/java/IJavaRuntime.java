@@ -31,6 +31,8 @@ public interface IJavaRuntime {
 
     String getVendor();
 
+    String getOsArch();
+
     boolean is64Bit();
 
     boolean isValid();

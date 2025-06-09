@@ -20,7 +20,6 @@
 package net.technicpack.launchercore.launch.java.version;
 
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
-import net.technicpack.utilslib.JavaUtils;
 
 import java.io.File;
 import java.util.Objects;
@@ -32,11 +31,13 @@ public final class CurrentJavaRuntime implements IJavaRuntime {
     private final String version;
     private final String vendor;
     private final boolean is64Bit;
+    private final String osArch;
 
     public CurrentJavaRuntime() {
         this.version = System.getProperty("java.version");
         this.vendor = System.getProperty("java.vendor");
-        this.is64Bit = JavaUtils.is64Bit();
+        this.osArch = System.getProperty("os.arch");
+        this.is64Bit = this.osArch.contains("64");
     }
 
     @Override
@@ -55,6 +56,11 @@ public final class CurrentJavaRuntime implements IJavaRuntime {
     }
 
     @Override
+    public String getOsArch() {
+        return osArch;
+    }
+
+    @Override
     public boolean is64Bit() {
         return is64Bit;
     }
@@ -68,11 +74,11 @@ public final class CurrentJavaRuntime implements IJavaRuntime {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         CurrentJavaRuntime that = (CurrentJavaRuntime) o;
-        return is64Bit == that.is64Bit && Objects.equals(version, that.version) && Objects.equals(vendor, that.vendor);
+        return is64Bit == that.is64Bit && Objects.equals(version, that.version) && Objects.equals(vendor, that.vendor) && Objects.equals(osArch, that.osArch);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(version, vendor, is64Bit);
+        return Objects.hash(version, vendor, is64Bit, osArch);
     }
 }

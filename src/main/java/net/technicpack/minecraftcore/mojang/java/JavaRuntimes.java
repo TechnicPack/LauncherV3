@@ -2,9 +2,9 @@ package net.technicpack.minecraftcore.mojang.java;
 
 import com.google.gson.annotations.SerializedName;
 import java.util.Collections;
-import net.technicpack.launchercore.launch.java.IJavaRuntime;
-import net.technicpack.launchercore.launch.java.JavaVersionRepository;
+
 import net.technicpack.utilslib.JavaUtils;
+import net.technicpack.utilslib.OSUtils;
 import net.technicpack.utilslib.OperatingSystem;
 
 import java.util.HashMap;
@@ -19,26 +19,34 @@ public class JavaRuntimes {
 
     @SerializedName("mac-os")
     private Map<String, List<JavaRuntime>> mac;
-
     @SerializedName("mac-os-arm64")
     private Map<String, List<JavaRuntime>> macArm64;
 
+    @SerializedName("windows-arm64")
+    private Map<String, List<JavaRuntime>> windowsArm64;
     @SerializedName("windows-x64")
     private Map<String, List<JavaRuntime>> windows64;
     @SerializedName("windows-x86")
     private Map<String, List<JavaRuntime>> windows32;
 
-    public Map<String, List<JavaRuntime>> getRuntimesForCurrentOS(JavaVersionRepository javaVersionRepository) {
+    private JavaRuntimes() {
+        // Empty constructor for GSON
+    }
+
+    public Map<String, List<JavaRuntime>> getRuntimesForCurrentOS() {
         switch (OperatingSystem.getOperatingSystem()) {
             case WINDOWS:
-                boolean hasAny64BitJre = javaVersionRepository.getVersions().stream().anyMatch(IJavaRuntime::is64Bit);
+                if (JavaUtils.isArm64()) {
+                    return windowsArm64;
+                }
 
-                if (hasAny64BitJre) {
+                if (OSUtils.is64BitOS()) {
                     return windows64;
                 }
 
                 return windows32;
             case OSX:
+                // TODO: improve this detection
                 if (JavaUtils.isArm64()) {
                     // Combine the arm64 and x64 entries, with the arm64 ones taking precedence
                     Map<String, List<JavaRuntime>> combinedMac = new HashMap<>(mac);
@@ -53,7 +61,7 @@ public class JavaRuntimes {
 
                 return mac;
             case LINUX:
-                if (JavaUtils.is64Bit()) {
+                if (OSUtils.is64BitOS()) {
                     return linux64;
                 }
 
@@ -64,8 +72,8 @@ public class JavaRuntimes {
         }
     }
 
-    public JavaRuntime getRuntimeForCurrentOS(String runtimeName, JavaVersionRepository javaVersionRepository) {
-        Map<String, List<JavaRuntime>> availableRuntimes = getRuntimesForCurrentOS(javaVersionRepository);
+    public JavaRuntime getRuntimeForCurrentOS(String runtimeName) {
+        Map<String, List<JavaRuntime>> availableRuntimes = getRuntimesForCurrentOS();
 
         if (availableRuntimes == null || availableRuntimes.isEmpty()) return null;
 
