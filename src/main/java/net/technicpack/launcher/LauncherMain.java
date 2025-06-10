@@ -140,7 +140,7 @@ public class LauncherMain {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ex) {
-            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+            Utils.getLogger().log(Level.SEVERE, "Failed to set system look and feel", ex);
         }
 
         ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
@@ -391,7 +391,7 @@ public class LauncherMain {
         (new InstalledJavaSource()).enumerateVersions(javaVersions);
         FileJavaSource javaVersionFile = FileJavaSource.load(new File(settings.getTechnicRoot(), "javaVersions.json"));
         javaVersionFile.enumerateVersions(javaVersions);
-        javaVersions.selectVersion(settings.getJavaVersion(), settings.getJavaBitness());
+        javaVersions.selectVersion(settings.getJavaVersion(), settings.getPrefer64Bit());
 
         TechnicUserStore users = TechnicUserStore.load(new File(directories.getLauncherDirectory(), "users.json"));
         MicrosoftAuthenticator microsoftAuthenticator = new MicrosoftAuthenticator(new File(directories.getLauncherDirectory(), "oauth"));

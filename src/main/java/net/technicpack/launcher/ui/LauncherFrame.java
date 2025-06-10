@@ -141,6 +141,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     DiscoverInfoPanel discoverInfoPanel;
 
     public LauncherFrame(final ResourceLoader resources, final ImageRepository<IUserType> skinRepository, final UserModel userModel, final TechnicSettings settings, final ModpackSelector modpackSelector, final ImageRepository<ModpackModel> iconRepo, final ImageRepository<ModpackModel> logoRepo, final ImageRepository<ModpackModel> backgroundRepo, final Installer installer, final ImageRepository<AuthorshipInfo> avatarRepo, final IPlatformApi platformApi, final LauncherDirectories directories, final IInstalledPackRepository packRepository, final StartupParameters params, final DiscoverInfoPanel discoverInfoPanel, final JavaVersionRepository javaVersions, final FileJavaSource fileJavaSource, final IBuildNumber buildNumber, final IDiscordApi discordApi) {
+        super();
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setTitle("Technic Launcher");
@@ -167,7 +168,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         //Handles rebuilding the frame, so use it to build the frame in the first place
         relocalize(resources);
 
-        selectTab("discover");
+        selectTab(TAB_DISCOVER);
 
         EventQueue.invokeLater(() -> LauncherMain.consoleFrame.setVisible(settings.getShowConsole()));
 
@@ -467,12 +468,12 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         infoSwap.setLayout(infoLayout);
         infoSwap.setOpaque(false);
         newsInfoPanel = new NewsInfoPanel(resources, avatarRepo);
-        infoSwap.add(discoverInfoPanel,"discover");
+        infoSwap.add(discoverInfoPanel,TAB_DISCOVER);
 
         JPanel newsHost = new JPanel();
-        infoSwap.add(newsHost, "news");
+        infoSwap.add(newsHost, TAB_NEWS);
         JPanel modpackHost = new JPanel();
-        infoSwap.add(modpackHost, "modpacks");
+        infoSwap.add(modpackHost, TAB_MODPACKS);
         centralPanel.add(infoSwap, BorderLayout.CENTER);
 
         newsSelector = new NewsSelector(resources, newsInfoPanel, platformApi, avatarRepo, newsCircle, settings);
@@ -535,7 +536,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         getRootPane().getContentPane().add(footer, BorderLayout.PAGE_END);
 
         if (resources.hasResource("teaser.png")) {
-            getRootPane().setGlassPane(new SplatPane(modpacksTab, resources.getIcon("teaser.png"), JLabel.SOUTH, 5, 0));
+            getRootPane().setGlassPane(new SplatPane(modpacksTab, resources.getIcon("teaser.png"), SwingConstants.SOUTH, 5, 0));
             getRootPane().getGlassPane().setVisible(true);
         }
     }

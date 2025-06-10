@@ -28,25 +28,28 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.logging.Level;
 
-public class TechnicUserStore implements IUserStore {
+public class TechnicUserStore implements IUserStore, Serializable {
     private Map<String, IUserType> savedUsers = new HashMap<>();
     private String lastUser;
     private transient File usersFile;
 
-    public TechnicUserStore() {
+    @SuppressWarnings("unused")
+    private TechnicUserStore() {
+        // Empty constructor for GSON
     }
 
-    public TechnicUserStore(File userFile) {
+    protected TechnicUserStore(File userFile) {
         this.usersFile = userFile;
     }
 
     public static TechnicUserStore load(File userFile) {
         if (!userFile.exists()) {
-            Utils.getLogger().log(Level.WARNING, "Unable to load users from " + userFile + " because it does not exist.");
+            Utils.getLogger().log(Level.WARNING, String.format("Unable to load users from %s because it does not exist.", userFile));
             return new TechnicUserStore(userFile);
         }
 
@@ -60,7 +63,7 @@ public class TechnicUserStore implements IUserStore {
                 return newModel;
             }
         } catch (JsonSyntaxException | IOException e) {
-            Utils.getLogger().log(Level.WARNING, "Unable to load users from " + userFile);
+            Utils.getLogger().log(Level.WARNING, String.format("Unable to load users from %s", userFile));
         }
 
         return new TechnicUserStore(userFile);
@@ -76,7 +79,7 @@ public class TechnicUserStore implements IUserStore {
         try {
             FileUtils.writeStringToFile(usersFile, json, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            Utils.getLogger().log(Level.WARNING, "Unable to save users " + usersFile);
+            Utils.getLogger().log(Level.WARNING, String.format("Unable to save users %s", usersFile));
         }
     }
 

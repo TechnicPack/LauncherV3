@@ -163,7 +163,7 @@ public class Installer {
                                 javaVersions.selectVersion(recommendedJavaVersion.getVersion(),
                                         recommendedJavaVersion.is64Bit());
                                 settings.setJavaVersion(recommendedJavaVersion.getVersion());
-                                settings.setJavaBitness(recommendedJavaVersion.is64Bit());
+                                settings.setPrefer64Bit(recommendedJavaVersion.is64Bit());
                             }
 
                             if (dialog.shouldRemember()) {

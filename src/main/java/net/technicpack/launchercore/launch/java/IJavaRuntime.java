@@ -33,6 +33,8 @@ public interface IJavaRuntime {
 
     String getOsArch();
 
+    String getBitness();
+
     boolean is64Bit();
 
     boolean isValid();

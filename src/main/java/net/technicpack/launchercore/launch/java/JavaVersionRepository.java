@@ -22,19 +22,16 @@ package net.technicpack.launchercore.launch.java;
 import net.technicpack.launchercore.launch.java.version.CurrentJavaRuntime;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 /**
- * Represents a repository of all the versions of java available to launch games with.
+ * A repository of all the system Java runtimes available to launch Minecraft with
  */
 public class JavaVersionRepository {
     public static final String VERSION_DEFAULT = "default";
     public static final String VERSION_LATEST_64BIT = "64bit";
-    private Map<File, IJavaRuntime> loadedVersions = new HashMap<>();
-    private Collection<IJavaRuntime> versionCache = new LinkedList<>();
+    private final Map<File, IJavaRuntime> loadedVersions = new HashMap<>();
+    private final Collection<IJavaRuntime> versionCache = new LinkedList<>();
     private IJavaRuntime selectedVersion;
 
     public JavaVersionRepository() {
@@ -63,20 +60,10 @@ public class JavaVersionRepository {
     }
 
     public IJavaRuntime getBest64BitVersion() {
-        IJavaRuntime bestVersion = null;
-        for (IJavaRuntime version : loadedVersions.values()) {
-            if (version.is64Bit()) {
-                if (bestVersion == null || bestVersion.getVersion() == null) {
-                    bestVersion = version;
-                    continue;
-                }
-
-                if (version.getVersion() != null && version.getVersion().compareTo(bestVersion.getVersion()) > 0)
-                    bestVersion = version;
-            }
-        }
-
-        return bestVersion;
+        return loadedVersions.values().stream()
+                .filter(IJavaRuntime::is64Bit)
+                .max(Comparator.comparing(IJavaRuntime::getVersion))
+                .orElse(null);
     }
 
     public Collection<IJavaRuntime> getVersions() {

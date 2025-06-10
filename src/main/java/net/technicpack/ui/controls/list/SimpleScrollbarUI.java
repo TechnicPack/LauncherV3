@@ -25,9 +25,6 @@ import java.awt.*;
 
 public class SimpleScrollbarUI extends BasicScrollBarUI {
 
-    private Color trackColor;
-    private Color thumbColor;
-
     public SimpleScrollbarUI(Color trackColor, Color thumbColor) {
         this.trackColor = trackColor;
         this.thumbColor = thumbColor;

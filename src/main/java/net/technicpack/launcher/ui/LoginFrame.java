@@ -55,10 +55,10 @@ import static javax.swing.JOptionPane.ERROR_MESSAGE;
 import static javax.swing.JOptionPane.showMessageDialog;
 
 public class LoginFrame extends DraggableFrame implements IRelocalizableResource, IAuthListener {
-    private ResourceLoader resources;
-    private ImageRepository<IUserType> skinRepository;
-    private UserModel userModel;
-    private TechnicSettings settings;
+    private transient ResourceLoader resources;
+    private final transient ImageRepository<IUserType> skinRepository;
+    private final transient UserModel userModel;
+    private final transient TechnicSettings settings;
 
     private RoundedButton addMicrosoft;
     private RoundedButton cancelMsa;
@@ -67,7 +67,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     private JLabel visitBrowser;
     private JComboBox<IUserType> nameSelect;
     private JComboBox<LanguageItem> languages;
-    private MsaLoginSwingWorker msaLoginSwingWorker;
+    private transient MsaLoginSwingWorker msaLoginSwingWorker;
 
     private static final int FRAME_WIDTH = 347;
     private static final int FRAME_HEIGHT = 399;
@@ -80,32 +80,6 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
-
-//        this.setFocusTraversalPolicy(new SortingFocusTraversalPolicy(new Comparator<Component>() {
-//            @Override
-//            public int compare(Component o1, Component o2) {
-//                //This long stupid stack of else/ifs enforces a tab order of
-//                //Username -> Password -> Remember me -> any buttons -> everything else who cares
-//                if (o1 == name || o1 == nameSelect)
-//                    return -1;
-//                else if (o2 == name || o2 == nameSelect)
-//                    return 1;
-//                else if (o1 == password)
-//                    return -1;
-//                else if (o2 == password)
-//                    return 1;
-//                else if (o1 == rememberAccount)
-//                    return -1;
-//                else if (o2 == rememberAccount)
-//                    return 1;
-//                else if (o1 instanceof AbstractButton)
-//                    return -1;
-//                else if (o2 instanceof AbstractButton)
-//                    return 1;
-//                else
-//                    return 0;
-//            }
-//        }));
 
         //Handles rebuilding the frame, so use it to build the frame in the first place
         relocalize(resources);
@@ -275,7 +249,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         }
         languages.setBorder(BorderFactory.createEmptyBorder());
         languages.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        languages.setUI(new LanguageCellUI(resources, new RoundedBorderFormatter(new LineBorder(Color.black, 1)), LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
+        languages.setUI(new LanguageCellUI(new RoundedBorderFormatter(new LineBorder(Color.black, 1)), LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
         languages.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         languages.setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
         languages.setRenderer(new LanguageCellRenderer(resources, "globe.png", LauncherFrame.COLOR_SELECTOR_BACK, LauncherFrame.COLOR_WHITE_TEXT));

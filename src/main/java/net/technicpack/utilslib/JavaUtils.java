@@ -28,14 +28,6 @@ public class JavaUtils {
         throw new IllegalStateException("Utility class");
     }
 
-    /**
-     * Determine the bitness of the current OS (64 or 32).
-     * If we're in a 32-bit Java runtime, this will always return 32.
-     */
-    public static String getJavaBitness() {
-        return JAVA_BITNESS;
-    }
-
     public static boolean isArm64() {
         return OS_ARCH.equals("aarch64");
     }

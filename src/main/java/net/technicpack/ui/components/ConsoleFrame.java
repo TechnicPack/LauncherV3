@@ -66,11 +66,11 @@ public class ConsoleFrame extends JFrame implements MouseListener {
         setSize(new Dimension(896, 504));
         buildUI();
 
-        this.setIconImage(frameIcon);
+        setIconImage(frameIcon);
 
         addMouseListener(this);
 
-        setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+        setDefaultCloseOperation(HIDE_ON_CLOSE);
     }
 
     public Document getDocument() { return document; }
@@ -118,7 +118,7 @@ public class ConsoleFrame extends JFrame implements MouseListener {
                 return font;
             }
         }
-        return new Font("Monospace", Font.PLAIN, 11);
+        return new Font("Monospace", Font.PLAIN, 14);
     }
 
     @Override

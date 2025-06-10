@@ -61,7 +61,7 @@ public class InstallVersionLibTask extends ListenerTask {
         }
 
         MojangVersion version = ((InstallTasksQueue<MojangVersion>) queue).getMetadata();
-        final String bitness = version.getJavaRuntime().is64Bit() ? "64" : "32" ;
+        final String bitness = version.getJavaRuntime().getBitness();
 
         String path = library.getArtifactPath(nativeClassifier).replace("${arch}", bitness);
 

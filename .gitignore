@@ -1,15 +1,12 @@
 *.class
-
-# Package Files #
+*.ear
+*.iml
 *.jar
 *.war
-*.ear
-
 .idea/
-target/
-*.iml
-
-module_launcherv3.xml
-launcherv3.xml
-launcherv3.properties
+.vscode/
 dependency-reduced-pom.xml
+launcherv3.properties
+launcherv3.xml
+module_launcherv3.xml
+target/

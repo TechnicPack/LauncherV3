@@ -65,6 +65,11 @@ public final class CurrentJavaRuntime implements IJavaRuntime {
     }
 
     @Override
+    public String getBitness() {
+        return is64Bit ? "64" : "32";
+    }
+
+    @Override
     public boolean is64Bit() {
         return is64Bit;
     }

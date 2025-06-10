@@ -1,5 +1,6 @@
 package net.technicpack.discord.io;
 
+import com.google.gson.annotations.SerializedName;
 import net.technicpack.rest.RestObject;
 
 import java.util.List;
@@ -8,18 +9,20 @@ import java.util.List;
 public class Server extends RestObject {
     private String id;
     private String name;
-    private String instant_invite;
+    @SerializedName("instant_invite")
+    private String instantInvite;
     private List<MemberInfo> members;
     private List<ChannelInfo> channels;
-    private int presence_count;
+    @SerializedName("presence_count")
+    private int presenceCount;
 
     public String getId() { return this.id; }
     public String getName() { return this.name; }
-    public String getInviteLink() { return instant_invite; }
+    public String getInviteLink() { return instantInvite; }
 
     public int getChannelCount() { return channels.size(); }
     public ChannelInfo getFirstChannel() {
-        if (channels.size() == 0)
+        if (channels.isEmpty())
             return null;
         return channels.get(0);
     }
@@ -31,5 +34,5 @@ public class Server extends RestObject {
     public MemberInfo getMember(int index) {
         return members.get(index);
     }
-    public int getPresenceCount() { return presence_count; }
+    public int getPresenceCount() { return presenceCount; }
 }

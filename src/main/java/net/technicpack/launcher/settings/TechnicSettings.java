@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.settings;
 
+import com.google.gson.annotations.SerializedName;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.util.LaunchAction;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
@@ -54,9 +55,10 @@ public class TechnicSettings implements ILaunchOptions {
     private String javaVersion = JavaVersionRepository.VERSION_LATEST_64BIT;
     private boolean autoAcceptRequirements = false;
     /**
-     * 64 bit if true, 32 bit if false
+     * User prefers 64 bit if true, 32 bit otherwise
      */
-    private boolean javaBitness = true;
+    @SerializedName("javaBitness")
+    private boolean prefer64Bit = true;
 
     private String launcherSettingsVersion = "2";
 
@@ -117,9 +119,9 @@ public class TechnicSettings implements ILaunchOptions {
         save();
     }
 
-    public boolean getJavaBitness() { return javaBitness; }
-    public void setJavaBitness(boolean javaBitness) {
-        this.javaBitness = javaBitness;
+    public boolean getPrefer64Bit() { return prefer64Bit; }
+    public void setPrefer64Bit(boolean prefer64Bit) {
+        this.prefer64Bit = prefer64Bit;
         save();
     }
 

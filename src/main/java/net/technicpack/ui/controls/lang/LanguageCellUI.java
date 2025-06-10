@@ -21,7 +21,6 @@ package net.technicpack.ui.controls.lang;
 
 import net.technicpack.ui.controls.list.SimpleScrollPopup;
 import net.technicpack.ui.controls.list.popupformatters.IPopupFormatter;
-import net.technicpack.ui.lang.ResourceLoader;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxUI;
@@ -31,15 +30,12 @@ import java.awt.*;
 
 public class LanguageCellUI extends BasicComboBoxUI {
 
-    private ResourceLoader resources;
+    private final Color trackColor;
+    private final Color thumbColor;
 
-    private Color trackColor;
-    private Color thumbColor;
+    private final IPopupFormatter popupFormatter;
 
-    private IPopupFormatter popupFormatter;
-
-    public LanguageCellUI(ResourceLoader loader, IPopupFormatter popupFormatter, Color trackColor, Color thumbColor) {
-        this.resources = loader;
+    public LanguageCellUI(IPopupFormatter popupFormatter, Color trackColor, Color thumbColor) {
         this.popupFormatter = popupFormatter;
         this.trackColor = trackColor;
         this.thumbColor = thumbColor;

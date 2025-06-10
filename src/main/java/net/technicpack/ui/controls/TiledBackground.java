@@ -24,9 +24,9 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class TiledBackground extends JPanel {
-    private BufferedImage image;
-    private int width;
-    private int height;
+    private transient BufferedImage image;
+    private int imageWidth;
+    private int imageHeight;
     private boolean filterImage;
 
     public TiledBackground(BufferedImage image) {
@@ -40,14 +40,15 @@ public class TiledBackground extends JPanel {
         this.image = image;
 
         if (image != null) {
-            width = image.getWidth();
-            height = image.getHeight();
+            imageWidth = image.getWidth();
+            imageHeight = image.getHeight();
         } else {
-            width = 0;
-            height = 0;
+            imageWidth = 0;
+            imageHeight = 0;
         }
     }
 
+    @Override
     public void paintComponent(Graphics g) {
         int destWidth = getWidth();
         int destHeight = getHeight();
@@ -63,13 +64,13 @@ public class TiledBackground extends JPanel {
 
         while (startY < destHeight) {
             int startX = 0;
-            int nextStartY = startY + height;
+            int nextStartY = startY + imageHeight;
 
             while (startX < destWidth) {
-                int nextStartX = startX + width;
+                int nextStartX = startX + imageWidth;
 
                 //draw
-                g.drawImage(image, startX, startY, nextStartX, nextStartY, 0, 0, width, height, null);
+                g.drawImage(image, startX, startY, nextStartX, nextStartY, 0, 0, imageWidth, imageHeight, null);
 
                 startX = nextStartX;
             }

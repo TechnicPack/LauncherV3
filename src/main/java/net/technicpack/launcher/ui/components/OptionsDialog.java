@@ -21,31 +21,31 @@ package net.technicpack.launcher.ui.components;
 import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.settings.StartupParameters;
+import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.InstallerFrame;
-import net.technicpack.minecraftcore.launch.WindowType;
-import net.technicpack.ui.listitems.javaversion.Best64BitVersionItem;
-import net.technicpack.ui.listitems.javaversion.DefaultVersionItem;
-import net.technicpack.ui.listitems.javaversion.JavaVersionItem;
+import net.technicpack.launcher.ui.LauncherFrame;
+import net.technicpack.launcher.ui.listitems.OnLaunchItem;
+import net.technicpack.launcher.ui.listitems.StreamItem;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.launch.java.source.FileJavaSource;
 import net.technicpack.launchercore.launch.java.version.FileBasedJavaRuntime;
+import net.technicpack.launchercore.util.LaunchAction;
+import net.technicpack.minecraftcore.launch.WindowType;
+import net.technicpack.ui.controls.LauncherDialog;
+import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.TooltipWarning;
+import net.technicpack.ui.controls.borders.RoundBorder;
 import net.technicpack.ui.controls.lang.LanguageCellRenderer;
 import net.technicpack.ui.controls.list.SimpleButtonComboUI;
 import net.technicpack.ui.controls.list.popupformatters.RoundedBorderFormatter;
+import net.technicpack.ui.controls.tabs.SimpleTabPane;
 import net.technicpack.ui.lang.IRelocalizableResource;
 import net.technicpack.ui.lang.ResourceLoader;
-import net.technicpack.launcher.settings.TechnicSettings;
-import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.ui.controls.LauncherDialog;
-import net.technicpack.ui.controls.RoundedButton;
-import net.technicpack.ui.controls.borders.RoundBorder;
-import net.technicpack.ui.controls.tabs.SimpleTabPane;
 import net.technicpack.ui.listitems.LanguageItem;
-import net.technicpack.launcher.ui.listitems.OnLaunchItem;
-import net.technicpack.launcher.ui.listitems.StreamItem;
-import net.technicpack.launchercore.util.LaunchAction;
+import net.technicpack.ui.listitems.javaversion.Best64BitVersionItem;
+import net.technicpack.ui.listitems.javaversion.DefaultVersionItem;
+import net.technicpack.ui.listitems.javaversion.JavaVersionItem;
 import net.technicpack.utilslib.DesktopUtils;
 import net.technicpack.utilslib.Memory;
 import net.technicpack.utilslib.OperatingSystem;
@@ -72,7 +72,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     private static final int DIALOG_WIDTH = 830;
     private static final int DIALOG_HEIGHT = 564;
 
-    private TechnicSettings settings;
+    private final TechnicSettings settings;
 
     private boolean hasShownStreamInfo = false;
     private ResourceLoader resources;
@@ -80,7 +80,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     private final FileJavaSource fileJavaSource;
     private final IBuildNumber buildNumber;
 
-    private DocumentListener javaArgsListener = new DocumentListener() {
+    private final DocumentListener javaArgsListener = new DocumentListener() {
         @Override
         public void insertUpdate(DocumentEvent e) {
             changeJavaArgs();
@@ -97,7 +97,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         }
     };
 
-    private DocumentListener dimensionListener = new DocumentListener() {
+    private final DocumentListener dimensionListener = new DocumentListener() {
         @Override
         public void insertUpdate(DocumentEvent e) {
             changeWindowDimensions();
@@ -114,7 +114,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         }
     };
 
-    private DocumentListener wrapperCommandListener = new DocumentListener() {
+    private final DocumentListener wrapperCommandListener = new DocumentListener() {
         @Override
         public void insertUpdate(DocumentEvent e) {
             changeWrapperCommand();
@@ -133,11 +133,11 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
 
     JComboBox<JavaVersionItem> versionSelect;
-    JComboBox memSelect;
+    JComboBox<Memory> memSelect;
     JTextArea javaArgs;
-    JComboBox streamSelect;
-    JComboBox launchSelect;
-    JComboBox langSelect;
+    JComboBox<StreamItem> streamSelect;
+    JComboBox<OnLaunchItem> launchSelect;
+    JComboBox<LanguageItem> langSelect;
     JTextField installField;
     JTextField clientId;
     JCheckBox showConsole;
@@ -145,8 +145,8 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     StartupParameters params;
     Component ramWarning;
     JCheckBox askFirstBox;
-    JComboBox useStencil;
-    JComboBox windowSelect;
+    JComboBox<String> useStencil;
+    JComboBox<String> windowSelect;
     JTextField widthInput;
     JTextField heightInput;
     JTextField wrapperCommand;
@@ -227,7 +227,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         boolean is64 = javaVersionItem.is64Bit();
         javaVersions.setSelectedVersion(javaVersionItem.getJavaVersion());
         settings.setJavaVersion(version);
-        settings.setJavaBitness(is64);
+        settings.setPrefer64Bit(is64);
         settings.save();
         rebuildMemoryList();
     }
@@ -276,7 +276,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             versionSelect.addItem(item);
             versionSelect.setSelectedItem(item);
             settings.setJavaVersion(chosenJava.getVersion());
-            settings.setJavaBitness(chosenJava.is64Bit());
+            settings.setPrefer64Bit(chosenJava.is64Bit());
             settings.save();
         }
     }
@@ -304,7 +304,6 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
     protected void changeLanguage() {
         settings.setLanguageCode(((LanguageItem) langSelect.getSelectedItem()).getLangCode());
-        settings.save();
 
         resources.setLocale(((LanguageItem) langSelect.getSelectedItem()).getLangCode());
     }
@@ -412,7 +411,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         }
 
         String settingsVersion = settings.getJavaVersion();
-        boolean settingsBitness = settings.getJavaBitness();
+        boolean settingsBitness = settings.getPrefer64Bit();
         if (settingsVersion == null || settingsVersion.isEmpty() || settingsVersion.equals(JavaVersionRepository.VERSION_DEFAULT))
             versionSelect.setSelectedIndex(0);
         else if (settingsVersion.equals(JavaVersionRepository.VERSION_LATEST_64BIT))
@@ -456,8 +455,6 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             case NOTHING:
                 launchSelect.setSelectedIndex(2);
                 break;
-            default:
-                launchSelect.setSelectedIndex(0);
         }
         launchSelect.addActionListener(e -> changeLaunchAction());
 
@@ -549,14 +546,15 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         }
 
         memSelect.removeAllItems();
-        long maxMemory = Memory.getAvailableMemory(javaVersions.getSelectedVersion().is64Bit());
+        boolean is64Bit = javaVersions.getSelectedVersion().is64Bit();
+        long maxMemory = Memory.getAvailableMemory(is64Bit);
         for (int i = 0; i < Memory.memoryOptions.length; i++) {
             if (Memory.memoryOptions[i].getMemoryMB() <= maxMemory)
                 memSelect.addItem(Memory.memoryOptions[i]);
         }
 
         Memory currentMem = Memory.getMemoryFromId(settings.getMemory());
-        Memory availableMem = Memory.getClosestAvailableMemory(currentMem, javaVersions.getSelectedVersion().is64Bit());
+        Memory availableMem = Memory.getClosestAvailableMemory(currentMem, is64Bit);
 
         if (currentMem.getMemoryMB() != availableMem.getMemoryMB()) {
             settings.setMemory(availableMem.getSettingsId());
@@ -566,15 +564,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         memSelect.addActionListener(e -> changeMemory());
 
         if (parent != null) {
-            boolean is64Bit = true;
-            boolean has64Bit = true;
-            if (javaVersions.getBest64BitVersion() == null) {
-                has64Bit = false;
-            }
-
-            if (!javaVersions.getSelectedVersion().is64Bit()) {
-                is64Bit = false;
-            }
+            boolean has64Bit = javaVersions.getBest64BitVersion() != null;
 
             if (is64Bit) {
                 parent.add(memSelect, new GridBagConstraints(1, 1, 6, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 80), 0, 16));
@@ -714,12 +704,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         panel.add(streamLabel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
         // Setup stream select box
-        streamSelect = new JComboBox();
-
-        if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
-            streamSelect.setUI(new MetalComboBoxUI());
-        }
-
+        streamSelect = new JComboBox<>();
         streamSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         streamSelect.setEditable(false);
         streamSelect.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
@@ -743,12 +728,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         langLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(langLabel, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
-        langSelect = new JComboBox();
-
-        if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
-            langSelect.setUI(new MetalComboBoxUI());
-        }
-
+        langSelect = new JComboBox<>();
         langSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         langSelect.setEditable(false);
         langSelect.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
@@ -772,12 +752,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         launchLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(launchLabel, new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
-        launchSelect = new JComboBox();
-
-        if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
-            launchSelect.setUI(new MetalComboBoxUI());
-        }
-
+        launchSelect = new JComboBox<>();
         launchSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         launchSelect.setEditable(false);
         launchSelect.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
@@ -918,7 +893,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         streamLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(streamLabel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
-        windowSelect = new JComboBox();
+        windowSelect = new JComboBox<>();
 
         if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
             windowSelect.setUI(new MetalComboBoxUI());
@@ -975,7 +950,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         useStencilField.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(useStencilField, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(10, 40, 0, 0), 0, 0));
 
-        useStencil = new JComboBox();
+        useStencil = new JComboBox<>();
 
         if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
             useStencil.setUI(new MetalComboBoxUI());
@@ -1065,7 +1040,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         memLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         panel.add(memLabel, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 60, 0, 0), 0, 0));
 
-        memSelect = new JComboBox();
+        memSelect = new JComboBox<>();
 
         if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
             memSelect.setUI(new MetalComboBoxUI());

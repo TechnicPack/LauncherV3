@@ -27,7 +27,9 @@ public class LauncherResource {
     private String sha256;
     private String zstdUrl;
 
-    public LauncherResource() {}
+    protected LauncherResource() {
+        // Empty constructor for GSON
+    }
 
     public String getFilename() { return filename; }
     public String getUrl() { return url; }

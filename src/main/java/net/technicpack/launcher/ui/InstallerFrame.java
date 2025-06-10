@@ -471,7 +471,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         }
         standardLanguages.setBorder(new RoundBorder(LauncherFrame.COLOR_SCROLL_THUMB, 1, 10));
         standardLanguages.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        standardLanguages.setUI(new LanguageCellUI(resources, new RoundedBorderFormatter(new LineBorder(Color.black, 1)), LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
+        standardLanguages.setUI(new LanguageCellUI(new RoundedBorderFormatter(new LineBorder(Color.black, 1)), LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
         standardLanguages.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         standardLanguages.setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
         standardLanguages.setRenderer(new LanguageCellRenderer(resources, "globe.png", LauncherFrame.COLOR_SELECTOR_BACK, LauncherFrame.COLOR_WHITE_TEXT));
@@ -553,7 +553,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         }
         portableLanguages.setBorder(new RoundBorder(LauncherFrame.COLOR_SCROLL_THUMB, 1, 10));
         portableLanguages.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        portableLanguages.setUI(new LanguageCellUI(resources, new RoundedBorderFormatter(new LineBorder(Color.black, 1)), LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
+        portableLanguages.setUI(new LanguageCellUI(new RoundedBorderFormatter(new LineBorder(Color.black, 1)), LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
         portableLanguages.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         portableLanguages.setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
         portableLanguages.setRenderer(new LanguageCellRenderer(resources, "globe.png", LauncherFrame.COLOR_SELECTOR_BACK, LauncherFrame.COLOR_WHITE_TEXT));

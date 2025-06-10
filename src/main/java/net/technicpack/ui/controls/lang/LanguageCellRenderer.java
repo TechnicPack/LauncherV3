@@ -26,33 +26,30 @@ import net.technicpack.ui.listitems.LanguageItem;
 import javax.swing.*;
 import java.awt.*;
 
-public class LanguageCellRenderer  extends JLabel implements ListCellRenderer {
+public class LanguageCellRenderer  extends JLabel implements ListCellRenderer<LanguageItem> {
 
-    private ResourceLoader resources;
     private ImageIcon globe;
 
-    private Color background;
-    private Color foreground;
+    private final Color defaultBackground;
+    private final Color defaultForeground;
 
-    public LanguageCellRenderer(ResourceLoader resourceLoader, String langIcon, Color background, Color foreground) {
-        resources = resourceLoader;
-
+    public LanguageCellRenderer(ResourceLoader resourceLoader, String langIcon, Color defaultBackground, Color defaultForeground) {
         if (langIcon != null)
             globe = resourceLoader.getIcon(langIcon);
-        this.background = background;
-        this.foreground = foreground;
+        this.defaultBackground = defaultBackground;
+        this.defaultForeground = defaultForeground;
 
-        setForeground(foreground);
-        setBackground(background);
-        setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
+        setForeground(defaultForeground);
+        setBackground(defaultBackground);
+        setFont(resourceLoader.getFont(ResourceLoader.FONT_OPENSANS, 14));
         setOpaque(true);
     }
 
     @Override
-    public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-        setForeground(this.foreground);
-        setBackground(this.background);
-        setFont(((LanguageItem)value).getLanguageResources().getFont(ResourceLoader.FONT_OPENSANS, list.getFont().getSize()));
+    public Component getListCellRendererComponent(JList<? extends LanguageItem> list, LanguageItem value, int index, boolean isSelected, boolean cellHasFocus) {
+        setForeground(this.defaultForeground);
+        setBackground(this.defaultBackground);
+        setFont(value.getLanguageResources().getFont(ResourceLoader.FONT_OPENSANS, list.getFont().getSize()));
         setText(value.toString());
 
         Object selectedValue = list.getSelectedValue();
@@ -69,7 +66,7 @@ public class LanguageCellRenderer  extends JLabel implements ListCellRenderer {
         if (selectedValue != null && selectedValue.equals(value)) {
             setBackground(LauncherFrame.COLOR_SELECTOR_OPTION);
         } else {
-            setBackground(background);
+            setBackground(defaultBackground);
         }
 
         return this;

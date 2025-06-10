@@ -128,6 +128,13 @@ public final class FileBasedJavaRuntime implements IJavaRuntime, Serializable {
         return osArch;
     }
 
+    @Override
+    public String getBitness() {
+        ensureQueried();
+
+        return is64Bit ? "64" : "32";
+    }
+
     public boolean is64Bit() {
         ensureQueried();
 

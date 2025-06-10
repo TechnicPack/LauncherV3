@@ -131,7 +131,7 @@ public class MinecraftLauncher {
         ILaunchOptions launchOpts = options.getOptions();
         String cpString = buildClassPath(pack, version, launchOpts);
 
-        Utils.getLogger().log(Level.FINE, "Classpath:\n\n" + cpString.replace(File.pathSeparator, "\n"));
+        Utils.getLogger().log(Level.FINE, String.format("Classpath:%n%n%s", cpString.replace(File.pathSeparatorChar, '\n')));
 
         // build arg parameter map
         Map<String, String> params = new HashMap<>();
@@ -185,7 +185,7 @@ public class MinecraftLauncher {
         String customJvmArgs = options.getOptions().getJavaArgs();
         if (StringUtils.isNotEmpty(customJvmArgs)) {
             customJvmArgs = customJvmArgs.replaceAll("[\\r\\n]", " ");
-            for (String customJvmArg : customJvmArgs.split("[ ]+")) {
+            for (String customJvmArg : customJvmArgs.split(" +")) {
                 commands.addRaw(customJvmArg);
             }
         }
@@ -320,7 +320,7 @@ public class MinecraftLauncher {
 
         IJavaRuntime runtime = version.getJavaRuntime();
 
-        final String bitness = runtime.is64Bit() ? "64" : "32";
+        final String bitness = runtime.getBitness();
 
         // Add all the libraries to the classpath
         for (Library library : version.getLibrariesForCurrentOS(launchOptions, runtime)) {

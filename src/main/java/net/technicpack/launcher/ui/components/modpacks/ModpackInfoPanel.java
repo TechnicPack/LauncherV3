@@ -45,7 +45,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
     private ImageRepository<AuthorshipInfo> avatarRepo;
     private ActionListener modpackRefreshListener;
 
-    private TiledBackground background;
+    private TiledBackground tiledBackground;
     private HorizontalGallery feedGallery;
     private ModpackBanner banner;
     private ModpackDataDisplay dataDisplay;
@@ -80,7 +80,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
 
         ImageJob<ModpackModel> job = backgroundRepo.startImageJob(modpack);
         job.addJobListener(this);
-        background.setImage(job.getImage());
+        tiledBackground.setImage(job.getImage());
 
         feedGallery.removeAll();
 
@@ -123,19 +123,19 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
     private void initComponents(ImageRepository<ModpackModel> iconRepo, ImageRepository<ModpackModel> logoRepo, ActionListener modpackOptionsListener, IDiscordApi discordApi) {
         setLayout(new BorderLayout());
 
-        background = new TiledBackground(null);
-        background.setOpaque(true);
-        background.setLayout(new BorderLayout());
-        background.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        background.setBackground(LauncherFrame.COLOR_CENTRAL_BACK);
-        background.setFilterImage(true);
-        this.add(background, BorderLayout.CENTER);
+        tiledBackground = new TiledBackground(null);
+        tiledBackground.setOpaque(true);
+        tiledBackground.setLayout(new BorderLayout());
+        tiledBackground.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        tiledBackground.setBackground(LauncherFrame.COLOR_CENTRAL_BACK);
+        tiledBackground.setFilterImage(true);
+        this.add(tiledBackground, BorderLayout.CENTER);
 
         JPanel layoutPanel = new JPanel();
         layoutPanel.setOpaque(false);
         layoutPanel.setLayout(new BoxLayout(layoutPanel, BoxLayout.PAGE_AXIS));
         layoutPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
-        background.add(layoutPanel,BorderLayout.CENTER);
+        tiledBackground.add(layoutPanel,BorderLayout.CENTER);
 
         banner = new ModpackBanner(resources, iconRepo, modpackOptionsListener);
         banner.setBackground(LauncherFrame.COLOR_BANNER);
@@ -271,7 +271,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
     @Override
     public void jobComplete(ImageJob<ModpackModel> job) {
         if (job.getJobData() == modpack) {
-            background.setImage(job.getImage());
+            tiledBackground.setImage(job.getImage());
 
             EventQueue.invokeLater(this::repaint);
         }
