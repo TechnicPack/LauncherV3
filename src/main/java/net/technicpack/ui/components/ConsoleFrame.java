@@ -50,6 +50,8 @@ public class ConsoleFrame extends JFrame implements MouseListener {
      */
     public ConsoleFrame(int numLines, Image frameIcon) {
         super("Technic Launcher Console");
+        setModalExclusionType(Dialog.ModalExclusionType.TOOLKIT_EXCLUDE);
+
         this.numLines = numLines;
 
         this.highlightedAttributes = new SimpleAttributeSet();
