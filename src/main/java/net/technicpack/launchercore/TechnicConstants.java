@@ -22,11 +22,12 @@ package net.technicpack.launchercore;
 import net.technicpack.autoupdate.IBuildNumber;
 
 public class TechnicConstants {
-    public static final String technicURL = "https://mirror.technicpack.net/Technic/";
-    public static final String technicVersions = technicURL + "version/";
-    public static final String technicFmlLibRepo = technicURL + "lib/fml/";
-    public static final String technicLibRepo = technicURL + "lib/";
-    public static final String javaDownloadUrl = "https://www.java.com/en/download/manual.jsp";
+    public static final String REPO_BASE_URL = "https://mirror.technicpack.net/Technic";
+    public static final String VERSIONS_BASE_URL = String.format("%s/version/", REPO_BASE_URL);
+    public static final String TECHNIC_FML_LIB_REPO = String.format("%s/lib/fml/", REPO_BASE_URL);
+    public static final String TECHNIC_LIB_REPO = String.format("%s/lib/", REPO_BASE_URL);
+    public static final String JAVA_DOWNLOAD_URL =
+            "https://api.adoptium.net/v3/installer/latest/21/ga/windows/x64/jre/hotspot/normal/eclipse?project=jdk";
 
     private static IBuildNumber buildNumber;
     private static String userAgent;

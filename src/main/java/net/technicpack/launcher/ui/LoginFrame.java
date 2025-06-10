@@ -18,7 +18,7 @@
 
 package net.technicpack.launcher.ui;
 
-import net.technicpack.launchercore.JavaVersionComparator;
+import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.exception.MicrosoftAuthException;
 import net.technicpack.launchercore.exception.ResponseException;
 import net.technicpack.launchercore.exception.SessionException;
@@ -80,6 +80,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         this.settings = settings;
 
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
+        setTitle("Technic Launcher - Login");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
 
@@ -310,7 +311,8 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         // Java version check for the Xbox auth certificate, which requires Java >= 8u91
         final String javaVersion = System.getProperty("java.version");
         if (JavaUtils.compareVersions(javaVersion, "1.8.0_91") < 0) {
-            Utils.getLogger().log(Level.SEVERE, "Aborting MSA login, Java version is too old");
+            Utils.getLogger().log(Level.SEVERE,
+                    String.format("Aborting MSA login, Java version is too old (%s)", javaVersion));
 
             JOptionPane.showMessageDialog(
                     this,
@@ -319,7 +321,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
                     ERROR_MESSAGE
             );
 
-            DesktopUtils.browseUrl("https://java.com/en/download/manual.jsp");
+            DesktopUtils.browseUrl(TechnicConstants.JAVA_DOWNLOAD_URL);
 
             return;
         }

@@ -384,7 +384,7 @@ public class Installer {
                 File target = new File(modpackFmlLibDir, name);
 
                 if (!target.exists() || (verifier != null && !verifier.isFileValid(target)) ) {
-                    verifyingFiles.addTask(new EnsureFileTask(cached, verifier, null, TechnicConstants.technicFmlLibRepo + name, installingLibs, installingLibs));
+                    verifyingFiles.addTask(new EnsureFileTask(cached, verifier, null, TechnicConstants.TECHNIC_FML_LIB_REPO + name, installingLibs, installingLibs));
                     installingLibs.addTask(new CopyFileTask(cached, target));
                 }
             });
@@ -464,7 +464,7 @@ public class Installer {
     private MojangVersionBuilder createVersionBuilder(ModpackModel modpack, InstallTasksQueue tasksQueue) {
 
         ZipFileRetriever zipVersionRetriever = new ZipFileRetriever(new File(modpack.getBinDir(), "modpack.jar"));
-        HttpFileRetriever fallbackVersionRetriever = new HttpFileRetriever(TechnicConstants.technicVersions, tasksQueue.getDownloadListener());
+        HttpFileRetriever fallbackVersionRetriever = new HttpFileRetriever(TechnicConstants.VERSIONS_BASE_URL, tasksQueue.getDownloadListener());
 
         ArrayList<MojangVersionRetriever> fallbackRetrievers = new ArrayList<>(1);
         fallbackRetrievers.add(fallbackVersionRetriever);

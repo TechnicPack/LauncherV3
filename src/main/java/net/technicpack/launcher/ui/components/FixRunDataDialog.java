@@ -259,7 +259,7 @@ public class FixRunDataDialog extends LauncherDialog {
             label.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    DesktopUtils.browseUrl(TechnicConstants.javaDownloadUrl);
+                    DesktopUtils.browseUrl(TechnicConstants.JAVA_DOWNLOAD_URL);
                 }
 
                 @Override
@@ -288,7 +288,7 @@ public class FixRunDataDialog extends LauncherDialog {
             label.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    DesktopUtils.browseUrl(TechnicConstants.javaDownloadUrl);
+                    DesktopUtils.browseUrl(TechnicConstants.JAVA_DOWNLOAD_URL);
                 }
 
                 @Override

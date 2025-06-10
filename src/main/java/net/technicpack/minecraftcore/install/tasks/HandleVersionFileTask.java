@@ -110,7 +110,7 @@ public class HandleVersionFileTask implements IInstallTask {
         if (isLegacy) {
             Library legacyWrapper = new Library(
                     "net.technicpack:legacywrapper:1.2.1",
-                    TechnicConstants.technicLibRepo + "net/technicpack/legacywrapper/1.2.1/legacywrapper-1.2.1.jar",
+                    TechnicConstants.TECHNIC_LIB_REPO + "net/technicpack/legacywrapper/1.2.1/legacywrapper-1.2.1.jar",
                     "741cbc946421a5a59188a51108e1ce5cb5674681",
                     77327
             );
@@ -204,7 +204,7 @@ public class HandleVersionFileTask implements IInstallTask {
             if (!is1_12_2) {
                 Library forgeWrapper = new Library(
                         "io.github.zekerzhayard:ForgeWrapper:1.6.0-technic",
-                        TechnicConstants.technicLibRepo + "io/github/zekerzhayard/ForgeWrapper/1.6.0-technic/ForgeWrapper-1.6.0-technic.jar",
+                        TechnicConstants.TECHNIC_LIB_REPO + "io/github/zekerzhayard/ForgeWrapper/1.6.0-technic/ForgeWrapper-1.6.0-technic.jar",
                         "8764cbf4c7ded7ac0ad9136a0070bbfeee8813cf",
                         34944
                 );
@@ -317,7 +317,7 @@ public class HandleVersionFileTask implements IInstallTask {
                     default:
                         throw new RuntimeException("Unknown log4j version " + log4jVersion + ", cannot continue");
                 }
-                String url = String.format(TechnicConstants.technicLibRepo + "org/apache/logging/log4j/%1$s/%2$s/%1$s-%2$s.jar", artifactName, log4jVersion);
+                String url = String.format(TechnicConstants.TECHNIC_LIB_REPO + "org/apache/logging/log4j/%1$s/%2$s/%1$s-%2$s.jar", artifactName, log4jVersion);
                 Library fixedLog4j = new Library(
                         "org.apache.logging.log4j:" + artifactName + ":" + log4jVersion,
                         url,
