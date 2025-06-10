@@ -32,19 +32,19 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.List;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 public class ResourceLoader {
-    private Collection<IRelocalizableResource> resources = new LinkedList<>();
+    private final Collection<IRelocalizableResource> resources = new LinkedList<>();
     private ResourceBundle stringData;
     private Locale currentLocale;
-    private String dottedResourcePath;
-    private String slashResourcePath;
+    private final String dottedResourcePath;
+    private final String slashResourcePath;
     private boolean isDefaultLocaleSupported = true;
-    private Locale defaultLocale;
+    private final Locale defaultLocale;
     private File launcherAssets;
     private Locale[] locales = { Locale.ENGLISH };
 
@@ -53,12 +53,16 @@ public class ResourceLoader {
     public static final String FONT_OPENSANS = "OpenSans+Cyberbit.ttf";
     public static final String FONT_RALEWAY = "Raleway+FireflySung.ttf";
 
-    public static final Map<String, Font> fontCache = new HashMap<>();
+    private static final Map<String, Font> fontCache = new HashMap<>();
 
     public static final Font fallbackFont = new Font("Arial", Font.PLAIN, 12);
 
     public void setSupportedLanguages(Locale[] locales) {
-        this.locales = locales;
+        this.locales = locales.clone();
+    }
+
+    public List<Locale> getSupportedLanguages() {
+        return Collections.unmodifiableList(Arrays.asList(locales));
     }
 
     public Font getFontByName(String fontName) {
@@ -97,18 +101,14 @@ public class ResourceLoader {
             this.launcherAssets = null;
         else
             this.launcherAssets = new File(directories.getAssetsDirectory(), "launcher");
-        dottedResourcePath = "";
-        slashResourcePath = "";
 
-        for (String pathToken : resourcesPath) {
-            dottedResourcePath += pathToken + ".";
-            slashResourcePath += "/" + pathToken;
-        }
+        dottedResourcePath = Arrays.stream(resourcesPath).collect(Collectors.joining(".", "", "."));
+        slashResourcePath = Arrays.stream(resourcesPath).collect(Collectors.joining("/", "/", ""));
 
-        Locale defaultLocale = Locale.getDefault();
-        this.defaultLocale = matchClosestSupportedLocale(defaultLocale);
+        Locale systemDefaultLocale = Locale.getDefault();
+        this.defaultLocale = matchClosestSupportedLocale(systemDefaultLocale);
 
-        if(!this.defaultLocale.getLanguage().equals(defaultLocale.getLanguage()))
+        if(!this.defaultLocale.getLanguage().equals(systemDefaultLocale.getLanguage()))
             isDefaultLocaleSupported = false;
     }
 
@@ -119,6 +119,8 @@ public class ResourceLoader {
         this.isDefaultLocaleSupported = resourceLoader.isDefaultLocaleSupported;
         this.stringData = resourceLoader.stringData;
         this.currentLocale = resourceLoader.currentLocale;
+        this.locales = resourceLoader.locales;
+        this.launcherAssets = resourceLoader.launcherAssets;
     }
 
     public boolean isDefaultLocaleSupported() {
@@ -127,7 +129,7 @@ public class ResourceLoader {
 
     public void setLocale(Locale locale) {
         currentLocale = locale;
-        stringData = ResourceBundle.getBundle(getBundlePath("lang.UIText"), locale);
+        stringData = ResourceBundle.getBundle(dottedResourcePath + "lang.UIText", locale);
         relocalizeResources();
     }
 
@@ -310,10 +312,6 @@ public class ResourceLoader {
         for(IRelocalizableResource resource : resources) {
             resource.relocalize(this);
         }
-    }
-      
-    private String getBundlePath(String bundle) {
-        return dottedResourcePath + bundle;
     }
 
     private String getResourcePath(String resource) {

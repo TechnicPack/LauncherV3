@@ -19,9 +19,13 @@
 
 package net.technicpack.utilslib;
 
+import net.technicpack.launchercore.JavaVersionComparator;
+
 public class JavaUtils {
     public static final String OS_ARCH = System.getProperty("os.arch");
     public static final String JAVA_BITNESS = OS_ARCH.contains("64") ? "64" : "32";
+    private static final JavaVersionComparator JAVA_VERSION_COMPARATOR = new JavaVersionComparator();
+
 
     private JavaUtils() {
         // Prevent initialization of this utility class
@@ -30,5 +34,14 @@ public class JavaUtils {
 
     public static boolean isArm64() {
         return OS_ARCH.equals("aarch64");
+    }
+
+    /**
+     * Compares two Java version strings.
+     * @return < 0 if v1 < v2, 0 if v1 == v2, > 0 if v1 > v2
+     * @see JavaVersionComparator#compare(String, String)
+     */
+    public static int compareVersions(String v1, String v2) {
+        return JAVA_VERSION_COMPARATOR.compare(v1, v2);
     }
 }

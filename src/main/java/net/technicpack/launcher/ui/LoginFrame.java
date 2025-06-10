@@ -18,11 +18,12 @@
 
 package net.technicpack.launcher.ui;
 
-import net.technicpack.launcher.LauncherMain;
+import net.technicpack.launchercore.JavaVersionComparator;
 import net.technicpack.launchercore.exception.MicrosoftAuthException;
 import net.technicpack.launchercore.exception.ResponseException;
 import net.technicpack.launchercore.exception.SessionException;
 import net.technicpack.minecraftcore.microsoft.auth.MicrosoftUser;
+import net.technicpack.ui.UIUtils;
 import net.technicpack.ui.controls.list.popupformatters.RoundedBorderFormatter;
 import net.technicpack.ui.controls.lang.LanguageCellRenderer;
 import net.technicpack.ui.controls.lang.LanguageCellUI;
@@ -41,6 +42,7 @@ import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.exception.AuthenticationException;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.utilslib.DesktopUtils;
+import net.technicpack.utilslib.JavaUtils;
 import net.technicpack.utilslib.Utils;
 
 import javax.swing.*;
@@ -227,26 +229,13 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
 
         linkPane.add(Box.createHorizontalStrut(8));
 
-        languages = new JComboBox();
+        languages = new JComboBox<>();
         String defaultLocaleText = resources.getString("launcheroptions.language.default");
         if (!resources.isDefaultLocaleSupported()) {
             defaultLocaleText = defaultLocaleText.concat(" (" + resources.getString("launcheroptions.language.unavailable") + ")");
         }
 
-        languages.addItem(new LanguageItem(ResourceLoader.DEFAULT_LOCALE, defaultLocaleText, resources));
-        for (int i = 0; i < LauncherMain.supportedLanguages.length; i++) {
-            languages.addItem(new LanguageItem(resources.getCodeFromLocale(LauncherMain.supportedLanguages[i]), LauncherMain.supportedLanguages[i].getDisplayName(LauncherMain.supportedLanguages[i]), resources.getVariant(LauncherMain.supportedLanguages[i])));
-        }
-        if (!settings.getLanguageCode().equalsIgnoreCase(ResourceLoader.DEFAULT_LOCALE)) {
-            Locale loc = resources.getLocaleFromCode(settings.getLanguageCode());
-
-            for (int i = 0; i < LauncherMain.supportedLanguages.length; i++) {
-                if (loc.equals(LauncherMain.supportedLanguages[i])) {
-                    languages.setSelectedIndex(i+1);
-                    break;
-                }
-            }
-        }
+        UIUtils.populateLanguageSelector(defaultLocaleText, languages, resources, settings);
         languages.setBorder(BorderFactory.createEmptyBorder());
         languages.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         languages.setUI(new LanguageCellUI(new RoundedBorderFormatter(new LineBorder(Color.black, 1)), LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
@@ -320,12 +309,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
     protected void addMicrosoftAccount() {
         // Java version check for the Xbox auth certificate, which requires Java >= 8u91
         final String javaVersion = System.getProperty("java.version");
-        final String[] javaVersionParts = javaVersion.split("[._-]");
-        // 1.8.0_201-1-ojdkbuild
-        // 1  8  0  201  1  ojdkbuild
-        // 1.8.0_91
-        // 1  8  0  91
-        if (javaVersionParts.length >= 4 && javaVersion.startsWith("1.8.0_") && Integer.parseInt(javaVersionParts[3]) < 91) {
+        if (JavaUtils.compareVersions(javaVersion, "1.8.0_91") < 0) {
             Utils.getLogger().log(Level.SEVERE, "Aborting MSA login, Java version is too old");
 
             final String steps = "Your Java version is too old for MSA login, and needs to updated. Follow these steps:\n\n"+

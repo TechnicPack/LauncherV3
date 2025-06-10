@@ -9,11 +9,15 @@ public class OSUtils {
      * which is only set when a 32-bit process is running on a 64-bit Windows
      * system.
      */
-    private static boolean isWow64Process;
+    private static final boolean IS_WOW64_PROCESS;
 
     static {
-        isWow64Process = OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS
+        IS_WOW64_PROCESS = OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS
                 && System.getenv("PROCESSOR_ARCHITEW6432") != null;
+    }
+
+    private OSUtils() {
+        // Prevent instantiation of this utility class
     }
 
     /**
@@ -26,7 +30,7 @@ public class OSUtils {
      *         otherwise
      */
     public static boolean isWow64Process() {
-        return isWow64Process;
+        return IS_WOW64_PROCESS;
     }
 
     /**

@@ -41,6 +41,7 @@ import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.LoginFrame;
 import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
+import net.technicpack.launchercore.JavaVersionComparator;
 import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.auth.UserModel;
@@ -102,11 +103,9 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.util.*;
 import java.util.logging.Handler;
@@ -116,12 +115,10 @@ import java.util.stream.Collectors;
 
 public class LauncherMain {
 
-    public static ConsoleFrame consoleFrame;
-
-    public static final Locale[] supportedLanguages = new Locale[] {
+    private static final Locale[] supportedLanguages = new Locale[]{
             Locale.ENGLISH,
-            new Locale("pt","BR"),
-            new Locale("pt","PT"),
+            new Locale("pt", "BR"),
+            new Locale("pt", "PT"),
             new Locale("cs"),
             Locale.GERMAN,
             Locale.FRENCH,
@@ -133,7 +130,7 @@ public class LauncherMain {
             new Locale("nl", "NL"),
             new Locale("sk"),
     };
-
+    private static ConsoleFrame consoleFrame;
     private static IBuildNumber buildNumber;
 
     public static void main(String[] argv) {
@@ -164,16 +161,12 @@ public class LauncherMain {
         }
 
         if (settings == null) {
-            ResourceLoader installerResources = new ResourceLoader(null, "net","technicpack","launcher","resources");
-            installerResources.setSupportedLanguages(supportedLanguages);
-            installerResources.setLocale(ResourceLoader.DEFAULT_LOCALE);
-            InstallerFrame dialog = new InstallerFrame(installerResources, params);
-            dialog.setVisible(true);
+            showSetupWindow(params);
             return;
         }
 
         LauncherDirectories directories = new TechnicLauncherDirectories(settings.getTechnicRoot());
-        ResourceLoader resources = new ResourceLoader(directories, "net","technicpack","launcher","resources");
+        ResourceLoader resources = new ResourceLoader(directories, "net", "technicpack", "launcher", "resources");
         resources.setSupportedLanguages(supportedLanguages);
         resources.setLocale(settings.getLanguageCode());
 
@@ -200,7 +193,7 @@ public class LauncherMain {
         // These 2 need to happen *before* the launcher or the updater run so we have valuable debug information and so
         // we can properly use websites that use Let's Encrypt (and other current certs not supported by old Java versions)
         runStartupDebug();
-        injectNewRootCerts();
+        updateJavaTrustStore();
 
         Relauncher launcher = new TechnicRelauncher(new HttpUpdateStream("https://api.technicpack.net/launcher/"), settings.getBuildStream()+"4", build, directories, resources, params);
 
@@ -216,6 +209,25 @@ public class LauncherMain {
         }
     }
 
+    /**
+     * Sets the visibility of the console frame.
+     *
+     * @param visible true to show the console, false to hide it
+     */
+    public static void setConsoleVisible(boolean visible) {
+        if (consoleFrame != null) {
+            consoleFrame.setVisible(visible);
+        }
+    }
+
+    private static void showSetupWindow(StartupParameters params) {
+        ResourceLoader installerResources = new ResourceLoader(null, "net", "technicpack", "launcher", "resources");
+        installerResources.setSupportedLanguages(supportedLanguages);
+        installerResources.setLocale(ResourceLoader.DEFAULT_LOCALE);
+        InstallerFrame dialog = new InstallerFrame(installerResources, params);
+        dialog.setVisible(true);
+    }
+
     private static void checkIfRunningInsideOneDrive(File launcherRoot) {
         if (OperatingSystem.getOperatingSystem() != OperatingSystem.WINDOWS) {
             return;
@@ -223,7 +235,7 @@ public class LauncherMain {
 
         Path launcherRootPath = launcherRoot.toPath();
 
-        for (String varName : new String[] { "OneDrive", "OneDriveConsumer" }) {
+        for (String varName : new String[]{"OneDrive", "OneDriveConsumer"}) {
             String varValue = System.getenv(varName);
             if (varValue == null || varValue.isEmpty()) {
                 continue;
@@ -254,8 +266,8 @@ public class LauncherMain {
         logger.addHandler(fileHandler);
         logger.setUseParentHandlers(false);
 
-        LauncherMain.consoleFrame = new ConsoleFrame(2500, resources.getImage("icon.png"));
-        Console console = new Console(LauncherMain.consoleFrame, buildNumber.getBuildNumber());
+        consoleFrame = new ConsoleFrame(2500, resources.getImage("icon.png"));
+        Console console = new Console(consoleFrame, buildNumber.getBuildNumber());
 
         logger.addHandler(new ConsoleHandler(console));
 
@@ -264,7 +276,7 @@ public class LauncherMain {
 
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
             e.printStackTrace();
-            logger.log(Level.SEVERE, "Unhandled Exception in " + t, e);
+            logger.log(Level.SEVERE, String.format("Unhandled exception in thread %s", t), e);
         });
     }
 
@@ -291,82 +303,94 @@ public class LauncherMain {
         }
     }
 
-    private static void injectNewRootCerts() {
-        // Adapted from Forge installer
+    private static String getCertificateFingerprint(Certificate cert) throws CertificateEncodingException, NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] der = cert.getEncoded();
+        md.update(der);
+        byte[] digest = md.digest();
+        StringBuilder sb = new StringBuilder();
+        for (byte b : digest) {
+            sb.append(String.format("%02X:", b));
+        }
+        sb.setLength(sb.length() - 1);
+        return sb.toString();
+    }
+
+    private static void updateJavaTrustStore() {
         final String javaVersion = System.getProperty("java.version");
-        if (javaVersion == null || !javaVersion.startsWith("1.8.0_")) {
-            Utils.getLogger().log(Level.INFO, String.format("Don't need to inject new root certificates: Java is recent enough (%s)", javaVersion));
+
+        if (JavaUtils.compareVersions(javaVersion, "1.8.0_141") >= 0) {
+            Utils.getLogger().info(String.format("Don't need to update Java trust store; Java version is recent enough (%s)", javaVersion));
             return;
         }
 
         try {
-            final String[] javaVersionParts = javaVersion.split("[._-]");
-            if (Integer.parseInt(javaVersionParts[3]) >= 141) {
-                Utils.getLogger().log(Level.INFO, String.format("Don't need to inject new root certificates: Java 8 is 141+ (%s)", javaVersion));
-                return;
+            // Load the default trust store
+            KeyStore defaultTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            final Path defaultKsPath = Paths.get(System.getProperty("java.home"), "lib", "security", "cacerts");
+            try (InputStream is = Files.newInputStream(defaultKsPath)) {
+                defaultTrustStore.load(is, "changeit".toCharArray());
             }
-        } catch (final NumberFormatException | ArrayIndexOutOfBoundsException e) {
-            Utils.getLogger().log(Level.WARNING, "Couldn't parse Java version, can't inject new root certs", e);
-            return;
-        }
 
-        try {
-            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            final Path ksPath = Paths.get(System.getProperty("java.home"), "lib", "security", "cacerts");
-            try (InputStream is = Files.newInputStream(ksPath)) {
-                keyStore.load(is, "changeit".toCharArray());
+            // Load our custom trust store
+            KeyStore technicTrustStore = KeyStore.getInstance("JKS");
+            try (InputStream is = LauncherMain.class.getResourceAsStream("/net/technicpack/launcher/resources/technicKeystore.jks")) {
+                technicTrustStore.load(is, "technicrootca".toCharArray());
             }
-            Map<String, Certificate> jdkTrustStore = Collections.list(keyStore.aliases()).stream().collect(Collectors.toMap(a -> a,
-                    (String alias) -> {
-                try {
-                    return keyStore.getCertificate(alias);
-                } catch (KeyStoreException e) {
-                    Utils.getLogger().log(Level.WARNING, "Failed to get certificate", e);
-                    return null;
-                }
-            }));
 
-            KeyStore technicKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            try (InputStream is = LauncherMain.class.getResourceAsStream("/net/technicpack/launcher/resources/technickeystore.jks")) {
-                technicKeyStore.load(is, "technicrootca".toCharArray());
-            }
-            Map<String, Certificate> technicTrustStore = Collections.list(technicKeyStore.aliases()).stream().collect(Collectors.toMap(a -> a,
-                    (String alias) -> {
-                try {
-                    return technicKeyStore.getCertificate(alias);
-                } catch (KeyStoreException e) {
-                    Utils.getLogger().log(Level.WARNING, "Failed to get certificate", e);
-                    return null;
-                }
-            }));
-
+            // Create a new, empty trust store to merge the default and custom ones
             KeyStore mergedTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            mergedTrustStore.load(null, new char[0]);
-            for (final Map.Entry<String, Certificate> entry : jdkTrustStore.entrySet()) {
-                mergedTrustStore.setCertificateEntry(entry.getKey(), entry.getValue());
-            }
-            for (final Map.Entry<String, Certificate> entry : technicTrustStore.entrySet()) {
-                mergedTrustStore.setCertificateEntry(entry.getKey(), entry.getValue());
+            mergedTrustStore.load(null, null);
+
+            // Copy the default trust store entries
+            Enumeration<String> defaultAliases = defaultTrustStore.aliases();
+            while (defaultAliases.hasMoreElements()) {
+                String alias = defaultAliases.nextElement();
+                Certificate cert = defaultTrustStore.getCertificate(alias);
+                if (cert == null) {
+                    Utils.getLogger().log(Level.WARNING, String.format("Certificate for alias '%s' in default trust store is null", alias));
+                    continue;
+                }
+                mergedTrustStore.setCertificateEntry(alias, cert);
             }
 
-            TrustManagerFactory instance = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            instance.init(mergedTrustStore);
-            SSLContext tls = SSLContext.getInstance("TLS");
-            tls.init(null, instance.getTrustManagers(), null);
-            HttpsURLConnection.setDefaultSSLSocketFactory(tls.getSocketFactory());
-            Utils.getLogger().log(Level.INFO, "Injected new root certificates");
+            // Copy the custom trust store entries
+            Enumeration<String> technicAliases = technicTrustStore.aliases();
+            while (technicAliases.hasMoreElements()) {
+                String alias = technicAliases.nextElement();
+                Certificate cert = technicTrustStore.getCertificate(alias);
+                if (cert == null) {
+                    Utils.getLogger().log(Level.WARNING, String.format("Certificate for alias '%s' in Technic trust store is null", alias));
+                    continue;
+                }
+                if (!mergedTrustStore.containsAlias(alias)) {
+                    Utils.getLogger().log(Level.FINE, String.format("Adding certificate with alias '%s', fingerprint %s", alias, getCertificateFingerprint(cert)));
+                    mergedTrustStore.setCertificateEntry(alias, cert);
+                }
+            }
+
+            // Initialize the SSL context with the merged trust store
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            tmf.init(mergedTrustStore);
+
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, tmf.getTrustManagers(), new SecureRandom());
+
+            HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+
+            Utils.getLogger().log(Level.INFO, "Updated Java trust store with new root certificates successfully");
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | KeyManagementException e) {
-            Utils.getLogger().log(Level.WARNING, "Failed to inject new root certificates. Problems might happen", e);
+            Utils.getLogger().log(Level.WARNING, "Failed to update Java trust store. Problems might happen with TLS connections", e);
         }
     }
 
-    private static void startLauncher(final TechnicSettings settings, StartupParameters startupParameters, final LauncherDirectories directories,
-                                      ResourceLoader resources) {
-        UIManager.put("ComboBox.disabledBackground", LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        UIManager.put("ComboBox.disabledForeground", LauncherFrame.COLOR_GREY_TEXT);
-        System.setProperty("xr.load.xml-reader", "org.ccil.cowan.tagsoup.Parser");
-
-        // Remove all log files older than a week
+    /**
+     * Creates a thread that will delete all log files older than a week.
+     *
+     * @param directories The launcher directories to use for finding the logs directory.
+     * @return A thread that will perform the cleanup.
+     */
+    private static Thread createCleanupLogsThread(LauncherDirectories directories) {
         Thread cleanupLogsThread = new Thread(() -> {
             Iterator<File> files = FileUtils.iterateFiles(new File(directories.getLauncherDirectory(), "logs"), new String[]{"log"}, false);
             final DateTime aWeekAgo = DateTime.now().minusWeeks(1);
@@ -378,6 +402,17 @@ public class LauncherMain {
             }
         });
         cleanupLogsThread.setDaemon(true);
+        return cleanupLogsThread;
+    }
+
+    private static void startLauncher(final TechnicSettings settings, StartupParameters startupParameters, final LauncherDirectories directories,
+                                      ResourceLoader resources) {
+        UIManager.put("ComboBox.disabledBackground", LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
+        UIManager.put("ComboBox.disabledForeground", LauncherFrame.COLOR_GREY_TEXT);
+        System.setProperty("xr.load.xml-reader", "org.ccil.cowan.tagsoup.Parser");
+
+        // Remove all log files older than a week
+        Thread cleanupLogsThread = createCleanupLogsThread(directories);
         cleanupLogsThread.start();
 
         final SplashScreen splash = new SplashScreen(resources.getImage("launch_splash.png"), 0);

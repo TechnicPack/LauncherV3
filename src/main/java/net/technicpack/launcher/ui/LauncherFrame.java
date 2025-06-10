@@ -170,7 +170,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
         selectTab(TAB_DISCOVER);
 
-        EventQueue.invokeLater(() -> LauncherMain.consoleFrame.setVisible(settings.getShowConsole()));
+        EventQueue.invokeLater(() -> LauncherMain.setConsoleVisible(settings.getShowConsole()));
 
         setLocationRelativeTo(null);
     }
@@ -236,14 +236,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             //Ask the user if they want to update to the newer version if:
             //1- the pack build is RECOMMENDED & the recommended version is diff from the installed version
             //2- the pack build is LATEST & the latest version is diff from the installed version
-            //3- the pack build is neither LATEST or RECOMMENDED & the pack build is diff from the installed version
-            boolean requestInstall = false;
-            if (pack.getBuild().equalsIgnoreCase(InstalledPack.RECOMMENDED) && pack.getPackInfo().getRecommended() != null && !pack.getPackInfo().getRecommended().equalsIgnoreCase(installedVersion.getVersion()))
-                requestInstall = true;
-            else if (pack.getBuild().equalsIgnoreCase(InstalledPack.LATEST) && pack.getPackInfo().getLatest() != null && !pack.getPackInfo().getLatest().equalsIgnoreCase(installedVersion.getVersion()))
-                requestInstall = true;
-            else if (!pack.getBuild().equalsIgnoreCase(InstalledPack.RECOMMENDED) && !pack.getBuild().equalsIgnoreCase(InstalledPack.LATEST) && !pack.getBuild().equalsIgnoreCase(installedVersion.getVersion()))
-                requestInstall = true;
+            //3- the pack build is neither LATEST nor RECOMMENDED & the pack build is diff from the installed version
+            boolean requestInstall = shouldRequestInstall(pack, installedVersion);
 
             //If the user says yes, update, then force a full install
             if (requestInstall) {
@@ -257,16 +251,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
         //If we're forcing an install, then derive the installation build from the pack build
         //otherwise, just use the installed version
-        String installBuild = null;
-        if (forceInstall && !pack.isLocalOnly()) {
-            installBuild = pack.getBuild();
-
-            if (installBuild.equalsIgnoreCase(InstalledPack.RECOMMENDED))
-                installBuild = pack.getPackInfo().getRecommended();
-            else if (installBuild.equalsIgnoreCase(InstalledPack.LATEST))
-                installBuild = pack.getPackInfo().getLatest();
-        } else if (installedVersion != null)
-            installBuild = installedVersion.getVersion();
+        String installBuild = getInstallBuild(forceInstall, pack, installedVersion);
 
         if (requiresInstall && installBuild != null && !installBuild.isEmpty()) {
             installer.justInstall(resources, pack, installBuild, forceInstall, this, installProgress);
@@ -278,6 +263,31 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         installProgressPlaceholder.setVisible(false);
         userChanged(userModel.getCurrentUser());
         invalidate();
+    }
+
+    private static boolean shouldRequestInstall(ModpackModel pack, Version installedVersion) {
+        boolean requestInstall = false;
+        if (pack.getBuild().equalsIgnoreCase(InstalledPack.RECOMMENDED) && pack.getPackInfo().getRecommended() != null && !pack.getPackInfo().getRecommended().equalsIgnoreCase(installedVersion.getVersion()))
+            requestInstall = true;
+        else if (pack.getBuild().equalsIgnoreCase(InstalledPack.LATEST) && pack.getPackInfo().getLatest() != null && !pack.getPackInfo().getLatest().equalsIgnoreCase(installedVersion.getVersion()))
+            requestInstall = true;
+        else if (!pack.getBuild().equalsIgnoreCase(InstalledPack.RECOMMENDED) && !pack.getBuild().equalsIgnoreCase(InstalledPack.LATEST) && !pack.getBuild().equalsIgnoreCase(installedVersion.getVersion()))
+            requestInstall = true;
+        return requestInstall;
+    }
+
+    private static String getInstallBuild(boolean forceInstall, ModpackModel pack, Version installedVersion) {
+        String installBuild = null;
+        if (forceInstall && !pack.isLocalOnly()) {
+            installBuild = pack.getBuild();
+
+            if (installBuild.equalsIgnoreCase(InstalledPack.RECOMMENDED))
+                installBuild = pack.getPackInfo().getRecommended();
+            else if (installBuild.equalsIgnoreCase(InstalledPack.LATEST))
+                installBuild = pack.getPackInfo().getLatest();
+        } else if (installedVersion != null)
+            installBuild = installedVersion.getVersion();
+        return installBuild;
     }
 
     public void launchCompleted() {

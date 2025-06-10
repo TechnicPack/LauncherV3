@@ -32,6 +32,7 @@ import net.technicpack.launchercore.launch.java.source.FileJavaSource;
 import net.technicpack.launchercore.launch.java.version.FileBasedJavaRuntime;
 import net.technicpack.launchercore.util.LaunchAction;
 import net.technicpack.minecraftcore.launch.WindowType;
+import net.technicpack.ui.UIUtils;
 import net.technicpack.ui.controls.LauncherDialog;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.TooltipWarning;
@@ -186,7 +187,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
     protected void changeShowConsole() {
         settings.setShowConsole(showConsole.isSelected());
-        LauncherMain.consoleFrame.setVisible(showConsole.isSelected());
+        LauncherMain.setConsoleVisible(showConsole.isSelected());
         settings.save();
     }
 
@@ -468,20 +469,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         }
 
         langSelect.setRenderer(new LanguageCellRenderer(resources, null, langSelect.getBackground(), langSelect.getForeground()));
-        langSelect.addItem(new LanguageItem(ResourceLoader.DEFAULT_LOCALE, defaultLocaleText, resources));
-        for (int i = 0; i < LauncherMain.supportedLanguages.length; i++) {
-            langSelect.addItem(new LanguageItem(resources.getCodeFromLocale(LauncherMain.supportedLanguages[i]), LauncherMain.supportedLanguages[i].getDisplayName(LauncherMain.supportedLanguages[i]), resources.getVariant(LauncherMain.supportedLanguages[i])));
-        }
-        if (!settings.getLanguageCode().equalsIgnoreCase(ResourceLoader.DEFAULT_LOCALE)) {
-            Locale loc = resources.getLocaleFromCode(settings.getLanguageCode());
-
-            for (int i = 0; i < LauncherMain.supportedLanguages.length; i++) {
-                if (loc.equals(LauncherMain.supportedLanguages[i])) {
-                    langSelect.setSelectedIndex(i+1);
-                    break;
-                }
-            }
-        }
+        UIUtils.populateLanguageSelector(defaultLocaleText, langSelect, resources, settings);
         langSelect.addActionListener(e -> changeLanguage());
 
         widthInput.getDocument().removeDocumentListener(dimensionListener);
