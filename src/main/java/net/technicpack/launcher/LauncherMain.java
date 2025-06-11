@@ -303,17 +303,22 @@ public class LauncherMain {
         }
     }
 
-    private static String getCertificateFingerprint(Certificate cert) throws CertificateEncodingException, NoSuchAlgorithmException {
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        byte[] der = cert.getEncoded();
-        md.update(der);
-        byte[] digest = md.digest();
-        StringBuilder sb = new StringBuilder();
-        for (byte b : digest) {
-            sb.append(String.format("%02X:", b));
+    private static String getCertificateFingerprint(Certificate cert) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] der = cert.getEncoded();
+            md.update(der);
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02X:", b));
+            }
+            sb.setLength(sb.length() - 1);
+            return sb.toString();
+        } catch (CertificateEncodingException | NoSuchAlgorithmException e) {
+            Utils.getLogger().log(Level.WARNING, "Failed to get certificate fingerprint", e);
+            return "unknown";
         }
-        sb.setLength(sb.length() - 1);
-        return sb.toString();
     }
 
     private static void updateJavaTrustStore() {
