@@ -20,7 +20,6 @@ package net.technicpack.launcher.ui;
 
 import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.discord.IDiscordApi;
-import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.ui.components.ModpackOptionsDialog;
 import net.technicpack.launchercore.install.LauncherDirectories;
@@ -169,8 +168,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         relocalize(resources);
 
         selectTab(TAB_DISCOVER);
-
-        EventQueue.invokeLater(() -> LauncherMain.setConsoleVisible(settings.getShowConsole()));
 
         setLocationRelativeTo(null);
     }

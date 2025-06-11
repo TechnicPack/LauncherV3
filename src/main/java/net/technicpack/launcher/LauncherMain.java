@@ -182,6 +182,11 @@ public class LauncherMain {
 
         setupLogging(directories, resources);
 
+        final boolean displayConsole = settings.getShowConsole();
+        if (displayConsole) {
+            EventQueue.invokeLater(() -> setConsoleVisible(true));
+        }
+
         int build = -1;
 
         try {
