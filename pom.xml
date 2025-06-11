@@ -192,14 +192,6 @@
                     <exclude>**/UIText*.properties</exclude>
                 </excludes>
             </resource>
-            <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
-                <targetPath>net/technicpack/launcher/resources</targetPath>
-                <filtering>true</filtering>
-                <includes>
-                    <include>version</include>
-                </includes>
-            </resource>
         </resources>
 
         <!-- Build plugins -->
