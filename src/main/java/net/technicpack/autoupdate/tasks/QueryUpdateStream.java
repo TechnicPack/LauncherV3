@@ -105,10 +105,11 @@ public class QueryUpdateStream implements IInstallTask {
                 downloadTasks.addTask(downloadFileTask);
             }
 
-            if (version.getBuild() == relauncher.getCurrentBuild() || (relauncher.getStreamName().startsWith("beta") && version.getBuild() <= relauncher.getCurrentBuild()))
+            if (relauncher.isSkipUpdate() || version.getBuild() == relauncher.getCurrentBuild()) {
                 return;
+            }
 
-            String updateUrl = null;
+            String updateUrl;
             String runningPath = relauncher.getRunningPath();
 
             if (runningPath == null) {

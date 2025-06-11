@@ -66,6 +66,7 @@ public abstract class Relauncher {
     public abstract boolean isUpdateOnly();
     public abstract boolean isMover();
     public abstract boolean isLauncherOnly();
+    public abstract boolean isSkipUpdate();
     public abstract InstallTasksQueue buildMoverTasks();
     public abstract InstallTasksQueue buildUpdaterTasks();
     public abstract String[] getLaunchArgs();

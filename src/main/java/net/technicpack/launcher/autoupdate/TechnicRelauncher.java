@@ -79,6 +79,11 @@ public class TechnicRelauncher extends Relauncher {
     }
 
     @Override
+    public boolean isSkipUpdate() {
+        return parameters.isSkipUpdate();
+    }
+
+    @Override
     public InstallTasksQueue buildMoverTasks() {
         InstallTasksQueue<Object> queue = new InstallTasksQueue<>(null);
 
