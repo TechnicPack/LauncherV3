@@ -7,13 +7,13 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 
 import java.util.concurrent.TimeUnit;
 
-public class CacheDiscordApi implements IDiscordApi {
+public class CachedDiscordApi implements IDiscordApi {
 
-    private IDiscordApi innerApi;
-    private Cache<String, Server> cache;
-    private Cache<String, Boolean> deadCache;
+    private final IDiscordApi innerApi;
+    private final Cache<String, Server> cache;
+    private final Cache<String, Boolean> deadCache;
 
-    public CacheDiscordApi(IDiscordApi innerApi, int cacheLength, int deadCacheLength) {
+    public CachedDiscordApi(IDiscordApi innerApi, int cacheLength, int deadCacheLength) {
         this.innerApi = innerApi;
         cache = CacheBuilder.newBuilder()
                 .concurrencyLevel(4)
@@ -32,31 +32,32 @@ public class CacheDiscordApi implements IDiscordApi {
     public void retrieveServer(ModpackModel modpack, final String serverId, final IDiscordCallback callback) {
         final Boolean deadCacheValue = deadCache.getIfPresent(serverId);
 
-        if (Boolean.TRUE.equals(deadCacheValue))
-            return;
-
-        Server cacheValue = cache.getIfPresent(serverId);
-        if (cacheValue != null) {
-            if (deadCacheValue == null)
-                deadCache.put(serverId, false);
-
-            callback.serverGetCallback(modpack, cacheValue);
+        if (Boolean.TRUE.equals(deadCacheValue)) {
             return;
         }
 
-        //Fill the dead cache immediately to prevent discord API requests from getting spammed
-        //before the first one comes back.  The response will sort out the "correct" value for the
-        //dead cache.
+        Server cacheValue = cache.getIfPresent(serverId);
+        if (cacheValue != null) {
+            if (deadCacheValue == null) {
+                deadCache.put(serverId, false);
+            }
+
+            callback.discordCallback(modpack, cacheValue);
+            return;
+        }
+
+        // Fill the dead cache immediately to prevent Discord API requests from getting spammed before the first one
+        // comes back. The response will sort out the "correct" value for the dead cache.
         deadCache.put(serverId, true);
         this.innerApi.retrieveServer(modpack, serverId, (pack, server) -> {
-            if (server == null)
+            if (server == null) {
                 deadCache.put(serverId, true);
-            else {
+            } else {
                 deadCache.put(serverId, false);
                 cache.put(serverId, server);
             }
 
-            callback.serverGetCallback(pack, server);
+            callback.discordCallback(pack, server);
         });
     }
 }

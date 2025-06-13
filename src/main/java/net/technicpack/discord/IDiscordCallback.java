@@ -4,5 +4,5 @@ import net.technicpack.discord.io.Server;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 
 public interface IDiscordCallback {
-    void serverGetCallback(ModpackModel pack, Server server);
+    void discordCallback(ModpackModel pack, Server server);
 }

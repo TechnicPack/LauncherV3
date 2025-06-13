@@ -10,18 +10,18 @@ import java.util.concurrent.ExecutionException;
 
 public class HttpDiscordApi implements IDiscordApi {
 
-    private String url;
+    private final String baseUrl;
 
-    public HttpDiscordApi(String url) {
-        this.url = url;
+    public HttpDiscordApi(String baseUrl) {
+        this.baseUrl = baseUrl;
     }
 
     @Override
     public void retrieveServer(final ModpackModel modpack, final String serverId, final IDiscordCallback callback) {
-        new SwingWorker<Server, Server>() {
+        new SwingWorker<Server, Void>() {
             @Override
             public Server doInBackground() {
-                String guildUrl = url + "servers/" + serverId + "/widget.json";
+                String guildUrl = String.format("%s/guilds/%s/widget.json", baseUrl, serverId);
 
                 try {
                     return RestObject.getRestObject(Server.class, guildUrl);
@@ -37,7 +37,7 @@ public class HttpDiscordApi implements IDiscordApi {
                 try {
                     Server server = get();
 
-                    callback.serverGetCallback(modpack, server);
+                    callback.discordCallback(modpack, server);
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
                 }

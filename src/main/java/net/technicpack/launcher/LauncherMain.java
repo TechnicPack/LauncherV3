@@ -22,7 +22,7 @@ import com.beust.jcommander.JCommander;
 import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.autoupdate.http.HttpUpdateStream;
-import net.technicpack.discord.CacheDiscordApi;
+import net.technicpack.discord.CachedDiscordApi;
 import net.technicpack.discord.HttpDiscordApi;
 import net.technicpack.discord.IDiscordApi;
 import net.technicpack.launcher.autoupdate.CommandLineBuildNumber;
@@ -41,7 +41,6 @@ import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.LoginFrame;
 import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
-import net.technicpack.launchercore.JavaVersionComparator;
 import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.auth.UserModel;
@@ -488,8 +487,8 @@ public class LauncherMain {
         ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());
         Installer installer = new Installer(startupParameters, directories, modpackInstaller, launcher, settings, iconMapper);
 
-        IDiscordApi discordApi = new HttpDiscordApi("https://discord.com/api/");
-        discordApi = new CacheDiscordApi(discordApi, 600, 60);
+        IDiscordApi discordApi = new HttpDiscordApi("https://discord.com/api");
+        discordApi = new CachedDiscordApi(discordApi, 600, 60);
 
         final LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, selector, iconRepo, logoRepo, backgroundRepo,
                 installer, avatarRepo, platform, directories, packStore, startupParameters, discoverInfoPanel, javaVersions, javaVersionFile,

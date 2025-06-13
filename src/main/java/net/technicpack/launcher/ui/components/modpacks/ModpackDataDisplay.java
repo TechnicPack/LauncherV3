@@ -19,7 +19,6 @@
 package net.technicpack.launcher.ui.components.modpacks;
 
 import net.technicpack.discord.IDiscordApi;
-import net.technicpack.discord.IDiscordCallback;
 import net.technicpack.discord.io.Server;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.LauncherFrame;
@@ -39,11 +38,12 @@ import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.List;
 
-public class ModpackDataDisplay extends JPanel implements IImageJobListener<ModpackModel>, IDiscordCallback {
-    private ResourceLoader resources;
-    private ImageRepository<ModpackModel> logoRepo;
-    private IDiscordApi discordApi;
+public class ModpackDataDisplay extends JPanel implements IImageJobListener<ModpackModel> {
+    private final ResourceLoader resources;
+    private final ImageRepository<ModpackModel> logoRepo;
+    private final IDiscordApi discordApi;
 
     private JPanel statBoxes;
 
@@ -58,11 +58,11 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
     private JPanel discordPanel;
     private JButton discordLabel;
     private JButton countLabel;
-    private java.util.List<JButton> discordButtons = new ArrayList<>(3);
+    private List<JButton> discordButtons = new ArrayList<>(3);
 
     private String packSiteUrl;
 
-    private ModpackModel currentModpack;
+    private transient ModpackModel currentModpack;
 
     public ModpackDataDisplay(ResourceLoader resources, ImageRepository<ModpackModel> logoRepo, IDiscordApi api) {
         this.resources = resources;
@@ -113,7 +113,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
 
         discordPanel.setVisible(false);
         if (modpack.getDiscordId() != null && !modpack.getDiscordId().isEmpty())
-            discordApi.retrieveServer(modpack, modpack.getDiscordId(), this);
+            discordApi.retrieveServer(modpack, modpack.getDiscordId(), this::updateDiscordComponents);
     }
 
     private void initComponents() {
@@ -311,28 +311,43 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         }
     }
 
-    @Override
-    public void serverGetCallback(ModpackModel pack, final Server server) {
-        if (this.currentModpack == pack) {
-            if (server != null && server.getInviteLink() != null && !server.getInviteLink().isEmpty()) {
-                this.discordPanel.setVisible(true);
-                this.countLabel.setText(resources.getString("launcher.discord.count", Integer.toString(server.getPresenceCount())));
-
-                if (pack.isOfficial())
-                    this.discordLabel.setText(resources.getString("launcher.discord.official"));
-                else
-                    this.discordLabel.setText(resources.getString("launcher.discord.join"));
-
-                for (JButton discordButton : discordButtons) {
-                    int actionListenerCount = discordButton.getActionListeners().length;
-                    for (int i = 0; i < actionListenerCount; i++) {
-                        discordButton.removeActionListener(discordButton.getActionListeners()[0]);
-                    }
-                    discordButton.addActionListener(e -> DesktopUtils.browseUrl(server.getInviteLink()));
-                }
-            } else {
-                this.discordPanel.setVisible(false);
-            }
+    private void updateDiscordComponents(ModpackModel pack, Server server) {
+        // Ensure that we're on the Event Dispatch Thread before updating the UI components.
+        // The current modpack check should also run in the EDT because the current modpack might change while
+        // other UI events are being processed.
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(() -> updateDiscordComponents(pack, server));
+            return;
         }
+
+        // If the pack has changed since we requested the Discord server information, ignore the response
+        if (this.currentModpack != pack) {
+            return;
+        }
+
+        // If the server is null or has no invite link, hide the Discord panel
+        if (server == null || server.getInviteLink() == null || server.getInviteLink().isEmpty()) {
+            this.discordPanel.setVisible(false);
+            return;
+        }
+
+        this.countLabel.setText(resources.getString("launcher.discord.count", Integer.toString(server.getPresenceCount())));
+
+        if (pack.isOfficial()) {
+            this.discordLabel.setText(resources.getString("launcher.discord.official"));
+        } else {
+            this.discordLabel.setText(resources.getString("launcher.discord.join"));
+        }
+
+        for (JButton discordButton : discordButtons) {
+            // Clean up any previous action listeners
+            for (ActionListener actionListener : discordButton.getActionListeners()) {
+                discordButton.removeActionListener(actionListener);
+            }
+
+            discordButton.addActionListener(e -> DesktopUtils.browseUrl(server.getInviteLink()));
+        }
+
+        this.discordPanel.setVisible(true);
     }
 }
