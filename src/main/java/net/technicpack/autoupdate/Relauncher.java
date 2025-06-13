@@ -22,6 +22,7 @@ package net.technicpack.autoupdate;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.utilslib.OperatingSystem;
+import net.technicpack.utilslib.ProcessUtils;
 import net.technicpack.utilslib.Utils;
 
 import javax.swing.*;
@@ -34,9 +35,9 @@ import java.util.List;
 
 public abstract class Relauncher {
 
-    private String stream;
-    private int currentBuild;
-    private LauncherDirectories directories;
+    private final String stream;
+    private final int currentBuild;
+    private final LauncherDirectories directories;
     private boolean didUpdate = false;
 
     public Relauncher(String stream, int currentBuild, LauncherDirectories directories) {
@@ -138,7 +139,27 @@ public abstract class Relauncher {
             }
         }
 
-        ProcessBuilder processBuilder = new ProcessBuilder();
+        ArrayList<String> commands = getCommands(launchPath);
+        commands.addAll(Arrays.asList(args));
+
+        String commandString = String.join(" ", commands);
+
+        Utils.getLogger().info(String.format("Launching command: '%s'", commandString));
+
+        ProcessBuilder pb = ProcessUtils.createProcessBuilder(commands);
+
+        try {
+            pb.start();
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "Your OS has prevented this relaunch from completing.  You may need to add an exception in your security software.", "Relaunch Failed", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.exit(0);
+    }
+
+    private ArrayList<String> getCommands(String launchPath) {
         ArrayList<String> commands = new ArrayList<>();
         if (!launchPath.endsWith(".exe")) {
             commands.add(OperatingSystem.getJavaDir());
@@ -151,27 +172,7 @@ public abstract class Relauncher {
             commands.add(getMainClass().getName());
         } else
             commands.add(launchPath);
-        commands.addAll(Arrays.asList(args));
-
-        String command = "";
-
-        for (String token : commands) {
-            command += token + " ";
-        }
-
-        Utils.getLogger().info("Launching command: '" + command + "'");
-
-        processBuilder.command(commands);
-
-        try {
-            processBuilder.start();
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(null, "Your OS has prevented this relaunch from completing.  You may need to add an exception in your security software.", "Relaunch Failed", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        System.exit(0);
+        return commands;
     }
 
     public String[] buildMoverArgs() throws UnsupportedEncodingException {

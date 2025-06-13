@@ -134,7 +134,7 @@ public class Utils {
     public static String getProcessOutput(String... command) {
         String out = null;
         try {
-            ProcessBuilder pb = new ProcessBuilder(command);
+            ProcessBuilder pb = ProcessUtils.createProcessBuilder(command);
             pb.redirectErrorStream(true);
             Process process = pb.start();
             final StringBuilder response=new StringBuilder();

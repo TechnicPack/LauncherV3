@@ -31,19 +31,17 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.RunData;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
-import net.technicpack.minecraftcore.mojang.version.io.VersionJavaInfo;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import net.technicpack.platform.IPlatformApi;
-import net.technicpack.utilslib.OSUtils;
 import net.technicpack.utilslib.OperatingSystem;
+import net.technicpack.utilslib.ProcessUtils;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -51,11 +49,6 @@ import java.util.Map;
 import java.util.logging.Level;
 
 public class MinecraftLauncher {
-
-    private static final String[] BAD_ENV_VARS = new String[] {
-            "JAVA_ARGS", "CLASSPATH", "CONFIGPATH", "JAVA_HOME", "JRE_HOME",
-            "_JAVA_OPTIONS", "JAVA_OPTIONS", "JAVA_TOOL_OPTIONS"
-    };
 
     private final LauncherDirectories directories;
     private final IPlatformApi platformApi;
@@ -93,13 +86,9 @@ public class MinecraftLauncher {
 
         Utils.getLogger().info("Running " + commandStr);
 
-        ProcessBuilder processBuilder = new ProcessBuilder(commands)
+        ProcessBuilder processBuilder = ProcessUtils.createProcessBuilder(commands)
                 .directory(pack.getInstalledDirectory())
                 .redirectErrorStream(true);
-
-        // Clean up environment variables that cause issues
-        Map<String, String> envVars = processBuilder.environment();
-        for (String badVar : BAD_ENV_VARS) envVars.remove(badVar);
 
         Process process = processBuilder.start();
         GameProcess mcProcess = new GameProcess(process, userAccessToken);
