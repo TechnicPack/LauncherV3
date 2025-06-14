@@ -202,15 +202,38 @@ public class LauncherMain {
         Relauncher launcher = new TechnicRelauncher(new HttpUpdateStream("https://api.technicpack.net/launcher/"), settings.getBuildStream()+"4", build, directories, resources, params);
 
         try {
-            if (launcher.runAutoUpdater())
+            if (launcher.runAutoUpdater()) {
                 startLauncher(settings, params, directories, resources);
+            }
         } catch (InterruptedException e) {
-            //Canceled by user
+            // Launcher update was interrupted, show an error message and exit
+            Utils.getLogger().log(Level.SEVERE, "Launcher update interrupted", e);
+            showStartupError(resources, resources.getString("updater.error.interrupt"));
+            // Restore the interrupted status
+            Thread.currentThread().interrupt();
+            System.exit(1);
         } catch (DownloadException e) {
-            //JOptionPane.showMessageDialog(null, resources.getString("launcher.updateerror.download", pack.getDisplayName(), e.getMessage()), resources.getString("launcher.installerror.title"), JOptionPane.WARNING_MESSAGE);
+            // There was an error downloading the launcher resources, show an error message and exit
+            Utils.getLogger().log(Level.SEVERE, "Failed to download launcher resources", e);
+            showStartupError(resources, resources.getString("updater.error.download", e.getMessage()));
+            System.exit(1);
         } catch (IOException e) {
-            e.printStackTrace();
+            // An unknown IO error occurred, show an error message and exit
+            Utils.getLogger().log(Level.SEVERE, "IOException when starting launcher", e);
+            showStartupError(resources, resources.getString("updater.error.io", e.getMessage()));
+            System.exit(1);
         }
+    }
+        }
+    }
+
+    private static void showStartupError(ResourceLoader resources, String message) {
+        JOptionPane.showMessageDialog(
+                null,
+                message,
+                resources.getString("updater.error.title"),
+                JOptionPane.ERROR_MESSAGE
+        );
     }
 
     /**
