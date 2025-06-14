@@ -62,9 +62,9 @@ public class DownloadFileTask extends ListenerTask {
      * @param decompressor {@link CompressorStreamFactory#ALL_NAMES}
      * @see CompressorStreamFactory#ALL_NAMES
      */
-    public void setDecompressor(String decompressor) {
-        if (CompressorStreamFactory.findAvailableCompressorInputStreamProviders().containsKey(decompressor)) {
-            throw new IllegalArgumentException("Decompressor " + decompressor + " is not available.");
+    public void setDecompressor(String decompressor) throws DownloadException {
+        if (!CompressorStreamFactory.findAvailableCompressorInputStreamProviders().containsKey(decompressor)) {
+            throw new DownloadException("Decompressor " + decompressor + " is not available.");
         }
 
         this.decompressor = decompressor;
