@@ -31,6 +31,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class DownloadFileTask extends ListenerTask {
     private String url;
@@ -39,6 +41,8 @@ public class DownloadFileTask extends ListenerTask {
     private IFileVerifier fileVerifier;
     private final boolean executable;
     private String decompressor;
+
+    private static final Set<String> AVAILABLE_DECOMPRESSORS = CompressorStreamFactory.findAvailableCompressorInputStreamProviders().keySet().stream().map(String::toLowerCase).collect(Collectors.toSet());
 
     protected File getDestination() { return destination; }
 
@@ -59,12 +63,12 @@ public class DownloadFileTask extends ListenerTask {
     }
 
     /**
-     * @param decompressor {@link CompressorStreamFactory#ALL_NAMES}
+     * @param decompressor See {@link CompressorStreamFactory#ALL_NAMES}
      * @see CompressorStreamFactory#ALL_NAMES
      */
     public void setDecompressor(String decompressor) throws DownloadException {
-        if (!CompressorStreamFactory.findAvailableCompressorInputStreamProviders().containsKey(decompressor)) {
-            throw new DownloadException("Decompressor " + decompressor + " is not available.");
+        if (!AVAILABLE_DECOMPRESSORS.contains(decompressor.toLowerCase())) {
+            throw new DownloadException(String.format("Decompressor '%s' is not available", decompressor));
         }
 
         this.decompressor = decompressor;
