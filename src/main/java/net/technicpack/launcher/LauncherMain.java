@@ -133,6 +133,8 @@ public class LauncherMain {
     private static IBuildNumber buildNumber;
 
     public static void main(String[] argv) {
+        runHeadlessCheck();
+
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ex) {
@@ -224,6 +226,15 @@ public class LauncherMain {
             System.exit(1);
         }
     }
+
+    /**
+     * Checks if the launcher is running in a headless environment and terminate if so.
+     */
+    @SuppressWarnings("java:S106")
+    private static void runHeadlessCheck() {
+        if (GraphicsEnvironment.isHeadless()) {
+            System.err.println("Technic Launcher cannot run in headless mode. Please run it in a graphical environment.");
+            System.exit(1);
         }
     }
 
