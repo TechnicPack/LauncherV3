@@ -93,10 +93,18 @@ import org.joda.time.DateTime;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.JOptionPane;
+import javax.swing.ToolTipManager;
+import javax.swing.UIManager;
+import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionListener;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
@@ -107,6 +115,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -314,8 +323,10 @@ public class LauncherMain {
         });
     }
 
+    /**
+     * Runs the startup debug, including OS information and DNS resolution for key hostnames.
+     */
     private static void runStartupDebug() {
-        // Startup debug messages
         Utils.getLogger().info(String.format("OS: %s", System.getProperty("os.name").toLowerCase(Locale.ENGLISH)));
         Utils.getLogger().info(String.format("Identified as %s", OperatingSystem.getOperatingSystem().getName()));
         Utils.getLogger().info(String.format("Java: %s %s-bit (%s)", System.getProperty("java.version"), JavaUtils.JAVA_BITNESS, JavaUtils.OS_ARCH));
@@ -326,15 +337,23 @@ public class LauncherMain {
                 "user.auth.xboxlive.com", "xsts.auth.xboxlive.com", "api.minecraftservices.com",
                 "launchermeta.mojang.com", "piston-meta.mojang.com",
         };
-        for (String domain : domains) {
-            try {
-                Collection<InetAddress> inetAddresses = Arrays.asList(InetAddress.getAllByName(domain));
-                String ips = inetAddresses.stream().map(InetAddress::getHostAddress).collect(Collectors.joining(", "));
-                Utils.getLogger().info(String.format("%s resolves to [%s]", domain, ips));
-            } catch (UnknownHostException ex) {
-                Utils.getLogger().log(Level.SEVERE, String.format("Failed to resolve %s: %s", domain, ex));
-            }
-        }
+
+        // Run DNS resolution asynchronously
+        CompletableFuture<?>[] dnsFutures = Arrays.stream(domains)
+                .map(domain -> CompletableFuture.runAsync(() -> {
+                    try {
+                        String ips = Arrays.stream(InetAddress.getAllByName(domain))
+                                .map(InetAddress::getHostAddress)
+                                .collect(Collectors.joining(", "));
+                        Utils.getLogger().info(String.format("%s resolves to [%s]", domain, ips));
+                    } catch (UnknownHostException ex) {
+                        Utils.getLogger().log(Level.SEVERE, String.format("Failed to resolve %s: %s", domain, ex));
+                    }
+                }))
+                .toArray(CompletableFuture[]::new);
+
+        // Wait for all DNS resolution tasks to complete
+        CompletableFuture.allOf(dnsFutures).join();
     }
 
     private static String getCertificateFingerprint(Certificate cert) {
