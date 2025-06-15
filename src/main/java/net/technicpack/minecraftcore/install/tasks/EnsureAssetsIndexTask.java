@@ -77,9 +77,9 @@ public class EnsureAssetsIndexTask implements IInstallTask {
 
         String assetsUrl = assetIndex.getUrl();
 
-        File output = new File(assetsDirectory + File.separator + "indexes", assetIndex.getId() + ".json");
+        File assetsFile = new File(assetsDirectory + File.separator + "indexes", assetIndex.getId() + ".json");
 
-        (new File(output.getParent())).mkdirs();
+        (new File(assetsFile.getParent())).mkdirs();
 
         IFileVerifier fileVerifier;
 
@@ -88,11 +88,11 @@ public class EnsureAssetsIndexTask implements IInstallTask {
         else
             fileVerifier = new ValidJsonFileVerifier(MojangUtils.getGson());
 
-        if (!output.exists() || !fileVerifier.isFileValid(output)) {
-            downloadIndexQueue.addTask(new DownloadFileTask(assetsUrl, output, fileVerifier));
+        if (!assetsFile.exists() || !fileVerifier.isFileValid(assetsFile)) {
+            downloadIndexQueue.addTask(new DownloadFileTask(assetsUrl, assetsFile, fileVerifier));
         }
 
-        examineIndexQueue.addTask(new InstallMinecraftAssetsTask(modpack, assetsDirectory.getAbsolutePath(), output, checkAssetsQueue, downloadAssetsQueue, installAssetsQueue));
+        examineIndexQueue.addTask(new InstallMinecraftAssetsTask(modpack, assetsDirectory.getAbsolutePath(), assetsFile, checkAssetsQueue, downloadAssetsQueue, installAssetsQueue));
     }
 
 }

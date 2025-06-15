@@ -294,7 +294,7 @@ public class Installer {
         TaskGroup installingLibs = new TaskGroup(resources.getString("install.message.installlibs"));
         TaskGroup installingMinecraft = new TaskGroup(resources.getString("install.message.installminecraft"));
         TaskGroup examineIndex = new TaskGroup(resources.getString("install.message.examiningindex"));
-        TaskGroup verifyingAssets = new TaskGroup(resources.getString("install.message.verifyassets"));
+        ParallelTaskGroup verifyingAssets = new ParallelTaskGroup(resources.getString("install.message.verifyassets"));
         TaskGroup installingAssets = new TaskGroup(resources.getString("install.message.installassets"));
         TaskGroup examineJava = new TaskGroup("Examining Java runtime...");
         TaskGroup downloadJava = new TaskGroup("Downloading Java runtime...");
