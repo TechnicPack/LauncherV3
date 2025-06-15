@@ -155,11 +155,7 @@ public class LauncherMain {
 
         TechnicSettings settings = null;
 
-        try {
-            settings = SettingsFactory.buildSettingsObject(Relauncher.getRunningPath(LauncherMain.class), params.isMover());
-        } catch (UnsupportedEncodingException ex) {
-            ex.printStackTrace();
-        }
+        settings = SettingsFactory.buildSettingsObject(Relauncher.getRunningPath(LauncherMain.class), params.isMover());
 
         if (settings == null) {
             showSetupWindow(params);

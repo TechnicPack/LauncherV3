@@ -51,7 +51,7 @@ public class TechnicRelauncher extends Relauncher {
     }
 
     @Override
-    protected Class getMainClass() {
+    protected Class<?> getMainClass() {
         return LauncherMain.class;
     }
 

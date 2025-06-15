@@ -197,15 +197,9 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
             Utils.sendTracking("installLauncher", "standard", buildNumber.getBuildNumber(), settings.getClientId());
 
             Relauncher relauncher = new TechnicRelauncher(null, settings.getBuildStream(), 0, new TechnicLauncherDirectories(settings.getTechnicRoot()), resources, params);
-            try {
-                String currentPath = relauncher.getRunningPath();
-                relauncher.launch(currentPath, params.getArgs());
-                System.exit(0);
-                return;
-            } catch (UnsupportedEncodingException ex) {
-                ex.printStackTrace();
-                return;
-            }
+            String currentPath = relauncher.getRunningPath();
+            relauncher.launch(currentPath, params.getArgs());
+            System.exit(0);
         });
         thread.start();
     }

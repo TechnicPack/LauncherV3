@@ -25,10 +25,12 @@ import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.ProcessUtils;
 import net.technicpack.utilslib.Utils;
 
-import javax.swing.*;
-import java.io.*;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
+import javax.swing.JOptionPane;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -52,17 +54,26 @@ public abstract class Relauncher {
 
     protected LauncherDirectories getDirectories() { return directories; }
 
-    public String getRunningPath() throws UnsupportedEncodingException {
+    public String getRunningPath() {
         return getRunningPath(getMainClass());
     }
 
-    public static String getRunningPath(Class clazz) throws UnsupportedEncodingException {
-        String path = clazz.getProtectionDomain().getCodeSource().getLocation().getPath();
-        path = path.replace("+", URLEncoder.encode("+", "UTF-8"));
-        return URLDecoder.decode(path, "UTF-8");
+    @SuppressWarnings({"java:S106", "java:S4507"})
+    public static String getRunningPath(Class<?> clazz) {
+        try {
+            URI uri = clazz.getProtectionDomain().getCodeSource().getLocation().toURI();
+            return Paths.get(uri).toString();
+        } catch (URISyntaxException ex) {
+            // This should never happen, but this is here just in case it does
+            System.err.println("Failed to get running path for class: " + clazz.getName());
+            //noinspection CallToPrintStackTrace
+            ex.printStackTrace();
+            System.exit(255);
+            return null; // Unreachable but required for compilation
+        }
     }
 
-    protected abstract Class getMainClass();
+    protected abstract Class<?> getMainClass();
     public abstract String getUpdateText();
     public abstract boolean isUpdateOnly();
     public abstract boolean isMover();
@@ -116,12 +127,7 @@ public abstract class Relauncher {
         File dest;
         String runningPath = null;
 
-        try {
-            runningPath = getRunningPath();
-        } catch (UnsupportedEncodingException ex) {
-            ex.printStackTrace();
-            return null;
-        }
+        runningPath = getRunningPath();
 
         if (runningPath.endsWith(".exe"))
             dest = new File(directories.getLauncherDirectory(), "temp.exe");
@@ -132,11 +138,7 @@ public abstract class Relauncher {
 
     public void launch(String launchPath, String[] args) {
         if (launchPath == null) {
-            try {
-                launchPath = getRunningPath();
-            } catch (UnsupportedEncodingException ex) {
-                return;
-            }
+            launchPath = getRunningPath();
         }
 
         ArrayList<String> commands = getCommands(launchPath);
@@ -175,7 +177,7 @@ public abstract class Relauncher {
         return commands;
     }
 
-    public String[] buildMoverArgs() throws UnsupportedEncodingException {
+    public String[] buildMoverArgs() {
         List<String> outArgs = new ArrayList<>();
         outArgs.add("-movetarget");
         outArgs.add(getRunningPath());
