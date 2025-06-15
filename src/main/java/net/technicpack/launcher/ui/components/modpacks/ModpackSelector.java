@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.ui.components.modpacks;
 
+import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.launcher.ui.controls.modpacks.FindMoreWidget;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserType;
@@ -129,23 +130,23 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
 
     private void initComponents() {
         setLayout(new BorderLayout());
-        setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
+        setBackground(UIConstants.COLOR_SELECTOR_BACK);
         setMaximumSize(new Dimension(287, getMaximumSize().height));
 
         JPanel header = new JPanel();
         header.setLayout(new GridBagLayout());
         header.setBorder(BorderFactory.createEmptyBorder(4,8,4,4));
-        header.setBackground(LauncherFrame.COLOR_SELECTOR_OPTION);
+        header.setBackground(UIConstants.COLOR_SELECTOR_OPTION);
         add(header, BorderLayout.PAGE_START);
 
-        filterContents = new WatermarkTextField(resources.getString("launcher.packselector.filter.hotfix"), LauncherFrame.COLOR_BLUE_DARKER);
+        filterContents = new WatermarkTextField(resources.getString("launcher.packselector.filter.hotfix"), UIConstants.COLOR_BLUE_DARKER);
         filterContents.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        filterContents.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
-        filterContents.setForeground(LauncherFrame.COLOR_BLUE);
-        filterContents.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
+        filterContents.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 8));
+        filterContents.setForeground(UIConstants.COLOR_BLUE);
+        filterContents.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
         filterContents.setSelectedTextColor(Color.black);
-        filterContents.setSelectionColor(LauncherFrame.COLOR_BUTTON_BLUE);
-        filterContents.setCaretColor(LauncherFrame.COLOR_BUTTON_BLUE);
+        filterContents.setSelectionColor(UIConstants.COLOR_BUTTON_BLUE);
+        filterContents.setCaretColor(UIConstants.COLOR_BUTTON_BLUE);
         filterContents.setColumns(20);
         ((AbstractDocument)filterContents.getDocument()).setDocumentFilter(new DocumentFilter() {
             @Override
@@ -198,7 +199,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         scrollPane.setOpaque(false);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getViewport().setOpaque(false);
-        scrollPane.getVerticalScrollBar().setUI(new SimpleScrollbarUI(LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
+        scrollPane.getVerticalScrollBar().setUI(new SimpleScrollbarUI(UIConstants.COLOR_SCROLL_TRACK, UIConstants.COLOR_SCROLL_THUMB));
         scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(10, 10));
         scrollPane.getVerticalScrollBar().setUnitIncrement(12);
         add(scrollPane, BorderLayout.CENTER);

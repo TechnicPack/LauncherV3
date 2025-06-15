@@ -18,26 +18,21 @@
 
 package net.technicpack.launcher.ui.components.news;
 
+import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.settings.TechnicSettings;
-import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 import net.technicpack.ui.controls.feeds.CountCircle;
 import net.technicpack.launcher.ui.controls.feeds.NewsWidget;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.AuthorshipInfo;
-import net.technicpack.platform.io.NewsArticle;
 import net.technicpack.platform.io.NewsData;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.utilslib.Utils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.logging.Level;
 
 public class NewsSelector extends JPanel {
@@ -78,7 +73,7 @@ public class NewsSelector extends JPanel {
 
     private void initComponents() {
         setLayout(new BorderLayout());
-        setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
+        setBackground(UIConstants.COLOR_SELECTOR_BACK);
 
         widgetHost = new JPanel();
         widgetHost.setOpaque(false);
@@ -88,7 +83,7 @@ public class NewsSelector extends JPanel {
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.setOpaque(false);
         scrollPane.getViewport().setOpaque(false);
-        scrollPane.getVerticalScrollBar().setUI(new SimpleScrollbarUI(LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
+        scrollPane.getVerticalScrollBar().setUI(new SimpleScrollbarUI(UIConstants.COLOR_SCROLL_TRACK, UIConstants.COLOR_SCROLL_THUMB));
         scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(10,10));
         scrollPane.getVerticalScrollBar().setUnitIncrement(12);
         add(scrollPane, BorderLayout.CENTER);

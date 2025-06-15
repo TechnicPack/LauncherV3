@@ -18,8 +18,8 @@
 
 package net.technicpack.launcher.ui.controls;
 
+import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.ui.lang.ResourceLoader;
-import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
@@ -75,20 +75,20 @@ public class UserWidget extends JPanel implements IImageJobListener<IUserType> {
         }
 
         JLabel staticText = new JLabel(preText);
-        staticText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        staticText.setForeground(UIConstants.COLOR_WHITE_TEXT);
         staticText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
 
         if (!preText.isEmpty())
             this.add(staticText);
 
         userName = new JLabel("");
-        userName.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        userName.setForeground(UIConstants.COLOR_WHITE_TEXT);
         userName.setBackground(Color.white);
         userName.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 17, Font.BOLD));
         this.add(userName);
 
         staticText = new JLabel(postText);
-        staticText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        staticText.setForeground(UIConstants.COLOR_WHITE_TEXT);
         staticText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
 
         if (!postText.isEmpty())

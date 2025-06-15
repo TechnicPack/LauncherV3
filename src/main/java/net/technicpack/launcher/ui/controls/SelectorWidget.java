@@ -18,8 +18,8 @@
 
 package net.technicpack.launcher.ui.controls;
 
+import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.ui.lang.ResourceLoader;
-import net.technicpack.launcher.ui.LauncherFrame;
 
 import javax.swing.*;
 
@@ -37,7 +37,7 @@ public class SelectorWidget extends JButton {
 
     protected void initComponents() {
         setBorder(BorderFactory.createEmptyBorder());
-        setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
+        setBackground(UIConstants.COLOR_SELECTOR_BACK);
         setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
         setContentAreaFilled(false);
         setOpaque(true);
@@ -47,6 +47,6 @@ public class SelectorWidget extends JButton {
     public boolean isSelected() { return isSelected; }
     public void setIsSelected(boolean isSelected) {
         this.isSelected = isSelected;
-        setBackground(isSelected?LauncherFrame.COLOR_SELECTOR_OPTION:LauncherFrame.COLOR_SELECTOR_BACK);
+        setBackground(isSelected? UIConstants.COLOR_SELECTOR_OPTION: UIConstants.COLOR_SELECTOR_BACK);
     }
 }

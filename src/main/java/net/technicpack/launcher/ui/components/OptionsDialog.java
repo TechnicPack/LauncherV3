@@ -23,7 +23,7 @@ import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.InstallerFrame;
-import net.technicpack.launcher.ui.LauncherFrame;
+import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.launcher.ui.listitems.OnLaunchItem;
 import net.technicpack.launcher.ui.listitems.StreamItem;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
@@ -560,9 +560,9 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
                 parent.add(memSelect, new GridBagConstraints(1, 1, 5, 1, 5, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 0), 0, 16));
 
                 JToolTip toolTip = new JToolTip();
-                toolTip.setBackground(LauncherFrame.COLOR_FOOTER);
-                toolTip.setForeground(LauncherFrame.COLOR_GREY_TEXT);
-                toolTip.setBorder(BorderFactory.createCompoundBorder(new LineBorder(LauncherFrame.COLOR_GREY_TEXT), BorderFactory.createEmptyBorder(5,5,5,5)));
+                toolTip.setBackground(UIConstants.COLOR_FOOTER);
+                toolTip.setForeground(UIConstants.COLOR_GREY_TEXT);
+                toolTip.setBorder(BorderFactory.createCompoundBorder(new LineBorder(UIConstants.COLOR_GREY_TEXT), BorderFactory.createEmptyBorder(5,5,5,5)));
                 toolTip.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
 
 
@@ -597,7 +597,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         JLabel title = new JLabel(resources.getString("launcher.title.options"));
         title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
-        title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        title.setForeground(UIConstants.COLOR_WHITE_TEXT);
         title.setOpaque(false);
         title.setIcon(resources.getIcon("options_cog.png"));
         title.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
@@ -615,31 +615,31 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         header.add(closeButton);
 
         SimpleTabPane centerPanel = new SimpleTabPane();
-        centerPanel.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        centerPanel.setForeground(LauncherFrame.COLOR_GREY_TEXT);
-        centerPanel.setSelectedBackground(LauncherFrame.COLOR_BLUE);
-        centerPanel.setSelectedForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        centerPanel.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        centerPanel.setForeground(UIConstants.COLOR_GREY_TEXT);
+        centerPanel.setSelectedBackground(UIConstants.COLOR_BLUE);
+        centerPanel.setSelectedForeground(UIConstants.COLOR_WHITE_TEXT);
         centerPanel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         centerPanel.setOpaque(true);
         add(centerPanel, BorderLayout.CENTER);
 
         JPanel general = new JPanel();
-        general.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        general.setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
 
         setupGeneralPanel(general);
 
         JPanel javaOptions = new JPanel();
-        javaOptions.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        javaOptions.setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
 
         setupJavaOptionsPanel(javaOptions);
 
         JPanel videoOptions = new JPanel();
-        videoOptions.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        videoOptions.setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
 
         setupVideoOptionsPanel(videoOptions);
 
         JPanel about = new JPanel();
-        about.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        about.setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
 
         String linkText = "<a href=\"https://github.com/TechnicPack/\">"+resources.getString("launcheroptions.about.linktext")+"</a>";
         String aboutText = "<html><head><style type=\"text/css\">a{color:#309aeb}body{font-family: "+resources.getFont(ResourceLoader.FONT_OPENSANS, 12).getFamily()+";color:#D0D0D0}</style></head><body>";
@@ -650,7 +650,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         about.setLayout(new BorderLayout());
 
         JLabel buildCtrl = new JLabel(resources.getString("launcher.build.text", buildNumber.getBuildNumber(), resources.getString("launcher.build." + settings.getBuildStream())));
-        buildCtrl.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        buildCtrl.setForeground(UIConstants.COLOR_WHITE_TEXT);
         buildCtrl.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         buildCtrl.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 0));
         about.add(buildCtrl, BorderLayout.SOUTH);
@@ -658,7 +658,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         JTextPane textPane = new JTextPane();
         textPane.setBorder(BorderFactory.createEmptyBorder(0, 24, 9, 24));
         textPane.setOpaque(false);
-        textPane.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        textPane.setForeground(UIConstants.COLOR_WHITE_TEXT);
         textPane.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         textPane.setEditable(false);
         textPane.setHighlighter(null);
@@ -688,121 +688,121 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         JLabel streamLabel = new JLabel(resources.getString("launcheroptions.general.build"));
         streamLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        streamLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        streamLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         panel.add(streamLabel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
         // Setup stream select box
         streamSelect = new JComboBox<>();
         streamSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         streamSelect.setEditable(false);
-        streamSelect.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
-        streamSelect.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        streamSelect.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        streamSelect.setUI(new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0)), resources, LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
+        streamSelect.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 10));
+        streamSelect.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        streamSelect.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        streamSelect.setUI(new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 0)), resources, UIConstants.COLOR_SCROLL_TRACK, UIConstants.COLOR_SCROLL_THUMB));
         streamSelect.setFocusable(false);
 
         Object child = streamSelect.getAccessibleContext().getAccessibleChild(0);
         BasicComboPopup popup = (BasicComboPopup)child;
         JList list = popup.getList();
-        list.setSelectionForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        list.setSelectionBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        list.setSelectionForeground(UIConstants.COLOR_BUTTON_BLUE);
+        list.setSelectionBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        list.setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
 
         panel.add(streamSelect, new GridBagConstraints(1, 0, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
 
         //Setup language box
         JLabel langLabel = new JLabel(resources.getString("launcheroptions.general.lang"));
         langLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        langLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        langLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         panel.add(langLabel, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
         langSelect = new JComboBox<>();
         langSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         langSelect.setEditable(false);
-        langSelect.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
-        langSelect.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        langSelect.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        langSelect.setUI(new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0)), resources, LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
+        langSelect.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 10));
+        langSelect.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        langSelect.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        langSelect.setUI(new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 0)), resources, UIConstants.COLOR_SCROLL_TRACK, UIConstants.COLOR_SCROLL_THUMB));
         langSelect.setFocusable(false);
 
         child = langSelect.getAccessibleContext().getAccessibleChild(0);
         popup = (BasicComboPopup)child;
         list = popup.getList();
-        list.setSelectionForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        list.setSelectionBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        list.setSelectionForeground(UIConstants.COLOR_BUTTON_BLUE);
+        list.setSelectionBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        list.setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
 
         panel.add(langSelect, new GridBagConstraints(1, 1, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
 
         //Setup on pack launch box
         JLabel launchLabel = new JLabel(resources.getString("launcheroptions.general.onlaunch"));
         launchLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        launchLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        launchLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         panel.add(launchLabel, new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
         launchSelect = new JComboBox<>();
         launchSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         launchSelect.setEditable(false);
-        launchSelect.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
-        launchSelect.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        launchSelect.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        launchSelect.setUI(new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0)), resources, LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
+        launchSelect.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 10));
+        launchSelect.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        launchSelect.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        launchSelect.setUI(new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 0)), resources, UIConstants.COLOR_SCROLL_TRACK, UIConstants.COLOR_SCROLL_THUMB));
         launchSelect.setFocusable(false);
 
         child = launchSelect.getAccessibleContext().getAccessibleChild(0);
         popup = (BasicComboPopup)child;
         list = popup.getList();
-        list.setSelectionForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        list.setSelectionBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        list.setSelectionForeground(UIConstants.COLOR_BUTTON_BLUE);
+        list.setSelectionBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        list.setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
 
         panel.add(launchSelect, new GridBagConstraints(1, 2, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
 
         //Install folder field
         JLabel installLabel = new JLabel(resources.getString("launcheroptions.general.install"));
         installLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        installLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        installLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         panel.add(installLabel, new GridBagConstraints(0, 3, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
         installField = new JTextField("");
         installField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        installField.setForeground(LauncherFrame.COLOR_BLUE);
-        installField.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
+        installField.setForeground(UIConstants.COLOR_BLUE);
+        installField.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
         installField.setHighlighter(null);
         installField.setEditable(false);
         installField.setCursor(null);
-        installField.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
+        installField.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 8));
         panel.add(installField, new GridBagConstraints(1, 3, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
 
         RoundedButton reinstallButton = new RoundedButton(resources.getString("launcheroptions.install.change"));
         reinstallButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         reinstallButton.setContentAreaFilled(false);
-        reinstallButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        reinstallButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        reinstallButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        reinstallButton.setHoverForeground(UIConstants.COLOR_BLUE);
         reinstallButton.addActionListener(e -> reinstall());
         panel.add(reinstallButton, new GridBagConstraints(3, 3, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 0, 8, 0), 0, 0));
 
         //Client ID field
         JLabel clientIdField = new JLabel(resources.getString("launcheroptions.general.id"));
         clientIdField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        clientIdField.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        clientIdField.setForeground(UIConstants.COLOR_WHITE_TEXT);
         panel.add(clientIdField, new GridBagConstraints(0, 4, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
         clientId = new JTextField("abc123");
         clientId.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        clientId.setForeground(LauncherFrame.COLOR_BLUE);
-        clientId.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
+        clientId.setForeground(UIConstants.COLOR_BLUE);
+        clientId.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
         clientId.setHighlighter(null);
         clientId.setEditable(false);
         clientId.setCursor(null);
-        clientId.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
+        clientId.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 8));
         panel.add(clientId, new GridBagConstraints(1, 4, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
 
         RoundedButton copyButton = new RoundedButton(resources.getString("launcheroptions.id.copy"));
         copyButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         copyButton.setContentAreaFilled(false);
-        copyButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        copyButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        copyButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        copyButton.setHoverForeground(UIConstants.COLOR_BLUE);
         copyButton.addActionListener(e -> copyCid());
         panel.add(copyButton, new GridBagConstraints(3, 4, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 0, 8, 0), 0, 0));
 
@@ -811,7 +811,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         //Add show console field
         JLabel showConsoleField = new JLabel(resources.getString("launcheroptions.general.console"));
         showConsoleField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        showConsoleField.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        showConsoleField.setForeground(UIConstants.COLOR_WHITE_TEXT);
         panel.add(showConsoleField, new GridBagConstraints(0, 5, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(10, 40, 0, 0), 0, 0));
 
         showConsole = new JCheckBox("", false);
@@ -828,7 +828,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         //Add launch to modpacks
         JLabel launchToModpacksField = new JLabel(resources.getString("launcheroptions.general.modpacktab"));
         launchToModpacksField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        launchToModpacksField.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        launchToModpacksField.setForeground(UIConstants.COLOR_WHITE_TEXT);
         panel.add(launchToModpacksField, new GridBagConstraints(0,6,1,1,0,0,GridBagConstraints.EAST,GridBagConstraints.NONE,new Insets(10,40,0,0),0,0));
 
         launchToModpacks = new JCheckBox("", false);
@@ -848,8 +848,8 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         RoundedButton openLogs = new RoundedButton(resources.getString("launcheroptions.general.logs"));
         openLogs.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         openLogs.setContentAreaFilled(false);
-        openLogs.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        openLogs.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        openLogs.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        openLogs.setHoverForeground(UIConstants.COLOR_BLUE);
         openLogs.setBorder(BorderFactory.createEmptyBorder(5, 17, 10, 17));
         openLogs.addActionListener(e -> openLogs());
         panel.add(openLogs, new GridBagConstraints(0, 8, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 10, 10, 0), 0, 0));
@@ -859,17 +859,17 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         if (windowSelect.getSelectedIndex() == 2) {
             widthInput.setEnabled(true);
             heightInput.setEnabled(true);
-            widthInput.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-            heightInput.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-            widthInput.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
-            heightInput.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
+            widthInput.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+            heightInput.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+            widthInput.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 8));
+            heightInput.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 8));
         } else {
             widthInput.setEnabled(false);
             heightInput.setEnabled(false);
-            widthInput.setForeground(LauncherFrame.COLOR_GREY_TEXT);
-            heightInput.setForeground(LauncherFrame.COLOR_GREY_TEXT);
-            widthInput.setBorder(new RoundBorder(LauncherFrame.COLOR_GREY_TEXT, 1, 8));
-            heightInput.setBorder(new RoundBorder(LauncherFrame.COLOR_GREY_TEXT, 1, 8));
+            widthInput.setForeground(UIConstants.COLOR_GREY_TEXT);
+            heightInput.setForeground(UIConstants.COLOR_GREY_TEXT);
+            widthInput.setBorder(new RoundBorder(UIConstants.COLOR_GREY_TEXT, 1, 8));
+            heightInput.setBorder(new RoundBorder(UIConstants.COLOR_GREY_TEXT, 1, 8));
         }
     }
 
@@ -878,7 +878,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         JLabel streamLabel = new JLabel(resources.getString("launcheroptions.video.windowSize"));
         streamLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        streamLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        streamLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         panel.add(streamLabel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0), 0, 0));
 
         windowSelect = new JComboBox<>();
@@ -889,53 +889,53 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         windowSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         windowSelect.setEditable(false);
-        windowSelect.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
-        windowSelect.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        windowSelect.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        windowSelect.setUI(new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0)), resources, LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
+        windowSelect.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 10));
+        windowSelect.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        windowSelect.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        windowSelect.setUI(new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 0)), resources, UIConstants.COLOR_SCROLL_TRACK, UIConstants.COLOR_SCROLL_THUMB));
         windowSelect.setFocusable(false);
 
         Object child = windowSelect.getAccessibleContext().getAccessibleChild(0);
         BasicComboPopup popup = (BasicComboPopup)child;
         JList list = popup.getList();
-        list.setSelectionForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        list.setSelectionBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        list.setSelectionForeground(UIConstants.COLOR_BUTTON_BLUE);
+        list.setSelectionBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        list.setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
 
         panel.add(windowSelect, new GridBagConstraints(1, 0, 1, 1, 0.5f, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
 
         JLabel widthLabel = new JLabel(resources.getString("launcheroptions.video.windowSize.width"));
         widthLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        widthLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        widthLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         panel.add(widthLabel, new GridBagConstraints(2, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
         widthInput = new JTextField(3);
         widthInput.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        widthInput.setForeground(LauncherFrame.COLOR_BLUE);
-        widthInput.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        widthInput.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
-        widthInput.setCaretColor(LauncherFrame.COLOR_BLUE);
+        widthInput.setForeground(UIConstants.COLOR_BLUE);
+        widthInput.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        widthInput.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 8));
+        widthInput.setCaretColor(UIConstants.COLOR_BLUE);
         widthInput.setText("800");
         panel.add(widthInput, new GridBagConstraints(3, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 6, 8, 16), 0, 0));
 
         JLabel heightLabel = new JLabel(resources.getString("launcheroptions.video.windowSize.height"));
         heightLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        heightLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        heightLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         panel.add(heightLabel, new GridBagConstraints(4, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
         heightInput = new JTextField(3);
         heightInput.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        heightInput.setForeground(LauncherFrame.COLOR_BLUE);
-        heightInput.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        heightInput.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
-        heightInput.setCaretColor(LauncherFrame.COLOR_BLUE);
+        heightInput.setForeground(UIConstants.COLOR_BLUE);
+        heightInput.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        heightInput.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 8));
+        heightInput.setCaretColor(UIConstants.COLOR_BLUE);
         heightInput.setText("600");
         panel.add(heightInput, new GridBagConstraints(5, 0, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(8, 6, 8, 16), 0,0));
 
         //Add show console field
         JLabel useStencilField = new JLabel(resources.getString("launcheroptions.video.stencil"));
         useStencilField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        useStencilField.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        useStencilField.setForeground(UIConstants.COLOR_WHITE_TEXT);
         panel.add(useStencilField, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(10, 40, 0, 0), 0, 0));
 
         useStencil = new JComboBox<>();
@@ -946,18 +946,18 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         useStencil.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         useStencil.setEditable(false);
-        useStencil.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
-        useStencil.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        useStencil.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        useStencil.setUI(new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0)), resources, LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
+        useStencil.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 10));
+        useStencil.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        useStencil.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        useStencil.setUI(new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 0)), resources, UIConstants.COLOR_SCROLL_TRACK, UIConstants.COLOR_SCROLL_THUMB));
         useStencil.setFocusable(false);
 
         child = useStencil.getAccessibleContext().getAccessibleChild(0);
         popup = (BasicComboPopup)child;
         list = popup.getList();
-        list.setSelectionForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        list.setSelectionBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        list.setSelectionForeground(UIConstants.COLOR_BUTTON_BLUE);
+        list.setSelectionBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        list.setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
         panel.add(useStencil, new GridBagConstraints(1, 1, 1, 1, 0.5f, 0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
 
         JLabel stencilInfo = new JLabel("") {
@@ -972,7 +972,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             }
         };
         stencilInfo.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 12));
-        stencilInfo.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        stencilInfo.setForeground(UIConstants.COLOR_WHITE_TEXT);
 
         stencilInfo.setText("<html><body style=\"font-family:" + stencilInfo.getFont().getFamily() + ";color:#D0D0D0\">" + resources.getString("launcheroptions.video.stencil.info") + "</body></html>");
 
@@ -988,7 +988,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         JLabel versionLabel = new JLabel(resources.getString("launcheroptions.java.version"));
         versionLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        versionLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        versionLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         panel.add(versionLabel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 60, 0, 0), 0, 0));
 
         versionSelect = new JComboBox<>();
@@ -999,33 +999,33 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         versionSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         versionSelect.setEditable(false);
-        versionSelect.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
-        versionSelect.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        versionSelect.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        SimpleButtonComboUI ui = new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0)), resources, LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB);
+        versionSelect.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 10));
+        versionSelect.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        versionSelect.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        SimpleButtonComboUI ui = new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 0)), resources, UIConstants.COLOR_SCROLL_TRACK, UIConstants.COLOR_SCROLL_THUMB);
         versionSelect.setUI(ui);
         versionSelect.setFocusable(false);
 
         Object child = versionSelect.getAccessibleContext().getAccessibleChild(0);
         BasicComboPopup popup = (BasicComboPopup)child;
         JList list = popup.getList();
-        list.setSelectionForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        list.setSelectionBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        list.setSelectionForeground(UIConstants.COLOR_BUTTON_BLUE);
+        list.setSelectionBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        list.setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
 
         panel.add(versionSelect, new GridBagConstraints(1, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 8), 0, 16));
 
         RoundedButton otherVersionButton = new RoundedButton(resources.getString("launcheroptions.java.otherversion"));
         otherVersionButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         otherVersionButton.setContentAreaFilled(false);
-        otherVersionButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        otherVersionButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        otherVersionButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        otherVersionButton.setHoverForeground(UIConstants.COLOR_BLUE);
         otherVersionButton.addActionListener(e -> selectOtherVersion());
         panel.add(otherVersionButton, new GridBagConstraints(2, 0, 5, 1, 2, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 8, 8, 80), 0, 0));
 
         JLabel memLabel = new JLabel(resources.getString("launcheroptions.java.memory"));
         memLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        memLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        memLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         panel.add(memLabel, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 60, 0, 0), 0, 0));
 
         memSelect = new JComboBox<>();
@@ -1036,58 +1036,58 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         memSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         memSelect.setEditable(false);
-        memSelect.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
-        memSelect.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        memSelect.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-         ui = new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0)), resources, LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB);
+        memSelect.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 10));
+        memSelect.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        memSelect.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+         ui = new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 0)), resources, UIConstants.COLOR_SCROLL_TRACK, UIConstants.COLOR_SCROLL_THUMB);
         memSelect.setUI(ui);
         memSelect.setFocusable(false);
 
         child = memSelect.getAccessibleContext().getAccessibleChild(0);
         popup = (BasicComboPopup)child;
         list = popup.getList();
-        list.setSelectionForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        list.setSelectionBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        list.setSelectionForeground(UIConstants.COLOR_BUTTON_BLUE);
+        list.setSelectionBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        list.setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
         panel.add(memSelect, new GridBagConstraints(1, 1, 6, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 80), 0, 16));
 
         JLabel argsLabel = new JLabel(resources.getString("launcheroptions.java.arguments"));
         argsLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        argsLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        argsLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         panel.add(argsLabel, new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 60, 0, 0), 0, 0));
 
         javaArgs = new JTextArea(32, 4);
         javaArgs.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        javaArgs.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        javaArgs.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        javaArgs.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
-        javaArgs.setCaretColor(LauncherFrame.COLOR_BUTTON_BLUE);
+        javaArgs.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        javaArgs.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        javaArgs.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 8));
+        javaArgs.setCaretColor(UIConstants.COLOR_BUTTON_BLUE);
         javaArgs.setMargin(new Insets(16, 4, 16, 4));
         javaArgs.setLineWrap(true);
         javaArgs.setWrapStyleWord(true);
-        javaArgs.setSelectionColor(LauncherFrame.COLOR_BUTTON_BLUE);
-        javaArgs.setSelectedTextColor(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
+        javaArgs.setSelectionColor(UIConstants.COLOR_BUTTON_BLUE);
+        javaArgs.setSelectedTextColor(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
 
         panel.add(javaArgs, new GridBagConstraints(1, 2, 6, 2, 0, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 6, 80), 0, 0));
 
         JLabel wrapperCmdLabel = new JLabel(resources.getString("launcheroptions.java.wrapper"));
         wrapperCmdLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        wrapperCmdLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        wrapperCmdLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         panel.add(wrapperCmdLabel, new GridBagConstraints(0, 4, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 60, 0, 0), 0, 0));
 
         wrapperCommand = new JTextField("");
         wrapperCommand.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        wrapperCommand.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        wrapperCommand.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        wrapperCommand.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
-        wrapperCommand.setCaretColor(LauncherFrame.COLOR_BUTTON_BLUE);
-        wrapperCommand.setSelectionColor(LauncherFrame.COLOR_BUTTON_BLUE);
-        wrapperCommand.setSelectedTextColor(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
+        wrapperCommand.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        wrapperCommand.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        wrapperCommand.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 8));
+        wrapperCommand.setCaretColor(UIConstants.COLOR_BUTTON_BLUE);
+        wrapperCommand.setSelectionColor(UIConstants.COLOR_BUTTON_BLUE);
+        wrapperCommand.setSelectedTextColor(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
         panel.add(wrapperCommand, new GridBagConstraints(1, 4, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
 
         JLabel autoApprovalLabel = new JLabel(resources.getString("launcheroptions.java.autoApprove"));
         autoApprovalLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        autoApprovalLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        autoApprovalLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         panel.add(autoApprovalLabel, new GridBagConstraints(0, 5, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 20, 0, 0), 0, 0));
 
         askFirstBox = new JCheckBox("", false);
@@ -1102,7 +1102,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         JLabel useMojangJavaLabel = new JLabel(resources.getString("launcheroptions.java.useMojangJava"));
         useMojangJavaLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        useMojangJavaLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        useMojangJavaLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         panel.add(useMojangJavaLabel, new GridBagConstraints(0, 6, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 20, 0, 0), 0, 0));
 
         useMojangJava = new JCheckBox("", false);

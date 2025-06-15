@@ -63,39 +63,9 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private static final int FRAME_WIDTH = 1194;
     private static final int FRAME_HEIGHT = 718;
 
-    public static final Color COLOR_RED = new Color(229,0,0);
-    public static final Color COLOR_GREEN = new Color(75, 168, 78);
-    public static final Color COLOR_BLUE = new Color(16, 108, 163);
-    public static final Color COLOR_BLUE_DARKER = new Color(12, 94, 145);
-    public static final Color COLOR_WHITE_TEXT = new Color(208,208,208);
-    public static final Color COLOR_DIM_TEXT = new Color(160,160,160);
-    public static final Color COLOR_HEADER_TEXT = new Color(255,255,255);
-    public static final Color COLOR_CHARCOAL = new Color(31, 31, 31);
-    public static final Color COLOR_BANNER = new Color(0, 0, 0, 160);
-    public static final Color COLOR_PANEL = new Color(36, 38, 39);
-    public static final Color COLOR_SCROLL_TRACK = new Color(18, 18, 18);
-    public static final Color COLOR_SCROLL_THUMB = new Color(53, 53, 53);
-    public static final Color COLOR_SELECTOR_BACK = new Color(22,26,29);
-    public static final Color COLOR_SELECTOR_OPTION = new Color(38, 46, 53);
-    public static final Color COLOR_FEED_BACK = new Color(22,26,29,200);
-    public static final Color COLOR_CENTRAL_BACK = new Color(25, 30, 34, 160);
-    public static final Color COLOR_CENTRAL_BACK_OPAQUE = new Color(25, 30, 34);
-    public static final Color COLOR_FEEDITEM_BACK = new Color(37, 44, 49);
-    public static final Color COLOR_LIKES_BACK = new Color(20, 65, 97);
-    public static final Color COLOR_BUTTON_BLUE = new Color(43, 128, 195);
-    public static final Color COLOR_FORM_ELEMENT_INTERNAL = new Color(30, 39, 46);
-    public static final Color COLOR_GREY_TEXT = new Color(86, 98, 110);
-    public static final Color COLOR_FOOTER = new Color(27, 32, 36);
-    public static final Color COLOR_SERVER = new Color(91, 192, 222);
-
-    public static final Color COLOR_REQUIREMENT_SUCCEED = new Color(94, 181, 103);
-    public static final Color COLOR_REQUIREMENT_FAIL = new Color(133, 12, 12);
-    public static final Color COLOR_REQUIREMENT_SEPARATOR = new Color(37, 44, 49);
-    public static final Color COLOR_REQUIREMENT_WARNING = new Color(230, 119, 0);
-
-    public static final String TAB_DISCOVER = "discover";
-    public static final String TAB_MODPACKS = "modpacks";
-    public static final String TAB_NEWS = "news";
+    private static final String TAB_DISCOVER = "discover";
+    private static final String TAB_MODPACKS = "modpacks";
+    private static final String TAB_NEWS = "news";
 
     private ResourceLoader resources;
     private final UserModel userModel;
@@ -344,8 +314,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         /////////////////////////////////////////////////////////////
         JPanel header = new JPanel();
         header.setLayout(new BoxLayout(header, BoxLayout.LINE_AXIS));
-        header.setBackground(COLOR_BLUE);
-        header.setForeground(COLOR_WHITE_TEXT);
+        header.setBackground(UIConstants.COLOR_BLUE);
+        header.setForeground(UIConstants.COLOR_WHITE_TEXT);
         header.setBorder(BorderFactory.createEmptyBorder(0,5,0,10));
         getRootPane().getContentPane().add(header, BorderLayout.PAGE_START);
 
@@ -381,8 +351,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         header.add(newsTab);
 
         CountCircle newsCircle = new CountCircle();
-        newsCircle.setBackground(COLOR_RED);
-        newsCircle.setForeground(COLOR_WHITE_TEXT);
+        newsCircle.setBackground(UIConstants.COLOR_RED);
+        newsCircle.setForeground(UIConstants.COLOR_WHITE_TEXT);
         newsCircle.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16, Font.BOLD));
         newsTab.add(newsCircle);
         newsCircle.setBounds(10,17,25,25);
@@ -423,7 +393,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         JButton launcherOptionsLabel = new JButton(resources.getString("launcher.title.options"));
         launcherOptionsLabel.setIcon(resources.getIcon("options_cog.png"));
         launcherOptionsLabel.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 14));
-        launcherOptionsLabel.setForeground(COLOR_WHITE_TEXT);
+        launcherOptionsLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         launcherOptionsLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         launcherOptionsLabel.setHorizontalTextPosition(SwingConstants.LEADING);
         launcherOptionsLabel.setAlignmentX(RIGHT_ALIGNMENT);
@@ -440,9 +410,9 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         // CENTRAL AREA
         /////////////////////////////////////////////////////////////
         centralPanel = new TintablePanel();
-        centralPanel.setBackground(COLOR_CHARCOAL);
-        centralPanel.setForeground(COLOR_WHITE_TEXT);
-        centralPanel.setTintColor(COLOR_CENTRAL_BACK);
+        centralPanel.setBackground(UIConstants.COLOR_CHARCOAL);
+        centralPanel.setForeground(UIConstants.COLOR_WHITE_TEXT);
+        centralPanel.setTintColor(UIConstants.COLOR_CENTRAL_BACK);
         getRootPane().getContentPane().add(centralPanel, BorderLayout.CENTER);
         centralPanel.setLayout(new BorderLayout());
 
@@ -493,10 +463,10 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         modpackHost.add(modpackSelector, BorderLayout.WEST);
 
         footer = new TintablePanel();
-        footer.setTintColor(COLOR_CENTRAL_BACK);
-        footer.setBackground(COLOR_FOOTER);
+        footer.setTintColor(UIConstants.COLOR_CENTRAL_BACK);
+        footer.setBackground(UIConstants.COLOR_FOOTER);
         footer.setLayout(new BoxLayout(footer, BoxLayout.LINE_AXIS));
-        footer.setForeground(COLOR_WHITE_TEXT);
+        footer.setForeground(UIConstants.COLOR_WHITE_TEXT);
         footer.setBorder(BorderFactory.createEmptyBorder(3,6,3,12));
 
         userWidget = new UserWidget(resources, skinRepository);
@@ -504,7 +474,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         footer.add(userWidget);
 
         JLabel dashText = new JLabel("| ");
-        dashText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        dashText.setForeground(UIConstants.COLOR_WHITE_TEXT);
         dashText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
         footer.add(dashText);
 
@@ -512,7 +482,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         logout.setBorder(BorderFactory.createEmptyBorder());
         logout.setContentAreaFilled(false);
         logout.setFocusable(false);
-        logout.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        logout.setForeground(UIConstants.COLOR_WHITE_TEXT);
         logout.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         logout.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
         logout.addActionListener(e -> logout());
@@ -520,7 +490,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
         installProgress = new ProgressBar();
         installProgress.setForeground(Color.white);
-        installProgress.setBackground(LauncherFrame.COLOR_GREEN);
+        installProgress.setBackground(UIConstants.COLOR_GREEN);
         installProgress.setBorder(BorderFactory.createEmptyBorder(5, 45, 4, 45));
         installProgress.setIcon(resources.getIcon("download_icon.png"));
         installProgress.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 12));
@@ -591,7 +561,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     public void setupPlayButtonText(ModpackModel modpack, IUserType user) {
         playButton.setEnabled(true);
-        playButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+        playButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
 
         final boolean isUserOffline = user != null && user.isOffline();
 
@@ -603,18 +573,18 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             } else {
                 playButton.setText(resources.getString("launcher.pack.launch"));
             }
-            playButton.setIcon(new ImageIcon(resources.colorImage(resources.getImage("play_button.png"), LauncherFrame.COLOR_BUTTON_BLUE)));
-            playButton.setHoverIcon(new ImageIcon(resources.colorImage(resources.getImage("play_button.png"), LauncherFrame.COLOR_BLUE)));
+            playButton.setIcon(new ImageIcon(resources.colorImage(resources.getImage("play_button.png"), UIConstants.COLOR_BUTTON_BLUE)));
+            playButton.setHoverIcon(new ImageIcon(resources.colorImage(resources.getImage("play_button.png"), UIConstants.COLOR_BLUE)));
         } else {
             if (isUserOffline) {
                 playButton.setEnabled(false);
-                playButton.setForeground(LauncherFrame.COLOR_GREY_TEXT);
+                playButton.setForeground(UIConstants.COLOR_GREY_TEXT);
                 playButton.setText(resources.getString("launcher.pack.cannotinstall"));
             } else {
                 playButton.setText(resources.getString("launcher.pack.install"));
             }
-            playButton.setIcon(new ImageIcon(resources.colorImage(resources.getImage("download_button.png"), LauncherFrame.COLOR_BUTTON_BLUE)));
-            playButton.setHoverIcon(new ImageIcon(resources.colorImage(resources.getImage("download_button.png"), LauncherFrame.COLOR_BLUE)));
+            playButton.setIcon(new ImageIcon(resources.colorImage(resources.getImage("download_button.png"), UIConstants.COLOR_BUTTON_BLUE)));
+            playButton.setHoverIcon(new ImageIcon(resources.colorImage(resources.getImage("download_button.png"), UIConstants.COLOR_BLUE)));
         }
     }
 }

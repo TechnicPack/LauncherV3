@@ -18,8 +18,8 @@
 
 package net.technicpack.launcher.ui.controls.modpacks;
 
+import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.ui.lang.ResourceLoader;
-import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.SelectorWidget;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
@@ -64,7 +64,7 @@ public class ModpackWidget extends SelectorWidget implements IImageJobListener<M
 
         displayName = new JLabel(modpack.getDisplayName());
         displayName.setFont(getResources().getFont(ResourceLoader.FONT_OPENSANS, 14));
-        displayName.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        displayName.setForeground(UIConstants.COLOR_WHITE_TEXT);
         displayName.setMaximumSize(new Dimension(210, displayName.getPreferredSize().height));
         add(displayName, new GridBagConstraints(1,0,1,1,1,0,GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
         updateIcon = new JLabel();
@@ -89,9 +89,9 @@ public class ModpackWidget extends SelectorWidget implements IImageJobListener<M
     @Override
     public JToolTip createToolTip() {
         JToolTip toolTip = new JToolTip();
-        toolTip.setBackground(LauncherFrame.COLOR_FOOTER);
-        toolTip.setForeground(LauncherFrame.COLOR_GREY_TEXT);
-        toolTip.setBorder(BorderFactory.createCompoundBorder(new LineBorder(LauncherFrame.COLOR_GREY_TEXT), BorderFactory.createEmptyBorder(5,5,5,5)));
+        toolTip.setBackground(UIConstants.COLOR_FOOTER);
+        toolTip.setForeground(UIConstants.COLOR_GREY_TEXT);
+        toolTip.setBorder(BorderFactory.createCompoundBorder(new LineBorder(UIConstants.COLOR_GREY_TEXT), BorderFactory.createEmptyBorder(5,5,5,5)));
         toolTip.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
 
         return toolTip;

@@ -82,7 +82,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setTitle("Technic Launcher - Login");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        getContentPane().setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        getContentPane().setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
 
         //Handles rebuilding the frame, so use it to build the frame in the first place
         relocalize(resources);
@@ -155,7 +155,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         //Select account label
         selectLabel = new JLabel(resources.getString("login.select"));
         selectLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        selectLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        selectLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         add(selectLabel, new GridBagConstraints(0, 2, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10,20,0,20), 0,0));
 
 //        visitBrowser = new JLabel(resources.getString("login.checkbrowser"));
@@ -172,20 +172,20 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
 
         nameSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         nameSelect.setEditable(true);
-        nameSelect.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
-        nameSelect.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        nameSelect.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
+        nameSelect.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 10));
+        nameSelect.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        nameSelect.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
         nameSelect.setVisible(false);
         UserCellRenderer userRenderer = new UserCellRenderer(resources, this.skinRepository);
         userRenderer.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        userRenderer.setSelectedBackgroundColor(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        userRenderer.setSelectedForegroundColor(LauncherFrame.COLOR_BUTTON_BLUE);
-        userRenderer.setUnselectedBackgroundColor(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
-        userRenderer.setUnselectedForegroundColor(LauncherFrame.COLOR_BUTTON_BLUE);
+        userRenderer.setSelectedBackgroundColor(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        userRenderer.setSelectedForegroundColor(UIConstants.COLOR_BUTTON_BLUE);
+        userRenderer.setUnselectedBackgroundColor(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
+        userRenderer.setUnselectedForegroundColor(UIConstants.COLOR_BUTTON_BLUE);
         nameSelect.setRenderer(userRenderer);
-        UserCellEditor userEditor = new UserCellEditor(resources.getFont(ResourceLoader.FONT_OPENSANS, 16), this.skinRepository, LauncherFrame.COLOR_BUTTON_BLUE);
+        UserCellEditor userEditor = new UserCellEditor(resources.getFont(ResourceLoader.FONT_OPENSANS, 16), this.skinRepository, UIConstants.COLOR_BUTTON_BLUE);
         nameSelect.setEditor(userEditor);
-        nameSelect.setUI(new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0)), resources, LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
+        nameSelect.setUI(new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 0)), resources, UIConstants.COLOR_SCROLL_TRACK, UIConstants.COLOR_SCROLL_THUMB));
         nameSelect.addActionListener(e -> setCurrentUser((IUserType) nameSelect.getSelectedItem()));
 
         add(nameSelect, new GridBagConstraints(0, 3, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(3, 20, 0, 20), 4, 4));
@@ -195,8 +195,8 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         login.setBorder(BorderFactory.createEmptyBorder(5,17,10,17));
         login.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 18));
         login.setContentAreaFilled(false);
-        login.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        login.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        login.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        login.setHoverForeground(UIConstants.COLOR_BLUE);
         login.addActionListener(e -> login());
         add(login, new GridBagConstraints(0, 6, GridBagConstraints.REMAINDER, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(12,20,0,20),0,0));
 
@@ -205,8 +205,8 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         addMicrosoft.setBorder(BorderFactory.createEmptyBorder(5,17,10,17));
         addMicrosoft.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         addMicrosoft.setContentAreaFilled(false);
-        addMicrosoft.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        addMicrosoft.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        addMicrosoft.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        addMicrosoft.setHoverForeground(UIConstants.COLOR_BLUE);
         addMicrosoft.addActionListener(e -> addMicrosoftAccount());
         add(addMicrosoft, new GridBagConstraints(0, 7, GridBagConstraints.REMAINDER, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(50,20,0,20),0,0));
 
@@ -215,8 +215,8 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         cancelMsa.setBorder(BorderFactory.createEmptyBorder(5, 17, 10, 17));
         cancelMsa.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         cancelMsa.setContentAreaFilled(false);
-        cancelMsa.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        cancelMsa.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        cancelMsa.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        cancelMsa.setHoverForeground(UIConstants.COLOR_BLUE);
         cancelMsa.setVisible(false);
         cancelMsa.addActionListener(e -> cancelMsaLogin());
         add(cancelMsa, new GridBagConstraints(0, 8, GridBagConstraints.REMAINDER, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(50,20,0,20),0,0));
@@ -224,7 +224,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         add(Box.createVerticalGlue(), new GridBagConstraints(0, 8, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
 
         JPanel linkPane = new JPanel();
-        linkPane.setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
+        linkPane.setBackground(UIConstants.COLOR_SELECTOR_BACK);
         linkPane.setBorder(BorderFactory.createEmptyBorder(7,0,7,0));
         linkPane.setLayout(new BoxLayout(linkPane, BoxLayout.LINE_AXIS));
 
@@ -239,10 +239,10 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         UIUtils.populateLanguageSelector(defaultLocaleText, languages, resources, settings);
         languages.setBorder(BorderFactory.createEmptyBorder());
         languages.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        languages.setUI(new LanguageCellUI(new RoundedBorderFormatter(new LineBorder(Color.black, 1)), LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
-        languages.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        languages.setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
-        languages.setRenderer(new LanguageCellRenderer(resources, "globe.png", LauncherFrame.COLOR_SELECTOR_BACK, LauncherFrame.COLOR_WHITE_TEXT));
+        languages.setUI(new LanguageCellUI(new RoundedBorderFormatter(new LineBorder(Color.black, 1)), UIConstants.COLOR_SCROLL_TRACK, UIConstants.COLOR_SCROLL_THUMB));
+        languages.setForeground(UIConstants.COLOR_WHITE_TEXT);
+        languages.setBackground(UIConstants.COLOR_SELECTOR_BACK);
+        languages.setRenderer(new LanguageCellRenderer(resources, "globe.png", UIConstants.COLOR_SELECTOR_BACK, UIConstants.COLOR_WHITE_TEXT));
         languages.setEditable(false);
         languages.setFocusable(false);
         languages.addActionListener(e -> languageChanged());
@@ -253,7 +253,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         JButton termsLink = new JButton(resources.getString("login.terms"));
         termsLink.setContentAreaFilled(false);
         termsLink.setBorder(BorderFactory.createEmptyBorder());
-        termsLink.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        termsLink.setForeground(UIConstants.COLOR_WHITE_TEXT);
         termsLink.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         termsLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         termsLink.addActionListener(e -> visitTerms());

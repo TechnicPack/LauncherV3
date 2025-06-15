@@ -18,8 +18,8 @@
 
 package net.technicpack.launcher.ui.controls.feeds;
 
+import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.ui.lang.ResourceLoader;
-import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.components.news.AuthorshipWidget;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.platform.io.AuthorshipInfo;
@@ -37,8 +37,8 @@ public class FeedItemView extends JButton {
         this.setBorder(BorderFactory.createEmptyBorder());
         this.setContentAreaFilled(false);
         this.setFocusable(false);
-        this.setBackground(LauncherFrame.COLOR_FEEDITEM_BACK);
-        this.setForeground(LauncherFrame.COLOR_HEADER_TEXT);
+        this.setBackground(UIConstants.COLOR_FEED_ITEM_BACK);
+        this.setForeground(UIConstants.COLOR_HEADER_TEXT);
         this.setFont(loader.getFont(ResourceLoader.FONT_OPENSANS, 12));
 
         this.feedItem = feedItem;

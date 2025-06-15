@@ -47,7 +47,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 
 public class InstallerFrame extends DraggableFrame implements IRelocalizableResource {
@@ -107,7 +106,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
             @Override
             public void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                g.setColor(LauncherFrame.COLOR_CENTRAL_BACK);
+                g.setColor(UIConstants.COLOR_CENTRAL_BACK);
                 g.fillRect(0, 0, getWidth(), getHeight());
             }
         };
@@ -281,7 +280,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
         if (result == JFileChooser.APPROVE_OPTION) {
             portableInstallDir.setText(chooser.getSelectedFile().getAbsolutePath());
-            portableInstallButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+            portableInstallButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
             portableInstallButton.setEnabled(true);
         }
     }
@@ -310,15 +309,15 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
     protected void useDefaultDirectoryChanged() {
         if (!standardDefaultDirectory.isSelected()) {
-            standardInstallDir.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-            standardInstallDir.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
+            standardInstallDir.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+            standardInstallDir.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 10));
             standardSelectButton.setEnabled(true);
-            standardSelectButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+            standardSelectButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
         } else {
-            standardInstallDir.setForeground(LauncherFrame.COLOR_SCROLL_THUMB);
-            standardInstallDir.setBorder(new RoundBorder(LauncherFrame.COLOR_SCROLL_THUMB, 1, 10));
+            standardInstallDir.setForeground(UIConstants.COLOR_SCROLL_THUMB);
+            standardInstallDir.setBorder(new RoundBorder(UIConstants.COLOR_SCROLL_THUMB, 1, 10));
             standardSelectButton.setEnabled(false);
-            standardSelectButton.setForeground(LauncherFrame.COLOR_GREY_TEXT);
+            standardSelectButton.setForeground(UIConstants.COLOR_GREY_TEXT);
             standardInstallDir.setText(OperatingSystem.getOperatingSystem().getUserDirectoryForApp("technic").getAbsolutePath());
         }
     }
@@ -337,7 +336,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         JLabel title = new JLabel(resources.getString("launcher.installer.title"));
         title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
         title.setBorder(BorderFactory.createEmptyBorder(5,0,5,0));
-        title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        title.setForeground(UIConstants.COLOR_WHITE_TEXT);
         title.setOpaque(false);
         title.setIcon(resources.getIcon("options_cog.png"));
         header.add(title);
@@ -358,21 +357,21 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         header.add(closeButton);
 
         SimpleTabPane centerPanel = new SimpleTabPane();
-        centerPanel.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        centerPanel.setForeground(LauncherFrame.COLOR_GREY_TEXT);
-        centerPanel.setSelectedBackground(LauncherFrame.COLOR_BLUE);
-        centerPanel.setSelectedForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        centerPanel.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        centerPanel.setForeground(UIConstants.COLOR_GREY_TEXT);
+        centerPanel.setSelectedBackground(UIConstants.COLOR_BLUE);
+        centerPanel.setSelectedForeground(UIConstants.COLOR_WHITE_TEXT);
         centerPanel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         centerPanel.setOpaque(true);
         add(centerPanel, BorderLayout.CENTER);
 
         JPanel standardInstallPanel = new JPanel();
-        standardInstallPanel.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        standardInstallPanel.setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
 
         setupStandardInstall(standardInstallPanel);
 
         JPanel portableModePanel = new JPanel();
-        portableModePanel.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        portableModePanel.setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
 
         setupPortableMode(portableModePanel);
 
@@ -392,7 +391,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
         JLabel standardSpiel = new JLabel("<html><body align=\"left\" style='margin-right:10px;'>"+resources.getString("launcher.installer.standardspiel")+"</body></html>");
         standardSpiel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        standardSpiel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        standardSpiel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         standardSpiel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
         panel.add(standardSpiel, new GridBagConstraints(0, 0, 3, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(9, 0, 0, 3), 0, 0));
 
@@ -407,7 +406,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         standardDefaultDirectory.setIcon(resources.getIcon("checkbox_open.png"));
         standardDefaultDirectory.setFocusPainted(false);
         standardDefaultDirectory.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        standardDefaultDirectory.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        standardDefaultDirectory.setForeground(UIConstants.COLOR_WHITE_TEXT);
         standardDefaultDirectory.setIconTextGap(6);
         standardDefaultDirectory.setSelected(settings.isPortable() || settings.getTechnicRoot().getAbsolutePath().equals(OperatingSystem.getOperatingSystem().getUserDirectoryForApp("technic").getAbsolutePath()));
         standardDefaultDirectory.addActionListener(e -> useDefaultDirectoryChanged());
@@ -415,7 +414,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
         JLabel installFolderLabel = new JLabel(resources.getString("launcher.installer.folder"));
         installFolderLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        installFolderLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        installFolderLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         panel.add(installFolderLabel, new GridBagConstraints(0, 3, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,24,0,8), 0,0));
 
         String installDir = OperatingSystem.getOperatingSystem().getUserDirectoryForApp("technic").getAbsolutePath();
@@ -425,7 +424,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
         standardInstallDir = new JTextField(installDir);
         standardInstallDir.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        standardInstallDir.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
+        standardInstallDir.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
         standardInstallDir.setHighlighter(null);
         standardInstallDir.setEditable(false);
         standardInstallDir.setCursor(null);
@@ -434,7 +433,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         standardSelectButton = new RoundedButton(resources.getString("launcher.installer.select"));
         standardSelectButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         standardSelectButton.setContentAreaFilled(false);
-        standardSelectButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        standardSelectButton.setHoverForeground(UIConstants.COLOR_BLUE);
         standardSelectButton.addActionListener(e -> selectStandard());
         panel.add(standardSelectButton, new GridBagConstraints(2, 3, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,5,0,16), 0,0));
 
@@ -449,12 +448,12 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
         standardLanguages = new JComboBox();
         UIUtils.populateLanguageSelector(defaultLocaleText, standardLanguages, resources, settings);
-        standardLanguages.setBorder(new RoundBorder(LauncherFrame.COLOR_SCROLL_THUMB, 1, 10));
+        standardLanguages.setBorder(new RoundBorder(UIConstants.COLOR_SCROLL_THUMB, 1, 10));
         standardLanguages.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        standardLanguages.setUI(new LanguageCellUI(new RoundedBorderFormatter(new LineBorder(Color.black, 1)), LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
-        standardLanguages.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        standardLanguages.setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
-        standardLanguages.setRenderer(new LanguageCellRenderer(resources, "globe.png", LauncherFrame.COLOR_SELECTOR_BACK, LauncherFrame.COLOR_WHITE_TEXT));
+        standardLanguages.setUI(new LanguageCellUI(new RoundedBorderFormatter(new LineBorder(Color.black, 1)), UIConstants.COLOR_SCROLL_TRACK, UIConstants.COLOR_SCROLL_THUMB));
+        standardLanguages.setForeground(UIConstants.COLOR_WHITE_TEXT);
+        standardLanguages.setBackground(UIConstants.COLOR_SELECTOR_BACK);
+        standardLanguages.setRenderer(new LanguageCellRenderer(resources, "globe.png", UIConstants.COLOR_SELECTOR_BACK, UIConstants.COLOR_WHITE_TEXT));
         standardLanguages.setEditable(false);
         standardLanguages.setFocusable(false);
         standardLanguages.addActionListener(e -> standardLanguageChanged());
@@ -463,8 +462,8 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         RoundedButton install = new RoundedButton(resources.getString("launcher.installer.install"));
         install.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         install.setContentAreaFilled(false);
-        install.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        install.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        install.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        install.setHoverForeground(UIConstants.COLOR_BLUE);
         install.setBorder(BorderFactory.createEmptyBorder(5, 17, 10, 17));
         install.addActionListener(e -> standardInstall());
         panel.add(install, new GridBagConstraints(1, 5, 2, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.VERTICAL, new Insets(0, 0, 8, 8), 0, 0));
@@ -476,7 +475,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
         JLabel portableSpiel = new JLabel("<html><body align=\"left\" style='margin-right:10px;'>"+resources.getString("launcher.installer.portablespiel")+"</body></html>");
         portableSpiel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        portableSpiel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        portableSpiel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         portableSpiel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
         panel.add(portableSpiel, new GridBagConstraints(0, 0, 3, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(9, 8, 9, 3), 0, 0));
 
@@ -484,7 +483,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
         JLabel installFolderLabel = new JLabel(resources.getString("launcher.installer.folder"));
         installFolderLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        installFolderLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        installFolderLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         panel.add(installFolderLabel, new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,24,0,8), 0,0));
 
         String installDir = "";
@@ -493,19 +492,19 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
         portableInstallDir = new JTextField(installDir);
         portableInstallDir.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        portableInstallDir.setForeground(LauncherFrame.COLOR_BLUE);
-        portableInstallDir.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
+        portableInstallDir.setForeground(UIConstants.COLOR_BLUE);
+        portableInstallDir.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
         portableInstallDir.setHighlighter(null);
         portableInstallDir.setEditable(false);
         portableInstallDir.setCursor(null);
-        portableInstallDir.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
+        portableInstallDir.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 8));
         panel.add(portableInstallDir, new GridBagConstraints(1, 2, 1, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,5,0,5),0,16));
 
         RoundedButton selectInstall = new RoundedButton(resources.getString("launcher.installer.select"));
         selectInstall.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         selectInstall.setContentAreaFilled(false);
-        selectInstall.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        selectInstall.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        selectInstall.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        selectInstall.setHoverForeground(UIConstants.COLOR_BLUE);
         selectInstall.addActionListener(e -> selectPortable());
         panel.add(selectInstall, new GridBagConstraints(2, 2, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,5,0,16), 0,0));
 
@@ -518,12 +517,12 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
         portableLanguages = new JComboBox();
         UIUtils.populateLanguageSelector(defaultLocaleText, portableLanguages, resources, settings);
-        portableLanguages.setBorder(new RoundBorder(LauncherFrame.COLOR_SCROLL_THUMB, 1, 10));
+        portableLanguages.setBorder(new RoundBorder(UIConstants.COLOR_SCROLL_THUMB, 1, 10));
         portableLanguages.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        portableLanguages.setUI(new LanguageCellUI(new RoundedBorderFormatter(new LineBorder(Color.black, 1)), LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
-        portableLanguages.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        portableLanguages.setBackground(LauncherFrame.COLOR_SELECTOR_BACK);
-        portableLanguages.setRenderer(new LanguageCellRenderer(resources, "globe.png", LauncherFrame.COLOR_SELECTOR_BACK, LauncherFrame.COLOR_WHITE_TEXT));
+        portableLanguages.setUI(new LanguageCellUI(new RoundedBorderFormatter(new LineBorder(Color.black, 1)), UIConstants.COLOR_SCROLL_TRACK, UIConstants.COLOR_SCROLL_THUMB));
+        portableLanguages.setForeground(UIConstants.COLOR_WHITE_TEXT);
+        portableLanguages.setBackground(UIConstants.COLOR_SELECTOR_BACK);
+        portableLanguages.setRenderer(new LanguageCellRenderer(resources, "globe.png", UIConstants.COLOR_SELECTOR_BACK, UIConstants.COLOR_WHITE_TEXT));
         portableLanguages.setEditable(false);
         portableLanguages.setFocusable(false);
         portableLanguages.addActionListener(e -> portableLanguageChanged());
@@ -532,14 +531,14 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         portableInstallButton = new RoundedButton(resources.getString("launcher.installer.install"));
         portableInstallButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         portableInstallButton.setContentAreaFilled(false);
-        portableInstallButton.setForeground(LauncherFrame.COLOR_GREY_TEXT);
-        portableInstallButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        portableInstallButton.setForeground(UIConstants.COLOR_GREY_TEXT);
+        portableInstallButton.setHoverForeground(UIConstants.COLOR_BLUE);
         portableInstallButton.setBorder(BorderFactory.createEmptyBorder(5, 17, 10, 17));
         portableInstallButton.addActionListener(e -> portableInstall());
         portableInstallButton.setEnabled(false);
 
         if (!installDir.equals("")) {
-            portableInstallButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
+            portableInstallButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
             portableInstallButton.setEnabled(true);
         }
 

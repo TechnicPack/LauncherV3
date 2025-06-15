@@ -18,7 +18,7 @@
 
 package net.technicpack.launcher.ui.controls.modpacks;
 
-import net.technicpack.launcher.ui.LauncherFrame;
+import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.launcher.ui.controls.SelectorWidget;
 import net.technicpack.ui.lang.ResourceLoader;
 
@@ -39,7 +39,7 @@ public class FindMoreWidget extends SelectorWidget {
         setBorder(new EmptyBorder(5,0,5,0));
         moreLabel = new JLabel(resources.getString("launcher.packselector.more"), JLabel.CENTER);
         moreLabel.setFont(getResources().getFont(ResourceLoader.FONT_OPENSANS, 14));
-        moreLabel.setForeground(LauncherFrame.COLOR_DIM_TEXT);
+        moreLabel.setForeground(UIConstants.COLOR_DIM_TEXT);
         moreLabel.setIcon(resources.getIcon("arrow_right.png"));
         moreLabel.setHorizontalTextPosition(SwingConstants.LEADING);
         moreLabel.setIconTextGap(8);

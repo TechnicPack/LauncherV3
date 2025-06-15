@@ -20,8 +20,8 @@ package net.technicpack.launcher.ui.components.modpacks;
 
 import net.technicpack.discord.IDiscordApi;
 import net.technicpack.discord.io.Server;
+import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.ui.lang.ResourceLoader;
-import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 import net.technicpack.ui.controls.feeds.StatBox;
 import net.technicpack.launchercore.image.IImageJobListener;
@@ -156,20 +156,20 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         ActionListener listener = e -> DesktopUtils.browseUrl(packSiteUrl);
 
         ratings = new StatBox(resources, resources.getString("launcher.packstats.ratings"), null);
-        ratings.setBackground(LauncherFrame.COLOR_LIKES_BACK);
-        ratings.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        ratings.setBackground(UIConstants.COLOR_LIKES_BACK);
+        ratings.setForeground(UIConstants.COLOR_WHITE_TEXT);
         ratings.addActionListener(listener);
         statBoxes.add(ratings);
 
         installs = new StatBox(resources, resources.getString("launcher.packstats.installs"), null);
-        installs.setBackground(LauncherFrame.COLOR_FEEDITEM_BACK);
-        installs.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        installs.setBackground(UIConstants.COLOR_FEED_ITEM_BACK);
+        installs.setForeground(UIConstants.COLOR_WHITE_TEXT);
         installs.addActionListener(listener);
         statBoxes.add(installs);
 
         runs = new StatBox(resources, resources.getString("launcher.packstats.runs"), null);
-        runs.setBackground(LauncherFrame.COLOR_FEEDITEM_BACK);
-        runs.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        runs.setBackground(UIConstants.COLOR_FEED_ITEM_BACK);
+        runs.setForeground(UIConstants.COLOR_WHITE_TEXT);
         runs.addActionListener(listener);
         statBoxes.add(runs);
 
@@ -190,7 +190,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         discordButtons.add(discordImage);
 
         discordLabel = new JButton(resources.getString("launcher.discord.join"));
-        discordLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        discordLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         discordLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 20));
         discordLabel.setContentAreaFilled(false);
         discordLabel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
@@ -200,7 +200,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         discordButtons.add(discordLabel);
 
         countLabel = new JButton(resources.getString("launcher.discord.count", Integer.toString(0)));
-        countLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        countLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         countLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         countLabel.setContentAreaFilled(false);
         countLabel.setBorder(BorderFactory.createEmptyBorder());
@@ -214,7 +214,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
 
         titleLabel = new JLabel(resources.getString("launcher.packstats.title", "Modpack"));
         titleLabel.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 24, Font.BOLD));
-        titleLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        titleLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         titleLabel.setHorizontalAlignment(SwingConstants.LEFT);
         titleLabel.setHorizontalTextPosition(SwingConstants.LEFT);
         titleLabel.setAlignmentX(LEFT_ALIGNMENT);
@@ -253,7 +253,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         description.setEditable(false);
         description.setHighlighter(null);
         description.setAlignmentX(LEFT_ALIGNMENT);
-        description.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        description.setForeground(UIConstants.COLOR_WHITE_TEXT);
         description.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         MutableAttributeSet attributes = new SimpleAttributeSet(description.getParagraphAttributes());
         StyleConstants.setLineSpacing(attributes, StyleConstants.getLineSpacing(attributes)*1.3f);
@@ -291,11 +291,11 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.setOpaque(false);
         scrollPane.getViewport().setOpaque(false);
-        scrollPane.getVerticalScrollBar().setUI(new SimpleScrollbarUI(LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
+        scrollPane.getVerticalScrollBar().setUI(new SimpleScrollbarUI(UIConstants.COLOR_SCROLL_TRACK, UIConstants.COLOR_SCROLL_THUMB));
         scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(10,10));
 
         JPanel scrollHostPanel = new JPanel();
-        scrollHostPanel.setBackground(LauncherFrame.COLOR_FEED_BACK);
+        scrollHostPanel.setBackground(UIConstants.COLOR_FEED_BACK);
         scrollHostPanel.setLayout(new BorderLayout());
         scrollHostPanel.add(scrollPane, BorderLayout.CENTER);
 

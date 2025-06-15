@@ -1,6 +1,6 @@
 package net.technicpack.launcher.ui.components;
 
-import net.technicpack.launcher.ui.LauncherFrame;
+import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
@@ -121,7 +121,7 @@ public class FixRunDataDialog extends LauncherDialog {
                 return dim;
             }
         };
-        centerPanel.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        centerPanel.setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
         centerPanel.setOpaque(true);
         centerPanel.setBorder(BorderFactory.createEmptyBorder(15,15,15,15));
         add(centerPanel, BorderLayout.CENTER);
@@ -137,7 +137,7 @@ public class FixRunDataDialog extends LauncherDialog {
                 "</body>" +
             "</html>");
         label.setFont(font);
-        label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        label.setForeground(UIConstants.COLOR_WHITE_TEXT);
         centerPanel.add(label, new GridBagConstraints(0, 0, 1, 1, 1.0f, 0, GridBagConstraints.NORTH, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0, 0));
         label.setPreferredSize(getPreferredSize(label.getText(), DIALOG_WIDTH-5));
 
@@ -155,14 +155,14 @@ public class FixRunDataDialog extends LauncherDialog {
                         "</body>" +
                     "</html>");
             label.setFont(font);
-            label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+            label.setForeground(UIConstants.COLOR_WHITE_TEXT);
             centerPanel.add(label, new GridBagConstraints(0, gridBagIndex++, 1, 1, 1.0f, 0, GridBagConstraints.SOUTH, GridBagConstraints.BOTH, new Insets(8, 0, 8, 0), 0, 0));
             label.setPreferredSize(getPreferredSize(label.getText(), DIALOG_WIDTH - 5));
         }
 
         JSeparator separator = new JSeparator();
-        separator.setForeground(LauncherFrame.COLOR_REQUIREMENT_SEPARATOR);
-        separator.setBackground(LauncherFrame.COLOR_REQUIREMENT_SEPARATOR);
+        separator.setForeground(UIConstants.COLOR_REQUIREMENT_SEPARATOR);
+        separator.setBackground(UIConstants.COLOR_REQUIREMENT_SEPARATOR);
         centerPanel.add(separator, new GridBagConstraints(0, gridBagIndex++, 1, 1, 1.0f, 0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(isFailure?14:0, 0, 0,0),0,0));
 
         if (isFailure) {
@@ -185,7 +185,7 @@ public class FixRunDataDialog extends LauncherDialog {
         JLabel title = new JLabel(text);
         title.setFont(resourceLoader.getFont(ResourceLoader.FONT_RALEWAY, 26));
         title.setBorder(BorderFactory.createEmptyBorder(5,0,5,0));
-        title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        title.setForeground(UIConstants.COLOR_WHITE_TEXT);
         title.setOpaque(false);
         title.setIcon(resourceLoader.getIcon("options_cog.png"));
         header.add(title);
@@ -236,7 +236,7 @@ public class FixRunDataDialog extends LauncherDialog {
                         resourceLoader.getString("fixRunData.cannotRun") +
                     "</body>" +
                 "</html>");
-        label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        label.setForeground(UIConstants.COLOR_WHITE_TEXT);
         centerPanel.add(label, new GridBagConstraints(0, gridBagIndex++, 1, 1, 1.0f, 0, GridBagConstraints.SOUTH, GridBagConstraints.BOTH, new Insets(8,0,4,0), 0,0));
         label.setPreferredSize(getPreferredSize(label.getText(), DIALOG_WIDTH-5));
 
@@ -272,7 +272,7 @@ public class FixRunDataDialog extends LauncherDialog {
                     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                 }
             });
-            label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+            label.setForeground(UIConstants.COLOR_WHITE_TEXT);
             centerPanel.add(label, new GridBagConstraints(0, gridBagIndex++, 1, 1, 1.0f, 0, GridBagConstraints.SOUTH, GridBagConstraints.BOTH, new Insets(0, 8, 0, 0), 0, 0));
             label.setPreferredSize(getPreferredSize(label.getText(), DIALOG_WIDTH - 5));
         }
@@ -301,7 +301,7 @@ public class FixRunDataDialog extends LauncherDialog {
                     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                 }
             });
-            label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+            label.setForeground(UIConstants.COLOR_WHITE_TEXT);
             centerPanel.add(label, new GridBagConstraints(0, gridBagIndex++, 1, 1, 1.0f, 0, GridBagConstraints.SOUTH, GridBagConstraints.BOTH, new Insets(0, 8, 0, 0), 0, 0));
             label.setPreferredSize(getPreferredSize(label.getText(), DIALOG_WIDTH - 5));
         }
@@ -313,7 +313,7 @@ public class FixRunDataDialog extends LauncherDialog {
                             resourceLoader.getString("fixRunData.needMoreRAM") +
                             "</body>" +
                             "</html>", resourceLoader.getIcon("danger_icon.png"), SwingConstants.LEFT);
-            label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+            label.setForeground(UIConstants.COLOR_WHITE_TEXT);
             centerPanel.add(label, new GridBagConstraints(0, gridBagIndex++, 1, 1, 1.0f, 0, GridBagConstraints.SOUTH, GridBagConstraints.BOTH, new Insets(0, 8, 0, 0), 0, 0));
             label.setPreferredSize(getPreferredSize(label.getText(), DIALOG_WIDTH - 5));
         }
@@ -338,7 +338,7 @@ public class FixRunDataDialog extends LauncherDialog {
                     "</body>" +
                 "</html>"
         );
-        label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        label.setForeground(UIConstants.COLOR_WHITE_TEXT);
         successFailPanel.add(label, new GridBagConstraints(1, 0, 1, 1, 1.0f, 0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(8,10,6,0),0,0));
         label.setPreferredSize(getPreferredSize(label.getText(), DIALOG_WIDTH - 125));
 
@@ -349,7 +349,7 @@ public class FixRunDataDialog extends LauncherDialog {
                     "</body>" +
                 "</html>"
         );
-        label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        label.setForeground(UIConstants.COLOR_WHITE_TEXT);
         successFailPanel.add(label, new GridBagConstraints(1, 1, 1, 1, 1.0f, 0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0,10,8,0),0,0));
         label.setPreferredSize(getPreferredSize(label.getText(), DIALOG_WIDTH - 125));
     }
@@ -363,8 +363,8 @@ public class FixRunDataDialog extends LauncherDialog {
         okButton.setFont(resourceLoader.getFont(ResourceLoader.FONT_OPENSANS, 16));
         okButton.setContentAreaFilled(false);
         okButton.setBorder(BorderFactory.createEmptyBorder(5, 25, 5, 25));
-        okButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        okButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        okButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        okButton.setHoverForeground(UIConstants.COLOR_BLUE);
         okButton.addActionListener(e -> {
             result = Result.OK;
             dispose();
@@ -379,7 +379,7 @@ public class FixRunDataDialog extends LauncherDialog {
 
         JLabel label = new JLabel(resourceLoader.getString("fixRunData.dontAskAgain"));
         label.setFont(font);
-        label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        label.setForeground(UIConstants.COLOR_WHITE_TEXT);
         checkPanel.add(label);
 
         rememberThis = new JCheckBox("", false);
@@ -398,8 +398,8 @@ public class FixRunDataDialog extends LauncherDialog {
         RoundedButton cancelButton = new RoundedButton(resourceLoader.getString("fixRunData.cancel"));
         cancelButton.setFont(resourceLoader.getFont(ResourceLoader.FONT_OPENSANS, 16));
         cancelButton.setContentAreaFilled(false);
-        cancelButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        cancelButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        cancelButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        cancelButton.setHoverForeground(UIConstants.COLOR_BLUE);
         cancelButton.addActionListener(e -> {
             result = Result.CANCEL;
             dispose();
@@ -411,8 +411,8 @@ public class FixRunDataDialog extends LauncherDialog {
         RoundedButton okButton = new RoundedButton(resourceLoader.getString("fixRunData.OK"));
         okButton.setFont(resourceLoader.getFont(ResourceLoader.FONT_OPENSANS, 16));
         okButton.setContentAreaFilled(false);
-        okButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        okButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        okButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        okButton.setHoverForeground(UIConstants.COLOR_BLUE);
         okButton.addActionListener(e -> {
             result = Result.ACCEPT;
             dispose();
@@ -421,7 +421,7 @@ public class FixRunDataDialog extends LauncherDialog {
     }
 
     private Color getPanelColor(boolean isSuccess, boolean hasRecommended) {
-        return isSuccess?LauncherFrame.COLOR_REQUIREMENT_SUCCEED:(hasRecommended?LauncherFrame.COLOR_REQUIREMENT_WARNING:LauncherFrame.COLOR_REQUIREMENT_FAIL);
+        return isSuccess? UIConstants.COLOR_REQUIREMENT_SUCCEED:(hasRecommended? UIConstants.COLOR_REQUIREMENT_WARNING: UIConstants.COLOR_REQUIREMENT_FAIL);
     }
 
     public String getPanelIcon(boolean isSuccess, boolean hasRecommended) {

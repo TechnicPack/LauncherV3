@@ -18,8 +18,8 @@
 
 package net.technicpack.launcher.ui.components.news;
 
+import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.ui.lang.ResourceLoader;
-import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 import net.technicpack.launchercore.image.ImageRepository;
@@ -29,7 +29,6 @@ import net.technicpack.utilslib.DesktopUtils;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
@@ -81,10 +80,10 @@ public class NewsInfoPanel extends JPanel implements PropertyChangeListener {
     private void initComponents() {
         setLayout(new GridBagLayout());
         setBorder(BorderFactory.createEmptyBorder(20,20,18,16));
-        setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
 
         title = new JLabel("");
-        title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        title.setForeground(UIConstants.COLOR_WHITE_TEXT);
         title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
         title.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
@@ -123,7 +122,7 @@ public class NewsInfoPanel extends JPanel implements PropertyChangeListener {
         newsText = new JTextPane();
         newsText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         newsText.setOpaque(false);
-        newsText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        newsText.setForeground(UIConstants.COLOR_WHITE_TEXT);
         newsText.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         newsText.setEditable(false);
         newsText.setHighlighter(null);
@@ -158,7 +157,7 @@ public class NewsInfoPanel extends JPanel implements PropertyChangeListener {
         });
 
         newsScroller = new JScrollPane(newsText, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        newsScroller.getVerticalScrollBar().setUI(new SimpleScrollbarUI(LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
+        newsScroller.getVerticalScrollBar().setUI(new SimpleScrollbarUI(UIConstants.COLOR_SCROLL_TRACK, UIConstants.COLOR_SCROLL_THUMB));
         newsScroller.getVerticalScrollBar().setPreferredSize(new Dimension(10, 10));
         newsScroller.setBorder(BorderFactory.createEmptyBorder());
         newsScroller.setMaximumSize(new Dimension(32000,900));
@@ -178,8 +177,8 @@ public class NewsInfoPanel extends JPanel implements PropertyChangeListener {
         RoundedButton discussButton = new RoundedButton(resources.getString("launcher.news.discuss"));
         discussButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         discussButton.setBorder(BorderFactory.createEmptyBorder(5, 17, 10, 17));
-        discussButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        discussButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        discussButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        discussButton.setHoverForeground(UIConstants.COLOR_BLUE);
         discussButton.setAlignmentX(RIGHT_ALIGNMENT);
         discussButton.setContentAreaFilled(false);
         discussButton.addActionListener(e -> visitCurrentItem());

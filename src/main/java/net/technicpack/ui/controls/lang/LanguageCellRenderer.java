@@ -19,7 +19,7 @@
 
 package net.technicpack.ui.controls.lang;
 
-import net.technicpack.launcher.ui.LauncherFrame;
+import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.ui.listitems.LanguageItem;
 
@@ -64,7 +64,7 @@ public class LanguageCellRenderer  extends JLabel implements ListCellRenderer<La
 
         // Set a lighter background for the currently selected option (on hover)
         if (selectedValue != null && selectedValue.equals(value)) {
-            setBackground(LauncherFrame.COLOR_SELECTOR_OPTION);
+            setBackground(UIConstants.COLOR_SELECTOR_OPTION);
         } else {
             setBackground(defaultBackground);
         }

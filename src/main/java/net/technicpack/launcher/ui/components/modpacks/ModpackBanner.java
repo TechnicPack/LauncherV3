@@ -18,16 +18,14 @@
 
 package net.technicpack.launcher.ui.components.modpacks;
 
-import net.technicpack.launchercore.modpacks.packinfo.CombinedPackInfo;
+import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.ui.lang.ResourceLoader;
-import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.modpacks.ModpackTag;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.install.Version;
 import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.solder.io.SolderPackInfo;
 import net.technicpack.utilslib.ImageUtils;
 
 import javax.swing.*;
@@ -95,16 +93,16 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
         modpackTags.removeAll();
 
         if (modpack.isOfficial())
-            addTag("launcher.pack.tag.official", LauncherFrame.COLOR_BLUE);
+            addTag("launcher.pack.tag.official", UIConstants.COLOR_BLUE);
 
         if (modpack.getPackInfo() != null && modpack.getPackInfo().hasSolder())
-            addTag("launcher.pack.tag.solder", LauncherFrame.COLOR_GREEN);
+            addTag("launcher.pack.tag.solder", UIConstants.COLOR_GREEN);
 
         if (modpack.isServerPack())
-            addTag("launcher.pack.tag.server", LauncherFrame.COLOR_SERVER);
+            addTag("launcher.pack.tag.server", UIConstants.COLOR_SERVER);
 
         if (modpack.isLocalOnly())
-            addTag("launcher.pack.tag.offline", LauncherFrame.COLOR_RED);
+            addTag("launcher.pack.tag.offline", UIConstants.COLOR_RED);
 
         if (modpackTags.getComponentCount() == 0) {
             modpackTags.add(Box.createRigidArea(new Dimension(8,14)));
@@ -142,7 +140,7 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
         this.add(modpackNamePanel);
 
         modpackName = new JLabel("Modpack");
-        modpackName.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        modpackName.setForeground(UIConstants.COLOR_WHITE_TEXT);
         modpackName.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
         modpackName.setHorizontalTextPosition(SwingConstants.LEFT);
         modpackName.setAlignmentX(LEFT_ALIGNMENT);
@@ -182,7 +180,7 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
 
         versionText = new JLabel(resources.getString("launcher.packbanner.version"));
         versionText.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        versionText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        versionText.setForeground(UIConstants.COLOR_WHITE_TEXT);
         versionText.setHorizontalTextPosition(SwingConstants.LEADING);
         versionText.setHorizontalAlignment(SwingConstants.RIGHT);
         versionText.setAlignmentX(RIGHT_ALIGNMENT);
@@ -191,7 +189,7 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
 
         installedVersion = new JLabel("1.0.7");
         installedVersion.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        installedVersion.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        installedVersion.setForeground(UIConstants.COLOR_WHITE_TEXT);
         installedVersion.setHorizontalTextPosition(SwingConstants.LEADING);
         installedVersion.setHorizontalAlignment(SwingConstants.RIGHT);
         installedVersion.setAlignmentX(RIGHT_ALIGNMENT);
@@ -201,11 +199,11 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
         packDoodads.add(Box.createRigidArea(new Dimension(0, 5)));
 
         modpackOptions = new JLabel(resources.getString("launcher.packbanner.options"));
-        modpackOptions.setIcon(new ImageIcon(resources.colorImage(resources.getImage("options_cog.png"), LauncherFrame.COLOR_BUTTON_BLUE)));
+        modpackOptions.setIcon(new ImageIcon(resources.colorImage(resources.getImage("options_cog.png"), UIConstants.COLOR_BUTTON_BLUE)));
         modpackOptions.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         Font font = resources.getFont(ResourceLoader.FONT_OPENSANS, 14);
         modpackOptions.setFont(font);
-        modpackOptions.setForeground(LauncherFrame.COLOR_BLUE);
+        modpackOptions.setForeground(UIConstants.COLOR_BLUE);
         modpackOptions.setHorizontalTextPosition(SwingConstants.LEADING);
         modpackOptions.setHorizontalAlignment(SwingConstants.RIGHT);
         modpackOptions.setAlignmentX(RIGHT_ALIGNMENT);

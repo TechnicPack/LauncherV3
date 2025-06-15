@@ -18,14 +18,13 @@
 
 package net.technicpack.launcher.ui.controls;
 
-import net.technicpack.launcher.ui.LauncherFrame;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.ui.lang.ResourceLoader;
 
 public class HeaderTab extends JLabel implements MouseListener {
@@ -39,8 +38,8 @@ public class HeaderTab extends JLabel implements MouseListener {
         setIsActive(false);
 
         setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
-        setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        setBackground(LauncherFrame.COLOR_BLUE_DARKER);
+        setForeground(UIConstants.COLOR_WHITE_TEXT);
+        setBackground(UIConstants.COLOR_BLUE_DARKER);
         setBorder(BorderFactory.createEmptyBorder(20,18,20,18));
         addMouseListener(this);
     }

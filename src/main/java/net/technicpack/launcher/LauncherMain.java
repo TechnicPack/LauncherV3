@@ -39,6 +39,7 @@ import net.technicpack.launcher.settings.migration.ResetJvmArgsIfDefaultString;
 import net.technicpack.launcher.ui.InstallerFrame;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.LoginFrame;
+import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launchercore.TechnicConstants;
@@ -465,8 +466,8 @@ public class LauncherMain {
 
     private static void startLauncher(final TechnicSettings settings, StartupParameters startupParameters, final LauncherDirectories directories,
                                       ResourceLoader resources) {
-        UIManager.put("ComboBox.disabledBackground", LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        UIManager.put("ComboBox.disabledForeground", LauncherFrame.COLOR_GREY_TEXT);
+        UIManager.put("ComboBox.disabledBackground", UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        UIManager.put("ComboBox.disabledForeground", UIConstants.COLOR_GREY_TEXT);
         System.setProperty("xr.load.xml-reader", "org.ccil.cowan.tagsoup.Parser");
 
         // Remove all log files older than a week
@@ -474,7 +475,7 @@ public class LauncherMain {
         cleanupLogsThread.start();
 
         final SplashScreen splash = new SplashScreen(resources.getImage("launch_splash.png"), 0);
-        Color bg = LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL;
+        Color bg = UIConstants.COLOR_FORM_ELEMENT_INTERNAL;
         splash.getContentPane().setBackground(new Color(bg.getRed(), bg.getGreen(), bg.getBlue(), 255));
         splash.pack();
         splash.setLocationRelativeTo(null);

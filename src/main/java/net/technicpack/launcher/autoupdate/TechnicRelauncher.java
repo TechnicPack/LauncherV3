@@ -21,10 +21,10 @@ package net.technicpack.launcher.autoupdate;
 import net.technicpack.autoupdate.IUpdateStream;
 import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.autoupdate.tasks.*;
+import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.settings.StartupParameters;
-import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
@@ -96,11 +96,11 @@ public class TechnicRelauncher extends Relauncher {
     @Override
     public InstallTasksQueue buildUpdaterTasks() {
         screen = new SplashScreen(resources.getImage("launch_splash.png"), 30);
-        Color bg = LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL;
+        Color bg = UIConstants.COLOR_FORM_ELEMENT_INTERNAL;
         screen.getContentPane().setBackground(new Color (bg.getRed(),bg.getGreen(),bg.getBlue(),255));
         screen.getProgressBar().setForeground(Color.white);
-        screen.getProgressBar().setBackground(LauncherFrame.COLOR_GREEN);
-        screen.getProgressBar().setBackFill(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        screen.getProgressBar().setBackground(UIConstants.COLOR_GREEN);
+        screen.getProgressBar().setBackFill(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
         screen.getProgressBar().setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 12));
         screen.pack();
         screen.setLocationRelativeTo(null);

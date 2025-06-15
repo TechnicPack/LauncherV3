@@ -19,10 +19,10 @@
 package net.technicpack.launcher.ui.components.modpacks;
 
 import net.technicpack.discord.IDiscordApi;
+import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.TiledBackground;
 import net.technicpack.ui.lang.ResourceLoader;
-import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.feeds.FeedItemView;
 import net.technicpack.ui.controls.feeds.HorizontalGallery;
 import net.technicpack.launchercore.image.IImageJobListener;
@@ -126,8 +126,8 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         tiledBackground = new TiledBackground(null);
         tiledBackground.setOpaque(true);
         tiledBackground.setLayout(new BorderLayout());
-        tiledBackground.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-        tiledBackground.setBackground(LauncherFrame.COLOR_CENTRAL_BACK);
+        tiledBackground.setForeground(UIConstants.COLOR_WHITE_TEXT);
+        tiledBackground.setBackground(UIConstants.COLOR_CENTRAL_BACK);
         tiledBackground.setFilterImage(true);
         this.add(tiledBackground, BorderLayout.CENTER);
 
@@ -138,7 +138,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         tiledBackground.add(layoutPanel,BorderLayout.CENTER);
 
         banner = new ModpackBanner(resources, iconRepo, modpackOptionsListener);
-        banner.setBackground(LauncherFrame.COLOR_BANNER);
+        banner.setBackground(UIConstants.COLOR_BANNER);
         banner.setBorder(BorderFactory.createEmptyBorder(0,0,4,0));
         layoutPanel.add(banner);
 
@@ -174,7 +174,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
 
         JLabel toplineLabel = new JLabel(resources.getString("launcher.packfeed.title"));
         toplineLabel.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 28));
-        toplineLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        toplineLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         topline.add(toplineLabel);
         topline.add(Box.createHorizontalGlue());
 
@@ -192,11 +192,11 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
 
         JLabel label = new JLabel(resources.getString("launcher.packfeed.noupdates"));
         label.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 20));
-        label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        label.setForeground(UIConstants.COLOR_WHITE_TEXT);
 
         feedGallery = new HorizontalGallery();
         feedGallery.setNoComponentsMessage(label);
-        feedGallery.setBackground(LauncherFrame.COLOR_FEED_BACK);
+        feedGallery.setBackground(UIConstants.COLOR_FEED_BACK);
         feedGallery.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         constraints = new GridBagConstraints();
         constraints.gridx = 0;
@@ -222,16 +222,16 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         deleteButton = new RoundedButton(resources.getString("modpackoptions.delete.text"));
         deleteButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         deleteButton.setBorder(BorderFactory.createEmptyBorder(5, 17, 10, 17));
-        deleteButton.setBackground(LauncherFrame.COLOR_FOOTER);
-        deleteButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        deleteButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        deleteButton.setBackground(UIConstants.COLOR_FOOTER);
+        deleteButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        deleteButton.setHoverForeground(UIConstants.COLOR_BLUE);
         deleteButton.setAlignmentX(RIGHT_ALIGNMENT);
         deleteButton.setFocusable(false);
         deleteButton.setContentAreaFilled(false);
         deleteButton.setShouldShowBackground(true);
         deleteButton.setIconTextGap(8);
-        deleteButton.setHoverIcon(new ImageIcon(resources.colorImage(resources.getImage("delete_button.png"), LauncherFrame.COLOR_BLUE)));
-        deleteButton.setIcon(new ImageIcon(resources.colorImage(resources.getImage("delete_button.png"), LauncherFrame.COLOR_BUTTON_BLUE)));
+        deleteButton.setHoverIcon(new ImageIcon(resources.colorImage(resources.getImage("delete_button.png"), UIConstants.COLOR_BLUE)));
+        deleteButton.setIcon(new ImageIcon(resources.colorImage(resources.getImage("delete_button.png"), UIConstants.COLOR_BUTTON_BLUE)));
         feedBottom.add(deleteButton, new GridBagConstraints(0, 3, 1,1,1,0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0,0,0,0),0,0));
 
         constraints = new GridBagConstraints();
@@ -247,9 +247,9 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
         playButton = new RoundedButton(resources.getString("launcher.pack.launch"));
         playButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         playButton.setBorder(BorderFactory.createEmptyBorder(5, 17, 10, 17));
-        playButton.setBackground(LauncherFrame.COLOR_FOOTER);
-        playButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        playButton.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        playButton.setBackground(UIConstants.COLOR_FOOTER);
+        playButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        playButton.setHoverForeground(UIConstants.COLOR_BLUE);
         playButton.setAlignmentX(RIGHT_ALIGNMENT);
         playButton.setFocusable(false);
         playButton.setContentAreaFilled(false);

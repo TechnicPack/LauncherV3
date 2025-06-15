@@ -18,7 +18,7 @@
 
 package net.technicpack.launcher.ui.components;
 
-import net.technicpack.launcher.ui.LauncherFrame;
+import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.launcher.ui.listitems.PackBuildItem;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.modpacks.InstalledPack;
@@ -79,14 +79,14 @@ public class ModpackOptionsDialog extends LauncherDialog {
     }
 
     protected void selectRecommended() {
-        manualBuildList.setBorder(new RoundBorder(LauncherFrame.COLOR_GREY_TEXT, 1, 10));
+        manualBuildList.setBorder(new RoundBorder(UIConstants.COLOR_GREY_TEXT, 1, 10));
         manualBuildList.setEnabled(false);
         manualBuildList.setSelectedItem(new PackBuildItem(modpack.getRecommendedBuild(), resources, modpack));
         this.modpack.setBuild(InstalledPack.RECOMMENDED);
     }
 
     protected void selectLatest() {
-        manualBuildList.setBorder(new RoundBorder(LauncherFrame.COLOR_GREY_TEXT, 1, 10));
+        manualBuildList.setBorder(new RoundBorder(UIConstants.COLOR_GREY_TEXT, 1, 10));
         manualBuildList.setEnabled(false);
         manualBuildList.setSelectedItem(new PackBuildItem(modpack.getLatestBuild(), resources, modpack));
         this.modpack.setBuild(InstalledPack.LATEST);
@@ -112,7 +112,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         }
 
         this.modpack.setBuild(((PackBuildItem) manualBuildList.getSelectedItem()).getBuildNumber());
-        manualBuildList.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 10));
+        manualBuildList.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 10));
         manualBuildList.setEnabled(true);
     }
 
@@ -175,7 +175,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         JLabel title = new JLabel(resources.getString("launcher.title.modpackoptions"));
         title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
         title.setBorder(BorderFactory.createEmptyBorder(5,0,5,0));
-        title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        title.setForeground(UIConstants.COLOR_WHITE_TEXT);
         title.setOpaque(false);
         title.setIcon(resources.getIcon("options_cog.png"));
         header.add(title);
@@ -192,7 +192,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
         header.add(closeButton);
 
         JPanel centerPanel = new JPanel();
-        centerPanel.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        centerPanel.setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
         centerPanel.setOpaque(true);
         centerPanel.setBorder(BorderFactory.createEmptyBorder(15,15,15,15));
         add(centerPanel, BorderLayout.CENTER);
@@ -201,30 +201,30 @@ public class ModpackOptionsDialog extends LauncherDialog {
 
         JLabel installFolderLabel = new JLabel(resources.getString("modpackoptions.installfolder.text"));
         installFolderLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        installFolderLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        installFolderLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         centerPanel.add(installFolderLabel, new GridBagConstraints(0, 0, 3, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
 
         installField = new JTextField("");
         installField.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        installField.setForeground(LauncherFrame.COLOR_BLUE);
-        installField.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
+        installField.setForeground(UIConstants.COLOR_BLUE);
+        installField.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
         installField.setHighlighter(null);
         installField.setEditable(false);
         installField.setCursor(null);
-        installField.setBorder(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 8));
+        installField.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 8));
         centerPanel.add(installField, new GridBagConstraints(3, 0, 1, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,5,0,5),0,0));
 
         RoundedButton openFolder = new RoundedButton(resources.getString("modpackoptions.installfolder.open"));
         openFolder.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         openFolder.setContentAreaFilled(false);
-        openFolder.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        openFolder.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        openFolder.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        openFolder.setHoverForeground(UIConstants.COLOR_BLUE);
         openFolder.setEnabled(modpack.getInstalledDirectory() != null && modpack.getInstalledDirectory().exists());
         if (modpack.getInstalledDirectory() != null && modpack.getInstalledDirectory().exists()) {
-            openFolder.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-            openFolder.setHoverForeground(LauncherFrame.COLOR_BLUE);
+            openFolder.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+            openFolder.setHoverForeground(UIConstants.COLOR_BLUE);
         } else {
-            openFolder.setForeground(LauncherFrame.COLOR_GREY_TEXT);
+            openFolder.setForeground(UIConstants.COLOR_GREY_TEXT);
         }
         openFolder.addActionListener(e -> openFolder());
         centerPanel.add(openFolder, new GridBagConstraints(4, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,5,0,5), 0,0));
@@ -232,14 +232,14 @@ public class ModpackOptionsDialog extends LauncherDialog {
         RoundedButton moveFolder = new RoundedButton(resources.getString("modpackoptions.installfolder.move"));
         moveFolder.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         moveFolder.setContentAreaFilled(false);
-        moveFolder.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        moveFolder.setHoverForeground(LauncherFrame.COLOR_BLUE);
+        moveFolder.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        moveFolder.setHoverForeground(UIConstants.COLOR_BLUE);
         moveFolder.setEnabled(modpack.getInstalledDirectory() != null && modpack.getInstalledDirectory().exists());
         if (modpack.getInstalledDirectory() != null && modpack.getInstalledDirectory().exists()) {
-            moveFolder.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-            moveFolder.setHoverForeground(LauncherFrame.COLOR_BLUE);
+            moveFolder.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+            moveFolder.setHoverForeground(UIConstants.COLOR_BLUE);
         } else {
-            moveFolder.setForeground(LauncherFrame.COLOR_GREY_TEXT);
+            moveFolder.setForeground(UIConstants.COLOR_GREY_TEXT);
         }
         moveFolder.addActionListener(e -> moveFolder());
         centerPanel.add(moveFolder, new GridBagConstraints(5, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,5), 0,0));
@@ -248,12 +248,12 @@ public class ModpackOptionsDialog extends LauncherDialog {
 
         JLabel buildSelectLabel = new JLabel(resources.getString("modpackoptions.version.text"));
         buildSelectLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        buildSelectLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        buildSelectLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         centerPanel.add(buildSelectLabel, new GridBagConstraints(0, 2, 6, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0,0,0,0),0,0));
 
         recommended = new JRadioButton(resources.getString("modpackoptions.version.recommended"));
         recommended.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        recommended.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        recommended.setForeground(UIConstants.COLOR_WHITE_TEXT);
         recommended.setIcon(resources.getIcon("radio_deselected.png"));
         recommended.setSelectedIcon(resources.getIcon("radio_selected.png"));
         recommended.setFocusPainted(false);
@@ -263,7 +263,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
 
         latest = new JRadioButton(resources.getString("modpackoptions.version.latest"));
         latest.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        latest.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        latest.setForeground(UIConstants.COLOR_WHITE_TEXT);
         latest.setIcon(resources.getIcon("radio_deselected.png"));
         latest.setSelectedIcon(resources.getIcon("radio_selected.png"));
         latest.setFocusPainted(false);
@@ -273,7 +273,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
 
         manual = new JRadioButton(resources.getString("modpackoptions.version.manual"));
         manual.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        manual.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        manual.setForeground(UIConstants.COLOR_WHITE_TEXT);
         manual.setIcon(resources.getIcon("radio_deselected.png"));
         manual.setSelectedIcon(resources.getIcon("radio_selected.png"));
         manual.setFocusPainted(false);
@@ -296,26 +296,26 @@ public class ModpackOptionsDialog extends LauncherDialog {
         }
 
         AdvancedCellRenderer renderer = new AdvancedCellRenderer();
-        renderer.setUnselectedBackgroundColor(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
-        renderer.setUnselectedForegroundColor(LauncherFrame.COLOR_BUTTON_BLUE);
-        renderer.setSelectedForegroundColor(LauncherFrame.COLOR_BUTTON_BLUE);
-        renderer.setSelectedBackgroundColor(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
+        renderer.setUnselectedBackgroundColor(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
+        renderer.setUnselectedForegroundColor(UIConstants.COLOR_BUTTON_BLUE);
+        renderer.setSelectedForegroundColor(UIConstants.COLOR_BUTTON_BLUE);
+        renderer.setSelectedBackgroundColor(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
 
         manualBuildList.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         manualBuildList.setEditable(false);
-        manualBuildList.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        manualBuildList.setBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
+        manualBuildList.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+        manualBuildList.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
         manualBuildList.setRenderer(renderer);
-        manualBuildList.setUI(new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(LauncherFrame.COLOR_BUTTON_BLUE, 1, 0)), resources, LauncherFrame.COLOR_SCROLL_TRACK, LauncherFrame.COLOR_SCROLL_THUMB));
+        manualBuildList.setUI(new SimpleButtonComboUI(new RoundedBorderFormatter(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 0)), resources, UIConstants.COLOR_SCROLL_TRACK, UIConstants.COLOR_SCROLL_THUMB));
         manualBuildList.setFocusable(false);
         manualBuildList.addActionListener(e -> buildUpdated());
 
         Object child = manualBuildList.getAccessibleContext().getAccessibleChild(0);
         BasicComboPopup popup = (BasicComboPopup)child;
         JList list = popup.getList();
-        list.setSelectionForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-        list.setSelectionBackground(LauncherFrame.COLOR_FORM_ELEMENT_INTERNAL);
-        list.setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+        list.setSelectionForeground(UIConstants.COLOR_BUTTON_BLUE);
+        list.setSelectionBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        list.setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
 
         centerPanel.add(manualBuildList, new GridBagConstraints(2, 6, 4, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(5,0,0,0), 0,0));
 
@@ -329,10 +329,10 @@ public class ModpackOptionsDialog extends LauncherDialog {
         deletePack.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         deletePack.setContentAreaFilled(false);
         if (modpack.getInstalledDirectory() != null) {
-            deletePack.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-            deletePack.setHoverForeground(LauncherFrame.COLOR_BLUE);
+            deletePack.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+            deletePack.setHoverForeground(UIConstants.COLOR_BLUE);
         } else {
-            deletePack.setForeground(LauncherFrame.COLOR_GREY_TEXT);
+            deletePack.setForeground(UIConstants.COLOR_GREY_TEXT);
         }
         deletePack.addActionListener(e -> deletePack());
         deletePack.setEnabled(modpack.getInstalledDirectory() != null);
@@ -344,10 +344,10 @@ public class ModpackOptionsDialog extends LauncherDialog {
         resetPack.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         resetPack.setContentAreaFilled(false);
         if (modpack.getInstalledDirectory() != null) {
-            resetPack.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-            resetPack.setHoverForeground(LauncherFrame.COLOR_BLUE);
+            resetPack.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+            resetPack.setHoverForeground(UIConstants.COLOR_BLUE);
         } else {
-            resetPack.setForeground(LauncherFrame.COLOR_GREY_TEXT);
+            resetPack.setForeground(UIConstants.COLOR_GREY_TEXT);
         }
         resetPack.addActionListener(e -> resetPack());
         resetPack.setEnabled(modpack.getInstalledDirectory() != null);

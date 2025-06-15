@@ -18,8 +18,8 @@
 
 package net.technicpack.launcher.ui.controls.feeds;
 
+import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.ui.lang.ResourceLoader;
-import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.controls.SelectorWidget;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
@@ -61,7 +61,7 @@ public class NewsWidget extends SelectorWidget implements IImageJobListener<Auth
 
         JLabel text = new JLabel(article.getTitle());
         text.setFont(getResources().getFont(ResourceLoader.FONT_OPENSANS, 14));
-        text.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+        text.setForeground(UIConstants.COLOR_WHITE_TEXT);
         text.setPreferredSize(new Dimension(200, text.getPreferredSize().height));
         add(text);
 
@@ -74,7 +74,7 @@ public class NewsWidget extends SelectorWidget implements IImageJobListener<Auth
         DateFormat format = DateFormat.getDateInstance(DateFormat.SHORT);
         JLabel date = new JLabel(format.format(article.getDate()));
         date.setFont(getResources().getFont(ResourceLoader.FONT_OPENSANS, 12));
-        date.setForeground(LauncherFrame.COLOR_DIM_TEXT);
+        date.setForeground(UIConstants.COLOR_DIM_TEXT);
         add(date);
     }
 
