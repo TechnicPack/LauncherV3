@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class EnsureLinkedFileTask implements IInstallTask {
+public class EnsureLinkedFileTask<T> implements IInstallTask<T> {
     private Path link;
     private Path target;
 
@@ -52,7 +52,7 @@ public class EnsureLinkedFileTask implements IInstallTask {
     }
 
     @Override
-    public void runTask(InstallTasksQueue queue) throws IOException {
+    public void runTask(InstallTasksQueue<T> queue) throws IOException {
         if (Files.isSymbolicLink(link) && Files.readSymbolicLink(link).equals(target)) {
             // link is symlink and points to the right place
             return;

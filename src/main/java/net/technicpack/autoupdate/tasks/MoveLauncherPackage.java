@@ -31,7 +31,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.logging.Level;
 
-public class MoveLauncherPackage implements IInstallTask {
+public class MoveLauncherPackage implements IInstallTask<Void> {
     private String description;
     private File launcher;
     private Relauncher relauncher;
@@ -53,7 +53,7 @@ public class MoveLauncherPackage implements IInstallTask {
     }
 
     @Override
-    public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
+    public void runTask(InstallTasksQueue<Void> queue) throws IOException, InterruptedException {
         String currentPath = relauncher.getRunningPath();
         Utils.getLogger().log(Level.INFO, String.format("Moving running package from %s to %s", currentPath, launcher.getAbsolutePath()));
 

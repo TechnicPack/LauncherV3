@@ -9,7 +9,6 @@ import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
 import net.technicpack.launchercore.install.verifiers.SHA1FileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
-import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.mojang.version.ExtractRulesFileFilter;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
@@ -19,16 +18,16 @@ import net.technicpack.utilslib.*;
 import java.io.File;
 import java.io.IOException;
 
-public class InstallVersionLibTask extends ListenerTask {
+public class InstallVersionLibTask extends ListenerTask<MojangVersion> {
     private Library library;
-    private ITasksQueue grabQueue;
-    private ITasksQueue downloadLibraryQueue;
-    private ITasksQueue copyLibraryQueue;
+    private ITasksQueue<MojangVersion> grabQueue;
+    private ITasksQueue<MojangVersion> downloadLibraryQueue;
+    private ITasksQueue<MojangVersion> copyLibraryQueue;
     private ModpackModel pack;
     private LauncherDirectories directories;
 
-    public InstallVersionLibTask(Library library, ITasksQueue grabQueue, ITasksQueue downloadLibraryQueue,
-                                 ITasksQueue copyLibraryQueue, ModpackModel pack, LauncherDirectories directories) {
+    public InstallVersionLibTask(Library library, ITasksQueue<MojangVersion> grabQueue, ITasksQueue<MojangVersion> downloadLibraryQueue,
+                                 ITasksQueue<MojangVersion> copyLibraryQueue, ModpackModel pack, LauncherDirectories directories) {
         this.library = library;
         this.downloadLibraryQueue = downloadLibraryQueue;
         this.copyLibraryQueue = copyLibraryQueue;
@@ -43,7 +42,7 @@ public class InstallVersionLibTask extends ListenerTask {
     }
 
     @Override
-    public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
+    public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException, InterruptedException {
         super.runTask(queue);
 
         queue.refreshProgress();
@@ -60,7 +59,7 @@ public class InstallVersionLibTask extends ListenerTask {
             }
         }
 
-        MojangVersion version = ((InstallTasksQueue<MojangVersion>) queue).getMetadata();
+        MojangVersion version = queue.getMetadata();
         final String bitness = version.getJavaRuntime().getBitness();
 
         String path = library.getArtifactPath(nativeClassifier).replace("${arch}", bitness);
@@ -100,6 +99,6 @@ public class InstallVersionLibTask extends ListenerTask {
         if (library.getExtract() != null)
             filter = new ExtractRulesFileFilter(library.getExtract());
 
-        grabQueue.addTask(new EnsureFileTask(cache, verifier, extractDirectory, url, downloadLibraryQueue, copyLibraryQueue, filter));
+        grabQueue.addTask(new EnsureFileTask<>(cache, verifier, extractDirectory, url, downloadLibraryQueue, copyLibraryQueue, filter));
     }
 }

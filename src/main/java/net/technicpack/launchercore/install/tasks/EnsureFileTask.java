@@ -27,31 +27,31 @@ import net.technicpack.utilslib.IZipFileFilter;
 import java.io.File;
 import java.io.IOException;
 
-public class EnsureFileTask<TaskQueue extends ITasksQueue> implements IInstallTask {
+public class EnsureFileTask<T> implements IInstallTask<T> {
     private final File cacheLocation;
     private final File zipExtractLocation;
     private final String sourceUrl;
     private final String friendlyFileName;
     private final IFileVerifier fileVerifier;
-    private final TaskQueue downloadTaskQueue;
-    private final TaskQueue copyTaskQueue;
+    private final ITasksQueue<T> downloadTaskQueue;
+    private final ITasksQueue<T> copyTaskQueue;
     private final IZipFileFilter filter;
     private boolean executable;
     private String downloadDecompressor;
 
-    public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, TaskQueue downloadTaskQueue, TaskQueue copyTaskQueue) {
+    public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, ITasksQueue<T> downloadTaskQueue, ITasksQueue<T> copyTaskQueue) {
         this(fileLocation, fileVerifier, zipExtractLocation, sourceUrl, fileLocation.getName(), downloadTaskQueue, copyTaskQueue, null);
     }
 
-    public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, TaskQueue downloadTaskQueue, TaskQueue copyTaskQueue, IZipFileFilter filter) {
+    public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, ITasksQueue<T> downloadTaskQueue, ITasksQueue<T> copyTaskQueue, IZipFileFilter filter) {
         this(fileLocation, fileVerifier, zipExtractLocation, sourceUrl, fileLocation.getName(), downloadTaskQueue, copyTaskQueue, filter);
     }
 
-    public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, String friendlyFileName, TaskQueue downloadTaskQueue, TaskQueue copyTaskQueue) {
+    public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, String friendlyFileName, ITasksQueue<T> downloadTaskQueue, ITasksQueue<T> copyTaskQueue) {
         this(fileLocation, fileVerifier, zipExtractLocation, sourceUrl, friendlyFileName, downloadTaskQueue, copyTaskQueue, null);
     }
 
-    public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, String friendlyFileName, TaskQueue downloadTaskQueue, TaskQueue copyTaskQueue, IZipFileFilter fileFilter) {
+    public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, String friendlyFileName, ITasksQueue<T> downloadTaskQueue, ITasksQueue<T> copyTaskQueue, IZipFileFilter fileFilter) {
         this.cacheLocation = fileLocation;
         this.zipExtractLocation = zipExtractLocation;
         this.sourceUrl = sourceUrl;
@@ -73,12 +73,12 @@ public class EnsureFileTask<TaskQueue extends ITasksQueue> implements IInstallTa
     }
 
     @Override
-    public void runTask(InstallTasksQueue queue) throws IOException {
+    public void runTask(InstallTasksQueue<T> queue) throws IOException {
         if (this.zipExtractLocation != null)
             unzipFile(this.copyTaskQueue, this.cacheLocation, this.zipExtractLocation, this.filter);
 
         if (sourceUrl != null && (!this.cacheLocation.exists() || (fileVerifier != null && !fileVerifier.isFileValid(this.cacheLocation)))) {
-            DownloadFileTask downloadFileTask = new DownloadFileTask(this.sourceUrl, this.cacheLocation, this.fileVerifier, this.friendlyFileName, this.executable);
+            DownloadFileTask<T> downloadFileTask = new DownloadFileTask<>(this.sourceUrl, this.cacheLocation, this.fileVerifier, this.friendlyFileName, this.executable);
 
             if (this.downloadDecompressor != null) {
                 downloadFileTask.setDecompressor(this.downloadDecompressor);
@@ -88,11 +88,11 @@ public class EnsureFileTask<TaskQueue extends ITasksQueue> implements IInstallTa
         }
     }
 
-    protected void unzipFile(TaskQueue taskQueue, File zipLocation, File targetLocation, IZipFileFilter filter) {
-        taskQueue.addNextTask(new UnzipFileTask(zipLocation, targetLocation, filter));
+    protected void unzipFile(ITasksQueue<T> taskQueue, File zipLocation, File targetLocation, IZipFileFilter filter) {
+        taskQueue.addNextTask(new UnzipFileTask<>(zipLocation, targetLocation, filter));
     }
 
-    protected void addDownloadTask(TaskQueue taskQueue, DownloadFileTask downloadFileTask) {
+    protected void addDownloadTask(ITasksQueue<T> taskQueue, DownloadFileTask<T> downloadFileTask) {
         taskQueue.addNextTask(downloadFileTask);
     }
 
@@ -102,7 +102,6 @@ public class EnsureFileTask<TaskQueue extends ITasksQueue> implements IInstallTa
 
     /**
      * @see DownloadFileTask#setDecompressor(String)
-     * @param downloadDecompressor
      */
     public void setDownloadDecompressor(String downloadDecompressor) {
         this.downloadDecompressor = downloadDecompressor;

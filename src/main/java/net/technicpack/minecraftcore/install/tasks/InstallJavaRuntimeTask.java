@@ -45,15 +45,15 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
-public class InstallJavaRuntimeTask implements IInstallTask {
+public class InstallJavaRuntimeTask implements IInstallTask<MojangVersion> {
     private final ModpackModel modpack;
     private final File runtimesDirectory;
     private final File runtimeManifestFile;
     private final VersionJavaInfo runtimeInfo;
-    private final ITasksQueue examineJavaQueue;
-    private final ITasksQueue downloadJavaQueue;
+    private final ITasksQueue<MojangVersion> examineJavaQueue;
+    private final ITasksQueue<MojangVersion> downloadJavaQueue;
 
-    public InstallJavaRuntimeTask(ModpackModel modpack, File runtimesDirectory, File runtimeManifestFile, VersionJavaInfo runtimeInfo, ITasksQueue examineJavaQueue, ITasksQueue downloadJavaQueue) {
+    public InstallJavaRuntimeTask(ModpackModel modpack, File runtimesDirectory, File runtimeManifestFile, VersionJavaInfo runtimeInfo, ITasksQueue<MojangVersion> examineJavaQueue, ITasksQueue<MojangVersion> downloadJavaQueue) {
         this.modpack = modpack;
         this.runtimesDirectory = runtimesDirectory;
         this.runtimeManifestFile = runtimeManifestFile;
@@ -79,7 +79,7 @@ public class InstallJavaRuntimeTask implements IInstallTask {
     }
 
     @Override
-    public void runTask(InstallTasksQueue queue) throws IOException {
+    public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException {
         String json = FileUtils.readFileToString(runtimeManifestFile, StandardCharsets.UTF_8);
         JavaRuntimeManifest manifest = MojangUtils.getGson().fromJson(json, JavaRuntimeManifest.class);
 
@@ -129,8 +129,8 @@ public class InstallJavaRuntimeTask implements IInstallTask {
                     downloadUrl = rawDownload.getUrl();
                 }
 
-                EnsureFileTask ensureFileTask;
-                ensureFileTask = new EnsureFileTask(target, verifier, null, downloadUrl, downloadJavaQueue, null);
+                EnsureFileTask<MojangVersion> ensureFileTask;
+                ensureFileTask = new EnsureFileTask<>(target, verifier, null, downloadUrl, downloadJavaQueue, null);
 
                 if (useLzma) {
                     ensureFileTask.setDownloadDecompressor(CompressorStreamFactory.LZMA);
@@ -153,7 +153,7 @@ public class InstallJavaRuntimeTask implements IInstallTask {
                 ensurePathIsSafe(runtimeRoot, target);
 
                 // We add it to the download queue so it runs after all the files exist
-                downloadJavaQueue.addTask(new EnsureLinkedFileTask(link, target));
+                downloadJavaQueue.addTask(new EnsureLinkedFileTask<>(link, target));
             }
         });
 
@@ -171,7 +171,7 @@ public class InstallJavaRuntimeTask implements IInstallTask {
         final IJavaRuntime runtime = new FileBasedJavaRuntime(runtimeExecutable);
 
 
-        MojangVersion version = ((InstallTasksQueue<MojangVersion>) queue).getMetadata();
+        MojangVersion version = queue.getMetadata();
 
 
         version.setJavaRuntime(runtime);

@@ -25,11 +25,11 @@ import net.technicpack.launchercore.util.DownloadListener;
 import java.io.IOException;
 import java.util.LinkedList;
 
-public class InstallTasksQueue<Metadata> implements ITasksQueue {
-    private DownloadListener listener;
-    private LinkedList<IInstallTask> tasks;
-    private IInstallTask currentTask;
-    private Metadata metadata;
+public class InstallTasksQueue<T> implements ITasksQueue<T> {
+    private final DownloadListener listener;
+    private final LinkedList<IInstallTask<T>> tasks;
+    private IInstallTask<T> currentTask;
+    private T metadata;
 
     public InstallTasksQueue(DownloadListener listener) {
         this.listener = listener;
@@ -50,11 +50,11 @@ public class InstallTasksQueue<Metadata> implements ITasksQueue {
         }
     }
 
-    public void addNextTask(IInstallTask task) {
+    public void addNextTask(IInstallTask<T> task) {
         tasks.addFirst(task);
     }
 
-    public void addTask(IInstallTask task) {
+    public void addTask(IInstallTask<T> task) {
         tasks.addLast(task);
     }
 
@@ -62,7 +62,7 @@ public class InstallTasksQueue<Metadata> implements ITasksQueue {
         return this.listener;
     }
 
-    public void setMetadata(Metadata metadata) { this.metadata = metadata; }
+    public void setMetadata(T metadata) { this.metadata = metadata; }
 
-    public Metadata getMetadata() { return this.metadata; }
+    public T getMetadata() { return this.metadata; }
 }

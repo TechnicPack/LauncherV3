@@ -30,22 +30,21 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.AssetIndex;
-import net.technicpack.rest.io.Modpack;
 
 import java.io.File;
 import java.io.IOException;
 
-public class EnsureAssetsIndexTask implements IInstallTask {
+public class EnsureAssetsIndexTask implements IInstallTask<MojangVersion> {
 
     private final File assetsDirectory;
     private final ModpackModel modpack;
-    private final ITasksQueue downloadIndexQueue;
-    private final ITasksQueue examineIndexQueue;
-    private final ITasksQueue checkAssetsQueue;
-    private final ITasksQueue downloadAssetsQueue;
-    private final ITasksQueue installAssetsQueue;
+    private final ITasksQueue<MojangVersion> downloadIndexQueue;
+    private final ITasksQueue<MojangVersion> examineIndexQueue;
+    private final ITasksQueue<MojangVersion> checkAssetsQueue;
+    private final ITasksQueue<MojangVersion> downloadAssetsQueue;
+    private final ITasksQueue<MojangVersion> installAssetsQueue;
 
-    public EnsureAssetsIndexTask(File assetsDirectory, ModpackModel modpack, ITasksQueue downloadIndexQueue, ITasksQueue examineIndexQueue, ITasksQueue checkAssetsQueue, ITasksQueue downloadAssetsQueue, ITasksQueue installAssetsQueue) {
+    public EnsureAssetsIndexTask(File assetsDirectory, ModpackModel modpack, ITasksQueue<MojangVersion> downloadIndexQueue, ITasksQueue<MojangVersion> examineIndexQueue, ITasksQueue<MojangVersion> checkAssetsQueue, ITasksQueue<MojangVersion> downloadAssetsQueue, ITasksQueue<MojangVersion> installAssetsQueue) {
         this.assetsDirectory = assetsDirectory;
         this.modpack = modpack;
         this.downloadIndexQueue = downloadIndexQueue;
@@ -66,8 +65,8 @@ public class EnsureAssetsIndexTask implements IInstallTask {
     }
 
     @Override
-    public void runTask(InstallTasksQueue queue) throws IOException {
-        MojangVersion version = ((InstallTasksQueue<MojangVersion>)queue).getMetadata();
+    public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException {
+        MojangVersion version = queue.getMetadata();
 
         AssetIndex assetIndex = version.getAssetIndex();
 
@@ -89,7 +88,7 @@ public class EnsureAssetsIndexTask implements IInstallTask {
             fileVerifier = new ValidJsonFileVerifier(MojangUtils.getGson());
 
         if (!assetsFile.exists() || !fileVerifier.isFileValid(assetsFile)) {
-            downloadIndexQueue.addTask(new DownloadFileTask(assetsUrl, assetsFile, fileVerifier));
+            downloadIndexQueue.addTask(new DownloadFileTask<>(assetsUrl, assetsFile, fileVerifier));
         }
 
         examineIndexQueue.addTask(new InstallMinecraftAssetsTask(modpack, assetsDirectory.getAbsolutePath(), assetsFile, checkAssetsQueue, downloadAssetsQueue, installAssetsQueue));

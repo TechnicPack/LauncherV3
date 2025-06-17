@@ -35,9 +35,9 @@ public class ImageJob<T> {
     private T lastJobData;
 
     protected boolean canRetry = true;
-    private AtomicReference<BufferedImage> imageReference;
+    private final AtomicReference<BufferedImage> imageReference;
 
-    private Collection<IImageJobListener<T>> jobListeners = new LinkedList<>();
+    private final Collection<IImageJobListener<T>> jobListeners = new LinkedList<>();
     private Thread imageThread;
 
     public ImageJob(IImageMapper<T> mapper, IImageStore<T> store) {
@@ -52,13 +52,13 @@ public class ImageJob<T> {
         return imageReference.get();
     }
 
-    public void addJobListener(IImageJobListener listener) {
+    public void addJobListener(IImageJobListener<T> listener) {
         synchronized (jobListeners) {
             jobListeners.add(listener);
         }
     }
 
-    public void removeJobListener(IImageJobListener listener) {
+    public void removeJobListener(IImageJobListener<T> listener) {
         synchronized (jobListeners) {
             jobListeners.remove(listener);
         }
@@ -86,7 +86,7 @@ public class ImageJob<T> {
     protected void notifyComplete() {
         if (EventQueue.isDispatchThread()) {
             synchronized (jobListeners) {
-                for (IImageJobListener listener : jobListeners) {
+                for (IImageJobListener<T> listener : jobListeners) {
                     listener.jobComplete(this);
                 }
             }

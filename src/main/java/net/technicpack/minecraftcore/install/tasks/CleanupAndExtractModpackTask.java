@@ -26,6 +26,7 @@ import net.technicpack.launchercore.install.tasks.EnsureFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.install.ModpackZipFilter;
+import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.Mod;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
@@ -37,14 +38,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class CleanupAndExtractModpackTask implements IInstallTask {
+public class CleanupAndExtractModpackTask implements IInstallTask<MojangVersion> {
 	private final ModpackModel pack;
 	private final Modpack modpack;
-    private final ITasksQueue checkModQueue;
-    private final ITasksQueue downloadModQueue;
-    private final ITasksQueue copyModQueue;
+    private final ITasksQueue<MojangVersion> checkModQueue;
+    private final ITasksQueue<MojangVersion> downloadModQueue;
+    private final ITasksQueue<MojangVersion> copyModQueue;
 
-	public CleanupAndExtractModpackTask(ModpackModel pack, Modpack modpack, ITasksQueue checkModQueue, ITasksQueue downloadModQueue, ITasksQueue copyModQueue) {
+	public CleanupAndExtractModpackTask(ModpackModel pack, Modpack modpack, ITasksQueue<MojangVersion> checkModQueue, ITasksQueue<MojangVersion> downloadModQueue, ITasksQueue<MojangVersion> copyModQueue) {
 		this.pack = pack;
 		this.modpack = modpack;
         this.checkModQueue = checkModQueue;
@@ -63,7 +64,7 @@ public class CleanupAndExtractModpackTask implements IInstallTask {
 	}
 
 	@Override
-	public void runTask(InstallTasksQueue queue) throws IOException {
+	public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException {
 		File modsDir = this.pack.getModsDir();
 
 		if (modsDir != null && modsDir.exists()) {
@@ -110,7 +111,7 @@ public class CleanupAndExtractModpackTask implements IInstallTask {
             else
                 verifier = new ValidZipFileVerifier();
 
-			checkModQueue.addTask(new EnsureFileTask(cacheFile, verifier, packOutput, url, downloadModQueue, copyModQueue, zipFilter));
+			checkModQueue.addTask(new EnsureFileTask<>(cacheFile, verifier, packOutput, url, downloadModQueue, copyModQueue, zipFilter));
 		}
 
 		copyModQueue.addTask(new CleanupModpackCacheTask(this.pack, modpack));

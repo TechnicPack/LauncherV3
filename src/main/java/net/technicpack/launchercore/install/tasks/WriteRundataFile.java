@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
@@ -14,7 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public class WriteRundataFile implements IInstallTask {
+public class WriteRundataFile implements IInstallTask<MojangVersion> {
     private ModpackModel modpackModel;
     private Modpack modpack;
 
@@ -34,7 +35,7 @@ public class WriteRundataFile implements IInstallTask {
     }
 
     @Override
-    public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
+    public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException, InterruptedException {
         if ((modpack.getJava() == null || modpack.getJava().isEmpty()) && (modpack.getMemory() == null || modpack.getMemory().isEmpty()))
             return;
 

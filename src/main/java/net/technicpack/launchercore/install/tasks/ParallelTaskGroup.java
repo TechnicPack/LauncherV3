@@ -35,10 +35,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ParallelTaskGroup implements IInstallTask, IWeightedTasksQueue {
+public class ParallelTaskGroup<T> implements IInstallTask<T>, IWeightedTasksQueue<T> {
     private final String groupName;
-    private final Map<IInstallTask, Float> taskWeights = new LinkedHashMap<>();
-    private final List<IInstallTask> taskList = new ArrayList<>();
+    private final Map<IInstallTask<T>, Float> taskWeights = new LinkedHashMap<>();
+    private final List<IInstallTask<T>> taskList = new ArrayList<>();
     private float totalWeight = 0f;
 
     private final AtomicInteger completedTasks = new AtomicInteger(0);
@@ -62,10 +62,10 @@ public class ParallelTaskGroup implements IInstallTask, IWeightedTasksQueue {
     }
 
     @Override
-    public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
+    public void runTask(InstallTasksQueue<T> queue) throws IOException, InterruptedException {
         List<CompletableFuture<Void>> futures = new ArrayList<>();
 
-        for (IInstallTask task : taskList) {
+        for (IInstallTask<T> task : taskList) {
             futures.add(CompletableFuture.runAsync(() -> {
                 try {
                     currentFile.set(task.getTaskDescription());
@@ -103,7 +103,7 @@ public class ParallelTaskGroup implements IInstallTask, IWeightedTasksQueue {
         if (taskList.isEmpty() || totalWeight == 0) return 0;
 
         float completedWeight = 0;
-        for (IInstallTask task : taskList) {
+        for (IInstallTask<T> task : taskList) {
             float weight = taskWeights.getOrDefault(task, 1.0f);
             completedWeight += (task.getTaskProgress() / 100f) * weight;
         }
@@ -112,24 +112,24 @@ public class ParallelTaskGroup implements IInstallTask, IWeightedTasksQueue {
     }
 
     @Override
-    public void addTask(IInstallTask task) {
+    public void addTask(IInstallTask<T> task) {
         addTask(task, 1.0f);
     }
 
     @Override
-    public void addTask(IInstallTask task, float weight) {
+    public void addTask(IInstallTask<T> task, float weight) {
         taskList.add(task);
         taskWeights.put(task, weight);
         totalWeight += weight;
     }
 
     @Override
-    public void addNextTask(IInstallTask task) {
+    public void addNextTask(IInstallTask<T> task) {
         addNextTask(task, 1.0f);
     }
 
     @Override
-    public void addNextTask(IInstallTask task, float weight) {
+    public void addNextTask(IInstallTask<T> task, float weight) {
         taskList.add(0, task);
         taskWeights.put(task, weight);
         totalWeight += weight;

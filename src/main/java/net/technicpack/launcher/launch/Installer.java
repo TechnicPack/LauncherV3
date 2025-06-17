@@ -270,7 +270,7 @@ public class Installer {
         return installerThread != null && installerThread.isAlive();
     }
 
-    public void buildTasksQueue(InstallTasksQueue queue, ResourceLoader resources, ModpackModel modpack, String build,
+    public void buildTasksQueue(InstallTasksQueue<MojangVersion> queue, ResourceLoader resources, ModpackModel modpack, String build,
             boolean doFullInstall, MojangVersionBuilder versionBuilder, IJavaRuntime selectedJavaRuntime, boolean mojangJavaWanted) throws IOException {
         PackInfo packInfo = modpack.getPackInfo();
         Modpack modpackData = packInfo.getModpack(build);
@@ -281,24 +281,24 @@ public class Installer {
         String minecraft = modpackData.getGameVersion();
         Version installedVersion = modpack.getInstalledVersion();
 
-        TaskGroup examineModpackData = new TaskGroup(resources.getString("install.message.examiningmodpack"));
-        TaskGroup verifyingFiles = new TaskGroup(resources.getString("install.message.verifyingfiles"));
-        TaskGroup downloadingMods = new TaskGroup(resources.getString("install.message.downloadmods"));
-        TaskGroup installingMods = new TaskGroup(resources.getString("install.message.installmods"));
-        TaskGroup checkVersionFile = new TaskGroup(resources.getString("install.message.checkversionfile"));
-        TaskGroup installVersionFile = new TaskGroup(resources.getString("install.message.installversionfile"));
-        TaskGroup rundataTaskGroup = new TaskGroup(resources.getString("install.message.runData"));
-        TaskGroup examineVersionFile = new TaskGroup(resources.getString("install.message.examiningversionfile"));
-        TaskGroup grabLibs = new TaskGroup(resources.getString("install.message.grablibraries"));
-        TaskGroup checkNonMavenLibs = new TaskGroup(resources.getString("install.message.nonmavenlibs"));
-        TaskGroup installingLibs = new TaskGroup(resources.getString("install.message.installlibs"));
-        TaskGroup installingMinecraft = new TaskGroup(resources.getString("install.message.installminecraft"));
-        TaskGroup examineIndex = new TaskGroup(resources.getString("install.message.examiningindex"));
-        ParallelTaskGroup verifyingAssets = new ParallelTaskGroup(resources.getString("install.message.verifyassets"));
-        TaskGroup installingAssets = new TaskGroup(resources.getString("install.message.installassets"));
-        TaskGroup fetchJavaManifest = new TaskGroup("Obtaining Java runtime information...");
-        ParallelTaskGroup examineJava = new ParallelTaskGroup("Examining Java runtime...");
-        TaskGroup downloadJava = new TaskGroup("Downloading Java runtime...");
+        TaskGroup<MojangVersion> examineModpackData = new TaskGroup<>(resources.getString("install.message.examiningmodpack"));
+        TaskGroup<MojangVersion> verifyingFiles = new TaskGroup<>(resources.getString("install.message.verifyingfiles"));
+        TaskGroup<MojangVersion> downloadingMods = new TaskGroup<>(resources.getString("install.message.downloadmods"));
+        TaskGroup<MojangVersion> installingMods = new TaskGroup<>(resources.getString("install.message.installmods"));
+        TaskGroup<MojangVersion> checkVersionFile = new TaskGroup<>(resources.getString("install.message.checkversionfile"));
+        TaskGroup<MojangVersion> installVersionFile = new TaskGroup<>(resources.getString("install.message.installversionfile"));
+        TaskGroup<MojangVersion> rundataTaskGroup = new TaskGroup<>(resources.getString("install.message.runData"));
+        TaskGroup<MojangVersion> examineVersionFile = new TaskGroup<>(resources.getString("install.message.examiningversionfile"));
+        TaskGroup<MojangVersion> grabLibs = new TaskGroup<>(resources.getString("install.message.grablibraries"));
+        TaskGroup<MojangVersion> checkNonMavenLibs = new TaskGroup<>(resources.getString("install.message.nonmavenlibs"));
+        TaskGroup<MojangVersion> installingLibs = new TaskGroup<>(resources.getString("install.message.installlibs"));
+        TaskGroup<MojangVersion> installingMinecraft = new TaskGroup<>(resources.getString("install.message.installminecraft"));
+        TaskGroup<MojangVersion> examineIndex = new TaskGroup<>(resources.getString("install.message.examiningindex"));
+        ParallelTaskGroup<MojangVersion> verifyingAssets = new ParallelTaskGroup<>(resources.getString("install.message.verifyassets"));
+        TaskGroup<MojangVersion> installingAssets = new TaskGroup<>(resources.getString("install.message.installassets"));
+        TaskGroup<MojangVersion> fetchJavaManifest = new TaskGroup<>("Obtaining Java runtime information...");
+        ParallelTaskGroup<MojangVersion> examineJava = new ParallelTaskGroup<>("Examining Java runtime...");
+        TaskGroup<MojangVersion> downloadJava = new TaskGroup<>("Downloading Java runtime...");
 
         queue.addTask(examineModpackData);
         queue.addTask(verifyingFiles);
@@ -386,8 +386,8 @@ public class Installer {
                 File target = new File(modpackFmlLibDir, name);
 
                 if (!target.exists() || (verifier != null && !verifier.isFileValid(target)) ) {
-                    verifyingFiles.addTask(new EnsureFileTask(cached, verifier, null, TechnicConstants.TECHNIC_FML_LIB_REPO + name, installingLibs, installingLibs));
-                    installingLibs.addTask(new CopyFileTask(cached, target));
+                    verifyingFiles.addTask(new EnsureFileTask<>(cached, verifier, null, TechnicConstants.TECHNIC_FML_LIB_REPO + name, installingLibs, installingLibs));
+                    installingLibs.addTask(new CopyFileTask<>(cached, target));
                 }
             });
         }
@@ -447,7 +447,7 @@ public class Installer {
         if (doFullInstall)
             rundataTaskGroup.addTask(new WriteRundataFile(modpack, modpackData));
         else
-            rundataTaskGroup.addTask(new CheckRundataFile(modpack, modpackData, rundataTaskGroup));
+            rundataTaskGroup.addTask(new CheckRunDataFile(modpack, modpackData, rundataTaskGroup));
 
         checkVersionFile.addTask(new VerifyVersionFilePresentTask(modpack, minecraft, versionBuilder));
         examineVersionFile.addTask(new HandleVersionFileTask(modpack, directories, checkNonMavenLibs, grabLibs, installingLibs, installingLibs, versionBuilder, settings, selectedJavaRuntime));
@@ -463,7 +463,7 @@ public class Installer {
         installingMinecraft.addTask(new InstallMinecraftIfNecessaryTask(modpack, minecraft, directories.getCacheDirectory(), jarRegenerationRequired));
     }
 
-    private MojangVersionBuilder createVersionBuilder(ModpackModel modpack, InstallTasksQueue tasksQueue) {
+    private MojangVersionBuilder createVersionBuilder(ModpackModel modpack, InstallTasksQueue<MojangVersion> tasksQueue) {
 
         ZipFileRetriever zipVersionRetriever = new ZipFileRetriever(new File(modpack.getBinDir(), "modpack.jar"));
         HttpFileRetriever fallbackVersionRetriever = new HttpFileRetriever(TechnicConstants.VERSIONS_BASE_URL, tasksQueue.getDownloadListener());

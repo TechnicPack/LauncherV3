@@ -40,13 +40,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Map;
 
-public class InstallMinecraftAssetsTask implements IInstallTask {
+public class InstallMinecraftAssetsTask implements IInstallTask<MojangVersion> {
     private final ModpackModel modpack;
     private final String assetsDirectory;
     private final File assetsIndex;
-    private final ITasksQueue checkAssetsQueue;
-    private final ITasksQueue downloadAssetsQueue;
-    private final ITasksQueue copyAssetsQueue;
+    private final ITasksQueue<MojangVersion> checkAssetsQueue;
+    private final ITasksQueue<MojangVersion> downloadAssetsQueue;
+    private final ITasksQueue<MojangVersion> copyAssetsQueue;
 
     private static final String VIRTUAL_FIELD = "virtual";
     private static final String MAP_TO_RESOURCES_FIELD = "map_to_resources";
@@ -54,7 +54,7 @@ public class InstallMinecraftAssetsTask implements IInstallTask {
     private static final String SIZE_FIELD = "size";
     private static final String HASH_FIELD = "hash";
 
-    public InstallMinecraftAssetsTask(ModpackModel modpack, String assetsDirectory, File assetsIndex, ITasksQueue checkAssetsQueue, ITasksQueue downloadAssetsQueue, ITasksQueue copyAssetsQueue) {
+    public InstallMinecraftAssetsTask(ModpackModel modpack, String assetsDirectory, File assetsIndex, ITasksQueue<MojangVersion> checkAssetsQueue, ITasksQueue<MojangVersion> downloadAssetsQueue, ITasksQueue<MojangVersion> copyAssetsQueue) {
         this.modpack = modpack;
         this.assetsDirectory = assetsDirectory;
         this.assetsIndex = assetsIndex;
@@ -74,7 +74,7 @@ public class InstallMinecraftAssetsTask implements IInstallTask {
     }
 
     @Override
-    public void runTask(InstallTasksQueue queue) throws IOException {
+    public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException {
         JsonObject obj = readAssetsIndex();
 
         boolean isVirtual = false;
@@ -89,7 +89,7 @@ public class InstallMinecraftAssetsTask implements IInstallTask {
             mapToResources = obj.get(MAP_TO_RESOURCES_FIELD).getAsBoolean();
         }
 
-        MojangVersion version = ((InstallTasksQueue<MojangVersion>) queue).getMetadata();
+        MojangVersion version = queue.getMetadata();
 
         version.setAreAssetsVirtual(isVirtual);
         version.setAssetsMapToResources(mapToResources);
@@ -162,7 +162,7 @@ public class InstallMinecraftAssetsTask implements IInstallTask {
 
         if (target != null && !target.exists()) {
             Files.createDirectories(target.getParentFile().toPath());
-            copyAssetsQueue.addTask(new CopyFileTask(location, target));
+            copyAssetsQueue.addTask(new CopyFileTask<>(location, target));
         }
     }
 }

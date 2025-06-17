@@ -28,7 +28,7 @@ import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
 
 import java.io.IOException;
 
-public class VerifyVersionFilePresentTask implements IInstallTask {
+public class VerifyVersionFilePresentTask implements IInstallTask<MojangVersion> {
 	private MojangVersionBuilder builder;
     private String minecraftVersion;
     private ModpackModel modpack;
@@ -50,7 +50,7 @@ public class VerifyVersionFilePresentTask implements IInstallTask {
 	}
 
 	@Override
-	public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
+	public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException, InterruptedException {
         MojangVersion version = builder.buildVersionFromKey(minecraftVersion);
 
         if (version == null && modpack.isLocalOnly())

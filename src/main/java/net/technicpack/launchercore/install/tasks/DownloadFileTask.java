@@ -27,14 +27,11 @@ import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class DownloadFileTask extends ListenerTask {
+public class DownloadFileTask<T> extends ListenerTask<T> {
     private String url;
     private File destination;
     private String taskDescription;
@@ -63,8 +60,8 @@ public class DownloadFileTask extends ListenerTask {
     }
 
     /**
-     * @param decompressor See {@link CompressorStreamFactory#ALL_NAMES}
-     * @see CompressorStreamFactory#ALL_NAMES
+     * @param decompressor See {@link CompressorStreamFactory#createCompressorInputStream(String, InputStream)}
+     * @see CompressorStreamFactory#createCompressorInputStream(String, InputStream)
      */
     public void setDecompressor(String decompressor) throws DownloadException {
         if (!AVAILABLE_DECOMPRESSORS.contains(decompressor.toLowerCase())) {
@@ -80,7 +77,7 @@ public class DownloadFileTask extends ListenerTask {
     }
 
     @Override
-    public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
+    public void runTask(InstallTasksQueue<T> queue) throws IOException, InterruptedException {
         super.runTask(queue);
 
         final boolean needsDecompression = decompressor != null;

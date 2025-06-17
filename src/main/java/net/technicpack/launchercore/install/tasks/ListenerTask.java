@@ -24,10 +24,10 @@ import net.technicpack.launchercore.util.DownloadListener;
 
 import java.io.IOException;
 
-public abstract class ListenerTask implements IInstallTask, DownloadListener {
+public abstract class ListenerTask<T> implements IInstallTask<T>, DownloadListener {
 
     private float taskProgress;
-    private InstallTasksQueue queue;
+    private InstallTasksQueue<T> queue;
 
     public ListenerTask() {
         taskProgress = 0;
@@ -39,11 +39,11 @@ public abstract class ListenerTask implements IInstallTask, DownloadListener {
     }
 
     @Override
-    public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
+    public void runTask(InstallTasksQueue<T> queue) throws IOException, InterruptedException {
         this.queue = queue;
     }
 
-    protected void setQueue(InstallTasksQueue queue) {
+    protected void setQueue(InstallTasksQueue<T> queue) {
         this.queue = queue;
     }
 

@@ -39,16 +39,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 
-public class QueryUpdateStream implements IInstallTask {
+public class QueryUpdateStream implements IInstallTask<Void> {
 
     private String description;
-    private ITasksQueue downloadTasks;
+    private ITasksQueue<Void> downloadTasks;
     private IUpdateStream updateStream;
     private LauncherDirectories directories;
     private Relauncher relauncher;
-    private Collection<IInstallTask> postDownloadTasks;
+    private Collection<IInstallTask<Void>> postDownloadTasks;
 
-    public QueryUpdateStream(String description, IUpdateStream stream, ITasksQueue downloadTasks, LauncherDirectories directories, Relauncher relauncher, Collection<IInstallTask> postDownloadTasks) {
+    public QueryUpdateStream(String description, IUpdateStream stream, ITasksQueue<Void> downloadTasks, LauncherDirectories directories, Relauncher relauncher, Collection<IInstallTask<Void>> postDownloadTasks) {
         this.description = description;
         this.downloadTasks = downloadTasks;
         this.updateStream = stream;
@@ -68,7 +68,7 @@ public class QueryUpdateStream implements IInstallTask {
     }
 
     @Override
-    public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
+    public void runTask(InstallTasksQueue<Void> queue) throws IOException, InterruptedException {
         try {
             StreamVersion version = updateStream.getStreamVersion(relauncher.getStreamName());
 
@@ -92,14 +92,14 @@ public class QueryUpdateStream implements IInstallTask {
                     continue;
                 }
 
-                DownloadFileTask downloadFileTask;
+                DownloadFileTask<Void> downloadFileTask;
 
                 String zstdUrl = resource.getZstdUrl();
                 if (zstdUrl != null && !zstdUrl.isEmpty()) {
-                    downloadFileTask = new DownloadFileTask(zstdUrl, targetFile, verifier, resource.getFilename());
+                    downloadFileTask = new DownloadFileTask<>(zstdUrl, targetFile, verifier, resource.getFilename());
                     downloadFileTask.setDecompressor(CompressorStreamFactory.ZSTANDARD);
                 } else {
-                    downloadFileTask = new DownloadFileTask(resource.getUrl(), targetFile, verifier, resource.getFilename());
+                    downloadFileTask = new DownloadFileTask<>(resource.getUrl(), targetFile, verifier, resource.getFilename());
                 }
 
                 downloadTasks.addTask(downloadFileTask);

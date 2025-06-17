@@ -84,8 +84,8 @@ public class TechnicRelauncher extends Relauncher {
     }
 
     @Override
-    public InstallTasksQueue buildMoverTasks() {
-        InstallTasksQueue<Object> queue = new InstallTasksQueue<>(null);
+    public InstallTasksQueue<Void> buildMoverTasks() {
+        InstallTasksQueue<Void> queue = new InstallTasksQueue<>(null);
 
         queue.addTask(new MoveLauncherPackage(resources.getString("updater.mover"), new File(parameters.getMoveTarget()), this));
         queue.addTask(new LaunchLauncherMode(resources.getString("updater.finallaunch"), this, parameters.getMoveTarget(), parameters.isLegacyMover()));
@@ -94,7 +94,7 @@ public class TechnicRelauncher extends Relauncher {
     }
 
     @Override
-    public InstallTasksQueue buildUpdaterTasks() {
+    public InstallTasksQueue<Void> buildUpdaterTasks() {
         screen = new SplashScreen(resources.getImage("launch_splash.png"), 30);
         Color bg = UIConstants.COLOR_FORM_ELEMENT_INTERNAL;
         screen.getContentPane().setBackground(new Color (bg.getRed(),bg.getGreen(),bg.getBlue(),255));
@@ -106,12 +106,12 @@ public class TechnicRelauncher extends Relauncher {
         screen.setLocationRelativeTo(null);
         screen.setVisible(true);
 
-        InstallTasksQueue<Object> queue = new InstallTasksQueue<>(screen.getProgressBar());
+        InstallTasksQueue<Void> queue = new InstallTasksQueue<>(screen.getProgressBar());
 
-        ArrayList<IInstallTask> postDownloadTasks = new ArrayList<>();
+        ArrayList<IInstallTask<Void>> postDownloadTasks = new ArrayList<>();
         postDownloadTasks.add(new LaunchMoverMode(resources.getString("updater.launchmover"), getTempLauncher(), this));
 
-        TaskGroup downloadFilesGroup = new TaskGroup(resources.getString("updater.downloads"));
+        TaskGroup<Void> downloadFilesGroup = new TaskGroup<>(resources.getString("updater.downloads"));
         queue.addTask(new EnsureUpdateFolders(resources.getString("updater.folders"), getDirectories()));
         queue.addTask(new QueryUpdateStream(resources.getString("updater.query"), updateStream, downloadFilesGroup, getDirectories(), this, postDownloadTasks));
         queue.addTask(downloadFilesGroup);

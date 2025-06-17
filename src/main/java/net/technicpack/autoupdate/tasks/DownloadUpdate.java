@@ -27,11 +27,11 @@ import net.technicpack.launchercore.install.tasks.IInstallTask;
 import java.io.IOException;
 import java.util.Collection;
 
-public class DownloadUpdate extends DownloadFileTask {
+public class DownloadUpdate extends DownloadFileTask<Void> {
     private Relauncher relauncher;
-    private Collection<IInstallTask> postUpdateActions;
+    private Collection<IInstallTask<Void>> postUpdateActions;
 
-    public DownloadUpdate(String url, Relauncher relauncher, Collection<IInstallTask> postUpdateActions) {
+    public DownloadUpdate(String url, Relauncher relauncher, Collection<IInstallTask<Void>> postUpdateActions) {
         super(url, relauncher.getTempLauncher(), null, relauncher.getUpdateText());
 
         this.relauncher = relauncher;
@@ -39,11 +39,11 @@ public class DownloadUpdate extends DownloadFileTask {
     }
 
     @Override
-    public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
+    public void runTask(InstallTasksQueue<Void> queue) throws IOException, InterruptedException {
         super.runTask(queue);
 
         if (!relauncher.isUpdateOnly() && getDestination().exists()) {
-            for (IInstallTask task : postUpdateActions) {
+            for (IInstallTask<Void> task : postUpdateActions) {
                 queue.addTask(task);
             }
         }

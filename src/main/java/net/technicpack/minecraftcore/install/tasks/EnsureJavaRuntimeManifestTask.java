@@ -37,14 +37,14 @@ import net.technicpack.minecraftcore.mojang.version.io.VersionJavaInfo;
 import java.io.File;
 import java.io.IOException;
 
-public class EnsureJavaRuntimeManifestTask implements IInstallTask {
+public class EnsureJavaRuntimeManifestTask implements IInstallTask<MojangVersion> {
 
     private final File runtimesDirectory;
     private final ModpackModel modpack;
-    private final ITasksQueue examineJavaQueue;
-    private final ITasksQueue downloadJavaQueue;
+    private final ITasksQueue<MojangVersion> examineJavaQueue;
+    private final ITasksQueue<MojangVersion> downloadJavaQueue;
 
-    public EnsureJavaRuntimeManifestTask(File runtimesDirectory, ModpackModel modpack, ITasksQueue examineJavaQueue, ITasksQueue downloadJavaQueue) {
+    public EnsureJavaRuntimeManifestTask(File runtimesDirectory, ModpackModel modpack, ITasksQueue<MojangVersion> examineJavaQueue, ITasksQueue<MojangVersion> downloadJavaQueue) {
         this.runtimesDirectory = runtimesDirectory;
         this.modpack = modpack;
         this.examineJavaQueue = examineJavaQueue;
@@ -62,8 +62,8 @@ public class EnsureJavaRuntimeManifestTask implements IInstallTask {
     }
 
     @Override
-    public void runTask(InstallTasksQueue queue) throws IOException {
-        MojangVersion version = ((InstallTasksQueue<MojangVersion>) queue).getMetadata();
+    public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException {
+        MojangVersion version = queue.getMetadata();
 
         VersionJavaInfo runtimeInfo = version.getMojangRuntimeInformation();
 
@@ -95,7 +95,7 @@ public class EnsureJavaRuntimeManifestTask implements IInstallTask {
         IFileVerifier fileVerifier = new SHA1FileVerifier(runtimeDownload.getSha1());
 
         if (!output.exists() || !fileVerifier.isFileValid(output)) {
-            examineJavaQueue.addTask(new DownloadFileTask(runtimeDownload.getUrl(), output, fileVerifier));
+            examineJavaQueue.addTask(new DownloadFileTask<>(runtimeDownload.getUrl(), output, fileVerifier));
         }
 
         examineJavaQueue.addTask(new InstallJavaRuntimeTask(modpack, runtimesDirectory, output, runtimeInfo, examineJavaQueue, downloadJavaQueue));

@@ -26,7 +26,7 @@ import net.technicpack.launchercore.install.tasks.IInstallTask;
 import java.io.File;
 import java.io.IOException;
 
-public class EnsureUpdateFolders implements IInstallTask {
+public class EnsureUpdateFolders implements IInstallTask<Void> {
     private String taskDescription;
     private LauncherDirectories directories;
 
@@ -46,7 +46,7 @@ public class EnsureUpdateFolders implements IInstallTask {
     }
 
     @Override
-    public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
+    public void runTask(InstallTasksQueue<Void> queue) throws IOException, InterruptedException {
         File launcherAssets = new File(directories.getAssetsDirectory(), "launcher");
         File patches = new File(launcherAssets, "patches");
 

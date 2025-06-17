@@ -7,7 +7,7 @@ import net.technicpack.launchercore.install.tasks.IInstallTask;
 import java.io.File;
 import java.io.IOException;
 
-public class LaunchMoverMode implements IInstallTask {
+public class LaunchMoverMode implements IInstallTask<Void> {
 
     private String description;
     private Relauncher relauncher;
@@ -30,7 +30,7 @@ public class LaunchMoverMode implements IInstallTask {
     }
 
     @Override
-    public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
+    public void runTask(InstallTasksQueue<Void> queue) throws IOException, InterruptedException {
         relauncher.launch(tempLauncher.getAbsolutePath(), relauncher.buildMoverArgs());
     }
 }

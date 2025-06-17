@@ -27,10 +27,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-public class TaskGroup implements IWeightedTasksQueue, IInstallTask {
+public class TaskGroup<T> implements IWeightedTasksQueue<T>, IInstallTask<T> {
     private final String groupName;
-    private final LinkedList<IInstallTask> taskList = new LinkedList<>();
-    private final Map<IInstallTask, Float> taskWeights = new HashMap<>();
+    private final LinkedList<IInstallTask<T>> taskList = new LinkedList<>();
+    private final Map<IInstallTask<T>, Float> taskWeights = new HashMap<>();
 
     private float totalWeight = 0;
 
@@ -48,21 +48,21 @@ public class TaskGroup implements IWeightedTasksQueue, IInstallTask {
 
     @Override
     public float getTaskProgress() {
-        if (taskList.size() == 0)
+        if (taskList.isEmpty())
             return 0;
         if (totalWeight == 0)
             return 0;
 
         float completedWeight = 0;
         for (int i = 0; i < taskProgress; i++) {
-            IInstallTask task = taskList.get(i);
+            IInstallTask<T> task = taskList.get(i);
             if (taskWeights.containsKey(task)) {
                 completedWeight += taskWeights.get(task);
             }
         }
 
         float finishedTasksProgress = (completedWeight / totalWeight);
-        IInstallTask currentTask = taskList.get(taskProgress);
+        IInstallTask<T> currentTask = taskList.get(taskProgress);
         float currentTaskProgress = (currentTask.getTaskProgress() / 100.0f);
 
         float currentTaskWeight = taskWeights.getOrDefault(currentTask, 1.0f);
@@ -73,11 +73,11 @@ public class TaskGroup implements IWeightedTasksQueue, IInstallTask {
     }
 
     @Override
-    public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
+    public void runTask(InstallTasksQueue<T> queue) throws IOException, InterruptedException {
         while (taskProgress < taskList.size()) {
             if (Thread.interrupted())
                 throw new InterruptedException();
-            IInstallTask currentTask = taskList.get(taskProgress);
+            IInstallTask<T> currentTask = taskList.get(taskProgress);
             fileName = currentTask.getTaskDescription();
             currentTask.runTask(queue);
             queue.refreshProgress();
@@ -86,22 +86,22 @@ public class TaskGroup implements IWeightedTasksQueue, IInstallTask {
     }
 
     @Override
-    public void addNextTask(IInstallTask task) {
+    public void addNextTask(IInstallTask<T> task) {
         addNextTask(task, 1);
     }
 
     @Override
-    public void addTask(IInstallTask task) {
+    public void addTask(IInstallTask<T> task) {
         addTask(task, 1);
     }
 
-    public void addNextTask(IInstallTask task, float weight) {
+    public void addNextTask(IInstallTask<T> task, float weight) {
         taskList.addFirst(task);
         taskWeights.put(task, weight);
         totalWeight += weight;
     }
 
-    public void addTask(IInstallTask task, float weight) {
+    public void addTask(IInstallTask<T> task, float weight) {
         taskList.addLast(task);
         taskWeights.put(task, weight);
         totalWeight += weight;

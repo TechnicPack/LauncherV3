@@ -21,7 +21,7 @@ package net.technicpack.launchercore.install;
 
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 
-public interface IWeightedTasksQueue extends ITasksQueue {
-    void addTask(IInstallTask task, float weight);
-    void addNextTask(IInstallTask task, float weight);
+public interface IWeightedTasksQueue<T> extends ITasksQueue<T> {
+    void addTask(IInstallTask<T> task, float weight);
+    void addNextTask(IInstallTask<T> task, float weight);
 }

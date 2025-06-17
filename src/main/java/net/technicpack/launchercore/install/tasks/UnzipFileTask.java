@@ -27,7 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.zip.ZipException;
 
-public class UnzipFileTask extends ListenerTask {
+public class UnzipFileTask<T> extends ListenerTask<T> {
     private File zipFile;
     private File destination;
     private IZipFileFilter filter;
@@ -44,7 +44,7 @@ public class UnzipFileTask extends ListenerTask {
     }
 
     @Override
-    public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
+    public void runTask(InstallTasksQueue<T> queue) throws IOException, InterruptedException {
         super.runTask(queue);
 
         if (!zipFile.exists()) {

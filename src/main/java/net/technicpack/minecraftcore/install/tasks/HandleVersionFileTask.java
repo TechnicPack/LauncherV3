@@ -47,7 +47,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class HandleVersionFileTask implements IInstallTask {
+public class HandleVersionFileTask implements IInstallTask<MojangVersion> {
     // Taken from https://stackoverflow.com/a/27872852
     private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Set<Object> seen = ConcurrentHashMap.newKeySet();
@@ -56,18 +56,18 @@ public class HandleVersionFileTask implements IInstallTask {
 
     private final ModpackModel pack;
     private final LauncherDirectories directories;
-    private final ITasksQueue checkLibraryQueue;
-    private final ITasksQueue downloadLibraryQueue;
-    private final ITasksQueue copyLibraryQueue;
-    private final ITasksQueue checkNonMavenLibsQueue;
+    private final ITasksQueue<MojangVersion> checkLibraryQueue;
+    private final ITasksQueue<MojangVersion> downloadLibraryQueue;
+    private final ITasksQueue<MojangVersion> copyLibraryQueue;
+    private final ITasksQueue<MojangVersion> checkNonMavenLibsQueue;
     private final MojangVersionBuilder versionBuilder;
     private final ILaunchOptions launchOptions;
     private final IJavaRuntime javaRuntime;
 
     private String libraryName;
 
-    public HandleVersionFileTask(ModpackModel pack, LauncherDirectories directories, ITasksQueue checkNonMavenLibsQueue,
-            ITasksQueue checkLibraryQueue, ITasksQueue downloadLibraryQueue, ITasksQueue copyLibraryQueue,
+    public HandleVersionFileTask(ModpackModel pack, LauncherDirectories directories, ITasksQueue<MojangVersion> checkNonMavenLibsQueue,
+            ITasksQueue<MojangVersion> checkLibraryQueue, ITasksQueue<MojangVersion> downloadLibraryQueue, ITasksQueue<MojangVersion> copyLibraryQueue,
             MojangVersionBuilder versionBuilder, ILaunchOptions launchOptions, IJavaRuntime javaRuntime) {
         this.pack = pack;
         this.directories = directories;
@@ -94,7 +94,7 @@ public class HandleVersionFileTask implements IInstallTask {
     }
 
     @Override
-    public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
+    public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException, InterruptedException {
         MojangVersion version = versionBuilder.buildVersionFromKey(null);
 
         if (version == null) {

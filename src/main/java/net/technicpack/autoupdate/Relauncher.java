@@ -79,8 +79,8 @@ public abstract class Relauncher {
     public abstract boolean isMover();
     public abstract boolean isLauncherOnly();
     public abstract boolean isSkipUpdate();
-    public abstract InstallTasksQueue buildMoverTasks();
-    public abstract InstallTasksQueue buildUpdaterTasks();
+    public abstract InstallTasksQueue<Void> buildMoverTasks();
+    public abstract InstallTasksQueue<Void> buildUpdaterTasks();
     public abstract String[] getLaunchArgs();
     public abstract void updateComplete();
     public abstract boolean canReboot();
@@ -98,7 +98,7 @@ public abstract class Relauncher {
                 needsReboot = true;
         }
 
-        InstallTasksQueue updateTasksQueue = null;
+        InstallTasksQueue<Void> updateTasksQueue = null;
         if (isMover()) {
             updateTasksQueue = buildMoverTasks();
         } else if (needsReboot && getCurrentBuild() > 0) {

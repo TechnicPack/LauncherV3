@@ -25,7 +25,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 
-public class CopyFileTask implements IInstallTask {
+public class CopyFileTask<T> implements IInstallTask<T> {
     private File source;
     private File destination;
 
@@ -45,7 +45,7 @@ public class CopyFileTask implements IInstallTask {
     }
 
     @Override
-    public void runTask(InstallTasksQueue queue) throws IOException {
+    public void runTask(InstallTasksQueue<T> queue) throws IOException {
         FileUtils.copyFile(this.source, this.destination);
     }
 }
