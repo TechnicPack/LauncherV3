@@ -55,7 +55,7 @@ public class MoveLauncherPackage implements IInstallTask {
     @Override
     public void runTask(InstallTasksQueue queue) throws IOException, InterruptedException {
         String currentPath = relauncher.getRunningPath();
-        Utils.getLogger().log(Level.INFO, "Moving running package from " + currentPath + " to " + launcher.getAbsolutePath());
+        Utils.getLogger().log(Level.INFO, String.format("Moving running package from %s to %s", currentPath, launcher.getAbsolutePath()));
 
         File source = new File(currentPath);
         File dest = new File(launcher.getAbsolutePath());

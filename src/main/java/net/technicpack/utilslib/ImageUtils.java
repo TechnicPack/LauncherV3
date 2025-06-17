@@ -31,6 +31,10 @@ public class ImageUtils {
     }
 
     public static BufferedImage scaleImage(BufferedImage img, int width, int height) {
+        if (img.getWidth() == width && img.getHeight() == height) {
+            return img; // No scaling needed
+        }
+
         BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = newImage.createGraphics();
         try {

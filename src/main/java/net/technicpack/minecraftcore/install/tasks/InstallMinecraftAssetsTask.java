@@ -158,7 +158,7 @@ public class InstallMinecraftAssetsTask implements IInstallTask {
             target = new File(modpack.getResourcesDir(), assetPath);
         }
 
-        checkAssetsQueue.addTask(new EnsureFileTask(location, verifier, null, url, hash, downloadAssetsQueue, copyAssetsQueue));
+        checkAssetsQueue.addTask(new EnsureFileTask<>(location, verifier, null, url, hash, downloadAssetsQueue, copyAssetsQueue));
 
         if (target != null && !target.exists()) {
             Files.createDirectories(target.getParentFile().toPath());

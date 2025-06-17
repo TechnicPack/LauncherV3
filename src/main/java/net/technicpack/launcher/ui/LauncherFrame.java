@@ -60,12 +60,12 @@ import java.awt.event.*;
 
 public class LauncherFrame extends DraggableFrame implements IRelocalizableResource, IAuthListener {
 
+    public static final String TAB_DISCOVER = "discover";
+    public static final String TAB_MODPACKS = "modpacks";
+    public static final String TAB_NEWS = "news";
+
     private static final int FRAME_WIDTH = 1194;
     private static final int FRAME_HEIGHT = 718;
-
-    private static final String TAB_DISCOVER = "discover";
-    private static final String TAB_MODPACKS = "modpacks";
-    private static final String TAB_NEWS = "news";
 
     private ResourceLoader resources;
     private final UserModel userModel;

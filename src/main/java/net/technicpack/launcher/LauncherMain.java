@@ -547,7 +547,7 @@ public class LauncherMain {
 
         ActionListener listener = e -> {
             splash.dispose();
-            if (settings.getLaunchToModpacks()) frame.selectTab("modpacks");
+            if (settings.getLaunchToModpacks()) frame.selectTab(LauncherFrame.TAB_MODPACKS);
         };
 
         discoverInfoPanel.setLoadListener(listener);

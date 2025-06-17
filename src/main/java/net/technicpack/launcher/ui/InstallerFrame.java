@@ -224,7 +224,11 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
             }
 
 
-        } catch (InterruptedException | IOException ex) {
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+            Thread.currentThread().interrupt();
+            return;
+        } catch (IOException ex) {
             ex.printStackTrace();
             return;
         }
