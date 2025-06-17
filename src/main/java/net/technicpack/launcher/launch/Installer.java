@@ -296,7 +296,8 @@ public class Installer {
         TaskGroup examineIndex = new TaskGroup(resources.getString("install.message.examiningindex"));
         ParallelTaskGroup verifyingAssets = new ParallelTaskGroup(resources.getString("install.message.verifyassets"));
         TaskGroup installingAssets = new TaskGroup(resources.getString("install.message.installassets"));
-        TaskGroup examineJava = new TaskGroup("Examining Java runtime...");
+        TaskGroup fetchJavaManifest = new TaskGroup("Obtaining Java runtime information...");
+        ParallelTaskGroup examineJava = new ParallelTaskGroup("Examining Java runtime...");
         TaskGroup downloadJava = new TaskGroup("Downloading Java runtime...");
 
         queue.addTask(examineModpackData);
@@ -315,6 +316,7 @@ public class Installer {
         queue.addTask(verifyingAssets);
         queue.addTask(installingAssets);
         if (mojangJavaWanted) {
+            queue.addTask(fetchJavaManifest);
             queue.addTask(examineJava);
             queue.addTask(downloadJava);
         }
@@ -451,7 +453,7 @@ public class Installer {
         examineVersionFile.addTask(new HandleVersionFileTask(modpack, directories, checkNonMavenLibs, grabLibs, installingLibs, installingLibs, versionBuilder, settings, selectedJavaRuntime));
         examineVersionFile.addTask(new EnsureAssetsIndexTask(directories.getAssetsDirectory(), modpack, installingMinecraft, examineIndex, verifyingAssets, installingAssets, installingAssets));
 
-        examineJava.addTask(new EnsureJavaRuntimeManifestTask(directories.getRuntimesDirectory(), modpack, examineJava, downloadJava));
+        fetchJavaManifest.addTask(new EnsureJavaRuntimeManifestTask(directories.getRuntimesDirectory(), modpack, examineJava, downloadJava));
 
         // Check if we need to regenerate the Minecraft jar. This is necessary if:
         // - A reinstall was requested (or forced, via modpack version update)
