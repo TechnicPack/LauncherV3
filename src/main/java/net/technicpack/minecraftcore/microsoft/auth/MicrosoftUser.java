@@ -6,8 +6,10 @@ import net.technicpack.launchercore.exception.AuthenticationException;
 import net.technicpack.minecraftcore.microsoft.auth.model.MinecraftProfile;
 import net.technicpack.minecraftcore.microsoft.auth.model.XboxMinecraftResponse;
 
-public class MicrosoftUser implements IUserType {
-    public static final String MC_MS_USER_TYPE = "msa";
+import java.io.Serializable;
+
+public class MicrosoftUser implements IUserType, Serializable {
+    public static final String USER_TYPE = "msa";
 
     private String id;
     private String username;
@@ -36,7 +38,7 @@ public class MicrosoftUser implements IUserType {
 
     @Override
     public String getUserType() {
-        return MC_MS_USER_TYPE;
+        return USER_TYPE;
     }
 
     @Override
@@ -66,7 +68,7 @@ public class MicrosoftUser implements IUserType {
 
     @Override
     public String getMCUserType() {
-        return MC_MS_USER_TYPE;
+        return USER_TYPE;
     }
 
     @Override
