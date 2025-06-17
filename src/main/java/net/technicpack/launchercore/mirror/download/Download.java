@@ -23,7 +23,6 @@ import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.exception.PermissionDeniedException;
 import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.utilslib.Utils;
-import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.net.*;
@@ -47,10 +46,11 @@ public class Download implements Runnable {
     private File outFile = null;
     private Exception exception = null;
 
-    private Object timeoutLock = new Object();
+    private final Object timeoutLock = new Object();
+    private final Object progressLock = new Object();
     private boolean isTimedOut = false;
 
-    public Download(URL url, String name, String outPath) throws MalformedURLException {
+    public Download(URL url, String name, String outPath) {
         this.url = url;
         this.outPath = outPath;
         this.name = name;
@@ -79,7 +79,7 @@ public class Download implements Runnable {
             if (responseFamily == 3) {
                 String redirUrlText = conn.getHeaderField("Location");
                 if (redirUrlText != null && !redirUrlText.isEmpty()) {
-                    URL redirectUrl = null;
+                    URL redirectUrl;
                     try {
                         redirectUrl = new URL(redirUrlText);
                     } catch (MalformedURLException ex) {
@@ -114,7 +114,7 @@ public class Download implements Runnable {
 
                 stateChanged();
 
-                Thread progress = new MonitorThread(Thread.currentThread(), rbc);
+                Thread progress = new MonitorThread(rbc);
                 progress.start();
 
                 fos.getChannel().transferFrom(rbc, 0, size > 0 ? size : Long.MAX_VALUE);
@@ -153,7 +153,6 @@ public class Download implements Runnable {
                     fileLength, durationSeconds, fileLength / durationSeconds / (1024 * 1024)));
         } catch (ClosedByInterruptException ex) {
             result = Result.FAILURE;
-            return;
         } catch (PermissionDeniedException e) {
             exception = e;
             result = Result.PERMISSION_DENIED;
@@ -204,13 +203,12 @@ public class Download implements Runnable {
     }
 
     private void stateChanged() {
-        if (listener != null)
+        if (listener != null) {
             listener.stateChanged(name, getProgress());
-    }
+        }
 
-    private void timeout() {
-        synchronized (timeoutLock) {
-            isTimedOut = true;
+        synchronized (progressLock) {
+            progressLock.notifyAll();
         }
     }
 
@@ -251,14 +249,12 @@ public class Download implements Runnable {
 
     private class MonitorThread extends Thread {
         private final ReadableByteChannel rbc;
-        private final Thread downloadThread;
         private long last = System.currentTimeMillis();
 
-        public MonitorThread(Thread downloadThread, ReadableByteChannel rbc) {
+        public MonitorThread(ReadableByteChannel rbc) {
             super("Download Monitor Thread");
             this.setDaemon(true);
             this.rbc = rbc;
-            this.downloadThread = downloadThread;
         }
 
         @Override
@@ -272,10 +268,10 @@ public class Download implements Runnable {
                         try {
                             rbc.close();
                             timeout();
-                        } catch (Exception ignore) {
-                            //We catch all exceptions here, because ReadableByteChannel is AWESOME
-                            //and was throwing NPE's sometimes when we tried to close it after
-                            //the connection broke.
+                        } catch (IOException | NullPointerException ignore) {
+                            // We catch IOException and NullPointerException here because sometimes ReadableByteChannel
+                            // can throw an NPE if we try to close it after the connection gets reset or otherwise
+                            // broken, which can cause the ReadableByteChannel internals to be in an inconsistent state.
                         }
                         return;
                     }
@@ -284,11 +280,23 @@ public class Download implements Runnable {
                 }
 
                 stateChanged();
-                try {
-                    sleep(50);
-                } catch (InterruptedException ignore) {
-                    return;
+                synchronized (progressLock) {
+                    long now = System.currentTimeMillis();
+                    long timeSinceLastUpdate = now - last;
+                    long waitTime = Math.max(1, TIMEOUT - timeSinceLastUpdate);
+                    try {
+                        progressLock.wait(waitTime);
+                    } catch (InterruptedException e) {
+                        this.interrupt();
+                        return;
+                    }
                 }
+            }
+        }
+
+        private void timeout() {
+            synchronized (timeoutLock) {
+                isTimedOut = true;
             }
         }
     }
