@@ -94,7 +94,7 @@ public class Utils {
             //System.out.println(responseCode + " " + urlLoc);
             if (responseFamily == 3) {
                 String newUrl = conn.getHeaderField("Location");
-                URL redirectUrl = null;
+                URL redirectUrl;
                 try {
                     redirectUrl = new URL(newUrl);
                 } catch (MalformedURLException ex) {

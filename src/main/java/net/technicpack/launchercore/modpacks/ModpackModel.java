@@ -301,14 +301,14 @@ public class ModpackModel {
         if (!runDataFile.exists())
             return null;
 
-        String runData = "{}";
+        String runData;
         try {
             runData = FileUtils.readFileToString(runDataFile, StandardCharsets.UTF_8);
         } catch (IOException ex) {
             return null;
         }
 
-        return (RunData)Utils.getGson().fromJson(runData, RunData.class);
+        return Utils.getGson().fromJson(runData, RunData.class);
     }
 
     public File getInstalledDirectory() {

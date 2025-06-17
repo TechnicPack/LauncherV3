@@ -75,7 +75,7 @@ public class DesktopUtils {
     public static void open(final File file) {
         new SwingWorker<Void, Void>() {
             @Override
-            protected Void doInBackground() throws Exception {
+            protected Void doInBackground() {
                 Utils.getLogger().info("Attempting to open "+file.getAbsolutePath());
                 String asciiUri = file.toURI().toASCIIString();
                 Utils.getLogger().info("Using "+asciiUri);

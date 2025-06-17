@@ -35,7 +35,7 @@ public class WriteRundataFile implements IInstallTask<MojangVersion> {
     }
 
     @Override
-    public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException, InterruptedException {
+    public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException {
         if ((modpack.getJava() == null || modpack.getJava().isEmpty()) && (modpack.getMemory() == null || modpack.getMemory().isEmpty()))
             return;
 

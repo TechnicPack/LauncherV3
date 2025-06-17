@@ -48,7 +48,7 @@ public class SearchResultPackSource implements IPackSource {
     public Collection<PackInfo> getPublicPacks() {
         resultPriorities.clear();
         //Get results from server
-        SearchResultsData results = null;
+        SearchResultsData results;
         try {
             results = platformApi.getSearchResults(searchTerms);
         } catch (RestfulAPIException ex) {

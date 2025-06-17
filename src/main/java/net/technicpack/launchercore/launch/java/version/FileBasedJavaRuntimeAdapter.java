@@ -17,7 +17,7 @@ public class FileBasedJavaRuntimeAdapter implements JsonSerializer<FileBasedJava
     @Override
     public FileBasedJavaRuntime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         JsonObject obj = json.getAsJsonObject();
-        JsonElement pathElement = null;
+        JsonElement pathElement;
         if (obj.has("path")) {
             pathElement = obj.get("path");
         } else {

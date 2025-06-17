@@ -30,7 +30,7 @@ public class DiscoverResourceLoader extends ImageResourceLoader {
 
     private final int _imageCacheCapacity;
 
-    private RepaintListener _repaintListener = NO_OP_REPAINT_LISTENER;
+    private RepaintListener _repaintListener;
 
     private final boolean _useBackgroundImageLoading;
 

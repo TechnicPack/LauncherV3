@@ -566,8 +566,8 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
                 toolTip.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
 
 
-                String text = null;
-                Icon icon = null;
+                String text;
+                Icon icon;
 
                 if (has64Bit) {
                     text = resources.getString("launcheroptions.java.use64bit");

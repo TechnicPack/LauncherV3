@@ -137,7 +137,7 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
     }
 
     public boolean hasSolder() {
-        return solder != null && !solder.equals("");
+        return solder != null && !solder.isEmpty();
     }
 
     public String getDescription() {
@@ -162,7 +162,7 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
     public boolean isServerPack() { return isServer; }
 
     @Override
-    public Modpack getModpack(String build) throws BuildInaccessibleException {
+    public Modpack getModpack(String build) {
         return new Modpack(this);
     }
 

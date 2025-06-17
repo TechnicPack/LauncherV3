@@ -72,7 +72,7 @@ public class NewsInfoPanel extends JPanel implements PropertyChangeListener {
     }
 
     protected void visitCurrentItem() {
-        if (url != null && !url.equals("")) {
+        if (url != null && !url.isEmpty()) {
             DesktopUtils.browseUrl(url);
         }
     }

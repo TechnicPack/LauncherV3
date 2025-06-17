@@ -46,13 +46,11 @@ public class SimpleTabPaneUI extends BasicTabbedPaneUI {
             case LEFT:
                 g.fillRect(x+1, y, w-1, h-2);
                 break;
-            case RIGHT:
-                g.fillRect(x, y, w-2, h-2);
-                break;
             case BOTTOM:
                 g.fillRect(x, y, w-2, h-1);
                 break;
             case TOP:
+            case RIGHT:
             default:
                 g.fillRect(x, y, w-2, h-2);
         }

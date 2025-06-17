@@ -130,7 +130,7 @@ public class PackLoadJob implements Runnable {
 
         String name = (pack != null) ? pack.getName() : packInfo.getName();
 
-        ModpackModel modpack = null;
+        ModpackModel modpack;
         boolean newModpackModel = true;
         if (processedModpacks.containsKey(name)) {
             modpack = processedModpacks.get(name);

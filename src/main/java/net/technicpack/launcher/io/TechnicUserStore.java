@@ -18,7 +18,6 @@
 
 package net.technicpack.launcher.io;
 
-import com.google.common.collect.Maps;
 import com.google.gson.JsonSyntaxException;
 import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.auth.IUserType;

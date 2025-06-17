@@ -163,7 +163,7 @@ public class LauncherMain {
             ex.printStackTrace();
         }
 
-        TechnicSettings settings = null;
+        TechnicSettings settings;
 
         settings = SettingsFactory.buildSettingsObject(Relauncher.getRunningPath(LauncherMain.class), params.isMover());
 

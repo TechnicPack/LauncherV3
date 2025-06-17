@@ -26,10 +26,10 @@ import java.awt.geom.RoundRectangle2D;
 
 public class RoundBorder extends AbstractBorder {
         private Color color;
-        private int thickness = 1;
-        private int radii = 8;
-        private Insets insets = null;
-        private BasicStroke stroke = null;
+        private int thickness;
+        private int radii;
+        private Insets insets;
+        private BasicStroke stroke;
         private int strokePad;
         RenderingHints hints;
 

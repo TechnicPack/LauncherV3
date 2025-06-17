@@ -98,7 +98,7 @@ public abstract class Relauncher {
                 needsReboot = true;
         }
 
-        InstallTasksQueue<Void> updateTasksQueue = null;
+        InstallTasksQueue<Void> updateTasksQueue;
         if (isMover()) {
             updateTasksQueue = buildMoverTasks();
         } else if (needsReboot && getCurrentBuild() > 0) {
@@ -125,7 +125,7 @@ public abstract class Relauncher {
 
     public File getTempLauncher() {
         File dest;
-        String runningPath = null;
+        String runningPath;
 
         runningPath = getRunningPath();
 
@@ -183,7 +183,7 @@ public abstract class Relauncher {
         outArgs.add(getRunningPath());
         outArgs.add("-moveronly");
         outArgs.addAll(Arrays.asList(getLaunchArgs()));
-        return outArgs.toArray(new String[outArgs.size()]);
+        return outArgs.toArray(new String[0]);
     }
 
     public String[] buildLauncherArgs(boolean isLegacy) {
@@ -194,6 +194,6 @@ public abstract class Relauncher {
             outArgs.add("-launcher");
         outArgs.addAll(Arrays.asList(getLaunchArgs()));
         outArgs.remove("-moveronly");
-        return outArgs.toArray(new String[outArgs.size()]);
+        return outArgs.toArray(new String[0]);
     }
 }

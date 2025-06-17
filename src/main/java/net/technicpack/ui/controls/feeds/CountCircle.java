@@ -64,7 +64,7 @@ public class CountCircle extends JComponent {
 
         Rectangle2D bounds = g2d.getFontMetrics().getStringBounds(text, g2d);
 
-        double radius = (bounds.getWidth() > bounds.getHeight())?bounds.getWidth():bounds.getHeight();
+        double radius = Math.max(bounds.getWidth(), bounds.getHeight());
         int size = (int)Math.ceil(radius);
 
         g2d.setColor(getBackground());

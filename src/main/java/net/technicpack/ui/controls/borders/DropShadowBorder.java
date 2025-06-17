@@ -27,8 +27,8 @@ import java.awt.image.BufferedImage;
 
 public class DropShadowBorder extends AbstractBorder {
     private Color color;
-    private int thickness = 1;
-    private Insets insets = null;
+    private int thickness;
+    private Insets insets;
     RenderingHints hints;
 
     public DropShadowBorder(

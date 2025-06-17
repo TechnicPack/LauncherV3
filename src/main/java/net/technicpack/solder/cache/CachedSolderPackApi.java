@@ -35,7 +35,6 @@ import org.joda.time.Seconds;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
@@ -141,7 +140,6 @@ public class CachedSolderPackApi implements ISolderPackApi {
         try {
             FileUtils.writeStringToFile(cacheFile, packCache, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            return;
         }
     }
 

@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 public class UserModel {
-    private IUserType mCurrentUser = null;
+    private IUserType mCurrentUser;
     private List<IAuthListener> mAuthListeners = new LinkedList<>();
     private IUserStore mUserStore;
     private MicrosoftAuthenticator microsoftAuthenticator;

@@ -180,8 +180,8 @@ public class DiscoverLinkListener extends LinkListener {
         if (find != null)
             return find;
 
-        for (Object l : layer.getChildren()) {
-            find = findBoxForElement(e, (Layer)l);
+        for (Layer l : layer.getChildren()) {
+            find = findBoxForElement(e, l);
 
             if (find != null)
                 return find;
@@ -194,8 +194,8 @@ public class DiscoverLinkListener extends LinkListener {
         if (box.getElement() == e)
             return box;
 
-        for(Object b : box.getChildren()) {
-            Box find = findBoxForElement(e,(Box)b);
+        for(Box b : box.getChildren()) {
+            Box find = findBoxForElement(e, b);
 
             if (find != null)
                 return find;
@@ -205,7 +205,7 @@ public class DiscoverLinkListener extends LinkListener {
     }
 
     private boolean findLink(BasicPanel panel, Element e) {
-        String uri = null;
+        String uri;
 
         for (Node node = e; node.getNodeType() == Node.ELEMENT_NODE; node = node.getParentNode()) {
             uri = panel.getSharedContext().getNamespaceHandler().getLinkUri((Element) node);

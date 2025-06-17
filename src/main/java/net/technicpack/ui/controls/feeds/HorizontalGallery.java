@@ -197,7 +197,7 @@ public class HorizontalGallery extends JPanel {
     }
 
     protected boolean seekForwardToComponent(Component component) {
-        Component lastComponent = null;
+        Component lastComponent;
         boolean didMoveGallery = false;
         do {
             lastComponent = getSelectedComponent();
@@ -213,7 +213,7 @@ public class HorizontalGallery extends JPanel {
     }
 
     protected boolean seekBackwardToComponent(Component component) {
-        Component lastComponent = null;
+        Component lastComponent;
         boolean didMoveGallery = false;
         do {
             lastComponent = getSelectedComponent();

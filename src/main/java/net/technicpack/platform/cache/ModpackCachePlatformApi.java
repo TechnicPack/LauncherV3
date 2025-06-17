@@ -32,7 +32,6 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
@@ -85,7 +84,7 @@ public class ModpackCachePlatformApi implements IPlatformApi {
     }
 
     @Override
-    public PlatformPackInfo getPlatformPackInfo(String packSlug) throws RestfulAPIException {
+    public PlatformPackInfo getPlatformPackInfo(String packSlug) {
         PlatformPackInfo info = cache.getIfPresent(packSlug);
 
         if (info == null && isDead(packSlug))
@@ -170,7 +169,6 @@ public class ModpackCachePlatformApi implements IPlatformApi {
         try {
             FileUtils.writeStringToFile(cacheFile, packCache, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            return;
         }
     }
 

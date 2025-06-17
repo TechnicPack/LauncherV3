@@ -86,7 +86,6 @@ public enum OperatingSystem {
             case OSX:
                 return new File(userHome, "Library/Application Support/" + appName);
             case UNKNOWN:
-                return new File(userHome, appName + "/");
             default:
                 return new File(userHome, appName + "/");
         }

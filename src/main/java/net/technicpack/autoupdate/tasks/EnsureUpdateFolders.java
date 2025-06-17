@@ -46,7 +46,7 @@ public class EnsureUpdateFolders implements IInstallTask<Void> {
     }
 
     @Override
-    public void runTask(InstallTasksQueue<Void> queue) throws IOException, InterruptedException {
+    public void runTask(InstallTasksQueue<Void> queue) {
         File launcherAssets = new File(directories.getAssetsDirectory(), "launcher");
         File patches = new File(launcherAssets, "patches");
 

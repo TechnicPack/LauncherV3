@@ -35,7 +35,7 @@
     <!-- Build server -->
     <ciManagement>
         <system>jenkins</system>
-        <url>http://jenkins.technicpack.net/job/LauncherV3/</url>
+        <url>https://jenkins.technicpack.net/job/LauncherV3/</url>
     </ciManagement>
 
     <!-- Project dependencies -->

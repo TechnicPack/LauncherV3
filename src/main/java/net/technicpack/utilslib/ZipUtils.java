@@ -32,7 +32,7 @@ import java.util.logging.Level;
 import java.util.zip.ZipException;
 
 public class ZipUtils {
-    public static boolean extractFile(File zip, File output, String fileName) throws IOException, InterruptedException {
+    public static boolean extractFile(File zip, File output, String fileName) throws InterruptedException {
         if (!zip.exists() || fileName == null) {
             return false;
         }

@@ -47,7 +47,7 @@ public class RenameJnilibToDylibTask implements IInstallTask<MojangVersion> {
     }
 
     @Override
-    public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException, InterruptedException {
+    public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException {
         // Rename all *.jnilib natives to *.dylib
         // This is required due to https://bugs.openjdk.org/browse/JDK-8127215
 

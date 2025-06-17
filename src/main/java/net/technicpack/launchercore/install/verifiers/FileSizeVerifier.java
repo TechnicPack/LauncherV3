@@ -19,8 +19,6 @@
 
 package net.technicpack.launchercore.install.verifiers;
 
-import org.apache.commons.io.FileUtils;
-
 import java.io.File;
 
 public class FileSizeVerifier implements IFileVerifier {

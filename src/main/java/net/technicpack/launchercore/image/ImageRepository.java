@@ -35,7 +35,7 @@ public class ImageRepository<T> {
     public ImageJob<T> startImageJob(T key) {
         String jobKey = store.getJobKey(key);
 
-        ImageJob<T> job = null;
+        ImageJob<T> job;
         if (allJobs.containsKey(jobKey))
             job = allJobs.get(jobKey);
         else {

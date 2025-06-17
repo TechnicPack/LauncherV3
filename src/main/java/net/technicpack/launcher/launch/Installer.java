@@ -117,7 +117,7 @@ public class Installer {
             GameProcess gameProcess = null;
 
             try {
-                MojangVersion version = null;
+                MojangVersion version;
 
                 InstallTasksQueue<MojangVersion> tasksQueue = new InstallTasksQueue<>(listener);
                 MojangVersionBuilder versionBuilder = createVersionBuilder(pack, tasksQueue);

@@ -30,7 +30,7 @@ public class CheckRunDataFile implements IInstallTask<MojangVersion> {
     }
 
     @Override
-    public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException, InterruptedException {
+    public void runTask(InstallTasksQueue<MojangVersion> queue) {
         File file = modpackModel.getBinDir();
         File runDataFile = new File(file, "runData");
 

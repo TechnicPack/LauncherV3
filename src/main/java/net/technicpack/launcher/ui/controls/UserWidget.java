@@ -55,7 +55,7 @@ public class UserWidget extends JPanel implements IImageJobListener<IUserType> {
 
         int endPreText = fullText.indexOf("{0}");
         int startPostText = endPreText + 3;
-        String preText = "";
+        String preText;
         String postText = "";
 
         if (endPreText < 0) {

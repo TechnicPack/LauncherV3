@@ -68,7 +68,7 @@ public class QueryUpdateStream implements IInstallTask<Void> {
     }
 
     @Override
-    public void runTask(InstallTasksQueue<Void> queue) throws IOException, InterruptedException {
+    public void runTask(InstallTasksQueue<Void> queue) throws IOException {
         try {
             StreamVersion version = updateStream.getStreamVersion(relauncher.getStreamName());
 
@@ -123,7 +123,6 @@ public class QueryUpdateStream implements IInstallTask<Void> {
 
             downloadTasks.addTask(new DownloadUpdate(updateUrl, relauncher, postDownloadTasks));
         } catch (RestfulAPIException ex) {
-            return;
         }
     }
 }

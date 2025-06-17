@@ -204,33 +204,22 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
     }
 
     protected void portableInstall() {
-        String targetPath = null;
+        String targetPath;
         final Relauncher relauncher = new TechnicRelauncher(null, settings.getBuildStream(), 0, new TechnicLauncherDirectories(settings.getTechnicRoot()), resources, params);
-        try {
-            String currentPath = relauncher.getRunningPath();
-            String launcher = (currentPath.endsWith(".exe"))?"TechnicLauncher.exe":"TechnicLauncher.jar";
+        String currentPath = relauncher.getRunningPath();
+        String launcher = (currentPath.endsWith(".exe"))?"TechnicLauncher.exe":"TechnicLauncher.jar";
 
-            targetPath = new File(portableInstallDir.getText(), launcher).getAbsolutePath();
+        targetPath = new File(portableInstallDir.getText(), launcher).getAbsolutePath();
 
-            File targetExe = new File(portableInstallDir.getText(), launcher);
+        File targetExe = new File(portableInstallDir.getText(), launcher);
 
-            if (!(new File(currentPath).equals(targetExe))) {
-                if (targetExe.exists() && !targetExe.delete()) {
-                    JOptionPane.showMessageDialog(this, resources.getString("installer.portable.replacefailed"), resources.getString("installer.portable.replacefailtitle"), JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                MoveLauncherPackage moveTask = new MoveLauncherPackage("", targetExe, relauncher);
-                moveTask.runTask(null);
+        if (!(new File(currentPath).equals(targetExe))) {
+            if (targetExe.exists() && !targetExe.delete()) {
+                JOptionPane.showMessageDialog(this, resources.getString("installer.portable.replacefailed"), resources.getString("installer.portable.replacefailtitle"), JOptionPane.ERROR_MESSAGE);
+                return;
             }
-
-
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-            Thread.currentThread().interrupt();
-            return;
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return;
+            MoveLauncherPackage moveTask = new MoveLauncherPackage("", targetExe, relauncher);
+            moveTask.runTask(null);
         }
 
         glassPane.setVisible(true);
@@ -246,10 +235,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
             if (oldSettingsFile.exists() && !oldSettingsFile.getAbsolutePath().equals(newSettingsFile.getAbsolutePath()))
                 oldSettingsFile.delete();
 
-            boolean rootHasChanged = false;
-
             if (oldRoot.exists() && !oldRoot.getAbsolutePath().equals(newRoot.getAbsolutePath())) {
-                rootHasChanged = true;
                 try {
                     if (!newRoot.exists())
                         newRoot.mkdirs();
@@ -541,7 +527,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         portableInstallButton.addActionListener(e -> portableInstall());
         portableInstallButton.setEnabled(false);
 
-        if (!installDir.equals("")) {
+        if (!installDir.isEmpty()) {
             portableInstallButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
             portableInstallButton.setEnabled(true);
         }

@@ -26,7 +26,6 @@ import net.technicpack.minecraftcore.mojang.version.io.*;
 import net.technicpack.minecraftcore.mojang.version.io.argument.Argument;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;

@@ -104,7 +104,7 @@ public class CleanupAndExtractModpackTask implements IInstallTask<MojangVersion>
 
 			processedFiles.add(cacheFile);
 
-            IFileVerifier verifier = null;
+            IFileVerifier verifier;
 
             if (md5 != null && !md5.isEmpty())
                 verifier = new MD5FileVerifier(md5);
