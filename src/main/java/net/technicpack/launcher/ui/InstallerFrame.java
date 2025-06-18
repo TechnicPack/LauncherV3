@@ -20,7 +20,6 @@ package net.technicpack.launcher.ui;
 
 import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.autoupdate.tasks.MoveLauncherPackage;
-import net.technicpack.launcher.autoupdate.TechnicRelauncher;
 import net.technicpack.launcher.autoupdate.VersionFileBuildNumber;
 import net.technicpack.launcher.io.TechnicLauncherDirectories;
 import net.technicpack.launcher.settings.StartupParameters;
@@ -195,7 +194,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
             VersionFileBuildNumber buildNumber = new VersionFileBuildNumber(resources);
             Utils.sendTracking("installLauncher", "standard", buildNumber.getBuildNumber(), settings.getClientId());
 
-            Relauncher relauncher = new TechnicRelauncher(null, settings.getBuildStream(), 0, new TechnicLauncherDirectories(settings.getTechnicRoot()), resources, params);
+            Relauncher relauncher = new Relauncher(null, settings.getBuildStream(), 0, new TechnicLauncherDirectories(settings.getTechnicRoot()), resources, params);
             String currentPath = relauncher.getRunningPath();
             relauncher.launch(currentPath, params.getArgs());
             System.exit(0);
@@ -205,7 +204,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
     protected void portableInstall() {
         String targetPath;
-        final Relauncher relauncher = new TechnicRelauncher(null, settings.getBuildStream(), 0, new TechnicLauncherDirectories(settings.getTechnicRoot()), resources, params);
+        final Relauncher relauncher = new Relauncher(null, settings.getBuildStream(), 0, new TechnicLauncherDirectories(settings.getTechnicRoot()), resources, params);
         String currentPath = relauncher.getRunningPath();
         String launcher = (currentPath.endsWith(".exe"))?"TechnicLauncher.exe":"TechnicLauncher.jar";
 

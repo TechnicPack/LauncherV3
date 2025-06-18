@@ -26,7 +26,6 @@ import net.technicpack.discord.CachedDiscordApi;
 import net.technicpack.discord.HttpDiscordApi;
 import net.technicpack.discord.IDiscordApi;
 import net.technicpack.launcher.autoupdate.CommandLineBuildNumber;
-import net.technicpack.launcher.autoupdate.TechnicRelauncher;
 import net.technicpack.launcher.autoupdate.VersionFileBuildNumber;
 import net.technicpack.launcher.io.*;
 import net.technicpack.launcher.launch.Installer;
@@ -207,7 +206,7 @@ public class LauncherMain {
         runStartupDebug();
         updateJavaTrustStore();
 
-        Relauncher launcher = new TechnicRelauncher(new HttpUpdateStream("https://api.technicpack.net/launcher/"), settings.getBuildStream()+"4", build, directories, resources, params);
+        Relauncher launcher = new Relauncher(new HttpUpdateStream("https://api.technicpack.net/launcher/"), settings.getBuildStream()+"4", build, directories, resources, params);
 
         try {
             if (launcher.runAutoUpdater()) {

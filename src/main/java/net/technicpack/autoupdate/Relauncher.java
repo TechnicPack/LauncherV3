@@ -19,13 +19,22 @@
 
 package net.technicpack.autoupdate;
 
+import net.technicpack.autoupdate.tasks.*;
+import net.technicpack.launcher.LauncherMain;
+import net.technicpack.launcher.settings.StartupParameters;
+import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.LauncherDirectories;
+import net.technicpack.launchercore.install.tasks.IInstallTask;
+import net.technicpack.launchercore.install.tasks.TaskGroup;
+import net.technicpack.ui.controls.installation.SplashScreen;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.ProcessUtils;
 import net.technicpack.utilslib.Utils;
 
 import javax.swing.JOptionPane;
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -35,17 +44,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public abstract class Relauncher {
+public class Relauncher {
 
     private final String stream;
     private final int currentBuild;
     private final LauncherDirectories directories;
+    protected ResourceLoader resources;
+    protected StartupParameters parameters;
+    protected IUpdateStream updateStream;
     private boolean didUpdate = false;
+    private SplashScreen screen = null;
 
-    public Relauncher(String stream, int currentBuild, LauncherDirectories directories) {
+    public Relauncher(IUpdateStream updateStream, String stream, int currentBuild, LauncherDirectories directories, ResourceLoader resources, StartupParameters parameters) {
         this.stream = stream;
         this.currentBuild = currentBuild;
         this.directories = directories;
+        this.resources = resources;
+        this.parameters = parameters;
+        this.updateStream = updateStream;
     }
 
     public int getCurrentBuild() { return currentBuild; }
@@ -73,17 +89,76 @@ public abstract class Relauncher {
         }
     }
 
-    protected abstract Class<?> getMainClass();
-    public abstract String getUpdateText();
-    public abstract boolean isUpdateOnly();
-    public abstract boolean isMover();
-    public abstract boolean isLauncherOnly();
-    public abstract boolean isSkipUpdate();
-    public abstract InstallTasksQueue<Void> buildMoverTasks();
-    public abstract InstallTasksQueue<Void> buildUpdaterTasks();
-    public abstract String[] getLaunchArgs();
-    public abstract void updateComplete();
-    public abstract boolean canReboot();
+    protected Class<?> getMainClass() {
+        return LauncherMain.class;
+    }
+
+    public String getUpdateText() {
+        return resources.getString("updater.launcherupdate");
+    }
+
+    public boolean isUpdateOnly() {
+        return parameters.isUpdate();
+    }
+
+    public boolean isMover() {
+        return (parameters.isMover() || parameters.isLegacyMover()) && !parameters.isLegacyLauncher();
+    }
+
+    public boolean isLauncherOnly() {
+        return parameters.isLauncher();
+    }
+
+    public boolean isSkipUpdate() {
+        return parameters.isSkipUpdate();
+    }
+
+    public InstallTasksQueue<Void> buildMoverTasks() {
+        InstallTasksQueue<Void> queue = new InstallTasksQueue<>(null);
+
+        queue.addTask(new MoveLauncherPackage(resources.getString("updater.mover"), new File(parameters.getMoveTarget()), this));
+        queue.addTask(new LaunchLauncherMode(resources.getString("updater.finallaunch"), this, parameters.getMoveTarget(), parameters.isLegacyMover()));
+
+        return queue;
+    }
+
+    public InstallTasksQueue<Void> buildUpdaterTasks() {
+        screen = new SplashScreen(resources.getImage("launch_splash.png"), 30);
+        Color bg = UIConstants.COLOR_FORM_ELEMENT_INTERNAL;
+        screen.getContentPane().setBackground(new Color (bg.getRed(),bg.getGreen(),bg.getBlue(),255));
+        screen.getProgressBar().setForeground(Color.white);
+        screen.getProgressBar().setBackground(UIConstants.COLOR_GREEN);
+        screen.getProgressBar().setBackFill(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
+        screen.getProgressBar().setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 12));
+        screen.pack();
+        screen.setLocationRelativeTo(null);
+        screen.setVisible(true);
+
+        InstallTasksQueue<Void> queue = new InstallTasksQueue<>(screen.getProgressBar());
+
+        ArrayList<IInstallTask<Void>> postDownloadTasks = new ArrayList<>();
+        postDownloadTasks.add(new LaunchMoverMode(resources.getString("updater.launchmover"), getTempLauncher(), this));
+
+        TaskGroup<Void> downloadFilesGroup = new TaskGroup<>(resources.getString("updater.downloads"));
+        queue.addTask(new EnsureUpdateFolders(resources.getString("updater.folders"), getDirectories()));
+        queue.addTask(new QueryUpdateStream(resources.getString("updater.query"), updateStream, downloadFilesGroup, getDirectories(), this, postDownloadTasks));
+        queue.addTask(downloadFilesGroup);
+
+        return queue;
+    }
+
+    public String[] getLaunchArgs() {
+        String[] launchArgs = new String[parameters.getArgs().length + 1];
+        System.arraycopy(parameters.getArgs(), 0, launchArgs, 0, parameters.getArgs().length);
+        launchArgs[parameters.getArgs().length] = "-blockReboot";
+        return parameters.getArgs();
+    }
+
+    public void updateComplete() {
+        screen.dispose();
+    }
+
+    public boolean canReboot() { return !parameters.isBlockReboot(); }
 
     public boolean runAutoUpdater() throws IOException, InterruptedException {
         if (isLauncherOnly())
