@@ -281,11 +281,8 @@ public class Download implements Runnable {
 
                 stateChanged();
                 synchronized (progressLock) {
-                    long now = System.currentTimeMillis();
-                    long timeSinceLastUpdate = now - last;
-                    long waitTime = Math.max(1, TIMEOUT - timeSinceLastUpdate);
                     try {
-                        progressLock.wait(waitTime);
+                        progressLock.wait(50);
                     } catch (InterruptedException e) {
                         this.interrupt();
                         return;
