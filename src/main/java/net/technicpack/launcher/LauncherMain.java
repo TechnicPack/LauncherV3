@@ -19,6 +19,7 @@
 package net.technicpack.launcher;
 
 import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
 import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.autoupdate.http.HttpUpdateStream;
@@ -154,11 +155,16 @@ public class LauncherMain {
 
         StartupParameters params = new StartupParameters(argv);
         try {
-            JCommander.newBuilder()
+            JCommander jc = JCommander.newBuilder()
                     .addObject(params)
-                    .build()
-                    .parse(argv);
-        } catch (Exception ex) {
+                    .build();
+            // Allow options to be case-insensitive
+            jc.setCaseSensitiveOptions(false);
+            // Ignore extra unknown options
+            jc.setAcceptUnknownOptions(true);
+            // Parse the arguments into the params object
+            jc.parse(argv);
+        } catch (ParameterException ex) {
             ex.printStackTrace();
         }
 

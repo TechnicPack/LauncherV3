@@ -147,11 +147,18 @@ public class Relauncher {
         return queue;
     }
 
-    public String[] getLaunchArgs() {
-        String[] launchArgs = new String[parameters.getArgs().length + 1];
-        System.arraycopy(parameters.getArgs(), 0, launchArgs, 0, parameters.getArgs().length);
-        launchArgs[parameters.getArgs().length] = "-blockReboot";
-        return parameters.getArgs();
+    /**
+     * Returns the arguments to be used when relaunching the updater.
+     * This includes the original arguments plus an additional "-blockReboot" argument.
+     *
+     * @return An array of strings representing the launch arguments.
+     */
+    public List<String> getRelaunchArgs() {
+        List<String> args = parameters.getArgs();
+        List<String> launchArgs = new ArrayList<>(args.size() + 1);
+        launchArgs.addAll(args);
+        launchArgs.add("-blockReboot");
+        return launchArgs;
     }
 
     public void updateComplete() {
@@ -195,7 +202,7 @@ public class Relauncher {
     }
 
     public void relaunch() {
-        launch(null, getLaunchArgs());
+        launch(null, getRelaunchArgs());
     }
 
     public File getTempLauncher() {
@@ -211,13 +218,13 @@ public class Relauncher {
         return dest;
     }
 
-    public void launch(String launchPath, String[] args) {
+    public void launch(String launchPath, List<String> args) {
         if (launchPath == null) {
             launchPath = getRunningPath();
         }
 
         ArrayList<String> commands = getCommands(launchPath);
-        commands.addAll(Arrays.asList(args));
+        commands.addAll(args);
 
         String commandString = String.join(" ", commands);
 
@@ -252,23 +259,23 @@ public class Relauncher {
         return commands;
     }
 
-    public String[] buildMoverArgs() {
+    public List<String> buildMoverArgs() {
         List<String> outArgs = new ArrayList<>();
         outArgs.add("-movetarget");
         outArgs.add(getRunningPath());
         outArgs.add("-moveronly");
-        outArgs.addAll(Arrays.asList(getLaunchArgs()));
-        return outArgs.toArray(new String[0]);
+        outArgs.addAll(getRelaunchArgs());
+        return outArgs;
     }
 
-    public String[] buildLauncherArgs(boolean isLegacy) {
+    public List<String> buildLauncherArgs(boolean isLegacy) {
         List<String> outArgs = new ArrayList<>();
         if (!isLegacy)
             outArgs.add("-launcheronly");
         else
             outArgs.add("-launcher");
-        outArgs.addAll(Arrays.asList(getLaunchArgs()));
+        outArgs.addAll(getRelaunchArgs());
         outArgs.remove("-moveronly");
-        return outArgs.toArray(new String[0]);
+        return outArgs;
     }
 }

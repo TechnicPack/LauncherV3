@@ -24,6 +24,7 @@ import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 
 import java.io.IOException;
+import java.util.List;
 
 public class LaunchLauncherMode implements IInstallTask<Void> {
 
@@ -51,7 +52,7 @@ public class LaunchLauncherMode implements IInstallTask<Void> {
 
     @Override
     public void runTask(InstallTasksQueue<Void> queue) {
-        String[] args = relauncher.buildLauncherArgs(isLegacy);
+        List<String> args = relauncher.buildLauncherArgs(isLegacy);
         relauncher.launch(launchTarget, args);
     }
 }

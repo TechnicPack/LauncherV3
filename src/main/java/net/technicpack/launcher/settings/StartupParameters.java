@@ -19,46 +19,52 @@
 package net.technicpack.launcher.settings;
 
 import com.beust.jcommander.Parameter;
-import com.beust.jcommander.internal.Lists;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public final class StartupParameters {
-    @SuppressWarnings("unused")
     private final String[] args;
-    @Parameter
-    private List<String> parameters = Lists.newArrayList();
-    @Parameter(names = {"-console"}, description = "Shows the console window")
+
+    @Parameter(names = "-console", description = "Show the console window")
     private boolean console = false;
-    @Parameter(names = {"-launcheronly"}, description = "Starts in launcher mode (rather than update/mover)")
+
+    @Parameter(names = "-launcheronly", description = "Start in launcher mode (rather than update/mover)")
     private boolean launcher = false;
-    @Parameter(names = {"-launcher"}, description = "Legacy launcher mode (indicates we should do a full update)")
+
+    @Parameter(names = "-launcher", description = "Legacy launcher mode (indicates we should do a full update)")
     private boolean oldLauncher = false;
-    @Parameter(names = {"-moveronly"}, description = "Starts in mover mode (copies recently-downloaded update to originally-run package)")
+
+    @Parameter(names = "-moveronly", description = "Start in mover mode (copies recently-downloaded update to originally-run package)")
     private boolean mover = false;
-    @Parameter(names = {"-mover"}, description = "Legacy mover mode- used to detect old-updater clients trying to update")
+
+    @Parameter(names = "-mover", description = "Legacy mover mode (used to detect old-updater clients trying to update)")
     private boolean oldMover = false;
-    @Parameter(names = {"-update"}, description = "Starts in update mode (closes after downloading updated resources)")
+
+    @Parameter(names = "-update", description = "Start in update mode (closes after downloading updated resources)")
     private boolean update = false;
-    @Parameter(names = {"-movetarget"}, description = "The path of the originally-run package to copy to")
+
+    @Parameter(names = "-movetarget", description = "The path of the originally-run package to copy to")
     private String moveTarget = null;
-    @Parameter(names = {"-discover"}, description = "An override param for the discover URL")
+
+    @Parameter(names = "-discover", description = "An override param for the discover URL")
     private String discover = null;
-    @Parameter(names = {"-blockReboot"}, description = "Prevent rebooting the launcher due to bad java properties.")
+
+    @Parameter(names = "-blockReboot", description = "Prevent rebooting the launcher due to bad java properties")
     private boolean blockReboot = false;
-    @Parameter(names = {"-buildNumber"}, description = "Force build number to this value for debugging.")
+
+    @Parameter(names = "-buildNumber", description = "Force build number to this value for debugging")
     private String buildNumber = "";
-    @Parameter(names= {"-skipUpdate"}, description = "Skip the launcher update (still updates resources)")
+
+    @Parameter(names= "-skipUpdate", description = "Skip the launcher update (still updates resources)")
     private boolean skipUpdate = false;
 
     public StartupParameters(String[] args) {
         this.args = args;
     }
 
-    public List<String> getParameters() {
-        return parameters;
-    }
-    public String[] getArgs() { return args; }
+    public List<String> getArgs() { return Collections.unmodifiableList(Arrays.asList(args)); }
 
     public boolean isConsole() {
         return console;
