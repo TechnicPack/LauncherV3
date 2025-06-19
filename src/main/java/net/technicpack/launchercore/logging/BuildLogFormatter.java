@@ -42,7 +42,7 @@ public class BuildLogFormatter extends Formatter {
         builder.append("[B#").append(launcherBuild).append("] ");
         builder.append(date.format(record.getMillis()));
         builder.append(" [");
-        builder.append(record.getLevel().getName().toUpperCase(Locale.ENGLISH));
+        builder.append(record.getLevel().getName().toUpperCase(Locale.ROOT));
         builder.append("] ");
         builder.append(formatMessage(record));
         if (builder.charAt(builder.length() - 1) != '\n') {

@@ -174,7 +174,7 @@ public class Rule {
         public boolean test(ILaunchOptions opts, IJavaRuntime runtime) {
             String os = OperatingSystem.getOperatingSystem().getName();
             String osVersion = System.getProperty("os.version");
-            String archProp = runtime.getOsArch().toLowerCase(Locale.ENGLISH);
+            String archProp = runtime.getOsArch().toLowerCase(Locale.ROOT);
             return (name == null || name.equalsIgnoreCase(os))
                     && (version == null || version.matcher(osVersion).matches())
                     && (arch == null || archProp.contains(arch.toLowerCase()));

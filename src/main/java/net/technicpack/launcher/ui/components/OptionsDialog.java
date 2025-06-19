@@ -883,7 +883,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         windowSelect = new JComboBox<>();
 
-        if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
+        if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("mac")) {
             windowSelect.setUI(new MetalComboBoxUI());
         }
 
@@ -940,7 +940,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         useStencil = new JComboBox<>();
 
-        if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
+        if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("mac")) {
             useStencil.setUI(new MetalComboBoxUI());
         }
 
@@ -993,7 +993,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         versionSelect = new JComboBox<>();
 
-        if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
+        if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("mac")) {
             versionSelect.setUI(new MetalComboBoxUI());
         }
 
@@ -1030,7 +1030,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         memSelect = new JComboBox<>();
 
-        if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
+        if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("mac")) {
             memSelect.setUI(new MetalComboBoxUI());
         }
 

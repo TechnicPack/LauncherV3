@@ -56,7 +56,7 @@ public enum OperatingSystem {
 
         //Always specify english when tolowercase/touppercasing values for comparison against well-known values
         //Prevents an issue with turkish users
-        String osName = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
+        String osName = System.getProperty("os.name").toLowerCase(Locale.ROOT);
 
         for (OperatingSystem operatingSystem : values()) {
             for (String alias : operatingSystem.getAliases()) {

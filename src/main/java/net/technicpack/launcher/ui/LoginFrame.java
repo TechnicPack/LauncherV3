@@ -166,7 +166,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         // Setup account select box
         nameSelect = new JComboBox<>();
 
-        if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
+        if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("mac")) {
             nameSelect.setUI(new MetalComboBoxUI());
         }
 

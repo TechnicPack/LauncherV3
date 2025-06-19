@@ -327,7 +327,7 @@ public class LauncherMain {
      * Runs the startup debug, including OS information and DNS resolution for key hostnames.
      */
     private static void runStartupDebug() {
-        Utils.getLogger().info(String.format("OS: %s", System.getProperty("os.name").toLowerCase(Locale.ENGLISH)));
+        Utils.getLogger().info(String.format("OS: %s", System.getProperty("os.name").toLowerCase(Locale.ROOT)));
         Utils.getLogger().info(String.format("Identified as %s", OperatingSystem.getOperatingSystem().getName()));
         Utils.getLogger().info(String.format("Java: %s %s-bit (%s)", System.getProperty("java.version"), JavaUtils.JAVA_BITNESS, JavaUtils.OS_ARCH));
         final String[] domains = {

@@ -291,7 +291,7 @@ public class ModpackOptionsDialog extends LauncherDialog {
 
         manualBuildList = new JComboBox();
 
-        if (System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("mac")) {
+        if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("mac")) {
             manualBuildList.setUI(new MetalComboBoxUI());
         }
 
