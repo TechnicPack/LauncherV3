@@ -18,30 +18,40 @@
 
 package net.technicpack.launcher.ui.controls.modpacks;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JLabel;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 
 public class ModpackTag extends JLabel {
+    private static final int HORIZONTAL_PADDING = 8;
+    private static final int VERTICAL_PADDING = 4;
+
     public ModpackTag(String text) {
         super(text);
     }
 
     @Override
-    public Dimension getMinimumSize() { return getPreferredSize(); }
+    public Dimension getMinimumSize() {
+        return getPreferredSize();
+    }
 
     @Override
-    public Dimension getMaximumSize() { return getPreferredSize(); }
+    public Dimension getMaximumSize() {
+        return getPreferredSize();
+    }
 
     @Override
     public Dimension getPreferredSize() {
         int textSize = getFontMetrics(getFont()).getHeight();
         int textWidth = getFontMetrics(getFont()).stringWidth(getText());
-        return new Dimension(textWidth+8, textSize+4);
+        return new Dimension(textWidth + HORIZONTAL_PADDING, textSize + VERTICAL_PADDING);
     }
 
     @Override
     public void paint(Graphics g) {
-        Graphics2D g2d = (Graphics2D)g;
+        Graphics2D g2d = (Graphics2D) g;
 
         g2d.setRenderingHint(
                 RenderingHints.KEY_ANTIALIASING,
@@ -53,13 +63,17 @@ public class ModpackTag extends JLabel {
                 RenderingHints.KEY_FRACTIONALMETRICS,
                 RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
-        g.setColor(getBackground());
-        g.fillRoundRect(1, 1, getWidth() - 2, getHeight() - 2, 5, 5);
-        g.setColor(getForeground());
-        g.setFont(getFont());
+        g2d.setColor(getBackground());
+        g2d.fillRoundRect(1, 1, getWidth() - 2, getHeight() - 2, 5, 5);
 
-        int textY = 1 + ((getHeight()-2 - g2d.getFontMetrics().getHeight()) / 2) + g2d.getFontMetrics().getAscent();
+        g2d.setColor(getForeground());
+        g2d.setFont(getFont());
 
-        g.drawString(getText(), 5, textY);
+        int textY =
+                1 + ((getHeight() - (VERTICAL_PADDING / 2) - g2d.getFontMetrics().getHeight()) / 2) + g2d.getFontMetrics().getAscent();
+
+        g2d.drawString(getText(), HORIZONTAL_PADDING / 2, textY);
+
+        g2d.dispose();
     }
 }
