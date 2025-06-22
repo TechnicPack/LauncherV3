@@ -221,6 +221,7 @@ public class Installer {
                     else
                         Utils.getLogger().info("Cancelled by code.");
                     e.printStackTrace();
+                    Sentry.captureException(e);
                 } else
                     Utils.getLogger().info("Cancelled by user.");
 
