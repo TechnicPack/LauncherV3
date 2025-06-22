@@ -106,7 +106,7 @@ public class MojangUtils {
 
             while (entries.hasMoreElements()) {
                 JarEntry entry = entries.nextElement();
-                if (securityPattern.matcher(entry.getName()).lookingAt()) {
+                if (securityPattern.matcher(entry.getName()).find()) {
                     continue;
                 }
                 try (InputStream is = jarFile.getInputStream(entry)) {
