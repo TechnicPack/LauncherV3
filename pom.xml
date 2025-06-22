@@ -339,27 +339,19 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.3.1</version>
+                <groupId>com.coderplus.maven.plugins</groupId>
+                <artifactId>copy-rename-maven-plugin</artifactId>
+                <version>1.0</version>
                 <executions>
                     <execution>
                         <id>copy-english-to-root</id>
                         <phase>generate-resources</phase>
                         <goals>
-                            <goal>copy-resources</goal>
+                            <goal>copy</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.outputDirectory}/net/technicpack/launcher/resources/lang</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${project.build.outputDirectory}/net/technicpack/launcher/resources/lang</directory>
-                                    <includes>
-                                        <include>UIText_en.properties</include>
-                                    </includes>
-                                    <targetPath>.</targetPath>
-                                </resource>
-                            </resources>
+                            <sourceFile>${project.build.outputDirectory}/net/technicpack/launcher/resources/lang/UIText_en.properties</sourceFile>
+                            <destinationFile>${project.build.outputDirectory}/net/technicpack/launcher/resources/lang/UIText.properties</destinationFile>
                         </configuration>
                     </execution>
                 </executions>
