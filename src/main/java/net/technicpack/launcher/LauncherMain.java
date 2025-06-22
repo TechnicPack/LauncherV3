@@ -20,6 +20,7 @@ package net.technicpack.launcher;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
+import io.sentry.Sentry;
 import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.autoupdate.http.HttpUpdateStream;
@@ -143,6 +144,11 @@ public class LauncherMain {
     private static IBuildNumber buildNumber;
 
     public static void main(String[] argv) {
+        // Initialize Sentry
+        Sentry.init(options -> {
+            options.setDsn("https://4741ed8316eaefd3fa537240d8800c62@o4508140473417728.ingest.us.sentry.io/4509542931431424");
+        });
+
         runHeadlessCheck();
 
         try {
@@ -228,11 +234,13 @@ public class LauncherMain {
         } catch (DownloadException e) {
             // There was an error downloading the launcher resources, show an error message and exit
             Utils.getLogger().log(Level.SEVERE, "Failed to download launcher resources", e);
+            Sentry.captureException(e);
             showStartupError(resources, resources.getString("updater.error.download", e.getMessage()));
             System.exit(1);
         } catch (IOException e) {
             // An unknown IO error occurred, show an error message and exit
             Utils.getLogger().log(Level.SEVERE, "IOException when starting launcher", e);
+            Sentry.captureException(e);
             showStartupError(resources, resources.getString("updater.error.io", e.getMessage()));
             System.exit(1);
         }
@@ -326,6 +334,7 @@ public class LauncherMain {
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
             e.printStackTrace();
             logger.log(Level.SEVERE, String.format("Unhandled exception in thread %s", t), e);
+            Sentry.captureException(e);
         });
     }
 

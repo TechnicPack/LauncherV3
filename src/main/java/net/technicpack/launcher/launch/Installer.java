@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.launch;
 
+import io.sentry.Sentry;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.LauncherFrame;
@@ -222,6 +223,8 @@ public class Installer {
                     e.printStackTrace();
                 } else
                     Utils.getLogger().info("Cancelled by user.");
+
+                Thread.currentThread().interrupt();
             } catch (PackNotAvailableOfflineException e) {
                 JOptionPane.showMessageDialog(frame, e.getMessage(),
                         resources.getString("launcher.installerror.unavailable"), JOptionPane.WARNING_MESSAGE);
@@ -242,7 +245,8 @@ public class Installer {
                 JOptionPane.showMessageDialog(frame, e.getMessage(), resources.getString("launcher.installerror.title"),
                         JOptionPane.WARNING_MESSAGE);
             } catch (Exception e) {
-                e.printStackTrace();
+                Utils.getLogger().log(Level.SEVERE, "Exception caught during modpack installation or launch.", e);
+                Sentry.captureException(e);
             } finally {
                 if (!doLaunch || gameProcess == null || gameProcess.getProcess() == null || !gameProcess.getProcess().isAlive()) {
                     EventQueue.invokeLater(frame::launchCompleted);
@@ -261,7 +265,9 @@ public class Installer {
 
                 if (!userCancelled) {
                     // Grab stack trace for this mysterious interruption
-                    Utils.getLogger().log(Level.WARNING, "Mysterious interruption source.", new Exception("Stack trace"));
+                    Exception ex = new Exception("Stack trace");
+                    Utils.getLogger().log(Level.WARNING, "Mysterious interruption source.", ex);
+                    Sentry.captureException(ex);
                 }
                 super.interrupt();
             }
