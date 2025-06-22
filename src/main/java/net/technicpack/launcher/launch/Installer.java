@@ -141,6 +141,9 @@ public class Installer {
                         throw new PackNotAvailableOfflineException(pack.getDisplayName());
                     }
 
+                    // Set up default Java runtime
+                    version.setJavaRuntime(javaVersions.getSelectedVersion());
+
                     boolean usingMojangJava = mojangJavaWanted && version.getMojangRuntimeInformation() != null;
 
                     Memory memoryObj = Memory.getClosestAvailableMemory(Memory.getMemoryFromId(settings.getMemory()),
