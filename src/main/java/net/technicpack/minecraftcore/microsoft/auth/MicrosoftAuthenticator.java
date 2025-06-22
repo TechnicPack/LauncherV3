@@ -3,8 +3,6 @@ package net.technicpack.minecraftcore.microsoft.auth;
 import com.google.api.client.auth.oauth2.*;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
-
-
 import com.google.api.client.http.*;
 import com.google.api.client.http.apache.v5.Apache5HttpTransport;
 import com.google.api.client.http.json.JsonHttpContent;
@@ -24,6 +22,11 @@ import java.io.IOException;
 import java.io.StreamCorruptedException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.AccessDeniedException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.FileOwnerAttributeView;
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -79,6 +82,26 @@ public class MicrosoftAuthenticator {
                     request.setCurlLoggingEnabled(true);
                 }
         );
+
+        // Work around the Access Denied exception that sometimes happens due to Windows ACL permission issues
+        Path dataStorePath = Paths.get(dataStore.getAbsolutePath());
+        if (Files.exists(dataStorePath)) {
+            try {
+
+                FileOwnerAttributeView fileAttributeView =
+                        Files.getFileAttributeView(dataStorePath, FileOwnerAttributeView.class);
+                fileAttributeView.getOwner();
+            } catch (AccessDeniedException e) {
+                // Attempt to delete the file if we get an AccessDeniedException
+                try {
+                    Files.delete(dataStorePath);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            } catch (IOException ignored) {
+                // Ignore any other IO exceptions
+            }
+        }
 
         try {
             dataStoreFactory = new FileDataStoreFactory(dataStore);
