@@ -180,8 +180,7 @@ public class MinecraftLauncher {
         }
 
         // build jvm args
-        IJavaRuntime runtime = version.getJavaRuntime();
-        String launchJavaVersion = runtime.getVersion();
+        String launchJavaVersion = javaRuntime.getVersion();
 
         // Ignore JVM args for Forge 1.13+, ForgeWrapper handles those
         // FIXME: HACK: This likely breaks some things as it will also skip vanilla JVM args
@@ -189,7 +188,7 @@ public class MinecraftLauncher {
             ArgumentList jvmArgs = version.getJavaArguments();
 
             if (jvmArgs != null) {
-                for (String arg : jvmArgs.resolve(options.getOptions(), runtime, paramDereferencer)) {
+                for (String arg : jvmArgs.resolve(options.getOptions(), javaRuntime, paramDereferencer)) {
                     commands.add(arg);
                 }
             }
@@ -240,7 +239,7 @@ public class MinecraftLauncher {
             commands.add("-Xdock:name=" + pack.getDisplayName());
 
             // Add -XstartOnFirstThread for Mac on LWJGL 3
-            boolean hasLwjgl3 = version.getLibrariesForCurrentOS(launchOpts, runtime).stream().anyMatch(library -> library.getName().startsWith("org.lwjgl:lwjgl:"));
+            boolean hasLwjgl3 = version.getLibrariesForCurrentOS(launchOpts, javaRuntime).stream().anyMatch(library -> library.getName().startsWith("org.lwjgl:lwjgl:"));
             if (hasLwjgl3) {
                 commands.addUnique("-XstartOnFirstThread");
             }
@@ -251,7 +250,7 @@ public class MinecraftLauncher {
         // build game args
         commands.addUnique("-cp", cpString);
         commands.addRaw(version.getMainClass());
-        List<String> mcArgs = version.getMinecraftArguments().resolve(launchOpts, runtime, paramDereferencer);
+        List<String> mcArgs = version.getMinecraftArguments().resolve(launchOpts, javaRuntime, paramDereferencer);
 
         // We manually iterate over the arguments so we can add them in "--name value" pairs, and exclude duplicates
         // this way. For example: --username Foobar
