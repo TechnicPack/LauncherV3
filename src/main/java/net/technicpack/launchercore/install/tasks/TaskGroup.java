@@ -75,8 +75,9 @@ public class TaskGroup<T> implements IWeightedTasksQueue<T>, IInstallTask<T> {
     @Override
     public void runTask(InstallTasksQueue<T> queue) throws IOException, InterruptedException {
         while (taskProgress < taskList.size()) {
-            if (Thread.interrupted())
+            if (Thread.currentThread().isInterrupted()) {
                 throw new InterruptedException();
+            }
             IInstallTask<T> currentTask = taskList.get(taskProgress);
             fileName = currentTask.getTaskDescription();
             currentTask.runTask(queue);
