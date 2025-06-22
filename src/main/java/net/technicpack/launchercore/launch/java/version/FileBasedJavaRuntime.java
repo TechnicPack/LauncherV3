@@ -29,7 +29,7 @@ import java.nio.file.Paths;
 import java.util.Objects;
 
 /**
- * An IJavaRuntime based on an externally-selected java executable.
+ * An IJavaRuntime based on an externally selected java executable.
  */
 public final class FileBasedJavaRuntime implements IJavaRuntime, Serializable {
     private transient boolean queried = false;
@@ -147,7 +147,7 @@ public final class FileBasedJavaRuntime implements IJavaRuntime, Serializable {
     public boolean isValid() {
         ensureQueried();
 
-        return (version != null && vendor != null);
+        return (version != null && vendor != null && osArch != null);
     }
 
     public String getExecutablePath() {
