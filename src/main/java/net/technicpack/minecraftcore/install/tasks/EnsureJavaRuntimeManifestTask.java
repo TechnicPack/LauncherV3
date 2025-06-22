@@ -41,12 +41,14 @@ public class EnsureJavaRuntimeManifestTask implements IInstallTask<MojangVersion
 
     private final File runtimesDirectory;
     private final ModpackModel modpack;
+    private final ITasksQueue<MojangVersion> fetchJavaManifest;
     private final ITasksQueue<MojangVersion> examineJavaQueue;
     private final ITasksQueue<MojangVersion> downloadJavaQueue;
 
-    public EnsureJavaRuntimeManifestTask(File runtimesDirectory, ModpackModel modpack, ITasksQueue<MojangVersion> examineJavaQueue, ITasksQueue<MojangVersion> downloadJavaQueue) {
+    public EnsureJavaRuntimeManifestTask(File runtimesDirectory, ModpackModel modpack, ITasksQueue<MojangVersion> fetchJavaManifest, ITasksQueue<MojangVersion> examineJavaQueue, ITasksQueue<MojangVersion> downloadJavaQueue) {
         this.runtimesDirectory = runtimesDirectory;
         this.modpack = modpack;
+        this.fetchJavaManifest = fetchJavaManifest;
         this.examineJavaQueue = examineJavaQueue;
         this.downloadJavaQueue = downloadJavaQueue;
     }
@@ -95,7 +97,7 @@ public class EnsureJavaRuntimeManifestTask implements IInstallTask<MojangVersion
         IFileVerifier fileVerifier = new SHA1FileVerifier(runtimeDownload.getSha1());
 
         if (!output.exists() || !fileVerifier.isFileValid(output)) {
-            examineJavaQueue.addTask(new DownloadFileTask<>(runtimeDownload.getUrl(), output, fileVerifier));
+            fetchJavaManifest.addTask(new DownloadFileTask<>(runtimeDownload.getUrl(), output, fileVerifier));
         }
 
         examineJavaQueue.addTask(new InstallJavaRuntimeTask(modpack, runtimesDirectory, output, runtimeInfo, examineJavaQueue, downloadJavaQueue));
