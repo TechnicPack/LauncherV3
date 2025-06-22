@@ -94,13 +94,13 @@ public class JavaVersionRepository {
 
     public IJavaRuntime getVersion(String version, boolean is64Bit) {
         if (version == null || version.isEmpty() || version.equals(VERSION_DEFAULT)) {
-            return loadedVersions.get(null);
+            return getDefaultVersion();
         }
 
         if (version.equals(VERSION_LATEST_64BIT)) {
             IJavaRuntime best64BitVersion = getBest64BitVersion();
             if (best64BitVersion == null)
-                best64BitVersion = loadedVersions.get(null);
+                best64BitVersion = getDefaultVersion();
             return best64BitVersion;
         }
 
@@ -112,7 +112,7 @@ public class JavaVersionRepository {
         IJavaRuntime specifiedVersion = loadedVersions.get(new File(version));
 
         if (specifiedVersion == null) {
-            specifiedVersion = loadedVersions.get(null);
+            specifiedVersion = getDefaultVersion();
         }
 
         return specifiedVersion;
