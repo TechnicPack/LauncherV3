@@ -118,13 +118,13 @@ public class Installer {
             GameProcess gameProcess = null;
 
             try {
-                MojangVersion version;
-
                 InstallTasksQueue<MojangVersion> tasksQueue = new InstallTasksQueue<>(listener);
                 MojangVersionBuilder versionBuilder = createVersionBuilder(pack, tasksQueue);
                 JavaVersionRepository javaVersions = launcher.getJavaVersions();
 
                 final boolean mojangJavaWanted = settings.shouldUseMojangJava();
+
+                MojangVersion version;
 
                 if (build != null && !build.isEmpty()) {
                     buildTasksQueue(tasksQueue, resources, pack, build, doFullInstall, versionBuilder, javaVersions.getSelectedVersion(), mojangJavaWanted);
@@ -132,6 +132,9 @@ public class Installer {
                     version = installer.installPack(tasksQueue, pack, build);
                 } else {
                     version = versionBuilder.buildVersionFromKey(null);
+
+                    // Set up default Java runtime
+                    version.setJavaRuntime(javaVersions.getSelectedVersion());
 
                     if (version != null)
                         pack.initDirectories();
@@ -141,9 +144,6 @@ public class Installer {
                     if (version == null) {
                         throw new PackNotAvailableOfflineException(pack.getDisplayName());
                     }
-
-                    // Set up default Java runtime
-                    version.setJavaRuntime(javaVersions.getSelectedVersion());
 
                     boolean usingMojangJava = mojangJavaWanted && version.getMojangRuntimeInformation() != null;
 
