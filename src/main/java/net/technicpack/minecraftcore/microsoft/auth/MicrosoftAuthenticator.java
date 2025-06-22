@@ -87,7 +87,7 @@ public class MicrosoftAuthenticator {
         Path dataStorePath = Paths.get(dataStore.getAbsolutePath());
         if (Files.exists(dataStorePath)) {
             try {
-
+                // FileDataStoreFactory internally does this when it tries to lock down the permissions of the file.
                 FileOwnerAttributeView fileAttributeView =
                         Files.getFileAttributeView(dataStorePath, FileOwnerAttributeView.class);
                 fileAttributeView.getOwner();
