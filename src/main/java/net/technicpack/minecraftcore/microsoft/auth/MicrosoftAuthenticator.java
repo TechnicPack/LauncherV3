@@ -10,6 +10,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
+import io.sentry.Sentry;
 import net.technicpack.launchercore.exception.AuthenticationException;
 import net.technicpack.launchercore.exception.MicrosoftAuthException;
 import net.technicpack.launchercore.exception.SessionException;
@@ -96,9 +97,11 @@ public class MicrosoftAuthenticator {
                 try {
                     Files.delete(dataStorePath);
                 } catch (IOException ex) {
+                    Sentry.captureException(ex);
                     throw new RuntimeException(ex);
                 }
-            } catch (IOException ignored) {
+            } catch (IOException ex) {
+                Sentry.captureException(ex);
                 // Ignore any other IO exceptions
             }
         }
