@@ -409,7 +409,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
         JButton launcherOptionsLabel = new JButton(resources.getString("launcher.title.options"));
         launcherOptionsLabel.setIcon(resources.getIcon("options_cog.png"));
-        launcherOptionsLabel.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 14));
+        launcherOptionsLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
         launcherOptionsLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         launcherOptionsLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         launcherOptionsLabel.setHorizontalTextPosition(SwingConstants.LEADING);
