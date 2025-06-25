@@ -105,6 +105,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     private String currentTabName;
 
+    private boolean launchCompletedRequested = false;
+
     NewsInfoPanel newsInfoPanel;
     ModpackInfoPanel modpackPanel;
     DiscoverInfoPanel discoverInfoPanel;
@@ -257,11 +259,26 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         return installBuild;
     }
 
+    /**
+     * Called when the installation is completed, either successfully or not.
+     * This will hide the progress bar.
+     * <p>
+     * This method must be called from the Event Dispatch Thread (EDT).
+     */
     public void launchCompleted() {
-        if (installer.isCurrentlyRunning()) {
+        // Ensure that this method is only called once, no matter how many times it's requested
+        if (launchCompletedRequested) {
+            return;
+        }
+
+        launchCompletedRequested = true;
+
+        if (!EventQueue.isDispatchThread()) {
             EventQueue.invokeLater(this::launchCompleted);
             return;
         }
+
+        launchCompletedRequested = false;
 
         installProgress.setVisible(false);
         installProgressPlaceholder.setVisible(true);
