@@ -396,17 +396,17 @@ public class Installer {
 
             try {
                 InstallTasksQueue<MojangVersion> tasksQueue = new InstallTasksQueue<>(listener);
-                MojangVersionBuilder versionBuilder = Installer.this.createVersionBuilder(pack, tasksQueue);
-                JavaVersionRepository javaVersions = Installer.this.launcher.getJavaVersions();
+                MojangVersionBuilder versionBuilder = createVersionBuilder(pack, tasksQueue);
+                JavaVersionRepository javaVersions = launcher.getJavaVersions();
 
-                final boolean mojangJavaWanted = Installer.this.settings.shouldUseMojangJava();
+                final boolean mojangJavaWanted = settings.shouldUseMojangJava();
 
                 MojangVersion version;
 
                 if (build != null && !build.isEmpty()) {
-                    Installer.this.buildTasksQueue(tasksQueue, resources, pack, build, doFullInstall, versionBuilder, javaVersions.getSelectedVersion(), mojangJavaWanted);
+                    buildTasksQueue(tasksQueue, resources, pack, build, doFullInstall, versionBuilder, javaVersions.getSelectedVersion(), mojangJavaWanted);
 
-                    version = Installer.this.installer.installPack(tasksQueue, pack, build);
+                    version = installer.installPack(tasksQueue, pack, build);
                 } else {
                     version = versionBuilder.buildVersionFromKey(null);
 
@@ -425,7 +425,7 @@ public class Installer {
 
                     boolean usingMojangJava = mojangJavaWanted && version.getMojangRuntimeInformation() != null;
 
-                    Memory memoryObj = Memory.getClosestAvailableMemory(Memory.getMemoryFromId(Installer.this.settings.getMemory()),
+                    Memory memoryObj = Memory.getClosestAvailableMemory(Memory.getMemoryFromId(settings.getMemory()),
                             javaVersions.getSelectedVersion().is64Bit());
                     long memory = memoryObj.getMemoryMB();
                     String versionNumber = javaVersions.getSelectedVersion().getVersion();
@@ -433,23 +433,23 @@ public class Installer {
 
                     if (data != null && !data.isRunDataValid(memory, versionNumber, usingMojangJava)) {
                         FixRunDataDialog dialog = new FixRunDataDialog(frame, resources, data, javaVersions, memoryObj,
-                                !Installer.this.settings.shouldAutoAcceptModpackRequirements(), usingMojangJava);
+                                !settings.shouldAutoAcceptModpackRequirements(), usingMojangJava);
                         dialog.setVisible(true);
                         if (dialog.getResult() == FixRunDataDialog.Result.ACCEPT) {
                             memoryObj = dialog.getRecommendedMemory();
                             memory = memoryObj.getMemoryMB();
-                            Installer.this.settings.setMemory(memoryObj.getSettingsId());
+                            settings.setMemory(memoryObj.getSettingsId());
 
                             IJavaRuntime recommendedJavaVersion = dialog.getRecommendedJavaVersion();
                             if (recommendedJavaVersion != null) {
                                 javaVersions.selectVersion(recommendedJavaVersion.getVersion(),
                                         recommendedJavaVersion.is64Bit());
-                                Installer.this.settings.setJavaVersion(recommendedJavaVersion.getVersion());
-                                Installer.this.settings.setPrefer64Bit(recommendedJavaVersion.is64Bit());
+                                settings.setJavaVersion(recommendedJavaVersion.getVersion());
+                                settings.setPrefer64Bit(recommendedJavaVersion.is64Bit());
                             }
 
                             if (dialog.shouldRemember()) {
-                                Installer.this.settings.setAutoAcceptModpackRequirements(true);
+                                settings.setAutoAcceptModpackRequirements(true);
                             }
                         } else {
                             return;
@@ -466,17 +466,17 @@ public class Installer {
                         }
                     }
 
-                    LaunchAction launchAction = Installer.this.settings.getLaunchAction();
+                    LaunchAction launchAction = settings.getLaunchAction();
 
                     if (launchAction == null || launchAction == LaunchAction.HIDE) {
-                        Installer.this.launcherUnhider = new LauncherUnhider(Installer.this.settings, frame);
+                        launcherUnhider = new LauncherUnhider(settings, frame);
                     } else {
-                        Installer.this.launcherUnhider = null;
+                        launcherUnhider = null;
                     }
 
                     LaunchOptions options = new LaunchOptions(pack.getDisplayName(),
-                            Installer.this.packIconMapper.getImageLocation(pack).getAbsolutePath(), Installer.this.settings);
-                    gameProcess = Installer.this.launcher.launch(pack, memory, options, Installer.this.launcherUnhider, version);
+                            packIconMapper.getImageLocation(pack).getAbsolutePath(), settings);
+                    gameProcess = launcher.launch(pack, memory, options, launcherUnhider, version);
 
                     if (launchAction == null || launchAction == LaunchAction.HIDE) {
                         frame.setVisible(false);
@@ -488,10 +488,10 @@ public class Installer {
                 }
             } catch (InterruptedException e) {
                 boolean cancelledByUser = false;
-                synchronized (Installer.this.cancelLock) {
-                    if (Installer.this.isCancelledByUser) {
+                synchronized (cancelLock) {
+                    if (isCancelledByUser) {
                         cancelledByUser = true;
-                        Installer.this.isCancelledByUser = false;
+                        isCancelledByUser = false;
                     }
                 }
 
