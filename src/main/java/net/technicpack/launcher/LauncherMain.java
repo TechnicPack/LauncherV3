@@ -102,6 +102,7 @@ import javax.swing.UIManager;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.GraphicsEnvironment;
+import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
@@ -148,6 +149,10 @@ public class LauncherMain {
         Sentry.init(options -> {
             options.setDsn("https://4741ed8316eaefd3fa537240d8800c62@o4508140473417728.ingest.us.sentry.io/4509542931431424");
         });
+
+        // Initialize the AWT desktop properties on Linux before any invocations are done
+        // https://github.com/JFormDesigner/FlatLaf/issues/405#issuecomment-960242342
+        Toolkit.getDefaultToolkit().getDesktopProperty("dummy");
 
         runHeadlessCheck();
 
