@@ -375,7 +375,6 @@
                             <classPath>
                                 <mainClass>${mainClass}</mainClass>
                                 <addDependencies>false</addDependencies>
-                                <preCp>anything</preCp>
                             </classPath>
                             <jre>
                                 <path>%JAVA_HOME%;%PATH%</path>
