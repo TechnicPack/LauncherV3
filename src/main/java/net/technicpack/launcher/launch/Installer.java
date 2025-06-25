@@ -475,7 +475,7 @@ public class Installer {
                 // Delete all other version JSON files in the bin dir
                 File[] binFiles = modpack.getBinDir().listFiles();
                 if (binFiles != null) {
-                    final Pattern minecraftVersionPattern = Pattern.compile("^[0-9]+(\\.[0-9]+)+\\.json$");
+                    final Pattern minecraftVersionPattern = Pattern.compile("^\\d++(\\.\\d++)++\\.json$");
                     for (File binFile : binFiles) {
                         if (minecraftVersionPattern.matcher(binFile.getName()).matches()) {
                             try {
