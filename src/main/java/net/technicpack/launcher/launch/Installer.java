@@ -454,8 +454,10 @@ public class Installer {
                 //If we're installing a new version of modpack, then we need to get rid of the existing version.json
                 File versionFile = new File(modpack.getBinDir(), "version.json");
                 if (versionFile.exists()) {
-                    if (!versionFile.delete()) {
-                        throw new CacheDeleteException(versionFile.getAbsolutePath());
+                    try {
+                        Files.delete(versionFile.toPath());
+                    } catch (IOException e) {
+                        throw new CacheDeleteException(versionFile.getAbsolutePath(), e);
                     }
                 }
 
@@ -463,8 +465,10 @@ public class Installer {
                 // (and the latest few Forge builds in 1.12.2)
                 File installProfileFile = new File(modpack.getBinDir(), "install_profile.json");
                 if (installProfileFile.exists()) {
-                    if (!installProfileFile.delete()) {
-                        throw new CacheDeleteException(installProfileFile.getAbsolutePath());
+                    try {
+                        Files.delete(installProfileFile.toPath());
+                    } catch (IOException e) {
+                        throw new CacheDeleteException(installProfileFile.getAbsolutePath(), e);
                     }
                 }
 
@@ -474,8 +478,10 @@ public class Installer {
                     final Pattern minecraftVersionPattern = Pattern.compile("^[0-9]+(\\.[0-9]+)+\\.json$");
                     for (File binFile : binFiles) {
                         if (minecraftVersionPattern.matcher(binFile.getName()).matches()) {
-                            if (!binFile.delete()) {
-                                throw new CacheDeleteException(binFile.getAbsolutePath());
+                            try {
+                                Files.delete(binFile.toPath());
+                            } catch (IOException e) {
+                                throw new CacheDeleteException(binFile.getAbsolutePath(), e);
                             }
                         }
                     }
@@ -484,8 +490,10 @@ public class Installer {
                 // Remove the runData file between updates/reinstall as well
                 File runData = new File(modpack.getBinDir(), "runData");
                 if (runData.exists()) {
-                    if (!runData.delete()) {
-                        throw new CacheDeleteException(runData.getAbsolutePath());
+                    try {
+                        Files.delete(runData.toPath());
+                    } catch (IOException e) {
+                        throw new CacheDeleteException(runData.getAbsolutePath(), e);
                     }
                 }
 
@@ -494,8 +502,10 @@ public class Installer {
                 // one that doesn't. One example of this is updating BareBonesPack from a Forge to a Fabric build.
                 File modpackJar = new File(modpack.getBinDir(), "modpack.jar");
                 if (modpackJar.exists()) {
-                    if (!modpackJar.delete()) {
-                        throw new CacheDeleteException(modpackJar.getAbsolutePath());
+                    try {
+                        Files.delete(modpackJar.toPath());
+                    } catch (IOException e) {
+                        throw new CacheDeleteException(modpackJar.getAbsolutePath(), e);
                     }
                 }
 
