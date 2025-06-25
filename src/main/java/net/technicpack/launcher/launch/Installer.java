@@ -449,71 +449,11 @@ public class Installer {
             }
 
             if (doFullInstall) {
-                //If we're installing a new version of modpack, then we need to get rid of the existing version.json
-                File versionFile = new File(pack.getBinDir(), "version.json");
-                if (versionFile.exists()) {
-                    try {
-                        Files.delete(versionFile.toPath());
-                    } catch (IOException e) {
-                        throw new CacheDeleteException(versionFile.getAbsolutePath(), e);
-                    }
-                }
-
-                // Remove bin/install_profile.json, which is used by ForgeWrapper to install Forge in Minecraft 1.13+
-                // (and the latest few Forge builds in 1.12.2)
-                File installProfileFile = new File(pack.getBinDir(), "install_profile.json");
-                if (installProfileFile.exists()) {
-                    try {
-                        Files.delete(installProfileFile.toPath());
-                    } catch (IOException e) {
-                        throw new CacheDeleteException(installProfileFile.getAbsolutePath(), e);
-                    }
-                }
-
-                // Delete all other version JSON files in the bin dir
-                File[] binFiles = pack.getBinDir().listFiles();
-                if (binFiles != null) {
-                    final Pattern minecraftVersionPattern = Pattern.compile("^\\d++(\\.\\d++)++\\.json$");
-                    for (File binFile : binFiles) {
-                        if (minecraftVersionPattern.matcher(binFile.getName()).matches()) {
-                            try {
-                                Files.delete(binFile.toPath());
-                            } catch (IOException e) {
-                                throw new CacheDeleteException(binFile.getAbsolutePath(), e);
-                            }
-                        }
-                    }
-                }
-
-                // Remove the runData file between updates/reinstall as well
-                File runData = new File(pack.getBinDir(), "runData");
-                if (runData.exists()) {
-                    try {
-                        Files.delete(runData.toPath());
-                    } catch (IOException e) {
-                        throw new CacheDeleteException(runData.getAbsolutePath(), e);
-                    }
-                }
-
-                // Remove the bin/modpack.jar file
-                // This prevents issues when upgrading a modpack between a version that has a modpack.jar, and
-                // one that doesn't. One example of this is updating BareBonesPack from a Forge to a Fabric build.
-                File modpackJar = new File(pack.getBinDir(), "modpack.jar");
-                if (modpackJar.exists()) {
-                    try {
-                        Files.delete(modpackJar.toPath());
-                    } catch (IOException e) {
-                        throw new CacheDeleteException(modpackJar.getAbsolutePath(), e);
-                    }
-                }
-
                 examineModpackData.addTask(new CleanupAndExtractModpackTask(pack, modpackData, verifyingFiles, downloadingMods, installingMods));
-            }
-
-            if (doFullInstall)
                 rundataTaskGroup.addTask(new WriteRundataFile(pack, modpackData));
-            else
+            } else {
                 rundataTaskGroup.addTask(new CheckRunDataFile(pack, modpackData, rundataTaskGroup));
+            }
 
             checkVersionFile.addTask(new VerifyVersionFilePresentTask(pack, minecraft, versionBuilder));
             examineVersionFile.addTask(new HandleVersionFileTask(pack, directories, checkNonMavenLibs, grabLibs, installingLibs, installingLibs, versionBuilder, settings, selectedJavaRuntime));

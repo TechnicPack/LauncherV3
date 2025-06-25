@@ -36,7 +36,9 @@ import net.technicpack.utilslib.IZipFileFilter;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public class CleanupAndExtractModpackTask implements IInstallTask<MojangVersion> {
 	private final ModpackModel pack;
@@ -65,28 +67,51 @@ public class CleanupAndExtractModpackTask implements IInstallTask<MojangVersion>
 
 	@Override
 	public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException {
-		File modsDir = this.pack.getModsDir();
+        final File binDir = pack.getBinDir();
 
-		if (modsDir != null && modsDir.exists()) {
-			deleteMods(modsDir);
-		}
+        //If we're installing a new version of modpack, then we need to get rid of the existing version.json
+        File versionFile = new File(binDir, "version.json");
+        removeFile(versionFile);
 
-		File coremodsDir = this.pack.getCoremodsDir();
+        // Remove bin/install_profile.json, which is used by ForgeWrapper to install Forge in Minecraft 1.13+
+        // (and the latest few Forge builds in 1.12.2)
+        File installProfileFile = new File(binDir, "install_profile.json");
+        removeFile(installProfileFile);
 
-		if (coremodsDir != null && coremodsDir.exists()) {
-			deleteMods(coremodsDir);
-		}
+        // Delete all other version JSON files in the bin dir
+        File[] binFiles = binDir.listFiles();
+        if (binFiles != null) {
+            final Pattern minecraftVersionPattern = Pattern.compile("^\\d++(\\.\\d++)++\\.json$");
+            for (File binFile : binFiles) {
+                if (minecraftVersionPattern.matcher(binFile.getName()).matches()) {
+                    removeFile(binFile);
+                }
+            }
+        }
 
-		//HACK - jamioflan is a big jerk who needs to put his mods in the dang mod directory!
-		File flansDir = new File(this.pack.getInstalledDirectory(), "Flan");
+        // Remove the runData file between updates/reinstall as well
+        File runData = new File(binDir, "runData");
+        removeFile(runData);
 
-		if (flansDir.exists()) {
-			deleteMods(flansDir);
-		}
+        // Remove the bin/modpack.jar file
+        // This prevents issues when upgrading a modpack between a version that has a modpack.jar, and
+        // one that doesn't. One example of this is updating BareBonesPack from a Forge to a Fabric build.
+        File modpackJar = new File(binDir, "modpack.jar");
+        removeFile(modpackJar);
 
-		File packOutput = this.pack.getInstalledDirectory();
+        // Clean out the mods
+        deleteMods(pack.getModsDir());
 
-		IZipFileFilter zipFilter = new ModpackZipFilter(this.pack);
+        // Clean out the coremods
+        deleteMods(pack.getCoremodsDir());
+
+        File modpackInstallDirectory = pack.getInstalledDirectory();
+
+        // Clean out Flan's mods because they're outside for some reason
+        File flansDir = new File(modpackInstallDirectory, "Flan");
+        deleteMods(flansDir);
+
+        IZipFileFilter zipFilter = new ModpackZipFilter(pack);
 
 		final File cacheDir = pack.getCacheDir();
 
@@ -111,13 +136,17 @@ public class CleanupAndExtractModpackTask implements IInstallTask<MojangVersion>
             else
                 verifier = new ValidZipFileVerifier();
 
-			checkModQueue.addTask(new EnsureFileTask<>(cacheFile, verifier, packOutput, url, downloadModQueue, copyModQueue, zipFilter));
+			checkModQueue.addTask(new EnsureFileTask<>(cacheFile, verifier, modpackInstallDirectory, url, downloadModQueue, copyModQueue, zipFilter));
 		}
 
-		copyModQueue.addTask(new CleanupModpackCacheTask(this.pack, modpack));
+		copyModQueue.addTask(new CleanupModpackCacheTask(pack, modpack));
 	}
 
 	private void deleteMods(File modsDir) throws CacheDeleteException {
+        if (modsDir == null || !modsDir.exists() || !modsDir.isDirectory()) {
+            return; // Nothing to delete
+        }
+
 		for (File mod : modsDir.listFiles()) {
 			if (mod.isDirectory()) {
 				deleteMods(mod);
@@ -125,10 +154,18 @@ public class CleanupAndExtractModpackTask implements IInstallTask<MojangVersion>
 			}
 
 			if (mod.getName().endsWith(".zip") || mod.getName().endsWith(".jar") || mod.getName().endsWith(".litemod")) {
-				if (!mod.delete()) {
-					throw new CacheDeleteException(mod.getAbsolutePath());
-				}
+                removeFile(mod);
 			}
 		}
 	}
+
+    private void removeFile(File file) throws CacheDeleteException {
+        if (file.exists()) {
+            try {
+                Files.delete(file.toPath());
+            } catch (IOException e) {
+                throw new CacheDeleteException(file.getAbsolutePath(), e);
+            }
+        }
+    }
 }
