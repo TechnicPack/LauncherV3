@@ -19,13 +19,16 @@
 
 package net.technicpack.ui.controls;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JTextField;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.FocusEvent;
 
 public class WatermarkTextField extends JTextField {
-    private String watermarkText;
-    private Color watermarkColor;
+    private final String watermarkText;
+    private final Color watermarkColor;
 
     public WatermarkTextField(String watermarkText, Color watermarkColor) {
         this.watermarkColor = watermarkColor;
@@ -42,12 +45,12 @@ public class WatermarkTextField extends JTextField {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        if (getText().length() == 0 && !hasFocus()) {
+        if (getText().isEmpty() && !isFocusOwner()) {
             g.setColor(watermarkColor);
 
             double height = g.getFontMetrics().getStringBounds(watermarkText, g).getHeight();
 
-            Graphics2D g2d = (Graphics2D)g;
+            Graphics2D g2d = (Graphics2D) g;
 
             g2d.setRenderingHint(
                     RenderingHints.KEY_ANTIALIASING,
