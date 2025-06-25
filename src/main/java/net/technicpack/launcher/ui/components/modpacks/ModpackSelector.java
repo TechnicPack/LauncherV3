@@ -131,11 +131,12 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         JScrollPane scrollPane;
         setLayout(new BorderLayout());
         setBackground(UIConstants.COLOR_SELECTOR_BACK);
-        setMaximumSize(new Dimension(287, getMaximumSize().height));
+        setPreferredSize(new Dimension(304, getPreferredSize().height));
+        setMaximumSize(getPreferredSize());
 
         JPanel header = new JPanel();
         header.setLayout(new GridBagLayout());
-        header.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 4));
+        header.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
         header.setBackground(UIConstants.COLOR_SELECTOR_OPTION);
         add(header, BorderLayout.PAGE_START);
 

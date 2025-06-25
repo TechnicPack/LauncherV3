@@ -53,9 +53,10 @@ public class ModpackWidget extends SelectorWidget implements IImageJobListener<M
         return modpack;
     }
 
+    @Override
     protected void initComponents() {
         super.initComponents();
-        setBorder(BorderFactory.createEmptyBorder(4,20,4,8));
+        setBorder(BorderFactory.createEmptyBorder(4,16,4,8));
         setLayout(new GridBagLayout());
 
         icon = new JLabel();
@@ -65,8 +66,12 @@ public class ModpackWidget extends SelectorWidget implements IImageJobListener<M
         displayName = new JLabel(modpack.getDisplayName());
         displayName.setFont(getResources().getFont(ResourceLoader.FONT_OPENSANS, 14));
         displayName.setForeground(UIConstants.COLOR_WHITE_TEXT);
-        displayName.setMaximumSize(new Dimension(210, displayName.getPreferredSize().height));
+        displayName.setPreferredSize(new Dimension(210, displayName.getPreferredSize().height));
+        // Ensure that modpack names are always on the left side, regardless of the user's RTL settings, which are
+        // based on the system's locale.
+        displayName.setHorizontalAlignment(SwingConstants.LEFT);
         add(displayName, new GridBagConstraints(1,0,1,1,1,0,GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
+
         updateIcon = new JLabel();
         updateIcon.setIcon(getResources().getIcon("update_available.png"));
         add(updateIcon, new GridBagConstraints(2,0,1,1,0,0,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,0,0,5),0,0));
