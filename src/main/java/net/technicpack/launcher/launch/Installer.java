@@ -376,76 +376,8 @@ public class Installer {
                 queue.addTask(examineJava);
                 queue.addTask(downloadJava);
             }
-            if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX)
+            if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX) {
                 queue.addTask(new RenameJnilibToDylibTask(pack));
-
-            // Add legacy FML libs
-            HashMap<String, String> fmlLibs = new HashMap<>();
-
-            switch (minecraft) {
-                case "1.3.2":
-                    fmlLibs.put("argo-2.25.jar", "bb672829fde76cb163004752b86b0484bd0a7f4b");
-                    fmlLibs.put("guava-12.0.1.jar", "b8e78b9af7bf45900e14c6f958486b6ca682195f");
-                    fmlLibs.put("asm-all-4.0.jar", "98308890597acb64047f7e896638e0d98753ae82");
-                    break;
-                case "1.4":
-                case "1.4.1":
-                case "1.4.2":
-                case "1.4.3":
-                case "1.4.4":
-                case "1.4.5":
-                case "1.4.6":
-                case "1.4.7":
-                    fmlLibs.put("argo-2.25.jar", "bb672829fde76cb163004752b86b0484bd0a7f4b");
-                    fmlLibs.put("guava-12.0.1.jar", "b8e78b9af7bf45900e14c6f958486b6ca682195f");
-                    fmlLibs.put("asm-all-4.0.jar", "98308890597acb64047f7e896638e0d98753ae82");
-                    fmlLibs.put("bcprov-jdk15on-147.jar", "b6f5d9926b0afbde9f4dbe3db88c5247be7794bb");
-                    break;
-                case "1.5":
-                    fmlLibs.put("argo-small-3.2.jar", "58912ea2858d168c50781f956fa5b59f0f7c6b51");
-                    fmlLibs.put("guava-14.0-rc3.jar", "931ae21fa8014c3ce686aaa621eae565fefb1a6a");
-                    fmlLibs.put("asm-all-4.1.jar", "054986e962b88d8660ae4566475658469595ef58");
-                    fmlLibs.put("bcprov-jdk15on-148.jar", "960dea7c9181ba0b17e8bab0c06a43f0a5f04e65");
-                    fmlLibs.put("deobfuscation_data_1.5.zip", "5f7c142d53776f16304c0bbe10542014abad6af8");
-                    fmlLibs.put("scala-library.jar", "458d046151ad179c85429ed7420ffb1eaf6ddf85");
-                    break;
-                case "1.5.1":
-                    fmlLibs.put("argo-small-3.2.jar", "58912ea2858d168c50781f956fa5b59f0f7c6b51");
-                    fmlLibs.put("guava-14.0-rc3.jar", "931ae21fa8014c3ce686aaa621eae565fefb1a6a");
-                    fmlLibs.put("asm-all-4.1.jar", "054986e962b88d8660ae4566475658469595ef58");
-                    fmlLibs.put("bcprov-jdk15on-148.jar", "960dea7c9181ba0b17e8bab0c06a43f0a5f04e65");
-                    fmlLibs.put("deobfuscation_data_1.5.1.zip", "22e221a0d89516c1f721d6cab056a7e37471d0a6");
-                    fmlLibs.put("scala-library.jar", "458d046151ad179c85429ed7420ffb1eaf6ddf85");
-                    break;
-                case "1.5.2":
-                    fmlLibs.put("argo-small-3.2.jar", "58912ea2858d168c50781f956fa5b59f0f7c6b51");
-                    fmlLibs.put("guava-14.0-rc3.jar", "931ae21fa8014c3ce686aaa621eae565fefb1a6a");
-                    fmlLibs.put("asm-all-4.1.jar", "054986e962b88d8660ae4566475658469595ef58");
-                    fmlLibs.put("bcprov-jdk15on-148.jar", "960dea7c9181ba0b17e8bab0c06a43f0a5f04e65");
-                    fmlLibs.put("deobfuscation_data_1.5.2.zip", "446e55cd986582c70fcf12cb27bc00114c5adfd9");
-                    fmlLibs.put("scala-library.jar", "458d046151ad179c85429ed7420ffb1eaf6ddf85");
-                    break;
-            }
-
-            if (!fmlLibs.isEmpty()) {
-                File modpackFmlLibDir = new File(pack.getInstalledDirectory(), "lib");
-                File fmlLibsCache = new File(directories.getCacheDirectory(), "fmllibs");
-                Files.createDirectories(fmlLibsCache.toPath());
-
-                fmlLibs.forEach((name, sha1) -> {
-                    SHA1FileVerifier verifier = null;
-
-                    if (!sha1.isEmpty())
-                        verifier = new SHA1FileVerifier(sha1);
-
-                    File cached = new File(fmlLibsCache, name);
-                    File target = new File(modpackFmlLibDir, name);
-
-                    if (!target.exists() || (verifier != null && !verifier.isFileValid(target)) ) {
-                        verifyingFiles.addTask(new EnsureFileTask<>(cached, verifier, null, TechnicConstants.TECHNIC_FML_LIB_REPO + name, installingLibs, installingLibs));
-                        installingLibs.addTask(new CopyFileTask<>(cached, target));
-                    }
-                });
             }
 
             if (doFullInstall) {
@@ -454,6 +386,8 @@ public class Installer {
             } else {
                 rundataTaskGroup.addTask(new CheckRunDataFile(pack, modpackData, rundataTaskGroup));
             }
+
+            verifyingFiles.addTask(new InstallFmlLibsTask(pack, directories, modpackData, verifyingFiles, installingLibs, installingLibs));
 
             checkVersionFile.addTask(new VerifyVersionFilePresentTask(pack, minecraft, versionBuilder));
             examineVersionFile.addTask(new HandleVersionFileTask(pack, directories, checkNonMavenLibs, grabLibs, installingLibs, installingLibs, versionBuilder, settings, selectedJavaRuntime));
