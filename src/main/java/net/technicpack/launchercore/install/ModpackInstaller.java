@@ -20,6 +20,7 @@
 package net.technicpack.launchercore.install;
 
 import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.utilslib.Utils;
 
@@ -34,7 +35,7 @@ public class ModpackInstaller {
         this.platformApi = platformApi;
     }
 
-    public <T> T installPack(InstallTasksQueue<T> tasksQueue, ModpackModel modpack, String build) throws IOException, InterruptedException {
+    public MojangVersion installPack(InstallTasksQueue<MojangVersion> tasksQueue, ModpackModel modpack, String build) throws IOException, InterruptedException {
         modpack.save();
         modpack.initDirectories();
 
