@@ -186,7 +186,7 @@ public class Installer {
 
             try {
                 InstallTasksQueue<MojangVersion> tasksQueue = new InstallTasksQueue<>(listener);
-                MojangVersionBuilder versionBuilder = createVersionBuilder(pack, tasksQueue);
+                MojangVersionBuilder versionBuilder = createVersionBuilder(tasksQueue);
                 JavaVersionRepository javaVersions = launcher.getJavaVersions();
 
                 final boolean mojangJavaWanted = settings.shouldUseMojangJava();
@@ -194,7 +194,7 @@ public class Installer {
                 MojangVersion version;
 
                 if (build != null && !build.isEmpty()) {
-                    buildTasksQueue(tasksQueue, resources, pack, build, doFullInstall, versionBuilder, javaVersions.getSelectedVersion(), mojangJavaWanted);
+                    buildTasksQueue(tasksQueue, build, versionBuilder, javaVersions.getSelectedVersion(), mojangJavaWanted);
 
                     version = installer.installPack(tasksQueue, pack, build);
                 } else {
@@ -203,9 +203,7 @@ public class Installer {
                     // Set up default Java runtime
                     version.setJavaRuntime(javaVersions.getSelectedVersion());
 
-                    if (version != null) {
-                        pack.initDirectories();
-                    }
+                    pack.initDirectories();
                 }
 
                 if (doLaunch) {
@@ -328,16 +326,16 @@ public class Installer {
             }
         }
 
-        private void buildTasksQueue(InstallTasksQueue<MojangVersion> queue, ResourceLoader resources, ModpackModel modpack, String build,
-                                    boolean doFullInstall, MojangVersionBuilder versionBuilder, IJavaRuntime selectedJavaRuntime, boolean mojangJavaWanted) throws IOException {
-            PackInfo packInfo = modpack.getPackInfo();
+        private void buildTasksQueue(InstallTasksQueue<MojangVersion> queue, String build,
+                                    MojangVersionBuilder versionBuilder, IJavaRuntime selectedJavaRuntime, boolean mojangJavaWanted) throws IOException {
+            PackInfo packInfo = pack.getPackInfo();
             Modpack modpackData = packInfo.getModpack(build);
 
             if (modpackData.getGameVersion() == null)
                 return;
 
             String minecraft = modpackData.getGameVersion();
-            Version installedVersion = modpack.getInstalledVersion();
+            Version installedVersion = pack.getInstalledVersion();
 
             TaskGroup<MojangVersion> examineModpackData = new TaskGroup<>(resources.getString("install.message.examiningmodpack"));
             TaskGroup<MojangVersion> verifyingFiles = new TaskGroup<>(resources.getString("install.message.verifyingfiles"));
@@ -379,7 +377,7 @@ public class Installer {
                 queue.addTask(downloadJava);
             }
             if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX)
-                queue.addTask(new RenameJnilibToDylibTask(modpack));
+                queue.addTask(new RenameJnilibToDylibTask(pack));
 
             // Add legacy FML libs
             HashMap<String, String> fmlLibs = new HashMap<>();
@@ -430,7 +428,7 @@ public class Installer {
             }
 
             if (!fmlLibs.isEmpty()) {
-                File modpackFmlLibDir = new File(modpack.getInstalledDirectory(), "lib");
+                File modpackFmlLibDir = new File(pack.getInstalledDirectory(), "lib");
                 File fmlLibsCache = new File(directories.getCacheDirectory(), "fmllibs");
                 Files.createDirectories(fmlLibsCache.toPath());
 
@@ -452,7 +450,7 @@ public class Installer {
 
             if (doFullInstall) {
                 //If we're installing a new version of modpack, then we need to get rid of the existing version.json
-                File versionFile = new File(modpack.getBinDir(), "version.json");
+                File versionFile = new File(pack.getBinDir(), "version.json");
                 if (versionFile.exists()) {
                     try {
                         Files.delete(versionFile.toPath());
@@ -463,7 +461,7 @@ public class Installer {
 
                 // Remove bin/install_profile.json, which is used by ForgeWrapper to install Forge in Minecraft 1.13+
                 // (and the latest few Forge builds in 1.12.2)
-                File installProfileFile = new File(modpack.getBinDir(), "install_profile.json");
+                File installProfileFile = new File(pack.getBinDir(), "install_profile.json");
                 if (installProfileFile.exists()) {
                     try {
                         Files.delete(installProfileFile.toPath());
@@ -473,7 +471,7 @@ public class Installer {
                 }
 
                 // Delete all other version JSON files in the bin dir
-                File[] binFiles = modpack.getBinDir().listFiles();
+                File[] binFiles = pack.getBinDir().listFiles();
                 if (binFiles != null) {
                     final Pattern minecraftVersionPattern = Pattern.compile("^\\d++(\\.\\d++)++\\.json$");
                     for (File binFile : binFiles) {
@@ -488,7 +486,7 @@ public class Installer {
                 }
 
                 // Remove the runData file between updates/reinstall as well
-                File runData = new File(modpack.getBinDir(), "runData");
+                File runData = new File(pack.getBinDir(), "runData");
                 if (runData.exists()) {
                     try {
                         Files.delete(runData.toPath());
@@ -500,7 +498,7 @@ public class Installer {
                 // Remove the bin/modpack.jar file
                 // This prevents issues when upgrading a modpack between a version that has a modpack.jar, and
                 // one that doesn't. One example of this is updating BareBonesPack from a Forge to a Fabric build.
-                File modpackJar = new File(modpack.getBinDir(), "modpack.jar");
+                File modpackJar = new File(pack.getBinDir(), "modpack.jar");
                 if (modpackJar.exists()) {
                     try {
                         Files.delete(modpackJar.toPath());
@@ -509,41 +507,41 @@ public class Installer {
                     }
                 }
 
-                examineModpackData.addTask(new CleanupAndExtractModpackTask(modpack, modpackData, verifyingFiles, downloadingMods, installingMods));
+                examineModpackData.addTask(new CleanupAndExtractModpackTask(pack, modpackData, verifyingFiles, downloadingMods, installingMods));
             }
 
             if (doFullInstall)
-                rundataTaskGroup.addTask(new WriteRundataFile(modpack, modpackData));
+                rundataTaskGroup.addTask(new WriteRundataFile(pack, modpackData));
             else
-                rundataTaskGroup.addTask(new CheckRunDataFile(modpack, modpackData, rundataTaskGroup));
+                rundataTaskGroup.addTask(new CheckRunDataFile(pack, modpackData, rundataTaskGroup));
 
-            checkVersionFile.addTask(new VerifyVersionFilePresentTask(modpack, minecraft, versionBuilder));
-            examineVersionFile.addTask(new HandleVersionFileTask(modpack, directories, checkNonMavenLibs, grabLibs, installingLibs, installingLibs, versionBuilder, settings, selectedJavaRuntime));
-            examineVersionFile.addTask(new EnsureAssetsIndexTask(directories.getAssetsDirectory(), modpack, installingMinecraft, examineIndex, verifyingAssets, installingAssets, installingAssets));
+            checkVersionFile.addTask(new VerifyVersionFilePresentTask(pack, minecraft, versionBuilder));
+            examineVersionFile.addTask(new HandleVersionFileTask(pack, directories, checkNonMavenLibs, grabLibs, installingLibs, installingLibs, versionBuilder, settings, selectedJavaRuntime));
+            examineVersionFile.addTask(new EnsureAssetsIndexTask(directories.getAssetsDirectory(), pack, installingMinecraft, examineIndex, verifyingAssets, installingAssets, installingAssets));
 
-            fetchJavaManifest.addTask(new EnsureJavaRuntimeManifestTask(directories.getRuntimesDirectory(), modpack, fetchJavaManifest, examineJava, downloadJava));
+            fetchJavaManifest.addTask(new EnsureJavaRuntimeManifestTask(directories.getRuntimesDirectory(), pack, fetchJavaManifest, examineJava, downloadJava));
 
             // Check if we need to regenerate the Minecraft jar. This is necessary if:
             // - A reinstall was requested (or forced, via modpack version update)
             // - The installed version is marked as legacy
             boolean jarRegenerationRequired = doFullInstall || (installedVersion != null && installedVersion.isLegacy());
 
-            installingMinecraft.addTask(new InstallMinecraftIfNecessaryTask(modpack, minecraft, directories.getCacheDirectory(), jarRegenerationRequired));
+            installingMinecraft.addTask(new InstallMinecraftIfNecessaryTask(pack, minecraft, directories.getCacheDirectory(), jarRegenerationRequired));
         }
 
-        private MojangVersionBuilder createVersionBuilder(ModpackModel modpack, InstallTasksQueue<MojangVersion> tasksQueue) {
-            ZipFileRetriever zipVersionRetriever = new ZipFileRetriever(new File(modpack.getBinDir(), "modpack.jar"));
+        private MojangVersionBuilder createVersionBuilder(InstallTasksQueue<MojangVersion> tasksQueue) {
+            ZipFileRetriever zipVersionRetriever = new ZipFileRetriever(new File(pack.getBinDir(), "modpack.jar"));
             HttpFileRetriever fallbackVersionRetriever = new HttpFileRetriever(TechnicConstants.VERSIONS_BASE_URL, tasksQueue.getDownloadListener());
 
             ArrayList<MojangVersionRetriever> fallbackRetrievers = new ArrayList<>(1);
             fallbackRetrievers.add(fallbackVersionRetriever);
 
-            File versionJson = new File(modpack.getBinDir(), "version.json");
+            File versionJson = new File(pack.getBinDir(), "version.json");
 
             // This always gets the version.json from the modpack.jar (it ignores "key"), cached as bin/version.json
             FileVersionBuilder zipVersionBuilder = new FileVersionBuilder(versionJson, zipVersionRetriever, fallbackRetrievers);
             // This gets the "key" from bin/$key.json if it exists, otherwise it downloads it from our repo into that location
-            FileVersionBuilder webVersionBuilder = new FileVersionBuilder(modpack.getBinDir(), null, fallbackRetrievers);
+            FileVersionBuilder webVersionBuilder = new FileVersionBuilder(pack.getBinDir(), null, fallbackRetrievers);
 
             return new ChainVersionBuilder(zipVersionBuilder, webVersionBuilder);
         }
