@@ -350,7 +350,7 @@ public class Installer {
             TaskGroup<MojangVersion> installingLibs = new TaskGroup<>(resources.getString("install.message.installlibs"));
             TaskGroup<MojangVersion> installingMinecraft = new TaskGroup<>(resources.getString("install.message.installminecraft"));
             TaskGroup<MojangVersion> examineIndex = new TaskGroup<>(resources.getString("install.message.examiningindex"));
-            ParallelTaskGroup<MojangVersion> verifyingAssets = new ParallelTaskGroup<>(resources.getString("install.message.verifyassets"));
+            TaskGroup<MojangVersion> verifyingAssets = new TaskGroup<>(resources.getString("install.message.verifyassets"));
             TaskGroup<MojangVersion> installingAssets = new TaskGroup<>(resources.getString("install.message.installassets"));
             TaskGroup<MojangVersion> fetchJavaManifest = new TaskGroup<>("Obtaining Java runtime information...");
             TaskGroup<MojangVersion> examineJava = new TaskGroup<>("Examining Java runtime...");
