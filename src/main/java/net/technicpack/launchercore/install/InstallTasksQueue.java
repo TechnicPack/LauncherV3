@@ -19,6 +19,7 @@
 
 package net.technicpack.launchercore.install;
 
+import io.sentry.Sentry;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.util.DownloadListener;
 
@@ -45,6 +46,7 @@ public class InstallTasksQueue<T> implements ITasksQueue<T> {
     public void runAllTasks() throws IOException, InterruptedException {
         while (!tasks.isEmpty()) {
             currentTask = tasks.removeFirst();
+            Sentry.addBreadcrumb(String.format("Running task: \"%s\" (%s)", currentTask.getTaskDescription(), currentTask.getClass().getSimpleName()));
             refreshProgress();
             currentTask.runTask(this);
         }

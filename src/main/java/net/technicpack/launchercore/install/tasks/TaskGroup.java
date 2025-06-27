@@ -19,6 +19,7 @@
 
 package net.technicpack.launchercore.install.tasks;
 
+import io.sentry.Sentry;
 import net.technicpack.launchercore.install.IWeightedTasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 
@@ -79,8 +80,10 @@ public class TaskGroup<T> implements IWeightedTasksQueue<T>, IInstallTask<T> {
                 throw new InterruptedException();
             }
             IInstallTask<T> currentTask = taskList.get(taskProgress);
+            Sentry.addBreadcrumb(String.format("TaskGroup \"%s\" running task \"%s\"", groupName, currentTask.getTaskDescription()));
             fileName = currentTask.getTaskDescription();
             currentTask.runTask(queue);
+            Sentry.addBreadcrumb(String.format("TaskGroup \"%s\" finished task \"%s\"", groupName, currentTask.getTaskDescription()));
             queue.refreshProgress();
             taskProgress++;
         }
