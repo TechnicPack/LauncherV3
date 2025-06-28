@@ -144,10 +144,6 @@ public class ResourceLoader {
         return variant;
     }
 
-    public String getCurrentLocaleCode() {
-        return getCodeFromLocale(currentLocale);
-    }
-
     public String getString(String stringKey, String... replacements) {
         String outString = stringData.getString(stringKey);
 
@@ -165,7 +161,7 @@ public class ResourceLoader {
 
     public String getCodeFromLocale(Locale locale) {
         if (locale.getLanguage().isEmpty()) {
-            return "default";
+            return DEFAULT_LOCALE;
         } else if (locale.getCountry().isEmpty()) {
             return locale.getLanguage();
         } else if (locale.getVariant().isEmpty()) {
@@ -283,7 +279,7 @@ public class ResourceLoader {
         Area cutOutArea = new Area(new Rectangle(0, 0, outputImage.getWidth(), outputImage.getHeight()));
 
         int diameter = Math.min(outputImage.getWidth(), outputImage.getHeight());
-        cutOutArea.subtract(new Area(new Ellipse2D.Float((outputImage.getWidth() - diameter) / 2, (outputImage.getHeight() - diameter) / 2, diameter, diameter)));
+        cutOutArea.subtract(new Area(new Ellipse2D.Float((outputImage.getWidth() - diameter) / 2.0f, (outputImage.getHeight() - diameter) / 2.0f, diameter, diameter)));
 
         // Set the fill color to an opaque color
         g2.setColor(Color.WHITE);
@@ -291,7 +287,7 @@ public class ResourceLoader {
         g2.setComposite(AlphaComposite.Clear);
         // Turn on antialiasing
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        // Clear the cut out area
+        // Clear the cut-out area
         g2.fill(cutOutArea);
 
         // dispose of the graphics object
@@ -301,10 +297,11 @@ public class ResourceLoader {
     }
 
     public Font getFont(String name, float size) {
-        return getFont(name,size,0);
+        return getFont(name,size,Font.PLAIN);
     }
 
     public Font getFont(String name, float size, int style) {
+        //noinspection MagicConstant
         return getFontByName(name).deriveFont(style, size);
     }
 
