@@ -21,6 +21,7 @@ package net.technicpack.launcher;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import io.sentry.Sentry;
+import io.sentry.protocol.User;
 import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.autoupdate.http.HttpUpdateStream;
@@ -187,6 +188,10 @@ public class LauncherMain {
             showSetupWindow(params);
             return;
         }
+
+        User sentryUser = new User();
+        sentryUser.setId(settings.getClientId());
+        Sentry.setUser(sentryUser);
 
         LauncherDirectories directories = new TechnicLauncherDirectories(settings.getTechnicRoot());
         ResourceLoader resources = new ResourceLoader(directories, "net", "technicpack", "launcher", "resources");
