@@ -207,7 +207,7 @@ public class FixRunDataDialog extends LauncherDialog {
         boolean javaSuccess = usingMojangJava || runData.isJavaValid(javaVersionRepository.getSelectedVersion().getVersion());
 
         String memRequirement = resourceLoader.getString("fixRunData.reqMemory", runData.getMemoryObject().toString());
-        String javaRequirement = resourceLoader.getString("fixRunData.reqJava", runData.getJava());
+        String javaRequirement = resourceLoader.getString("fixRunData.reqJava", runData.getJava() == null ? "" : runData.getJava());
 
         String currentMem = resourceLoader.getString("fixRunData.currentMemory", attemptedMemory.toString());
         String currentJavaBitness = javaVersionRepository.getSelectedVersion().is64Bit()?resourceLoader.getString("launcheroptions.java.64bit"):resourceLoader.getString("launcheroptions.java.32bit");

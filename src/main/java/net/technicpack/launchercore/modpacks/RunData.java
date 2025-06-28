@@ -5,17 +5,20 @@ import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.utilslib.Memory;
 import net.technicpack.utilslib.Utils;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.logging.Level;
 
 @SuppressWarnings({"unused"})
-public class RunData {
+public class RunData implements Serializable {
     private String java;
     private String memory;
-    transient private long memoryLong = -1;
+    private transient long memoryLong = -1;
 
-    public RunData() {}
+    private RunData() {
+        // Empty constructor for GSON
+    }
 
     public String getJava() { return java; }
 
