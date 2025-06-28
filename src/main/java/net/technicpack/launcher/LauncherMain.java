@@ -206,7 +206,10 @@ public class LauncherMain {
         else
             buildNumber = new VersionFileBuildNumber(resources);
 
-        Sentry.configureScope(scope -> scope.setTag("buildNumber", buildNumber.getBuildNumber()));
+        Sentry.configureScope(scope -> {
+            scope.setTag("buildNumber", buildNumber.getBuildNumber());
+            scope.setTag("updateStream", settings.getBuildStream());
+        });
 
         TechnicConstants.setBuildNumber(buildNumber);
 
