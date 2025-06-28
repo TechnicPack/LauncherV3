@@ -43,7 +43,7 @@ public class EnsureFileTask<T> implements IInstallTask<T> {
     private boolean executable = false;
     private String downloadDecompressor;
 
-    public EnsureFileTask(ITasksQueue<T> downloadQueue, @NotNull File target) {
+    public EnsureFileTask(@NotNull ITasksQueue<T> downloadQueue, @NotNull File target) {
         this.targetFile = target;
         this.friendlyFileName = target.getName();
         this.downloadTaskQueue = downloadQueue;
@@ -112,7 +112,7 @@ public class EnsureFileTask<T> implements IInstallTask<T> {
      * @param directory The directory to extract into
      * @param copyQueue The {@link ITasksQueue<T>} to run the extraction operation in
      */
-    public @NotNull EnsureFileTask<T> withExtractTo(File directory, ITasksQueue<T> copyQueue) {
+    public @NotNull EnsureFileTask<T> withExtractTo(@NotNull File directory, @NotNull ITasksQueue<T> copyQueue) {
         Objects.requireNonNull(directory, "Extraction directory must be set.");
         Objects.requireNonNull(copyQueue, "Copy task queue must be set.");
 

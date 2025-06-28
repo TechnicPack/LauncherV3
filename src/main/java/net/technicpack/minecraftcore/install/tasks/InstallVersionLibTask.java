@@ -102,8 +102,11 @@ public class InstallVersionLibTask extends ListenerTask<MojangVersion> {
         EnsureFileTask<MojangVersion> ensureFileTask = new EnsureFileTask<>(downloadLibraryQueue, cache)
                 .withUrl(url)
                 .withVerifier(verifier)
-                .withExtractTo(extractDirectory, copyLibraryQueue)
                 .withZipFilter(filter);
+
+        if (extractDirectory != null) {
+            ensureFileTask.withExtractTo(extractDirectory, copyLibraryQueue);
+        }
 
         grabQueue.addTask(ensureFileTask);
     }
