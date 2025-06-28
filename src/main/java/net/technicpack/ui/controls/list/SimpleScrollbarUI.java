@@ -47,6 +47,13 @@ public class SimpleScrollbarUI extends BasicScrollBarUI {
     }
 
     @Override
+    protected void uninstallComponents() {
+        // Do nothing.
+        // The buttons never get created or added, so this is here to prevent a NullPointerException, which happens
+        // when BasicScrollBarUI.uninstallComponents() calls scrollbar.remove(x) with x being a null button
+    }
+
+    @Override
     protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
         g.setColor(trackColor);
         g.fillRect(trackBounds.x, trackBounds.y, trackBounds.width, trackBounds.height);
