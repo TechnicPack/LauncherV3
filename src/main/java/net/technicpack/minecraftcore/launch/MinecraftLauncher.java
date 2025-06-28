@@ -19,6 +19,7 @@
 
 package net.technicpack.minecraftcore.launch;
 
+import io.sentry.Sentry;
 import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.auth.UserModel;
@@ -312,6 +313,8 @@ public class MinecraftLauncher {
         final char separator = File.pathSeparatorChar;
 
         IJavaRuntime runtime = version.getJavaRuntime();
+
+        Sentry.addBreadcrumb(String.format("Runtime is %s", runtime));
 
         final String bitness = runtime.getBitness();
 

@@ -90,4 +90,15 @@ public final class CurrentJavaRuntime implements IJavaRuntime {
     public int hashCode() {
         return Objects.hash(version, vendor, is64Bit, osArch);
     }
+
+    @Override
+    public String toString() {
+        return "CurrentJavaRuntime{" +
+                "version='" + version + '\'' +
+                ", vendor='" + vendor + '\'' +
+                ", is64Bit=" + is64Bit +
+                ", osArch='" + osArch + '\'' +
+                ", executableFile=" + executableFile +
+                '}';
+    }
 }

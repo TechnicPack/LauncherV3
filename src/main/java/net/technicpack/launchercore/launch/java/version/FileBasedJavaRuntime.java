@@ -19,6 +19,7 @@
 
 package net.technicpack.launchercore.launch.java.version;
 
+import io.sentry.Sentry;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.utilslib.ProfilingUtils;
 import net.technicpack.utilslib.Utils;
@@ -109,6 +110,7 @@ public final class FileBasedJavaRuntime implements IJavaRuntime, Serializable {
             }
         } catch (IOException ex) {
             // ignore, it should never happen
+            Sentry.captureException(ex);
         }
 
         is64Bit = osArch != null && osArch.contains("64");
@@ -164,5 +166,18 @@ public final class FileBasedJavaRuntime implements IJavaRuntime, Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         FileBasedJavaRuntime that = (FileBasedJavaRuntime) o;
         return Objects.equals(filePath, that.filePath);
+    }
+
+    @Override
+    public String toString() {
+        return "FileBasedJavaRuntime{" +
+                "queried=" + queried +
+                ", version='" + version + '\'' +
+                ", vendor='" + vendor + '\'' +
+                ", osArch='" + osArch + '\'' +
+                ", is64Bit=" + is64Bit +
+                ", javaPath=" + javaPath +
+                ", filePath='" + filePath + '\'' +
+                '}';
     }
 }
