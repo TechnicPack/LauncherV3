@@ -22,6 +22,7 @@ package net.technicpack.minecraftcore.launch;
 import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.auth.UserModel;
+import net.technicpack.launchercore.exception.InstallException;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.launch.GameProcess;
 import net.technicpack.launchercore.launch.ProcessExitListener;
@@ -70,7 +71,7 @@ public class MinecraftLauncher {
     }
 
     public GameProcess launch(ModpackModel pack, long memory, LaunchOptions options, ProcessExitListener exitListener,
-            MojangVersion version) throws IOException {
+            MojangVersion version) throws IOException, InstallException {
         List<String> commands = buildCommands(pack, memory, version, options);
 
         // This will never be null
@@ -102,7 +103,7 @@ public class MinecraftLauncher {
         return mcProcess;
     }
 
-    private List<String> buildCommands(ModpackModel pack, long memory, MojangVersion version, LaunchOptions options) {
+    private List<String> buildCommands(ModpackModel pack, long memory, MojangVersion version, LaunchOptions options) throws InstallException {
         LaunchCommandCollector commands = new LaunchCommandCollector();
 
         // Wrapper command (optirun, etc)
@@ -123,52 +124,7 @@ public class MinecraftLauncher {
         Utils.getLogger().log(Level.FINE, String.format("Classpath:%n%n%s", cpString.replace(File.pathSeparatorChar, '\n')));
 
         // build arg parameter map
-        Map<String, String> params = new HashMap<>();
-        IUserType user = userModel.getCurrentUser();
-        File gameDirectory = pack.getInstalledDirectory();
-
-        params.put("auth_username", user.getUsername());
-        params.put("auth_session", user.getSessionId());
-        params.put("auth_access_token", user.getAccessToken());
-
-        params.put("auth_player_name", user.getDisplayName());
-        params.put("auth_uuid", user.getId());
-
-        params.put("profile_name", user.getDisplayName());
-        params.put("version_name", version.getId());
-        params.put("version_type", version.getType().getName());
-
-        params.put("game_directory", gameDirectory.getAbsolutePath());
-        params.put("natives_directory", nativesDir);
-        params.put("classpath", cpString);
-
-        params.put("resolution_width", Integer.toString(launchOpts.getCustomWidth()));
-        params.put("resolution_height", Integer.toString(launchOpts.getCustomHeight()));
-
-        StringSubstitutor paramDereferencer = new StringSubstitutor(params);
-
-        String targetAssets = directories.getAssetsDirectory().getAbsolutePath();
-
-        String assetsKey = version.getAssetsKey();
-
-        if (assetsKey == null || assetsKey.isEmpty()) {
-            assetsKey = "legacy";
-        }
-
-        if (version.getAreAssetsVirtual()) {
-            targetAssets += File.separator + "virtual" + File.separator + assetsKey;
-        } else if (version.getAssetsMapToResources()) {
-            targetAssets = pack.getResourcesDir().getAbsolutePath();
-        }
-
-        params.put("game_assets", targetAssets);
-        params.put("assets_root", targetAssets);
-        params.put("assets_index_name", assetsKey);
-        params.put("user_type", user.getMCUserType());
-        params.put("user_properties", user.getUserProperties());
-
-        params.put("launcher_name", "technic");
-        params.put("launcher_version", "4." + buildNumber.getBuildNumber());
+        StringSubstitutor paramDereferencer = createParamDereferencer(pack, version, nativesDir, cpString, launchOpts);
 
         // Prepend custom JVM arguments
         String customJvmArgs = options.getOptions().getJavaArgs();
@@ -302,8 +258,57 @@ public class MinecraftLauncher {
         return commands.collect();
     }
 
-    private String buildClassPath(ModpackModel pack, MojangVersion version, ILaunchOptions launchOptions) {
-        StringBuilder builder = new StringBuilder(10_000);
+    private StringSubstitutor createParamDereferencer(ModpackModel pack, MojangVersion version, String nativesDir, String cpString, ILaunchOptions launchOpts) {
+        Map<String, String> params = new HashMap<>();
+        IUserType user = userModel.getCurrentUser();
+        File gameDirectory = pack.getInstalledDirectory();
+
+        params.put("auth_username", user.getUsername());
+        params.put("auth_session", user.getSessionId());
+        params.put("auth_access_token", user.getAccessToken());
+
+        params.put("auth_player_name", user.getDisplayName());
+        params.put("auth_uuid", user.getId());
+
+        params.put("profile_name", user.getDisplayName());
+        params.put("version_name", version.getId());
+        params.put("version_type", version.getType().getName());
+
+        params.put("game_directory", gameDirectory.getAbsolutePath());
+        params.put("natives_directory", nativesDir);
+        params.put("classpath", cpString);
+
+        params.put("resolution_width", Integer.toString(launchOpts.getCustomWidth()));
+        params.put("resolution_height", Integer.toString(launchOpts.getCustomHeight()));
+
+        String targetAssets = directories.getAssetsDirectory().getAbsolutePath();
+
+        String assetsKey = version.getAssetsKey();
+
+        if (assetsKey == null || assetsKey.isEmpty()) {
+            assetsKey = "legacy";
+        }
+
+        if (version.getAreAssetsVirtual()) {
+            targetAssets += File.separator + "virtual" + File.separator + assetsKey;
+        } else if (version.getAssetsMapToResources()) {
+            targetAssets = pack.getResourcesDir().getAbsolutePath();
+        }
+
+        params.put("game_assets", targetAssets);
+        params.put("assets_root", targetAssets);
+        params.put("assets_index_name", assetsKey);
+        params.put("user_type", user.getMCUserType());
+        params.put("user_properties", user.getUserProperties());
+
+        params.put("launcher_name", "technic");
+        params.put("launcher_version", "4." + buildNumber.getBuildNumber());
+
+        return new StringSubstitutor(params);
+    }
+
+    private String buildClassPath(ModpackModel pack, MojangVersion version, ILaunchOptions launchOptions) throws InstallException {
+        StringBuilder sb = new StringBuilder(10_000);
         final char separator = File.pathSeparatorChar;
 
         IJavaRuntime runtime = version.getJavaRuntime();
@@ -318,13 +323,10 @@ public class MinecraftLauncher {
 
             File file = new File(directories.getCacheDirectory(), library.getArtifactPath().replace("${arch}", bitness));
             if (!file.isFile() || !file.exists()) {
-                throw new RuntimeException("Library " + library.getName() + " not found.");
+                throw new InstallException("Library " + library.getName() + " not found.");
             }
 
-            if (builder.length() > 1) {
-                builder.append(separator);
-            }
-            builder.append(file.getAbsolutePath());
+            sb.append(file.getAbsolutePath()).append(separator);
         }
 
         // Add the modpack.jar to the classpath if it exists and the modpack isn't
@@ -335,10 +337,7 @@ public class MinecraftLauncher {
         if (!hasModernMinecraftForge && !hasNeoForge) {
             File modpack = new File(pack.getBinDir(), "modpack.jar");
             if (modpack.exists()) {
-                if (builder.length() > 1) {
-                    builder.append(separator);
-                }
-                builder.append(modpack.getAbsolutePath());
+                sb.append(modpack.getAbsolutePath()).append(separator);
             }
         }
 
@@ -352,12 +351,9 @@ public class MinecraftLauncher {
         if (!minecraft.exists()) {
             throw new RuntimeException("Minecraft not installed for this pack: " + pack);
         }
-        if (builder.length() > 1) {
-            builder.append(separator);
-        }
-        builder.append(minecraft.getAbsolutePath());
+        sb.append(minecraft.getAbsolutePath());
 
-        return builder.toString();
+        return sb.toString();
     }
 
 }
