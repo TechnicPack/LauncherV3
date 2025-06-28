@@ -153,7 +153,12 @@ public class LauncherMain {
 
         // Initialize the AWT desktop properties on Linux before any invocations are done
         // https://github.com/JFormDesigner/FlatLaf/issues/405#issuecomment-960242342
-        Toolkit.getDefaultToolkit().getDesktopProperty("dummy");
+        try {
+            Toolkit.getDefaultToolkit().getDesktopProperty("dummy");
+        } catch (Exception e) {
+            // Ignore any AWT exceptions, but log them to Sentry
+            Sentry.captureException(e);
+        }
 
         runHeadlessCheck();
 
