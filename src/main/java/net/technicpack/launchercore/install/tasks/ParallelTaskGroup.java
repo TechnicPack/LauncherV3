@@ -46,6 +46,8 @@ public class ParallelTaskGroup<T> implements IInstallTask<T>, IWeightedTasksQueu
 
     private final ExecutorService executor;
 
+    private final Object taskListLock = new Object();
+
     public ParallelTaskGroup(String name) {
         this.groupName = name;
         this.executor = createDefaultExecutor();
@@ -100,15 +102,17 @@ public class ParallelTaskGroup<T> implements IInstallTask<T>, IWeightedTasksQueu
 
     @Override
     public float getTaskProgress() {
-        if (taskList.isEmpty() || totalWeight == 0) return 0;
+        synchronized (taskListLock) {
+            if (taskList.isEmpty() || totalWeight == 0) return 0;
 
-        float completedWeight = 0;
-        for (IInstallTask<T> task : taskList) {
-            float weight = taskWeights.getOrDefault(task, 1.0f);
-            completedWeight += (task.getTaskProgress() / 100f) * weight;
+            float completedWeight = 0;
+            for (IInstallTask<T> task : taskList) {
+                float weight = taskWeights.getOrDefault(task, 1.0f);
+                completedWeight += (task.getTaskProgress() / 100f) * weight;
+            }
+
+            return (completedWeight / totalWeight) * 100f;
         }
-
-        return (completedWeight / totalWeight) * 100f;
     }
 
     @Override
@@ -118,9 +122,11 @@ public class ParallelTaskGroup<T> implements IInstallTask<T>, IWeightedTasksQueu
 
     @Override
     public void addTask(IInstallTask<T> task, float weight) {
-        taskList.add(task);
-        taskWeights.put(task, weight);
-        totalWeight += weight;
+        synchronized (taskListLock) {
+            taskList.add(task);
+            taskWeights.put(task, weight);
+            totalWeight += weight;
+        }
     }
 
     @Override
@@ -130,8 +136,10 @@ public class ParallelTaskGroup<T> implements IInstallTask<T>, IWeightedTasksQueu
 
     @Override
     public void addNextTask(IInstallTask<T> task, float weight) {
-        taskList.add(0, task);
-        taskWeights.put(task, weight);
-        totalWeight += weight;
+        synchronized (taskListLock) {
+            taskList.add(0, task);
+            taskWeights.put(task, weight);
+            totalWeight += weight;
+        }
     }
 }
