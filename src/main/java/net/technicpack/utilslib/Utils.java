@@ -224,10 +224,11 @@ public class Utils {
                     download.getOutFile().delete();
                 }
 
-                if (Thread.interrupted())
+                if (Thread.currentThread().isInterrupted()) {
                     throw new InterruptedException();
+                }
 
-                System.err.println("Download of " + url + " Failed! " + download.getException());
+                getLogger().log(Level.WARNING, String.format("Download of %s failed!", url), download.getException());
                 if (listener != null) {
                     listener.stateChanged("Download failed, retries remaining: " + tries, 0F);
                 }

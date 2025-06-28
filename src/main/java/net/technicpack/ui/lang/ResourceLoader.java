@@ -22,6 +22,7 @@ package net.technicpack.ui.lang;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
+import org.intellij.lang.annotations.MagicConstant;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -297,11 +298,11 @@ public class ResourceLoader {
     }
 
     public Font getFont(String name, float size) {
-        return getFont(name,size,Font.PLAIN);
+        return getFont(name, size, Font.PLAIN);
     }
 
-    public Font getFont(String name, float size, int style) {
-        //noinspection MagicConstant
+    public Font getFont(String name, float size,
+                        @MagicConstant(flags = {Font.PLAIN, Font.BOLD, Font.ITALIC}) int style) {
         return getFontByName(name).deriveFont(style, size);
     }
 
