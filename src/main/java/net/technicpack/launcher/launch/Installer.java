@@ -24,16 +24,14 @@ import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.components.FixRunDataDialog;
 import net.technicpack.launchercore.TechnicConstants;
-import net.technicpack.launchercore.exception.BuildInaccessibleException;
-import net.technicpack.launchercore.exception.CacheDeleteException;
-import net.technicpack.launchercore.exception.DownloadException;
-import net.technicpack.launchercore.exception.PackNotAvailableOfflineException;
+import net.technicpack.launchercore.exception.*;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.ModpackInstaller;
 import net.technicpack.launchercore.install.Version;
-import net.technicpack.launchercore.install.tasks.*;
-import net.technicpack.launchercore.install.verifiers.SHA1FileVerifier;
+import net.technicpack.launchercore.install.tasks.CheckRunDataFile;
+import net.technicpack.launchercore.install.tasks.TaskGroup;
+import net.technicpack.launchercore.install.tasks.WriteRundataFile;
 import net.technicpack.launchercore.launch.GameProcess;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
@@ -63,11 +61,8 @@ import javax.swing.JOptionPane;
 import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.logging.Level;
-import java.util.regex.Pattern;
 import java.util.zip.ZipException;
 
 public class Installer {
@@ -275,55 +270,52 @@ public class Installer {
                     }
                 }
             } catch (InterruptedException e) {
-                boolean cancelledByUser = false;
-                synchronized (cancelLock) {
-                    if (isCancelledByUser) {
-                        cancelledByUser = true;
-                        isCancelledByUser = false;
-                    }
-                }
-
-                // Canceled by user
-                if (!cancelledByUser) {
-                    if (e.getCause() != null) {
-                        Utils.getLogger().info("Cancelled by exception.");
-                    } else {
-                        Utils.getLogger().info("Cancelled by code.");
-                    }
-                    e.printStackTrace();
-                    Sentry.captureException(e);
-                } else {
+                if (isCancelledByUser) {
                     Utils.getLogger().info("Cancelled by user.");
+                } else {
+                    if (e.getCause() != null) {
+                        Utils.getLogger().log(Level.INFO, "Cancelled by exception.", e);
+                    } else {
+                        Utils.getLogger().log(Level.INFO, "Cancelled by code.");
+                    }
+                    Sentry.captureException(e);
                 }
 
-                Thread.currentThread().interrupt();
+                this.interrupt();
             } catch (PackNotAvailableOfflineException e) {
-                JOptionPane.showMessageDialog(frame, e.getMessage(),
-                        resources.getString("launcher.installerror.unavailable"), JOptionPane.WARNING_MESSAGE);
+                showErrorDialog(resources.getString("launcher.installerror.unavailable"), e.getMessage());
             } catch (DownloadException e) {
-                JOptionPane.showMessageDialog(frame,
-                        resources.getString("launcher.installerror.download", pack.getDisplayName(), e.getMessage()),
-                        resources.getString("launcher.installerror.title"), JOptionPane.WARNING_MESSAGE);
+                showErrorDialog(
+                    resources.getString("launcher.installerror.download", pack.getDisplayName(), e.getMessage())
+                );
             } catch (ZipException e) {
-                JOptionPane.showMessageDialog(frame,
-                        resources.getString("launcher.installerror.unzip", pack.getDisplayName(), e.getMessage()),
-                        resources.getString("launcher.installerror.title"), JOptionPane.WARNING_MESSAGE);
+                showErrorDialog(
+                    resources.getString("launcher.installerror.unzip", pack.getDisplayName(), e.getMessage())
+                );
             } catch (CacheDeleteException e) {
-                JOptionPane.showMessageDialog(frame,
-                        resources.getString("launcher.installerror.cache", pack.getDisplayName(), e.getMessage()),
-                        resources.getString("launcher.installerror.title"), JOptionPane.WARNING_MESSAGE);
-            } catch (BuildInaccessibleException e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(frame, e.getMessage(), resources.getString("launcher.installerror.title"),
-                        JOptionPane.WARNING_MESSAGE);
+                showErrorDialog(
+                    resources.getString("launcher.installerror.cache", pack.getDisplayName(), e.getMessage())
+                );
+            } catch (InstallException | BuildInaccessibleException e) {
+                Utils.getLogger().log(Level.SEVERE, "Exception caught during modpack installation or launch.", e);
+                showErrorDialog(e.getMessage());
             } catch (Exception e) {
                 Utils.getLogger().log(Level.SEVERE, "Exception caught during modpack installation or launch.", e);
                 Sentry.captureException(e);
+                showErrorDialog(String.format("Unknown error: %s", e.getMessage()));
             } finally {
                 if (!doLaunch || !isGameProcessRunning()) {
                     EventQueue.invokeLater(frame::launchCompleted);
                 }
             }
+        }
+
+        private void showErrorDialog(String title, String message) {
+            EventQueue.invokeLater(() -> JOptionPane.showMessageDialog(frame, message, title, JOptionPane.ERROR_MESSAGE));
+        }
+
+        private void showErrorDialog(String message) {
+            showErrorDialog(resources.getString("launcher.installerror.title"), message);
         }
 
         private void buildTasksQueue(InstallTasksQueue<MojangVersion> queue, String build,
