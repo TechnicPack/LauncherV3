@@ -129,14 +129,17 @@ public class InstallJavaRuntimeTask implements IInstallTask<MojangVersion> {
                     downloadUrl = rawDownload.getUrl();
                 }
 
-                EnsureFileTask<MojangVersion> ensureFileTask;
-                ensureFileTask = new EnsureFileTask<>(target, verifier, null, downloadUrl, downloadJavaQueue, null);
+                EnsureFileTask<MojangVersion> ensureFileTask = new EnsureFileTask<>(downloadJavaQueue, target)
+                        .withUrl(downloadUrl)
+                        .withVerifier(verifier);
 
                 if (useLzma) {
-                    ensureFileTask.setDownloadDecompressor(CompressorStreamFactory.LZMA);
+                    ensureFileTask.withDownloadDecompressor(CompressorStreamFactory.LZMA);
                 }
 
-                ensureFileTask.setExecutable(runtimeFile.isExecutable());
+                if (runtimeFile.isExecutable()) {
+                    ensureFileTask.withExecutableBitSet();
+                }
 
                 examineJavaQueue.addTask(ensureFileTask);
             }
@@ -172,7 +175,6 @@ public class InstallJavaRuntimeTask implements IInstallTask<MojangVersion> {
 
 
         MojangVersion version = queue.getMetadata();
-
 
         version.setJavaRuntime(runtime);
     }

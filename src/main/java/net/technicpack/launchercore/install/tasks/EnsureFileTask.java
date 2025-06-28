@@ -23,48 +23,35 @@ import net.technicpack.launchercore.install.ITasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.utilslib.IZipFileFilter;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
+@SuppressWarnings("UnusedReturnValue")
 public class EnsureFileTask<T> implements IInstallTask<T> {
-    private final File cacheLocation;
-    private final File zipExtractLocation;
-    private final String sourceUrl;
-    private final String friendlyFileName;
-    private final IFileVerifier fileVerifier;
+    private final File targetFile;
     private final ITasksQueue<T> downloadTaskQueue;
-    private final ITasksQueue<T> copyTaskQueue;
-    private final IZipFileFilter filter;
-    private boolean executable;
+    private final @NotNull String friendlyFileName;
+    private File zipExtractionDirectory;
+    private String sourceUrl;
+    private IFileVerifier fileVerifier;
+    private ITasksQueue<T> copyTaskQueue;
+    private @Nullable IZipFileFilter filter = null;
+    private boolean executable = false;
     private String downloadDecompressor;
 
-    public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, ITasksQueue<T> downloadTaskQueue, ITasksQueue<T> copyTaskQueue) {
-        this(fileLocation, fileVerifier, zipExtractLocation, sourceUrl, fileLocation.getName(), downloadTaskQueue, copyTaskQueue, null);
-    }
-
-    public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, ITasksQueue<T> downloadTaskQueue, ITasksQueue<T> copyTaskQueue, IZipFileFilter filter) {
-        this(fileLocation, fileVerifier, zipExtractLocation, sourceUrl, fileLocation.getName(), downloadTaskQueue, copyTaskQueue, filter);
-    }
-
-    public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, String friendlyFileName, ITasksQueue<T> downloadTaskQueue, ITasksQueue<T> copyTaskQueue) {
-        this(fileLocation, fileVerifier, zipExtractLocation, sourceUrl, friendlyFileName, downloadTaskQueue, copyTaskQueue, null);
-    }
-
-    public EnsureFileTask(File fileLocation, IFileVerifier fileVerifier, File zipExtractLocation, String sourceUrl, String friendlyFileName, ITasksQueue<T> downloadTaskQueue, ITasksQueue<T> copyTaskQueue, IZipFileFilter fileFilter) {
-        this.cacheLocation = fileLocation;
-        this.zipExtractLocation = zipExtractLocation;
-        this.sourceUrl = sourceUrl;
-        this.fileVerifier = fileVerifier;
-        this.friendlyFileName = friendlyFileName;
-        this.downloadTaskQueue = downloadTaskQueue;
-        this.copyTaskQueue = copyTaskQueue;
-        this.filter = fileFilter;
+    public EnsureFileTask(ITasksQueue<T> downloadQueue, @NotNull File target) {
+        this.targetFile = target;
+        this.friendlyFileName = target.getName();
+        this.downloadTaskQueue = downloadQueue;
     }
 
     @Override
-    public String getTaskDescription() {
-        return "Verifying " + this.cacheLocation.getName();
+    public @NotNull String getTaskDescription() {
+        return String.format("Verifying %s", targetFile.getName());
     }
 
     @Override
@@ -74,36 +61,74 @@ public class EnsureFileTask<T> implements IInstallTask<T> {
 
     @Override
     public void runTask(InstallTasksQueue<T> queue) throws IOException {
-        if (this.zipExtractLocation != null)
-            unzipFile(this.copyTaskQueue, this.cacheLocation, this.zipExtractLocation, this.filter);
+        Objects.requireNonNull(this.downloadTaskQueue, "Download task queue must be set.");
+        Objects.requireNonNull(this.targetFile, "Target file must be set.");
+        Objects.requireNonNull(this.friendlyFileName, "Friendly file name must be set.");
 
-        if (sourceUrl != null && (!this.cacheLocation.exists() || (fileVerifier != null && !fileVerifier.isFileValid(this.cacheLocation)))) {
-            DownloadFileTask<T> downloadFileTask = new DownloadFileTask<>(this.sourceUrl, this.cacheLocation, this.fileVerifier, this.friendlyFileName, this.executable);
+        if (zipExtractionDirectory != null) {
+            // This is added before the download because we're adding to the head, so the download task runs before
+            copyTaskQueue.addNextTask(new UnzipFileTask<>(targetFile, zipExtractionDirectory, filter));
+        }
 
-            if (this.downloadDecompressor != null) {
-                downloadFileTask.setDecompressor(this.downloadDecompressor);
+        if (sourceUrl != null && (!targetFile.exists() || (fileVerifier != null && !fileVerifier.isFileValid(targetFile)))) {
+            DownloadFileTask<T> downloadFileTask = new DownloadFileTask<>(sourceUrl, targetFile, fileVerifier,
+                                                                          friendlyFileName);
+
+            if (executable) {
+                downloadFileTask.withExecutable();
             }
 
-            this.addDownloadTask(downloadTaskQueue, downloadFileTask);
+            if (downloadDecompressor != null) {
+                downloadFileTask.setDecompressor(downloadDecompressor);
+            }
+
+            downloadTaskQueue.addNextTask(downloadFileTask);
         }
     }
 
-    protected void unzipFile(ITasksQueue<T> taskQueue, File zipLocation, File targetLocation, IZipFileFilter filter) {
-        taskQueue.addNextTask(new UnzipFileTask<>(zipLocation, targetLocation, filter));
-    }
-
-    protected void addDownloadTask(ITasksQueue<T> taskQueue, DownloadFileTask<T> downloadFileTask) {
-        taskQueue.addNextTask(downloadFileTask);
-    }
-
-    public void setExecutable(boolean executable) {
-        this.executable = executable;
+    /**
+     * Mark the target file as executable
+     */
+    public @NotNull EnsureFileTask<T> withExecutableBitSet() {
+        this.executable = true;
+        return this;
     }
 
     /**
      * @see DownloadFileTask#setDecompressor(String)
      */
-    public void setDownloadDecompressor(String downloadDecompressor) {
+    public @NotNull EnsureFileTask<T> withDownloadDecompressor(String downloadDecompressor) {
         this.downloadDecompressor = downloadDecompressor;
+        return this;
+    }
+
+    public @NotNull EnsureFileTask<T> withVerifier(IFileVerifier fileVerifier) {
+        this.fileVerifier = fileVerifier;
+        return this;
+    }
+
+    /**
+     * Sets the directory where to extract this ZIP file to.
+     * @param directory The directory to extract into
+     * @param copyQueue The {@link ITasksQueue<T>} to run the extraction operation in
+     */
+    public @NotNull EnsureFileTask<T> withExtractTo(File directory, ITasksQueue<T> copyQueue) {
+        Objects.requireNonNull(directory, "Extraction directory must be set.");
+        Objects.requireNonNull(copyQueue, "Copy task queue must be set.");
+
+        this.zipExtractionDirectory = directory;
+        this.copyTaskQueue = copyQueue;
+
+        return this;
+    }
+
+    public @NotNull EnsureFileTask<T> withZipFilter(IZipFileFilter filter) {
+        this.filter = filter;
+        return this;
+    }
+
+    public @NotNull EnsureFileTask<T> withUrl(String url) {
+        this.sourceUrl = url;
+        return this;
     }
 }

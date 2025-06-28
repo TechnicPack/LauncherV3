@@ -26,37 +26,48 @@ import net.technicpack.utilslib.Utils;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
+import org.apache.commons.compress.compressors.CompressorStreamProvider;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("UnusedReturnValue")
 public class DownloadFileTask<T> extends ListenerTask<T> {
-    private String url;
-    private File destination;
-    private String taskDescription;
-    private IFileVerifier fileVerifier;
-    private final boolean executable;
+    private static final Set<String> AVAILABLE_DECOMPRESSORS;
+
+    static {
+        SortedMap<String, CompressorStreamProvider> availableProviders =
+                CompressorStreamFactory.findAvailableCompressorInputStreamProviders();
+
+        AVAILABLE_DECOMPRESSORS = availableProviders.keySet()
+                                                    .stream()
+                                                    .map(String::toLowerCase)
+                                                    .collect(Collectors.toSet());
+    }
+
+    private final String url;
+    private final File destination;
+    private final String taskDescription;
+    private final IFileVerifier fileVerifier;
+    private boolean executable;
     private String decompressor;
-
-    private static final Set<String> AVAILABLE_DECOMPRESSORS = CompressorStreamFactory.findAvailableCompressorInputStreamProviders().keySet().stream().map(String::toLowerCase).collect(Collectors.toSet());
-
-    protected File getDestination() { return destination; }
 
     public DownloadFileTask(String url, File destination, IFileVerifier verifier) {
         this(url, destination, verifier, destination.getName());
     }
 
     public DownloadFileTask(String url, File destination, IFileVerifier verifier, String taskDescription) {
-        this(url, destination, verifier, taskDescription, false);
-    }
-
-    public DownloadFileTask(String url, File destination, IFileVerifier verifier, String taskDescription, boolean executable) {
         this.url = url;
         this.destination = destination;
         this.fileVerifier = verifier;
         this.taskDescription = taskDescription;
-        this.executable = executable;
+    }
+
+    protected File getDestination() {
+        return destination;
     }
 
     /**
@@ -93,40 +104,55 @@ public class DownloadFileTask<T> extends ListenerTask<T> {
             tempDestination = this.destination;
         }
 
-        Utils.downloadFile(url, tempDestination.getName(), tempDestination.getAbsolutePath(), null, downloadFileVerifier, this);
+        Utils.downloadFile(url, tempDestination.getName(), tempDestination.getAbsolutePath(), null,
+                           downloadFileVerifier, this);
 
         if (needsDecompression) {
-            Utils.getLogger().fine("Decompressing " + tempDestination.getAbsolutePath() + " using " + decompressor);
-
-            try (FileInputStream fis = new FileInputStream(tempDestination);
-                 CompressorInputStream cis = new CompressorStreamFactory().createCompressorInputStream(decompressor, fis);
-                 FileOutputStream fos = new FileOutputStream(this.destination);
-            ) {
-                byte[] buffer = new byte[65536];
-                int n;
-                while ((n = cis.read(buffer)) != -1) {
-                    fos.write(buffer, 0, n);
-                }
-            } catch (CompressorException e) {
-                throw new DownloadException("Failed to decompress " + tempDestination.getName(), e);
-            }
-
-            if (this.fileVerifier.isFileValid(this.destination)) {
-                tempDestination.delete();
-            } else {
-                this.destination.delete();
-                throw new DownloadException("Failed to download " + this.destination.getName() + ".");
-            }
+            decompress(tempDestination);
         }
 
         if (!this.destination.exists()) {
             throw new DownloadException("Failed to download " + this.destination.getName() + ".");
         }
 
-        if (this.executable) {
-            if (!this.destination.setExecutable(this.executable)) {
-                throw new DownloadException("Failed to set " + this.destination.getName() + " as executable");
-            }
+        if (this.executable && !this.destination.setExecutable(true)) {
+            throw new DownloadException("Failed to set " + this.destination.getName() + " as executable");
         }
+    }
+
+    private void decompress(File tempDestination) throws IOException {
+        Utils.getLogger().fine("Decompressing " + tempDestination.getAbsolutePath() + " using " + decompressor);
+
+        try (FileInputStream fis = new FileInputStream(tempDestination);
+             CompressorInputStream cis = new CompressorStreamFactory().createCompressorInputStream(decompressor, fis);
+             FileOutputStream fos = new FileOutputStream(this.destination)) {
+            byte[] buffer = new byte[65536];
+            int n;
+            while ((n = cis.read(buffer)) != -1) {
+                fos.write(buffer, 0, n);
+            }
+        } catch (CompressorException e) {
+            throw new DownloadException("Failed to decompress " + tempDestination.getName(), e);
+        }
+
+        if (this.fileVerifier.isFileValid(this.destination)) {
+            try {
+                Files.delete(tempDestination.toPath());
+            } catch (IOException e) {
+                throw new DownloadException("Failed to delete temporary file " + tempDestination.getAbsolutePath(), e);
+            }
+        } else {
+            try {
+                Files.delete(this.destination.toPath());
+            } catch (IOException e) {
+                throw new DownloadException("Failed to delete broken downloaded file " + this.destination.getAbsolutePath(), e);
+            }
+            throw new DownloadException("Failed to download " + this.destination.getAbsolutePath());
+        }
+    }
+
+    public DownloadFileTask<T> withExecutable() {
+        this.executable = true;
+        return this;
     }
 }

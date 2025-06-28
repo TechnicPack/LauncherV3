@@ -41,6 +41,7 @@ import org.apache.maven.artifact.versioning.ComparableVersion;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -54,30 +55,61 @@ public class HandleVersionFileTask implements IInstallTask<MojangVersion> {
         return t -> seen.add(keyExtractor.apply(t));
     }
 
-    private final ModpackModel pack;
-    private final LauncherDirectories directories;
-    private final ITasksQueue<MojangVersion> checkLibraryQueue;
-    private final ITasksQueue<MojangVersion> downloadLibraryQueue;
-    private final ITasksQueue<MojangVersion> copyLibraryQueue;
-    private final ITasksQueue<MojangVersion> checkNonMavenLibsQueue;
-    private final MojangVersionBuilder versionBuilder;
-    private final ILaunchOptions launchOptions;
-    private final IJavaRuntime javaRuntime;
+    private ModpackModel pack;
+    private LauncherDirectories directories;
+    private ITasksQueue<MojangVersion> checkLibraryQueue;
+    private ITasksQueue<MojangVersion> downloadLibraryQueue;
+    private ITasksQueue<MojangVersion> copyLibraryQueue;
+    private ITasksQueue<MojangVersion> checkNonMavenLibsQueue;
+    private MojangVersionBuilder versionBuilder;
+    private ILaunchOptions launchOptions;
+    private IJavaRuntime javaRuntime;
 
     private String libraryName;
 
-    public HandleVersionFileTask(ModpackModel pack, LauncherDirectories directories, ITasksQueue<MojangVersion> checkNonMavenLibsQueue,
-            ITasksQueue<MojangVersion> checkLibraryQueue, ITasksQueue<MojangVersion> downloadLibraryQueue, ITasksQueue<MojangVersion> copyLibraryQueue,
-            MojangVersionBuilder versionBuilder, ILaunchOptions launchOptions, IJavaRuntime javaRuntime) {
+    public HandleVersionFileTask withPack(ModpackModel pack) {
         this.pack = pack;
+        return this;
+    }
+
+    public HandleVersionFileTask withDirectories(LauncherDirectories directories) {
         this.directories = directories;
+        return this;
+    }
+
+    public HandleVersionFileTask withCheckLibraryQueue(ITasksQueue<MojangVersion> checkLibraryQueue) {
         this.checkLibraryQueue = checkLibraryQueue;
+        return this;
+    }
+
+    public HandleVersionFileTask withDownloadLibraryQueue(ITasksQueue<MojangVersion> downloadLibraryQueue) {
         this.downloadLibraryQueue = downloadLibraryQueue;
+        return this;
+    }
+
+    public HandleVersionFileTask withCopyLibraryQueue(ITasksQueue<MojangVersion> copyLibraryQueue) {
         this.copyLibraryQueue = copyLibraryQueue;
+        return this;
+    }
+
+    public HandleVersionFileTask withCheckNonMavenLibsQueue(ITasksQueue<MojangVersion> checkNonMavenLibsQueue) {
         this.checkNonMavenLibsQueue = checkNonMavenLibsQueue;
+        return this;
+    }
+
+    public HandleVersionFileTask withVersionBuilder(MojangVersionBuilder versionBuilder) {
         this.versionBuilder = versionBuilder;
+        return this;
+    }
+
+    public HandleVersionFileTask withLaunchOptions(ILaunchOptions launchOptions) {
         this.launchOptions = launchOptions;
+        return this;
+    }
+
+    public HandleVersionFileTask withJavaRuntime(IJavaRuntime javaRuntime) {
         this.javaRuntime = javaRuntime;
+        return this;
     }
 
     @Override
@@ -95,6 +127,16 @@ public class HandleVersionFileTask implements IInstallTask<MojangVersion> {
 
     @Override
     public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException, InterruptedException {
+        Objects.requireNonNull(pack, "ModpackModel must be set.");
+        Objects.requireNonNull(directories, "LauncherDirectories must be set.");
+        Objects.requireNonNull(checkLibraryQueue, "CheckLibraryQueue must be set.");
+        Objects.requireNonNull(downloadLibraryQueue, "DownloadLibraryQueue must be set.");
+        Objects.requireNonNull(copyLibraryQueue, "CopyLibraryQueue must be set.");
+        Objects.requireNonNull(checkNonMavenLibsQueue, "CheckNonMavenLibsQueue must be set.");
+        Objects.requireNonNull(versionBuilder, "VersionBuilder must be set.");
+        Objects.requireNonNull(launchOptions, "LaunchOptions must be set.");
+        Objects.requireNonNull(javaRuntime, "JavaRuntime must be set.");
+
         MojangVersion version = versionBuilder.buildVersionFromKey(null);
 
         if (version == null) {

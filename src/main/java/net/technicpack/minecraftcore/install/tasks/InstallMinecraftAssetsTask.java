@@ -145,24 +145,28 @@ public class InstallMinecraftAssetsTask implements IInstallTask<MojangVersion> {
             verifier = new FileSizeVerifier(size);
         }
 
-        File location = new File(String.format("%s/objects/%s", assetsDirectory, hash.substring(0, 2)), hash);
+        File target = new File(String.format("%s/objects/%s", assetsDirectory, hash.substring(0, 2)), hash);
         String url = MojangUtils.getResourceUrl(hash);
 
-        Files.createDirectories(location.getParentFile().toPath());
+        Files.createDirectories(target.getParentFile().toPath());
 
-        File target = null;
+        File cloneTo = null;
 
         if (isVirtual) {
-            target = new File(String.format("%s/virtual/%s/%s", assetsDirectory, assetsKey, assetPath));
+            cloneTo = new File(String.format("%s/virtual/%s/%s", assetsDirectory, assetsKey, assetPath));
         } else if (mapToResources) {
-            target = new File(modpack.getResourcesDir(), assetPath);
+            cloneTo = new File(modpack.getResourcesDir(), assetPath);
         }
 
-        checkAssetsQueue.addTask(new EnsureFileTask<>(location, verifier, null, url, hash, downloadAssetsQueue, copyAssetsQueue));
+        EnsureFileTask<MojangVersion> ensureFileTask = new EnsureFileTask<>(downloadAssetsQueue, target)
+                .withUrl(url)
+                .withVerifier(verifier);
 
-        if (target != null && !target.exists()) {
-            Files.createDirectories(target.getParentFile().toPath());
-            copyAssetsQueue.addTask(new CopyFileTask<>(location, target));
+        checkAssetsQueue.addTask(ensureFileTask);
+
+        if (cloneTo != null && !cloneTo.exists()) {
+            Files.createDirectories(cloneTo.getParentFile().toPath());
+            copyAssetsQueue.addTask(new CopyFileTask<>(target, cloneTo));
         }
     }
 }

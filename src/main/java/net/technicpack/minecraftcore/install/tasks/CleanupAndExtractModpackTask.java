@@ -136,7 +136,13 @@ public class CleanupAndExtractModpackTask implements IInstallTask<MojangVersion>
             else
                 verifier = new ValidZipFileVerifier();
 
-			checkModQueue.addTask(new EnsureFileTask<>(cacheFile, verifier, modpackInstallDirectory, url, downloadModQueue, copyModQueue, zipFilter));
+            EnsureFileTask<MojangVersion> ensureFileTask = new EnsureFileTask<>(downloadModQueue, cacheFile)
+                    .withUrl(url)
+                    .withVerifier(verifier)
+                    .withExtractTo(modpackInstallDirectory, copyModQueue)
+                    .withZipFilter(zipFilter);
+
+			checkModQueue.addTask(ensureFileTask);
 		}
 
 		copyModQueue.addTask(new CleanupModpackCacheTask(pack, modpack));

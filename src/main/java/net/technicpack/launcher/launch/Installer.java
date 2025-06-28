@@ -382,7 +382,15 @@ public class Installer {
             verifyingFiles.addTask(new InstallFmlLibsTask(pack, directories, modpackData, verifyingFiles, installingLibs, installingLibs));
 
             checkVersionFile.addTask(new VerifyVersionFilePresentTask(pack, minecraft, versionBuilder));
-            examineVersionFile.addTask(new HandleVersionFileTask(pack, directories, checkNonMavenLibs, grabLibs, installingLibs, installingLibs, versionBuilder, settings, selectedJavaRuntime));
+            examineVersionFile.addTask(new HandleVersionFileTask().withPack(pack)
+                                                                  .withDirectories(directories)
+                                                                  .withCheckNonMavenLibsQueue(checkNonMavenLibs)
+                                                                  .withCheckLibraryQueue(grabLibs)
+                                                                  .withDownloadLibraryQueue(installingLibs)
+                                                                  .withCopyLibraryQueue(installingLibs)
+                                                                  .withVersionBuilder(versionBuilder)
+                                                                  .withLaunchOptions(settings)
+                                                                  .withJavaRuntime(selectedJavaRuntime));
             examineVersionFile.addTask(new EnsureAssetsIndexTask(directories.getAssetsDirectory(), pack, installingMinecraft, examineIndex, verifyingAssets, installingAssets, installingAssets));
 
             fetchJavaManifest.addTask(new EnsureJavaRuntimeManifestTask(directories.getRuntimesDirectory(), pack, fetchJavaManifest, examineJava, downloadJava));

@@ -74,8 +74,11 @@ public class InstallFmlLibsTask implements IInstallTask<MojangVersion> {
             File target = new File(modpackFmlLibDir, name);
 
             if (!target.exists() || (verifier != null && !verifier.isFileValid(target))) {
-                verifyingFiles.addTask(new EnsureFileTask<>(cached, verifier, null,
-                        TechnicConstants.TECHNIC_FML_LIB_REPO + name, downloadLibraryQueue, copyLibraryQueue));
+                EnsureFileTask<MojangVersion> ensureFileTask = new EnsureFileTask<>(downloadLibraryQueue, cached)
+                        .withUrl(TechnicConstants.TECHNIC_FML_LIB_REPO + name)
+                        .withVerifier(verifier);
+
+                verifyingFiles.addTask(ensureFileTask);
                 copyLibraryQueue.addTask(new CopyFileTask<>(cached, target));
             }
         });
