@@ -149,6 +149,7 @@ public class LauncherMain {
         // Initialize Sentry
         Sentry.init(options -> {
             options.setDsn("https://4741ed8316eaefd3fa537240d8800c62@o4508140473417728.ingest.us.sentry.io/4509542931431424");
+            options.setTag("launcherPath", LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().getPath());
         });
 
         // Initialize the AWT desktop properties on Linux before any invocations are done
