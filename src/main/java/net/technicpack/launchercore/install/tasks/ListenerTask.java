@@ -29,7 +29,7 @@ public abstract class ListenerTask<T> implements IInstallTask<T>, DownloadListen
     private float taskProgress;
     private InstallTasksQueue<T> queue;
 
-    public ListenerTask() {
+    protected ListenerTask() {
         taskProgress = 0;
     }
 

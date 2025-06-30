@@ -32,11 +32,13 @@ public class TaskGroup<T> implements IWeightedTasksQueue<T>, IInstallTask<T> {
     private final String groupName;
     private final LinkedList<IInstallTask<T>> taskList = new LinkedList<>();
     private final Map<IInstallTask<T>, Float> taskWeights = new HashMap<>();
+    private final Object taskListLock = new Object();
 
     private float totalWeight = 0;
+    private float completedWeight = 0;
 
-    private int taskProgress = 0;
-    private String fileName = "";
+    private IInstallTask<T> currentTask;
+    private String currentTaskDescription = "";
 
     public TaskGroup(String name) {
         this.groupName = name;
@@ -44,70 +46,87 @@ public class TaskGroup<T> implements IWeightedTasksQueue<T>, IInstallTask<T> {
 
     @Override
     public String getTaskDescription() {
-        return groupName.replace("%s", fileName);
+        return groupName.replace("%s", currentTaskDescription);
     }
 
     @Override
     public float getTaskProgress() {
-        if (taskList.isEmpty())
-            return 0;
-        if (totalWeight == 0)
-            return 0;
-
-        float completedWeight = 0;
-        for (int i = 0; i < taskProgress; i++) {
-            IInstallTask<T> task = taskList.get(i);
-            if (taskWeights.containsKey(task)) {
-                completedWeight += taskWeights.get(task);
+        synchronized (taskListLock) {
+            if (taskList.isEmpty() || totalWeight == 0) {
+                return 0;
             }
+
+            // The formula is:
+            // progress = (completedWeight + (currentTaskFractionDone * currentTaskWeight)) / totalWeight * 100
+
+            float progress = completedWeight;
+
+            if (currentTask != null) {
+                float currentTaskWeight = taskWeights.getOrDefault(currentTask, 1.0f);
+                progress += (currentTask.getTaskProgress() / 100.0f) * currentTaskWeight;
+            }
+
+            return (progress / totalWeight) * 100.0f;
         }
-
-        float finishedTasksProgress = (completedWeight / totalWeight);
-        IInstallTask<T> currentTask = taskList.get(taskProgress);
-        float currentTaskProgress = (currentTask.getTaskProgress() / 100.0f);
-
-        float currentTaskWeight = taskWeights.getOrDefault(currentTask, 1.0f);
-
-        currentTaskProgress *= (currentTaskWeight / totalWeight);
-
-        return (finishedTasksProgress + currentTaskProgress) * 100.0f;
     }
 
     @Override
     public void runTask(InstallTasksQueue<T> queue) throws IOException, InterruptedException {
-        while (taskProgress < taskList.size()) {
+        // The check is in the first synchronized block because isEmpty() isn't atomic
+        while (true) {
             if (Thread.currentThread().isInterrupted()) {
                 throw new InterruptedException();
             }
-            IInstallTask<T> currentTask = taskList.get(taskProgress);
-            Sentry.addBreadcrumb(String.format("TaskGroup \"%s\" running task \"%s\"", groupName, currentTask.getTaskDescription()));
-            fileName = currentTask.getTaskDescription();
+
+            synchronized (taskListLock) {
+                if (taskList.isEmpty()) {
+                    break;
+                }
+                currentTask = taskList.removeFirst();
+                currentTaskDescription = currentTask.getTaskDescription();
+            }
+
+            Sentry.addBreadcrumb(String.format("TaskGroup \"%s\" running task \"%s\"", groupName,
+                                               currentTaskDescription));
             currentTask.runTask(queue);
-            Sentry.addBreadcrumb(String.format("TaskGroup \"%s\" finished task \"%s\"", groupName, currentTask.getTaskDescription()));
-            queue.refreshProgress();
-            taskProgress++;
+            Sentry.addBreadcrumb(String.format("TaskGroup \"%s\" finished task \"%s\"", groupName,
+                                               currentTaskDescription));
+
+            synchronized (taskListLock) {
+                queue.refreshProgress();
+                completedWeight += taskWeights.getOrDefault(currentTask, 1.0f);
+                taskWeights.remove(currentTask);
+            }
         }
     }
 
     @Override
     public void addNextTask(IInstallTask<T> task) {
-        addNextTask(task, 1);
+        addNextTask(task, 1.0f);
     }
 
     @Override
     public void addTask(IInstallTask<T> task) {
-        addTask(task, 1);
+        addTask(task, 1.0f);
     }
 
-    public void addNextTask(IInstallTask<T> task, float weight) {
-        taskList.addFirst(task);
-        taskWeights.put(task, weight);
-        totalWeight += weight;
-    }
-
+    @Override
     public void addTask(IInstallTask<T> task, float weight) {
-        taskList.addLast(task);
-        taskWeights.put(task, weight);
-        totalWeight += weight;
+        synchronized (taskListLock) {
+            taskList.addLast(task);
+            taskWeights.put(task, weight);
+            totalWeight += weight;
+        }
     }
+
+    @Override
+    public void addNextTask(IInstallTask<T> task, float weight) {
+        synchronized (taskListLock) {
+            taskList.addFirst(task);
+            taskWeights.put(task, weight);
+            totalWeight += weight;
+        }
+    }
+
+
 }

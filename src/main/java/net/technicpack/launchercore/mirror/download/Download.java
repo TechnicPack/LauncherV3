@@ -58,7 +58,7 @@ public class Download implements Runnable {
 
     public float getProgress() {
         if (size > 0) {
-            return ((float) downloaded / size) * 100;
+            return (float) ((double) downloaded / size * 100);
         } else {
             return 0;
         }
