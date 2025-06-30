@@ -152,6 +152,10 @@ public class ResourceLoader {
             String find = String.format("{%d}", i);
             String replace = replacements[i];
 
+            if (replace == null) {
+                throw new IllegalArgumentException("Replacement string cannot be null");
+            }
+
             if (outString.contains(find)) {
                 outString = outString.replace(find, replace);
             }
