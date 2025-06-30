@@ -108,7 +108,7 @@ public class Download implements Runnable {
 
             long startTime = System.nanoTime();
 
-            try (ReadableByteChannel rbc = Channels.newChannel(in);
+            try (CountingReadableByteChannel rbc = new CountingReadableByteChannel(Channels.newChannel(in));
                  FileOutputStream fos = new FileOutputStream(outFile)) {
                 fos.getChannel().lock();
 
@@ -248,10 +248,10 @@ public class Download implements Runnable {
     }
 
     private class MonitorThread extends Thread {
-        private final ReadableByteChannel rbc;
+        private final CountingReadableByteChannel rbc;
         private long last = System.currentTimeMillis();
 
-        public MonitorThread(ReadableByteChannel rbc) {
+        public MonitorThread(CountingReadableByteChannel rbc) {
             super("Download Monitor Thread");
             this.setDaemon(true);
             this.rbc = rbc;
@@ -260,10 +260,10 @@ public class Download implements Runnable {
         @Override
         public void run() {
             while (!this.isInterrupted()) {
-                long fileLength = outFile.length();
-                long diff = fileLength - downloaded;
-                downloaded = fileLength;
-                if (diff == 0) {
+                long bytesRead = this.rbc.getBytesRead();
+                long bytesDelta = bytesRead - downloaded;
+                downloaded = bytesRead;
+                if (bytesDelta == 0) {
                     if ((System.currentTimeMillis() - last) > TIMEOUT) {
                         try {
                             rbc.close();
@@ -282,7 +282,7 @@ public class Download implements Runnable {
                 stateChanged();
                 synchronized (progressLock) {
                     try {
-                        progressLock.wait(50);
+                        progressLock.wait(33); // ~30.3 Hz
                     } catch (InterruptedException e) {
                         this.interrupt();
                         return;
