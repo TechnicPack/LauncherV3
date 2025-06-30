@@ -230,7 +230,7 @@ public class Relauncher {
 
         Utils.getLogger().info(String.format("Launching command: '%s'", commandString));
 
-        ProcessBuilder pb = ProcessUtils.createProcessBuilder(commands);
+        ProcessBuilder pb = ProcessUtils.createProcessBuilder(commands, true);
 
         try {
             pb.start();

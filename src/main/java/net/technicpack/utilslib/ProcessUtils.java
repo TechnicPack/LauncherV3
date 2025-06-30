@@ -33,6 +33,20 @@ public class ProcessUtils {
         return pb;
     }
 
+    public static ProcessBuilder createProcessBuilder(List<String> command, boolean allowJavaHome) {
+        ProcessBuilder pb = new ProcessBuilder(command);
+        Map<String, String> env = pb.environment();
+
+        for (String varName : ENV_VARS_TO_REMOVE) {
+            if (varName.equals("JAVA_HOME") && allowJavaHome) {
+                continue;
+            }
+            env.remove(varName);
+        }
+
+        return pb;
+    }
+
     /**
      * @see #createProcessBuilder(List)
      */

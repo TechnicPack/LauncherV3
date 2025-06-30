@@ -49,9 +49,9 @@ public class DesktopUtils {
                         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
                             Desktop.getDesktop().browse(new URI(url));
                         else if (OperatingSystem.getOperatingSystem() == OperatingSystem.LINUX)
-                            ProcessUtils.createProcessBuilder("xdg-open", url).start();
+                            new ProcessBuilder("xdg-open", url).start();
                         else if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX)
-                            ProcessUtils.createProcessBuilder("open", url).start();
+                            new ProcessBuilder("open", url).start();
                         else
                             SwingUtilities.invokeLater(() -> showBrowseUrlDialog(url));
                     }
