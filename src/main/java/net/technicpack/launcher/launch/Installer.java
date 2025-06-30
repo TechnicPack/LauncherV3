@@ -61,6 +61,7 @@ import javax.swing.JOptionPane;
 import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
+import java.nio.channels.ClosedByInterruptException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.zip.ZipException;
@@ -261,7 +262,7 @@ public class Installer {
                         System.exit(0);
                     }
                 }
-            } catch (InterruptedException e) {
+            } catch (ClosedByInterruptException | InterruptedException e) {
                 if (isCancelledByUser) {
                     Utils.getLogger().info("Cancelled by user.");
                 } else {
