@@ -22,6 +22,7 @@ import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.discord.IDiscordApi;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.ui.components.ModpackOptionsDialog;
+import net.technicpack.launchercore.exception.InstallException;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.launch.java.source.FileJavaSource;
@@ -222,7 +223,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         //otherwise, just use the installed version
         String installBuild = getInstallBuild(forceInstall, pack, installedVersion);
 
-        if (requiresInstall && installBuild != null && !installBuild.isEmpty()) {
+        if (requiresInstall) {
             installer.justInstall(resources, pack, installBuild, forceInstall, this, installProgress);
         } else {
             installer.installAndRun(resources, pack, installBuild, forceInstall, this, installProgress);

@@ -28,19 +28,31 @@ import net.technicpack.solder.io.SolderPackInfo;
 
 public class HttpSolderPackApi implements ISolderPackApi {
 
-    private String baseUrl;
-    private String modpackSlug;
-    private String clientId;
-    private String mirrorUrl;
+    private final String baseUrl;
+    private final String modpackSlug;
+    private final String clientId;
+    private final String mirrorUrl;
 
     protected HttpSolderPackApi(String baseUrl, String modpackSlug, String clientId, String mirrorUrl) throws RestfulAPIException {
-        this.baseUrl = baseUrl;
+        if (baseUrl == null) {
+            throw new RestfulAPIException(String.format("The Solder base URL for the modpack \"%s\" is null",
+                                                        modpackSlug));
+        }
+
+        if (mirrorUrl == null) {
+            throw new RestfulAPIException(String.format("The Solder mirror URL for the modpack \"%s\" is null",
+                                                        modpackSlug));
+        }
+
+        // Remove the right trailing slash from the base URL so we can format the URLs in a much cleaner manner
+        if (baseUrl.charAt(baseUrl.length() - 1) == '/') {
+            this.baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        } else {
+            this.baseUrl = baseUrl;
+        }
         this.modpackSlug = modpackSlug;
         this.clientId = clientId;
         this.mirrorUrl = mirrorUrl;
-
-        if (mirrorUrl == null)
-            throw new RestfulAPIException("A mirror URL could not be retrieved from '" + baseUrl + "modpack'");
     }
 
     @Override
@@ -55,7 +67,7 @@ public class HttpSolderPackApi implements ISolderPackApi {
 
     @Override
     public SolderPackInfo getPackInfo() throws RestfulAPIException {
-        String packUrl = baseUrl + "modpack/" + modpackSlug + "?cid=" + clientId;
+        String packUrl = String.format("%s/modpack/%s?cid=%s", baseUrl, modpackSlug, clientId);
         SolderPackInfo info = RestObject.getRestObject(SolderPackInfo.class, packUrl);
         info.setSolder(this);
         return info;
@@ -63,17 +75,12 @@ public class HttpSolderPackApi implements ISolderPackApi {
 
     @Override
     public Modpack getPackBuild(String build) throws BuildInaccessibleException {
-        try {
-            String url = baseUrl + "modpack/" + modpackSlug + "/" + build + "?cid=" + clientId;
-            Modpack pack = RestObject.getRestObject(Modpack.class, url);
+        String url = String.format("%s/modpack/%s/%s?cid=%s", baseUrl, modpackSlug, build, clientId);
 
-            if (pack != null) {
-                return pack;
-            }
+        try {
+            return RestObject.getRestObject(Modpack.class, url);
         } catch (RestfulAPIException e) {
             throw new BuildInaccessibleException(modpackSlug, build, e);
         }
-
-        throw new BuildInaccessibleException(modpackSlug, build);
     }
 }

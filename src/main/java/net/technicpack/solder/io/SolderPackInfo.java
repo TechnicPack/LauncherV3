@@ -19,6 +19,7 @@
 
 package net.technicpack.solder.io;
 
+import com.google.gson.annotations.SerializedName;
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
 import net.technicpack.platform.io.FeedItem;
 import net.technicpack.rest.RestObject;
@@ -34,15 +35,16 @@ import java.util.List;
 public class SolderPackInfo extends RestObject implements PackInfo {
 
     private String name;
-    private String display_name;
+    @SerializedName("display_name")
+    private String displayName;
     private String recommended;
     private String latest;
     private List<String> builds;
     private transient ISolderPackApi solder;
     private transient boolean isLocal = false;
 
-    public SolderPackInfo() {
-
+    private SolderPackInfo() {
+        // Empty constructor for GSON
     }
 
     public ISolderPackApi getSolder() {
@@ -60,7 +62,7 @@ public class SolderPackInfo extends RestObject implements PackInfo {
 
     @Override
     public String getDisplayName() {
-        return display_name;
+        return displayName;
     }
 
     @Override
@@ -144,8 +146,11 @@ public class SolderPackInfo extends RestObject implements PackInfo {
 
     @Override
     public boolean isLocal() {
-        if (builds.size() == 0)
+        // If this Solder modpack has no builds available, then there's effectively no modpack available, so we
+        // consider the modpack as local-only/not enough information available for installation or launch.
+        if (builds.isEmpty()) {
             return true;
+        }
 
         return isLocal;
     }
@@ -161,7 +166,7 @@ public class SolderPackInfo extends RestObject implements PackInfo {
     public String toString() {
         return "SolderPackInfo{" +
                 "name='" + name + '\'' +
-                ", display_name='" + display_name + '\'' +
+                ", display_name='" + displayName + '\'' +
                 ", recommended='" + recommended + '\'' +
                 ", latest='" + latest + '\'' +
                 ", builds=" + builds +

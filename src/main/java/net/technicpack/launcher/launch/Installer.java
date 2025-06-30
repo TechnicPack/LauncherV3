@@ -154,6 +154,7 @@ public class Installer {
             this.frame = frame;
 
             Utils.getLogger().info(String.format("Starting installer thread for %s (%s)", pack.getDisplayName(), build));
+            Sentry.addBreadcrumb(String.format("Starting installer thread for %s (%s)", pack.getDisplayName(), build));
         }
 
         /// Interrupt is being called from a mysterious source, so unless this is a user-initiated cancel
@@ -188,18 +189,9 @@ public class Installer {
 
                 MojangVersion version;
 
-                if (build != null && !build.isEmpty()) {
-                    buildTasksQueue(tasksQueue, build, versionBuilder, javaVersions.getSelectedVersion(), mojangJavaWanted);
+                buildTasksQueue(tasksQueue, build, versionBuilder, javaVersions.getSelectedVersion(), mojangJavaWanted);
 
-                    version = installer.installPack(tasksQueue, pack, build);
-                } else {
-                    version = versionBuilder.buildVersionFromKey(null);
-
-                    // Set up default Java runtime
-                    version.setJavaRuntime(javaVersions.getSelectedVersion());
-
-                    pack.initDirectories();
-                }
+                version = installer.installPack(tasksQueue, pack, build);
 
                 if (doLaunch) {
                     if (version == null) {
@@ -319,12 +311,20 @@ public class Installer {
         }
 
         private void buildTasksQueue(InstallTasksQueue<MojangVersion> queue, String build,
-                                    MojangVersionBuilder versionBuilder, IJavaRuntime selectedJavaRuntime, boolean mojangJavaWanted) throws IOException {
+                                    MojangVersionBuilder versionBuilder, IJavaRuntime selectedJavaRuntime, boolean mojangJavaWanted) throws IOException, InstallException {
             PackInfo packInfo = pack.getPackInfo();
+
+            // Abort modpack install/launch if we don't have the necessary information.
+            // This can happen if a modpack is local-only and doesn't have cached information.
+            if (packInfo == null) {
+                throw new InstallException("No modpack information found, cannot install or launch modpack.");
+            }
+
             Modpack modpackData = packInfo.getModpack(build);
 
-            if (modpackData.getGameVersion() == null)
-                return;
+            if (modpackData.getGameVersion() == null) {
+                throw new InstallException("No game version found for modpack, cannot install or launch modpack.");
+            }
 
             String minecraft = modpackData.getGameVersion();
             Version installedVersion = pack.getInstalledVersion();
