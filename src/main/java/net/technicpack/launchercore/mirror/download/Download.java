@@ -267,12 +267,12 @@ public class Download implements Runnable {
                     if ((System.currentTimeMillis() - last) > TIMEOUT) {
                         try {
                             rbc.close();
-                            timeout();
                         } catch (IOException | NullPointerException ignore) {
                             // We catch IOException and NullPointerException here because sometimes ReadableByteChannel
                             // can throw an NPE if we try to close it after the connection gets reset or otherwise
                             // broken, which can cause the ReadableByteChannel internals to be in an inconsistent state.
                         }
+                        timeout();
                         return;
                     }
                 } else {
