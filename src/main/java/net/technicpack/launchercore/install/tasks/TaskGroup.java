@@ -52,7 +52,7 @@ public class TaskGroup<T> implements IWeightedTasksQueue<T>, IInstallTask<T> {
     @Override
     public float getTaskProgress() {
         synchronized (taskListLock) {
-            if (taskList.isEmpty() || totalWeight == 0) {
+            if (totalWeight == 0) {
                 return 0;
             }
 
