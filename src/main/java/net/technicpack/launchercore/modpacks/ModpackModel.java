@@ -20,7 +20,7 @@
 package net.technicpack.launchercore.modpacks;
 
 import net.technicpack.launchercore.install.LauncherDirectories;
-import net.technicpack.launchercore.install.Version;
+import net.technicpack.launchercore.install.ModpackVersion;
 import net.technicpack.launchercore.modpacks.packinfo.CombinedPackInfo;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.launchercore.modpacks.sources.IModpackTagBuilder;
@@ -151,7 +151,7 @@ public class ModpackModel {
 
         List<String> oneBuild = new ArrayList<>(1);
 
-        Version version = getInstalledVersion();
+        ModpackVersion version = getInstalledVersion();
 
         if (version != null)
             oneBuild.add(version.getVersion());
@@ -214,11 +214,10 @@ public class ModpackModel {
         return packInfo.isLocal();
     }
 
-    public Version getInstalledVersion() {
-        Version version = null;
+    public ModpackVersion getInstalledVersion() {
         File versionFile = new File(getBinDir(), "version");
         if (versionFile.exists()) {
-            return Version.load(versionFile);
+            return ModpackVersion.load(versionFile);
         } else {
             return null;
         }
@@ -228,7 +227,7 @@ public class ModpackModel {
         if (installedPack == null || packInfo == null)
             return false;
 
-        Version installedVersion = getInstalledVersion();
+        ModpackVersion installedVersion = getInstalledVersion();
 
         if (installedVersion == null)
             return false;

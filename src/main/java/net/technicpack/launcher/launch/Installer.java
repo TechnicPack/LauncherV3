@@ -28,7 +28,7 @@ import net.technicpack.launchercore.exception.*;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.ModpackInstaller;
-import net.technicpack.launchercore.install.Version;
+import net.technicpack.launchercore.install.ModpackVersion;
 import net.technicpack.launchercore.install.tasks.CheckRunDataFile;
 import net.technicpack.launchercore.install.tasks.TaskGroup;
 import net.technicpack.launchercore.install.tasks.WriteRundataFile;
@@ -328,7 +328,7 @@ public class Installer {
             }
 
             String minecraft = modpackData.getGameVersion();
-            Version installedVersion = pack.getInstalledVersion();
+            ModpackVersion installedVersion = pack.getInstalledVersion();
 
             TaskGroup<MojangVersion> examineModpackData = new TaskGroup<>(resources.getString("install.message.examiningmodpack"));
             TaskGroup<MojangVersion> verifyingFiles = new TaskGroup<>(resources.getString("install.message.verifyingfiles"));

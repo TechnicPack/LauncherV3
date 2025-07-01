@@ -24,7 +24,7 @@ import net.technicpack.launcher.ui.controls.modpacks.ModpackTag;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.image.ImageRepository;
-import net.technicpack.launchercore.install.Version;
+import net.technicpack.launchercore.install.ModpackVersion;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.utilslib.ImageUtils;
 
@@ -64,7 +64,7 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
 
         modpackOptions.setVisible(!modpack.isLocalOnly() || modpack.getInstalledVersion() != null);
 
-        Version packVersion = modpack.getInstalledVersion();
+        ModpackVersion packVersion = modpack.getInstalledVersion();
 
         if (packVersion == null) {
             updateReady.setVisible(false);

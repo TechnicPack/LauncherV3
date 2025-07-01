@@ -28,15 +28,15 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 
-public class Version {
+public class ModpackVersion {
     private String version;
     private boolean legacy;
 
-    public Version() {
-
+    private ModpackVersion() {
+        // Empty constructor for GSON
     }
 
-    public Version(String version, boolean legacy) {
+    public ModpackVersion(String version, boolean legacy) {
         this.version = version;
         this.legacy = legacy;
     }
@@ -49,34 +49,33 @@ public class Version {
         return version;
     }
 
-    public static Version load(File version) {
-        if (!version.exists()) {
-            Utils.getLogger().log(Level.WARNING, "Unable to load version from " + version + " because it does not exist.");
+    public static ModpackVersion load(File versionFile) {
+        if (!versionFile.exists()) {
+            Utils.getLogger().log(Level.WARNING, String.format("Unable to load version from %s because it does not exist.", versionFile));
             return null;
         }
 
         try {
-            String json = FileUtils.readFileToString(version, StandardCharsets.UTF_8);
-            return Utils.getGson().fromJson(json, Version.class);
+            String json = FileUtils.readFileToString(versionFile, StandardCharsets.UTF_8);
+            return Utils.getGson().fromJson(json, ModpackVersion.class);
         } catch (JsonSyntaxException | IOException e) {
-            Utils.getLogger().log(Level.WARNING, "Unable to load version from " + version);
+            Utils.getLogger().log(Level.WARNING, String.format("Unable to load version from %s", versionFile), e);
             return null;
         }
     }
 
-    public void save(File saveDirectory) {
-        File version = new File(saveDirectory, "version");
+    public void save(File versionFile) {
         String json = Utils.getGson().toJson(this);
 
         try {
-            FileUtils.writeStringToFile(version, json, StandardCharsets.UTF_8);
+            FileUtils.writeStringToFile(versionFile, json, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            Utils.getLogger().log(Level.WARNING, "Unable to save installed " + version);
+            Utils.getLogger().log(Level.WARNING, String.format("Unable to save installed %s", versionFile), e);
         }
     }
 
     @Override
     public String toString() {
-        return version + " " + legacy;
+        return String.format("ModpackVersion{version='%s', legacy=%s}", version, legacy);
     }
 }

@@ -24,6 +24,7 @@ import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.utilslib.Utils;
 
+import java.io.File;
 import java.io.IOException;
 
 public class ModpackInstaller {
@@ -39,11 +40,11 @@ public class ModpackInstaller {
         modpack.save();
         modpack.initDirectories();
 
-        Version installedVersion = modpack.getInstalledVersion();
+        ModpackVersion installedVersion = modpack.getInstalledVersion();
         tasksQueue.runAllTasks();
 
-        Version versionFile = new Version(build, false);
-        versionFile.save(modpack.getBinDir());
+        ModpackVersion versionFile = new ModpackVersion(build, false);
+        versionFile.save(new File(modpack.getBinDir(), "version"));
 
         if (installedVersion == null) {
             platformApi.incrementPackInstalls(modpack.getName());

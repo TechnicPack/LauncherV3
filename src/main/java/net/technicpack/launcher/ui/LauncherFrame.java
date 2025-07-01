@@ -22,7 +22,6 @@ import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.discord.IDiscordApi;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.ui.components.ModpackOptionsDialog;
-import net.technicpack.launchercore.exception.InstallException;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.launch.java.source.FileJavaSource;
@@ -49,7 +48,7 @@ import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.image.ImageRepository;
-import net.technicpack.launchercore.install.Version;
+import net.technicpack.launchercore.install.ModpackVersion;
 import net.technicpack.launchercore.modpacks.InstalledPack;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.platform.IPlatformApi;
@@ -196,7 +195,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         }
 
         boolean forceInstall = false;
-        Version installedVersion = pack.getInstalledVersion();
+        ModpackVersion installedVersion = pack.getInstalledVersion();
 
         //Force a full install (check cache, redownload, unzip files) if we have no current installation of this modpack
         if (installedVersion == null) {
@@ -236,7 +235,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         invalidate();
     }
 
-    private static boolean shouldRequestInstall(ModpackModel pack, Version installedVersion) {
+    private static boolean shouldRequestInstall(ModpackModel pack, ModpackVersion installedVersion) {
         final String installedBuild = installedVersion.getVersion();
 
         final String wantedBuild = pack.getBuild();
@@ -252,7 +251,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
                 || (!wantsRecommended && !wantsLatest && !wantedBuild.equalsIgnoreCase(installedBuild));
     }
 
-    private static String getInstallBuild(boolean forceInstall, ModpackModel pack, Version installedVersion) {
+    private static String getInstallBuild(boolean forceInstall, ModpackModel pack, ModpackVersion installedVersion) {
         String installBuild = null;
         if (forceInstall && !pack.isLocalOnly()) {
             installBuild = pack.getBuild();
