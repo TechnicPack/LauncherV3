@@ -17,54 +17,59 @@
  * along with Technic UI Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.ui.components;
+package net.technicpack.launchercore.logging;
 
-import net.technicpack.launchercore.logging.RotatingFileHandler;
+import io.sentry.Sentry;
+import net.technicpack.ui.components.ConsoleFrame;
 import net.technicpack.utilslib.Utils;
 
-import javax.swing.*;
+import javax.swing.SwingUtilities;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import java.util.logging.Handler;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 
-public class Console {
-    private ConsoleFrame frame = null;
-    private RotatingFileHandler handler = null;
+public class ConsoleHandler extends Handler {
     private final ConsoleFrame consoleFrame;
-    private final String build;
 
-    public Console(ConsoleFrame consoleFrame, String build) {
+    public ConsoleHandler(ConsoleFrame consoleFrame) {
         this.consoleFrame = consoleFrame;
-        this.build = build;
         Utils.getLogger().info("Console Mode Activated");
     }
 
-    public ConsoleFrame getFrame() {
-        return frame;
-    }
+    @Override
+    public void publish(LogRecord record) {
+        String msg;
 
-    public void setRotatingFileHandler(RotatingFileHandler handler) {
-        this.handler = handler;
-    }
-
-    public RotatingFileHandler getHandler() {
-        return handler;
-    }
-
-    public void destroyConsole() {
-        if (frame != null) {
-            frame.setVisible(false);
-            frame.dispose();
+        try {
+            msg = getFormatter().format(record);
+        } catch (Exception ex) {
+            Sentry.captureException(ex);
+            return;
         }
+
+        final AttributeSet attributes = getAttributes(record, msg);
+        final String writeText = msg.replace("\n\n", "\n");
+        final Document document = consoleFrame.getDocument();
+
+        SwingUtilities.invokeLater(() -> {
+            try {
+                int offset = document.getLength();
+                document.insertString(offset, writeText, attributes);
+                consoleFrame.setCaretPosition(document.getLength());
+            } catch (BadLocationException ble) {
+            }
+        });
     }
 
-    public void log(String line, Level level) {
-        line = "[B#" + build + "] " + line;
-
+    private AttributeSet getAttributes(LogRecord record, String msg) {
         AttributeSet attributes = consoleFrame.getDefaultAttributes();
 
-        if (line.startsWith("(!!)")) {
+        final Level level = record.getLevel();
+
+        if (msg.startsWith("(!!)")) {
             attributes = consoleFrame.getHighlightedAttributes();
         } else if (level == Level.SEVERE) {
             attributes = consoleFrame.getErrorAttributes();
@@ -74,17 +79,16 @@ public class Console {
             attributes = consoleFrame.getDebugAttributes();
         }
 
-        final String writeText = line.replace("\n\n", "\n");
-        final AttributeSet writeAttributes = (attributes != null) ? attributes : consoleFrame.getDefaultAttributes();
-        final Document document = consoleFrame.getDocument();
+        return attributes;
+    }
 
-        SwingUtilities.invokeLater(() -> {
-            try {
-                int offset = document.getLength();
-                document.insertString(offset, writeText, writeAttributes);
-                consoleFrame.setCaretPosition(document.getLength());
-            } catch (BadLocationException ble) {
-            }
-        });
+    @Override
+    public void flush() {
+        // Nothing to do
+    }
+
+    @Override
+    public void close() throws SecurityException {
+        // Nothing to do
     }
 }

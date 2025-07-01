@@ -1,41 +1,46 @@
 /*
- * This file is part of Technic UI Core.
+ * This file is part of Technic Launcher Core.
  * Copyright ©2015 Syndicate, LLC
  *
- * Technic UI Core is free software: you can redistribute it and/or modify
+ * Technic Launcher Core is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Technic UI Core is distributed in the hope that it will be useful,
+ * Technic Launcher Core is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License,
  * as well as a copy of the GNU Lesser General Public License,
- * along with Technic UI Core.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Technic Launcher Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.ui.components;
+package net.technicpack.launchercore.logging;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.logging.Handler;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.Locale;
+import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
-public class ConsoleHandler extends Handler {
+public class ConsoleLogFormatter extends Formatter {
+    private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 
-    private Console console;
-
-    public ConsoleHandler(Console console) {
-        this.console = console;
-    }
+    public ConsoleLogFormatter() {}
 
     @Override
-    public void publish(LogRecord record) {
+    public String format(LogRecord record) {
         StringBuilder builder = new StringBuilder();
-        builder.append(record.getMessage());
+        builder.append(timeFormat.format(new Date(record.getMillis())));
+        builder.append(' ');
+        builder.append(formatMessage(record));
         builder.append('\n');
 
         if (record.getThrown() != null) {
@@ -44,16 +49,6 @@ public class ConsoleHandler extends Handler {
             builder.append(writer);
         }
 
-        this.console.log(builder.toString(), record.getLevel());
-    }
-
-    @Override
-    public void flush() {
-
-    }
-
-    @Override
-    public void close() throws SecurityException {
-
+        return builder.toString();
     }
 }

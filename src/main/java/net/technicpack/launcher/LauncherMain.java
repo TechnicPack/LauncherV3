@@ -56,8 +56,7 @@ import net.technicpack.launchercore.install.ModpackInstaller;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.launch.java.source.FileJavaSource;
 import net.technicpack.launchercore.launch.java.source.InstalledJavaSource;
-import net.technicpack.launchercore.logging.BuildLogFormatter;
-import net.technicpack.launchercore.logging.RotatingFileHandler;
+import net.technicpack.launchercore.logging.*;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.PackLoader;
 import net.technicpack.launchercore.modpacks.resources.PackImageStore;
@@ -81,10 +80,7 @@ import net.technicpack.solder.ISolderApi;
 import net.technicpack.solder.SolderPackSource;
 import net.technicpack.solder.cache.CachedSolderApi;
 import net.technicpack.solder.http.HttpSolderApi;
-import net.technicpack.ui.components.Console;
 import net.technicpack.ui.components.ConsoleFrame;
-import net.technicpack.ui.components.ConsoleHandler;
-import net.technicpack.ui.components.LoggerOutputStream;
 import net.technicpack.ui.controls.installation.SplashScreen;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.JavaUtils;
@@ -333,24 +329,23 @@ public class LauncherMain {
         System.out.println("Setting up logging");
         final Logger logger = Utils.getLogger();
         File logDirectory = directories.getLogsDirectory();
-        File logs = new File(logDirectory, "techniclauncher_%D.log");
+        File logs = new File(logDirectory, "techniclauncher_%s.log");
         RotatingFileHandler fileHandler = new RotatingFileHandler(logs.getPath());
-
         fileHandler.setFormatter(new BuildLogFormatter(buildNumber.getBuildNumber()));
 
         for (Handler h : logger.getHandlers()) {
             logger.removeHandler(h);
         }
-        logger.addHandler(fileHandler);
         logger.setUseParentHandlers(false);
+        logger.addHandler(fileHandler);
 
         consoleFrame = new ConsoleFrame(2500, resources.getImage("icon.png"));
-        Console console = new Console(consoleFrame, buildNumber.getBuildNumber());
+        ConsoleHandler consoleHandler = new ConsoleHandler(consoleFrame);
+        consoleHandler.setFormatter(new ConsoleLogFormatter());
+        logger.addHandler(consoleHandler);
 
-        logger.addHandler(new ConsoleHandler(console));
-
-        System.setOut(new PrintStream(new LoggerOutputStream(console, Level.INFO, logger), true));
-        System.setErr(new PrintStream(new LoggerOutputStream(console, Level.SEVERE, logger), true));
+        System.setOut(new PrintStream(new LoggerOutputStream(Level.INFO, logger), true));
+        System.setErr(new PrintStream(new LoggerOutputStream(Level.SEVERE, logger), true));
 
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
             e.printStackTrace();

@@ -17,7 +17,7 @@
  * along with Technic UI Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.ui.components;
+package net.technicpack.launchercore.logging;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -26,13 +26,11 @@ import java.util.logging.Logger;
 
 public class LoggerOutputStream extends ByteArrayOutputStream {
     private final String separator = System.lineSeparator();
-    private final Console console;
     private final Level level;
     private final Logger log;
 
-    public LoggerOutputStream(Console console, Level level, Logger log) {
+    public LoggerOutputStream(Level level, Logger log) {
         super();
-        this.console = console;
         this.level = level;
         this.log = log;
     }
@@ -43,7 +41,7 @@ public class LoggerOutputStream extends ByteArrayOutputStream {
         String record = this.toString();
         super.reset();
 
-        if (record.length() > 0 && !record.equals(separator)) {
+        if (!record.isEmpty() && !record.equals(separator)) {
             log.logp(level, "LoggerOutputStream", "log" + level, record);
         }
     }

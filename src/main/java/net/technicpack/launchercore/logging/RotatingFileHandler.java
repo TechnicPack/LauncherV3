@@ -46,7 +46,7 @@ public class RotatingFileHandler extends StreamHandler {
     }
 
     private String calculatePath() {
-        return logPathFormat.replace("%D", dateFormat.format(new Date()));
+        return String.format(logPathFormat, dateFormat.format(new Date()));
     }
 
     private void changeFileIfNeeded() {
