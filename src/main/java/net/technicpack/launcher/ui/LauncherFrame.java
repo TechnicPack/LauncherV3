@@ -106,7 +106,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     private String currentTabName;
 
-    private boolean launchCompletedRequested = false;
+    private volatile boolean launchCompletedRequested = false;
 
     NewsInfoPanel newsInfoPanel;
     ModpackInfoPanel modpackPanel;
@@ -202,7 +202,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             forceInstall = true;
             requiresInstall = true;
         } else if (pack.getBuild() != null && !pack.isLocalOnly()) {
-
             //Ask the user if they want to update to the newer version if:
             //1- the pack build is RECOMMENDED & the recommended version is diff from the installed version
             //2- the pack build is LATEST & the latest version is diff from the installed version
@@ -229,9 +228,10 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             installer.installAndRun(resources, pack, installBuild, forceInstall, this, installProgress);
         }
 
+        installProgress.stateChanged("Initializing...", 0);
         installProgress.setVisible(true);
         installProgressPlaceholder.setVisible(false);
-        userChanged(userModel.getCurrentUser());
+        setupPlayButtonText(pack, userModel.getCurrentUser());
         invalidate();
     }
 
