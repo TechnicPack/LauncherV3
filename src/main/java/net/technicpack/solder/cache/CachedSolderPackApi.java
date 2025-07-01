@@ -148,7 +148,7 @@ public class CachedSolderPackApi implements ISolderPackApi {
 
         Boolean isDead = deadBuildCache.getIfPresent(build);
 
-        if (isDead != null && isDead)
+        if (Boolean.TRUE.equals(isDead))
             return null;
 
         Modpack modpack = buildCache.getIfPresent(build);
