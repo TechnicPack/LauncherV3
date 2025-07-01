@@ -90,13 +90,10 @@ public class CachedSolderPackApi implements ISolderPackApi {
 
     @Override
     public SolderPackInfo getPackInfo() throws RestfulAPIException {
-        if (Seconds.secondsBetween(lastInfoAccess, DateTime.now()).isLessThan(Seconds.seconds(cacheInSeconds))) {
-            if (rootInfoCache != null)
-                return rootInfoCache;
-        }
-
-        if (Seconds.secondsBetween(lastInfoAccess, DateTime.now()).isLessThan(Seconds.seconds(cacheInSeconds / 10)))
+        if (Seconds.secondsBetween(lastInfoAccess, DateTime.now())
+                   .isLessThan(Seconds.seconds(cacheInSeconds)) && rootInfoCache != null) {
             return rootInfoCache;
+        }
 
         try {
             return pullAndCache();
@@ -126,8 +123,10 @@ public class CachedSolderPackApi implements ISolderPackApi {
             String packCache = FileUtils.readFileToString(cacheFile, StandardCharsets.UTF_8);
             rootInfoCache = Utils.getGson().fromJson(packCache, SolderPackInfo.class);
 
-            if (rootInfoCache != null)
+            if (rootInfoCache != null) {
                 rootInfoCache.setLocal();
+                rootInfoCache.setSolder(innerApi);
+            }
         } catch (IOException | JsonSyntaxException ex) {
         }
     }
