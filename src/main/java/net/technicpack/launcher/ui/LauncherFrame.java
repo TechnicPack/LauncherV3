@@ -27,6 +27,7 @@ import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.launch.java.source.FileJavaSource;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
+import net.technicpack.rest.io.PackInfo;
 import net.technicpack.ui.controls.DraggableFrame;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.SplatPane;
@@ -236,14 +237,19 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     }
 
     private static boolean shouldRequestInstall(ModpackModel pack, Version installedVersion) {
-        boolean requestInstall = false;
-        if (pack.getBuild().equalsIgnoreCase(InstalledPack.RECOMMENDED) && pack.getPackInfo().getRecommended() != null && !pack.getPackInfo().getRecommended().equalsIgnoreCase(installedVersion.getVersion()))
-            requestInstall = true;
-        else if (pack.getBuild().equalsIgnoreCase(InstalledPack.LATEST) && pack.getPackInfo().getLatest() != null && !pack.getPackInfo().getLatest().equalsIgnoreCase(installedVersion.getVersion()))
-            requestInstall = true;
-        else if (!pack.getBuild().equalsIgnoreCase(InstalledPack.RECOMMENDED) && !pack.getBuild().equalsIgnoreCase(InstalledPack.LATEST) && !pack.getBuild().equalsIgnoreCase(installedVersion.getVersion()))
-            requestInstall = true;
-        return requestInstall;
+        final String installedBuild = installedVersion.getVersion();
+
+        final String wantedBuild = pack.getBuild();
+        final boolean wantsRecommended = wantedBuild.equalsIgnoreCase(InstalledPack.RECOMMENDED);
+        final boolean wantsLatest = wantedBuild.equalsIgnoreCase(InstalledPack.LATEST);
+
+        final PackInfo packInfo = pack.getPackInfo();
+        final String recommendedBuild = packInfo.getRecommended();
+        final String latestBuild = packInfo.getLatest();
+
+        return (wantsRecommended && recommendedBuild != null && !recommendedBuild.equalsIgnoreCase(installedBuild))
+                || (wantsLatest && latestBuild != null && !latestBuild.equalsIgnoreCase(installedBuild))
+                || (!wantsRecommended && !wantsLatest && !wantedBuild.equalsIgnoreCase(installedBuild));
     }
 
     private static String getInstallBuild(boolean forceInstall, ModpackModel pack, Version installedVersion) {
