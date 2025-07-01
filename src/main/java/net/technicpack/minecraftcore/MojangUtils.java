@@ -30,12 +30,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.technicpack.launcher.io.IUserTypeInstanceCreator;
 import net.technicpack.launchercore.auth.IUserType;
+import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.minecraftcore.mojang.java.JavaRuntimesIndex;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
-import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
-import net.technicpack.minecraftcore.mojang.version.io.CompleteVersionV21;
-import net.technicpack.minecraftcore.mojang.version.io.Rule;
-import net.technicpack.minecraftcore.mojang.version.io.RuleAdapter;
+import net.technicpack.minecraftcore.mojang.version.io.*;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentListAdapter;
 import net.technicpack.utilslib.DateTypeAdapter;
@@ -93,18 +91,20 @@ public class MojangUtils {
         return gson;
     }
 
-    public static void copyMinecraftJar(File minecraft, File output) throws IOException {
-        String[] security = { "MOJANG_C.DSA",
-                "MOJANG_C.SF",
-                "CODESIGN.RSA",
-                "CODESIGN.SF" };
+    public static void copyMinecraftJar(File minecraft, File output, DownloadListener listener) throws IOException {
+        String[] security = {"MOJANG_C.DSA", "MOJANG_C.SF", "CODESIGN.RSA", "CODESIGN.SF"};
         Pattern securityPattern = Pattern.compile(Arrays.stream(security).map(Pattern::quote).collect(Collectors.joining("|")));
+        listener.stateChanged("Processing Minecraft jar", 0);
         try (JarFile jarFile = new JarFile(minecraft);
              OutputStream out = Files.newOutputStream(output.toPath());
              JarOutputStream jos = new JarOutputStream(out)) {
             Enumeration<JarEntry> entries = jarFile.entries();
 
+            final int totalEntries = jarFile.size();
+            int x = 1;
+
             while (entries.hasMoreElements()) {
+                listener.stateChanged("Processing Minecraft jar", (float) x / totalEntries * 100);
                 JarEntry entry = entries.nextElement();
                 if (securityPattern.matcher(entry.getName()).find()) {
                     continue;
@@ -120,6 +120,7 @@ public class MojangUtils {
                 }
                 jos.flush();
                 jos.closeEntry();
+                x++;
             }
         }
     }

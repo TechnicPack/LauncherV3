@@ -79,7 +79,7 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask<MojangVersion>
 		File binMinecraftJar = new File(this.pack.getBinDir(), "minecraft.jar");
 
 		if (!binMinecraftJar.exists() || regenerate) {
-			MojangUtils.copyMinecraftJar(cache, binMinecraftJar);
+			MojangUtils.copyMinecraftJar(cache, binMinecraftJar, this);
 		}
 	}
 
