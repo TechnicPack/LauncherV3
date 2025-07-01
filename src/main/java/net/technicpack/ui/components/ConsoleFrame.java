@@ -136,6 +136,11 @@ public class ConsoleFrame extends JFrame implements MouseListener {
     }
 
     private void doPop(MouseEvent e) {
+        // The component must be visible, or an exception is thrown in Component.getLocationOnScreen_NoTreeLock()
+        if (!e.getComponent().isVisible()) {
+            return;
+        }
+
         ContextMenu menu = new ContextMenu();
         menu.show(e.getComponent(), e.getX(), e.getY());
     }
