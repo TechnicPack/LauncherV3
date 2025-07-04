@@ -488,7 +488,7 @@
                     <plugin>
                         <groupId>io.sentry</groupId>
                         <artifactId>sentry-maven-plugin</artifactId>
-                        <version>0.5.0</version>
+                        <version>0.6.0</version>
                         <extensions>true</extensions>
                         <configuration>
                             <!-- for showing output of sentry-cli -->
