@@ -287,7 +287,8 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         int result = chooser.showOpenDialog(this);
 
         if (result == JFileChooser.APPROVE_OPTION) {
-            if (chooser.getSelectedFile().listFiles().length > 0) {
+            File[] files = chooser.getSelectedFile().listFiles();
+            if (files == null || files.length > 0) {
                 JOptionPane.showMessageDialog(this, resources.getString("modpackoptions.move.errortext"), resources.getString("modpackoptions.move.errortitle"), JOptionPane.ERROR_MESSAGE);
                 return;
             }
