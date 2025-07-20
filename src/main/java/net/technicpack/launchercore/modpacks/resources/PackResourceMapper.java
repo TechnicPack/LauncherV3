@@ -45,12 +45,17 @@ public class PackResourceMapper implements IImageMapper<ModpackModel> {
     public boolean shouldDownloadImage(ModpackModel imageKey) {
         Resource res = resourceType.getResource(imageKey);
 
-        if (res == null)
+        if (res == null) {
             return false;
-        if (res.getMd5() == null || res.getMd5().isEmpty())
-            return true;
+        }
 
-        return !CryptoUtils.checkMD5(getImageLocation(imageKey), res.getMd5());
+        final String md5 = res.getMd5();
+
+        if (md5 == null || md5.isEmpty()) {
+            return true;
+        }
+
+        return !CryptoUtils.checkMD5(getImageLocation(imageKey), md5);
     }
 
     @Override

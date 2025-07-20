@@ -19,6 +19,8 @@
 
 package net.technicpack.rest.io;
 
+import org.jetbrains.annotations.Nullable;
+
 public class Resource {
 
     private String url;
@@ -37,6 +39,7 @@ public class Resource {
         return url;
     }
 
+    @Nullable
     public String getMd5() {
         return md5;
     }
