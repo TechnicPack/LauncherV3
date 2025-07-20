@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -201,9 +202,9 @@ public class ModpackModel {
         return packInfo.getBackground();
     }
 
-    public ArrayList<FeedItem> getFeed() {
+    public List<FeedItem> getFeed() {
         if (packInfo == null)
-            return new ArrayList<>();
+            return Collections.emptyList();
 
         return packInfo.getFeed();
     }

@@ -20,24 +20,24 @@ package net.technicpack.launcher.ui.components.modpacks;
 
 import net.technicpack.discord.IDiscordApi;
 import net.technicpack.launcher.ui.UIConstants;
-import net.technicpack.ui.controls.RoundedButton;
-import net.technicpack.ui.controls.TiledBackground;
-import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.controls.feeds.FeedItemView;
-import net.technicpack.ui.controls.feeds.HorizontalGallery;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.platform.io.FeedItem;
+import net.technicpack.ui.controls.RoundedButton;
+import net.technicpack.ui.controls.TiledBackground;
+import net.technicpack.ui.controls.feeds.HorizontalGallery;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.DesktopUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
+import java.util.List;
 
 public class ModpackInfoPanel extends JPanel implements IImageJobListener<ModpackModel> {
     private ResourceLoader resources;
@@ -84,7 +84,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
 
         feedGallery.removeAll();
 
-        ArrayList<FeedItem> feed = modpack.getFeed();
+        List<FeedItem> feed = modpack.getFeed();
 
         if (feed != null) {
             for (FeedItem item : feed) {
