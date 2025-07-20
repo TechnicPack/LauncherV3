@@ -22,6 +22,7 @@ package net.technicpack.rest.io;
 
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
 import net.technicpack.platform.io.FeedItem;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,5 +69,6 @@ public interface PackInfo {
 
     boolean hasSolder();
 
+    @Nullable
     String getDiscordId();
 }
