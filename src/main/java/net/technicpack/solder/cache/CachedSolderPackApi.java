@@ -21,7 +21,8 @@ package net.technicpack.solder.cache;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonParseException;
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.rest.RestfulAPIException;
@@ -29,33 +30,40 @@ import net.technicpack.rest.io.Modpack;
 import net.technicpack.solder.ISolderPackApi;
 import net.technicpack.solder.io.SolderPackInfo;
 import net.technicpack.utilslib.Utils;
-import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Seconds;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 public class CachedSolderPackApi implements ISolderPackApi {
 
-    private LauncherDirectories directories;
-    private ISolderPackApi innerApi;
-    private int cacheInSeconds;
-    private String packSlug;
+    private final ISolderPackApi innerApi;
+    private final int cacheInSeconds;
+    private final String packSlug;
 
     private SolderPackInfo rootInfoCache = null;
     private DateTime lastInfoAccess = new DateTime(0);
 
-    private Cache<String, Modpack> buildCache;
-    private Cache<String, Boolean> deadBuildCache;
+    private final Cache<String, Modpack> buildCache;
+    private final Cache<String, Boolean> deadBuildCache;
+
+    private final Path cachePath;
 
     public CachedSolderPackApi(LauncherDirectories directories, ISolderPackApi innerApi, int cacheInSeconds, String packSlug) {
-        this.directories = directories;
         this.innerApi = innerApi;
         this.cacheInSeconds = cacheInSeconds;
         this.packSlug = packSlug;
+        this.cachePath = directories.getAssetsDirectory().toPath()
+                                    .resolve("packs")
+                                    .resolve(packSlug)
+                                    .resolve("soldercache.json");
 
         buildCache = CacheBuilder.newBuilder()
                 .concurrencyLevel(4)
@@ -107,7 +115,7 @@ public class CachedSolderPackApi implements ISolderPackApi {
     private SolderPackInfo pullAndCache() throws RestfulAPIException {
         try {
             rootInfoCache = innerApi.getPackInfoForBulk();
-            saveForeverCache(rootInfoCache);
+            saveForeverCache();
             return rootInfoCache;
         } finally {
             lastInfoAccess = DateTime.now();
@@ -115,30 +123,29 @@ public class CachedSolderPackApi implements ISolderPackApi {
     }
 
     private void loadForeverCache() {
-        File cacheFile = new File(new File(new File(directories.getAssetsDirectory(), "packs"), packSlug), "soldercache.json");
-        if (!cacheFile.exists())
+        if (!Files.exists(cachePath)) {
             return;
+        }
 
-        try {
-            String packCache = FileUtils.readFileToString(cacheFile, StandardCharsets.UTF_8);
-            rootInfoCache = Utils.getGson().fromJson(packCache, SolderPackInfo.class);
+        try (Reader reader = Files.newBufferedReader(cachePath, StandardCharsets.UTF_8)){
+            rootInfoCache = Utils.getGson().fromJson(reader, SolderPackInfo.class);
 
-            if (rootInfoCache != null) {
-                rootInfoCache.setLocal();
-                rootInfoCache.setSolder(innerApi);
+            if (rootInfoCache == null) {
+                return;
             }
-        } catch (IOException | JsonSyntaxException ex) {
+
+            rootInfoCache.setLocal();
+            rootInfoCache.setSolder(innerApi);
+        } catch (JsonParseException | IOException ex) {
+            Utils.getLogger().log(Level.SEVERE, String.format("Failed to load Solder cache for modpack \"%s\"", packSlug), ex);
         }
     }
 
-    private void saveForeverCache(SolderPackInfo info) {
-        File cacheFile = new File(new File(new File(directories.getAssetsDirectory(), "packs"), info.getName()), "soldercache.json");
-
-        String packCache = Utils.getGson().toJson(info);
-
-        try {
-            FileUtils.writeStringToFile(cacheFile, packCache, StandardCharsets.UTF_8);
-        } catch (IOException e) {
+    private void saveForeverCache() {
+        try (Writer writer = Files.newBufferedWriter(cachePath, StandardCharsets.UTF_8)) {
+            Utils.getGson().toJson(rootInfoCache, writer);
+        } catch (JsonIOException | IOException ex) {
+            Utils.getLogger().log(Level.SEVERE, String.format("Failed to save Solder cache for modpack \"%s\"", packSlug), ex);
         }
     }
 

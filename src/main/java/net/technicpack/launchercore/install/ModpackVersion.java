@@ -19,13 +19,16 @@
 
 package net.technicpack.launchercore.install;
 
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonParseException;
 import net.technicpack.utilslib.Utils;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.logging.Level;
 
 public class ModpackVersion {
@@ -56,20 +59,19 @@ public class ModpackVersion {
         }
 
         try {
-            String json = FileUtils.readFileToString(versionFile, StandardCharsets.UTF_8);
-            return Utils.getGson().fromJson(json, ModpackVersion.class);
-        } catch (JsonSyntaxException | IOException e) {
+            try (Reader reader = Files.newBufferedReader(versionFile.toPath(), StandardCharsets.UTF_8)) {
+                return Utils.getGson().fromJson(reader, ModpackVersion.class);
+            }
+        } catch (JsonParseException | IOException e) {
             Utils.getLogger().log(Level.WARNING, String.format("Unable to load version from %s", versionFile), e);
             return null;
         }
     }
 
     public void save(File versionFile) {
-        String json = Utils.getGson().toJson(this);
-
-        try {
-            FileUtils.writeStringToFile(versionFile, json, StandardCharsets.UTF_8);
-        } catch (IOException e) {
+        try (Writer writer = Files.newBufferedWriter(versionFile.toPath(), StandardCharsets.UTF_8)) {
+            Utils.getGson().toJson(this, writer);
+        } catch (JsonIOException | IOException e) {
             Utils.getLogger().log(Level.WARNING, String.format("Unable to save installed %s", versionFile), e);
         }
     }

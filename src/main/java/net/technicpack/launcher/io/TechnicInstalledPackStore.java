@@ -18,15 +18,20 @@
 
 package net.technicpack.launcher.io;
 
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonParseException;
 import net.technicpack.launchercore.modpacks.InstalledPack;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.utilslib.Utils;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,45 +39,58 @@ import java.util.Map;
 import java.util.logging.Level;
 
 public class TechnicInstalledPackStore implements IInstalledPackRepository {
-
-    private transient File loadedFile;
+    @SuppressWarnings("java:S2065")
+    private transient Path storePath;
 
     private final Map<String, InstalledPack> installedPacks = new HashMap<>();
     private final List<String> byIndex = new ArrayList<>();
     private String selected = null;
 
-    public TechnicInstalledPackStore(File jsonFile) {
-        setLoadedFile(jsonFile);
+    public TechnicInstalledPackStore(Path storePath) {
+        setStorePath(storePath);
+    }
+
+    @SuppressWarnings("unused")
+    private TechnicInstalledPackStore() {
+        // Empty constructor for GSON
     }
 
     public static TechnicInstalledPackStore load(File jsonFile) {
-        if (!jsonFile.exists()) {
-            Utils.getLogger().log(Level.WARNING, "Unable to load installedPacks from " + jsonFile + " because it does not exist.");
-            return new TechnicInstalledPackStore(jsonFile);
+        Path storePath = jsonFile.toPath().toAbsolutePath();
+
+        if (!Files.exists(storePath)) {
+            Utils.getLogger().log(Level.WARNING, String.format("Unable to load installedPacks from %s because it does not exist", storePath));
+            return new TechnicInstalledPackStore(storePath);
         }
 
         try {
-            String json = FileUtils.readFileToString(jsonFile, StandardCharsets.UTF_8);
-            TechnicInstalledPackStore parsedList = Utils.getGson().fromJson(json, TechnicInstalledPackStore.class);
+            try (Reader reader = Files.newBufferedReader(storePath, StandardCharsets.UTF_8)) {
+                TechnicInstalledPackStore parsedList = Utils.getGson().fromJson(reader, TechnicInstalledPackStore.class);
 
-            if (parsedList != null) {
-                parsedList.setLoadedFile(jsonFile);
+                if (parsedList == null) {
+                    return new TechnicInstalledPackStore(storePath);
+                }
+
+                parsedList.setStorePath(storePath);
                 return parsedList;
-            } else
-                return new TechnicInstalledPackStore(jsonFile);
-        } catch (JsonSyntaxException | IOException e) {
-            Utils.getLogger().log(Level.WARNING, "Unable to load installedPacks from " + jsonFile);
-            return new TechnicInstalledPackStore(jsonFile);
+            }
+        } catch (JsonParseException | IOException e) {
+            Utils.getLogger().log(Level.SEVERE, String.format("Failed to load installedPacks from %s", storePath), e);
+            return new TechnicInstalledPackStore(storePath);
         }
     }
 
-    protected void setLoadedFile(File loadedFile) {
-        this.loadedFile = loadedFile;
-
+    protected void cleanUpLegacyEntries() {
         //HACK: "And that's why.... you don't put view data in the model."
         /////////// - J. Walter Weatherman, Software Developer
         installedPacks.remove("addpack");
         byIndex.remove("addpack");
+    }
+
+    protected void setStorePath(Path storePath) {
+        this.storePath = storePath;
+
+        cleanUpLegacyEntries();
     }
 
     @Override
@@ -116,21 +134,27 @@ public class TechnicInstalledPackStore implements IInstalledPackRepository {
         return pack;
     }
 
+    // TODO: all of this should be syncronized on the file
     @Override
     public void save() {
-        String json = Utils.getGson().toJson(this);
+        // First we write to a temp file, then we move that file to the intended path.
+        // This way, we won't end up with an empty file if we fail to write to it.
 
-        File tmpFile = new File(loadedFile.getAbsolutePath() + ".tmp");
+        Path tmp = storePath.resolveSibling(storePath.getFileName() + ".tmp");
 
-        try {
-            // First we write to a temp file, then we move that file to the intended path
-            // This way, we won't end up with an empty file if we fail to write to it
-            FileUtils.writeStringToFile(tmpFile, json, StandardCharsets.UTF_8);
-            if (loadedFile.exists() && !loadedFile.delete())
-                throw new IOException("Failed to delete");
-            FileUtils.moveFile(tmpFile, loadedFile);
-        } catch (IOException e) {
-            Utils.getLogger().log(Level.WARNING, "Unable to save settings " + loadedFile, e);
+        try (Writer writer = Files.newBufferedWriter(tmp, StandardCharsets.UTF_8)) {
+            Utils.getGson().toJson(this, writer);
+
+            Files.move(tmp, storePath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException | JsonIOException e) {
+            // Clean up the temp file
+            try {
+                Files.deleteIfExists(tmp);
+            } catch (IOException ignored) {
+                // We can safely continue, even if the temp wasn't deleted
+            }
+
+            Utils.getLogger().log(Level.SEVERE, String.format("Failed to save installedPacks to %s", storePath), e);
         }
     }
 }

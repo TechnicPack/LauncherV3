@@ -21,19 +21,23 @@ package net.technicpack.platform.cache;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonParseException;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.NewsData;
 import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.utilslib.Utils;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 public class ModpackCachePlatformApi implements IPlatformApi {
 
@@ -147,16 +151,16 @@ public class ModpackCachePlatformApi implements IPlatformApi {
         if (!cacheFile.exists())
             return null;
 
-        try {
-            String packCache = FileUtils.readFileToString(cacheFile, StandardCharsets.UTF_8);
-            PlatformPackInfo info = Utils.getGson().fromJson(packCache, PlatformPackInfo.class);
+        try (Reader reader = Files.newBufferedReader(cacheFile.toPath(), StandardCharsets.UTF_8)) {
+            PlatformPackInfo info = Utils.getGson().fromJson(reader, PlatformPackInfo.class);
 
             if (info != null) {
                 foreverCache.put(packSlug, info);
             }
 
             return info;
-        } catch (IOException | JsonSyntaxException ex) {
+        } catch (JsonParseException | IOException ex) {
+            Utils.getLogger().log(Level.SEVERE, String.format("Failed to load pack cache %s", cacheFile.getAbsolutePath()), ex);
             return null;
         }
     }
@@ -164,11 +168,10 @@ public class ModpackCachePlatformApi implements IPlatformApi {
     private void saveForeverCache(PlatformPackInfo info) {
         File cacheFile = new File(new File(new File(directories.getAssetsDirectory(), "packs"), info.getName()), "cache.json");
 
-        String packCache = Utils.getGson().toJson(info);
-
-        try {
-            FileUtils.writeStringToFile(cacheFile, packCache, StandardCharsets.UTF_8);
-        } catch (IOException e) {
+        try (Writer writer = Files.newBufferedWriter(cacheFile.toPath(), StandardCharsets.UTF_8)) {
+            Utils.getGson().toJson(info, writer);
+        } catch (JsonIOException | IOException e) {
+            Utils.getLogger().log(Level.SEVERE, String.format("Failed to save pack cache %s", cacheFile.getAbsolutePath()), e);
         }
     }
 

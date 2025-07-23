@@ -18,6 +18,7 @@
 
 package net.technicpack.launcher.settings;
 
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import net.technicpack.launcher.settings.migration.IMigrator;
 import net.technicpack.launchercore.auth.IUserStore;
@@ -29,7 +30,9 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -81,14 +84,15 @@ public class SettingsFactory {
             return null;
 
         try {
-            String json = FileUtils.readFileToString(settingsFile, StandardCharsets.UTF_8);
-            TechnicSettings settings = Utils.getGson().fromJson(json, TechnicSettings.class);
+            try (Reader reader = Files.newBufferedReader(settingsFile.toPath(), StandardCharsets.UTF_8)) {
+                TechnicSettings settings = Utils.getGson().fromJson(reader, TechnicSettings.class);
 
-            if (settings != null)
-                settings.setFilePath(settingsFile);
+                if (settings != null)
+                    settings.setFilePath(settingsFile);
 
-            return settings;
-        } catch (JsonSyntaxException | IOException e) {
+                return settings;
+            }
+        } catch (JsonParseException | IOException e) {
             Utils.getLogger().log(Level.WARNING, "Unable to load version from " + settingsFile);
             return null;
         }

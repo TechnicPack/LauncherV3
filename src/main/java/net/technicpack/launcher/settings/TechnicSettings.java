@@ -28,7 +28,9 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -210,12 +212,11 @@ public class TechnicSettings implements ILaunchOptions {
     }
 
     public void save() {
-        String json = Utils.getGson().toJson(this);
-
-        try {
-            FileUtils.writeStringToFile(settingsFile, json, StandardCharsets.UTF_8);
+        // TODO: this should probably be syncronized and use a temp file
+        try (Writer writer = Files.newBufferedWriter(settingsFile.toPath(), StandardCharsets.UTF_8)) {
+            Utils.getGson().toJson(this, writer);
         } catch (IOException e) {
-            Utils.getLogger().log(Level.WARNING, "Unable to save installed " + settingsFile);
+            Utils.getLogger().log(Level.SEVERE, String.format("Failed to save settings %s", settingsFile), e);
         }
     }
 

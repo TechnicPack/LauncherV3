@@ -19,6 +19,8 @@
 
 package net.technicpack.launchercore.launch.java.source;
 
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonParseException;
 import net.technicpack.launchercore.launch.java.IVersionSource;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.launch.java.version.FileBasedJavaRuntime;
@@ -26,6 +28,7 @@ import net.technicpack.utilslib.Utils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -65,17 +68,16 @@ public class FileJavaSource implements IVersionSource, Serializable {
             FileJavaSource source = Utils.getGson().fromJson(reader, FileJavaSource.class);
             source.setLoadedFile(file);
             return source;
-        } catch (IOException ex) {
+        } catch (JsonParseException | IOException ex) {
             Utils.getLogger().log(Level.SEVERE, "Failed to load Java versions file", ex);
             return new FileJavaSource(file);
         }
     }
 
     public void save() {
-        try (FileOutputStream fos = new FileOutputStream(loadedFile);
-             OutputStreamWriter writer = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
+        try (Writer writer = Files.newBufferedWriter(loadedFile.toPath())) {
             Utils.getGson().toJson(this, writer);
-        } catch (IOException ex) {
+        } catch (JsonIOException | IOException ex) {
             Utils.getLogger().log(Level.SEVERE, "Failed to save Java versions file", ex);
         }
     }

@@ -19,6 +19,7 @@
 
 package net.technicpack.launchercore.modpacks;
 
+import com.google.gson.JsonParseException;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.ModpackVersion;
 import net.technicpack.launchercore.modpacks.packinfo.CombinedPackInfo;
@@ -34,7 +35,9 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -301,14 +304,12 @@ public class ModpackModel {
         if (!runDataFile.exists())
             return null;
 
-        String runData;
-        try {
-            runData = FileUtils.readFileToString(runDataFile, StandardCharsets.UTF_8);
-        } catch (IOException ex) {
+        try (Reader reader = Files.newBufferedReader(runDataFile.toPath(), StandardCharsets.UTF_8)) {
+            return Utils.getGson().fromJson(reader, RunData.class);
+        } catch (JsonParseException | IOException e) {
+            Utils.getLogger().log(Level.SEVERE, String.format("Error reading runData file %s, returning null", runDataFile.getAbsolutePath()), e);
             return null;
         }
-
-        return Utils.getGson().fromJson(runData, RunData.class);
     }
 
     public File getInstalledDirectory() {

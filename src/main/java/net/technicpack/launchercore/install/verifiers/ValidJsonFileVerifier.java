@@ -20,12 +20,16 @@
 package net.technicpack.launchercore.install.verifiers;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import net.technicpack.utilslib.Utils;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.logging.Level;
 
 public class ValidJsonFileVerifier implements IFileVerifier {
@@ -37,13 +41,15 @@ public class ValidJsonFileVerifier implements IFileVerifier {
 
     @Override
     public boolean isFileValid(File file) {
-        try {
-            String json = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-            JsonObject obj = validatingGson.fromJson(json, JsonObject.class);
+        try (Reader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
+            JsonObject obj = validatingGson.fromJson(reader, JsonObject.class);
 
             return (obj != null);
-        } catch (Exception ex) {
-            Utils.getLogger().log(Level.SEVERE, "An exception was raised while verifying " + file.getAbsolutePath() + "- this probably just means the file is invalid, in which case this is not an error:", ex);
+        } catch (JsonSyntaxException e) {
+            Utils.getLogger().log(Level.WARNING, String.format("JSON validation failed for %s", file.getAbsolutePath()), e);
+            return false;
+        } catch (JsonIOException | IOException ex) {
+            Utils.getLogger().log(Level.SEVERE, String.format("An I/O error happened while validating %s", file.getAbsolutePath()), ex);
         }
 
         return false;

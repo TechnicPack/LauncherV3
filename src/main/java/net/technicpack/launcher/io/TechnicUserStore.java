@@ -18,18 +18,20 @@
 
 package net.technicpack.launcher.io;
 
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonParseException;
 import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.utilslib.Utils;
-import org.apache.commons.io.FileUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.nio.file.Files;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 public class TechnicUserStore implements IUserStore, Serializable {
@@ -53,16 +55,19 @@ public class TechnicUserStore implements IUserStore, Serializable {
         }
 
         try {
-            String json = FileUtils.readFileToString(userFile, StandardCharsets.UTF_8);
-            TechnicUserStore newModel = MojangUtils.getGson().fromJson(json, TechnicUserStore.class);
+            TechnicUserStore newModel;
+
+            try (Reader reader = Files.newBufferedReader(userFile.toPath(), StandardCharsets.UTF_8)) {
+                newModel = MojangUtils.getGson().fromJson(reader, TechnicUserStore.class);
+            }
 
             if (newModel != null) {
                 newModel.cleanupSavedUsers();
                 newModel.setUserFile(userFile);
                 return newModel;
             }
-        } catch (JsonSyntaxException | IOException e) {
-            Utils.getLogger().log(Level.WARNING, String.format("Unable to load users from %s", userFile));
+        } catch (JsonParseException | IOException e) {
+            Utils.getLogger().log(Level.SEVERE, String.format("Unable to load users from %s", userFile), e);
         }
 
         return new TechnicUserStore(userFile);
@@ -73,12 +78,10 @@ public class TechnicUserStore implements IUserStore, Serializable {
     }
 
     public void save() {
-        String json = MojangUtils.getGson().toJson(this);
-
-        try {
-            FileUtils.writeStringToFile(usersFile, json, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            Utils.getLogger().log(Level.WARNING, String.format("Unable to save users %s", usersFile));
+        try (Writer writer = Files.newBufferedWriter(usersFile.toPath(), StandardCharsets.UTF_8)) {
+            MojangUtils.getGson().toJson(this, writer);
+        } catch (JsonIOException | IOException e) {
+            Utils.getLogger().log(Level.SEVERE, String.format("Unable to save users file %s", usersFile), e);
         }
     }
 

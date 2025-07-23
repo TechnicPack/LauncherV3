@@ -19,6 +19,7 @@
 
 package net.technicpack.minecraftcore.install.tasks;
 
+import com.google.gson.JsonParseException;
 import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.install.ITasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
@@ -38,11 +39,12 @@ import net.technicpack.minecraftcore.mojang.version.io.Download;
 import net.technicpack.minecraftcore.mojang.version.io.VersionJavaInfo;
 import net.technicpack.utilslib.OperatingSystem;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class InstallJavaRuntimeTask implements IInstallTask<MojangVersion> {
@@ -80,8 +82,13 @@ public class InstallJavaRuntimeTask implements IInstallTask<MojangVersion> {
 
     @Override
     public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException {
-        String json = FileUtils.readFileToString(runtimeManifestFile, StandardCharsets.UTF_8);
-        JavaRuntimeManifest manifest = MojangUtils.getGson().fromJson(json, JavaRuntimeManifest.class);
+        JavaRuntimeManifest manifest;
+
+        try (Reader reader = Files.newBufferedReader(runtimeManifestFile.toPath(), StandardCharsets.UTF_8)) {
+            manifest = MojangUtils.getGson().fromJson(reader, JavaRuntimeManifest.class);
+        } catch (JsonParseException ex) {
+            throw new IOException("Failed to parse Java runtime manifest", ex);
+        }
 
         if (manifest == null) {
             throw new DownloadException("The Java runtime manifest is invalid.");

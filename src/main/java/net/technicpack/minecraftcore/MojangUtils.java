@@ -24,16 +24,16 @@ import com.google.api.client.http.apache.v5.Apache5HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import net.technicpack.launcher.io.IUserTypeInstanceCreator;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.minecraftcore.mojang.java.JavaRuntimesIndex;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
-import net.technicpack.minecraftcore.mojang.version.io.*;
+import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
+import net.technicpack.minecraftcore.mojang.version.io.CompleteVersionV21;
+import net.technicpack.minecraftcore.mojang.version.io.Rule;
+import net.technicpack.minecraftcore.mojang.version.io.RuleAdapter;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentListAdapter;
 import net.technicpack.utilslib.DateTypeAdapter;
@@ -41,6 +41,7 @@ import net.technicpack.utilslib.LowerCaseEnumTypeAdapterFactory;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.jar.JarEntry;
@@ -224,9 +225,11 @@ public class MojangUtils {
         try {
             HttpRequest request = REQUEST_FACTORY.buildGetRequest(new GenericUrl(RUNTIMES_URL));
             HttpResponse httpResponse = request.execute();
-            javaRuntimesIndex = gson.fromJson(httpResponse.parseAsString(), JavaRuntimesIndex.class);
-            return javaRuntimesIndex;
-        } catch (IOException e) {
+            try (Reader reader = new BufferedReader(new InputStreamReader(httpResponse.getContent(), StandardCharsets.UTF_8))) {
+                javaRuntimesIndex = gson.fromJson(reader, JavaRuntimesIndex.class);
+                return javaRuntimesIndex;
+            }
+        } catch (JsonParseException | IOException e) {
             e.printStackTrace();
             return null;
         }

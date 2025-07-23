@@ -20,7 +20,8 @@
 package net.technicpack.rest;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonParseException;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 import net.technicpack.launchercore.TechnicConstants;
 
 import java.io.*;
@@ -43,28 +44,28 @@ public abstract class RestObject implements Serializable {
             conn.setConnectTimeout(15000);
             conn.setReadTimeout(15000);
 
-            try (InputStream stream = conn.getInputStream();
-                 InputStreamReader isr = new InputStreamReader(stream, StandardCharsets.UTF_8);
-                 BufferedReader reader = new BufferedReader(isr)) {
-                T result = gson.fromJson(reader, restObject);
+            T result;
 
-                if (result == null) {
-                    throw new RestfulAPIException(String.format("Unable to access URL [%s]", url));
-                }
-
-                if (result.hasError()) {
-                    throw new RestfulAPIException(String.format("Error in response: %s", result.getError()));
-                }
-
-                return result;
+            try (Reader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+                result = gson.fromJson(reader, restObject);
             }
+
+            if (result == null) {
+                throw new RestfulAPIException(String.format("Unable to access URL [%s]", url));
+            }
+
+            if (result.hasError()) {
+                throw new RestfulAPIException(String.format("Error in response: %s", result.getError()));
+            }
+
+            return result;
         } catch (SocketTimeoutException e) {
             throw new RestfulAPIException(String.format("Timed out accessing URL [%s]", url), e);
         } catch (MalformedURLException e) {
             throw new RestfulAPIException(String.format("Invalid URL [%s]", url), e);
-        } catch (JsonParseException e) {
+        } catch (JsonSyntaxException e) {
             throw new RestfulAPIException(String.format("Error parsing response JSON at URL [%s]", url), e);
-        } catch (IOException e) {
+        } catch (JsonIOException | IOException e) {
             throw new RestfulAPIException(String.format("Error accessing URL [%s]", url), e);
         }
     }

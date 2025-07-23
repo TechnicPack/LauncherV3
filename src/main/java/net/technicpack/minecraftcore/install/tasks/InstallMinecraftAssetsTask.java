@@ -21,6 +21,7 @@ package net.technicpack.minecraftcore.install.tasks;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.install.ITasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
@@ -35,15 +36,18 @@ import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.utilslib.Utils;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 
 public class InstallMinecraftAssetsTask implements IInstallTask<MojangVersion> {
     private final ModpackModel modpack;
     private final String assetsDirectory;
-    private final File assetsIndex;
+    private final Path assetsIndex;
     private final ITasksQueue<MojangVersion> checkAssetsQueue;
     private final ITasksQueue<MojangVersion> downloadAssetsQueue;
     private final ITasksQueue<MojangVersion> copyAssetsQueue;
@@ -57,7 +61,7 @@ public class InstallMinecraftAssetsTask implements IInstallTask<MojangVersion> {
     public InstallMinecraftAssetsTask(ModpackModel modpack, String assetsDirectory, File assetsIndex, ITasksQueue<MojangVersion> checkAssetsQueue, ITasksQueue<MojangVersion> downloadAssetsQueue, ITasksQueue<MojangVersion> copyAssetsQueue) {
         this.modpack = modpack;
         this.assetsDirectory = assetsDirectory;
-        this.assetsIndex = assetsIndex;
+        this.assetsIndex = assetsIndex.toPath();
         this.checkAssetsQueue = checkAssetsQueue;
         this.downloadAssetsQueue = downloadAssetsQueue;
         this.copyAssetsQueue = copyAssetsQueue;
@@ -111,9 +115,7 @@ public class InstallMinecraftAssetsTask implements IInstallTask<MojangVersion> {
     }
 
     private JsonObject readAssetsIndex() throws IOException {
-        try (FileInputStream fis = new FileInputStream(assetsIndex);
-             InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
-             BufferedReader reader = new BufferedReader(isr)) {
+        try (Reader reader = Files.newBufferedReader(assetsIndex, StandardCharsets.UTF_8)) {
             JsonObject jsonObject = MojangUtils.getGson().fromJson(reader, JsonObject.class);
 
             if (jsonObject == null) {
@@ -121,6 +123,8 @@ public class InstallMinecraftAssetsTask implements IInstallTask<MojangVersion> {
             }
 
             return jsonObject;
+        } catch (JsonParseException ex) {
+            throw new IOException(String.format("Failed to load assets index file %s", assetsIndex), ex);
         }
     }
 

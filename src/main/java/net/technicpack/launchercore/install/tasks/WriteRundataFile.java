@@ -1,19 +1,17 @@
 package net.technicpack.launchercore.install.tasks;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.*;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.utilslib.Utils;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 public class WriteRundataFile implements IInstallTask<MojangVersion> {
     private ModpackModel modpackModel;
@@ -46,8 +44,11 @@ public class WriteRundataFile implements IInstallTask<MojangVersion> {
         JsonElement memory = getJsonValue(modpack.getMemory());
         runData.add("java", java);
         runData.add("memory", memory);
-        String output = Utils.getGson().toJson(runData);
-        FileUtils.writeStringToFile(runDataFile, output, StandardCharsets.UTF_8);
+        try (Writer writer = Files.newBufferedWriter(runDataFile.toPath(), StandardCharsets.UTF_8)) {
+            Utils.getGson().toJson(runData, writer);
+        } catch (JsonIOException ex) {
+            throw new IOException(String.format("Error writing runData file %s", runDataFile), ex);
+        }
     }
 
     private JsonElement getJsonValue(String value) {
