@@ -65,7 +65,6 @@ import net.technicpack.launchercore.modpacks.resources.resourcetype.IModpackReso
 import net.technicpack.launchercore.modpacks.resources.resourcetype.IconResourceType;
 import net.technicpack.launchercore.modpacks.resources.resourcetype.LogoResourceType;
 import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
-import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.minecraftcore.launch.MinecraftLauncher;
 import net.technicpack.minecraftcore.microsoft.auth.MicrosoftAuthenticator;
 import net.technicpack.platform.IPlatformApi;
@@ -544,7 +543,7 @@ public class LauncherMain {
         IPlatformApi platform = new ModpackCachePlatformApi(httpPlatform, 60 * 60, fileSystem);
         IPlatformSearchApi platformSearch = new HttpPlatformSearchApi("https://api.technicpack.net/", buildNumber.getBuildNumber());
 
-        IInstalledPackRepository packStore = TechnicInstalledPackStore.load(new File(fileSystem.getLauncherDirectory(), "installedPacks"));
+        InstalledPackStore packStore = InstalledPackStore.load(new File(fileSystem.getLauncherDirectory(), "installedPacks"));
         IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(platform, solder);
 
         ArrayList<IMigrator> migrators = new ArrayList<>(1);

@@ -21,7 +21,6 @@ package net.technicpack.launcher.io;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
 import net.technicpack.launchercore.modpacks.InstalledPack;
-import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.utilslib.Utils;
 
 import java.io.File;
@@ -38,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
-public class TechnicInstalledPackStore implements IInstalledPackRepository {
+public class InstalledPackStore {
     @SuppressWarnings("java:S2065")
     private transient Path storePath;
 
@@ -46,29 +45,29 @@ public class TechnicInstalledPackStore implements IInstalledPackRepository {
     private final List<String> byIndex = new ArrayList<>();
     private String selected = null;
 
-    public TechnicInstalledPackStore(Path storePath) {
+    public InstalledPackStore(Path storePath) {
         setStorePath(storePath);
     }
 
     @SuppressWarnings("unused")
-    private TechnicInstalledPackStore() {
+    private InstalledPackStore() {
         // Empty constructor for GSON
     }
 
-    public static TechnicInstalledPackStore load(File jsonFile) {
+    public static InstalledPackStore load(File jsonFile) {
         Path storePath = jsonFile.toPath().toAbsolutePath();
 
         if (!Files.exists(storePath)) {
             Utils.getLogger().log(Level.WARNING, String.format("Unable to load installedPacks from %s because it does not exist", storePath));
-            return new TechnicInstalledPackStore(storePath);
+            return new InstalledPackStore(storePath);
         }
 
         try {
             try (Reader reader = Files.newBufferedReader(storePath, StandardCharsets.UTF_8)) {
-                TechnicInstalledPackStore parsedList = Utils.getGson().fromJson(reader, TechnicInstalledPackStore.class);
+                InstalledPackStore parsedList = Utils.getGson().fromJson(reader, InstalledPackStore.class);
 
                 if (parsedList == null) {
-                    return new TechnicInstalledPackStore(storePath);
+                    return new InstalledPackStore(storePath);
                 }
 
                 parsedList.setStorePath(storePath);
@@ -76,7 +75,7 @@ public class TechnicInstalledPackStore implements IInstalledPackRepository {
             }
         } catch (JsonParseException | IOException e) {
             Utils.getLogger().log(Level.SEVERE, String.format("Failed to load installedPacks from %s", storePath), e);
-            return new TechnicInstalledPackStore(storePath);
+            return new InstalledPackStore(storePath);
         }
     }
 

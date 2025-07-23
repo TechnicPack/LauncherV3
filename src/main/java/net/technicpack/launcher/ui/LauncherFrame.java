@@ -20,44 +20,45 @@ package net.technicpack.launcher.ui;
 
 import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.discord.IDiscordApi;
+import net.technicpack.launcher.io.InstalledPackStore;
 import net.technicpack.launcher.io.LauncherFileSystem;
-import net.technicpack.launcher.settings.StartupParameters;
-import net.technicpack.launcher.ui.components.ModpackOptionsDialog;
-import net.technicpack.launchercore.launch.java.JavaVersionRepository;
-import net.technicpack.launchercore.launch.java.source.FileJavaSource;
-import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
-import net.technicpack.rest.io.PackInfo;
-import net.technicpack.ui.controls.DraggableFrame;
-import net.technicpack.ui.controls.RoundedButton;
-import net.technicpack.ui.controls.SplatPane;
-import net.technicpack.ui.controls.TintablePanel;
-import net.technicpack.ui.lang.IRelocalizableResource;
-import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.launch.Installer;
+import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
+import net.technicpack.launcher.ui.components.ModpackOptionsDialog;
 import net.technicpack.launcher.ui.components.OptionsDialog;
 import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
 import net.technicpack.launcher.ui.components.modpacks.ModpackInfoPanel;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launcher.ui.components.news.NewsInfoPanel;
 import net.technicpack.launcher.ui.components.news.NewsSelector;
-import net.technicpack.launcher.ui.controls.*;
-import net.technicpack.ui.controls.feeds.CountCircle;
-import net.technicpack.ui.controls.installation.ProgressBar;
+import net.technicpack.launcher.ui.controls.HeaderTab;
+import net.technicpack.launcher.ui.controls.UserWidget;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.install.ModpackVersion;
+import net.technicpack.launchercore.launch.java.JavaVersionRepository;
+import net.technicpack.launchercore.launch.java.source.FileJavaSource;
 import net.technicpack.launchercore.modpacks.InstalledPack;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.AuthorshipInfo;
+import net.technicpack.rest.io.PackInfo;
+import net.technicpack.ui.controls.DraggableFrame;
+import net.technicpack.ui.controls.RoundedButton;
+import net.technicpack.ui.controls.SplatPane;
+import net.technicpack.ui.controls.TintablePanel;
+import net.technicpack.ui.controls.feeds.CountCircle;
+import net.technicpack.ui.controls.installation.ProgressBar;
+import net.technicpack.ui.lang.IRelocalizableResource;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.DesktopUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionListener;
 
 public class LauncherFrame extends DraggableFrame implements IRelocalizableResource, IAuthListener {
 
@@ -79,7 +80,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private final Installer installer;
     private final IPlatformApi platformApi;
     private final LauncherFileSystem fileSystem;
-    private final IInstalledPackRepository packRepo;
+    private final InstalledPackStore packRepo;
     private final StartupParameters params;
     private final JavaVersionRepository javaVersions;
     private final FileJavaSource fileJavaSource;
@@ -112,7 +113,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     ModpackInfoPanel modpackPanel;
     DiscoverInfoPanel discoverInfoPanel;
 
-    public LauncherFrame(final ResourceLoader resources, final ImageRepository<IUserType> skinRepository, final UserModel userModel, final TechnicSettings settings, final ModpackSelector modpackSelector, final ImageRepository<ModpackModel> iconRepo, final ImageRepository<ModpackModel> logoRepo, final ImageRepository<ModpackModel> backgroundRepo, final Installer installer, final ImageRepository<AuthorshipInfo> avatarRepo, final IPlatformApi platformApi, final LauncherFileSystem fileSystem, final IInstalledPackRepository packRepository, final StartupParameters params, final DiscoverInfoPanel discoverInfoPanel, final JavaVersionRepository javaVersions, final FileJavaSource fileJavaSource, final IBuildNumber buildNumber, final IDiscordApi discordApi) {
+    public LauncherFrame(final ResourceLoader resources, final ImageRepository<IUserType> skinRepository, final UserModel userModel, final TechnicSettings settings, final ModpackSelector modpackSelector, final ImageRepository<ModpackModel> iconRepo, final ImageRepository<ModpackModel> logoRepo, final ImageRepository<ModpackModel> backgroundRepo, final Installer installer, final ImageRepository<AuthorshipInfo> avatarRepo, final IPlatformApi platformApi, final LauncherFileSystem fileSystem, final InstalledPackStore packStore, final StartupParameters params, final DiscoverInfoPanel discoverInfoPanel, final JavaVersionRepository javaVersions, final FileJavaSource fileJavaSource, final IBuildNumber buildNumber, final IDiscordApi discordApi) {
         super();
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -129,7 +130,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.avatarRepo = avatarRepo;
         this.platformApi = platformApi;
         this.fileSystem = fileSystem;
-        this.packRepo = packRepository;
+        this.packRepo = packStore;
         this.params = params;
         this.discoverInfoPanel = discoverInfoPanel;
         this.fileJavaSource = fileJavaSource;

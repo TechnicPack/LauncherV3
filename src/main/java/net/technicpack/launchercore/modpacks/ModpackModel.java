@@ -20,10 +20,10 @@
 package net.technicpack.launchercore.modpacks;
 
 import com.google.gson.JsonParseException;
+import net.technicpack.launcher.io.InstalledPackStore;
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launchercore.install.ModpackVersion;
 import net.technicpack.launchercore.modpacks.packinfo.CombinedPackInfo;
-import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.launchercore.modpacks.sources.IModpackTagBuilder;
 import net.technicpack.platform.io.FeedItem;
 import net.technicpack.platform.io.PlatformPackInfo;
@@ -47,7 +47,7 @@ import java.util.logging.Level;
 public class ModpackModel {
     private InstalledPack installedPack;
     private PackInfo packInfo;
-    private IInstalledPackRepository installedPackRepository;
+    private InstalledPackStore packStore;
     private LauncherFileSystem fileSystem;
     private Collection<String> tags = new ArrayList<>();
 
@@ -57,12 +57,12 @@ public class ModpackModel {
     private File installedDirectory;
     private int priority = -2;
 
-    public ModpackModel(InstalledPack installedPack, PackInfo info, IInstalledPackRepository installedPackRepository, LauncherFileSystem fileSystem) {
+    public ModpackModel(InstalledPack installedPack, PackInfo info, InstalledPackStore packStore, LauncherFileSystem fileSystem) {
         this();
 
         this.installedPack = installedPack;
         this.packInfo = info;
-        this.installedPackRepository = installedPackRepository;
+        this.packStore = packStore;
         this.fileSystem = fileSystem;
     }
 
@@ -86,9 +86,9 @@ public class ModpackModel {
         return packInfo;
     }
 
-    public void setInstalledPack(InstalledPack pack, IInstalledPackRepository packRepo) {
+    public void setInstalledPack(InstalledPack pack, InstalledPackStore packStore) {
         installedPack = pack;
-        installedPackRepository = packRepo;
+        this.packStore = packStore;
     }
 
     public void setPackInfo(PackInfo packInfo) {
@@ -445,11 +445,11 @@ public class ModpackModel {
             installedPack = new InstalledPack(getName(), getBuild());
         }
 
-        installedPackRepository.put(installedPack);
+        packStore.put(installedPack);
     }
 
     public boolean isSelected() {
-        String selectedSlug = installedPackRepository.getSelectedSlug();
+        String selectedSlug = packStore.getSelectedSlug();
 
         if (selectedSlug == null)
             select();
@@ -458,7 +458,7 @@ public class ModpackModel {
     }
 
     public void select() {
-        String storedSelection = installedPackRepository.getSelectedSlug();
+        String storedSelection = packStore.getSelectedSlug();
         String name = getName();
 
         if (name == null) {
@@ -469,7 +469,7 @@ public class ModpackModel {
         // - The stored selection is null (e.g. new launcher installs)
         // - The current modpack slug is different from the stored selection
         if (storedSelection == null || !storedSelection.equals(name)) {
-            installedPackRepository.setSelectedSlug(name);
+            packStore.setSelectedSlug(name);
         }
     }
 
@@ -531,7 +531,7 @@ public class ModpackModel {
             }
         }
 
-        installedPackRepository.remove(getName());
+        packStore.remove(getName());
         installedPack = null;
         installedDirectory = null;
     }

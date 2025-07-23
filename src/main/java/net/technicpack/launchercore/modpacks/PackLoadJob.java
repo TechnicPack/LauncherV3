@@ -19,9 +19,9 @@
 
 package net.technicpack.launchercore.modpacks;
 
+import net.technicpack.launcher.io.InstalledPackStore;
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
-import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.launchercore.modpacks.sources.IModpackTagBuilder;
 import net.technicpack.launchercore.modpacks.sources.IPackSource;
 import net.technicpack.rest.io.PackInfo;
@@ -36,7 +36,7 @@ public class PackLoadJob implements Runnable {
     private LauncherFileSystem fileSystem;
     private IModpackTagBuilder tagBuilder;
     private IAuthoritativePackSource authoritativeSource;
-    private IInstalledPackRepository packRepository;
+    private InstalledPackStore packStore;
     private Collection<IPackSource> packSources;
     private IModpackContainer container;
     private boolean doLoadRepository;
@@ -44,8 +44,8 @@ public class PackLoadJob implements Runnable {
 
     private boolean isCancelled = false;
 
-    public PackLoadJob(LauncherFileSystem fileSystem, IInstalledPackRepository packRepository, IAuthoritativePackSource authoritativeSource, Collection<IPackSource> packSources, IModpackContainer container, IModpackTagBuilder tagBuilder, boolean doLoadRepository) {
-        this.packRepository = packRepository;
+    public PackLoadJob(LauncherFileSystem fileSystem, InstalledPackStore packStore, IAuthoritativePackSource authoritativeSource, Collection<IPackSource> packSources, IModpackContainer container, IModpackTagBuilder tagBuilder, boolean doLoadRepository) {
+        this.packStore = packStore;
         this.authoritativeSource = authoritativeSource;
         this.packSources = packSources;
         this.container = container;
@@ -83,8 +83,8 @@ public class PackLoadJob implements Runnable {
         Collection<Thread> threads = new ArrayList<>(threadCount);
 
         if (doLoadRepository) {
-            for (final String packName : packRepository.getPackNames()) {
-                InstalledPack pack = packRepository.getInstalledPacks().get(packName);
+            for (final String packName : packStore.getPackNames()) {
+                InstalledPack pack = packStore.getInstalledPacks().get(packName);
                 addPackThreadSafe(pack, null, -1);
             }
         }
@@ -136,7 +136,7 @@ public class PackLoadJob implements Runnable {
             modpack = processedModpacks.get(name);
             newModpackModel = false;
             if (modpack.getInstalledPack() == null && pack != null) {
-                modpack.setInstalledPack(pack, packRepository);
+                modpack.setInstalledPack(pack, packStore);
             }
 
             if (packInfo != null) {
@@ -144,7 +144,7 @@ public class PackLoadJob implements Runnable {
                 modpack.updatePriority(priority);
             }
         } else {
-            modpack = new ModpackModel(pack, packInfo, packRepository, fileSystem);
+            modpack = new ModpackModel(pack, packInfo, packStore, fileSystem);
             modpack.updatePriority(priority);
 
             if (packInfo == null)
@@ -153,8 +153,8 @@ public class PackLoadJob implements Runnable {
             processedModpacks.put(name, modpack);
         }
 
-        if (modpack.getInstalledPack() == null && !doLoadRepository && packRepository.getInstalledPacks().containsKey(modpack.getName())) {
-            modpack.setInstalledPack(packRepository.getInstalledPacks().get(modpack.getName()), packRepository);
+        if (modpack.getInstalledPack() == null && !doLoadRepository && packStore.getInstalledPacks().containsKey(modpack.getName())) {
+            modpack.setInstalledPack(packStore.getInstalledPacks().get(modpack.getName()), packStore);
         }
 
         Runnable fillDataMethod = null;

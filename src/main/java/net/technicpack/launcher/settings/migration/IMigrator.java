@@ -18,13 +18,13 @@
 
 package net.technicpack.launcher.settings.migration;
 
+import net.technicpack.launcher.io.InstalledPackStore;
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launcher.io.UserStore;
 import net.technicpack.launcher.settings.TechnicSettings;
-import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 
 public interface IMigrator {
     String getMigrationVersion();
     String getMigratedVersion();
-    void migrate(TechnicSettings settings, IInstalledPackRepository packStore, LauncherFileSystem fileSystem, UserStore users);
+    void migrate(TechnicSettings settings, InstalledPackStore packStore, LauncherFileSystem fileSystem, UserStore users);
 }
