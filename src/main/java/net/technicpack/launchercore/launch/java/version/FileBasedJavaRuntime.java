@@ -32,13 +32,15 @@ import java.util.Objects;
 /**
  * An IJavaRuntime based on an externally selected java executable.
  */
-public final class FileBasedJavaRuntime implements IJavaRuntime, Serializable {
+@SuppressWarnings("java:S2065")
+public final class FileBasedJavaRuntime implements IJavaRuntime {
     private transient boolean queried = false;
     private transient String version;
     private transient String vendor;
     private transient String osArch;
     private transient boolean is64Bit;
     private transient File javaPath;
+
     private String filePath;
 
     public FileBasedJavaRuntime(File javaPath) {

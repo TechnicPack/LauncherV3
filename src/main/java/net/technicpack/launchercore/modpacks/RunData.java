@@ -5,15 +5,16 @@ import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.utilslib.Memory;
 import net.technicpack.utilslib.Utils;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.logging.Level;
 
 @SuppressWarnings({"unused"})
-public class RunData implements Serializable {
+public class RunData {
     private String java;
     private String memory;
+
+    @SuppressWarnings("java:S2065")
     private transient long memoryLong = -1;
 
     private RunData() {

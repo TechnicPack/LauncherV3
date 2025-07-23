@@ -36,8 +36,10 @@ import java.util.logging.Level;
 /**
  * Loads versions from an external file
  */
-public class FileJavaSource implements IVersionSource, Serializable {
+public class FileJavaSource implements IVersionSource {
+    @SuppressWarnings("java:S2065")
     private transient File loadedFile;
+
     private List<FileBasedJavaRuntime> versions = new ArrayList<>();
 
     protected FileJavaSource(File loadFile) {

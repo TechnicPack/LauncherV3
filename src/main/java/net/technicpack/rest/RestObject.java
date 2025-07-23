@@ -31,7 +31,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 
-public abstract class RestObject implements Serializable {
+public abstract class RestObject {
     private static final Gson gson = new Gson();
 
     @SuppressWarnings("unused")

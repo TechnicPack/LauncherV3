@@ -6,15 +6,14 @@ import net.technicpack.launchercore.exception.AuthenticationException;
 import net.technicpack.minecraftcore.microsoft.auth.model.MinecraftProfile;
 import net.technicpack.minecraftcore.microsoft.auth.model.XboxMinecraftResponse;
 
-import java.io.Serializable;
-
-public class MicrosoftUser implements IUserType, Serializable {
+public class MicrosoftUser implements IUserType {
     public static final String USER_TYPE = "msa";
 
     private String id;
     private String username;
     private String accessToken = "0";
 
+    @SuppressWarnings("java:S2065")
     private transient boolean isOffline = false;
 
     @SuppressWarnings("unused") // Gson constructor

@@ -24,14 +24,12 @@ import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"unused"})
-public class CompleteVersion implements MojangVersion, Serializable {
-
+@SuppressWarnings({"unused", "java:S2065"})
+public class CompleteVersion implements MojangVersion {
     private String id;
     private Date time;
     private Date releaseTime;
