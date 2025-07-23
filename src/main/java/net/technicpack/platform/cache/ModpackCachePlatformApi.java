@@ -23,7 +23,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
-import net.technicpack.launchercore.install.LauncherDirectories;
+import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.NewsData;
 import net.technicpack.platform.io.PlatformPackInfo;
@@ -45,11 +45,11 @@ public class ModpackCachePlatformApi implements IPlatformApi {
     private Cache<String, PlatformPackInfo> cache;
     private Cache<String, Boolean> deadPacks;
     private Cache<String, PlatformPackInfo> foreverCache;
-    private LauncherDirectories directories;
+    private LauncherFileSystem fileSystem;
 
-    public ModpackCachePlatformApi(IPlatformApi innerApi, int cacheInSeconds, LauncherDirectories directories) {
+    public ModpackCachePlatformApi(IPlatformApi innerApi, int cacheInSeconds, LauncherFileSystem fileSystem) {
         this.innerApi = innerApi;
-        this.directories = directories;
+        this.fileSystem = fileSystem;
         cache = CacheBuilder.newBuilder()
                 .concurrencyLevel(4)
                 .maximumSize(300)
@@ -147,7 +147,7 @@ public class ModpackCachePlatformApi implements IPlatformApi {
     }
 
     private PlatformPackInfo loadForeverCache(String packSlug) {
-        File cacheFile = new File(new File(new File(directories.getAssetsDirectory(), "packs"), packSlug), "cache.json");
+        File cacheFile = new File(new File(new File(fileSystem.getAssetsDirectory(), "packs"), packSlug), "cache.json");
         if (!cacheFile.exists())
             return null;
 
@@ -166,7 +166,7 @@ public class ModpackCachePlatformApi implements IPlatformApi {
     }
 
     private void saveForeverCache(PlatformPackInfo info) {
-        File cacheFile = new File(new File(new File(directories.getAssetsDirectory(), "packs"), info.getName()), "cache.json");
+        File cacheFile = new File(new File(new File(fileSystem.getAssetsDirectory(), "packs"), info.getName()), "cache.json");
 
         try (Writer writer = Files.newBufferedWriter(cacheFile.toPath(), StandardCharsets.UTF_8)) {
             Utils.getGson().toJson(info, writer);

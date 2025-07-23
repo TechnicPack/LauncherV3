@@ -19,7 +19,7 @@
 
 package net.technicpack.launchercore.modpacks;
 
-import net.technicpack.launchercore.install.LauncherDirectories;
+import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.launchercore.modpacks.sources.IModpackTagBuilder;
@@ -30,16 +30,16 @@ import java.util.Collection;
 public class PackLoader {
     private IInstalledPackRepository packRepository;
     private IAuthoritativePackSource authoritativeSource;
-    private LauncherDirectories directories;
+    private LauncherFileSystem fileSystem;
 
-    public PackLoader(LauncherDirectories directories, IInstalledPackRepository packStore, IAuthoritativePackSource packInfos) {
+    public PackLoader(LauncherFileSystem fileSystem, IInstalledPackRepository packStore, IAuthoritativePackSource packInfos) {
         this.packRepository = packStore;
         this.authoritativeSource = packInfos;
-        this.directories = directories;
+        this.fileSystem = fileSystem;
     }
 
     public PackLoadJob createRepositoryLoadJob(IModpackContainer container, Collection<IPackSource> packSources, IModpackTagBuilder tagBuilder, boolean doLoadRepository) {
-        PackLoadJob job = new PackLoadJob(directories, packRepository, authoritativeSource, packSources, container, tagBuilder, doLoadRepository);
+        PackLoadJob job = new PackLoadJob(fileSystem, packRepository, authoritativeSource, packSources, container, tagBuilder, doLoadRepository);
         Thread thread = new Thread(job);
         thread.start();
         return job;

@@ -23,10 +23,10 @@ import net.technicpack.autoupdate.IUpdateStream;
 import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.autoupdate.io.LauncherResource;
 import net.technicpack.autoupdate.io.StreamVersion;
+import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launchercore.exception.DownloadException;
-import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.ITasksQueue;
-import net.technicpack.launchercore.install.LauncherDirectories;
+import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.DownloadFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
@@ -44,15 +44,15 @@ public class QueryUpdateStream implements IInstallTask<Void> {
     private String description;
     private ITasksQueue<Void> downloadTasks;
     private IUpdateStream updateStream;
-    private LauncherDirectories directories;
+    private LauncherFileSystem fileSystem;
     private Relauncher relauncher;
     private Collection<IInstallTask<Void>> postDownloadTasks;
 
-    public QueryUpdateStream(String description, IUpdateStream stream, ITasksQueue<Void> downloadTasks, LauncherDirectories directories, Relauncher relauncher, Collection<IInstallTask<Void>> postDownloadTasks) {
+    public QueryUpdateStream(String description, IUpdateStream stream, ITasksQueue<Void> downloadTasks, LauncherFileSystem fileSystem, Relauncher relauncher, Collection<IInstallTask<Void>> postDownloadTasks) {
         this.description = description;
         this.downloadTasks = downloadTasks;
         this.updateStream = stream;
-        this.directories = directories;
+        this.fileSystem = fileSystem;
         this.relauncher = relauncher;
         this.postDownloadTasks = postDownloadTasks;
     }
@@ -86,7 +86,7 @@ public class QueryUpdateStream implements IInstallTask<Void> {
                     verifier = null;
                 }
 
-                File targetFile = new File(new File(directories.getAssetsDirectory(), "launcher"), resource.getFilename());
+                File targetFile = new File(new File(fileSystem.getAssetsDirectory(), "launcher"), resource.getFilename());
 
                 if (targetFile.exists() && verifier.isFileValid(targetFile)) {
                     continue;

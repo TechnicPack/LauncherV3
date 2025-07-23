@@ -21,10 +21,10 @@ package net.technicpack.minecraftcore.launch;
 
 import io.sentry.Sentry;
 import net.technicpack.autoupdate.IBuildNumber;
+import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.exception.InstallException;
-import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.launch.GameProcess;
 import net.technicpack.launchercore.launch.ProcessExitListener;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
@@ -52,15 +52,15 @@ import java.util.logging.Level;
 
 public class MinecraftLauncher {
 
-    private final LauncherDirectories directories;
+    private final LauncherFileSystem fileSystem;
     private final IPlatformApi platformApi;
     private final UserModel userModel;
     private final JavaVersionRepository javaVersions;
     private final IBuildNumber buildNumber;
 
-    public MinecraftLauncher(final IPlatformApi platformApi, final LauncherDirectories directories,
+    public MinecraftLauncher(final IPlatformApi platformApi, final LauncherFileSystem fileSystem,
             final UserModel userModel, final JavaVersionRepository javaVersions, IBuildNumber buildNumber) {
-        this.directories = directories;
+        this.fileSystem = fileSystem;
         this.platformApi = platformApi;
         this.userModel = userModel;
         this.javaVersions = javaVersions;
@@ -173,7 +173,7 @@ public class MinecraftLauncher {
 
         // This is for ForgeWrapper >= 1.4.2
         if (MojangUtils.requiresForgeWrapper(version)) {
-            commands.addUnique("-Dforgewrapper.librariesDir=" + directories.getCacheDirectory().getAbsolutePath());
+            commands.addUnique("-Dforgewrapper.librariesDir=" + fileSystem.getCacheDirectory().getAbsolutePath());
 
             // The Forge installer jar is really the modpack.jar
             File modpackJar = new File(pack.getBinDir(), "modpack.jar");
@@ -181,7 +181,7 @@ public class MinecraftLauncher {
 
             // We feed ForgeWrapper the unmodified Minecraft jar here
             String mcVersion = MojangUtils.getMinecraftVersion(version);
-            File minecraftJar = new File(directories.getCacheDirectory(), "minecraft_" + mcVersion + ".jar");
+            File minecraftJar = new File(fileSystem.getCacheDirectory(), "minecraft_" + mcVersion + ".jar");
             commands.addUnique("-Dforgewrapper.minecraft=" + minecraftJar.getAbsolutePath());
         }
 
@@ -282,7 +282,7 @@ public class MinecraftLauncher {
         params.put("resolution_width", Integer.toString(launchOpts.getCustomWidth()));
         params.put("resolution_height", Integer.toString(launchOpts.getCustomHeight()));
 
-        String targetAssets = directories.getAssetsDirectory().getAbsolutePath();
+        String targetAssets = fileSystem.getAssetsDirectory().getAbsolutePath();
 
         String assetsKey = version.getAssetsKey();
 
@@ -324,7 +324,7 @@ public class MinecraftLauncher {
                 continue;
             }
 
-            File file = new File(directories.getCacheDirectory(), library.getArtifactPath().replace("${arch}", bitness));
+            File file = new File(fileSystem.getCacheDirectory(), library.getArtifactPath().replace("${arch}", bitness));
             if (!file.isFile() || !file.exists()) {
                 throw new InstallException("Library " + library.getName() + " not found.");
             }
@@ -347,7 +347,7 @@ public class MinecraftLauncher {
         // Add the minecraft jar to the classpath
         File minecraft;
         if (hasModernMinecraftForge || hasNeoForge) {
-            minecraft = new File(directories.getCacheDirectory(), "minecraft_" + version.getParentVersion() + ".jar");
+            minecraft = new File(fileSystem.getCacheDirectory(), "minecraft_" + version.getParentVersion() + ".jar");
         } else {
             minecraft = new File(pack.getBinDir(), "minecraft.jar");
         }

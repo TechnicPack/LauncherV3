@@ -1,9 +1,9 @@
 package net.technicpack.minecraftcore.install.tasks;
 
+import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.install.ITasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
-import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.tasks.CopyFileTask;
 import net.technicpack.launchercore.install.tasks.EnsureFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
@@ -20,18 +20,18 @@ import java.util.Map;
 
 public class InstallFmlLibsTask implements IInstallTask<MojangVersion> {
     private final ModpackModel pack;
-    private final LauncherDirectories directories;
+    private final LauncherFileSystem fileSystem;
     private final Modpack modpack;
     private final ITasksQueue<MojangVersion> verifyingFiles;
     private final ITasksQueue<MojangVersion> downloadLibraryQueue;
     private final ITasksQueue<MojangVersion> copyLibraryQueue;
 
-    public InstallFmlLibsTask(ModpackModel pack, LauncherDirectories directories, Modpack modpack,
+    public InstallFmlLibsTask(ModpackModel pack, LauncherFileSystem fileSystem, Modpack modpack,
                               ITasksQueue<MojangVersion> verifyingFiles,
                               ITasksQueue<MojangVersion> downloadLibraryQueue,
                               ITasksQueue<MojangVersion> copyLibraryQueue) {
         this.pack = pack;
-        this.directories = directories;
+        this.fileSystem = fileSystem;
         this.modpack = modpack;
         this.verifyingFiles = verifyingFiles;
         this.downloadLibraryQueue = downloadLibraryQueue;
@@ -60,7 +60,7 @@ public class InstallFmlLibsTask implements IInstallTask<MojangVersion> {
         }
 
         File modpackFmlLibDir = new File(pack.getInstalledDirectory(), "lib");
-        File fmlLibsCache = new File(directories.getCacheDirectory(), "fmllibs");
+        File fmlLibsCache = new File(fileSystem.getCacheDirectory(), "fmllibs");
         Files.createDirectories(fmlLibsCache.toPath());
 
         fmlLibs.forEach((name, sha1) -> {

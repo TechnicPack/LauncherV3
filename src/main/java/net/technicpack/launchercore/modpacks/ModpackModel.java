@@ -20,7 +20,7 @@
 package net.technicpack.launchercore.modpacks;
 
 import com.google.gson.JsonParseException;
-import net.technicpack.launchercore.install.LauncherDirectories;
+import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launchercore.install.ModpackVersion;
 import net.technicpack.launchercore.modpacks.packinfo.CombinedPackInfo;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
@@ -48,7 +48,7 @@ public class ModpackModel {
     private InstalledPack installedPack;
     private PackInfo packInfo;
     private IInstalledPackRepository installedPackRepository;
-    private LauncherDirectories directories;
+    private LauncherFileSystem fileSystem;
     private Collection<String> tags = new ArrayList<>();
 
     private String buildName;
@@ -57,13 +57,13 @@ public class ModpackModel {
     private File installedDirectory;
     private int priority = -2;
 
-    public ModpackModel(InstalledPack installedPack, PackInfo info, IInstalledPackRepository installedPackRepository, LauncherDirectories directories) {
+    public ModpackModel(InstalledPack installedPack, PackInfo info, IInstalledPackRepository installedPackRepository, LauncherFileSystem fileSystem) {
         this();
 
         this.installedPack = installedPack;
         this.packInfo = info;
         this.installedPackRepository = installedPackRepository;
-        this.directories = directories;
+        this.fileSystem = fileSystem;
     }
 
     protected ModpackModel() {
@@ -320,10 +320,10 @@ public class ModpackModel {
             String rawDir = installedPack.getDirectory();
 
             if (rawDir != null && rawDir.startsWith(InstalledPack.LAUNCHER_DIR)) {
-                rawDir = new File(directories.getLauncherDirectory(), rawDir.substring(InstalledPack.LAUNCHER_DIR.length())).getAbsolutePath();
+                rawDir = new File(fileSystem.getLauncherDirectory(), rawDir.substring(InstalledPack.LAUNCHER_DIR.length())).getAbsolutePath();
             }
             if (rawDir != null && rawDir.startsWith(InstalledPack.MODPACKS_DIR)) {
-                rawDir = new File(directories.getModpacksDirectory(), rawDir.substring(InstalledPack.MODPACKS_DIR.length())).getAbsolutePath();
+                rawDir = new File(fileSystem.getModpacksDirectory(), rawDir.substring(InstalledPack.MODPACKS_DIR.length())).getAbsolutePath();
             }
 
             setInstalledDirectory(new File(rawDir));
@@ -421,14 +421,14 @@ public class ModpackModel {
 
         String newInstalledPackDir;
 
-        if (path.equals(directories.getModpacksDirectory().getAbsolutePath())) {
+        if (path.equals(fileSystem.getModpacksDirectory().getAbsolutePath())) {
             newInstalledPackDir = InstalledPack.MODPACKS_DIR;
-        } else if (path.equals(directories.getLauncherDirectory().getAbsolutePath())) {
+        } else if (path.equals(fileSystem.getLauncherDirectory().getAbsolutePath())) {
             newInstalledPackDir = InstalledPack.LAUNCHER_DIR;
-        } else if (path.startsWith(directories.getModpacksDirectory().getAbsolutePath())) {
-            newInstalledPackDir = InstalledPack.MODPACKS_DIR + path.substring(directories.getModpacksDirectory().getAbsolutePath().length() + 1);
-        } else if (path.startsWith(directories.getLauncherDirectory().getAbsolutePath())) {
-            newInstalledPackDir = InstalledPack.LAUNCHER_DIR + path.substring(directories.getLauncherDirectory().getAbsolutePath().length() + 1);
+        } else if (path.startsWith(fileSystem.getModpacksDirectory().getAbsolutePath())) {
+            newInstalledPackDir = InstalledPack.MODPACKS_DIR + path.substring(fileSystem.getModpacksDirectory().getAbsolutePath().length() + 1);
+        } else if (path.startsWith(fileSystem.getLauncherDirectory().getAbsolutePath())) {
+            newInstalledPackDir = InstalledPack.LAUNCHER_DIR + path.substring(fileSystem.getLauncherDirectory().getAbsolutePath().length() + 1);
         } else {
             newInstalledPackDir = path;
         }
@@ -522,7 +522,7 @@ public class ModpackModel {
             }
         }
 
-        File assets = new File(directories.getAssetsDirectory(), getName());
+        File assets = new File(fileSystem.getAssetsDirectory(), getName());
         if (assets.exists()) {
             try {
                 FileUtils.deleteDirectory(assets);

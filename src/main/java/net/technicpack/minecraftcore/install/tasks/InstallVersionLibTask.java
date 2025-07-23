@@ -1,8 +1,8 @@
 package net.technicpack.minecraftcore.install.tasks;
 
+import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launchercore.install.ITasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
-import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.tasks.EnsureFileTask;
 import net.technicpack.launchercore.install.tasks.ListenerTask;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
@@ -13,7 +13,9 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.mojang.version.ExtractRulesFileFilter;
 import net.technicpack.minecraftcore.mojang.version.MojangVersion;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
-import net.technicpack.utilslib.*;
+import net.technicpack.utilslib.IZipFileFilter;
+import net.technicpack.utilslib.OperatingSystem;
+import net.technicpack.utilslib.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,16 +26,16 @@ public class InstallVersionLibTask extends ListenerTask<MojangVersion> {
     private ITasksQueue<MojangVersion> downloadLibraryQueue;
     private ITasksQueue<MojangVersion> copyLibraryQueue;
     private ModpackModel pack;
-    private LauncherDirectories directories;
+    private LauncherFileSystem fileSystem;
 
     public InstallVersionLibTask(Library library, ITasksQueue<MojangVersion> grabQueue, ITasksQueue<MojangVersion> downloadLibraryQueue,
-                                 ITasksQueue<MojangVersion> copyLibraryQueue, ModpackModel pack, LauncherDirectories directories) {
+                                 ITasksQueue<MojangVersion> copyLibraryQueue, ModpackModel pack, LauncherFileSystem fileSystem) {
         this.library = library;
         this.downloadLibraryQueue = downloadLibraryQueue;
         this.copyLibraryQueue = copyLibraryQueue;
         this.grabQueue = grabQueue;
         this.pack = pack;
-        this.directories = directories;
+        this.fileSystem = fileSystem;
     }
 
     @Override
@@ -64,7 +66,7 @@ public class InstallVersionLibTask extends ListenerTask<MojangVersion> {
 
         String path = library.getArtifactPath(nativeClassifier).replace("${arch}", bitness);
 
-        File cache = new File(directories.getCacheDirectory(), path);
+        File cache = new File(fileSystem.getCacheDirectory(), path);
         if (cache.getParentFile() != null) {
             cache.getParentFile().mkdirs();
         }

@@ -21,10 +21,10 @@ package net.technicpack.autoupdate;
 
 import net.technicpack.autoupdate.tasks.*;
 import net.technicpack.launcher.LauncherMain;
+import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.launchercore.install.InstallTasksQueue;
-import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.install.tasks.TaskGroup;
 import net.technicpack.ui.controls.installation.SplashScreen;
@@ -48,17 +48,17 @@ public class Relauncher {
 
     private final String stream;
     private final int currentBuild;
-    private final LauncherDirectories directories;
+    private final LauncherFileSystem fileSystem;
     protected ResourceLoader resources;
     protected StartupParameters parameters;
     protected IUpdateStream updateStream;
     private boolean didUpdate = false;
     private SplashScreen screen = null;
 
-    public Relauncher(IUpdateStream updateStream, String stream, int currentBuild, LauncherDirectories directories, ResourceLoader resources, StartupParameters parameters) {
+    public Relauncher(IUpdateStream updateStream, String stream, int currentBuild, LauncherFileSystem fileSystem, ResourceLoader resources, StartupParameters parameters) {
         this.stream = stream;
         this.currentBuild = currentBuild;
-        this.directories = directories;
+        this.fileSystem = fileSystem;
         this.resources = resources;
         this.parameters = parameters;
         this.updateStream = updateStream;
@@ -68,7 +68,7 @@ public class Relauncher {
     public String getStreamName() { return stream; }
     public void setUpdated() { didUpdate = true; }
 
-    protected LauncherDirectories getDirectories() { return directories; }
+    protected LauncherFileSystem getFileSystem() { return fileSystem; }
 
     public String getRunningPath() {
         return getRunningPath(getMainClass());
@@ -140,8 +140,8 @@ public class Relauncher {
         postDownloadTasks.add(new LaunchMoverMode(resources.getString("updater.launchmover"), getTempLauncher(), this));
 
         TaskGroup<Void> downloadFilesGroup = new TaskGroup<>(resources.getString("updater.downloads"));
-        queue.addTask(new EnsureUpdateFolders(resources.getString("updater.folders"), getDirectories()));
-        queue.addTask(new QueryUpdateStream(resources.getString("updater.query"), updateStream, downloadFilesGroup, getDirectories(), this, postDownloadTasks));
+        queue.addTask(new EnsureUpdateFolders(resources.getString("updater.folders"), getFileSystem()));
+        queue.addTask(new QueryUpdateStream(resources.getString("updater.query"), updateStream, downloadFilesGroup, getFileSystem(), this, postDownloadTasks));
         queue.addTask(downloadFilesGroup);
 
         return queue;
@@ -212,9 +212,9 @@ public class Relauncher {
         runningPath = getRunningPath();
 
         if (runningPath.endsWith(".exe"))
-            dest = new File(directories.getLauncherDirectory(), "temp.exe");
+            dest = new File(fileSystem.getLauncherDirectory(), "temp.exe");
         else
-            dest = new File(directories.getLauncherDirectory(), "temp.jar");
+            dest = new File(fileSystem.getLauncherDirectory(), "temp.jar");
         return dest;
     }
 

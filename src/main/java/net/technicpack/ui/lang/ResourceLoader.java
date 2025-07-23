@@ -19,13 +19,13 @@
 
 package net.technicpack.ui.lang;
 
-import net.technicpack.launchercore.install.LauncherDirectories;
+import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 import org.intellij.lang.annotations.MagicConstant;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
+import javax.swing.ImageIcon;
 import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
@@ -97,11 +97,11 @@ public class ResourceLoader {
         return font;
     }
 
-    public ResourceLoader(LauncherDirectories directories, String... resourcesPath) {
-        if (directories == null)
+    public ResourceLoader(LauncherFileSystem fileSystem, String... resourcesPath) {
+        if (fileSystem == null)
             this.launcherAssets = null;
         else
-            this.launcherAssets = new File(directories.getAssetsDirectory(), "launcher");
+            this.launcherAssets = new File(fileSystem.getAssetsDirectory(), "launcher");
 
         dottedResourcePath = Arrays.stream(resourcesPath).collect(Collectors.joining(".", "", "."));
         slashResourcePath = Arrays.stream(resourcesPath).collect(Collectors.joining("/", "/", ""));

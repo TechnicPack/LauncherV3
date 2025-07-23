@@ -18,8 +18,8 @@
 
 package net.technicpack.launcher.ui.components.discover;
 
+import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
-import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.Utils;
@@ -50,12 +50,12 @@ import java.util.logging.Level;
 public class DiscoverInfoPanel extends JPanel {
 
     final private XHTMLPanel panel;
-    final private LauncherDirectories directories;
+    final private LauncherFileSystem fileSystem;
     final private ResourceLoader resources;
     private ActionListener loadListener = null;
 
-    public DiscoverInfoPanel(final ResourceLoader loader, String discoverUrl, final IPlatformApi platform, final LauncherDirectories directories, final ModpackSelector modpackSelector) {
-        this.directories = directories;
+    public DiscoverInfoPanel(final ResourceLoader loader, String discoverUrl, final IPlatformApi platform, final LauncherFileSystem fileSystem, final ModpackSelector modpackSelector) {
+        this.fileSystem = fileSystem;
         this.resources = loader;
 
         if (discoverUrl == null)
@@ -123,7 +123,7 @@ public class DiscoverInfoPanel extends JPanel {
 
         EventQueue.invokeLater(() -> {
             try {
-                File localCache = new File(directories.getCacheDirectory(), "discover.html");
+                File localCache = new File(fileSystem.getCacheDirectory(), "discover.html");
                 panel.setDocument(getDiscoverDocument(runnableAccessDiscover, localCache), runnableAccessDiscover);
             } catch (Exception ex) {
                 //Can't load document from internet- don't beef

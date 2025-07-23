@@ -19,9 +19,9 @@
 package net.technicpack.launcher.settings;
 
 import com.google.gson.JsonParseException;
+import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launcher.io.UserStore;
 import net.technicpack.launcher.settings.migration.IMigrator;
-import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
@@ -60,12 +60,12 @@ public class SettingsFactory {
         return settings;
     }
 
-    public static void migrateSettings(TechnicSettings settings, IInstalledPackRepository packStore, LauncherDirectories directories, UserStore users, List<IMigrator> migrators) {
+    public static void migrateSettings(TechnicSettings settings, IInstalledPackRepository packStore, LauncherFileSystem fileSystem, UserStore users, List<IMigrator> migrators) {
         for(IMigrator migrator : migrators) {
             String version = settings.getLauncherSettingsVersion();
             boolean bothNull = version == null && migrator.getMigrationVersion() == null;
             if (bothNull || (version != null && version.equals(migrator.getMigrationVersion())))  {
-                migrator.migrate(settings, packStore, directories, users);
+                migrator.migrate(settings, packStore, fileSystem, users);
                 settings.setLauncherSettingsVersion(migrator.getMigratedVersion());
             }
         }

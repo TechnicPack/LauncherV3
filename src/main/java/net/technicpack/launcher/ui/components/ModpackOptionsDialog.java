@@ -18,9 +18,9 @@
 
 package net.technicpack.launcher.ui.components;
 
+import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.launcher.ui.listitems.PackBuildItem;
-import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.modpacks.InstalledPack;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.ui.controls.LauncherDialog;
@@ -54,13 +54,13 @@ public class ModpackOptionsDialog extends LauncherDialog {
     private JComboBox manualBuildList;
     private JFileChooser chooser;
 
-    public ModpackOptionsDialog(Frame owner, LauncherDirectories directories, ModpackModel modpack, ResourceLoader resources) {
+    public ModpackOptionsDialog(Frame owner, LauncherFileSystem fileSystem, ModpackModel modpack, ResourceLoader resources) {
         super(owner);
 
         this.modpack = modpack;
         this.resources = resources;
 
-        chooser = new JFileChooser(directories.getModpacksDirectory());
+        chooser = new JFileChooser(fileSystem.getModpacksDirectory());
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
         initComponents();

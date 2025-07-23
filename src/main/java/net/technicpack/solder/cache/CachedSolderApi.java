@@ -21,7 +21,7 @@ package net.technicpack.solder.cache;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import net.technicpack.launchercore.install.LauncherDirectories;
+import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.solder.ISolderApi;
 import net.technicpack.solder.ISolderPackApi;
@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 
 public class CachedSolderApi implements ISolderApi {
 
-    private LauncherDirectories directories;
+    private LauncherFileSystem fileSystem;
     private ISolderApi innerApi;
     private Collection<SolderPackInfo> cachedPublicPacks = null;
     private DateTime lastSolderPull = new DateTime(0);
@@ -81,8 +81,8 @@ public class CachedSolderApi implements ISolderApi {
 
     private Cache<CacheTuple, ISolderPackApi> packs;
 
-    public CachedSolderApi(LauncherDirectories directories, ISolderApi innerApi, int cacheInSeconds) {
-        this.directories = directories;
+    public CachedSolderApi(LauncherFileSystem fileSystem, ISolderApi innerApi, int cacheInSeconds) {
+        this.fileSystem = fileSystem;
         this.innerApi = innerApi;
         this.cacheInSeconds = cacheInSeconds;
 
@@ -99,7 +99,7 @@ public class CachedSolderApi implements ISolderApi {
         ISolderPackApi pack = packs.getIfPresent(tuple);
 
         if (pack == null) {
-            pack = new CachedSolderPackApi(directories, innerApi.getSolderPack(solderRoot, modpackSlug, mirrorUrl), cacheInSeconds, modpackSlug);
+            pack = new CachedSolderPackApi(fileSystem, innerApi.getSolderPack(solderRoot, modpackSlug, mirrorUrl), cacheInSeconds, modpackSlug);
             packs.put(tuple, pack);
         }
 

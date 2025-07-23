@@ -18,9 +18,9 @@
 
 package net.technicpack.launcher.settings.migration;
 
+import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launcher.io.UserStore;
 import net.technicpack.launcher.settings.TechnicSettings;
-import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.modpacks.InstalledPack;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
@@ -49,7 +49,7 @@ public class InitialV3Migrator implements IMigrator {
     }
 
     @Override
-    public void migrate(TechnicSettings settings, IInstalledPackRepository packStore, LauncherDirectories directories, UserStore users) {
+    public void migrate(TechnicSettings settings, IInstalledPackRepository packStore, LauncherFileSystem fileSystem, UserStore users) {
         //A fresh install/upgrade from v2 shouldn't show the latest news as being new
         int maxNewsId = 0;
 
@@ -69,7 +69,7 @@ public class InitialV3Migrator implements IMigrator {
         List<ModpackModel> deletePacks = new LinkedList<>();
         for (String packName : packStore.getPackNames()) {
             InstalledPack pack = packStore.getInstalledPacks().get(packName);
-            ModpackModel model = new ModpackModel(pack, null, packStore, directories);
+            ModpackModel model = new ModpackModel(pack, null, packStore, fileSystem);
 
             if (!model.getInstalledDirectory().exists()) {
                 deletePacks.add(model);

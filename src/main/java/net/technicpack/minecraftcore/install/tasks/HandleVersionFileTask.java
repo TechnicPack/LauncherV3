@@ -19,11 +19,11 @@
 
 package net.technicpack.minecraftcore.install.tasks;
 
+import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.install.ITasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
-import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.launchercore.modpacks.ModpackModel;
@@ -56,7 +56,7 @@ public class HandleVersionFileTask implements IInstallTask<MojangVersion> {
     }
 
     private ModpackModel pack;
-    private LauncherDirectories directories;
+    private LauncherFileSystem fileSystem;
     private ITasksQueue<MojangVersion> checkLibraryQueue;
     private ITasksQueue<MojangVersion> downloadLibraryQueue;
     private ITasksQueue<MojangVersion> copyLibraryQueue;
@@ -72,8 +72,8 @@ public class HandleVersionFileTask implements IInstallTask<MojangVersion> {
         return this;
     }
 
-    public HandleVersionFileTask withDirectories(LauncherDirectories directories) {
-        this.directories = directories;
+    public HandleVersionFileTask withFileSystem(LauncherFileSystem fileSystem) {
+        this.fileSystem = fileSystem;
         return this;
     }
 
@@ -128,7 +128,7 @@ public class HandleVersionFileTask implements IInstallTask<MojangVersion> {
     @Override
     public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException, InterruptedException {
         Objects.requireNonNull(pack, "ModpackModel must be set.");
-        Objects.requireNonNull(directories, "LauncherDirectories must be set.");
+        Objects.requireNonNull(fileSystem, "LauncherFileSystem must be set.");
         Objects.requireNonNull(checkLibraryQueue, "CheckLibraryQueue must be set.");
         Objects.requireNonNull(downloadLibraryQueue, "DownloadLibraryQueue must be set.");
         Objects.requireNonNull(copyLibraryQueue, "CopyLibraryQueue must be set.");
@@ -239,7 +239,7 @@ public class HandleVersionFileTask implements IInstallTask<MojangVersion> {
                 }
 
                 checkLibraryQueue.addTask(new InstallVersionLibTask(library, checkNonMavenLibsQueue,
-                        downloadLibraryQueue, copyLibraryQueue, pack, directories));
+                                                                    downloadLibraryQueue, copyLibraryQueue, pack, fileSystem));
             }
 
             // For Minecraft Forge 1.13+ and NeoForge, we inject our ForgeWrapper as a dependency and launch it through that
@@ -369,7 +369,7 @@ public class HandleVersionFileTask implements IInstallTask<MojangVersion> {
 
                 // Add fixed lib
                 version.addLibrary(fixedLog4j);
-                checkLibraryQueue.addTask(new InstallVersionLibTask(fixedLog4j, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
+                checkLibraryQueue.addTask(new InstallVersionLibTask(fixedLog4j, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, fileSystem));
 
                 // Remove unpatched lib
                 version.removeLibrary(library.getName());
@@ -377,7 +377,7 @@ public class HandleVersionFileTask implements IInstallTask<MojangVersion> {
                 continue;
             }
 
-            checkLibraryQueue.addTask(new InstallVersionLibTask(library, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, directories));
+            checkLibraryQueue.addTask(new InstallVersionLibTask(library, checkNonMavenLibsQueue, downloadLibraryQueue, copyLibraryQueue, pack, fileSystem));
         }
 
         queue.setMetadata(version);

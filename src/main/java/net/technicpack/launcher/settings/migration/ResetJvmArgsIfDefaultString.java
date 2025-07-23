@@ -18,9 +18,9 @@
 
 package net.technicpack.launcher.settings.migration;
 
+import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launcher.io.UserStore;
 import net.technicpack.launcher.settings.TechnicSettings;
-import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 
 public class ResetJvmArgsIfDefaultString implements IMigrator {
@@ -35,7 +35,7 @@ public class ResetJvmArgsIfDefaultString implements IMigrator {
     }
 
     @Override
-    public void migrate(TechnicSettings settings, IInstalledPackRepository packStore, LauncherDirectories directories, UserStore users) {
+    public void migrate(TechnicSettings settings, IInstalledPackRepository packStore, LauncherFileSystem fileSystem, UserStore users) {
         // If the JVM flags are set to the default string we set it to null/empty string so we can change the defaults
         // in the future.
 

@@ -51,7 +51,6 @@ import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.image.face.MinotarFaceImageStore;
 import net.technicpack.launchercore.image.face.WebAvatarImageStore;
-import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.ModpackInstaller;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.launch.java.source.FileJavaSource;
@@ -195,13 +194,13 @@ public class LauncherMain {
         sentryUser.setId(settings.getClientId());
         Sentry.setUser(sentryUser);
 
-        LauncherDirectories directories = new TechnicLauncherDirectories(settings.getTechnicRoot());
-        ResourceLoader resources = new ResourceLoader(directories, "net", "technicpack", "launcher", "resources");
+        LauncherFileSystem fileSystem = new LauncherFileSystem(settings.getTechnicRoot());
+        ResourceLoader resources = new ResourceLoader(fileSystem, "net", "technicpack", "launcher", "resources");
         resources.setSupportedLanguages(supportedLanguages);
         resources.setLocale(settings.getLanguageCode());
 
         // Sanity check
-        checkIfRunningInsideOneDrive(directories.getLauncherDirectory());
+        checkIfRunningInsideOneDrive(fileSystem.getLauncherDirectory());
 
         if (params.getBuildNumber() != null && !params.getBuildNumber().isEmpty())
             buildNumber = new CommandLineBuildNumber(params);
@@ -215,7 +214,7 @@ public class LauncherMain {
 
         TechnicConstants.setBuildNumber(buildNumber);
 
-        setupLogging(directories, resources);
+        setupLogging(fileSystem, resources);
 
         final boolean displayConsole = settings.getShowConsole();
         if (displayConsole) {
@@ -235,11 +234,11 @@ public class LauncherMain {
         runStartupDebug();
         updateJavaTrustStore();
 
-        Relauncher launcher = new Relauncher(new HttpUpdateStream("https://api.technicpack.net/launcher/"), settings.getBuildStream()+"4", build, directories, resources, params);
+        Relauncher launcher = new Relauncher(new HttpUpdateStream("https://api.technicpack.net/launcher/"), settings.getBuildStream()+"4", build, fileSystem, resources, params);
 
         try {
             if (launcher.runAutoUpdater()) {
-                startLauncher(settings, params, directories, resources);
+                startLauncher(settings, params, fileSystem, resources);
             }
         } catch (InterruptedException e) {
             // Launcher update was interrupted, show an error message and exit
@@ -325,10 +324,10 @@ public class LauncherMain {
         }
     }
 
-    private static void setupLogging(LauncherDirectories directories, ResourceLoader resources) {
+    private static void setupLogging(LauncherFileSystem fileSystem, ResourceLoader resources) {
         System.out.println("Setting up logging");
         final Logger logger = Utils.getLogger();
-        File logDirectory = directories.getLogsDirectory();
+        File logDirectory = fileSystem.getLogsDirectory();
         File logs = new File(logDirectory, "techniclauncher_%s.log");
         RotatingFileHandler fileHandler = new RotatingFileHandler(logs.getPath());
         fileHandler.setFormatter(new BuildLogFormatter(buildNumber.getBuildNumber()));
@@ -476,12 +475,12 @@ public class LauncherMain {
     /**
      * Creates a thread that will delete all log files older than a week.
      *
-     * @param directories The launcher directories to use for finding the logs directory.
+     * @param fileSystem The launcher filesystem to use for finding the logs directory.
      * @return A thread that will perform the cleanup.
      */
-    private static Thread createCleanupLogsThread(LauncherDirectories directories) {
+    private static Thread createCleanupLogsThread(LauncherFileSystem fileSystem) {
         Thread cleanupLogsThread = new Thread(() -> {
-            Iterator<File> files = FileUtils.iterateFiles(new File(directories.getLauncherDirectory(), "logs"), new String[]{"log"}, false);
+            Iterator<File> files = FileUtils.iterateFiles(new File(fileSystem.getLauncherDirectory(), "logs"), new String[]{"log"}, false);
             final DateTime aWeekAgo = DateTime.now().minusWeeks(1);
             while (files.hasNext()) {
                 File logFile = files.next();
@@ -494,14 +493,14 @@ public class LauncherMain {
         return cleanupLogsThread;
     }
 
-    private static void startLauncher(final TechnicSettings settings, StartupParameters startupParameters, final LauncherDirectories directories,
+    private static void startLauncher(final TechnicSettings settings, StartupParameters startupParameters, final LauncherFileSystem fileSystem,
                                       ResourceLoader resources) {
         UIManager.put("ComboBox.disabledBackground", UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
         UIManager.put("ComboBox.disabledForeground", UIConstants.COLOR_GREY_TEXT);
         System.setProperty("xr.load.xml-reader", "org.ccil.cowan.tagsoup.Parser");
 
         // Remove all log files older than a week
-        Thread cleanupLogsThread = createCleanupLogsThread(directories);
+        Thread cleanupLogsThread = createCleanupLogsThread(fileSystem);
         cleanupLogsThread.start();
 
         final SplashScreen splash = new SplashScreen(resources.getImage("launch_splash.png"), 0);
@@ -517,43 +516,43 @@ public class LauncherMain {
         javaVersionFile.enumerateVersions(javaVersions);
         javaVersions.selectVersion(settings.getJavaVersion(), settings.getPrefer64Bit());
 
-        UserStore users = UserStore.load(new File(directories.getLauncherDirectory(), "users.json"));
-        MicrosoftAuthenticator microsoftAuthenticator = new MicrosoftAuthenticator(new File(directories.getLauncherDirectory(), "oauth"));
+        UserStore users = UserStore.load(new File(fileSystem.getLauncherDirectory(), "users.json"));
+        MicrosoftAuthenticator microsoftAuthenticator = new MicrosoftAuthenticator(new File(fileSystem.getLauncherDirectory(), "oauth"));
         UserModel userModel = new UserModel(users, microsoftAuthenticator);
 
         IModpackResourceType iconType = new IconResourceType();
         IModpackResourceType logoType = new LogoResourceType();
         IModpackResourceType backgroundType = new BackgroundResourceType();
 
-        PackResourceMapper iconMapper = new PackResourceMapper(directories, resources.getImage("icon.png"), iconType);
+        PackResourceMapper iconMapper = new PackResourceMapper(fileSystem, resources.getImage("icon.png"), iconType);
         ImageRepository<ModpackModel> iconRepo = new ImageRepository<>(iconMapper, new PackImageStore(iconType));
-        ImageRepository<ModpackModel> logoRepo = new ImageRepository<>(new PackResourceMapper(directories,
+        ImageRepository<ModpackModel> logoRepo = new ImageRepository<>(new PackResourceMapper(fileSystem,
                 resources.getImage("modpack/ModImageFiller.png"), logoType), new PackImageStore(logoType));
-        ImageRepository<ModpackModel> backgroundRepo = new ImageRepository<>(new PackResourceMapper(directories, null, backgroundType),
+        ImageRepository<ModpackModel> backgroundRepo = new ImageRepository<>(new PackResourceMapper(fileSystem, null, backgroundType),
                 new PackImageStore(backgroundType));
 
-        ImageRepository<IUserType> skinRepo = new ImageRepository<>(new TechnicFaceMapper(directories, resources),
+        ImageRepository<IUserType> skinRepo = new ImageRepository<>(new TechnicFaceMapper(fileSystem, resources),
                 new MinotarFaceImageStore("https://minotar.net/"));
 
-        ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<>(new TechnicAvatarMapper(directories, resources),
+        ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<>(new TechnicAvatarMapper(fileSystem, resources),
                 new WebAvatarImageStore());
 
         HttpSolderApi httpSolder = new HttpSolderApi(settings.getClientId());
-        ISolderApi solder = new CachedSolderApi(directories, httpSolder, 60 * 60);
+        ISolderApi solder = new CachedSolderApi(fileSystem, httpSolder, 60 * 60);
         HttpPlatformApi httpPlatform = new HttpPlatformApi("https://api.technicpack.net/", buildNumber.getBuildNumber());
 
-        IPlatformApi platform = new ModpackCachePlatformApi(httpPlatform, 60 * 60, directories);
+        IPlatformApi platform = new ModpackCachePlatformApi(httpPlatform, 60 * 60, fileSystem);
         IPlatformSearchApi platformSearch = new HttpPlatformSearchApi("https://api.technicpack.net/", buildNumber.getBuildNumber());
 
-        IInstalledPackRepository packStore = TechnicInstalledPackStore.load(new File(directories.getLauncherDirectory(), "installedPacks"));
+        IInstalledPackRepository packStore = TechnicInstalledPackStore.load(new File(fileSystem.getLauncherDirectory(), "installedPacks"));
         IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(platform, solder);
 
         ArrayList<IMigrator> migrators = new ArrayList<>(1);
         migrators.add(new InitialV3Migrator(platform));
         migrators.add(new ResetJvmArgsIfDefaultString());
-        SettingsFactory.migrateSettings(settings, packStore, directories, users, migrators);
+        SettingsFactory.migrateSettings(settings, packStore, fileSystem, users, migrators);
 
-        PackLoader packList = new PackLoader(directories, packStore, packInfoRepository);
+        PackLoader packList = new PackLoader(fileSystem, packStore, packInfoRepository);
         ModpackSelector selector = new ModpackSelector(resources, packList, new SolderPackSource("https://solder.technicpack.net/api/", solder),
                 solder, platform, platformSearch, iconRepo);
         selector.setBorder(BorderFactory.createEmptyBorder());
@@ -561,17 +560,17 @@ public class LauncherMain {
 
         resources.registerResource(selector);
 
-        DiscoverInfoPanel discoverInfoPanel = new DiscoverInfoPanel(resources, startupParameters.getDiscoverUrl(), platform, directories, selector);
+        DiscoverInfoPanel discoverInfoPanel = new DiscoverInfoPanel(resources, startupParameters.getDiscoverUrl(), platform, fileSystem, selector);
 
-        MinecraftLauncher launcher = new MinecraftLauncher(platform, directories, userModel, javaVersions, buildNumber);
+        MinecraftLauncher launcher = new MinecraftLauncher(platform, fileSystem, userModel, javaVersions, buildNumber);
         ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());
-        Installer installer = new Installer(startupParameters, directories, modpackInstaller, launcher, settings, iconMapper);
+        Installer installer = new Installer(startupParameters, fileSystem, modpackInstaller, launcher, settings, iconMapper);
 
         IDiscordApi discordApi = new HttpDiscordApi("https://discord.com/api");
         discordApi = new CachedDiscordApi(discordApi, 600, 60);
 
         final LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, selector, iconRepo, logoRepo, backgroundRepo,
-                installer, avatarRepo, platform, directories, packStore, startupParameters, discoverInfoPanel, javaVersions, javaVersionFile,
+                installer, avatarRepo, platform, fileSystem, packStore, startupParameters, discoverInfoPanel, javaVersions, javaVersionFile,
                 buildNumber, discordApi);
         userModel.addAuthListener(frame);
 

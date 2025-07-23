@@ -19,8 +19,8 @@
 
 package net.technicpack.launchercore.modpacks.resources;
 
+import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launchercore.image.IImageMapper;
-import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.resources.resourcetype.IModpackResourceType;
 import net.technicpack.rest.io.Resource;
@@ -31,12 +31,12 @@ import java.io.File;
 
 public class PackResourceMapper implements IImageMapper<ModpackModel> {
 
-    private LauncherDirectories directories;
+    private LauncherFileSystem fileSystem;
     private BufferedImage defaultImage;
     private IModpackResourceType resourceType;
 
-    public PackResourceMapper(LauncherDirectories directories, BufferedImage defaultImage, IModpackResourceType resourceType) {
-        this.directories = directories;
+    public PackResourceMapper(LauncherFileSystem fileSystem, BufferedImage defaultImage, IModpackResourceType resourceType) {
+        this.fileSystem = fileSystem;
         this.defaultImage = defaultImage;
         this.resourceType = resourceType;
     }
@@ -60,7 +60,7 @@ public class PackResourceMapper implements IImageMapper<ModpackModel> {
 
     @Override
     public File getImageLocation(ModpackModel imageKey) {
-        File assets = new File(directories.getAssetsDirectory(), "packs");
+        File assets = new File(fileSystem.getAssetsDirectory(), "packs");
         File packs = new File(assets, imageKey.getName());
         return new File(packs, resourceType.getImageName());
     }

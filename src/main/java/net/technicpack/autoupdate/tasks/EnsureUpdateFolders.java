@@ -19,20 +19,19 @@
 
 package net.technicpack.autoupdate.tasks;
 
+import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launchercore.install.InstallTasksQueue;
-import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 
 import java.io.File;
-import java.io.IOException;
 
 public class EnsureUpdateFolders implements IInstallTask<Void> {
     private String taskDescription;
-    private LauncherDirectories directories;
+    private LauncherFileSystem fileSystem;
 
-    public EnsureUpdateFolders(String taskDescription, LauncherDirectories directories) {
+    public EnsureUpdateFolders(String taskDescription, LauncherFileSystem fileSystem) {
         this.taskDescription = taskDescription;
-        this.directories = directories;
+        this.fileSystem = fileSystem;
     }
 
     @Override
@@ -47,7 +46,7 @@ public class EnsureUpdateFolders implements IInstallTask<Void> {
 
     @Override
     public void runTask(InstallTasksQueue<Void> queue) {
-        File launcherAssets = new File(directories.getAssetsDirectory(), "launcher");
+        File launcherAssets = new File(fileSystem.getAssetsDirectory(), "launcher");
         File patches = new File(launcherAssets, "patches");
 
         if (!patches.exists())

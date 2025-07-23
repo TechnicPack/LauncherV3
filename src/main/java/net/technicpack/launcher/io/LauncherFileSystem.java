@@ -18,15 +18,14 @@
 
 package net.technicpack.launcher.io;
 
-import net.technicpack.launchercore.install.LauncherDirectories;
-
 import javax.swing.JOptionPane;
 import java.io.File;
 
-public class TechnicLauncherDirectories implements LauncherDirectories {
+public class LauncherFileSystem {
     private File workDir;
 
-    public TechnicLauncherDirectories(File rootDir) {
+    public LauncherFileSystem(File rootDir) {
+        // TODO: this constructor should create the folders and ensure they exist or abort
         workDir = rootDir;
     }
 
@@ -63,6 +62,7 @@ public class TechnicLauncherDirectories implements LauncherDirectories {
     }
 
     public File getAssetsDirectory() {
+        // TODO: all of these directories should be final and just one instance, it's stupid to make a new instance every single time
         File assets = new File(getLauncherDirectory(), "assets");
 
         ensureDirectory(assets);

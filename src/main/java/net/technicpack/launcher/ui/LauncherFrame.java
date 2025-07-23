@@ -20,9 +20,9 @@ package net.technicpack.launcher.ui;
 
 import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.discord.IDiscordApi;
+import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.ui.components.ModpackOptionsDialog;
-import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.launch.java.source.FileJavaSource;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
@@ -78,7 +78,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private final ImageRepository<AuthorshipInfo> avatarRepo;
     private final Installer installer;
     private final IPlatformApi platformApi;
-    private final LauncherDirectories directories;
+    private final LauncherFileSystem fileSystem;
     private final IInstalledPackRepository packRepo;
     private final StartupParameters params;
     private final JavaVersionRepository javaVersions;
@@ -112,7 +112,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     ModpackInfoPanel modpackPanel;
     DiscoverInfoPanel discoverInfoPanel;
 
-    public LauncherFrame(final ResourceLoader resources, final ImageRepository<IUserType> skinRepository, final UserModel userModel, final TechnicSettings settings, final ModpackSelector modpackSelector, final ImageRepository<ModpackModel> iconRepo, final ImageRepository<ModpackModel> logoRepo, final ImageRepository<ModpackModel> backgroundRepo, final Installer installer, final ImageRepository<AuthorshipInfo> avatarRepo, final IPlatformApi platformApi, final LauncherDirectories directories, final IInstalledPackRepository packRepository, final StartupParameters params, final DiscoverInfoPanel discoverInfoPanel, final JavaVersionRepository javaVersions, final FileJavaSource fileJavaSource, final IBuildNumber buildNumber, final IDiscordApi discordApi) {
+    public LauncherFrame(final ResourceLoader resources, final ImageRepository<IUserType> skinRepository, final UserModel userModel, final TechnicSettings settings, final ModpackSelector modpackSelector, final ImageRepository<ModpackModel> iconRepo, final ImageRepository<ModpackModel> logoRepo, final ImageRepository<ModpackModel> backgroundRepo, final Installer installer, final ImageRepository<AuthorshipInfo> avatarRepo, final IPlatformApi platformApi, final LauncherFileSystem fileSystem, final IInstalledPackRepository packRepository, final StartupParameters params, final DiscoverInfoPanel discoverInfoPanel, final JavaVersionRepository javaVersions, final FileJavaSource fileJavaSource, final IBuildNumber buildNumber, final IDiscordApi discordApi) {
         super();
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -128,7 +128,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.installer = installer;
         this.avatarRepo = avatarRepo;
         this.platformApi = platformApi;
-        this.directories = directories;
+        this.fileSystem = fileSystem;
         this.packRepo = packRepository;
         this.params = params;
         this.discoverInfoPanel = discoverInfoPanel;
@@ -300,7 +300,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         if (modpackOptionsDialog == null) {
             centralPanel.setTintActive(true);
             footer.setTintActive(true);
-            modpackOptionsDialog = new ModpackOptionsDialog(this, directories, model, resources);
+            modpackOptionsDialog = new ModpackOptionsDialog(this, fileSystem, model, resources);
             modpackOptionsDialog.setVisible(true);
             modpackOptionsDialog = null;
             centralPanel.setTintActive(false);

@@ -19,6 +19,7 @@
 package net.technicpack.launcher.launch;
 
 import io.sentry.Sentry;
+import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.LauncherFrame;
@@ -26,7 +27,6 @@ import net.technicpack.launcher.ui.components.FixRunDataDialog;
 import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.exception.*;
 import net.technicpack.launchercore.install.InstallTasksQueue;
-import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.install.ModpackInstaller;
 import net.technicpack.launchercore.install.ModpackVersion;
 import net.technicpack.launchercore.install.tasks.CheckRunDataFile;
@@ -72,7 +72,7 @@ public class Installer {
     protected final TechnicSettings settings;
     protected final PackResourceMapper packIconMapper;
     protected final StartupParameters startupParameters;
-    protected final LauncherDirectories directories;
+    protected final LauncherFileSystem fileSystem;
     protected final Object cancelLock = new Object();
     protected volatile boolean isCancelledByUser = false;
 
@@ -80,14 +80,14 @@ public class Installer {
     private volatile LauncherUnhider launcherUnhider;
     private volatile GameProcess gameProcess;
 
-    public Installer(StartupParameters startupParameters, LauncherDirectories directories, ModpackInstaller installer,
-            MinecraftLauncher launcher, TechnicSettings settings, PackResourceMapper packIconMapper) {
+    public Installer(StartupParameters startupParameters, LauncherFileSystem fileSystem, ModpackInstaller installer,
+                     MinecraftLauncher launcher, TechnicSettings settings, PackResourceMapper packIconMapper) {
         this.installer = installer;
         this.launcher = launcher;
         this.settings = settings;
         this.packIconMapper = packIconMapper;
         this.startupParameters = startupParameters;
-        this.directories = directories;
+        this.fileSystem = fileSystem;
     }
 
     public void cancel() {
@@ -380,11 +380,11 @@ public class Installer {
                 rundataTaskGroup.addTask(new CheckRunDataFile(pack, modpackData, rundataTaskGroup));
             }
 
-            verifyingFiles.addTask(new InstallFmlLibsTask(pack, directories, modpackData, verifyingFiles, installingLibs, installingLibs));
+            verifyingFiles.addTask(new InstallFmlLibsTask(pack, fileSystem, modpackData, verifyingFiles, installingLibs, installingLibs));
 
             checkVersionFile.addTask(new VerifyVersionFilePresentTask(pack, minecraft, versionBuilder));
             examineVersionFile.addTask(new HandleVersionFileTask().withPack(pack)
-                                                                  .withDirectories(directories)
+                                                                  .withFileSystem(fileSystem)
                                                                   .withCheckNonMavenLibsQueue(checkNonMavenLibs)
                                                                   .withCheckLibraryQueue(grabLibs)
                                                                   .withDownloadLibraryQueue(installingLibs)
@@ -392,16 +392,16 @@ public class Installer {
                                                                   .withVersionBuilder(versionBuilder)
                                                                   .withLaunchOptions(settings)
                                                                   .withJavaRuntime(selectedJavaRuntime));
-            examineVersionFile.addTask(new EnsureAssetsIndexTask(directories.getAssetsDirectory(), pack, installingMinecraft, examineIndex, verifyingAssets, installingAssets, installingAssets));
+            examineVersionFile.addTask(new EnsureAssetsIndexTask(fileSystem.getAssetsDirectory(), pack, installingMinecraft, examineIndex, verifyingAssets, installingAssets, installingAssets));
 
-            fetchJavaManifest.addTask(new EnsureJavaRuntimeManifestTask(directories.getRuntimesDirectory(), pack, fetchJavaManifest, examineJava, downloadJava));
+            fetchJavaManifest.addTask(new EnsureJavaRuntimeManifestTask(fileSystem.getRuntimesDirectory(), pack, fetchJavaManifest, examineJava, downloadJava));
 
             // Check if we need to regenerate the Minecraft jar. This is necessary if:
             // - A reinstall was requested (or forced, via modpack version update)
             // - The installed version is marked as legacy
             boolean jarRegenerationRequired = doFullInstall || (installedVersion != null && installedVersion.isLegacy());
 
-            installingMinecraft.addTask(new InstallMinecraftIfNecessaryTask(pack, minecraft, directories.getCacheDirectory(), jarRegenerationRequired));
+            installingMinecraft.addTask(new InstallMinecraftIfNecessaryTask(pack, minecraft, fileSystem.getCacheDirectory(), jarRegenerationRequired));
         }
 
         private MojangVersionBuilder createVersionBuilder(InstallTasksQueue<MojangVersion> tasksQueue) {

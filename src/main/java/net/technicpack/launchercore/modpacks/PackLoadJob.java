@@ -19,21 +19,21 @@
 
 package net.technicpack.launchercore.modpacks;
 
-import net.technicpack.launchercore.install.LauncherDirectories;
+import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
 import net.technicpack.launchercore.modpacks.sources.IModpackTagBuilder;
 import net.technicpack.launchercore.modpacks.sources.IPackSource;
 import net.technicpack.rest.io.PackInfo;
 
-import java.awt.*;
+import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 public class PackLoadJob implements Runnable {
-    private LauncherDirectories directories;
+    private LauncherFileSystem fileSystem;
     private IModpackTagBuilder tagBuilder;
     private IAuthoritativePackSource authoritativeSource;
     private IInstalledPackRepository packRepository;
@@ -44,13 +44,13 @@ public class PackLoadJob implements Runnable {
 
     private boolean isCancelled = false;
 
-    public PackLoadJob(LauncherDirectories directories, IInstalledPackRepository packRepository, IAuthoritativePackSource authoritativeSource, Collection<IPackSource> packSources, IModpackContainer container, IModpackTagBuilder tagBuilder, boolean doLoadRepository) {
+    public PackLoadJob(LauncherFileSystem fileSystem, IInstalledPackRepository packRepository, IAuthoritativePackSource authoritativeSource, Collection<IPackSource> packSources, IModpackContainer container, IModpackTagBuilder tagBuilder, boolean doLoadRepository) {
         this.packRepository = packRepository;
         this.authoritativeSource = authoritativeSource;
         this.packSources = packSources;
         this.container = container;
         this.tagBuilder = tagBuilder;
-        this.directories = directories;
+        this.fileSystem = fileSystem;
         this.doLoadRepository = doLoadRepository;
         container.clear();
     }
@@ -144,7 +144,7 @@ public class PackLoadJob implements Runnable {
                 modpack.updatePriority(priority);
             }
         } else {
-            modpack = new ModpackModel(pack, packInfo, packRepository, directories);
+            modpack = new ModpackModel(pack, packInfo, packRepository, fileSystem);
             modpack.updatePriority(priority);
 
             if (packInfo == null)

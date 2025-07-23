@@ -18,20 +18,19 @@
 
 package net.technicpack.launcher.io;
 
-import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.image.IImageMapper;
-import net.technicpack.launchercore.install.LauncherDirectories;
+import net.technicpack.ui.lang.ResourceLoader;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 
 public class TechnicFaceMapper implements IImageMapper<IUserType> {
-    private LauncherDirectories directories;
+    private LauncherFileSystem fileSystem;
     private BufferedImage defaultImage;
 
-    public TechnicFaceMapper(LauncherDirectories directories, ResourceLoader resources) {
-        this.directories = directories;
+    public TechnicFaceMapper(LauncherFileSystem fileSystem, ResourceLoader resources) {
+        this.fileSystem = fileSystem;
         defaultImage = resources.getImage("news/authorHelm.png");
     }
 
@@ -42,7 +41,7 @@ public class TechnicFaceMapper implements IImageMapper<IUserType> {
 
     @Override
     public File getImageLocation(IUserType imageKey) {
-        return new File(directories.getAssetsDirectory(), "avatars" + File.separator + imageKey.getDisplayName() + ".png");
+        return new File(fileSystem.getAssetsDirectory(), "avatars" + File.separator + imageKey.getDisplayName() + ".png");
     }
 
     @Override

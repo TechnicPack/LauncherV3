@@ -23,8 +23,8 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
+import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
-import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.solder.ISolderPackApi;
@@ -56,11 +56,11 @@ public class CachedSolderPackApi implements ISolderPackApi {
 
     private final Path cachePath;
 
-    public CachedSolderPackApi(LauncherDirectories directories, ISolderPackApi innerApi, int cacheInSeconds, String packSlug) {
+    public CachedSolderPackApi(LauncherFileSystem fileSystem, ISolderPackApi innerApi, int cacheInSeconds, String packSlug) {
         this.innerApi = innerApi;
         this.cacheInSeconds = cacheInSeconds;
         this.packSlug = packSlug;
-        this.cachePath = directories.getAssetsDirectory().toPath()
+        this.cachePath = fileSystem.getAssetsDirectory().toPath()
                                     .resolve("packs")
                                     .resolve(packSlug)
                                     .resolve("soldercache.json");
