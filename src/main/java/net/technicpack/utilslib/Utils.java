@@ -33,6 +33,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -133,6 +134,7 @@ public class Utils {
      */
     public static String getProcessOutput(String... command) {
         String out = null;
+
         try {
             ProcessBuilder pb = ProcessUtils.createProcessBuilder(command);
             pb.redirectErrorStream(true);
@@ -140,13 +142,14 @@ public class Utils {
             final StringBuilder response=new StringBuilder();
 
             Thread outputThread = new Thread(() -> {
-                try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                    String line;
-                    while ((line = bufferedReader.readLine()) != null) {
-                        response.append(line).append('\n');
+                char[] buffer = new char[4096];
+                int n;
+                try (Reader reader = new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8)) {
+                    while ((n = reader.read(buffer)) != -1) {
+                        response.append(buffer, 0, n);
                     }
-                } catch (IOException ex) {
-                    // Ignore errors from reading the process output
+                } catch (IOException e) {
+                    Utils.getLogger().log(Level.SEVERE, String.format("Error reading process output: %s", String.join(" ", command)), e);
                 }
             });
             outputThread.start();
@@ -157,15 +160,13 @@ public class Utils {
             if (response.length() > 0) {
                 out = response.toString().trim();
             }
+        } catch (IOException e) {
+            Utils.getLogger().log(Level.SEVERE, String.format("Error running command: %s", String.join(" ", command)), e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            Utils.getLogger().log(Level.WARNING, String.format("Interrupted while waiting for command: %s", String.join(" ", command)), e);
         }
-        catch (IOException e) {
-            //Some kind of problem running java -version or getting output, just assume the version is bad
-            return null;
-        } catch (InterruptedException ex) {
-            //Something booted us while we were waiting on java -version to complete, just assume
-            //this version is bad
-            return null;
-        }
+
         return out;
     }
 
