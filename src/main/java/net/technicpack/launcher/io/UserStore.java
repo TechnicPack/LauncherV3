@@ -30,6 +30,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,51 +42,54 @@ public class UserStore {
     private String lastUser;
 
     @SuppressWarnings("java:S2065")
-    private transient File usersFile;
+    private transient Path storePath;
 
     @SuppressWarnings("unused")
     private UserStore() {
         // Empty constructor for GSON
     }
 
-    protected UserStore(File userFile) {
-        this.usersFile = userFile;
+    private UserStore(Path storePath) {
+        this.storePath = storePath.toAbsolutePath();
     }
 
     public static UserStore load(File userFile) {
-        if (!userFile.exists()) {
-            Utils.getLogger().log(Level.WARNING, String.format("Unable to load users from %s because it does not exist.", userFile));
-            return new UserStore(userFile);
+        Path storePath = userFile.toPath();
+
+        if (!Files.exists(storePath)) {
+            Utils.getLogger().log(Level.WARNING, String.format("Unable to load users from %s because it does not exist", storePath));
+            return new UserStore(storePath);
         }
 
         try {
             UserStore newModel;
 
-            try (Reader reader = Files.newBufferedReader(userFile.toPath(), StandardCharsets.UTF_8)) {
+            try (Reader reader = Files.newBufferedReader(storePath, StandardCharsets.UTF_8)) {
                 newModel = MojangUtils.getGson().fromJson(reader, UserStore.class);
             }
 
+            // This is required because Gson doesn't allow post-processing after deserialization
             if (newModel != null) {
-                newModel.cleanupSavedUsers();
-                newModel.setUserFile(userFile);
+                newModel.removeNullUsers();
+                newModel.setStorePath(storePath);
                 return newModel;
             }
         } catch (JsonParseException | IOException e) {
-            Utils.getLogger().log(Level.SEVERE, String.format("Unable to load users from %s", userFile), e);
+            Utils.getLogger().log(Level.SEVERE, String.format("Failed to load users from %s", storePath), e);
         }
 
-        return new UserStore(userFile);
+        return new UserStore(storePath);
     }
 
-    public void setUserFile(File userFile) {
-        this.usersFile = userFile;
+    private void setStorePath(Path storePath) {
+        this.storePath = storePath;
     }
 
     public void save() {
-        try (Writer writer = Files.newBufferedWriter(usersFile.toPath(), StandardCharsets.UTF_8)) {
+        try (Writer writer = Files.newBufferedWriter(storePath, StandardCharsets.UTF_8)) {
             MojangUtils.getGson().toJson(this, writer);
         } catch (JsonIOException | IOException e) {
-            Utils.getLogger().log(Level.SEVERE, String.format("Unable to save users file %s", usersFile), e);
+            Utils.getLogger().log(Level.SEVERE, String.format("Failed to save users to %s", storePath), e);
         }
     }
 
@@ -120,7 +124,7 @@ public class UserStore {
         return lastUser;
     }
 
-    private void cleanupSavedUsers() {
+    private void removeNullUsers() {
         savedUsers.values().removeAll(Collections.singleton(null));
     }
 }
