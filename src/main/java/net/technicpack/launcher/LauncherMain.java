@@ -517,7 +517,7 @@ public class LauncherMain {
         javaVersionFile.enumerateVersions(javaVersions);
         javaVersions.selectVersion(settings.getJavaVersion(), settings.getPrefer64Bit());
 
-        TechnicUserStore users = TechnicUserStore.load(new File(directories.getLauncherDirectory(), "users.json"));
+        UserStore users = UserStore.load(new File(directories.getLauncherDirectory(), "users.json"));
         MicrosoftAuthenticator microsoftAuthenticator = new MicrosoftAuthenticator(new File(directories.getLauncherDirectory(), "oauth"));
         UserModel userModel = new UserModel(users, microsoftAuthenticator);
 

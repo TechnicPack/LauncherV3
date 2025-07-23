@@ -19,6 +19,7 @@
 
 package net.technicpack.launchercore.auth;
 
+import net.technicpack.launcher.io.UserStore;
 import net.technicpack.launchercore.exception.AuthenticationException;
 import net.technicpack.launchercore.exception.ResponseException;
 import net.technicpack.launchercore.exception.SessionException;
@@ -35,10 +36,10 @@ import java.util.logging.Level;
 public class UserModel {
     private IUserType mCurrentUser;
     private List<IAuthListener> mAuthListeners = new LinkedList<>();
-    private IUserStore mUserStore;
+    private UserStore mUserStore;
     private MicrosoftAuthenticator microsoftAuthenticator;
 
-    public UserModel(IUserStore userStore, MicrosoftAuthenticator microsoftAuthenticator) {
+    public UserModel(UserStore userStore, MicrosoftAuthenticator microsoftAuthenticator) {
         this.mCurrentUser = null;
         this.mUserStore = userStore;
         this.microsoftAuthenticator = microsoftAuthenticator;

@@ -20,12 +20,14 @@ package net.technicpack.launcher.io;
 
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
-import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.utilslib.Utils;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Collection;
@@ -34,31 +36,33 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
-public class TechnicUserStore implements IUserStore, Serializable {
-    private Map<String, IUserType> savedUsers = new HashMap<>();
+public class UserStore {
+    private final Map<String, IUserType> savedUsers = new HashMap<>();
     private String lastUser;
+
+    @SuppressWarnings("java:S2065")
     private transient File usersFile;
 
     @SuppressWarnings("unused")
-    private TechnicUserStore() {
+    private UserStore() {
         // Empty constructor for GSON
     }
 
-    protected TechnicUserStore(File userFile) {
+    protected UserStore(File userFile) {
         this.usersFile = userFile;
     }
 
-    public static TechnicUserStore load(File userFile) {
+    public static UserStore load(File userFile) {
         if (!userFile.exists()) {
             Utils.getLogger().log(Level.WARNING, String.format("Unable to load users from %s because it does not exist.", userFile));
-            return new TechnicUserStore(userFile);
+            return new UserStore(userFile);
         }
 
         try {
-            TechnicUserStore newModel;
+            UserStore newModel;
 
             try (Reader reader = Files.newBufferedReader(userFile.toPath(), StandardCharsets.UTF_8)) {
-                newModel = MojangUtils.getGson().fromJson(reader, TechnicUserStore.class);
+                newModel = MojangUtils.getGson().fromJson(reader, UserStore.class);
             }
 
             if (newModel != null) {
@@ -70,7 +74,7 @@ public class TechnicUserStore implements IUserStore, Serializable {
             Utils.getLogger().log(Level.SEVERE, String.format("Unable to load users from %s", userFile), e);
         }
 
-        return new TechnicUserStore(userFile);
+        return new UserStore(userFile);
     }
 
     public void setUserFile(File userFile) {
