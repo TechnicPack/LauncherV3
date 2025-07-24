@@ -26,6 +26,7 @@ import net.technicpack.rest.io.PackInfo;
 import net.technicpack.rest.io.Resource;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @SuppressWarnings({"unused"})
@@ -87,8 +88,7 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
         return logo;
     }
 
-    @Override
-    public String getRecommended() {
+    protected String getVersion() {
         if (hasSolder())
             return null;
 
@@ -96,11 +96,13 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
     }
 
     @Override
-    public String getLatest() {
-        if (hasSolder())
-            return null;
+    public String getRecommended() {
+        return getVersion();
+    }
 
-        return version;
+    @Override
+    public String getLatest() {
+        return getVersion();
     }
 
     @Override
@@ -114,9 +116,9 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
     @Override
     public List<String> getBuilds() {
         if (hasSolder()) {
-            // If this is a Solder modpack, Platform modpack version has no play in the builds list
-            // Code can actually reach this if the Solder instance is offline, due to how combined modpack info works
-            return new ArrayList<>(0);
+            // If this is a Solder modpack, then the Platform modpack version is ignored.
+            // Code can actually reach this if the Solder instance is offline, due to how combined modpack info works.
+            return Collections.emptyList();
         }
 
         List<String> builds = new ArrayList<>();
