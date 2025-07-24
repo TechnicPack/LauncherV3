@@ -24,7 +24,7 @@ import net.technicpack.launchercore.util.LaunchAction;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.launch.WindowType;
 import net.technicpack.utilslib.Utils;
-import org.apache.commons.io.FileUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -103,7 +103,13 @@ public class TechnicSettings implements ILaunchOptions {
         save();
     }
 
-    public LaunchAction getLaunchAction() { return launchAction; }
+    @NotNull
+    public LaunchAction getLaunchAction() {
+        if (launchAction == null) {
+            return LaunchAction.HIDE;
+        }
+        return launchAction;
+    }
     public void setLaunchAction(LaunchAction launchAction) {
         this.launchAction = launchAction;
         save();

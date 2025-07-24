@@ -244,7 +244,7 @@ public class Installer {
 
                     LaunchAction launchAction = settings.getLaunchAction();
 
-                    if (launchAction == null || launchAction == LaunchAction.HIDE) {
+                    if (launchAction == LaunchAction.HIDE) {
                         launcherUnhider = new LauncherUnhider(settings, frame);
                     } else {
                         launcherUnhider = null;
@@ -254,12 +254,15 @@ public class Installer {
                             packIconMapper.getImageLocation(pack).getAbsolutePath(), settings);
                     gameProcess = launcher.launch(pack, memory, options, launcherUnhider, version);
 
-                    if (launchAction == null || launchAction == LaunchAction.HIDE) {
-                        frame.setVisible(false);
-                    } else if (launchAction == LaunchAction.NOTHING) {
-                        EventQueue.invokeLater(frame::launchCompleted);
-                    } else if (launchAction == LaunchAction.CLOSE) {
-                        System.exit(0);
+                    switch (launchAction) {
+                        case HIDE:
+                            frame.setVisible(false);
+                            break;
+                        case NOTHING:
+                            EventQueue.invokeLater(frame::launchCompleted);
+                            break;
+                        case CLOSE:
+                            System.exit(0);
                     }
                 }
             } catch (ClosedByInterruptException | InterruptedException e) {
