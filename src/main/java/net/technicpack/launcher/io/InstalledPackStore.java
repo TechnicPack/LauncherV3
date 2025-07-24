@@ -92,28 +92,23 @@ public class InstalledPackStore {
         cleanUpLegacyEntries();
     }
 
-    @Override
     public Map<String, InstalledPack> getInstalledPacks() {
         return installedPacks;
     }
 
-    @Override
     public List<String> getPackNames() {
         return byIndex;
     }
 
-    @Override
     public String getSelectedSlug() {
         return selected;
     }
 
-    @Override
     public void setSelectedSlug(String slug) {
         selected = slug;
         save();
     }
 
-    @Override
     public InstalledPack put(InstalledPack installedPack) {
         InstalledPack pack = installedPacks.put(installedPack.getName(), installedPack);
         if (pack == null) {
@@ -123,7 +118,6 @@ public class InstalledPackStore {
         return pack;
     }
 
-    @Override
     public InstalledPack remove(String name) {
         InstalledPack pack = installedPacks.remove(name);
         if (pack != null) {
@@ -134,7 +128,6 @@ public class InstalledPackStore {
     }
 
     // TODO: all of this should be syncronized on the file
-    @Override
     public void save() {
         // First we write to a temp file, then we move that file to the intended path.
         // This way, we won't end up with an empty file if we fail to write to it.
