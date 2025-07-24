@@ -88,7 +88,7 @@ public class TechnicSettings implements ILaunchOptions {
     public void setLauncherSettingsVersion(String version) { this.launcherSettingsVersion = version; }
 
     public boolean isPortable() {
-        return (directory != null && !directory.isEmpty() && directory.equalsIgnoreCase(PORTABLE_MODE));
+        return directory != null && directory.equalsIgnoreCase(PORTABLE_MODE);
     }
 
     public void setPortable() {
