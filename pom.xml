@@ -246,7 +246,6 @@
                     <target>1.8</target>
                     <compilerArgs>
                         <O>-Xlint:all</O>
-                        <O>-Xlint:-path</O>
                     </compilerArgs>
                     <showWarnings>true</showWarnings>
                     <showDeprecation>true</showDeprecation>

@@ -41,6 +41,8 @@ public class TechnicSettings implements ILaunchOptions {
     // These are the default JVM args in the vanilla launcher
     public static final String DEFAULT_JAVA_ARGS = "-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M";
 
+    private static final String PORTABLE_MODE = "portable";
+
     private transient File settingsFile;
     private transient File technicRoot;
     private int memory;
@@ -86,11 +88,11 @@ public class TechnicSettings implements ILaunchOptions {
     public void setLauncherSettingsVersion(String version) { this.launcherSettingsVersion = version; }
 
     public boolean isPortable() {
-        return (directory != null && !directory.isEmpty() && directory.equalsIgnoreCase("portable"));
+        return (directory != null && !directory.isEmpty() && directory.equalsIgnoreCase(PORTABLE_MODE));
     }
 
     public void setPortable() {
-        directory = "portable";
+        directory = PORTABLE_MODE;
     }
 
     public void installTo(String directory) {
@@ -227,7 +229,7 @@ public class TechnicSettings implements ILaunchOptions {
     }
 
     protected void buildTechnicRoot() {
-        if (directory == null || directory.isEmpty() || directory.equalsIgnoreCase("portable"))
+        if (directory == null || directory.isEmpty() || directory.equalsIgnoreCase(PORTABLE_MODE))
             technicRoot = settingsFile.getParentFile();
         else
             technicRoot = new File(directory);
