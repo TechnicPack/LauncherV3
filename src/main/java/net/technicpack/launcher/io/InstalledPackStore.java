@@ -41,8 +41,8 @@ public class InstalledPackStore {
     @SuppressWarnings("java:S2065")
     private transient Path storePath;
 
-    private final Map<String, InstalledPack> installedPacks = new HashMap<>();
-    private final List<String> byIndex = new ArrayList<>();
+    private Map<String, InstalledPack> installedPacks = new HashMap<>();
+    private List<String> byIndex = new ArrayList<>();
     private String selected = null;
 
     public InstalledPackStore(Path storePath) {

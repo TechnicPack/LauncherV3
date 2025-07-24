@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.logging.Level;
 
 public class UserStore {
-    private final Map<String, IUserType> savedUsers = new HashMap<>();
+    private Map<String, IUserType> savedUsers = new HashMap<>();
     private String lastUser;
 
     @SuppressWarnings("java:S2065")
