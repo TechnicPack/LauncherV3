@@ -41,7 +41,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 public class Relauncher {
@@ -157,7 +157,9 @@ public class Relauncher {
         List<String> args = parameters.getArgs();
         List<String> launchArgs = new ArrayList<>(args.size() + 1);
         launchArgs.addAll(args);
-        launchArgs.add("-blockReboot");
+        if (!launchArgs.contains("-blockReboot")) {
+            launchArgs.add("-blockReboot");
+        }
         return launchArgs;
     }
 
@@ -223,7 +225,7 @@ public class Relauncher {
             launchPath = getRunningPath();
         }
 
-        ArrayList<String> commands = getCommands(launchPath);
+        ArrayList<String> commands = getBaseCommands(launchPath);
         commands.addAll(args);
 
         String commandString = String.join(" ", commands);
@@ -243,7 +245,7 @@ public class Relauncher {
         System.exit(0);
     }
 
-    private ArrayList<String> getCommands(String launchPath) {
+    private ArrayList<String> getBaseCommands(String launchPath) {
         ArrayList<String> commands = new ArrayList<>();
         if (!launchPath.endsWith(".exe")) {
             commands.add(OperatingSystem.getJavaDir());
@@ -273,8 +275,22 @@ public class Relauncher {
             outArgs.add("-launcheronly");
         else
             outArgs.add("-launcher");
-        outArgs.addAll(getRelaunchArgs());
-        outArgs.remove("-moveronly");
+
+        Iterator<String> it = getRelaunchArgs().iterator();
+        while (it.hasNext()) {
+            String arg = it.next();
+            // ignore -movetarget
+            if (arg.equals("-movetarget")) {
+                // change to the next item (the -movetarget value) and also ignore that
+                if (it.hasNext()) {
+                    it.next();
+                }
+            } else if (!arg.equals("-moveronly")) {
+                // ignore -moveronly
+                outArgs.add(arg);
+            }
+        }
+
         return outArgs;
     }
 }
