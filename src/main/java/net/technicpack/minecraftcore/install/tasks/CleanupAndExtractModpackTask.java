@@ -26,7 +26,7 @@ import net.technicpack.launchercore.install.tasks.EnsureFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.install.ModpackZipFilter;
-import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.Mod;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
@@ -40,14 +40,14 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
-public class CleanupAndExtractModpackTask implements IInstallTask<MojangVersion> {
+public class CleanupAndExtractModpackTask implements IInstallTask<IMinecraftVersionInfo> {
 	private final ModpackModel pack;
 	private final Modpack modpack;
-    private final ITasksQueue<MojangVersion> checkModQueue;
-    private final ITasksQueue<MojangVersion> downloadModQueue;
-    private final ITasksQueue<MojangVersion> copyModQueue;
+    private final ITasksQueue<IMinecraftVersionInfo> checkModQueue;
+    private final ITasksQueue<IMinecraftVersionInfo> downloadModQueue;
+    private final ITasksQueue<IMinecraftVersionInfo> copyModQueue;
 
-	public CleanupAndExtractModpackTask(ModpackModel pack, Modpack modpack, ITasksQueue<MojangVersion> checkModQueue, ITasksQueue<MojangVersion> downloadModQueue, ITasksQueue<MojangVersion> copyModQueue) {
+	public CleanupAndExtractModpackTask(ModpackModel pack, Modpack modpack, ITasksQueue<IMinecraftVersionInfo> checkModQueue, ITasksQueue<IMinecraftVersionInfo> downloadModQueue, ITasksQueue<IMinecraftVersionInfo> copyModQueue) {
 		this.pack = pack;
 		this.modpack = modpack;
         this.checkModQueue = checkModQueue;
@@ -66,7 +66,7 @@ public class CleanupAndExtractModpackTask implements IInstallTask<MojangVersion>
 	}
 
 	@Override
-	public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException {
+	public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) throws IOException {
         final File binDir = pack.getBinDir();
 
         //If we're installing a new version of modpack, then we need to get rid of the existing version.json
@@ -136,7 +136,7 @@ public class CleanupAndExtractModpackTask implements IInstallTask<MojangVersion>
             else
                 verifier = new ValidZipFileVerifier();
 
-            EnsureFileTask<MojangVersion> ensureFileTask = new EnsureFileTask<>(downloadModQueue, cacheFile)
+            EnsureFileTask<IMinecraftVersionInfo> ensureFileTask = new EnsureFileTask<>(downloadModQueue, cacheFile)
                     .withUrl(url)
                     .withVerifier(verifier)
                     .withExtractTo(modpackInstallDirectory, copyModQueue)

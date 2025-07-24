@@ -22,14 +22,14 @@ package net.technicpack.minecraftcore.install.tasks;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-public class RenameJnilibToDylibTask implements IInstallTask<MojangVersion> {
+public class RenameJnilibToDylibTask implements IInstallTask<IMinecraftVersionInfo> {
     private ModpackModel modpack;
 
     public RenameJnilibToDylibTask(ModpackModel modpack) {
@@ -47,7 +47,7 @@ public class RenameJnilibToDylibTask implements IInstallTask<MojangVersion> {
     }
 
     @Override
-    public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException {
+    public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) throws IOException {
         // Rename all *.jnilib natives to *.dylib
         // This is required due to https://bugs.openjdk.org/browse/JDK-8127215
 

@@ -29,7 +29,7 @@ import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
-import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
 import net.technicpack.minecraftcore.mojang.version.builder.FileVersionBuilder;
 import net.technicpack.minecraftcore.mojang.version.builder.retrievers.ZipFileRetriever;
@@ -48,7 +48,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class HandleVersionFileTask implements IInstallTask<MojangVersion> {
+public class HandleVersionFileTask implements IInstallTask<IMinecraftVersionInfo> {
     // Taken from https://stackoverflow.com/a/27872852
     private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Set<Object> seen = ConcurrentHashMap.newKeySet();
@@ -57,10 +57,10 @@ public class HandleVersionFileTask implements IInstallTask<MojangVersion> {
 
     private ModpackModel pack;
     private LauncherFileSystem fileSystem;
-    private ITasksQueue<MojangVersion> checkLibraryQueue;
-    private ITasksQueue<MojangVersion> downloadLibraryQueue;
-    private ITasksQueue<MojangVersion> copyLibraryQueue;
-    private ITasksQueue<MojangVersion> checkNonMavenLibsQueue;
+    private ITasksQueue<IMinecraftVersionInfo> checkLibraryQueue;
+    private ITasksQueue<IMinecraftVersionInfo> downloadLibraryQueue;
+    private ITasksQueue<IMinecraftVersionInfo> copyLibraryQueue;
+    private ITasksQueue<IMinecraftVersionInfo> checkNonMavenLibsQueue;
     private MojangVersionBuilder versionBuilder;
     private ILaunchOptions launchOptions;
     private IJavaRuntime javaRuntime;
@@ -77,22 +77,22 @@ public class HandleVersionFileTask implements IInstallTask<MojangVersion> {
         return this;
     }
 
-    public HandleVersionFileTask withCheckLibraryQueue(ITasksQueue<MojangVersion> checkLibraryQueue) {
+    public HandleVersionFileTask withCheckLibraryQueue(ITasksQueue<IMinecraftVersionInfo> checkLibraryQueue) {
         this.checkLibraryQueue = checkLibraryQueue;
         return this;
     }
 
-    public HandleVersionFileTask withDownloadLibraryQueue(ITasksQueue<MojangVersion> downloadLibraryQueue) {
+    public HandleVersionFileTask withDownloadLibraryQueue(ITasksQueue<IMinecraftVersionInfo> downloadLibraryQueue) {
         this.downloadLibraryQueue = downloadLibraryQueue;
         return this;
     }
 
-    public HandleVersionFileTask withCopyLibraryQueue(ITasksQueue<MojangVersion> copyLibraryQueue) {
+    public HandleVersionFileTask withCopyLibraryQueue(ITasksQueue<IMinecraftVersionInfo> copyLibraryQueue) {
         this.copyLibraryQueue = copyLibraryQueue;
         return this;
     }
 
-    public HandleVersionFileTask withCheckNonMavenLibsQueue(ITasksQueue<MojangVersion> checkNonMavenLibsQueue) {
+    public HandleVersionFileTask withCheckNonMavenLibsQueue(ITasksQueue<IMinecraftVersionInfo> checkNonMavenLibsQueue) {
         this.checkNonMavenLibsQueue = checkNonMavenLibsQueue;
         return this;
     }
@@ -126,7 +126,7 @@ public class HandleVersionFileTask implements IInstallTask<MojangVersion> {
     }
 
     @Override
-    public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException, InterruptedException {
+    public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) throws IOException, InterruptedException {
         Objects.requireNonNull(pack, "ModpackModel must be set.");
         Objects.requireNonNull(fileSystem, "LauncherFileSystem must be set.");
         Objects.requireNonNull(checkLibraryQueue, "CheckLibraryQueue must be set.");
@@ -137,7 +137,7 @@ public class HandleVersionFileTask implements IInstallTask<MojangVersion> {
         Objects.requireNonNull(launchOptions, "LaunchOptions must be set.");
         Objects.requireNonNull(javaRuntime, "JavaRuntime must be set.");
 
-        MojangVersion version = versionBuilder.buildVersionFromKey(null);
+        IMinecraftVersionInfo version = versionBuilder.buildVersionFromKey(null);
 
         if (version == null) {
             throw new DownloadException("The version.json file was invalid.");
@@ -174,7 +174,7 @@ public class HandleVersionFileTask implements IInstallTask<MojangVersion> {
         if (hasModernMinecraftForge || hasNeoForge) {
             File profileJson = new File(pack.getBinDir(), "install_profile.json");
             ZipFileRetriever zipVersionRetriever = new ZipFileRetriever(new File(pack.getBinDir(), "modpack.jar"));
-            MojangVersion installerVersion = new FileVersionBuilder(profileJson, zipVersionRetriever, null).buildVersionFromKey("install_profile");
+            IMinecraftVersionInfo installerVersion = new FileVersionBuilder(profileJson, zipVersionRetriever, null).buildVersionFromKey("install_profile");
 
             // These are for Minecraft Forge. They're invalid (but safe) with NeoForge
             final String[] versionIdParts = version.getId().split("-", 3);

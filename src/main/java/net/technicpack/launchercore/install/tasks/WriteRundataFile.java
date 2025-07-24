@@ -3,7 +3,7 @@ package net.technicpack.launchercore.install.tasks;
 import com.google.gson.*;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.utilslib.Utils;
 
@@ -13,7 +13,7 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
-public class WriteRundataFile implements IInstallTask<MojangVersion> {
+public class WriteRundataFile implements IInstallTask<IMinecraftVersionInfo> {
     private ModpackModel modpackModel;
     private Modpack modpack;
 
@@ -33,7 +33,7 @@ public class WriteRundataFile implements IInstallTask<MojangVersion> {
     }
 
     @Override
-    public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException {
+    public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) throws IOException {
         if ((modpack.getJava() == null || modpack.getJava().isEmpty()) && (modpack.getMemory() == null || modpack.getMemory().isEmpty()))
             return;
 

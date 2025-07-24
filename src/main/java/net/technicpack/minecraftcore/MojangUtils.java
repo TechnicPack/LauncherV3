@@ -29,11 +29,8 @@ import net.technicpack.launcher.io.IUserTypeInstanceCreator;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.minecraftcore.mojang.java.JavaRuntimesIndex;
-import net.technicpack.minecraftcore.mojang.version.MojangVersion;
-import net.technicpack.minecraftcore.mojang.version.io.CompleteVersion;
-import net.technicpack.minecraftcore.mojang.version.io.CompleteVersionV21;
-import net.technicpack.minecraftcore.mojang.version.io.Rule;
-import net.technicpack.minecraftcore.mojang.version.io.RuleAdapter;
+import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
+import net.technicpack.minecraftcore.mojang.version.io.*;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentListAdapter;
 import net.technicpack.utilslib.DateTypeAdapter;
@@ -66,7 +63,6 @@ public class MojangUtils {
     }
 
     private static final Gson gson;
-    private static final NavigableMap<Integer, Class<? extends MojangVersion>> versionJsonVersions;
 
     static {
         GsonBuilder builder = new GsonBuilder();
@@ -75,13 +71,10 @@ public class MojangUtils {
         builder.registerTypeAdapter(ArgumentList.class, new ArgumentListAdapter());
         builder.registerTypeAdapter(Rule.class, new RuleAdapter());
         builder.registerTypeAdapter(IUserType.class, new IUserTypeInstanceCreator());
+        builder.registerTypeAdapter(MinecraftVersionInfo.class, new MinecraftVersionInfoDeserializer());
         builder.enableComplexMapKeySerialization();
         builder.setPrettyPrinting();
         gson = builder.create();
-
-        versionJsonVersions = new TreeMap<>();
-        versionJsonVersions.put(0, CompleteVersion.class);
-        versionJsonVersions.put(21, CompleteVersionV21.class);
 
         REQUEST_FACTORY = HTTP_TRANSPORT.createRequestFactory(
                 request -> request.setParser(new JsonObjectParser(JSON_FACTORY))
@@ -126,36 +119,13 @@ public class MojangUtils {
         }
     }
 
-    public static MojangVersion parseVersionJson(String json) {
-        JsonObject root = JsonParser.parseString(json).getAsJsonObject();
-
-        // Safeguard in the event the version.json we get is actually the one inside a vanilla Minecraft jar
-        // (which isn't valid)
-        if (root.has("world_version") && root.has("protocol_version")) {
-            throw new IllegalArgumentException("Invalid version file, this looks like a Minecraft client jar. Are you sure you didn't place a Minecraft jar as the modpack.jar?");
-        }
-
-        Class<? extends MojangVersion> versionJsonType;
-        if (root.has("minimumLauncherVersion")) {
-            int minLauncherVersion = root.get("minimumLauncherVersion").getAsInt();
-            Map.Entry<Integer, Class<? extends MojangVersion>> entry = versionJsonVersions.floorEntry(minLauncherVersion);
-            if (entry == null) {
-                throw new IllegalArgumentException("Unsupported minimumLauncherVersion: " + minLauncherVersion);
-            }
-            versionJsonType = entry.getValue();
-        } else { // fallback: check if "arguments" key exists since only 1.13+ should have it
-            versionJsonType = root.has("arguments") ? CompleteVersionV21.class : CompleteVersion.class;
-        }
-        return getGson().fromJson(root, versionJsonType);
-    }
-
     public static boolean isLegacyVersion(String version) {
         final String[] versionParts = version.split("[.-]", 3);
 
         return Integer.parseInt(versionParts[0]) == 1 && Integer.parseInt(versionParts[1]) < 6;
     }
 
-    public static boolean hasModernMinecraftForge(MojangVersion version) {
+    public static boolean hasModernMinecraftForge(IMinecraftVersionInfo version) {
         Pattern p = Pattern.compile("^(?<mc>[0-9.]+)-forge-(?<forge>[0-9.]+)$");
         Matcher m = p.matcher(version.getId());
 
@@ -181,14 +151,14 @@ public class MojangUtils {
         return false;
     }
 
-    public static boolean hasNeoForge(MojangVersion version) {
+    public static boolean hasNeoForge(IMinecraftVersionInfo version) {
         Pattern p = Pattern.compile("^neoforge-(?<forge>[0-9.]+)");
         Matcher m = p.matcher(version.getId());
 
         return m.lookingAt();
     }
 
-    public static String getMinecraftVersion(MojangVersion version) {
+    public static String getMinecraftVersion(IMinecraftVersionInfo version) {
         final String id = version.getId();
 
         // Simplification in case it doesn't have Forge at all
@@ -205,7 +175,7 @@ public class MojangUtils {
         return idParts[0];
     }
 
-    public static boolean requiresForgeWrapper(MojangVersion version) {
+    public static boolean requiresForgeWrapper(IMinecraftVersionInfo version) {
         if (hasNeoForge(version)) {
             return true;
         }

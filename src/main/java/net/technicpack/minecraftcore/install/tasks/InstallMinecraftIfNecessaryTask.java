@@ -25,14 +25,14 @@ import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.SHA1FileVerifier;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
-import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.io.GameDownloads;
 import net.technicpack.utilslib.Utils;
 
 import java.io.File;
 import java.io.IOException;
 
-public class InstallMinecraftIfNecessaryTask extends ListenerTask<MojangVersion> {
+public class InstallMinecraftIfNecessaryTask extends ListenerTask<IMinecraftVersionInfo> {
 
 	private ModpackModel pack;
 	private String minecraftVersion;
@@ -52,10 +52,10 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask<MojangVersion>
 	}
 
 	@Override
-	public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException, InterruptedException {
+	public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) throws IOException, InterruptedException {
 		super.runTask(queue);
 
-		MojangVersion version = queue.getMetadata();
+		IMinecraftVersionInfo version = queue.getMetadata();
 
 		GameDownloads dls = version.getDownloads();
 

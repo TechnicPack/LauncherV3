@@ -32,7 +32,7 @@ import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.RunData;
 import net.technicpack.minecraftcore.MojangUtils;
-import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import net.technicpack.platform.IPlatformApi;
@@ -72,7 +72,7 @@ public class MinecraftLauncher {
     }
 
     public GameProcess launch(ModpackModel pack, long memory, LaunchOptions options, ProcessExitListener exitListener,
-            MojangVersion version) throws IOException, InstallException {
+            IMinecraftVersionInfo version) throws IOException, InstallException {
         List<String> commands = buildCommands(pack, memory, version, options);
 
         // This will never be null
@@ -104,7 +104,7 @@ public class MinecraftLauncher {
         return mcProcess;
     }
 
-    private List<String> buildCommands(ModpackModel pack, long memory, MojangVersion version, LaunchOptions options) throws InstallException {
+    private List<String> buildCommands(ModpackModel pack, long memory, IMinecraftVersionInfo version, LaunchOptions options) throws InstallException {
         LaunchCommandCollector commands = new LaunchCommandCollector();
 
         // Wrapper command (optirun, etc)
@@ -259,7 +259,7 @@ public class MinecraftLauncher {
         return commands.collect();
     }
 
-    private StringSubstitutor createParamDereferencer(ModpackModel pack, MojangVersion version, String nativesDir, String cpString, ILaunchOptions launchOpts) {
+    private StringSubstitutor createParamDereferencer(ModpackModel pack, IMinecraftVersionInfo version, String nativesDir, String cpString, ILaunchOptions launchOpts) {
         Map<String, String> params = new HashMap<>();
         IUserType user = userModel.getCurrentUser();
         File gameDirectory = pack.getInstalledDirectory();
@@ -308,7 +308,7 @@ public class MinecraftLauncher {
         return new StringSubstitutor(params);
     }
 
-    private String buildClassPath(ModpackModel pack, MojangVersion version, ILaunchOptions launchOptions) throws InstallException {
+    private String buildClassPath(ModpackModel pack, IMinecraftVersionInfo version, ILaunchOptions launchOptions) throws InstallException {
         StringBuilder sb = new StringBuilder(10_000);
         final char separator = File.pathSeparatorChar;
 

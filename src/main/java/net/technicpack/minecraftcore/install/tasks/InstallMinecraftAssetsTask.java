@@ -33,7 +33,7 @@ import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.SHA1FileVerifier;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
-import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.utilslib.Utils;
 
 import java.io.File;
@@ -44,13 +44,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
-public class InstallMinecraftAssetsTask implements IInstallTask<MojangVersion> {
+public class InstallMinecraftAssetsTask implements IInstallTask<IMinecraftVersionInfo> {
     private final ModpackModel modpack;
     private final String assetsDirectory;
     private final Path assetsIndex;
-    private final ITasksQueue<MojangVersion> checkAssetsQueue;
-    private final ITasksQueue<MojangVersion> downloadAssetsQueue;
-    private final ITasksQueue<MojangVersion> copyAssetsQueue;
+    private final ITasksQueue<IMinecraftVersionInfo> checkAssetsQueue;
+    private final ITasksQueue<IMinecraftVersionInfo> downloadAssetsQueue;
+    private final ITasksQueue<IMinecraftVersionInfo> copyAssetsQueue;
 
     private static final String VIRTUAL_FIELD = "virtual";
     private static final String MAP_TO_RESOURCES_FIELD = "map_to_resources";
@@ -58,7 +58,7 @@ public class InstallMinecraftAssetsTask implements IInstallTask<MojangVersion> {
     private static final String SIZE_FIELD = "size";
     private static final String HASH_FIELD = "hash";
 
-    public InstallMinecraftAssetsTask(ModpackModel modpack, String assetsDirectory, File assetsIndex, ITasksQueue<MojangVersion> checkAssetsQueue, ITasksQueue<MojangVersion> downloadAssetsQueue, ITasksQueue<MojangVersion> copyAssetsQueue) {
+    public InstallMinecraftAssetsTask(ModpackModel modpack, String assetsDirectory, File assetsIndex, ITasksQueue<IMinecraftVersionInfo> checkAssetsQueue, ITasksQueue<IMinecraftVersionInfo> downloadAssetsQueue, ITasksQueue<IMinecraftVersionInfo> copyAssetsQueue) {
         this.modpack = modpack;
         this.assetsDirectory = assetsDirectory;
         this.assetsIndex = assetsIndex.toPath();
@@ -78,7 +78,7 @@ public class InstallMinecraftAssetsTask implements IInstallTask<MojangVersion> {
     }
 
     @Override
-    public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException {
+    public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) throws IOException {
         JsonObject obj = readAssetsIndex();
 
         boolean isVirtual = false;
@@ -93,7 +93,7 @@ public class InstallMinecraftAssetsTask implements IInstallTask<MojangVersion> {
             mapToResources = obj.get(MAP_TO_RESOURCES_FIELD).getAsBoolean();
         }
 
-        MojangVersion version = queue.getMetadata();
+        IMinecraftVersionInfo version = queue.getMetadata();
 
         version.setAreAssetsVirtual(isVirtual);
         version.setAssetsMapToResources(mapToResources);
@@ -162,7 +162,7 @@ public class InstallMinecraftAssetsTask implements IInstallTask<MojangVersion> {
             cloneTo = new File(modpack.getResourcesDir(), assetPath);
         }
 
-        EnsureFileTask<MojangVersion> ensureFileTask = new EnsureFileTask<>(downloadAssetsQueue, target)
+        EnsureFileTask<IMinecraftVersionInfo> ensureFileTask = new EnsureFileTask<>(downloadAssetsQueue, target)
                 .withUrl(url)
                 .withVerifier(verifier);
 

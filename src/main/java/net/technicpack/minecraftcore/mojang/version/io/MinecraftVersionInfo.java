@@ -21,7 +21,7 @@ package net.technicpack.minecraftcore.mojang.version.io;
 
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
-import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 
 import java.util.Date;
@@ -29,12 +29,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused", "java:S2065"})
-public class CompleteVersionV21 implements MojangVersion {
+public class MinecraftVersionInfo implements IMinecraftVersionInfo {
     private String id;
     private Date time;
     private Date releaseTime;
     private ReleaseType type;
-    private LaunchArguments arguments;
     private List<Library> libraries;
     private String mainClass;
     private int minimumLauncherVersion;
@@ -45,6 +44,13 @@ public class CompleteVersionV21 implements MojangVersion {
     private GameDownloads downloads;
     private String inheritsFrom;
     private VersionJavaInfo javaVersion;
+
+    // Used in newer formats (minimumLauncherVersion = 21)
+    private LaunchArguments arguments;
+
+    // These are used by older formats (minimumLauncherVersion < 21)
+    private String minecraftArguments;
+    private String javaArguments;
 
     private transient boolean areAssetsVirtual;
     private transient boolean mapToResources;
@@ -198,6 +204,10 @@ public class CompleteVersionV21 implements MojangVersion {
     @Override
     public void setJavaRuntime(IJavaRuntime runtime) {
         this.javaRuntime = runtime;
+    }
+
+    public void setArguments(LaunchArguments arguments) {
+        this.arguments = arguments;
     }
 
     @Override

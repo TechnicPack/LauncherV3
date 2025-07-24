@@ -2,18 +2,17 @@ package net.technicpack.launchercore.install.tasks;
 
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.rest.io.Modpack;
 
 import java.io.File;
-import java.io.IOException;
 
-public class CheckRunDataFile implements IInstallTask<MojangVersion> {
+public class CheckRunDataFile implements IInstallTask<IMinecraftVersionInfo> {
     private final ModpackModel modpackModel;
     private final Modpack modpack;
-    private final TaskGroup<MojangVersion> writeRunDataGroup;
+    private final TaskGroup<IMinecraftVersionInfo> writeRunDataGroup;
 
-    public CheckRunDataFile(ModpackModel modpackModel, Modpack modpack, TaskGroup<MojangVersion> writeRunDataGroup) {
+    public CheckRunDataFile(ModpackModel modpackModel, Modpack modpack, TaskGroup<IMinecraftVersionInfo> writeRunDataGroup) {
         this.modpackModel = modpackModel;
         this.modpack = modpack;
         this.writeRunDataGroup = writeRunDataGroup;
@@ -30,7 +29,7 @@ public class CheckRunDataFile implements IInstallTask<MojangVersion> {
     }
 
     @Override
-    public void runTask(InstallTasksQueue<MojangVersion> queue) {
+    public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) {
         File file = modpackModel.getBinDir();
         File runDataFile = new File(file, "runData");
 

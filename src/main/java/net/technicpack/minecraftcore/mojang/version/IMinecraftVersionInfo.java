@@ -27,39 +27,38 @@ import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import java.util.Date;
 import java.util.List;
 
-public interface MojangVersion {
+public interface IMinecraftVersionInfo {
+    String getId();
 
-    public String getId();
+    ReleaseType getType();
 
-    public ReleaseType getType();
+    void setType(ReleaseType releaseType);
 
-    public void setType(ReleaseType releaseType);
+    Date getUpdatedTime();
 
-    public Date getUpdatedTime();
+    void setUpdatedTime(Date updatedTime);
 
-    public void setUpdatedTime(Date updatedTime);
+    Date getReleaseTime();
 
-    public Date getReleaseTime();
+    void setReleaseTime(Date releaseTime);
 
-    public void setReleaseTime(Date releaseTime);
+    ArgumentList getMinecraftArguments();
 
-    public ArgumentList getMinecraftArguments();
+    ArgumentList getJavaArguments();
 
-    public ArgumentList getJavaArguments();
+    List<Library> getLibraries();
 
-    public List<Library> getLibraries();
+    List<Library> getLibrariesForCurrentOS(ILaunchOptions options, IJavaRuntime runtime);
 
-    public List<Library> getLibrariesForCurrentOS(ILaunchOptions options, IJavaRuntime runtime);
+    String getMainClass();
 
-    public String getMainClass();
+    void setMainClass(String mainClass);
 
-    public void setMainClass(String mainClass);
+    int getMinimumLauncherVersion();
 
-    public int getMinimumLauncherVersion();
+    String getIncompatibilityReason();
 
-    public String getIncompatibilityReason();
-
-    public List<Rule> getRules();
+    List<Rule> getRules();
 
     String getAssetsKey();
 
@@ -67,27 +66,28 @@ public interface MojangVersion {
 
     GameDownloads getDownloads();
 
-    public String getParentVersion();
+    String getParentVersion();
 
-    public boolean getAreAssetsVirtual();
+    boolean getAreAssetsVirtual();
 
-    public void setAreAssetsVirtual(boolean areAssetsVirtual);
+    void setAreAssetsVirtual(boolean areAssetsVirtual);
 
-    public boolean getAssetsMapToResources();
+    boolean getAssetsMapToResources();
 
-    public void setAssetsMapToResources(boolean mapToResources);
+    void setAssetsMapToResources(boolean mapToResources);
 
-    public void addLibrary(Library library);
+    void addLibrary(Library library);
 
-    public void prependLibrary(Library library);
+    void prependLibrary(Library library);
 
     /**
      * Get information about the Mojang JRE
-     * @return The Mojang JRE information.<br>If there isn't one associated with the version.json manifest file, null will be returned.
+     * @return The Mojang JRE information.<br>If there isn't one associated with the version.json manifest file, null
+     * will be returned.
      */
     VersionJavaInfo getMojangRuntimeInformation();
 
-    public void removeLibrary(String libraryName);
+    void removeLibrary(String libraryName);
 
     IJavaRuntime getJavaRuntime();
 

@@ -30,22 +30,22 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.java.JavaRuntime;
 import net.technicpack.minecraftcore.mojang.java.JavaRuntimesIndex;
-import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.io.Download;
 import net.technicpack.minecraftcore.mojang.version.io.VersionJavaInfo;
 
 import java.io.File;
 import java.io.IOException;
 
-public class EnsureJavaRuntimeManifestTask implements IInstallTask<MojangVersion> {
+public class EnsureJavaRuntimeManifestTask implements IInstallTask<IMinecraftVersionInfo> {
 
     private final File runtimesDirectory;
     private final ModpackModel modpack;
-    private final ITasksQueue<MojangVersion> fetchJavaManifest;
-    private final ITasksQueue<MojangVersion> examineJavaQueue;
-    private final ITasksQueue<MojangVersion> downloadJavaQueue;
+    private final ITasksQueue<IMinecraftVersionInfo> fetchJavaManifest;
+    private final ITasksQueue<IMinecraftVersionInfo> examineJavaQueue;
+    private final ITasksQueue<IMinecraftVersionInfo> downloadJavaQueue;
 
-    public EnsureJavaRuntimeManifestTask(File runtimesDirectory, ModpackModel modpack, ITasksQueue<MojangVersion> fetchJavaManifest, ITasksQueue<MojangVersion> examineJavaQueue, ITasksQueue<MojangVersion> downloadJavaQueue) {
+    public EnsureJavaRuntimeManifestTask(File runtimesDirectory, ModpackModel modpack, ITasksQueue<IMinecraftVersionInfo> fetchJavaManifest, ITasksQueue<IMinecraftVersionInfo> examineJavaQueue, ITasksQueue<IMinecraftVersionInfo> downloadJavaQueue) {
         this.runtimesDirectory = runtimesDirectory;
         this.modpack = modpack;
         this.fetchJavaManifest = fetchJavaManifest;
@@ -64,8 +64,8 @@ public class EnsureJavaRuntimeManifestTask implements IInstallTask<MojangVersion
     }
 
     @Override
-    public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException {
-        MojangVersion version = queue.getMetadata();
+    public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) throws IOException {
+        IMinecraftVersionInfo version = queue.getMetadata();
 
         VersionJavaInfo runtimeInfo = version.getMojangRuntimeInformation();
 

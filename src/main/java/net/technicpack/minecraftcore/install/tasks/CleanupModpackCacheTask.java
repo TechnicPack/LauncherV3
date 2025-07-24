@@ -22,7 +22,7 @@ package net.technicpack.minecraftcore.install.tasks;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.Mod;
 import org.apache.commons.io.FileUtils;
@@ -32,7 +32,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-public class CleanupModpackCacheTask implements IInstallTask<MojangVersion> {
+public class CleanupModpackCacheTask implements IInstallTask<IMinecraftVersionInfo> {
 	private ModpackModel pack;
 	private Modpack modpack;
 
@@ -52,7 +52,7 @@ public class CleanupModpackCacheTask implements IInstallTask<MojangVersion> {
 	}
 
 	@Override
-	public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException {
+	public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) throws IOException {
 		final File cacheDir = pack.getCacheDir();
 
 		File[] files = cacheDir.listFiles();

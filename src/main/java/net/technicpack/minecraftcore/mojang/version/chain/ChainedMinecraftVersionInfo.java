@@ -21,7 +21,7 @@ package net.technicpack.minecraftcore.mojang.version.chain;
 
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
-import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.io.*;
 import net.technicpack.minecraftcore.mojang.version.io.argument.Argument;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
@@ -31,11 +31,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class VersionChain implements MojangVersion {
+public class ChainedMinecraftVersionInfo implements IMinecraftVersionInfo {
 
-    private List<MojangVersion> chain;
+    private List<IMinecraftVersionInfo> chain;
 
-    public VersionChain(MojangVersion rootVersion) {
+    public ChainedMinecraftVersionInfo(IMinecraftVersionInfo rootVersion) {
         chain = new LinkedList<>();
         chain.add(rootVersion);
     }
@@ -79,7 +79,7 @@ public class VersionChain implements MojangVersion {
     public ArgumentList getMinecraftArguments() {
         ArgumentList.Builder allArguments = new ArgumentList.Builder();
 
-        for (MojangVersion version : chain) {
+        for (IMinecraftVersionInfo version : chain) {
             if (version.getMinecraftArguments() != null) {
                 for (Argument arg : version.getMinecraftArguments().getArguments()) {
                     allArguments.addArgument(arg);
@@ -94,7 +94,7 @@ public class VersionChain implements MojangVersion {
     public ArgumentList getJavaArguments() {
         ArgumentList.Builder allArguments = new ArgumentList.Builder();
 
-        for (MojangVersion version : chain) {
+        for (IMinecraftVersionInfo version : chain) {
             if (version.getJavaArguments() != null) {
                 for (Argument arg : version.getJavaArguments().getArguments()) {
                     allArguments.addArgument(arg);
@@ -109,7 +109,7 @@ public class VersionChain implements MojangVersion {
     public List<Library> getLibraries() {
         List<Library> allLibraries = new LinkedList<>();
 
-        for (MojangVersion version : chain) {
+        for (IMinecraftVersionInfo version : chain) {
             if (version.getLibraries() != null)
                 allLibraries.addAll(0, version.getLibraries());
         }
@@ -122,7 +122,7 @@ public class VersionChain implements MojangVersion {
         List<Library> allLibraries = new LinkedList<>();
 
         for (int i = chain.size() - 1; i >= 0; i--) {
-            MojangVersion version = chain.get(i);
+            IMinecraftVersionInfo version = chain.get(i);
             List<Library> librariesForCurrentOS = version.getLibrariesForCurrentOS(options, runtime);
             if (librariesForCurrentOS != null)
                 allLibraries.addAll(0, librariesForCurrentOS);
@@ -133,7 +133,7 @@ public class VersionChain implements MojangVersion {
 
     @Override
     public String getMainClass() {
-        for (MojangVersion version : chain) {
+        for (IMinecraftVersionInfo version : chain) {
             if (version.getMainClass() != null)
                 return version.getMainClass();
         }
@@ -153,7 +153,7 @@ public class VersionChain implements MojangVersion {
 
     @Override
     public String getIncompatibilityReason() {
-        for (MojangVersion version : chain) {
+        for (IMinecraftVersionInfo version : chain) {
             if (version.getIncompatibilityReason() != null)
                 return version.getIncompatibilityReason();
         }
@@ -165,7 +165,7 @@ public class VersionChain implements MojangVersion {
     public List<Rule> getRules() {
         List<Rule> allRules = new LinkedList<>();
 
-        for (MojangVersion version : chain) {
+        for (IMinecraftVersionInfo version : chain) {
             if (version.getRules() != null)
                 allRules.addAll(0, version.getRules());
         }
@@ -175,7 +175,7 @@ public class VersionChain implements MojangVersion {
 
     @Override
     public AssetIndex getAssetIndex() {
-        for (MojangVersion version : chain) {
+        for (IMinecraftVersionInfo version : chain) {
             if (version.getAssetIndex() != null)
                 return version.getAssetIndex();
         }
@@ -185,7 +185,7 @@ public class VersionChain implements MojangVersion {
 
     @Override
     public String getAssetsKey() {
-        for (MojangVersion version : chain) {
+        for (IMinecraftVersionInfo version : chain) {
             if (version.getAssetsKey() != null)
                 return version.getAssetsKey();
         }
@@ -195,7 +195,7 @@ public class VersionChain implements MojangVersion {
 
     @Override
     public GameDownloads getDownloads() {
-        for (MojangVersion version : chain) {
+        for (IMinecraftVersionInfo version : chain) {
             if (version.getDownloads() != null)
                 return version.getDownloads();
         }
@@ -240,7 +240,7 @@ public class VersionChain implements MojangVersion {
 
     @Override
     public VersionJavaInfo getMojangRuntimeInformation() {
-        for (MojangVersion version : chain) {
+        for (IMinecraftVersionInfo version : chain) {
             if (version.getMojangRuntimeInformation() != null)
                 return version.getMojangRuntimeInformation();
         }
@@ -250,14 +250,14 @@ public class VersionChain implements MojangVersion {
 
     @Override
     public void removeLibrary(String libraryName) {
-        for (MojangVersion version : chain) {
+        for (IMinecraftVersionInfo version : chain) {
             version.removeLibrary(libraryName);
         }
     }
 
     @Override
     public IJavaRuntime getJavaRuntime() {
-        for (MojangVersion version : chain) {
+        for (IMinecraftVersionInfo version : chain) {
             if (version.getJavaRuntime() != null)
                 return version.getJavaRuntime();
         }
@@ -267,12 +267,12 @@ public class VersionChain implements MojangVersion {
 
     @Override
     public void setJavaRuntime(IJavaRuntime runtime) {
-        for (MojangVersion version : chain) {
+        for (IMinecraftVersionInfo version : chain) {
             version.setJavaRuntime(runtime);
         }
     }
 
-    public void addVersionToChain(MojangVersion version) {
+    public void addVersionToChain(IMinecraftVersionInfo version) {
         chain.add(version);
     }
 }

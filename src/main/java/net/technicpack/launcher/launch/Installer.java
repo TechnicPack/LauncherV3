@@ -43,7 +43,7 @@ import net.technicpack.launchercore.util.LaunchAction;
 import net.technicpack.minecraftcore.install.tasks.*;
 import net.technicpack.minecraftcore.launch.LaunchOptions;
 import net.technicpack.minecraftcore.launch.MinecraftLauncher;
-import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
 import net.technicpack.minecraftcore.mojang.version.builder.FileVersionBuilder;
 import net.technicpack.minecraftcore.mojang.version.builder.MojangVersionRetriever;
@@ -182,13 +182,13 @@ public class Installer {
             gameProcess = null;
 
             try {
-                InstallTasksQueue<MojangVersion> tasksQueue = new InstallTasksQueue<>(listener);
+                InstallTasksQueue<IMinecraftVersionInfo> tasksQueue = new InstallTasksQueue<>(listener);
                 MojangVersionBuilder versionBuilder = createVersionBuilder(tasksQueue);
                 JavaVersionRepository javaVersions = launcher.getJavaVersions();
 
                 final boolean mojangJavaWanted = settings.shouldUseMojangJava();
 
-                MojangVersion version;
+                IMinecraftVersionInfo version;
 
                 buildTasksQueue(tasksQueue, build, versionBuilder, javaVersions.getSelectedVersion(), mojangJavaWanted);
 
@@ -311,8 +311,8 @@ public class Installer {
             showErrorDialog(resources.getString("launcher.installerror.title"), message);
         }
 
-        private void buildTasksQueue(InstallTasksQueue<MojangVersion> queue, String build,
-                                    MojangVersionBuilder versionBuilder, IJavaRuntime selectedJavaRuntime, boolean mojangJavaWanted) throws IOException, InstallException {
+        private void buildTasksQueue(InstallTasksQueue<IMinecraftVersionInfo> queue, String build,
+                                     MojangVersionBuilder versionBuilder, IJavaRuntime selectedJavaRuntime, boolean mojangJavaWanted) throws IOException, InstallException {
             PackInfo packInfo = pack.getPackInfo();
 
             // Abort modpack install/launch if we don't have the necessary information.
@@ -330,24 +330,24 @@ public class Installer {
             String minecraft = modpackData.getGameVersion();
             ModpackVersion installedVersion = pack.getInstalledVersion();
 
-            TaskGroup<MojangVersion> examineModpackData = new TaskGroup<>(resources.getString("install.message.examiningmodpack"));
-            TaskGroup<MojangVersion> verifyingFiles = new TaskGroup<>(resources.getString("install.message.verifyingfiles"));
-            TaskGroup<MojangVersion> downloadingMods = new TaskGroup<>(resources.getString("install.message.downloadmods"));
-            TaskGroup<MojangVersion> installingMods = new TaskGroup<>(resources.getString("install.message.installmods"));
-            TaskGroup<MojangVersion> checkVersionFile = new TaskGroup<>(resources.getString("install.message.checkversionfile"));
-            TaskGroup<MojangVersion> installVersionFile = new TaskGroup<>(resources.getString("install.message.installversionfile"));
-            TaskGroup<MojangVersion> rundataTaskGroup = new TaskGroup<>(resources.getString("install.message.runData"));
-            TaskGroup<MojangVersion> examineVersionFile = new TaskGroup<>(resources.getString("install.message.examiningversionfile"));
-            TaskGroup<MojangVersion> grabLibs = new TaskGroup<>(resources.getString("install.message.grablibraries"));
-            TaskGroup<MojangVersion> checkNonMavenLibs = new TaskGroup<>(resources.getString("install.message.nonmavenlibs"));
-            TaskGroup<MojangVersion> installingLibs = new TaskGroup<>(resources.getString("install.message.installlibs"));
-            TaskGroup<MojangVersion> installingMinecraft = new TaskGroup<>(resources.getString("install.message.installminecraft"));
-            TaskGroup<MojangVersion> examineIndex = new TaskGroup<>(resources.getString("install.message.examiningindex"));
-            TaskGroup<MojangVersion> verifyingAssets = new TaskGroup<>(resources.getString("install.message.verifyassets"));
-            TaskGroup<MojangVersion> installingAssets = new TaskGroup<>(resources.getString("install.message.installassets"));
-            TaskGroup<MojangVersion> fetchJavaManifest = new TaskGroup<>("Obtaining Java runtime information...");
-            TaskGroup<MojangVersion> examineJava = new TaskGroup<>("Examining Java runtime...");
-            TaskGroup<MojangVersion> downloadJava = new TaskGroup<>("Downloading Java runtime...");
+            TaskGroup<IMinecraftVersionInfo> examineModpackData = new TaskGroup<>(resources.getString("install.message.examiningmodpack"));
+            TaskGroup<IMinecraftVersionInfo> verifyingFiles = new TaskGroup<>(resources.getString("install.message.verifyingfiles"));
+            TaskGroup<IMinecraftVersionInfo> downloadingMods = new TaskGroup<>(resources.getString("install.message.downloadmods"));
+            TaskGroup<IMinecraftVersionInfo> installingMods = new TaskGroup<>(resources.getString("install.message.installmods"));
+            TaskGroup<IMinecraftVersionInfo> checkVersionFile = new TaskGroup<>(resources.getString("install.message.checkversionfile"));
+            TaskGroup<IMinecraftVersionInfo> installVersionFile = new TaskGroup<>(resources.getString("install.message.installversionfile"));
+            TaskGroup<IMinecraftVersionInfo> rundataTaskGroup = new TaskGroup<>(resources.getString("install.message.runData"));
+            TaskGroup<IMinecraftVersionInfo> examineVersionFile = new TaskGroup<>(resources.getString("install.message.examiningversionfile"));
+            TaskGroup<IMinecraftVersionInfo> grabLibs = new TaskGroup<>(resources.getString("install.message.grablibraries"));
+            TaskGroup<IMinecraftVersionInfo> checkNonMavenLibs = new TaskGroup<>(resources.getString("install.message.nonmavenlibs"));
+            TaskGroup<IMinecraftVersionInfo> installingLibs = new TaskGroup<>(resources.getString("install.message.installlibs"));
+            TaskGroup<IMinecraftVersionInfo> installingMinecraft = new TaskGroup<>(resources.getString("install.message.installminecraft"));
+            TaskGroup<IMinecraftVersionInfo> examineIndex = new TaskGroup<>(resources.getString("install.message.examiningindex"));
+            TaskGroup<IMinecraftVersionInfo> verifyingAssets = new TaskGroup<>(resources.getString("install.message.verifyassets"));
+            TaskGroup<IMinecraftVersionInfo> installingAssets = new TaskGroup<>(resources.getString("install.message.installassets"));
+            TaskGroup<IMinecraftVersionInfo> fetchJavaManifest = new TaskGroup<>("Obtaining Java runtime information...");
+            TaskGroup<IMinecraftVersionInfo> examineJava = new TaskGroup<>("Examining Java runtime...");
+            TaskGroup<IMinecraftVersionInfo> downloadJava = new TaskGroup<>("Downloading Java runtime...");
 
             queue.addTask(examineModpackData);
             queue.addTask(verifyingFiles);
@@ -404,7 +404,7 @@ public class Installer {
             installingMinecraft.addTask(new InstallMinecraftIfNecessaryTask(pack, minecraft, fileSystem.getCacheDirectory(), jarRegenerationRequired));
         }
 
-        private MojangVersionBuilder createVersionBuilder(InstallTasksQueue<MojangVersion> tasksQueue) {
+        private MojangVersionBuilder createVersionBuilder(InstallTasksQueue<IMinecraftVersionInfo> tasksQueue) {
             ZipFileRetriever zipVersionRetriever = new ZipFileRetriever(new File(pack.getBinDir(), "modpack.jar"));
             HttpFileRetriever fallbackVersionRetriever = new HttpFileRetriever(TechnicConstants.VERSIONS_BASE_URL, tasksQueue.getDownloadListener());
 

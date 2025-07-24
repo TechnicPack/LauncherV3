@@ -19,18 +19,19 @@
 
 package net.technicpack.minecraftcore.mojang.version.builder;
 
-import net.technicpack.minecraftcore.MojangUtils;
-import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
-import org.apache.commons.io.FileUtils;
+import net.technicpack.minecraftcore.mojang.version.io.MinecraftVersionInfo;
+import net.technicpack.utilslib.Utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
 
 public class FileVersionBuilder implements MojangVersionBuilder {
-
     private File version;
     private MojangVersionRetriever retriever;
     private List<MojangVersionRetriever> fallbackRetrievers;
@@ -42,7 +43,7 @@ public class FileVersionBuilder implements MojangVersionBuilder {
     }
 
     @Override
-    public MojangVersion buildVersionFromKey(String key) throws InterruptedException, IOException {
+    public IMinecraftVersionInfo buildVersionFromKey(String key) throws InterruptedException, IOException {
         File target = version;
 
         if (key != null) {
@@ -67,7 +68,8 @@ public class FileVersionBuilder implements MojangVersionBuilder {
         if (!target.exists())
             return null;
 
-        String json = FileUtils.readFileToString(target, StandardCharsets.UTF_8);
-        return MojangUtils.parseVersionJson(json);
+        try (Reader reader = Files.newBufferedReader(target.toPath(), StandardCharsets.UTF_8)) {
+            return Utils.getGson().fromJson(reader, MinecraftVersionInfo.class);
+        }
     }
 }

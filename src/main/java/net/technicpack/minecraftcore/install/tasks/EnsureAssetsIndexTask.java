@@ -28,23 +28,22 @@ import net.technicpack.launchercore.install.verifiers.SHA1FileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidJsonFileVerifier;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
-import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.io.AssetIndex;
 
 import java.io.File;
-import java.io.IOException;
 
-public class EnsureAssetsIndexTask implements IInstallTask<MojangVersion> {
+public class EnsureAssetsIndexTask implements IInstallTask<IMinecraftVersionInfo> {
 
     private final File assetsDirectory;
     private final ModpackModel modpack;
-    private final ITasksQueue<MojangVersion> downloadIndexQueue;
-    private final ITasksQueue<MojangVersion> examineIndexQueue;
-    private final ITasksQueue<MojangVersion> checkAssetsQueue;
-    private final ITasksQueue<MojangVersion> downloadAssetsQueue;
-    private final ITasksQueue<MojangVersion> installAssetsQueue;
+    private final ITasksQueue<IMinecraftVersionInfo> downloadIndexQueue;
+    private final ITasksQueue<IMinecraftVersionInfo> examineIndexQueue;
+    private final ITasksQueue<IMinecraftVersionInfo> checkAssetsQueue;
+    private final ITasksQueue<IMinecraftVersionInfo> downloadAssetsQueue;
+    private final ITasksQueue<IMinecraftVersionInfo> installAssetsQueue;
 
-    public EnsureAssetsIndexTask(File assetsDirectory, ModpackModel modpack, ITasksQueue<MojangVersion> downloadIndexQueue, ITasksQueue<MojangVersion> examineIndexQueue, ITasksQueue<MojangVersion> checkAssetsQueue, ITasksQueue<MojangVersion> downloadAssetsQueue, ITasksQueue<MojangVersion> installAssetsQueue) {
+    public EnsureAssetsIndexTask(File assetsDirectory, ModpackModel modpack, ITasksQueue<IMinecraftVersionInfo> downloadIndexQueue, ITasksQueue<IMinecraftVersionInfo> examineIndexQueue, ITasksQueue<IMinecraftVersionInfo> checkAssetsQueue, ITasksQueue<IMinecraftVersionInfo> downloadAssetsQueue, ITasksQueue<IMinecraftVersionInfo> installAssetsQueue) {
         this.assetsDirectory = assetsDirectory;
         this.modpack = modpack;
         this.downloadIndexQueue = downloadIndexQueue;
@@ -65,8 +64,8 @@ public class EnsureAssetsIndexTask implements IInstallTask<MojangVersion> {
     }
 
     @Override
-    public void runTask(InstallTasksQueue<MojangVersion> queue) {
-        MojangVersion version = queue.getMetadata();
+    public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) {
+        IMinecraftVersionInfo version = queue.getMetadata();
 
         AssetIndex assetIndex = version.getAssetIndex();
 

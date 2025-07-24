@@ -4,9 +4,19 @@ import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 
 @SuppressWarnings({"unused"})
 public class LaunchArguments {
-
 	private ArgumentList game;
 	private ArgumentList jvm;
+
+    private LaunchArguments() {
+        // Empty constructor for GSON
+    }
+
+    public static LaunchArguments fromLegacyString(String minecraftArguments, String javaArguments) {
+        LaunchArguments args = new LaunchArguments();
+        args.game = ArgumentList.fromString(minecraftArguments);
+        args.jvm = ArgumentList.fromString(javaArguments);
+        return args;
+    }
 
 	public ArgumentList getGameArgs() {
 		return game;

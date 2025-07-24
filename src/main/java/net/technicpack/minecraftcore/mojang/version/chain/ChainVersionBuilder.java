@@ -19,7 +19,7 @@
 
 package net.technicpack.minecraftcore.mojang.version.chain;
 
-import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
 
 import java.io.IOException;
@@ -36,15 +36,15 @@ public class ChainVersionBuilder implements MojangVersionBuilder {
         this.chainedVersionBuilder = chainedVersionBuilder;
     }
 
-    public MojangVersion buildVersionFromKey(String key) throws InterruptedException, IOException {
-        MojangVersion primary = primaryVersionBuilder.buildVersionFromKey(key);
+    public IMinecraftVersionInfo buildVersionFromKey(String key) throws InterruptedException, IOException {
+        IMinecraftVersionInfo primary = primaryVersionBuilder.buildVersionFromKey(key);
 
         if (primary == null)
             return null;
 
-        VersionChain chain = new VersionChain(primary);
+        ChainedMinecraftVersionInfo chain = new ChainedMinecraftVersionInfo(primary);
 
-        MojangVersion latest = primary;
+        IMinecraftVersionInfo latest = primary;
 
         while (latest.getParentVersion() != null) {
             latest = chainedVersionBuilder.buildVersionFromKey(latest.getParentVersion());

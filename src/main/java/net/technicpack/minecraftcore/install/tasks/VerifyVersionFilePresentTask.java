@@ -23,12 +23,12 @@ import net.technicpack.launchercore.exception.PackNotAvailableOfflineException;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
 
 import java.io.IOException;
 
-public class VerifyVersionFilePresentTask implements IInstallTask<MojangVersion> {
+public class VerifyVersionFilePresentTask implements IInstallTask<IMinecraftVersionInfo> {
 	private MojangVersionBuilder builder;
     private String minecraftVersion;
     private ModpackModel modpack;
@@ -50,8 +50,8 @@ public class VerifyVersionFilePresentTask implements IInstallTask<MojangVersion>
 	}
 
 	@Override
-	public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException, InterruptedException {
-        MojangVersion version = builder.buildVersionFromKey(minecraftVersion);
+	public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) throws IOException, InterruptedException {
+        IMinecraftVersionInfo version = builder.buildVersionFromKey(minecraftVersion);
 
         if (version == null && modpack.isLocalOnly())
             throw new PackNotAvailableOfflineException(modpack.getDisplayName());

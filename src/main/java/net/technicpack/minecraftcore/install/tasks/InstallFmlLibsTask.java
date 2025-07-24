@@ -10,7 +10,7 @@ import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.install.verifiers.SHA1FileVerifier;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.FmlLibsManager;
-import net.technicpack.minecraftcore.mojang.version.MojangVersion;
+import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.rest.io.Modpack;
 
 import java.io.File;
@@ -18,18 +18,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Map;
 
-public class InstallFmlLibsTask implements IInstallTask<MojangVersion> {
+public class InstallFmlLibsTask implements IInstallTask<IMinecraftVersionInfo> {
     private final ModpackModel pack;
     private final LauncherFileSystem fileSystem;
     private final Modpack modpack;
-    private final ITasksQueue<MojangVersion> verifyingFiles;
-    private final ITasksQueue<MojangVersion> downloadLibraryQueue;
-    private final ITasksQueue<MojangVersion> copyLibraryQueue;
+    private final ITasksQueue<IMinecraftVersionInfo> verifyingFiles;
+    private final ITasksQueue<IMinecraftVersionInfo> downloadLibraryQueue;
+    private final ITasksQueue<IMinecraftVersionInfo> copyLibraryQueue;
 
     public InstallFmlLibsTask(ModpackModel pack, LauncherFileSystem fileSystem, Modpack modpack,
-                              ITasksQueue<MojangVersion> verifyingFiles,
-                              ITasksQueue<MojangVersion> downloadLibraryQueue,
-                              ITasksQueue<MojangVersion> copyLibraryQueue) {
+                              ITasksQueue<IMinecraftVersionInfo> verifyingFiles,
+                              ITasksQueue<IMinecraftVersionInfo> downloadLibraryQueue,
+                              ITasksQueue<IMinecraftVersionInfo> copyLibraryQueue) {
         this.pack = pack;
         this.fileSystem = fileSystem;
         this.modpack = modpack;
@@ -49,7 +49,7 @@ public class InstallFmlLibsTask implements IInstallTask<MojangVersion> {
     }
 
     @Override
-    public void runTask(InstallTasksQueue<MojangVersion> queue) throws IOException, InterruptedException {
+    public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) throws IOException, InterruptedException {
         final String minecraft = modpack.getGameVersion();
 
         // Add legacy FML libs
@@ -74,7 +74,7 @@ public class InstallFmlLibsTask implements IInstallTask<MojangVersion> {
             File target = new File(modpackFmlLibDir, name);
 
             if (!target.exists() || (verifier != null && !verifier.isFileValid(target))) {
-                EnsureFileTask<MojangVersion> ensureFileTask = new EnsureFileTask<>(downloadLibraryQueue, cached)
+                EnsureFileTask<IMinecraftVersionInfo> ensureFileTask = new EnsureFileTask<>(downloadLibraryQueue, cached)
                         .withUrl(TechnicConstants.TECHNIC_FML_LIB_REPO + name)
                         .withVerifier(verifier);
 
