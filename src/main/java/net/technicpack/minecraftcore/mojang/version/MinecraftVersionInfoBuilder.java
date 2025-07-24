@@ -17,11 +17,10 @@
  * along with Technic Minecraft Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.technicpack.minecraftcore.mojang.version.builder;
+package net.technicpack.minecraftcore.mojang.version;
 
-import java.io.File;
 import java.io.IOException;
 
-public interface MojangVersionRetriever {
-    void retrieveVersion(File file, String key) throws InterruptedException, IOException;
+public interface MinecraftVersionInfoBuilder {
+    IMinecraftVersionInfo buildVersionFromKey(String key) throws IOException, InterruptedException;
 }

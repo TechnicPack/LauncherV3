@@ -20,24 +20,24 @@
 package net.technicpack.minecraftcore.mojang.version.chain;
 
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
-import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
+import net.technicpack.minecraftcore.mojang.version.MinecraftVersionInfoBuilder;
 
 import java.io.IOException;
 import java.util.regex.Pattern;
 
-public class ChainVersionBuilder implements MojangVersionBuilder {
+public class ChainedMinecraftVersionInfoBuilder implements MinecraftVersionInfoBuilder {
     private static final Pattern MINECRAFT_VERSION_PATTERN = Pattern.compile("^\\d++(\\.\\d++)++$");
 
-    private MojangVersionBuilder primaryVersionBuilder;
-    private MojangVersionBuilder chainedVersionBuilder;
+    private final MinecraftVersionInfoBuilder primaryBuilder;
+    private final MinecraftVersionInfoBuilder chainedBuilder;
 
-    public ChainVersionBuilder(MojangVersionBuilder primaryVersionBuilder, MojangVersionBuilder chainedVersionBuilder) {
-        this.primaryVersionBuilder = primaryVersionBuilder;
-        this.chainedVersionBuilder = chainedVersionBuilder;
+    public ChainedMinecraftVersionInfoBuilder(MinecraftVersionInfoBuilder primaryBuilder, MinecraftVersionInfoBuilder chainedBuilder) {
+        this.primaryBuilder = primaryBuilder;
+        this.chainedBuilder = chainedBuilder;
     }
 
     public IMinecraftVersionInfo buildVersionFromKey(String key) throws InterruptedException, IOException {
-        IMinecraftVersionInfo primary = primaryVersionBuilder.buildVersionFromKey(key);
+        IMinecraftVersionInfo primary = primaryBuilder.buildVersionFromKey(key);
 
         if (primary == null)
             return null;
@@ -47,7 +47,7 @@ public class ChainVersionBuilder implements MojangVersionBuilder {
         IMinecraftVersionInfo latest = primary;
 
         while (latest.getParentVersion() != null) {
-            latest = chainedVersionBuilder.buildVersionFromKey(latest.getParentVersion());
+            latest = chainedBuilder.buildVersionFromKey(latest.getParentVersion());
 
             if (latest == null)
                 return null;
@@ -66,7 +66,7 @@ public class ChainVersionBuilder implements MojangVersionBuilder {
             if (!MINECRAFT_VERSION_PATTERN.matcher(parts[0]).matches())
                 throw new IOException("Latest version in version chain failed to resolve to a Minecraft version");
 
-            chain.addVersionToChain(chainedVersionBuilder.buildVersionFromKey(parts[0]));
+            chain.addVersionToChain(chainedBuilder.buildVersionFromKey(parts[0]));
         }
 
         return chain;

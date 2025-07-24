@@ -1,6 +1,7 @@
 package net.technicpack.minecraftcore.mojang.version.io;
 
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
+import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings({"unused"})
 public class LaunchArguments {
@@ -11,10 +12,10 @@ public class LaunchArguments {
         // Empty constructor for GSON
     }
 
-    public static LaunchArguments fromLegacyString(String minecraftArguments, String javaArguments) {
+    public static LaunchArguments fromLegacyString(String minecraftArguments) {
         LaunchArguments args = new LaunchArguments();
         args.game = ArgumentList.fromString(minecraftArguments);
-        args.jvm = ArgumentList.fromString(javaArguments);
+        args.jvm = null;
         return args;
     }
 
@@ -22,6 +23,7 @@ public class LaunchArguments {
 		return game;
 	}
 
+    @Nullable
 	public ArgumentList getJvmArgs() {
 		return jvm;
 	}

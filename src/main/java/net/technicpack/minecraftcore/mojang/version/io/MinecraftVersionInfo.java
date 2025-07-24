@@ -24,37 +24,46 @@ import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"unused", "java:S2065"})
+@SuppressWarnings("java:S2065")
 public class MinecraftVersionInfo implements IMinecraftVersionInfo {
-    private String id;
-    private Date time;
-    private Date releaseTime;
-    private ReleaseType type;
-    private List<Library> libraries;
+    private final String id;
+    private final ReleaseType type;
+    private final LaunchArguments arguments;
+    private final List<Library> libraries;
+    private final List<Rule> rules;
+    private final String assets;
+    private final AssetIndex assetIndex;
+    private final GameDownloads downloads;
+    private final String inheritsFrom;
+    private final VersionJavaInfo javaVersion;
     private String mainClass;
-    private int minimumLauncherVersion;
-    private String incompatibilityReason;
-    private List<Rule> rules;
-    private String assets;
-    private AssetIndex assetIndex;
-    private GameDownloads downloads;
-    private String inheritsFrom;
-    private VersionJavaInfo javaVersion;
-
-    // Used in newer formats (minimumLauncherVersion = 21)
-    private LaunchArguments arguments;
-
-    // These are used by older formats (minimumLauncherVersion < 21)
-    private String minecraftArguments;
-    private String javaArguments;
 
     private transient boolean areAssetsVirtual;
     private transient boolean mapToResources;
     private transient IJavaRuntime javaRuntime;
+
+    MinecraftVersionInfo(MinecraftVersionInfoRaw raw) {
+        id = raw.id;
+        type = raw.type;
+        if (raw.arguments != null) {
+            arguments = raw.arguments;
+        } else if (raw.minecraftArguments != null && !raw.minecraftArguments.isEmpty()) {
+            arguments = LaunchArguments.fromLegacyString(raw.minecraftArguments);
+        } else {
+            throw new IllegalArgumentException("No arguments found");
+        }
+        libraries = raw.libraries;
+        mainClass = raw.mainClass;
+        rules = raw.rules;
+        assets = raw.assets;
+        assetIndex = raw.assetIndex;
+        downloads = raw.downloads;
+        inheritsFrom = raw.inheritsFrom;
+        javaVersion = raw.javaVersion;
+    }
 
     @Override
     public String getId() {
@@ -64,31 +73,6 @@ public class MinecraftVersionInfo implements IMinecraftVersionInfo {
     @Override
     public ReleaseType getType() {
         return type;
-    }
-
-    @Override
-    public void setType(ReleaseType type) {
-        this.type = type;
-    }
-
-    @Override
-    public Date getUpdatedTime() {
-        return time;
-    }
-
-    @Override
-    public void setUpdatedTime(Date updatedTime) {
-        this.time = updatedTime;
-    }
-
-    @Override
-    public Date getReleaseTime() {
-        return releaseTime;
-    }
-
-    @Override
-    public void setReleaseTime(Date releaseTime) {
-        this.releaseTime = releaseTime;
     }
 
     @Override
@@ -119,16 +103,6 @@ public class MinecraftVersionInfo implements IMinecraftVersionInfo {
     @Override
     public void setMainClass(String mainClass) {
         this.mainClass = mainClass;
-    }
-
-    @Override
-    public int getMinimumLauncherVersion() {
-        return minimumLauncherVersion;
-    }
-
-    @Override
-    public String getIncompatibilityReason() {
-        return incompatibilityReason;
     }
 
     @Override
@@ -193,7 +167,7 @@ public class MinecraftVersionInfo implements IMinecraftVersionInfo {
 
     @Override
     public void removeLibrary(String libraryName) {
-        libraries = libraries.stream().filter(library -> !library.getName().equals(libraryName)).collect(Collectors.toList());
+        libraries.removeIf(library -> library.getName().equals(libraryName));
     }
 
     @Override
@@ -206,24 +180,23 @@ public class MinecraftVersionInfo implements IMinecraftVersionInfo {
         this.javaRuntime = runtime;
     }
 
-    public void setArguments(LaunchArguments arguments) {
-        this.arguments = arguments;
-    }
-
     @Override
     public String toString() {
-        return "CompleteVersionV21{" +
+        return "MinecraftVersionInfo{" +
                 "id='" + id + '\'' +
-                ", time=" + time +
-                ", releaseTime=" + releaseTime +
                 ", type=" + type +
-                ", arguments='" + arguments + '\'' +
+                ", arguments=" + arguments +
                 ", libraries=" + libraries +
                 ", mainClass='" + mainClass + '\'' +
-                ", minimumLauncherVersion=" + minimumLauncherVersion +
-                ", incompatibilityReason='" + incompatibilityReason + '\'' +
                 ", rules=" + rules +
+                ", assets='" + assets + '\'' +
+                ", assetIndex=" + assetIndex +
+                ", downloads=" + downloads +
+                ", inheritsFrom='" + inheritsFrom + '\'' +
+                ", javaVersion=" + javaVersion +
+                ", areAssetsVirtual=" + areAssetsVirtual +
+                ", mapToResources=" + mapToResources +
+                ", javaRuntime=" + javaRuntime +
                 '}';
     }
-
 }

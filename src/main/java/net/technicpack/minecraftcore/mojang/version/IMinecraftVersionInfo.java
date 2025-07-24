@@ -24,23 +24,12 @@ import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.mojang.version.io.*;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 
-import java.util.Date;
 import java.util.List;
 
 public interface IMinecraftVersionInfo {
     String getId();
 
     ReleaseType getType();
-
-    void setType(ReleaseType releaseType);
-
-    Date getUpdatedTime();
-
-    void setUpdatedTime(Date updatedTime);
-
-    Date getReleaseTime();
-
-    void setReleaseTime(Date releaseTime);
 
     ArgumentList getMinecraftArguments();
 
@@ -53,10 +42,6 @@ public interface IMinecraftVersionInfo {
     String getMainClass();
 
     void setMainClass(String mainClass);
-
-    int getMinimumLauncherVersion();
-
-    String getIncompatibilityReason();
 
     List<Rule> getRules();
 

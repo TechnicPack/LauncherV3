@@ -30,9 +30,9 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
-import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
-import net.technicpack.minecraftcore.mojang.version.builder.FileVersionBuilder;
-import net.technicpack.minecraftcore.mojang.version.builder.retrievers.ZipFileRetriever;
+import net.technicpack.minecraftcore.mojang.version.MinecraftVersionInfoBuilder;
+import net.technicpack.minecraftcore.mojang.version.builder.FileMinecraftVersionInfoBuilder;
+import net.technicpack.minecraftcore.mojang.version.builder.retrievers.ZipMinecraftVersionInfoRetriever;
 import net.technicpack.minecraftcore.mojang.version.io.Artifact;
 import net.technicpack.minecraftcore.mojang.version.io.Downloads;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
@@ -61,7 +61,7 @@ public class HandleVersionFileTask implements IInstallTask<IMinecraftVersionInfo
     private ITasksQueue<IMinecraftVersionInfo> downloadLibraryQueue;
     private ITasksQueue<IMinecraftVersionInfo> copyLibraryQueue;
     private ITasksQueue<IMinecraftVersionInfo> checkNonMavenLibsQueue;
-    private MojangVersionBuilder versionBuilder;
+    private MinecraftVersionInfoBuilder versionBuilder;
     private ILaunchOptions launchOptions;
     private IJavaRuntime javaRuntime;
 
@@ -97,7 +97,7 @@ public class HandleVersionFileTask implements IInstallTask<IMinecraftVersionInfo
         return this;
     }
 
-    public HandleVersionFileTask withVersionBuilder(MojangVersionBuilder versionBuilder) {
+    public HandleVersionFileTask withVersionBuilder(MinecraftVersionInfoBuilder versionBuilder) {
         this.versionBuilder = versionBuilder;
         return this;
     }
@@ -173,8 +173,8 @@ public class HandleVersionFileTask implements IInstallTask<IMinecraftVersionInfo
 
         if (hasModernMinecraftForge || hasNeoForge) {
             File profileJson = new File(pack.getBinDir(), "install_profile.json");
-            ZipFileRetriever zipVersionRetriever = new ZipFileRetriever(new File(pack.getBinDir(), "modpack.jar"));
-            IMinecraftVersionInfo installerVersion = new FileVersionBuilder(profileJson, zipVersionRetriever, null).buildVersionFromKey("install_profile");
+            ZipMinecraftVersionInfoRetriever zipVersionRetriever = new ZipMinecraftVersionInfoRetriever(new File(pack.getBinDir(), "modpack.jar"));
+            IMinecraftVersionInfo installerVersion = new FileMinecraftVersionInfoBuilder(profileJson, zipVersionRetriever, null).buildVersionFromKey("install_profile");
 
             // These are for Minecraft Forge. They're invalid (but safe) with NeoForge
             final String[] versionIdParts = version.getId().split("-", 3);

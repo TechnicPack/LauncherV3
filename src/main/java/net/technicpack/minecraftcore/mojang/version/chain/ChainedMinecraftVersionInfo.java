@@ -26,7 +26,6 @@ import net.technicpack.minecraftcore.mojang.version.io.*;
 import net.technicpack.minecraftcore.mojang.version.io.argument.Argument;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,31 +47,6 @@ public class ChainedMinecraftVersionInfo implements IMinecraftVersionInfo {
     @Override
     public ReleaseType getType() {
         return chain.get(0).getType();
-    }
-
-    @Override
-    public void setType(ReleaseType releaseType) {
-        chain.get(0).setType(releaseType);
-    }
-
-    @Override
-    public Date getUpdatedTime() {
-        return chain.get(0).getUpdatedTime();
-    }
-
-    @Override
-    public void setUpdatedTime(Date updatedTime) {
-        chain.get(0).setUpdatedTime(updatedTime);
-    }
-
-    @Override
-    public Date getReleaseTime() {
-        return chain.get(0).getReleaseTime();
-    }
-
-    @Override
-    public void setReleaseTime(Date releaseTime) {
-        chain.get(0).setReleaseTime(releaseTime);
     }
 
     @Override
@@ -144,21 +118,6 @@ public class ChainedMinecraftVersionInfo implements IMinecraftVersionInfo {
     @Override
     public void setMainClass(String mainClass) {
         chain.get(0).setMainClass(mainClass);
-    }
-
-    @Override
-    public int getMinimumLauncherVersion() {
-        return chain.get(0).getMinimumLauncherVersion();
-    }
-
-    @Override
-    public String getIncompatibilityReason() {
-        for (IMinecraftVersionInfo version : chain) {
-            if (version.getIncompatibilityReason() != null)
-                return version.getIncompatibilityReason();
-        }
-
-        return null;
     }
 
     @Override

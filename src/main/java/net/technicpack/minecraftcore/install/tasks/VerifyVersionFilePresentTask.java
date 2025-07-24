@@ -24,16 +24,16 @@ import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
-import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
+import net.technicpack.minecraftcore.mojang.version.MinecraftVersionInfoBuilder;
 
 import java.io.IOException;
 
 public class VerifyVersionFilePresentTask implements IInstallTask<IMinecraftVersionInfo> {
-	private MojangVersionBuilder builder;
+	private MinecraftVersionInfoBuilder builder;
     private String minecraftVersion;
     private ModpackModel modpack;
 
-	public VerifyVersionFilePresentTask(ModpackModel modpack, String minecraftVersion, MojangVersionBuilder builder) {
+	public VerifyVersionFilePresentTask(ModpackModel modpack, String minecraftVersion, MinecraftVersionInfoBuilder builder) {
 		this.builder = builder;
         this.minecraftVersion = minecraftVersion;
         this.modpack = modpack;

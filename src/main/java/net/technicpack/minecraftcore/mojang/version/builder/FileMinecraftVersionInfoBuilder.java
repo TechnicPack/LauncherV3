@@ -19,10 +19,10 @@
 
 package net.technicpack.minecraftcore.mojang.version.builder;
 
+import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
-import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
+import net.technicpack.minecraftcore.mojang.version.MinecraftVersionInfoBuilder;
 import net.technicpack.minecraftcore.mojang.version.io.MinecraftVersionInfo;
-import net.technicpack.utilslib.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,12 +31,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
 
-public class FileVersionBuilder implements MojangVersionBuilder {
+public class FileMinecraftVersionInfoBuilder implements MinecraftVersionInfoBuilder {
     private File version;
-    private MojangVersionRetriever retriever;
-    private List<MojangVersionRetriever> fallbackRetrievers;
+    private MinecraftVersionInfoRetriever retriever;
+    private List<MinecraftVersionInfoRetriever> fallbackRetrievers;
 
-    public FileVersionBuilder(File version, MojangVersionRetriever retriever, List<MojangVersionRetriever> fallbackRetrievers) {
+    public FileMinecraftVersionInfoBuilder(File version, MinecraftVersionInfoRetriever retriever, List<MinecraftVersionInfoRetriever> fallbackRetrievers) {
         this.version = version;
         this.retriever = retriever;
         this.fallbackRetrievers = fallbackRetrievers;
@@ -56,7 +56,7 @@ public class FileVersionBuilder implements MojangVersionBuilder {
                 retriever.retrieveVersion(target, key);
 
             if (fallbackRetrievers != null) {
-                for (MojangVersionRetriever fallbackRetriever : fallbackRetrievers) {
+                for (MinecraftVersionInfoRetriever fallbackRetriever : fallbackRetrievers) {
                     if (target.exists())
                         break;
 
@@ -69,7 +69,7 @@ public class FileVersionBuilder implements MojangVersionBuilder {
             return null;
 
         try (Reader reader = Files.newBufferedReader(target.toPath(), StandardCharsets.UTF_8)) {
-            return Utils.getGson().fromJson(reader, MinecraftVersionInfo.class);
+            return MojangUtils.getGson().fromJson(reader, MinecraftVersionInfo.class);
         }
     }
 }

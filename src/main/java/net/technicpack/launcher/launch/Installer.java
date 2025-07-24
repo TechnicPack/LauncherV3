@@ -44,12 +44,12 @@ import net.technicpack.minecraftcore.install.tasks.*;
 import net.technicpack.minecraftcore.launch.LaunchOptions;
 import net.technicpack.minecraftcore.launch.MinecraftLauncher;
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
-import net.technicpack.minecraftcore.mojang.version.MojangVersionBuilder;
-import net.technicpack.minecraftcore.mojang.version.builder.FileVersionBuilder;
-import net.technicpack.minecraftcore.mojang.version.builder.MojangVersionRetriever;
-import net.technicpack.minecraftcore.mojang.version.builder.retrievers.HttpFileRetriever;
-import net.technicpack.minecraftcore.mojang.version.builder.retrievers.ZipFileRetriever;
-import net.technicpack.minecraftcore.mojang.version.chain.ChainVersionBuilder;
+import net.technicpack.minecraftcore.mojang.version.MinecraftVersionInfoBuilder;
+import net.technicpack.minecraftcore.mojang.version.builder.FileMinecraftVersionInfoBuilder;
+import net.technicpack.minecraftcore.mojang.version.builder.MinecraftVersionInfoRetriever;
+import net.technicpack.minecraftcore.mojang.version.builder.retrievers.HttpMinecraftVersionInfoRetriever;
+import net.technicpack.minecraftcore.mojang.version.builder.retrievers.ZipMinecraftVersionInfoRetriever;
+import net.technicpack.minecraftcore.mojang.version.chain.ChainedMinecraftVersionInfoBuilder;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.ui.lang.ResourceLoader;
@@ -183,7 +183,7 @@ public class Installer {
 
             try {
                 InstallTasksQueue<IMinecraftVersionInfo> tasksQueue = new InstallTasksQueue<>(listener);
-                MojangVersionBuilder versionBuilder = createVersionBuilder(tasksQueue);
+                MinecraftVersionInfoBuilder versionBuilder = createVersionBuilder(tasksQueue);
                 JavaVersionRepository javaVersions = launcher.getJavaVersions();
 
                 final boolean mojangJavaWanted = settings.shouldUseMojangJava();
@@ -315,7 +315,8 @@ public class Installer {
         }
 
         private void buildTasksQueue(InstallTasksQueue<IMinecraftVersionInfo> queue, String build,
-                                     MojangVersionBuilder versionBuilder, IJavaRuntime selectedJavaRuntime, boolean mojangJavaWanted) throws IOException, InstallException {
+                                     MinecraftVersionInfoBuilder versionBuilder, IJavaRuntime selectedJavaRuntime,
+                                     boolean mojangJavaWanted) throws IOException, InstallException {
             PackInfo packInfo = pack.getPackInfo();
 
             // Abort modpack install/launch if we don't have the necessary information.
@@ -407,21 +408,21 @@ public class Installer {
             installingMinecraft.addTask(new InstallMinecraftIfNecessaryTask(pack, minecraft, fileSystem.getCacheDirectory(), jarRegenerationRequired));
         }
 
-        private MojangVersionBuilder createVersionBuilder(InstallTasksQueue<IMinecraftVersionInfo> tasksQueue) {
-            ZipFileRetriever zipVersionRetriever = new ZipFileRetriever(new File(pack.getBinDir(), "modpack.jar"));
-            HttpFileRetriever fallbackVersionRetriever = new HttpFileRetriever(TechnicConstants.VERSIONS_BASE_URL, tasksQueue.getDownloadListener());
+        private MinecraftVersionInfoBuilder createVersionBuilder(InstallTasksQueue<IMinecraftVersionInfo> tasksQueue) {
+            ZipMinecraftVersionInfoRetriever zipVersionRetriever = new ZipMinecraftVersionInfoRetriever(new File(pack.getBinDir(), "modpack.jar"));
+            HttpMinecraftVersionInfoRetriever fallbackVersionRetriever = new HttpMinecraftVersionInfoRetriever(TechnicConstants.VERSIONS_BASE_URL, tasksQueue.getDownloadListener());
 
-            ArrayList<MojangVersionRetriever> fallbackRetrievers = new ArrayList<>(1);
+            ArrayList<MinecraftVersionInfoRetriever> fallbackRetrievers = new ArrayList<>(1);
             fallbackRetrievers.add(fallbackVersionRetriever);
 
             File versionJson = new File(pack.getBinDir(), "version.json");
 
             // This always gets the version.json from the modpack.jar (it ignores "key"), cached as bin/version.json
-            FileVersionBuilder zipVersionBuilder = new FileVersionBuilder(versionJson, zipVersionRetriever, fallbackRetrievers);
+            FileMinecraftVersionInfoBuilder zipVersionBuilder = new FileMinecraftVersionInfoBuilder(versionJson, zipVersionRetriever, fallbackRetrievers);
             // This gets the "key" from bin/$key.json if it exists, otherwise it downloads it from our repo into that location
-            FileVersionBuilder webVersionBuilder = new FileVersionBuilder(pack.getBinDir(), null, fallbackRetrievers);
+            FileMinecraftVersionInfoBuilder webVersionBuilder = new FileMinecraftVersionInfoBuilder(pack.getBinDir(), null, fallbackRetrievers);
 
-            return new ChainVersionBuilder(zipVersionBuilder, webVersionBuilder);
+            return new ChainedMinecraftVersionInfoBuilder(zipVersionBuilder, webVersionBuilder);
         }
     }
 }

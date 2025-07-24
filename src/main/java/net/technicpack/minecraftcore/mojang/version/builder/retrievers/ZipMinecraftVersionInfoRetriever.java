@@ -19,28 +19,24 @@
 
 package net.technicpack.minecraftcore.mojang.version.builder.retrievers;
 
-import net.technicpack.launchercore.install.verifiers.ValidJsonFileVerifier;
-import net.technicpack.launchercore.util.DownloadListener;
-import net.technicpack.minecraftcore.MojangUtils;
-import net.technicpack.minecraftcore.mojang.version.builder.MojangVersionRetriever;
-import net.technicpack.utilslib.Utils;
+import net.technicpack.minecraftcore.mojang.version.builder.MinecraftVersionInfoRetriever;
+import net.technicpack.utilslib.ZipUtils;
 
 import java.io.File;
 import java.io.IOException;
 
-public class HttpFileRetriever implements MojangVersionRetriever {
+public class ZipMinecraftVersionInfoRetriever implements MinecraftVersionInfoRetriever {
 
-    private String baseUrl;
-    private DownloadListener listener;
+    private File zip;
 
-    public HttpFileRetriever(String baseUrl, DownloadListener listener) {
-        this.baseUrl = baseUrl;
-        this.listener = listener;
+    public ZipMinecraftVersionInfoRetriever(File sourceZip) {
+        this.zip = sourceZip;
     }
 
     @Override
-    public void retrieveVersion(File target, String key) throws InterruptedException, IOException {
-        String url = baseUrl + key + "/" + key + ".json";
-        Utils.downloadFile(url, target.getName(), target.getAbsolutePath(), null, new ValidJsonFileVerifier(MojangUtils.getGson()), listener);
+    public void retrieveVersion(File target, String key) throws IOException, InterruptedException {
+        if (zip.exists()) {
+            ZipUtils.extractFile(zip, target.getParentFile(), target.getName());
+        }
     }
 }
