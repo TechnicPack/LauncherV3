@@ -211,7 +211,7 @@ public class Installer {
                         FixRunDataDialog dialog = new FixRunDataDialog(frame, resources, data, javaVersions, memoryObj,
                                 !settings.shouldAutoAcceptModpackRequirements(), usingMojangJava);
                         dialog.setVisible(true);
-                        if (dialog.getResult() == FixRunDataDialog.Result.ACCEPT) {
+                        if (dialog.getResult() == FixRunDataDialog.Result.APPLY) {
                             memoryObj = dialog.getRecommendedMemory();
                             memory = memoryObj.getMemoryMB();
                             settings.setMemory(memoryObj.getSettingsId());

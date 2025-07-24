@@ -34,12 +34,12 @@ public class FixRunDataDialog extends LauncherDialog {
     private Memory recommendedMemory;
 
     private JCheckBox rememberThis;
-    private Result result = Result.OK;
+    private Result result = Result.REQUIREMENTS_UNMET;
 
     public enum Result {
-        OK,
-        ACCEPT,
-        CANCEL
+        REQUIREMENTS_UNMET, // System requirements aren't met, cannot launch
+        APPLY,              // User accepts and applies recommendations (launch continues)
+        CANCEL              // User cancels/dismisses when recommendations are available (no launch)
     }
 
     public FixRunDataDialog(Frame owner, ResourceLoader resourceLoader, RunData runData, JavaVersionRepository javaVersionRepository, Memory attemptedMemory, boolean shouldAskFirst, boolean usingMojangJava) {
@@ -59,7 +59,7 @@ public class FixRunDataDialog extends LauncherDialog {
     public void setVisible(boolean visible) {
         if ((recommendedVersion != null && recommendedMemory != null && javaVersionRepository.getSelectedVersion().equals(recommendedVersion) && attemptedMemory.getMemoryMB() == recommendedMemory.getMemoryMB()) ||
                 (!shouldAskFirst && recommendedMemory != null && recommendedVersion != null)) {
-            result = Result.ACCEPT;
+            result = Result.APPLY;
             dispose();
             return;
         }
@@ -366,7 +366,7 @@ public class FixRunDataDialog extends LauncherDialog {
         okButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
         okButton.setHoverForeground(UIConstants.COLOR_BLUE);
         okButton.addActionListener(e -> {
-            result = Result.OK;
+            result = Result.REQUIREMENTS_UNMET;
             dispose();
         });
         buttonPanel.add(okButton);
@@ -414,7 +414,7 @@ public class FixRunDataDialog extends LauncherDialog {
         okButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
         okButton.setHoverForeground(UIConstants.COLOR_BLUE);
         okButton.addActionListener(e -> {
-            result = Result.ACCEPT;
+            result = Result.APPLY;
             dispose();
         });
         buttonPanel.add(okButton);
