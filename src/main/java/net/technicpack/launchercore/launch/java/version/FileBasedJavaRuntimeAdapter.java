@@ -23,7 +23,7 @@ public class FileBasedJavaRuntimeAdapter implements JsonSerializer<FileBasedJava
         } else {
             pathElement = obj.get("filePath");
         }
-        if (pathElement == null) throw new JsonParseException("Missing path field");
+        if (pathElement == null) throw new JsonSyntaxException("Missing path field");
         return new FileBasedJavaRuntime(pathElement.getAsString());
     }
 

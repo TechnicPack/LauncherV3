@@ -41,8 +41,8 @@ public class DateTypeAdapter
     }
 
     public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-        if (!(json instanceof JsonPrimitive)) {
-            throw new JsonParseException("The date should be a string value");
+        if (!json.isJsonPrimitive()) {
+            throw new JsonSyntaxException("The date should be a string value");
         }
 
         Date date = deserializeToDate(json);
