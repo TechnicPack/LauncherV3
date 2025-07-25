@@ -21,7 +21,7 @@ package net.technicpack.minecraftcore.mojang.version.io;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
+import com.google.gson.JsonSyntaxException;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.launch.WindowType;
@@ -34,6 +34,26 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class Rule {
+    // Feature keys
+    private static final String HAS_CUSTOM_RESOLUTION = "has_custom_resolution";
+    private static final String IS_DEMO_USER = "is_demo_user";
+    private static final String HAS_QUICK_PLAYS_SUPPORT = "has_quick_plays_support";
+    private static final String IS_QUICK_PLAY_SINGLEPLAYER = "is_quick_play_singleplayer";
+    private static final String IS_QUICK_PLAY_MULTIPLAYER = "is_quick_play_multiplayer";
+    private static final String IS_QUICK_PLAY_REALMS = "is_quick_play_realms";
+
+    // Field names
+    private static final String FEATURES_FIELD = "features";
+    private static final String ACTION_FIELD = "action";
+    private static final String OS_FIELD = "os";
+    private static final String OS_NAME_FIELD = "name";
+    private static final String OS_VERSION_FIELD = "version";
+    private static final String OS_ARCH_FIELD = "arch";
+
+    // Action values
+    private static final String ACTION_ALLOW_VALUE = "allow";
+    private static final String ACTION_DISALLOW_VALUE = "disallow";
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -61,49 +81,50 @@ public class Rule {
     private final List<RuleCondition> conditions = new ArrayList<>();
 
     public Rule(JsonObject rule) {
-        String action = rule.get("action").getAsString();
+        String action = rule.get(ACTION_FIELD).getAsString();
         switch (action) {
-            case "allow":
+            case ACTION_ALLOW_VALUE:
                 negated = false;
                 break;
-            case "disallow":
+            case ACTION_DISALLOW_VALUE:
                 negated = true;
                 break;
             default:
-                throw new JsonParseException("Expected rule action, got: " + action);
+                throw new JsonSyntaxException("Expected rule action, got: " + action);
         }
 
-        if (rule.has("os")) {
-            JsonObject os = rule.get("os").getAsJsonObject();
+        if (rule.has(OS_FIELD)) {
+            JsonObject os = rule.get(OS_FIELD).getAsJsonObject();
             conditions.add(new OsCondition(
-                    os.has("name") ? os.get("name").getAsString() : null,
-                    os.has("version") ? os.get("version").getAsString() : null,
-                    os.has("arch") ? os.get("arch").getAsString() : null));
+                    os.has(OS_NAME_FIELD) ? os.get(OS_NAME_FIELD).getAsString() : null,
+                    os.has(OS_VERSION_FIELD) ? os.get(OS_VERSION_FIELD).getAsString() : null,
+                    os.has(OS_ARCH_FIELD) ? os.get(OS_ARCH_FIELD).getAsString() : null
+            ));
         }
-        if (rule.has("features")) {
-            JsonObject features = rule.get("features").getAsJsonObject();
+        if (rule.has(FEATURES_FIELD)) {
+            JsonObject features = rule.get(FEATURES_FIELD).getAsJsonObject();
             for (String feature : features.keySet()) {
                 switch (feature) {
-                    case "has_custom_resolution":
-                        conditions.add(new CustomResolutionCondition(features.get("has_custom_resolution").getAsBoolean()));
+                    case HAS_CUSTOM_RESOLUTION:
+                        conditions.add(new CustomResolutionCondition(features.get(HAS_CUSTOM_RESOLUTION).getAsBoolean()));
                         break;
-                    case "is_demo_user":
-                        conditions.add(new DemoUserCondition(features.get("is_demo_user").getAsBoolean()));
+                    case IS_DEMO_USER:
+                        conditions.add(new DemoUserCondition(features.get(IS_DEMO_USER).getAsBoolean()));
                         break;
-                    case "has_quick_plays_support":
-                        conditions.add(new QuickPlaysSupportCondition(features.get("has_quick_plays_support").getAsBoolean()));
+                    case HAS_QUICK_PLAYS_SUPPORT:
+                        conditions.add(new QuickPlaysSupportCondition(features.get(HAS_QUICK_PLAYS_SUPPORT).getAsBoolean()));
                         break;
-                    case "is_quick_play_singleplayer":
-                        conditions.add(new QuickPlaySingleplayerCondition(features.get("is_quick_play_singleplayer").getAsBoolean()));
+                    case IS_QUICK_PLAY_SINGLEPLAYER:
+                        conditions.add(new QuickPlaySingleplayerCondition(features.get(IS_QUICK_PLAY_SINGLEPLAYER).getAsBoolean()));
                         break;
-                    case "is_quick_play_multiplayer":
-                        conditions.add(new QuickPlayMultiplayerCondition(features.get("is_quick_play_multiplayer").getAsBoolean()));
+                    case IS_QUICK_PLAY_MULTIPLAYER:
+                        conditions.add(new QuickPlayMultiplayerCondition(features.get(IS_QUICK_PLAY_MULTIPLAYER).getAsBoolean()));
                         break;
-                    case "is_quick_play_realms":
-                        conditions.add(new QuickPlayRealmsCondition(features.get("is_quick_play_realms").getAsBoolean()));
+                    case IS_QUICK_PLAY_REALMS:
+                        conditions.add(new QuickPlayRealmsCondition(features.get(IS_QUICK_PLAY_REALMS).getAsBoolean()));
                         break;
                     default:
-                        throw new JsonParseException("Unknown feature: " + feature);
+                        throw new JsonSyntaxException("Unknown feature: " + feature);
                 }
             }
         }
@@ -126,14 +147,14 @@ public class Rule {
         for (RuleCondition condition : conditions) {
             condition.serialize(json);
         }
-        json.addProperty("action", negated ? "disallow" : "allow");
+        json.addProperty(ACTION_FIELD, negated ? ACTION_DISALLOW_VALUE : ACTION_ALLOW_VALUE);
         return json;
     }
 
     private static JsonObject getFeatures(JsonObject root) {
-        if (root.has("features")) return root.get("features").getAsJsonObject();
+        if (root.has(FEATURES_FIELD)) return root.get(FEATURES_FIELD).getAsJsonObject();
         JsonObject features = new JsonObject();
-        root.add("features", features);
+        root.add(FEATURES_FIELD, features);
         return features;
     }
 
@@ -183,10 +204,10 @@ public class Rule {
         @Override
         public void serialize(JsonObject root) {
             JsonObject os = new JsonObject();
-            if (name != null) os.addProperty("name", name);
-            if (version != null) os.addProperty("version", version.pattern());
-            if (arch != null) os.addProperty("arch", arch);
-            root.add("os", os);
+            if (name != null) os.addProperty(OS_NAME_FIELD, name);
+            if (version != null) os.addProperty(OS_VERSION_FIELD, version.pattern());
+            if (arch != null) os.addProperty(OS_ARCH_FIELD, arch);
+            root.add(OS_FIELD, os);
         }
 
     }
@@ -220,7 +241,7 @@ public class Rule {
 
         @Override
         public void serialize(JsonObject root) {
-            getFeatures(root).addProperty("has_custom_resolution", shouldHaveCustomResolution);
+            getFeatures(root).addProperty(HAS_CUSTOM_RESOLUTION, shouldHaveCustomResolution);
         }
 
     }
@@ -253,7 +274,7 @@ public class Rule {
 
         @Override
         public void serialize(JsonObject root) {
-            getFeatures(root).addProperty("is_demo_user", shouldBeDemoUser);
+            getFeatures(root).addProperty(IS_DEMO_USER, shouldBeDemoUser);
         }
 
     }
@@ -286,7 +307,7 @@ public class Rule {
 
         @Override
         public void serialize(JsonObject root) {
-            getFeatures(root).addProperty("has_quick_plays_support", shouldHaveQuickPlaysSupport);
+            getFeatures(root).addProperty(HAS_QUICK_PLAYS_SUPPORT, shouldHaveQuickPlaysSupport);
         }
 
     }
@@ -319,7 +340,7 @@ public class Rule {
 
         @Override
         public void serialize(JsonObject root) {
-            getFeatures(root).addProperty("is_quick_play_singleplayer", shouldQuickPlayBeSingleplayer);
+            getFeatures(root).addProperty(IS_QUICK_PLAY_SINGLEPLAYER, shouldQuickPlayBeSingleplayer);
         }
 
     }
@@ -352,7 +373,7 @@ public class Rule {
 
         @Override
         public void serialize(JsonObject root) {
-            getFeatures(root).addProperty("is_quick_play_multiplayer", shouldQuickPlayBeMultiplayer);
+            getFeatures(root).addProperty(IS_QUICK_PLAY_MULTIPLAYER, shouldQuickPlayBeMultiplayer);
         }
 
     }
@@ -385,7 +406,7 @@ public class Rule {
 
         @Override
         public void serialize(JsonObject root) {
-            getFeatures(root).addProperty("is_quick_play_realms", shouldQuickPlayBeRealms);
+            getFeatures(root).addProperty(IS_QUICK_PLAY_REALMS, shouldQuickPlayBeRealms);
         }
 
     }
