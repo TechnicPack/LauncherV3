@@ -116,7 +116,7 @@ public class Relauncher {
     public InstallTasksQueue<Void> buildMoverTasks() {
         InstallTasksQueue<Void> queue = new InstallTasksQueue<>(null);
 
-        queue.addTask(new MoveLauncherPackage(resources.getString("updater.mover"), new File(parameters.getMoveTarget()), this));
+        queue.addTask(new CopyLauncherPackage(resources.getString("updater.mover"), new File(parameters.getMoveTarget()), this));
         queue.addTask(new LaunchLauncherMode(resources.getString("updater.finallaunch"), this, parameters.getMoveTarget(), parameters.isLegacyMover()));
 
         return queue;

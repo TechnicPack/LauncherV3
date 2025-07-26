@@ -19,18 +19,18 @@
 package net.technicpack.launcher.ui;
 
 import net.technicpack.autoupdate.Relauncher;
-import net.technicpack.autoupdate.tasks.MoveLauncherPackage;
+import net.technicpack.autoupdate.tasks.CopyLauncherPackage;
 import net.technicpack.launcher.autoupdate.VersionFileBuildNumber;
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.ui.UIUtils;
-import net.technicpack.ui.controls.list.popupformatters.RoundedBorderFormatter;
 import net.technicpack.ui.controls.DraggableFrame;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.borders.RoundBorder;
 import net.technicpack.ui.controls.lang.LanguageCellRenderer;
 import net.technicpack.ui.controls.lang.LanguageCellUI;
+import net.technicpack.ui.controls.list.popupformatters.RoundedBorderFormatter;
 import net.technicpack.ui.controls.tabs.SimpleTabPane;
 import net.technicpack.ui.lang.IRelocalizableResource;
 import net.technicpack.ui.lang.ResourceLoader;
@@ -203,13 +203,11 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
     }
 
     protected void portableInstall() {
-        String targetPath;
         final Relauncher relauncher = new Relauncher(null, settings.getBuildStream(), 0, new LauncherFileSystem(settings.getTechnicRoot()), resources, params);
         String currentPath = relauncher.getRunningPath();
         String launcher = (currentPath.endsWith(".exe"))?"TechnicLauncher.exe":"TechnicLauncher.jar";
 
-        targetPath = new File(portableInstallDir.getText(), launcher).getAbsolutePath();
-
+        String targetPath = new File(portableInstallDir.getText(), launcher).getAbsolutePath();
         File targetExe = new File(portableInstallDir.getText(), launcher);
 
         if (!(new File(currentPath).equals(targetExe))) {
@@ -217,8 +215,14 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
                 JOptionPane.showMessageDialog(this, resources.getString("installer.portable.replacefailed"), resources.getString("installer.portable.replacefailtitle"), JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            MoveLauncherPackage moveTask = new MoveLauncherPackage("", targetExe, relauncher);
-            moveTask.runTask(null);
+            CopyLauncherPackage copyTask = new CopyLauncherPackage("", targetExe, relauncher);
+            try {
+                copyTask.runTask(null);
+            } catch (Exception e) {
+                // TODO: fix this to actually show the error
+                JOptionPane.showMessageDialog(this, resources.getString("installer.portable.replacefailed"), resources.getString("installer.portable.replacefailtitle"), JOptionPane.ERROR_MESSAGE);
+                return;
+            }
         }
 
         glassPane.setVisible(true);
