@@ -52,10 +52,24 @@ public class InstalledPack {
         this.build = build;
     }
 
+    /**
+     * Retrieves the installation directory.
+     * <p/>
+     * This can have the {@link #LAUNCHER_DIR} or {@link #MODPACKS_DIR} prefixes, so care should be taken to replace
+     * these prefixes with the full paths before using them.
+     *
+     * @return the directory path as a {@code String}
+     */
     public String getDirectory() {
         return directory;
     }
 
+    /**
+     * Sets the installation directory.
+     * <p/>
+     * This can have the {@link #LAUNCHER_DIR} or {@link #MODPACKS_DIR} prefixes, so care should be taken to replace
+     * the full path with these prefixes before setting them.
+     */
     public void setDirectory(String directory) {
         this.directory = directory;
     }

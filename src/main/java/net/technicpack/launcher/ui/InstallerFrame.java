@@ -75,7 +75,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         this.resources = resources;
         this.params = params;
         this.settings = new TechnicSettings();
-        this.settings.setFilePath(new File(OperatingSystem.getOperatingSystem().getUserDirectoryForApp("technic"), "settings.json"));
+        this.settings.setFilePath(new File(OperatingSystem.getOperatingSystem().getTechnicDirectory(), "settings.json"));
         this.settings.getTechnicRoot();
 
         addGlassPane();
@@ -160,7 +160,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
         Thread thread = new Thread(() -> {
             File oldSettings = settings.getFilePath();
-            File newSettings = new File(OperatingSystem.getOperatingSystem().getUserDirectoryForApp("technic"), "settings.json");
+            File newSettings = new File(OperatingSystem.getOperatingSystem().getTechnicDirectory(), "settings.json");
 
             if (oldSettings.exists() && !oldSettings.getAbsolutePath().equals(newSettings.getAbsolutePath())) {
                 oldSettings.delete();
@@ -185,7 +185,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
             settings.setFilePath(newSettings);
 
-            if (settings.isPortable() || rootHasChanged || !standardInstallDir.getText().equals(OperatingSystem.getOperatingSystem().getUserDirectoryForApp("technic").getAbsolutePath()))
+            if (settings.isPortable() || rootHasChanged || !standardInstallDir.getText().equals(OperatingSystem.getOperatingSystem().getTechnicDirectory().getAbsolutePath()))
                 settings.installTo(standardInstallDir.getText());
             settings.getTechnicRoot();
             settings.setLanguageCode(((LanguageItem)standardLanguages.getSelectedItem()).getLangCode());
@@ -194,7 +194,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
             VersionFileBuildNumber buildNumber = new VersionFileBuildNumber(resources);
             Utils.sendTracking("installLauncher", "standard", buildNumber.getBuildNumber(), settings.getClientId());
 
-            Relauncher relauncher = new Relauncher(null, settings.getBuildStream(), 0, new LauncherFileSystem(settings.getTechnicRoot()), resources, params);
+            Relauncher relauncher = new Relauncher(null, settings.getBuildStream(), 0, new LauncherFileSystem(settings.getTechnicRootPath()), resources, params);
             String currentPath = relauncher.getRunningPath();
             relauncher.launch(currentPath, params.getArgs());
             System.exit(0);
@@ -203,7 +203,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
     }
 
     protected void portableInstall() {
-        final Relauncher relauncher = new Relauncher(null, settings.getBuildStream(), 0, new LauncherFileSystem(settings.getTechnicRoot()), resources, params);
+        final Relauncher relauncher = new Relauncher(null, settings.getBuildStream(), 0, new LauncherFileSystem(settings.getTechnicRootPath()), resources, params);
         String currentPath = relauncher.getRunningPath();
         String launcher = (currentPath.endsWith(".exe"))?"TechnicLauncher.exe":"TechnicLauncher.jar";
 
@@ -312,7 +312,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
             standardInstallDir.setBorder(new RoundBorder(UIConstants.COLOR_SCROLL_THUMB, 1, 10));
             standardSelectButton.setEnabled(false);
             standardSelectButton.setForeground(UIConstants.COLOR_GREY_TEXT);
-            standardInstallDir.setText(OperatingSystem.getOperatingSystem().getUserDirectoryForApp("technic").getAbsolutePath());
+            standardInstallDir.setText(OperatingSystem.getOperatingSystem().getTechnicDirectory().getAbsolutePath());
         }
     }
 
@@ -402,7 +402,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         standardDefaultDirectory.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
         standardDefaultDirectory.setForeground(UIConstants.COLOR_WHITE_TEXT);
         standardDefaultDirectory.setIconTextGap(6);
-        standardDefaultDirectory.setSelected(settings.isPortable() || settings.getTechnicRoot().getAbsolutePath().equals(OperatingSystem.getOperatingSystem().getUserDirectoryForApp("technic").getAbsolutePath()));
+        standardDefaultDirectory.setSelected(settings.isPortable() || settings.getTechnicRoot().getAbsolutePath().equals(OperatingSystem.getOperatingSystem().getTechnicDirectory().getAbsolutePath()));
         standardDefaultDirectory.addActionListener(e -> useDefaultDirectoryChanged());
         panel.add(standardDefaultDirectory, new GridBagConstraints(0, 2, 3, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,24,12,0),0,0));
 
@@ -411,7 +411,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         installFolderLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
         panel.add(installFolderLabel, new GridBagConstraints(0, 3, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,24,0,8), 0,0));
 
-        String installDir = OperatingSystem.getOperatingSystem().getUserDirectoryForApp("technic").getAbsolutePath();
+        String installDir = OperatingSystem.getOperatingSystem().getTechnicDirectory().getAbsolutePath();
 
         if (!settings.isPortable())
             installDir = settings.getTechnicRoot().getAbsolutePath();

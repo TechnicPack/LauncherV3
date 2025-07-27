@@ -23,7 +23,6 @@ import com.google.gson.JsonParseException;
 import net.technicpack.launchercore.modpacks.InstalledPack;
 import net.technicpack.utilslib.Utils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -54,9 +53,7 @@ public class InstalledPackStore {
         // Empty constructor for GSON
     }
 
-    public static InstalledPackStore load(File jsonFile) {
-        Path storePath = jsonFile.toPath().toAbsolutePath();
-
+    public static InstalledPackStore load(Path storePath) {
         if (!Files.exists(storePath)) {
             Utils.getLogger().log(Level.WARNING, String.format("Unable to load installedPacks from %s because it does not exist", storePath));
             return new InstalledPackStore(storePath);

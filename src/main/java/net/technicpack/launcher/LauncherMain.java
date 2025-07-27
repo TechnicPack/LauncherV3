@@ -84,7 +84,6 @@ import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.JavaUtils;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
-import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -112,12 +111,16 @@ import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class LauncherMain {
 
@@ -193,13 +196,13 @@ public class LauncherMain {
         sentryUser.setId(settings.getClientId());
         Sentry.setUser(sentryUser);
 
-        LauncherFileSystem fileSystem = new LauncherFileSystem(settings.getTechnicRoot());
+        LauncherFileSystem fileSystem = new LauncherFileSystem(settings.getTechnicRootPath());
         ResourceLoader resources = new ResourceLoader(fileSystem, "net", "technicpack", "launcher", "resources");
         resources.setSupportedLanguages(supportedLanguages);
         resources.setLocale(settings.getLanguageCode());
 
         // Sanity check
-        checkIfRunningInsideOneDrive(fileSystem.getLauncherDirectory());
+        checkIfRunningInsideOneDrive(fileSystem.getRootDirectory());
 
         if (params.getBuildNumber() != null && !params.getBuildNumber().isEmpty())
             buildNumber = new CommandLineBuildNumber(params);
@@ -300,12 +303,10 @@ public class LauncherMain {
         dialog.setVisible(true);
     }
 
-    private static void checkIfRunningInsideOneDrive(File launcherRoot) {
+    private static void checkIfRunningInsideOneDrive(Path rootDir) {
         if (OperatingSystem.getOperatingSystem() != OperatingSystem.WINDOWS) {
             return;
         }
-
-        Path launcherRootPath = launcherRoot.toPath();
 
         for (String varName : new String[]{"OneDrive", "OneDriveConsumer"}) {
             String varValue = System.getenv(varName);
@@ -313,9 +314,9 @@ public class LauncherMain {
                 continue;
             }
 
-            Path oneDrivePath = new File(varValue).toPath();
+            Path oneDrivePath = Paths.get(varValue);
 
-            if (launcherRootPath.startsWith(oneDrivePath)) {
+            if (rootDir.startsWith(oneDrivePath)) {
                 JOptionPane.showMessageDialog(null,
                         "Technic Launcher cannot run inside OneDrive. Please move it out of OneDrive, in the launcher settings.",
                         "Cannot run inside OneDrive", JOptionPane.ERROR_MESSAGE);
@@ -324,11 +325,10 @@ public class LauncherMain {
     }
 
     private static void setupLogging(LauncherFileSystem fileSystem, ResourceLoader resources) {
-        System.out.println("Setting up logging");
+        System.out.println("Setting up logging"); // NOSONAR - Logging system not initialized yet
         final Logger logger = Utils.getLogger();
-        File logDirectory = fileSystem.getLogsDirectory();
-        File logs = new File(logDirectory, "techniclauncher_%s.log");
-        RotatingFileHandler fileHandler = new RotatingFileHandler(logs.getPath());
+        Path logsDirectory = fileSystem.getLogsDirectory();
+        RotatingFileHandler fileHandler = new RotatingFileHandler(logsDirectory, "techniclauncher_%s.log");
         fileHandler.setFormatter(new BuildLogFormatter(buildNumber.getBuildNumber()));
 
         for (Handler h : logger.getHandlers()) {
@@ -342,11 +342,11 @@ public class LauncherMain {
         consoleHandler.setFormatter(new ConsoleLogFormatter());
         logger.addHandler(consoleHandler);
 
+        // TODO: remove this when things no longer print to stdout or stderr
         System.setOut(new PrintStream(new LoggerOutputStream(Level.INFO, logger), true));
         System.setErr(new PrintStream(new LoggerOutputStream(Level.SEVERE, logger), true));
 
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
-            e.printStackTrace();
             logger.log(Level.SEVERE, String.format("Unhandled exception in thread %s", t), e);
             Sentry.captureException(e);
         });
@@ -479,13 +479,28 @@ public class LauncherMain {
      */
     private static Thread createCleanupLogsThread(LauncherFileSystem fileSystem) {
         Thread cleanupLogsThread = new Thread(() -> {
-            Iterator<File> files = FileUtils.iterateFiles(new File(fileSystem.getLauncherDirectory(), "logs"), new String[]{"log"}, false);
+            final Path logsDir = fileSystem.getLogsDirectory();
+
+            if (!Files.exists(logsDir)) {
+                // Directory doesn't exist, nothing to clean up
+                return;
+            }
+
             final DateTime aWeekAgo = DateTime.now().minusWeeks(1);
-            while (files.hasNext()) {
-                File logFile = files.next();
-                if (logFile.exists() && (new DateTime(logFile.lastModified())).isBefore(aWeekAgo)) {
-                    logFile.delete();
-                }
+            try (Stream<Path> walk = Files.walk(logsDir, 1)) {
+                walk.filter(p -> Files.isRegularFile(p) && p.toString().endsWith(".log")).forEach(p -> {
+                    try {
+                        DateTime dateTime = new DateTime(Files.getLastModifiedTime(p).toMillis());
+
+                        if (dateTime.isBefore(aWeekAgo)) {
+                            Files.deleteIfExists(p);
+                        }
+                    } catch (IOException e) {
+                        Utils.getLogger().log(Level.WARNING, String.format("Failed to delete old log file: %s", p), e);
+                    }
+                });
+            } catch (IOException e) {
+                Utils.getLogger().log(Level.WARNING, "Failed to clean up log files", e);
             }
         });
         cleanupLogsThread.setDaemon(true);
@@ -515,9 +530,9 @@ public class LauncherMain {
         javaVersionFile.enumerateVersions(javaVersions);
         javaVersions.selectVersion(settings.getJavaVersion(), settings.getPrefer64Bit());
 
-        UserStore users = UserStore.load(new File(fileSystem.getLauncherDirectory(), "users.json"));
-        MicrosoftAuthenticator microsoftAuthenticator = new MicrosoftAuthenticator(new File(fileSystem.getLauncherDirectory(), "oauth"));
-        UserModel userModel = new UserModel(users, microsoftAuthenticator);
+        UserStore userStore = UserStore.load(fileSystem.getRootDirectory().resolve("users.json"));
+        MicrosoftAuthenticator microsoftAuthenticator = new MicrosoftAuthenticator(fileSystem.getRootDirectory().resolve("oauth").toFile());
+        UserModel userModel = new UserModel(userStore, microsoftAuthenticator);
 
         IModpackResourceType iconType = new IconResourceType();
         IModpackResourceType logoType = new LogoResourceType();
@@ -543,13 +558,13 @@ public class LauncherMain {
         IPlatformApi platform = new ModpackCachePlatformApi(httpPlatform, 60 * 60, fileSystem);
         IPlatformSearchApi platformSearch = new HttpPlatformSearchApi("https://api.technicpack.net/", buildNumber.getBuildNumber());
 
-        InstalledPackStore packStore = InstalledPackStore.load(new File(fileSystem.getLauncherDirectory(), "installedPacks"));
+        InstalledPackStore packStore = InstalledPackStore.load(fileSystem.getRootDirectory().resolve("installedPacks"));
         IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(platform, solder);
 
         ArrayList<IMigrator> migrators = new ArrayList<>(1);
         migrators.add(new InitialV3Migrator(platform));
         migrators.add(new ResetJvmArgsIfDefaultString());
-        SettingsFactory.migrateSettings(settings, packStore, fileSystem, users, migrators);
+        SettingsFactory.migrateSettings(settings, packStore, fileSystem, userStore, migrators);
 
         PackLoader packList = new PackLoader(fileSystem, packStore, packInfoRepository);
         ModpackSelector selector = new ModpackSelector(resources, packList, new SolderPackSource("https://solder.technicpack.net/api/", solder),

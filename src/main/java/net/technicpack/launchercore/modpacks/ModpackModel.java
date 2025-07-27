@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -319,11 +320,15 @@ public class ModpackModel {
         if (installedDirectory == null) {
             String rawDir = installedPack.getDirectory();
 
-            if (rawDir != null && rawDir.startsWith(InstalledPack.LAUNCHER_DIR)) {
-                rawDir = new File(fileSystem.getLauncherDirectory(), rawDir.substring(InstalledPack.LAUNCHER_DIR.length())).getAbsolutePath();
+            if (rawDir == null) {
+                return null;
             }
-            if (rawDir != null && rawDir.startsWith(InstalledPack.MODPACKS_DIR)) {
-                rawDir = new File(fileSystem.getModpacksDirectory(), rawDir.substring(InstalledPack.MODPACKS_DIR.length())).getAbsolutePath();
+
+            if (rawDir.startsWith(InstalledPack.LAUNCHER_DIR)) {
+                rawDir = fileSystem.getRootDirectory().resolve(rawDir.substring(InstalledPack.LAUNCHER_DIR.length())).toString();
+            }
+            if (rawDir.startsWith(InstalledPack.MODPACKS_DIR)) {
+                rawDir = fileSystem.getModpacksDirectory().resolve(rawDir.substring(InstalledPack.MODPACKS_DIR.length())).toString();
             }
 
             setInstalledDirectory(new File(rawDir));
@@ -417,20 +422,23 @@ public class ModpackModel {
         }
 
         installedDirectory = targetDirectory;
-        String path = installedDirectory.getAbsolutePath();
+        Path path = installedDirectory.toPath().toAbsolutePath();
 
         String newInstalledPackDir;
 
-        if (path.equals(fileSystem.getModpacksDirectory().getAbsolutePath())) {
+        final Path modpacksDir = fileSystem.getModpacksDirectory();
+        final Path launcherRootDir = fileSystem.getRootDirectory();
+
+        if (path.equals(modpacksDir)) {
             newInstalledPackDir = InstalledPack.MODPACKS_DIR;
-        } else if (path.equals(fileSystem.getLauncherDirectory().getAbsolutePath())) {
+        } else if (path.equals(launcherRootDir)) {
             newInstalledPackDir = InstalledPack.LAUNCHER_DIR;
-        } else if (path.startsWith(fileSystem.getModpacksDirectory().getAbsolutePath())) {
-            newInstalledPackDir = InstalledPack.MODPACKS_DIR + path.substring(fileSystem.getModpacksDirectory().getAbsolutePath().length() + 1);
-        } else if (path.startsWith(fileSystem.getLauncherDirectory().getAbsolutePath())) {
-            newInstalledPackDir = InstalledPack.LAUNCHER_DIR + path.substring(fileSystem.getLauncherDirectory().getAbsolutePath().length() + 1);
+        } else if (path.startsWith(modpacksDir)) {
+            newInstalledPackDir = InstalledPack.MODPACKS_DIR + modpacksDir.relativize(path);
+        } else if (path.startsWith(launcherRootDir)) {
+            newInstalledPackDir = InstalledPack.LAUNCHER_DIR + launcherRootDir.relativize(path);
         } else {
-            newInstalledPackDir = path;
+            newInstalledPackDir = path.toString();
         }
 
         // Only need to save if we've actually changed the raw directory
@@ -522,10 +530,10 @@ public class ModpackModel {
             }
         }
 
-        File assets = new File(fileSystem.getAssetsDirectory(), getName());
-        if (assets.exists()) {
+        Path assets = fileSystem.getPackAssetsDirectory().resolve(getName());
+        if (Files.isDirectory(assets)) {
             try {
-                FileUtils.deleteDirectory(assets);
+                FileUtils.deleteDirectory(assets.toFile());
             } catch (IOException ex) {
                 Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
             }

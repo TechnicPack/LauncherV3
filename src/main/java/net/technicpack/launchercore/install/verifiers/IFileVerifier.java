@@ -20,7 +20,10 @@
 package net.technicpack.launchercore.install.verifiers;
 
 import java.io.File;
+import java.nio.file.Path;
 
 public interface IFileVerifier {
     boolean isFileValid(File file);
+
+    boolean isFileValid(Path path);
 }

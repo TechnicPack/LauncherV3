@@ -70,24 +70,24 @@ public enum OperatingSystem {
         return UNKNOWN;
     }
 
-    public File getUserDirectoryForApp(String appName) {
+    public File getTechnicDirectory() {
         String userHome = System.getProperty("user.home", ".");
 
         switch (this) {
             case LINUX:
-                return new File(userHome, "."+appName+"/");
+                return new File(userHome, ".technic/");
             case WINDOWS:
                 String applicationData = System.getenv("APPDATA");
                 if (applicationData != null) {
-                    return new File(applicationData, "."+appName+"/");
+                    return new File(applicationData, ".technic/");
                 } else {
-                    return new File(userHome, "."+appName+"/");
+                    return new File(userHome, ".technic/");
                 }
             case OSX:
-                return new File(userHome, "Library/Application Support/" + appName);
+                return new File(userHome, "Library/Application Support/technic");
             case UNKNOWN:
             default:
-                return new File(userHome, appName + "/");
+                return new File(userHome, "technic/");
         }
     }
 

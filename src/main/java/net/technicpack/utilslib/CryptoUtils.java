@@ -3,16 +3,24 @@ package net.technicpack.utilslib;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 
-import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_1;
-import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_256;
+import static org.apache.commons.codec.digest.MessageDigestAlgorithms.*;
 
 public class CryptoUtils {
     public static String getSHA256(File file) {
         try {
             return new DigestUtils(SHA_256).digestAsHex(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static String getSHA256(Path path) {
+        try {
+            return new DigestUtils(SHA_256).digestAsHex(path);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -36,6 +44,15 @@ public class CryptoUtils {
         return null;
     }
 
+    public static String getSHA1(Path path) {
+        try {
+            return new DigestUtils(SHA_1).digestAsHex(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static boolean checkSHA1(File file, String sha1) {
         return checkSHA1(sha1, getSHA1(file));
     }
@@ -46,10 +63,16 @@ public class CryptoUtils {
 
     public static String getMD5(File file) {
         try {
-            FileInputStream fis = new FileInputStream(file);
-            String md5 = DigestUtils.md5Hex(fis);
-            fis.close();
-            return md5;
+            return new DigestUtils(MD5).digestAsHex(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static String getMD5(Path path) {
+        try {
+            return new DigestUtils(MD5).digestAsHex(path);
         } catch (IOException e) {
             e.printStackTrace();
         }

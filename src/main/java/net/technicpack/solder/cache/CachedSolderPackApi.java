@@ -60,8 +60,7 @@ public class CachedSolderPackApi implements ISolderPackApi {
         this.innerApi = innerApi;
         this.cacheInSeconds = cacheInSeconds;
         this.packSlug = packSlug;
-        this.cachePath = fileSystem.getAssetsDirectory().toPath()
-                                    .resolve("packs")
+        this.cachePath = fileSystem.getPackAssetsDirectory()
                                     .resolve(packSlug)
                                     .resolve("soldercache.json");
 

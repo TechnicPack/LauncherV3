@@ -30,12 +30,12 @@ import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.utilslib.Utils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -147,11 +147,13 @@ public class ModpackCachePlatformApi implements IPlatformApi {
     }
 
     private PlatformPackInfo loadForeverCache(String packSlug) {
-        File cacheFile = new File(new File(new File(fileSystem.getAssetsDirectory(), "packs"), packSlug), "cache.json");
-        if (!cacheFile.exists())
+        Path cacheFile = fileSystem.getPackAssetsDirectory()
+                                   .resolve(packSlug)
+                                   .resolve("cache.json");
+        if (!Files.exists(cacheFile))
             return null;
 
-        try (Reader reader = Files.newBufferedReader(cacheFile.toPath(), StandardCharsets.UTF_8)) {
+        try (Reader reader = Files.newBufferedReader(cacheFile, StandardCharsets.UTF_8)) {
             PlatformPackInfo info = Utils.getGson().fromJson(reader, PlatformPackInfo.class);
 
             if (info != null) {
@@ -160,18 +162,20 @@ public class ModpackCachePlatformApi implements IPlatformApi {
 
             return info;
         } catch (JsonParseException | IOException ex) {
-            Utils.getLogger().log(Level.SEVERE, String.format("Failed to load pack cache %s", cacheFile.getAbsolutePath()), ex);
+            Utils.getLogger().log(Level.SEVERE, String.format("Failed to load pack cache %s", cacheFile), ex);
             return null;
         }
     }
 
     private void saveForeverCache(PlatformPackInfo info) {
-        File cacheFile = new File(new File(new File(fileSystem.getAssetsDirectory(), "packs"), info.getName()), "cache.json");
+        Path cacheFile = fileSystem.getPackAssetsDirectory()
+                                   .resolve(info.getName())
+                                   .resolve("cache.json");
 
-        try (Writer writer = Files.newBufferedWriter(cacheFile.toPath(), StandardCharsets.UTF_8)) {
+        try (Writer writer = Files.newBufferedWriter(cacheFile, StandardCharsets.UTF_8)) {
             Utils.getGson().toJson(info, writer);
         } catch (JsonIOException | IOException e) {
-            Utils.getLogger().log(Level.SEVERE, String.format("Failed to save pack cache %s", cacheFile.getAbsolutePath()), e);
+            Utils.getLogger().log(Level.SEVERE, String.format("Failed to save pack cache %s", cacheFile), e);
         }
     }
 

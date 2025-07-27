@@ -19,7 +19,13 @@
 
 package net.technicpack.launchercore.install.verifiers;
 
+import net.technicpack.utilslib.Utils;
+
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.logging.Level;
 
 public class FileSizeVerifier implements IFileVerifier {
     private final long size;
@@ -31,5 +37,15 @@ public class FileSizeVerifier implements IFileVerifier {
     @Override
     public boolean isFileValid(File file) {
         return file.length() == size;
+    }
+
+    @Override
+    public boolean isFileValid(Path path) {
+        try {
+            return Files.size(path) == size;
+        } catch (IOException e) {
+            Utils.getLogger().log(Level.WARNING, String.format("File size verification failed for %s", path.toAbsolutePath()), e);
+            return false;
+        }
     }
 }

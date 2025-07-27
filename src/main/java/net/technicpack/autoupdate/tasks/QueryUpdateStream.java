@@ -86,7 +86,7 @@ public class QueryUpdateStream implements IInstallTask<Void> {
                     verifier = null;
                 }
 
-                File targetFile = new File(new File(fileSystem.getAssetsDirectory(), "launcher"), resource.getFilename());
+                File targetFile = fileSystem.getLauncherAssetsDirectory().resolve(resource.getFilename()).toFile();
 
                 if (targetFile.exists() && verifier.isFileValid(targetFile)) {
                     continue;

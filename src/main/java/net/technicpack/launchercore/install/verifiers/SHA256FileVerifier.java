@@ -23,25 +23,42 @@ import net.technicpack.utilslib.CryptoUtils;
 import net.technicpack.utilslib.Utils;
 
 import java.io.File;
+import java.nio.file.Path;
 
 public class SHA256FileVerifier implements IFileVerifier {
-    private String sha256Hash;
+    private String expectedHash;
 
-    public SHA256FileVerifier(String sha256Hash) {
-        this.sha256Hash = sha256Hash;
+    public SHA256FileVerifier(String expectedHash) {
+        this.expectedHash = expectedHash;
     }
 
     public boolean isFileValid(File file) {
-        if (sha256Hash == null || sha256Hash.isEmpty())
+        if (expectedHash == null || expectedHash.isEmpty())
             return false;
 
         String resultSha256 = CryptoUtils.getSHA256(file);
 
-        boolean hashMatches = sha256Hash.equalsIgnoreCase(resultSha256);
+        boolean hashMatches = expectedHash.equalsIgnoreCase(resultSha256);
 
         if (!hashMatches)
-            Utils.getLogger().warning("SHA256 verification for " + file + " failed. Expected " + sha256Hash + ", got " + resultSha256);
+            Utils.getLogger().warning("SHA256 verification for " + file + " failed. Expected " + expectedHash + ", got " + resultSha256);
 
         return hashMatches;
+    }
+
+    @Override
+    public boolean isFileValid(Path path) {
+        if (expectedHash == null || expectedHash.isEmpty())
+            return false;
+
+        String resultSha256 = CryptoUtils.getSHA256(path);
+
+        boolean hashMatches = expectedHash.equalsIgnoreCase(resultSha256);
+
+        if (!hashMatches)
+            Utils.getLogger().warning("SHA256 verification for " + path + " failed. Expected " + expectedHash + ", got " + resultSha256);
+
+        return hashMatches;
+
     }
 }

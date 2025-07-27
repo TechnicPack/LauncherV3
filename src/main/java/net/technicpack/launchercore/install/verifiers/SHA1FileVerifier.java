@@ -23,24 +23,40 @@ import net.technicpack.utilslib.CryptoUtils;
 import net.technicpack.utilslib.Utils;
 
 import java.io.File;
+import java.nio.file.Path;
 
 public class SHA1FileVerifier implements IFileVerifier {
-    private String sha1Hash;
+    private String expectedHash;
 
-    public SHA1FileVerifier(String sha1Hash) {
-        this.sha1Hash = sha1Hash;
+    public SHA1FileVerifier(String expectedHash) {
+        this.expectedHash = expectedHash;
     }
 
     public boolean isFileValid(File file) {
-        if (sha1Hash == null || sha1Hash.isEmpty())
+        if (expectedHash == null || expectedHash.isEmpty())
             return false;
 
         String resultSha1 = CryptoUtils.getSHA1(file);
 
-        boolean hashMatches = sha1Hash.equalsIgnoreCase(resultSha1);
+        boolean hashMatches = expectedHash.equalsIgnoreCase(resultSha1);
 
         if (!hashMatches)
-            Utils.getLogger().warning("SHA1 verification for " + file + " failed. Expected " + sha1Hash + ", got " + resultSha1);
+            Utils.getLogger().warning("SHA1 verification for " + file + " failed. Expected " + expectedHash + ", got " + resultSha1);
+
+        return hashMatches;
+    }
+
+    @Override
+    public boolean isFileValid(Path path) {
+        if (expectedHash == null || expectedHash.isEmpty())
+            return false;
+
+        String resultSha1 = CryptoUtils.getSHA1(path);
+
+        boolean hashMatches = expectedHash.equalsIgnoreCase(resultSha1);
+
+        if (!hashMatches)
+            Utils.getLogger().warning("SHA1 verification for " + path + " failed. Expected " + expectedHash + ", got " + resultSha1);
 
         return hashMatches;
     }

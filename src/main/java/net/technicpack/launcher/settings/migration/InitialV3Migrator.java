@@ -28,6 +28,7 @@ import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.NewsArticle;
 import net.technicpack.rest.RestfulAPIException;
 
+import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -71,7 +72,8 @@ public class InitialV3Migrator implements IMigrator {
             InstalledPack pack = packStore.getInstalledPacks().get(packName);
             ModpackModel model = new ModpackModel(pack, null, packStore, fileSystem);
 
-            if (!model.getInstalledDirectory().exists()) {
+            File installedDirectory = model.getInstalledDirectory();
+            if (installedDirectory == null || !installedDirectory.exists()) {
                 deletePacks.add(model);
             }
         }

@@ -23,7 +23,6 @@ import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.Utils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 import org.xhtmlrenderer.event.DocumentListener;
@@ -39,12 +38,11 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.logging.Level;
 
 public class DiscoverInfoPanel extends JPanel {
@@ -123,7 +121,7 @@ public class DiscoverInfoPanel extends JPanel {
 
         EventQueue.invokeLater(() -> {
             try {
-                File localCache = new File(fileSystem.getCacheDirectory(), "discover.html");
+                Path localCache = fileSystem.getCacheDirectory().resolve("discover.html");
                 panel.setDocument(getDiscoverDocument(runnableAccessDiscover, localCache), runnableAccessDiscover);
             } catch (Exception ex) {
                 //Can't load document from internet- don't beef
@@ -153,13 +151,13 @@ public class DiscoverInfoPanel extends JPanel {
         }
     }
 
-    protected Document getDiscoverDocument(String url, File localCache) {
+    protected Document getDiscoverDocument(String url, Path localCache) {
         //Attempt to retrieve the discover page from the live site, then a local cache, then an internal resource
         Document doc = getDiscoverDocumentFromLiveSite(url, localCache);
         if (doc != null)
             return doc;
 
-        if (localCache.exists()) {
+        if (!Files.exists(localCache)) {
             doc = getDiscoverDocumentFromLocalCache(localCache);
             if (doc != null)
                 return doc;
@@ -168,15 +166,19 @@ public class DiscoverInfoPanel extends JPanel {
         return getDiscoverDocumentFromResource();
     }
 
-    protected Document getDiscoverDocumentFromLiveSite(String url, File localCache) {
+    protected Document getDiscoverDocumentFromLiveSite(String url, Path localCache) {
         try {
             HttpURLConnection conn = Utils.openHttpConnection(new URL(url));
-            InputStream stream = conn.getInputStream();
-            byte[] data = IOUtils.toByteArray(stream);
+            byte[] data;
+            try (InputStream stream = conn.getInputStream()) {
+                data = IOUtils.toByteArray(stream);
+            }
 
             Document doc = XMLResource.load(new ByteArrayInputStream(data)).getDocument();
             if (doc != null) {
-                FileUtils.writeByteArrayToFile(localCache, data);
+                try (OutputStream stream = Files.newOutputStream(localCache)) {
+                    stream.write(data);
+                }
                 return doc;
             }
         } catch (IOException ex) {
@@ -186,9 +188,9 @@ public class DiscoverInfoPanel extends JPanel {
         return null;
     }
 
-    protected Document getDiscoverDocumentFromLocalCache(File localCache) {
-        try {
-            return XMLResource.load(FileUtils.openInputStream(localCache)).getDocument();
+    protected Document getDiscoverDocumentFromLocalCache(Path localCache) {
+        try (InputStream stream = Files.newInputStream(localCache)) {
+            return XMLResource.load(stream).getDocument();
         } catch (IOException ex) {
             ex.printStackTrace();
         }

@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -140,7 +141,6 @@ public class Relauncher {
         postDownloadTasks.add(new LaunchMoverMode(resources.getString("updater.launchmover"), getTempLauncher(), this));
 
         TaskGroup<Void> downloadFilesGroup = new TaskGroup<>(resources.getString("updater.downloads"));
-        queue.addTask(new EnsureUpdateFolders(resources.getString("updater.folders"), getFileSystem()));
         queue.addTask(new QueryUpdateStream(resources.getString("updater.query"), updateStream, downloadFilesGroup, getFileSystem(), this, postDownloadTasks));
         queue.addTask(downloadFilesGroup);
 
@@ -208,16 +208,13 @@ public class Relauncher {
     }
 
     public File getTempLauncher() {
-        File dest;
-        String runningPath;
+        String runningPath = getRunningPath();
 
-        runningPath = getRunningPath();
+        String extension = runningPath.endsWith(".exe") ? "exe" : "jar";
 
-        if (runningPath.endsWith(".exe"))
-            dest = new File(fileSystem.getLauncherDirectory(), "temp.exe");
-        else
-            dest = new File(fileSystem.getLauncherDirectory(), "temp.jar");
-        return dest;
+        Path destPath = fileSystem.getRootDirectory().resolve(String.format("temp.%s", extension));
+
+        return destPath.toFile();
     }
 
     public void launch(String launchPath, List<String> args) {

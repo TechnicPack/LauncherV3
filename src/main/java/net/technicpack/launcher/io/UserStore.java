@@ -24,7 +24,6 @@ import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.utilslib.Utils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -53,9 +52,7 @@ public class UserStore {
         this.storePath = storePath.toAbsolutePath();
     }
 
-    public static UserStore load(File userFile) {
-        Path storePath = userFile.toPath();
-
+    public static UserStore load(Path storePath) {
         if (!Files.exists(storePath)) {
             Utils.getLogger().log(Level.WARNING, String.format("Unable to load users from %s because it does not exist", storePath));
             return new UserStore(storePath);

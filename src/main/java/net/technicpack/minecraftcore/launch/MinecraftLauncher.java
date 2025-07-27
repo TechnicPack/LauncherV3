@@ -44,6 +44,8 @@ import org.apache.commons.text.StringSubstitutor;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -173,7 +175,7 @@ public class MinecraftLauncher {
 
         // This is for ForgeWrapper >= 1.4.2
         if (MojangUtils.requiresForgeWrapper(version)) {
-            commands.addUnique("-Dforgewrapper.librariesDir=" + fileSystem.getCacheDirectory().getAbsolutePath());
+            commands.addUnique("-Dforgewrapper.librariesDir=" + fileSystem.getCacheDirectory().toString());
 
             // The Forge installer jar is really the modpack.jar
             File modpackJar = new File(pack.getBinDir(), "modpack.jar");
@@ -181,8 +183,8 @@ public class MinecraftLauncher {
 
             // We feed ForgeWrapper the unmodified Minecraft jar here
             String mcVersion = MojangUtils.getMinecraftVersion(version);
-            File minecraftJar = new File(fileSystem.getCacheDirectory(), "minecraft_" + mcVersion + ".jar");
-            commands.addUnique("-Dforgewrapper.minecraft=" + minecraftJar.getAbsolutePath());
+            Path minecraftJar = fileSystem.getCacheDirectory().resolve(String.format("minecraft_%s.jar", mcVersion));
+            commands.addUnique("-Dforgewrapper.minecraft=" + minecraftJar);
         }
 
         commands.addUnique("-Dminecraft.applet.TargetDirectory=" + pack.getInstalledDirectory().getAbsolutePath());
@@ -282,7 +284,7 @@ public class MinecraftLauncher {
         params.put("resolution_width", Integer.toString(launchOpts.getCustomWidth()));
         params.put("resolution_height", Integer.toString(launchOpts.getCustomHeight()));
 
-        String targetAssets = fileSystem.getAssetsDirectory().getAbsolutePath();
+        String targetAssets = fileSystem.getAssetsDirectory().toString();
 
         String assetsKey = version.getAssetsKey();
 
@@ -324,12 +326,12 @@ public class MinecraftLauncher {
                 continue;
             }
 
-            File file = new File(fileSystem.getCacheDirectory(), library.getArtifactPath().replace("${arch}", bitness));
-            if (!file.isFile() || !file.exists()) {
+            Path file = fileSystem.getCacheDirectory().resolve(library.getArtifactPath().replace("${arch}", bitness));
+            if (!Files.isRegularFile(file)) {
                 throw new InstallException("Library " + library.getName() + " not found.");
             }
 
-            sb.append(file.getAbsolutePath()).append(separator);
+            sb.append(file).append(separator);
         }
 
         // Add the modpack.jar to the classpath if it exists and the modpack isn't
@@ -345,16 +347,17 @@ public class MinecraftLauncher {
         }
 
         // Add the minecraft jar to the classpath
-        File minecraft;
+        Path minecraft;
         if (hasModernMinecraftForge || hasNeoForge) {
-            minecraft = new File(fileSystem.getCacheDirectory(), "minecraft_" + version.getParentVersion() + ".jar");
+            minecraft = fileSystem.getCacheDirectory()
+                                  .resolve(String.format("minecraft_%s.jar", version.getParentVersion()));
         } else {
-            minecraft = new File(pack.getBinDir(), "minecraft.jar");
+            minecraft = pack.getBinDir().toPath().resolve("minecraft.jar");
         }
-        if (!minecraft.exists()) {
-            throw new RuntimeException("Minecraft not installed for this pack: " + pack);
+        if (!Files.isRegularFile(minecraft)) {
+            throw new RuntimeException(String.format("Minecraft not installed for this pack: %s", pack.getName()));
         }
-        sb.append(minecraft.getAbsolutePath());
+        sb.append(minecraft);
 
         return sb.toString();
     }

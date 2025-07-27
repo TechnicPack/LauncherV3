@@ -16,6 +16,7 @@ import net.technicpack.rest.io.Modpack;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 
 public class InstallFmlLibsTask implements IInstallTask<IMinecraftVersionInfo> {
@@ -59,9 +60,9 @@ public class InstallFmlLibsTask implements IInstallTask<IMinecraftVersionInfo> {
             return;
         }
 
+        Path fmlLibsCache = fileSystem.getCacheDirectory().resolve("fmllibs");
+        Files.createDirectories(fmlLibsCache);
         File modpackFmlLibDir = new File(pack.getInstalledDirectory(), "lib");
-        File fmlLibsCache = new File(fileSystem.getCacheDirectory(), "fmllibs");
-        Files.createDirectories(fmlLibsCache.toPath());
 
         fmlLibs.forEach((name, sha1) -> {
             SHA1FileVerifier verifier = null;
@@ -70,7 +71,7 @@ public class InstallFmlLibsTask implements IInstallTask<IMinecraftVersionInfo> {
                 verifier = new SHA1FileVerifier(sha1);
             }
 
-            File cached = new File(fmlLibsCache, name);
+            File cached = fmlLibsCache.resolve(name).toFile();
             File target = new File(modpackFmlLibDir, name);
 
             if (!target.exists() || (verifier != null && !verifier.isFileValid(target))) {

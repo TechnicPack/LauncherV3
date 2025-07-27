@@ -41,7 +41,10 @@ public class TechnicFaceMapper implements IImageMapper<IUserType> {
 
     @Override
     public File getImageLocation(IUserType imageKey) {
-        return new File(fileSystem.getAssetsDirectory(), "avatars" + File.separator + imageKey.getDisplayName() + ".png");
+        return fileSystem.getAssetsDirectory()
+                         .resolve("avatars")
+                         .resolve(imageKey.getDisplayName() + ".png")
+                         .toFile();
     }
 
     @Override

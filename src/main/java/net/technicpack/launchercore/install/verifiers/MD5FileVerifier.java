@@ -23,24 +23,40 @@ import net.technicpack.utilslib.CryptoUtils;
 import net.technicpack.utilslib.Utils;
 
 import java.io.File;
+import java.nio.file.Path;
 
 public class MD5FileVerifier implements IFileVerifier {
-    private String md5Hash;
+    private final String expectedHash;
 
-    public MD5FileVerifier(String md5Hash) {
-        this.md5Hash = md5Hash;
+    public MD5FileVerifier(String expectedHash) {
+        this.expectedHash = expectedHash;
     }
 
     public boolean isFileValid(File file) {
-        if (md5Hash == null || md5Hash.isEmpty())
+        if (expectedHash == null || expectedHash.isEmpty())
             return false;
 
         String resultMD5 = CryptoUtils.getMD5(file);
 
-        boolean hashMatches = md5Hash.equalsIgnoreCase(resultMD5);
+        boolean hashMatches = expectedHash.equalsIgnoreCase(resultMD5);
 
         if (!hashMatches)
-            Utils.getLogger().warning("MD5 verification for " + file + " failed. Expected " + md5Hash + ", got " + resultMD5);
+            Utils.getLogger().warning("MD5 verification for " + file + " failed. Expected " + expectedHash + ", got " + resultMD5);
+
+        return hashMatches;
+    }
+
+    @Override
+    public boolean isFileValid(Path path) {
+        if (expectedHash == null || expectedHash.isEmpty())
+            return false;
+
+        String resultMD5 = CryptoUtils.getMD5(path);
+
+        boolean hashMatches = expectedHash.equalsIgnoreCase(resultMD5);
+
+        if (!hashMatches)
+            Utils.getLogger().warning("MD5 verification for " + path + " failed. Expected " + expectedHash + ", got " + resultMD5);
 
         return hashMatches;
     }

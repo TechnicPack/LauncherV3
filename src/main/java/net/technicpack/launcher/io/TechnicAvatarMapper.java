@@ -41,7 +41,11 @@ public class TechnicAvatarMapper implements IImageMapper<AuthorshipInfo> {
 
     @Override
     public File getImageLocation(AuthorshipInfo imageKey) {
-        return new File(fileSystem.getAssetsDirectory(), "avatars" + File.separator + "gravitar" + File.separator + imageKey.getUser() + ".png");
+        return fileSystem.getAssetsDirectory()
+                         .resolve("avatars")
+                         .resolve("gravitar")
+                         .resolve(imageKey.getUser() + ".png")
+                         .toFile();
     }
 
     @Override

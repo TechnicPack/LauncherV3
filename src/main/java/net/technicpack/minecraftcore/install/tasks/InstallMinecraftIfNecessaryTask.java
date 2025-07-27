@@ -24,29 +24,40 @@ import net.technicpack.launchercore.install.tasks.ListenerTask;
 import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.SHA1FileVerifier;
 import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.minecraftcore.MojangUtils;
+import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.io.GameDownloads;
 import net.technicpack.utilslib.Utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.JarOutputStream;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class InstallMinecraftIfNecessaryTask extends ListenerTask<IMinecraftVersionInfo> {
 
 	private ModpackModel pack;
 	private String minecraftVersion;
-	private File cacheDirectory;
+	private Path cacheDirectory;
 	private boolean forceRegeneration;
 
-	public InstallMinecraftIfNecessaryTask(ModpackModel pack, String minecraftVersion, File cacheDirectory, boolean forceRegeneration) {
+	public InstallMinecraftIfNecessaryTask(ModpackModel pack, String minecraftVersion, Path cacheDirectory, boolean forceRegeneration) {
 		this.pack = pack;
 		this.minecraftVersion = minecraftVersion;
 		this.cacheDirectory = cacheDirectory;
 		this.forceRegeneration = forceRegeneration;
 	}
 
-	@Override
+    @Override
 	public String getTaskDescription() {
 		return "Installing Minecraft";
 	}
@@ -66,21 +77,56 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask<IMinecraftVers
 		String url = dls.forClient().getUrl();
 		IFileVerifier verifier = new SHA1FileVerifier(dls.forClient().getSha1());
 
-		File cache = new File(cacheDirectory, "minecraft_" + this.minecraftVersion + ".jar");
+        Path originalJar = cacheDirectory.resolve(String.format("minecraft_%s.jar", minecraftVersion));
 
 		boolean regenerate = forceRegeneration;
 
-		if (!cache.exists() || !verifier.isFileValid(cache)) {
+		if (!Files.isRegularFile(originalJar) || !verifier.isFileValid(originalJar)) {
 			String output = this.pack.getCacheDir() + File.separator + "minecraft.jar";
-			Utils.downloadFile(url, cache.getName(), output, cache, verifier, this);
+			Utils.downloadFile(url, originalJar.getFileName().toString(), output, originalJar.toFile(), verifier, this);
 			regenerate = true;
 		}
 
-		File binMinecraftJar = new File(this.pack.getBinDir(), "minecraft.jar");
+		File targetJar = new File(this.pack.getBinDir(), "minecraft.jar");
 
-		if (!binMinecraftJar.exists() || regenerate) {
-			MojangUtils.copyMinecraftJar(cache, binMinecraftJar, this);
+		if (!targetJar.exists() || regenerate) {
+			copyMinecraftJar(originalJar, targetJar.toPath(), this);
 		}
 	}
 
+
+    private static void copyMinecraftJar(Path jar, Path output, DownloadListener listener) throws IOException {
+        String[] security = {"MOJANG_C.DSA", "MOJANG_C.SF", "CODESIGN.RSA", "CODESIGN.SF"};
+        Pattern securityPattern = Pattern.compile(Arrays.stream(security).map(Pattern::quote).collect(Collectors.joining("|")));
+        listener.stateChanged("Processing Minecraft jar", 0);
+        try (JarFile jarFile = new JarFile(jar.toFile());
+             OutputStream out = Files.newOutputStream(output);
+             JarOutputStream jos = new JarOutputStream(out)) {
+            Enumeration<JarEntry> entries = jarFile.entries();
+
+            final int totalEntries = jarFile.size();
+            int x = 0;
+            JarEntry entry;
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+
+            while (entries.hasMoreElements()) {
+                listener.stateChanged("Processing Minecraft jar", (float) ++x / totalEntries * 100);
+                entry = entries.nextElement();
+                if (securityPattern.matcher(entry.getName()).find()) {
+                    continue;
+                }
+                try (InputStream is = jarFile.getInputStream(entry)) {
+                    // create a new entry to avoid ZipException: invalid entry compressed size
+                    jos.putNextEntry(new JarEntry(entry.getName()));
+
+                    while ((bytesRead = is.read(buffer)) != -1) {
+                        jos.write(buffer, 0, bytesRead);
+                    }
+                }
+                jos.flush();
+                jos.closeEntry();
+            }
+        }
+    }
 }

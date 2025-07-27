@@ -19,6 +19,8 @@ import net.technicpack.utilslib.Utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class InstallVersionLibTask extends ListenerTask<IMinecraftVersionInfo> {
     private Library library;
@@ -66,9 +68,10 @@ public class InstallVersionLibTask extends ListenerTask<IMinecraftVersionInfo> {
 
         String path = library.getArtifactPath(nativeClassifier).replace("${arch}", bitness);
 
-        File cache = new File(fileSystem.getCacheDirectory(), path);
-        if (cache.getParentFile() != null) {
-            cache.getParentFile().mkdirs();
+        Path cache = fileSystem.getCacheDirectory().resolve(path);
+
+        if (cache.getParent() != null) {
+            Files.createDirectories(cache.getParent());
         }
 
         IFileVerifier verifier;
@@ -80,13 +83,13 @@ public class InstallVersionLibTask extends ListenerTask<IMinecraftVersionInfo> {
             verifier = new ValidZipFileVerifier();
 
         // TODO: Add check based on size (so it fails early if the size is different)
-        if (cache.exists() && verifier.isFileValid(cache) && extractDirectory == null)
+        if (Files.isRegularFile(cache) && verifier.isFileValid(cache) && extractDirectory == null)
             return;
 
         String url = null;
 
         // TODO: this causes verification to happen twice, for natives
-        if (!cache.exists() || !verifier.isFileValid(cache)) {
+        if (!Files.isRegularFile(cache) || !verifier.isFileValid(cache)) {
             url = library.getDownloadUrl(path).replace("${arch}", bitness);
             if (sha1 == null || sha1.isEmpty()) {
                 String md5 = Utils.getETag(url);

@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.logging.Level;
 
 public class ValidJsonFileVerifier implements IFileVerifier {
@@ -50,6 +51,22 @@ public class ValidJsonFileVerifier implements IFileVerifier {
             return false;
         } catch (JsonIOException | IOException ex) {
             Utils.getLogger().log(Level.SEVERE, String.format("An I/O error happened while validating %s", file.getAbsolutePath()), ex);
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean isFileValid(Path path) {
+        try (Reader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+            JsonObject obj = validatingGson.fromJson(reader, JsonObject.class);
+
+            return (obj != null);
+        } catch (JsonSyntaxException e) {
+            Utils.getLogger().log(Level.WARNING, String.format("JSON validation failed for %s", path), e);
+            return false;
+        } catch (JsonIOException | IOException ex) {
+            Utils.getLogger().log(Level.SEVERE, String.format("An I/O error happened while validating %s", path), ex);
         }
 
         return false;

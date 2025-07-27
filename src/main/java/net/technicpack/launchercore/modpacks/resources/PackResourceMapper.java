@@ -60,9 +60,10 @@ public class PackResourceMapper implements IImageMapper<ModpackModel> {
 
     @Override
     public File getImageLocation(ModpackModel imageKey) {
-        File assets = new File(fileSystem.getAssetsDirectory(), "packs");
-        File packs = new File(assets, imageKey.getName());
-        return new File(packs, resourceType.getImageName());
+        return fileSystem.getPackAssetsDirectory()
+                         .resolve(imageKey.getName())
+                         .resolve(resourceType.getImageName())
+                         .toFile();
     }
 
     @Override

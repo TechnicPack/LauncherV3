@@ -36,7 +36,6 @@ import java.util.logging.Level;
 
 public class SettingsFactory {
     public static TechnicSettings buildSettingsObject(String runningDir, boolean isMover) {
-
         System.out.println("Settings for exe: "+runningDir);
 
         File portableSettingsDir = getPortableSettingsDir(runningDir, isMover);
@@ -53,7 +52,7 @@ public class SettingsFactory {
             return portableSettings;
         }
 
-        File installedSettingsDir = OperatingSystem.getOperatingSystem().getUserDirectoryForApp("technic");
+        File installedSettingsDir = OperatingSystem.getOperatingSystem().getTechnicDirectory();
 
         TechnicSettings settings = tryGetSettings(installedSettingsDir);
 

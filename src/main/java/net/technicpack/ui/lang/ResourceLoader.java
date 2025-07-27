@@ -21,7 +21,6 @@ package net.technicpack.ui.lang;
 
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.utilslib.Utils;
-import org.apache.commons.io.FileUtils;
 import org.intellij.lang.annotations.MagicConstant;
 
 import javax.imageio.ImageIO;
@@ -30,9 +29,10 @@ import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Level;
@@ -46,7 +46,7 @@ public class ResourceLoader {
     private final String slashResourcePath;
     private boolean isDefaultLocaleSupported = true;
     private final Locale defaultLocale;
-    private File launcherAssets;
+    private final Path launcherAssets;
     private Locale[] locales = { Locale.ENGLISH };
 
     public static final String DEFAULT_LOCALE = "default";
@@ -67,33 +67,31 @@ public class ResourceLoader {
     }
 
     public Font getFontByName(String fontName) {
-        Font font;
 
-        if (fontCache.containsKey(fontName))
+        if (fontCache.containsKey(fontName)) {
             return fontCache.get(fontName);
+        }
 
-        if (launcherAssets == null)
+        if (launcherAssets == null) {
             return fallbackFont;
+        }
 
+        Font font;
         try {
-            try (InputStream fontStream = FileUtils.openInputStream(new File(launcherAssets, fontName))) {
-                if (fontStream == null)
-                    return fallbackFont;
-
+            try (InputStream fontStream = Files.newInputStream(launcherAssets.resolve(fontName))) {
                 font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
             }
             GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            genv.registerFont(font);
+            if (!genv.registerFont(font)) {
+                return fallbackFont;
+            }
         } catch (Exception e) {
             e.printStackTrace();
             // Fallback
             return fallbackFont;
         }
-        fontCache.put(fontName, font);
 
-        if (font == null)
-            return fallbackFont;
-        
+        fontCache.put(fontName, font);
         return font;
     }
 
@@ -101,7 +99,7 @@ public class ResourceLoader {
         if (fileSystem == null)
             this.launcherAssets = null;
         else
-            this.launcherAssets = new File(fileSystem.getAssetsDirectory(), "launcher");
+            this.launcherAssets = fileSystem.getLauncherAssetsDirectory();
 
         dottedResourcePath = Arrays.stream(resourcesPath).collect(Collectors.joining(".", "", "."));
         slashResourcePath = Arrays.stream(resourcesPath).collect(Collectors.joining("/", "/", ""));

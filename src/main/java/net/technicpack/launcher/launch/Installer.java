@@ -396,7 +396,7 @@ public class Installer {
                                                                   .withVersionBuilder(versionBuilder)
                                                                   .withLaunchOptions(settings)
                                                                   .withJavaRuntime(selectedJavaRuntime));
-            examineVersionFile.addTask(new EnsureAssetsIndexTask(fileSystem.getAssetsDirectory(), pack, installingMinecraft, examineIndex, verifyingAssets, installingAssets, installingAssets));
+            examineVersionFile.addTask(new EnsureAssetsIndexTask(fileSystem.getAssetsDirectory().toFile(), pack, installingMinecraft, examineIndex, verifyingAssets, installingAssets, installingAssets));
 
             fetchJavaManifest.addTask(new EnsureJavaRuntimeManifestTask(fileSystem.getRuntimesDirectory(), pack, fetchJavaManifest, examineJava, downloadJava));
 

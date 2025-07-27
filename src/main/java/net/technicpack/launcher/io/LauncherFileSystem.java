@@ -19,78 +19,134 @@
 package net.technicpack.launcher.io;
 
 import javax.swing.JOptionPane;
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class LauncherFileSystem {
-    private File workDir;
+    private final Path rootDirectory;
+    private final Path assetsDirectory;
+    private final Path cacheDirectory;
+    private final Path logsDirectory;
+    private final Path modpacksDirectory;
+    private final Path runtimesDirectory;
+    private final Path launcherAssetsDirectory;
+    private final Path packAssetsDirectory;
 
-    public LauncherFileSystem(File rootDir) {
-        // TODO: this constructor should create the folders and ensure they exist or abort
-        workDir = rootDir;
+    public LauncherFileSystem(Path rootDir) {
+        this.rootDirectory = rootDir.toAbsolutePath().normalize();
+
+        assetsDirectory = rootDirectory.resolve("assets");
+        cacheDirectory = rootDirectory.resolve("cache");
+        logsDirectory = rootDirectory.resolve("logs");
+        modpacksDirectory = rootDirectory.resolve("modpacks");
+        runtimesDirectory = rootDirectory.resolve("runtimes");
+
+        launcherAssetsDirectory = assetsDirectory.resolve("launcher");
+        packAssetsDirectory = assetsDirectory.resolve("packs");
+
+        createDirectories();
     }
 
-    private void ensureDirectory(File dir) {
-        if (dir.exists() && dir.isDirectory()) {
-            return;
-        }
+    public void createDirectories() {
+        createDirectory(rootDirectory);
+        createDirectory(assetsDirectory);
+        createDirectory(cacheDirectory);
+        createDirectory(logsDirectory);
+        createDirectory(modpacksDirectory);
+        createDirectory(runtimesDirectory);
+        createDirectory(launcherAssetsDirectory);
+        createDirectory(packAssetsDirectory);
+    }
 
-        if (dir.exists() && !dir.isDirectory()) {
-            if (!dir.delete()) {
-                JOptionPane.showMessageDialog(null, "Failed to create directory " + dir.getAbsolutePath() + ".\nThis is a critical error, the launcher will terminate now.", "Critical error - Technic Launcher", JOptionPane.ERROR_MESSAGE);
-                System.exit(1);
+    private void createDirectory(Path path) {
+        ensureDirectory(path);
+    }
+
+    private Path ensureDirectory(Path path) {
+        if (Files.exists(path)) {
+            if (Files.isDirectory(path)) {
+                return path;
+            }
+
+            try {
+                Files.deleteIfExists(path);
+            } catch (IOException e) {
+                abortWithErrorDialog(path);
             }
         }
 
-        if (!dir.mkdirs()) {
-            JOptionPane.showMessageDialog(null, "Failed to create directory " + dir.getAbsolutePath() + ".\nThis is a critical error, the launcher will terminate now.", "Critical error - Technic Launcher", JOptionPane.ERROR_MESSAGE);
-            System.exit(1);
+        try {
+            Files.createDirectories(path);
+        } catch (IOException e) {
+            abortWithErrorDialog(path);
         }
+
+        return path;
     }
 
-    public File getLauncherDirectory() {
-        ensureDirectory(workDir);
-
-        return workDir;
+    private static void abortWithErrorDialog(Path path) {
+        JOptionPane.showMessageDialog(null, String.format("Failed to create directory %s.%nThis is a critical error, the launcher will terminate now.", path), "Critical error - Technic Launcher", JOptionPane.ERROR_MESSAGE);
+        System.exit(1);
     }
 
-    public File getCacheDirectory() {
-        File cache = new File(getLauncherDirectory(), "cache");
-
-        ensureDirectory(cache);
-
-        return cache;
+    /**
+     * The root directory of the launcher storage.
+     * <p/>
+     * On a default setup on Windows, this is "%APPDATA%\.technic"
+     */
+    public Path getRootDirectory() {
+        return ensureDirectory(rootDirectory);
     }
 
-    public File getAssetsDirectory() {
-        // TODO: all of these directories should be final and just one instance, it's stupid to make a new instance every single time
-        File assets = new File(getLauncherDirectory(), "assets");
-
-        ensureDirectory(assets);
-
-        return assets;
+    /**
+     * The directory where cached files are stored.
+     * <p/>
+     * This includes FML libraries, Minecraft client jars, Minecraft libraries, and the discover page.
+     */
+    public Path getCacheDirectory() {
+        return ensureDirectory(cacheDirectory);
     }
 
-    public File getModpacksDirectory() {
-        File modpacks = new File(getLauncherDirectory(), "modpacks");
-
-        ensureDirectory(modpacks);
-
-        return modpacks;
+    /**
+     * The directory where assets are stored
+     */
+    public Path getAssetsDirectory() {
+        return assetsDirectory;
     }
 
-    public File getRuntimesDirectory() {
-        File runtimes = new File(getLauncherDirectory(), "runtimes");
-
-        ensureDirectory(runtimes);
-
-        return runtimes;
+    /**
+     * The directory where modpacks are installed to
+     */
+    public Path getModpacksDirectory() {
+        return ensureDirectory(modpacksDirectory);
     }
 
-    public File getLogsDirectory() {
-        File logs = new File(getLauncherDirectory(), "logs");
+    /**
+     * The directory for Mojang JREs
+     */
+    public Path getRuntimesDirectory() {
+        return ensureDirectory(runtimesDirectory);
+    }
 
-        ensureDirectory(logs);
+    /**
+     * The directory for launcher log files
+     */
+    public Path getLogsDirectory() {
+        return ensureDirectory(logsDirectory);
+    }
 
-        return logs;
+    /**
+     * The directory for launcher assets
+     */
+    public Path getLauncherAssetsDirectory() {
+        return ensureDirectory(launcherAssetsDirectory);
+    }
+
+    /**
+     * The directory for modpack assets
+     */
+    public Path getPackAssetsDirectory() {
+        return ensureDirectory(packAssetsDirectory);
     }
 }

@@ -19,48 +19,66 @@
 
 package net.technicpack.launchercore.logging;
 
-import net.technicpack.utilslib.Utils;
-
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
 
-public class RotatingFileHandler extends StreamHandler {
-    private final SimpleDateFormat dateFormat;
-    private final String logPathFormat;
-    private String currentLogPath;
+import static java.nio.file.StandardOpenOption.APPEND;
 
-    public RotatingFileHandler(String logPathFormat) {
-        this.logPathFormat = logPathFormat;
-        dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        currentLogPath = calculatePath();
+public class RotatingFileHandler extends StreamHandler {
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private Path logsDirectory;
+    private final String filenameFormat;
+    private String currentFilename;
+
+    public RotatingFileHandler(Path logsDirectory, String filenameFormat) {
+        this.filenameFormat = filenameFormat;
+        setLogsDirectory(logsDirectory);
+    }
+
+    private synchronized void setLogsDirectory(Path logsDirectory) {
+        if (logsDirectory == null) {
+            throw new NullPointerException("logsDirectory cannot be null");
+        }
+
+        this.logsDirectory = logsDirectory;
+
+        updateOutputFile();
+    }
+
+    private synchronized void updateOutputFile() {
+        // Close the output stream, in case it's open
+        this.close();
+
+        currentFilename = buildFilename();
         try {
-            setOutputStream(new FileOutputStream(currentLogPath, true));
-        } catch (FileNotFoundException ex) {
-            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+            OutputStream out = Files.newOutputStream(this.logsDirectory.resolve(currentFilename), APPEND);
+            setOutputStream(out);
+        } catch (IOException ignored) {
+            // We can't really log exceptions if the logger doesn't work
+            // TODO: implement ErrorManager that doesn't write to System.err
         }
     }
 
-    private String calculatePath() {
-        return String.format(logPathFormat, dateFormat.format(new Date()));
+    private String buildFilename() {
+        return String.format(filenameFormat, dateFormat.format(new Date()));
     }
 
-    private void changeFileIfNeeded() {
-        final String newPath = calculatePath();
-        if (!currentLogPath.equals(newPath)) {
-            final String oldPath = currentLogPath;
-            currentLogPath = newPath;
-            try {
-                this.close();
-                setOutputStream(new FileOutputStream(currentLogPath, true));
-                super.publish(new LogRecord(Level.INFO, "Continued from " + oldPath));
-            } catch (FileNotFoundException ex) {
-                Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
-            }
+    private synchronized void changeFileIfNeeded() {
+        final String newFilename = buildFilename();
+        if (!currentFilename.equals(newFilename)) {
+            final String oldPath = currentFilename;
+
+            currentFilename = newFilename;
+            // TODO: make this not have to call buildFilename() again
+            updateOutputFile();
+            super.publish(new LogRecord(Level.INFO, String.format("Continued from %s", oldPath)));
         }
     }
 

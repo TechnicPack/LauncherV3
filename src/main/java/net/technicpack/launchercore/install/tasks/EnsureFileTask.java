@@ -28,12 +28,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Objects;
 
 @SuppressWarnings("UnusedReturnValue")
 public class EnsureFileTask<T> implements IInstallTask<T> {
-    private final File targetFile;
-    private final ITasksQueue<T> downloadTaskQueue;
+    private final @NotNull File targetFile;
+    private final @NotNull ITasksQueue<T> downloadTaskQueue;
     private final @NotNull String friendlyFileName;
     private File zipExtractionDirectory;
     private String sourceUrl;
@@ -44,9 +45,13 @@ public class EnsureFileTask<T> implements IInstallTask<T> {
     private String downloadDecompressor;
 
     public EnsureFileTask(@NotNull ITasksQueue<T> downloadQueue, @NotNull File target) {
-        this.targetFile = target;
+        this.downloadTaskQueue = Objects.requireNonNull(downloadQueue, "Download task queue must be set.");
+        this.targetFile = Objects.requireNonNull(target, "Target file must be set.");
         this.friendlyFileName = target.getName();
-        this.downloadTaskQueue = downloadQueue;
+    }
+
+    public EnsureFileTask(@NotNull ITasksQueue<T> downloadQueue, @NotNull Path target) {
+        this(downloadQueue, target.toFile());
     }
 
     @Override

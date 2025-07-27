@@ -27,7 +27,6 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.gson.*;
 import net.technicpack.launcher.io.IUserTypeInstanceCreator;
 import net.technicpack.launchercore.auth.IUserType;
-import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.minecraftcore.mojang.java.JavaRuntimesIndex;
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.io.*;
@@ -39,14 +38,9 @@ import org.apache.maven.artifact.versioning.ComparableVersion;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.jar.JarOutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class MojangUtils {
     private static final HttpTransport HTTP_TRANSPORT = new Apache5HttpTransport();
@@ -83,40 +77,6 @@ public class MojangUtils {
 
     public static Gson getGson() {
         return gson;
-    }
-
-    public static void copyMinecraftJar(File minecraft, File output, DownloadListener listener) throws IOException {
-        String[] security = {"MOJANG_C.DSA", "MOJANG_C.SF", "CODESIGN.RSA", "CODESIGN.SF"};
-        Pattern securityPattern = Pattern.compile(Arrays.stream(security).map(Pattern::quote).collect(Collectors.joining("|")));
-        listener.stateChanged("Processing Minecraft jar", 0);
-        try (JarFile jarFile = new JarFile(minecraft);
-             OutputStream out = Files.newOutputStream(output.toPath());
-             JarOutputStream jos = new JarOutputStream(out)) {
-            Enumeration<JarEntry> entries = jarFile.entries();
-
-            final int totalEntries = jarFile.size();
-            int x = 1;
-
-            while (entries.hasMoreElements()) {
-                listener.stateChanged("Processing Minecraft jar", (float) x / totalEntries * 100);
-                JarEntry entry = entries.nextElement();
-                if (securityPattern.matcher(entry.getName()).find()) {
-                    continue;
-                }
-                try (InputStream is = jarFile.getInputStream(entry)) {
-                    //create a new entry to avoid ZipException: invalid entry compressed size
-                    jos.putNextEntry(new JarEntry(entry.getName()));
-                    byte[] buffer = new byte[4096];
-                    int bytesRead;
-                    while ((bytesRead = is.read(buffer)) != -1) {
-                        jos.write(buffer, 0, bytesRead);
-                    }
-                }
-                jos.flush();
-                jos.closeEntry();
-                x++;
-            }
-        }
     }
 
     public static boolean isLegacyVersion(String version) {

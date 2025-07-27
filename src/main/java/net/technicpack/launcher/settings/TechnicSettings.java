@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -82,6 +83,10 @@ public class TechnicSettings implements ILaunchOptions {
             buildTechnicRoot();
 
         return technicRoot;
+    }
+
+    public Path getTechnicRootPath() {
+        return getTechnicRoot().toPath().toAbsolutePath();
     }
 
     public String getLauncherSettingsVersion() { return launcherSettingsVersion; }

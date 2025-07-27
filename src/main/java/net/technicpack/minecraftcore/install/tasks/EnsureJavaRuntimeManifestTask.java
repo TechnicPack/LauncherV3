@@ -34,18 +34,18 @@ import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.io.Download;
 import net.technicpack.minecraftcore.mojang.version.io.VersionJavaInfo;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class EnsureJavaRuntimeManifestTask implements IInstallTask<IMinecraftVersionInfo> {
-
-    private final File runtimesDirectory;
+    private final Path runtimesDirectory;
     private final ModpackModel modpack;
     private final ITasksQueue<IMinecraftVersionInfo> fetchJavaManifest;
     private final ITasksQueue<IMinecraftVersionInfo> examineJavaQueue;
     private final ITasksQueue<IMinecraftVersionInfo> downloadJavaQueue;
 
-    public EnsureJavaRuntimeManifestTask(File runtimesDirectory, ModpackModel modpack, ITasksQueue<IMinecraftVersionInfo> fetchJavaManifest, ITasksQueue<IMinecraftVersionInfo> examineJavaQueue, ITasksQueue<IMinecraftVersionInfo> downloadJavaQueue) {
+    public EnsureJavaRuntimeManifestTask(Path runtimesDirectory, ModpackModel modpack, ITasksQueue<IMinecraftVersionInfo> fetchJavaManifest, ITasksQueue<IMinecraftVersionInfo> examineJavaQueue, ITasksQueue<IMinecraftVersionInfo> downloadJavaQueue) {
         this.runtimesDirectory = runtimesDirectory;
         this.modpack = modpack;
         this.fetchJavaManifest = fetchJavaManifest;
@@ -90,17 +90,17 @@ public class EnsureJavaRuntimeManifestTask implements IInstallTask<IMinecraftVer
 
         Download runtimeDownload = manifest.getManifest();
 
-        File output = new File(runtimesDirectory + File.separator + "manifests", runtimeName + ".json");
+        Path output = runtimesDirectory.resolve("manifests").resolve(runtimeName + ".json");
 
-        (new File(output.getParent())).mkdirs();
+        Files.createDirectories(output.getParent());
 
         IFileVerifier fileVerifier = new SHA1FileVerifier(runtimeDownload.getSha1());
 
-        if (!output.exists() || !fileVerifier.isFileValid(output)) {
-            fetchJavaManifest.addTask(new DownloadFileTask<>(runtimeDownload.getUrl(), output, fileVerifier));
+        if (!Files.isRegularFile(output) || !fileVerifier.isFileValid(output)) {
+            fetchJavaManifest.addTask(new DownloadFileTask<>(runtimeDownload.getUrl(), output.toFile(), fileVerifier));
         }
 
-        examineJavaQueue.addTask(new InstallJavaRuntimeTask(modpack, runtimesDirectory, output, runtimeInfo, examineJavaQueue, downloadJavaQueue));
+        examineJavaQueue.addTask(new InstallJavaRuntimeTask(runtimesDirectory, output, runtimeInfo, examineJavaQueue, downloadJavaQueue));
     }
 
 }
