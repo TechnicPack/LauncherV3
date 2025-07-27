@@ -56,7 +56,7 @@ public class ResourceLoader {
 
     private static final Map<String, Font> fontCache = new HashMap<>();
 
-    public static final Font fallbackFont = new Font("Arial", Font.PLAIN, 12);
+    public static final Font fallbackFont = new Font("SansSerif", Font.PLAIN, 12);
 
     public void setSupportedLanguages(Locale[] locales) {
         this.locales = locales.clone();
@@ -67,7 +67,6 @@ public class ResourceLoader {
     }
 
     public Font getFontByName(String fontName) {
-
         if (fontCache.containsKey(fontName)) {
             return fontCache.get(fontName);
         }
@@ -83,7 +82,7 @@ public class ResourceLoader {
             }
             GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
             if (!genv.registerFont(font)) {
-                return fallbackFont;
+                Utils.getLogger().log(Level.WARNING, String.format("Failed to register font: %s", fontName));
             }
         } catch (Exception e) {
             e.printStackTrace();
