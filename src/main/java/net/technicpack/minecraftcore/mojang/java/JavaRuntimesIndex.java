@@ -1,12 +1,11 @@
 package net.technicpack.minecraftcore.mojang.java;
 
 import com.google.gson.annotations.SerializedName;
-import java.util.Collections;
-
 import net.technicpack.utilslib.JavaUtils;
 import net.technicpack.utilslib.OSUtils;
 import net.technicpack.utilslib.OperatingSystem;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

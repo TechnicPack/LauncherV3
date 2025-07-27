@@ -19,8 +19,9 @@
 
 package net.technicpack.ui.controls;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JPanel;
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
 public class TiledBackground extends JPanel {

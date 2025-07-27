@@ -24,7 +24,10 @@ import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.utilslib.ProfilingUtils;
 import net.technicpack.utilslib.Utils;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;

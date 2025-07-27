@@ -31,7 +31,8 @@ import org.xhtmlrenderer.render.Box;
 import org.xhtmlrenderer.swing.BasicPanel;
 import org.xhtmlrenderer.swing.LinkListener;
 
-import java.awt.*;
+import java.awt.Cursor;
+import java.awt.Rectangle;
 import java.util.LinkedList;
 import java.util.List;
 

@@ -19,9 +19,15 @@
 
 package net.technicpack.ui.controls;
 
-import javax.swing.*;
+import javax.swing.Icon;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JToolTip;
 import javax.swing.plaf.metal.MetalToolTipUI;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 
 public class TooltipWarning extends JLabel {
 

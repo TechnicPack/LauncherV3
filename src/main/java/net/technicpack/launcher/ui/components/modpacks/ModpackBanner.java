@@ -19,13 +19,13 @@
 package net.technicpack.launcher.ui.components.modpacks;
 
 import net.technicpack.launcher.ui.UIConstants;
-import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.controls.modpacks.ModpackTag;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.install.ModpackVersion;
 import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.ImageUtils;
 
 import javax.swing.*;

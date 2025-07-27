@@ -22,7 +22,8 @@ package net.technicpack.ui.components;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 /**
  * Console dialog for showing console messages.

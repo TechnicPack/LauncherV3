@@ -18,20 +18,23 @@
 
 package net.technicpack.launcher.ui.components.news;
 
-import net.technicpack.launcher.ui.UIConstants;
-import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.settings.TechnicSettings;
-import net.technicpack.ui.controls.list.SimpleScrollbarUI;
-import net.technicpack.ui.controls.feeds.CountCircle;
+import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.launcher.ui.controls.feeds.NewsWidget;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.platform.io.NewsData;
 import net.technicpack.rest.RestfulAPIException;
+import net.technicpack.ui.controls.feeds.CountCircle;
+import net.technicpack.ui.controls.list.SimpleScrollbarUI;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.Utils;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import java.awt.*;
 import java.util.logging.Level;
 

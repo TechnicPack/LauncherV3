@@ -5,7 +5,6 @@ import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 
 import java.io.File;
-import java.io.IOException;
 
 public class LaunchMoverMode implements IInstallTask<Void> {
 

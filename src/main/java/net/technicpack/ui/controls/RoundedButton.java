@@ -19,7 +19,8 @@
 
 package net.technicpack.ui.controls;
 
-import javax.swing.*;
+import javax.swing.Icon;
+import javax.swing.JButton;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;

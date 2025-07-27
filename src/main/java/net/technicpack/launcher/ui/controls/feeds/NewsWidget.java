@@ -19,16 +19,19 @@
 package net.technicpack.launcher.ui.controls.feeds;
 
 import net.technicpack.launcher.ui.UIConstants;
-import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.controls.SelectorWidget;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.platform.io.NewsArticle;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.ImageUtils;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import java.awt.Dimension;
 import java.text.DateFormat;
 import java.util.Calendar;
 

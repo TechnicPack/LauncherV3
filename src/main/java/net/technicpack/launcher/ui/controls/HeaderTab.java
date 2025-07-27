@@ -18,14 +18,16 @@
 
 package net.technicpack.launcher.ui.controls;
 
-import javax.swing.*;
-import java.awt.*;
+import net.technicpack.launcher.ui.UIConstants;
+import net.technicpack.ui.lang.ResourceLoader;
+
+import javax.swing.BorderFactory;
+import javax.swing.DefaultButtonModel;
+import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-
-import net.technicpack.launcher.ui.UIConstants;
-import net.technicpack.ui.lang.ResourceLoader;
 
 public class HeaderTab extends JLabel implements MouseListener {
     private boolean isActive;

@@ -22,9 +22,12 @@ import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.launcher.ui.controls.SelectorWidget;
 import net.technicpack.ui.lang.ResourceLoader;
 
-import javax.swing.*;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 
 public class FindMoreWidget extends SelectorWidget {
     private JLabel moreLabel;

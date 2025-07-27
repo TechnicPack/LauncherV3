@@ -19,8 +19,12 @@
 
 package net.technicpack.ui.controls;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import java.awt.Color;
+import java.awt.Graphics;
 
 public class TintablePanel extends JPanel {
     private Color tintColor;

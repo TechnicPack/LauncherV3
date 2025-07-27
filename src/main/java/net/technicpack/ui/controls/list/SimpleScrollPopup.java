@@ -19,9 +19,9 @@
 
 package net.technicpack.ui.controls.list;
 
-import javax.swing.*;
+import javax.swing.JComboBox;
 import javax.swing.plaf.basic.BasicComboPopup;
-import java.awt.*;
+import java.awt.Color;
 
 public class SimpleScrollPopup extends BasicComboPopup {
 

@@ -21,7 +21,8 @@ package net.technicpack.ui.controls.installation;
 
 import net.technicpack.launchercore.util.DownloadListener;
 
-import javax.swing.*;
+import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 import java.awt.*;
 
 public class ProgressBar extends JLabel implements DownloadListener {

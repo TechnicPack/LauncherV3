@@ -19,13 +19,15 @@
 package net.technicpack.launcher.ui.controls.feeds;
 
 import net.technicpack.launcher.ui.UIConstants;
-import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.components.news.AuthorshipWidget;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.platform.io.FeedItem;
+import net.technicpack.ui.lang.ResourceLoader;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
 import java.awt.*;
 
 public class FeedItemView extends JButton {

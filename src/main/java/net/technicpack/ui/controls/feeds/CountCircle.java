@@ -19,8 +19,10 @@
 
 package net.technicpack.ui.controls.feeds;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JComponent;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 
 public class CountCircle extends JComponent {

@@ -21,8 +21,12 @@ package net.technicpack.ui.controls;
 
 import net.technicpack.ui.controls.borders.DropShadowBorder;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JDialog;
+import javax.swing.JPanel;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Window;
 
 public class LauncherDialog extends JDialog {
     private int dragGripX;

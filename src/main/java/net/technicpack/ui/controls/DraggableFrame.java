@@ -19,7 +19,7 @@
 
 package net.technicpack.ui.controls;
 
-import javax.swing.*;
+import javax.swing.JFrame;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;

@@ -22,11 +22,7 @@ package net.technicpack.launchercore.logging;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.Locale;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 

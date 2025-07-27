@@ -21,7 +21,9 @@ package net.technicpack.launcher.ui.controls;
 import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.ui.lang.ResourceLoader;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
 
 public class SelectorWidget extends JButton {
 

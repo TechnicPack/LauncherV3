@@ -19,8 +19,8 @@
 
 package net.technicpack.ui.controls.tabs;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JTabbedPane;
+import java.awt.Color;
 
 public class SimpleTabPane extends JTabbedPane {
 

@@ -19,7 +19,7 @@
 
 package net.technicpack.ui.controls.tabs;
 
-import javax.swing.*;
+import javax.swing.JComponent;
 import javax.swing.plaf.basic.BasicTabbedPaneUI;
 import java.awt.*;
 

@@ -19,7 +19,6 @@
 
 package net.technicpack.platform.io;
 
-import net.technicpack.launchercore.exception.BuildInaccessibleException;
 import net.technicpack.rest.RestObject;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;

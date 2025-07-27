@@ -21,7 +21,6 @@ package net.technicpack.launchercore.image;
 
 import javax.imageio.ImageIO;
 import javax.swing.SwingUtilities;
-import java.awt.EventQueue;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;

@@ -1,7 +1,9 @@
 package net.technicpack.ui.controls;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.Icon;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import java.awt.Graphics;
 
 public class SplatPane extends JComponent {
     private JComponent hoverTarget;

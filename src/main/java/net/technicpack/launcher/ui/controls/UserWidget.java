@@ -19,15 +19,18 @@
 package net.technicpack.launcher.ui.controls;
 
 import net.technicpack.launcher.ui.UIConstants;
-import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.image.ImageRepository;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.ImageUtils;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.image.BufferedImage;
 
 public class UserWidget extends JPanel implements IImageJobListener<IUserType> {

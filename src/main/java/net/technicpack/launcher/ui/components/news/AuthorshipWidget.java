@@ -19,15 +19,15 @@
 package net.technicpack.launcher.ui.components.news;
 
 import net.technicpack.launcher.ui.UIConstants;
-import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.platform.io.AuthorshipInfo;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.ImageUtils;
 import org.joda.time.*;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Font;
 import java.util.Date;
 
 public class AuthorshipWidget extends JPanel implements IImageJobListener<AuthorshipInfo> {

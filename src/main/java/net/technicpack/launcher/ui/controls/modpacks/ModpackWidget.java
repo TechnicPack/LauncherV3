@@ -19,16 +19,19 @@
 package net.technicpack.launcher.ui.controls.modpacks;
 
 import net.technicpack.launcher.ui.UIConstants;
-import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launcher.ui.controls.SelectorWidget;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.ImageUtils;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 
 public class ModpackWidget extends SelectorWidget implements IImageJobListener<ModpackModel> {
     private ModpackModel modpack;

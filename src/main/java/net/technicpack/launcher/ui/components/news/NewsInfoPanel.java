@@ -19,18 +19,21 @@
 package net.technicpack.launcher.ui.components.news;
 
 import net.technicpack.launcher.ui.UIConstants;
-import net.technicpack.ui.lang.ResourceLoader;
-import net.technicpack.ui.controls.RoundedButton;
-import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.platform.io.NewsArticle;
+import net.technicpack.ui.controls.RoundedButton;
+import net.technicpack.ui.controls.list.SimpleScrollbarUI;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.DesktopUtils;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 

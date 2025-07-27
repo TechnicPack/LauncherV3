@@ -22,11 +22,12 @@ package net.technicpack.ui.controls.lang;
 import net.technicpack.ui.controls.list.SimpleScrollPopup;
 import net.technicpack.ui.controls.list.popupformatters.IPopupFormatter;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.BasicComboPopup;
 import javax.swing.plaf.basic.ComboPopup;
-import java.awt.*;
+import java.awt.Color;
 
 public class LanguageCellUI extends BasicComboBoxUI {
 

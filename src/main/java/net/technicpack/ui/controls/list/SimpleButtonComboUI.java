@@ -19,15 +19,15 @@
 
 package net.technicpack.ui.controls.list;
 
-import net.technicpack.ui.controls.list.SimpleScrollPopup;
 import net.technicpack.ui.controls.list.popupformatters.IPopupFormatter;
 import net.technicpack.ui.lang.ResourceLoader;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.BasicComboPopup;
 import javax.swing.plaf.basic.ComboPopup;
-import java.awt.*;
+import java.awt.Color;
 
 public class SimpleButtonComboUI extends BasicComboBoxUI {
 

@@ -23,8 +23,8 @@ import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
-import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.Mod;
+import net.technicpack.rest.io.Modpack;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;

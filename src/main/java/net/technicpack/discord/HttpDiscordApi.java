@@ -5,7 +5,7 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.rest.RestObject;
 import net.technicpack.rest.RestfulAPIException;
 
-import javax.swing.*;
+import javax.swing.SwingWorker;
 import java.util.concurrent.ExecutionException;
 
 public class HttpDiscordApi implements IDiscordApi {

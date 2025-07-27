@@ -19,8 +19,12 @@
 
 package net.technicpack.ui.controls.list;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.ListCellRenderer;
+import java.awt.Color;
+import java.awt.Component;
 
 public class AdvancedCellRenderer<T> extends JLabel implements ListCellRenderer<T> {
 

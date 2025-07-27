@@ -19,7 +19,10 @@
 
 package net.technicpack.autoupdate;
 
-import net.technicpack.autoupdate.tasks.*;
+import net.technicpack.autoupdate.tasks.CopyLauncherPackage;
+import net.technicpack.autoupdate.tasks.LaunchLauncherMode;
+import net.technicpack.autoupdate.tasks.LaunchMoverMode;
+import net.technicpack.autoupdate.tasks.QueryUpdateStream;
 import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launcher.settings.StartupParameters;

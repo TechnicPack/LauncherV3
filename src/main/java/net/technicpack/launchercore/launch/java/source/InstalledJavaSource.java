@@ -19,11 +19,11 @@
 
 package net.technicpack.launchercore.launch.java.source;
 
-import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.launchercore.launch.java.IVersionSource;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.launch.java.source.os.MacInstalledJavaSource;
 import net.technicpack.launchercore.launch.java.source.os.WinRegistryJavaSource;
+import net.technicpack.utilslib.OperatingSystem;
 
 /**
  * This IVersionSource is used to collect the known-installed versions of java.  The code is OS-specific,

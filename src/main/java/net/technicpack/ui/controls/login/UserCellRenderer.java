@@ -19,16 +19,19 @@
 
 package net.technicpack.ui.controls.login;
 
-import net.technicpack.ui.controls.list.AdvancedCellRenderer;
-import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.image.ImageRepository;
+import net.technicpack.ui.controls.list.AdvancedCellRenderer;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.ImageUtils;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JList;
+import javax.swing.ListCellRenderer;
+import java.awt.Component;
 import java.util.HashMap;
 
 public class UserCellRenderer extends AdvancedCellRenderer<IUserType> implements ListCellRenderer<IUserType>, IImageJobListener<IUserType> {

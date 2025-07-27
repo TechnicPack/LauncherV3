@@ -2,7 +2,6 @@ package net.technicpack.minecraftcore.microsoft.auth.model;
 
 import com.google.api.client.util.Key;
 import net.technicpack.launchercore.exception.MicrosoftAuthException;
-import net.technicpack.minecraftcore.microsoft.auth.model.XuiObject;
 
 import java.util.ArrayList;
 import java.util.List;

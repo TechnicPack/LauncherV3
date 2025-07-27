@@ -23,7 +23,6 @@ import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 
-import java.io.IOException;
 import java.util.List;
 
 public class LaunchLauncherMode implements IInstallTask<Void> {

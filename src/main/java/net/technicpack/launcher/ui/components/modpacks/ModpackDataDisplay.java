@@ -21,13 +21,13 @@ package net.technicpack.launcher.ui.components.modpacks;
 import net.technicpack.discord.IDiscordApi;
 import net.technicpack.discord.io.Server;
 import net.technicpack.launcher.ui.UIConstants;
-import net.technicpack.ui.lang.ResourceLoader;
-import net.technicpack.ui.controls.list.SimpleScrollbarUI;
-import net.technicpack.ui.controls.feeds.StatBox;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.ui.controls.feeds.StatBox;
+import net.technicpack.ui.controls.list.SimpleScrollbarUI;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.DesktopUtils;
 import net.technicpack.utilslib.ImageUtils;
 
@@ -36,7 +36,9 @@ import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 
