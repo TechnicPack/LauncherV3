@@ -122,18 +122,18 @@ public class LauncherMain {
 
     private static final Locale[] supportedLanguages = new Locale[]{
             Locale.ENGLISH,
-            new Locale("pt", "BR"),
-            new Locale("pt", "PT"),
-            new Locale("cs"),
+            Locale.forLanguageTag("pt-BR"),
+            Locale.forLanguageTag("pt-PT"),
+            Locale.forLanguageTag("cs"),
             Locale.GERMAN,
             Locale.FRENCH,
             Locale.ITALIAN,
-            new Locale("hu"),
-            new Locale("pl"),
+            Locale.forLanguageTag("hu"),
+            Locale.forLanguageTag("pl"),
             Locale.CHINA,
             Locale.TAIWAN,
-            new Locale("nl", "NL"),
-            new Locale("sk"),
+            Locale.forLanguageTag("nl-NL"),
+            Locale.forLanguageTag("sk"),
     };
     private static ConsoleFrame consoleFrame;
     private static IBuildNumber buildNumber;
