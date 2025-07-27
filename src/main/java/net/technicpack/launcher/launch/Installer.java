@@ -73,7 +73,6 @@ public class Installer {
     protected final PackResourceMapper packIconMapper;
     protected final StartupParameters startupParameters;
     protected final LauncherFileSystem fileSystem;
-    protected final Object cancelLock = new Object();
     protected volatile boolean isCancelledByUser = false;
 
     private Thread installerThread;
@@ -92,9 +91,7 @@ public class Installer {
 
     public void cancel() {
         Utils.getLogger().info("User pressed cancel button.");
-        synchronized (cancelLock) {
-            isCancelledByUser = true;
-        }
+        isCancelledByUser = true;
         installerThread.interrupt();
     }
 
@@ -156,24 +153,6 @@ public class Installer {
 
             Utils.getLogger().info(String.format("Starting installer thread for %s (%s)", pack.getDisplayName(), build));
             Sentry.addBreadcrumb(String.format("Starting installer thread for %s (%s)", pack.getDisplayName(), build));
-        }
-
-        /// Interrupt is being called from a mysterious source, so unless this is a user-initiated cancel
-        /// Let's print the stack trace of the interruptor.
-        @Override
-        public void interrupt() {
-            boolean userCancelled = false;
-            synchronized (cancelLock) {
-                if (isCancelledByUser)
-                    userCancelled = true;
-            }
-
-            if (!userCancelled) {
-                // Grab stack trace for this mysterious interruption
-                Exception e = new Exception("Stack trace");
-                Utils.getLogger().log(Level.WARNING, "Mysterious interruption source.", e);
-            }
-            super.interrupt();
         }
 
         @Override

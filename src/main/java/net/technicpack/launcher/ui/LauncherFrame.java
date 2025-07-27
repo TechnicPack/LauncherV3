@@ -59,6 +59,7 @@ import net.technicpack.utilslib.DesktopUtils;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class LauncherFrame extends DraggableFrame implements IRelocalizableResource, IAuthListener {
 
@@ -86,6 +87,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private final FileJavaSource fileJavaSource;
     private final IBuildNumber buildNumber;
     private final IDiscordApi discordApi;
+    private final AtomicBoolean launchCompletedRequested = new AtomicBoolean(false);
 
     private ModpackOptionsDialog modpackOptionsDialog = null;
 
@@ -106,8 +108,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private TintablePanel footer;
 
     private String currentTabName;
-
-    private volatile boolean launchCompletedRequested = false;
 
     NewsInfoPanel newsInfoPanel;
     ModpackInfoPanel modpackPanel;
@@ -267,33 +267,29 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     }
 
     /**
-     * Called when the installation is completed, either successfully or not.
-     * This will hide the progress bar.
-     * <p>
-     * This method must be called from the Event Dispatch Thread (EDT).
+     * Called when the installation is complete, either successfully or not. This will hide the progress bar.
      */
     public void launchCompleted() {
         // Ensure that this method is only called once, no matter how many times it's requested
-        if (launchCompletedRequested) {
+        if (launchCompletedRequested.compareAndSet(false, true)) {
             return;
         }
-
-        launchCompletedRequested = true;
 
         if (!EventQueue.isDispatchThread()) {
             EventQueue.invokeLater(this::launchCompleted);
             return;
         }
 
-        launchCompletedRequested = false;
+        try {
+            installProgress.setVisible(false);
+            installProgressPlaceholder.setVisible(true);
 
-        installProgress.setVisible(false);
-        installProgressPlaceholder.setVisible(true);
+            userModel.setCurrentUser(userModel.getCurrentUser());
 
-
-        userModel.setCurrentUser(userModel.getCurrentUser());
-
-        invalidate();
+            invalidate();
+        } finally {
+            launchCompletedRequested.set(false);
+        }
     }
 
     protected void openModpackOptions(ModpackModel model) {

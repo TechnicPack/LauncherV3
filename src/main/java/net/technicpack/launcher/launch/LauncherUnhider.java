@@ -23,13 +23,13 @@ import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launchercore.launch.ProcessExitListener;
 import net.technicpack.launchercore.util.LaunchAction;
 
-import java.awt.*;
+import javax.swing.SwingUtilities;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class LauncherUnhider implements ProcessExitListener {
-
     private final TechnicSettings settings;
     private final LauncherFrame frame;
-    private boolean hasExited = false;
+    private final AtomicBoolean called = new AtomicBoolean(false);
 
     public LauncherUnhider(TechnicSettings settings, LauncherFrame frame) {
         this.settings = settings;
@@ -38,16 +38,19 @@ public class LauncherUnhider implements ProcessExitListener {
 
     @Override
     public void onProcessExit() {
-        LaunchAction action = settings.getLaunchAction();
-        if (action == null || action == LaunchAction.HIDE) {
-            frame.setVisible(true);
+        // This ensures that we only run this function once
+        if (called.compareAndSet(false, true)) {
+            return;
         }
 
-        hasExited = true;
-        EventQueue.invokeLater(frame::launchCompleted);
-    }
+        LaunchAction action = settings.getLaunchAction();
 
-    public boolean hasExited() {
-        return hasExited;
+        SwingUtilities.invokeLater(() -> {
+            if (action == LaunchAction.HIDE) {
+                frame.setVisible(true);
+            }
+
+            frame.launchCompleted();
+        });
     }
 }
