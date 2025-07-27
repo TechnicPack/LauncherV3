@@ -172,7 +172,6 @@ public class Installer {
                 // Grab stack trace for this mysterious interruption
                 Exception e = new Exception("Stack trace");
                 Utils.getLogger().log(Level.WARNING, "Mysterious interruption source.", e);
-                Sentry.captureException(e);
             }
             super.interrupt();
         }
