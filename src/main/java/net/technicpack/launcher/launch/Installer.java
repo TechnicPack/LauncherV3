@@ -76,8 +76,8 @@ public class Installer {
     protected volatile boolean isCancelledByUser = false;
 
     private Thread installerThread;
-    private volatile LauncherUnhider launcherUnhider;
-    private volatile GameProcess gameProcess;
+    private GameProcess gameProcess;
+    private final Object gameLock = new Object();
 
     public Installer(StartupParameters startupParameters, LauncherFileSystem fileSystem, ModpackInstaller installer,
                      MinecraftLauncher launcher, TechnicSettings settings, PackResourceMapper packIconMapper) {
@@ -127,7 +127,9 @@ public class Installer {
     }
 
     public boolean isGameProcessRunning() {
-        return gameProcess != null && gameProcess.getProcess() != null && gameProcess.getProcess().isAlive();
+        synchronized (gameLock) {
+            return gameProcess != null && gameProcess.getProcess() != null && gameProcess.getProcess().isAlive();
+        }
     }
 
     private class InstallerThread extends Thread {
@@ -157,7 +159,7 @@ public class Installer {
 
         @Override
         public void run() {
-            gameProcess = null;
+            setGameProcess(null);
 
             try {
                 InstallTasksQueue<IMinecraftVersionInfo> tasksQueue = new InstallTasksQueue<>(listener);
@@ -222,6 +224,7 @@ public class Installer {
 
                     LaunchAction launchAction = settings.getLaunchAction();
 
+                    LauncherUnhider launcherUnhider;
                     if (launchAction == LaunchAction.HIDE) {
                         launcherUnhider = new LauncherUnhider(settings, frame);
                     } else {
@@ -230,7 +233,7 @@ public class Installer {
 
                     LaunchOptions options = new LaunchOptions(pack.getDisplayName(),
                             packIconMapper.getImageLocation(pack).getAbsolutePath(), settings);
-                    gameProcess = launcher.launch(pack, memory, options, launcherUnhider, version);
+                    setGameProcess(launcher.launch(pack, memory, options, launcherUnhider, version));
 
                     switch (launchAction) {
                         case HIDE:
@@ -281,6 +284,12 @@ public class Installer {
                 if (!doLaunch || !isGameProcessRunning()) {
                     SwingUtilities.invokeLater(frame::launchCompleted);
                 }
+            }
+        }
+
+        private void setGameProcess(GameProcess gameProcess) {
+            synchronized (gameLock) {
+                Installer.this.gameProcess = gameProcess;
             }
         }
 

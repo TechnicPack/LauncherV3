@@ -271,7 +271,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
      */
     public void launchCompleted() {
         // Ensure that this method is only called once, no matter how many times it's requested
-        if (launchCompletedRequested.compareAndSet(false, true)) {
+        if (!launchCompletedRequested.compareAndSet(false, true)) {
             return;
         }
 

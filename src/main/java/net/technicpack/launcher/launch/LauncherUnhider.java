@@ -39,7 +39,7 @@ public class LauncherUnhider implements ProcessExitListener {
     @Override
     public void onProcessExit() {
         // This ensures that we only run this function once
-        if (called.compareAndSet(false, true)) {
+        if (!called.compareAndSet(false, true)) {
             return;
         }
 
