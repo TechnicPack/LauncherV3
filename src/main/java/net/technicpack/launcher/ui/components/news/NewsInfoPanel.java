@@ -68,7 +68,7 @@ public class NewsInfoPanel extends JPanel implements PropertyChangeListener {
 
         authorshipInfo.setAuthorshipInfo(article.getAuthorshipInfo(), avatarRepo.startImageJob(article.getAuthorshipInfo()));
 
-        EventQueue.invokeLater(() -> newsText.scrollRectToVisible(new Rectangle(0, 0, 1, 1)));
+        SwingUtilities.invokeLater(() -> newsText.scrollRectToVisible(new Rectangle(0, 0, 1, 1)));
     }
 
     protected void visitCurrentItem() {

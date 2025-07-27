@@ -34,11 +34,14 @@ import org.xhtmlrenderer.swing.ImageResourceLoader;
 import org.xhtmlrenderer.swing.SwingReplacedElementFactory;
 
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
@@ -85,7 +88,7 @@ public class DiscoverInfoPanel extends JPanel {
                 if (!hasReloaded) {
                     hasReloaded = true;
 
-                    EventQueue.invokeLater(() -> panel.setDocument(getDiscoverDocumentFromResource(), runnableAccessDiscover));
+                    SwingUtilities.invokeLater(() -> panel.setDocument(getDiscoverDocumentFromResource(), runnableAccessDiscover));
                 }
             }
 
@@ -96,7 +99,7 @@ public class DiscoverInfoPanel extends JPanel {
                 if (!hasReloaded) {
                     hasReloaded = true;
 
-                    EventQueue.invokeLater(() -> panel.setDocument(getDiscoverDocumentFromResource(), runnableAccessDiscover));
+                    SwingUtilities.invokeLater(() -> panel.setDocument(getDiscoverDocumentFromResource(), runnableAccessDiscover));
                 }
             }
         });
@@ -119,7 +122,7 @@ public class DiscoverInfoPanel extends JPanel {
         panel.getSharedContext().setReplacedElementFactory(factory);
         panel.getSharedContext().setFontMapping("Raleway", resources.getFont(ResourceLoader.FONT_RALEWAY, 12));
 
-        EventQueue.invokeLater(() -> {
+        SwingUtilities.invokeLater(() -> {
             try {
                 Path localCache = fileSystem.getCacheDirectory().resolve("discover.html");
                 panel.setDocument(getDiscoverDocument(runnableAccessDiscover, localCache), runnableAccessDiscover);
@@ -141,7 +144,7 @@ public class DiscoverInfoPanel extends JPanel {
     protected void triggerLoadListener() {
         final ActionListener deferredListener = loadListener;
         if (deferredListener != null) {
-            EventQueue.invokeLater(new Runnable() {
+            SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
                     deferredListener.actionPerformed(new ActionEvent(this, 0, "loaded"));

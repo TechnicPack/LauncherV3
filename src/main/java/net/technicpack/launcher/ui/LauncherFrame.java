@@ -275,8 +275,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             return;
         }
 
-        if (!EventQueue.isDispatchThread()) {
-            EventQueue.invokeLater(this::launchCompleted);
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(this::launchCompleted);
             return;
         }
 
@@ -557,7 +557,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         if (currentTabName != null)
             selectTab(currentTabName);
 
-        EventQueue.invokeLater(() -> {
+        SwingUtilities.invokeLater(() -> {
             invalidate();
             repaint();
         });
@@ -575,7 +575,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
                 setupPlayButtonText(modpackSelector.getSelectedPack(), user);
 
             modpackSelector.forceRefresh();
-            EventQueue.invokeLater(this::repaint);
+            SwingUtilities.invokeLater(this::repaint);
         }
     }
 

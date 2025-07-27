@@ -108,7 +108,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
 
         refreshSelectedUsers();
 
-        EventQueue.invokeLater(() -> {
+        SwingUtilities.invokeLater(() -> {
             invalidate();
             repaint();
         });
@@ -123,7 +123,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
             if (nameSelect.isVisible())
                 nameSelect.grabFocus();
 
-            EventQueue.invokeLater(() -> {
+            SwingUtilities.invokeLater(() -> {
                 invalidate();
                 repaint();
             });

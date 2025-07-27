@@ -106,7 +106,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
         job.addJobListener(this);
         packImage.setIcon(new ImageIcon(ImageUtils.scaleImage(job.getImage(), 370, 220)));
 
-        EventQueue.invokeLater(() -> {
+        SwingUtilities.invokeLater(() -> {
             description.scrollRectToVisible(new Rectangle(new Dimension(1, 1)));
             repaint();
         });

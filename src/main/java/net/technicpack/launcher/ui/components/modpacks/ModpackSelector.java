@@ -291,7 +291,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         rebuildUI();
 
         if (selectedWidget != null) {
-            EventQueue.invokeLater(() -> {
+            SwingUtilities.invokeLater(() -> {
                 if (widget == selectedWidget) {
                     selectWidget(widget);
                 } else {
@@ -336,7 +336,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
                         refreshWidget.getModpack().setPackInfo(infoToUse);
                     }
 
-                    EventQueue.invokeLater(() -> {
+                    SwingUtilities.invokeLater(() -> {
                         if (modpackInfoPanel != null) {
                             modpackInfoPanel.setModpackIfSame(refreshWidget.getModpack());
                         }
@@ -350,7 +350,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
                         iconRepo.refreshRetry(refreshWidget.getModpack());
                         refreshWidget.updateFromPack(iconRepo.startImageJob(refreshWidget.getModpack()));
 
-                        EventQueue.invokeLater(() -> {
+                        SwingUtilities.invokeLater(() -> {
                             revalidate();
                             repaint();
                         });
@@ -365,8 +365,8 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
     }
 
     protected void rebuildUI() {
-        if (!EventQueue.isDispatchThread()) {
-            EventQueue.invokeLater(this::rebuildUI);
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(this::rebuildUI);
             return;
         }
 
@@ -540,7 +540,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
 
         initComponents();
 
-        EventQueue.invokeLater(() -> {
+        SwingUtilities.invokeLater(() -> {
             invalidate();
             repaint();
         });

@@ -26,6 +26,7 @@ import net.technicpack.launchercore.modpacks.sources.IModpackTagBuilder;
 import net.technicpack.launchercore.modpacks.sources.IPackSource;
 import net.technicpack.rest.io.PackInfo;
 
+import javax.swing.SwingUtilities;
 import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,10 +62,10 @@ public class PackLoadJob implements Runnable {
     //This method forces the cancel to occur on the dispatch thread, since addPack always takes place on the dispatch thread,
     //so we don't have to worry about an addPack being halfway through completion if this object is saying it's cancelled
     public void cancel() {
-        if (EventQueue.isDispatchThread()) {
+        if (SwingUtilities.isEventDispatchThread()) {
             isCancelled = true;
         } else {
-            EventQueue.invokeLater(this::cancel);
+            SwingUtilities.invokeLater(this::cancel);
         }
     }
 
@@ -116,12 +117,12 @@ public class PackLoadJob implements Runnable {
     }
 
     protected void refreshCompleteThreadSafe() {
-        EventQueue.invokeLater(() -> container.refreshComplete());
+        SwingUtilities.invokeLater(() -> container.refreshComplete());
     }
 
 
     protected void addPackThreadSafe(final InstalledPack pack, final PackInfo packInfo, final int priority) {
-        EventQueue.invokeLater(() -> addPack(pack, packInfo, priority));
+        SwingUtilities.invokeLater(() -> addPack(pack, packInfo, priority));
     }
 
     protected void addPack(final InstalledPack pack, final PackInfo packInfo, final int priority) {

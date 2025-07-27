@@ -120,8 +120,8 @@ public class ProgressBar extends JLabel implements DownloadListener {
     }
 
     protected void setProgress(final String progressText, final float progress) {
-        if (!EventQueue.isDispatchThread()) {
-            EventQueue.invokeLater(() -> setProgress(progressText, progress));
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(() -> setProgress(progressText, progress));
             return;
         }
 

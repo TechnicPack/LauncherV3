@@ -89,12 +89,8 @@ import org.joda.time.DateTime;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
-import javax.swing.BorderFactory;
-import javax.swing.JOptionPane;
-import javax.swing.ToolTipManager;
-import javax.swing.UIManager;
+import javax.swing.*;
 import java.awt.Color;
-import java.awt.EventQueue;
 import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
@@ -220,7 +216,7 @@ public class LauncherMain {
 
         final boolean displayConsole = settings.getShowConsole();
         if (displayConsole) {
-            EventQueue.invokeLater(() -> setConsoleVisible(true));
+            SwingUtilities.invokeLater(() -> setConsoleVisible(true));
         }
 
         int build = -1;

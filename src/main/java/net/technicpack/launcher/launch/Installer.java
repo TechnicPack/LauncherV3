@@ -58,7 +58,7 @@ import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 
 import javax.swing.JOptionPane;
-import java.awt.EventQueue;
+import javax.swing.SwingUtilities;
 import java.io.File;
 import java.io.IOException;
 import java.nio.channels.ClosedByInterruptException;
@@ -237,7 +237,7 @@ public class Installer {
                             frame.setVisible(false);
                             break;
                         case NOTHING:
-                            EventQueue.invokeLater(frame::launchCompleted);
+                            SwingUtilities.invokeLater(frame::launchCompleted);
                             break;
                         case CLOSE:
                             System.exit(0);
@@ -279,13 +279,13 @@ public class Installer {
                 showErrorDialog(String.format("Unknown error: %s", e.getMessage()));
             } finally {
                 if (!doLaunch || !isGameProcessRunning()) {
-                    EventQueue.invokeLater(frame::launchCompleted);
+                    SwingUtilities.invokeLater(frame::launchCompleted);
                 }
             }
         }
 
         private void showErrorDialog(String title, String message) {
-            EventQueue.invokeLater(() -> JOptionPane.showMessageDialog(frame, message, title, JOptionPane.ERROR_MESSAGE));
+            SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(frame, message, title, JOptionPane.ERROR_MESSAGE));
         }
 
         private void showErrorDialog(String message) {

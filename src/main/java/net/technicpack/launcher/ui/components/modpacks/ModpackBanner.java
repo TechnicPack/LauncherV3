@@ -250,7 +250,7 @@ public class ModpackBanner extends JPanel implements IImageJobListener<ModpackMo
 
             modpackIcon.setIcon(new ImageIcon(icon));
             getParent().invalidate();
-            EventQueue.invokeLater(() -> getParent().repaint());
+            SwingUtilities.invokeLater(() -> getParent().repaint());
         }
     }
 }

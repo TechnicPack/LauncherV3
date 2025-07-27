@@ -20,16 +20,16 @@ package net.technicpack.launcher.ui.components.discover;
  * }}}
  */
 
-        import org.xhtmlrenderer.extend.FSImage;
-        import org.xhtmlrenderer.resource.ImageResource;
-        import org.xhtmlrenderer.swing.AWTFSImage;
-        import org.xhtmlrenderer.swing.ImageResourceLoader;
-        import org.xhtmlrenderer.util.ImageUtil;
-        import org.xhtmlrenderer.util.XRLog;
+import org.xhtmlrenderer.extend.FSImage;
+import org.xhtmlrenderer.resource.ImageResource;
+import org.xhtmlrenderer.swing.AWTFSImage;
+import org.xhtmlrenderer.swing.ImageResourceLoader;
+import org.xhtmlrenderer.util.ImageUtil;
+import org.xhtmlrenderer.util.XRLog;
 
-        import java.awt.*;
-        import java.awt.image.BufferedImage;
-        import java.util.logging.Level;
+import javax.swing.SwingUtilities;
+import java.awt.image.BufferedImage;
+import java.util.logging.Level;
 
 
 /**
@@ -77,7 +77,7 @@ class ImageLoadWorker extends Thread {
 
                 // msfImage belongs to the Swing AWT thread
                 final BufferedImage newImg1 = newImg;
-                EventQueue.invokeLater(() -> loadItem._mfsImage.setImage(loadItem._uri, newImg1, wasScaled));
+                SwingUtilities.invokeLater(() -> loadItem._mfsImage.setImage(loadItem._uri, newImg1, wasScaled));
             }
         } catch (InterruptedException e) {
             //

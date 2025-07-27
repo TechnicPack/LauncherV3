@@ -20,7 +20,8 @@
 package net.technicpack.launchercore.image;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
+import javax.swing.SwingUtilities;
+import java.awt.EventQueue;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -84,14 +85,14 @@ public class ImageJob<T> {
     }
 
     protected void notifyComplete() {
-        if (EventQueue.isDispatchThread()) {
+        if (SwingUtilities.isEventDispatchThread()) {
             synchronized (jobListeners) {
                 for (IImageJobListener<T> listener : jobListeners) {
                     listener.jobComplete(this);
                 }
             }
         } else {
-            EventQueue.invokeLater(this::notifyComplete);
+            SwingUtilities.invokeLater(this::notifyComplete);
         }
     }
 

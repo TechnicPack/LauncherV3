@@ -355,7 +355,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         final InstallerFrame frame = new InstallerFrame(resources, params, settings, getOwner());
         frame.setVisible(true);
 
-        EventQueue.invokeLater(frame::requestFocus);
+        SwingUtilities.invokeLater(frame::requestFocus);
 
         this.dispose();
     }
@@ -1130,7 +1130,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         initComponents();
         initControlValues();
 
-        EventQueue.invokeLater(() -> {
+        SwingUtilities.invokeLater(() -> {
             invalidate();
             repaint();
         });

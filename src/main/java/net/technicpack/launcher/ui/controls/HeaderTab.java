@@ -50,7 +50,7 @@ public class HeaderTab extends JLabel implements MouseListener {
         this.isActive = isActive;
         this.setOpaque(isActive);
 
-        EventQueue.invokeLater(this::repaint);
+        SwingUtilities.invokeLater(this::repaint);
     }
 
     public void addActionListener(ActionListener listener) {
