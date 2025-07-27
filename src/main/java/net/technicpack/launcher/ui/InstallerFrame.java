@@ -46,6 +46,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.logging.Level;
 
 public class InstallerFrame extends DraggableFrame implements IRelocalizableResource {
@@ -191,6 +193,24 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
             settings.setLanguageCode(((LanguageItem)standardLanguages.getSelectedItem()).getLangCode());
             settings.save();
 
+            // FIXME: temporary workaround to suppress the "file not found" warning on first run
+            Path installedPacks = newRoot.toPath().resolve("installedPacks");
+            try {
+                if (!Files.exists(installedPacks)) {
+                    Files.createFile(installedPacks);
+                }
+            } catch (IOException e) {
+                // ignore for now
+            }
+            Path usersJson = newRoot.toPath().resolve("users.json");
+            try {
+                if (!Files.exists(usersJson)) {
+                    Files.createFile(usersJson);
+                }
+            } catch (IOException e) {
+                // ignore for now
+            }
+
             VersionFileBuildNumber buildNumber = new VersionFileBuildNumber(resources);
             Utils.sendTracking("installLauncher", "standard", buildNumber.getBuildNumber(), settings.getClientId());
 
@@ -255,6 +275,24 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
             settings.getTechnicRoot();
             settings.setLanguageCode(((LanguageItem)portableLanguages.getSelectedItem()).getLangCode());
             settings.save();
+
+            // FIXME: temporary workaround to suppress the "file not found" warning on first run
+            Path installedPacks = newRoot.toPath().resolve("installedPacks");
+            try {
+                if (!Files.exists(installedPacks)) {
+                    Files.createFile(installedPacks);
+                }
+            } catch (IOException e) {
+                // ignore for now
+            }
+            Path usersJson = newRoot.toPath().resolve("users.json");
+            try {
+                if (!Files.exists(usersJson)) {
+                    Files.createFile(usersJson);
+                }
+            } catch (IOException e) {
+                // ignore for now
+            }
 
             VersionFileBuildNumber buildNumber = new VersionFileBuildNumber(resources);
             Utils.sendTracking("installLauncher", "portable", buildNumber.getBuildNumber(), settings.getClientId());
