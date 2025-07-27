@@ -21,10 +21,13 @@ package net.technicpack.rest;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.JsonParseException;
 import net.technicpack.launchercore.TechnicConstants;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 
@@ -60,10 +63,10 @@ public abstract class RestObject {
             throw new RestfulAPIException(String.format("Timed out accessing URL [%s]", url), e);
         } catch (URISyntaxException | MalformedURLException e) {
             throw new RestfulAPIException(String.format("Invalid URI [%s]", url), e);
-        } catch (JsonSyntaxException e) {
-            throw new RestfulAPIException(String.format("Error parsing response JSON at URL [%s]", url), e);
         } catch (JsonIOException | IOException e) {
             throw new RestfulAPIException(String.format("Error accessing URL [%s]", url), e);
+        } catch (JsonParseException e) {
+            throw new RestfulAPIException(String.format("Error parsing response JSON at URL [%s]", url), e);
         }
     }
 
