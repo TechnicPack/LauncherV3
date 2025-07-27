@@ -98,8 +98,8 @@ public class ModpackCachePlatformApi implements IPlatformApi {
             if (info == null) {
                 info = pullAndCache(packSlug);
             }
-        } catch (RestfulAPIException ex) {
-            ex.printStackTrace();
+        } catch (RestfulAPIException e) {
+            e.printStackTrace();
 
             deadPacks.put(packSlug, true);
             return getDeadPackInfo(packSlug);
@@ -115,7 +115,7 @@ public class ModpackCachePlatformApi implements IPlatformApi {
             if (deadInfo != null)
                 deadInfo.setLocal();
             return deadInfo;
-        } catch (RestfulAPIException ex) {
+        } catch (RestfulAPIException e) {
             return null;
         }
     }
@@ -161,8 +161,8 @@ public class ModpackCachePlatformApi implements IPlatformApi {
             }
 
             return info;
-        } catch (JsonParseException | IOException ex) {
-            Utils.getLogger().log(Level.SEVERE, String.format("Failed to load pack cache %s", cacheFile), ex);
+        } catch (JsonParseException | IOException e) {
+            Utils.getLogger().log(Level.SEVERE, String.format("Failed to load pack cache %s", cacheFile), e);
             return null;
         }
     }

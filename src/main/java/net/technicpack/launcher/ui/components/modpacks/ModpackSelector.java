@@ -328,7 +328,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
                             ISolderPackApi solderPack = solderApi.getSolderPack(updatedInfo.getSolder(),
                                     updatedInfo.getName(), solderApi.getMirrorUrl(updatedInfo.getSolder()));
                             infoToUse = new CombinedPackInfo(solderPack.getPackInfo(), updatedInfo);
-                        } catch (RestfulAPIException ex) {
+                        } catch (RestfulAPIException e) {
                         }
                     }
 
@@ -356,8 +356,8 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
                         });
                     });
 
-                } catch (RestfulAPIException ex) {
-                    ex.printStackTrace();
+                } catch (RestfulAPIException e) {
+                    e.printStackTrace();
                 }
             }
         };
@@ -451,7 +451,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
         setTintActive(true);
         defaultPacks.removePassthroughContainer(this);
 
-        currentSearchTimer = new Timer(500, e -> {
+        currentSearchTimer = new Timer(500, event -> {
             String localSearchTag = searchText.trim();
 
             String localSearchUrl = searchText.trim();
@@ -494,7 +494,7 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
                         }
                     }
                 }
-            } catch (URISyntaxException ex) {
+            } catch (URISyntaxException e) {
                 //It wasn't a valid URI which is actually fine.
             }
 

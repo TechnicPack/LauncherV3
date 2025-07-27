@@ -36,8 +36,8 @@ public class RunData {
                     throw new NumberFormatException("Invalid runData memory specified, cannot be negative");
                 }
                 memoryLong = Long.parseLong(memory);
-            } catch (NumberFormatException ex) {
-                Utils.getLogger().log(Level.WARNING, "Exception caught when parsing runData memory", ex);
+            } catch (NumberFormatException e) {
+                Utils.getLogger().log(Level.WARNING, "Exception caught when parsing runData memory", e);
                 memoryLong = 0;
             }
         }

@@ -60,9 +60,9 @@ public class ProcessMonitorThread extends Thread {
                 lineBuilder.append(' ').append(line);
                 this.logger.info(lineBuilder.toString());
             }
-        } catch (IOException ex) {
+        } catch (IOException e) {
             this.logger.log(Level.SEVERE,
-                    "Error reading process output - process will continue running but output will not be logged", ex);
+                    "Error reading process output - process will continue running but output will not be logged", e);
         }
 
         try {

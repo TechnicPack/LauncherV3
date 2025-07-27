@@ -68,11 +68,11 @@ public class LimitLinesDocumentListener implements DocumentListener {
         }
     }
 
-    private void removeLines(DocumentEvent e) {
+    private void removeLines(DocumentEvent event) {
         try {
             // The root Element of the Document will tell us the total number
             // of line in the Document.
-            Document document = e.getDocument();
+            Document document = event.getDocument();
             Element root = document.getDefaultRootElement();
             int excess = root.getElementCount() - maximumLines;
 
@@ -82,8 +82,8 @@ public class LimitLinesDocumentListener implements DocumentListener {
 
                 try {
                     document.remove(0, end);
-                } catch (BadLocationException ble) {
-                    System.out.println(ble);
+                } catch (BadLocationException e) {
+                    System.out.println(e);
                 }
             }
         } finally {

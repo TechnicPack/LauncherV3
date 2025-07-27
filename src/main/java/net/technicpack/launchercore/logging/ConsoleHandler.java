@@ -45,8 +45,8 @@ public class ConsoleHandler extends Handler {
 
         try {
             msg = getFormatter().format(record);
-        } catch (Exception ex) {
-            Sentry.captureException(ex);
+        } catch (Exception e) {
+            Sentry.captureException(e);
             return;
         }
 
@@ -59,7 +59,7 @@ public class ConsoleHandler extends Handler {
                 int offset = document.getLength();
                 document.insertString(offset, writeText, attributes);
                 consoleFrame.setCaretPosition(document.getLength());
-            } catch (BadLocationException ble) {
+            } catch (BadLocationException e) {
             }
         });
     }

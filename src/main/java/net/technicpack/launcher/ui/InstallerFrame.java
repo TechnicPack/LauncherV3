@@ -180,8 +180,8 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
                     FileUtils.copyDirectory(oldRoot, newRoot);
                     FileUtils.deleteDirectory(oldRoot);
-                } catch (IOException ex) {
-                    Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ",ex);
+                } catch (IOException e) {
+                    Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ",e);
                 }
             }
 
@@ -265,8 +265,8 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
                     FileUtils.copyDirectory(oldRoot, newRoot);
                     FileUtils.deleteDirectory(oldRoot);
-                } catch (IOException ex) {
-                    Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ",ex);
+                } catch (IOException e) {
+                    Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ",e);
                 }
             }
 

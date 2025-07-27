@@ -51,8 +51,8 @@ public class SolderPackSource implements IPackSource {
             Collection<SolderPackInfo> packs = solder.getPublicSolderPacks(baseUrl);
 
             returnValue.addAll(packs);
-        } catch (RestfulAPIException ex) {
-            Utils.getLogger().log(Level.WARNING, "Unable to load technic modpacks", ex);
+        } catch (RestfulAPIException e) {
+            Utils.getLogger().log(Level.WARNING, "Unable to load technic modpacks", e);
         }
 
         return returnValue;

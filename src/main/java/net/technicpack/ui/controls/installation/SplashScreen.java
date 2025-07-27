@@ -81,9 +81,9 @@ public class SplashScreen extends JFrame {
         try {
             // Try to set a transparent background, but it isn't always supported
             this.setBackground(new Color(0, 0, 0, 0));
-        } catch (UnsupportedOperationException ex) {
+        } catch (UnsupportedOperationException e) {
             this.setBackground(new Color(0, 0, 0));
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException e) {
             Utils.getLogger().warning("Your desktop environment does not support translucent windows. Technic Launcher will not look as rad for you.");
         }
     }

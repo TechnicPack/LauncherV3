@@ -55,16 +55,16 @@ public class DesktopUtils {
                         else
                             SwingUtilities.invokeLater(() -> showBrowseUrlDialog(url));
                     }
-                } catch (IOException ex) {
-                    Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+                } catch (IOException e) {
+                    Utils.getLogger().log(Level.SEVERE, e.getMessage(), e);
                     SwingUtilities.invokeLater(() -> showBrowseUrlDialog(url));
-                } catch (URISyntaxException ex) {
+                } catch (URISyntaxException e) {
                     //If we got a bogus URL from the internet, then this will throw.  Log & Ignore
-                    Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
-                } catch (RuntimeException ex) {
+                    Utils.getLogger().log(Level.SEVERE, e.getMessage(), e);
+                } catch (RuntimeException e) {
                     //browse() throws a bunch of runtime exceptions if you give it bad input
                     //WHICH IS AWESOME
-                    Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+                    Utils.getLogger().log(Level.SEVERE, e.getMessage(), e);
                 }
 
                 return null;
@@ -84,8 +84,8 @@ public class DesktopUtils {
                 Utils.getLogger().info("Intermediary path "+asciiUri);
                 try {
                     Desktop.getDesktop().open(new File(new URI(asciiUri).getPath()));
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
                 return null;

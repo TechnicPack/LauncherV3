@@ -46,8 +46,8 @@ public class WriteRundataFile implements IInstallTask<IMinecraftVersionInfo> {
         runData.add("memory", memory);
         try (Writer writer = Files.newBufferedWriter(runDataFile.toPath(), StandardCharsets.UTF_8)) {
             Utils.getGson().toJson(runData, writer);
-        } catch (JsonIOException ex) {
-            throw new IOException(String.format("Error writing runData file %s", runDataFile), ex);
+        } catch (JsonIOException e) {
+            throw new IOException(String.format("Error writing runData file %s", runDataFile), e);
         }
     }
 

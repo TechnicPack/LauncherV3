@@ -104,8 +104,8 @@ public class CachedSolderPackApi implements ISolderPackApi {
 
         try {
             return pullAndCache();
-        } catch (RestfulAPIException ex) {
-            ex.printStackTrace();
+        } catch (RestfulAPIException e) {
+            e.printStackTrace();
 
             return getPackInfoForBulk();
         }
@@ -135,16 +135,16 @@ public class CachedSolderPackApi implements ISolderPackApi {
 
             rootInfoCache.setLocal();
             rootInfoCache.setSolder(innerApi);
-        } catch (JsonParseException | IOException ex) {
-            Utils.getLogger().log(Level.SEVERE, String.format("Failed to load Solder cache for modpack \"%s\"", packSlug), ex);
+        } catch (JsonParseException | IOException e) {
+            Utils.getLogger().log(Level.SEVERE, String.format("Failed to load Solder cache for modpack \"%s\"", packSlug), e);
         }
     }
 
     private void saveForeverCache() {
         try (Writer writer = Files.newBufferedWriter(cachePath, StandardCharsets.UTF_8)) {
             Utils.getGson().toJson(rootInfoCache, writer);
-        } catch (JsonIOException | IOException ex) {
-            Utils.getLogger().log(Level.SEVERE, String.format("Failed to save Solder cache for modpack \"%s\"", packSlug), ex);
+        } catch (JsonIOException | IOException e) {
+            Utils.getLogger().log(Level.SEVERE, String.format("Failed to save Solder cache for modpack \"%s\"", packSlug), e);
         }
     }
 

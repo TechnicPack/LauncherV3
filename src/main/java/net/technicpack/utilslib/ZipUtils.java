@@ -72,7 +72,7 @@ public class ZipUtils {
             while ((length = inputStream.read(buffer, 0, buffer.length)) != -1) {
                 outputStream.write(buffer, 0, length);
             }
-        } catch (ClosedByInterruptException ex) {
+        } catch (ClosedByInterruptException e) {
             throw new InterruptedException();
         }
     }

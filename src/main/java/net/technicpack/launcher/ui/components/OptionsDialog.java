@@ -338,13 +338,13 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
         try {
             width = Integer.parseInt(widthStr);
-        } catch (NumberFormatException ex) {
+        } catch (NumberFormatException e) {
             //Not important
         }
 
         try {
             height = Integer.parseInt(heightStr);
-        } catch (NumberFormatException ex) {
+        } catch (NumberFormatException e) {
             //Not important
         }
 

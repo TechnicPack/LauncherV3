@@ -43,7 +43,7 @@ public class CrafatarFaceImageStore implements IImageStore<IUserType> {
     public void downloadImage(IUserType user, File location) {
         try {
             Utils.downloadFile(mBaseUrl + "avatars/" + user.getId() + "?size=100&overlay", user.getDisplayName(), location.getAbsolutePath());
-        } catch (InterruptedException ex) {
+        } catch (InterruptedException e) {
             //User cancelled
         } catch (IOException e) {
             Utils.getLogger().log(Level.INFO, "Error downloading user face image: " + user.getDisplayName(), e);

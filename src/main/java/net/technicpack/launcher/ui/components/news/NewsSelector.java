@@ -146,8 +146,8 @@ public class NewsSelector extends JPanel {
         Thread thread = new Thread(() -> {
             try {
                 loadNewsItems(platformApi.getNews());
-            } catch (RestfulAPIException ex) {
-                Utils.getLogger().log(Level.WARNING, "Unable to load news", ex);
+            } catch (RestfulAPIException e) {
+                Utils.getLogger().log(Level.WARNING, "Unable to load news", e);
             }
         });
 

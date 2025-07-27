@@ -81,8 +81,8 @@ public class InstallJavaRuntimeTask implements IInstallTask<IMinecraftVersionInf
 
         try (Reader reader = Files.newBufferedReader(runtimeManifestFile, StandardCharsets.UTF_8)) {
             manifest = MojangUtils.getGson().fromJson(reader, JavaRuntimeManifest.class);
-        } catch (JsonParseException ex) {
-            throw new IOException("Failed to parse Java runtime manifest", ex);
+        } catch (JsonParseException e) {
+            throw new IOException("Failed to parse Java runtime manifest", e);
         }
 
         if (manifest == null) {

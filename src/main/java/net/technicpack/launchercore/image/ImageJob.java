@@ -112,7 +112,7 @@ public class ImageJob<T> {
                     if (imageLocation != null && imageLocation.exists()) {
                         try {
                             existingImage = ImageIO.read(imageLocation);
-                        } catch (IOException ex) {
+                        } catch (IOException e) {
                             //Corrupt or missing- that's fine, just redownload it
                         }
                     }
@@ -131,7 +131,7 @@ public class ImageJob<T> {
 
                             if (newImage != null)
                                 setImage(newImage);
-                        } catch (IOException ex) {
+                        } catch (IOException e) {
                             //Again- probably something wrong with the image, so we'll just show the default
                         }
                     }

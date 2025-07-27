@@ -54,7 +54,7 @@ public class PackImageStore implements IImageStore<ModpackModel> {
         try {
             // We can pass null as the name here because there's no listener set, so the name is never used
             Utils.downloadFile(res.getUrl(), null, target.getAbsolutePath());
-        } catch (InterruptedException ex) {
+        } catch (InterruptedException e) {
             //user cancel
         } catch (IOException e) {
             Utils.getLogger().log(Level.INFO, "Error downloading pack resource " + res.getUrl() + " for pack " + key.getName(), e);

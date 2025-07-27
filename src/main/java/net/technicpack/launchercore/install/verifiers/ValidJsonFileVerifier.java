@@ -43,8 +43,8 @@ public class ValidJsonFileVerifier implements IFileVerifier {
             JsonObject obj = validatingGson.fromJson(reader, JsonObject.class);
 
             return (obj != null);
-        } catch (JsonIOException | IOException ex) {
-            Utils.getLogger().log(Level.SEVERE, String.format("An I/O error happened while validating %s", file.getAbsolutePath()), ex);
+        } catch (JsonIOException | IOException e) {
+            Utils.getLogger().log(Level.SEVERE, String.format("An I/O error happened while validating %s", file.getAbsolutePath()), e);
         } catch (JsonParseException e) {
             Utils.getLogger().log(Level.WARNING, String.format("JSON validation failed for %s", file.getAbsolutePath()), e);
             return false;
@@ -59,8 +59,8 @@ public class ValidJsonFileVerifier implements IFileVerifier {
             JsonObject obj = validatingGson.fromJson(reader, JsonObject.class);
 
             return (obj != null);
-        } catch (JsonIOException | IOException ex) {
-            Utils.getLogger().log(Level.SEVERE, String.format("An I/O error happened while validating %s", path), ex);
+        } catch (JsonIOException | IOException e) {
+            Utils.getLogger().log(Level.SEVERE, String.format("An I/O error happened while validating %s", path), e);
         } catch (JsonParseException e) {
             Utils.getLogger().log(Level.WARNING, String.format("JSON validation failed for %s", path), e);
             return false;

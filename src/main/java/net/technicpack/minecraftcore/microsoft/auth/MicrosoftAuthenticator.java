@@ -96,12 +96,12 @@ public class MicrosoftAuthenticator {
                 // Attempt to delete the file if we get an AccessDeniedException
                 try {
                     Files.delete(dataStorePath);
-                } catch (IOException ex) {
-                    Sentry.captureException(ex);
-                    throw new RuntimeException(ex);
+                } catch (IOException e2) {
+                    Sentry.captureException(e2);
+                    throw new RuntimeException(e2);
                 }
-            } catch (IOException ex) {
-                Sentry.captureException(ex);
+            } catch (IOException e) {
+                Sentry.captureException(e);
                 // Ignore any other IO exceptions
             }
         }

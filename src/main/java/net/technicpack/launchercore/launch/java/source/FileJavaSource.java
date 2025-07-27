@@ -70,8 +70,8 @@ public class FileJavaSource implements IVersionSource {
             FileJavaSource source = Utils.getGson().fromJson(reader, FileJavaSource.class);
             source.setLoadedFile(file);
             return source;
-        } catch (JsonParseException | IOException ex) {
-            Utils.getLogger().log(Level.SEVERE, "Failed to load Java versions file", ex);
+        } catch (JsonParseException | IOException e) {
+            Utils.getLogger().log(Level.SEVERE, "Failed to load Java versions file", e);
             return new FileJavaSource(file);
         }
     }
@@ -79,8 +79,8 @@ public class FileJavaSource implements IVersionSource {
     public void save() {
         try (Writer writer = Files.newBufferedWriter(loadedFile.toPath())) {
             Utils.getGson().toJson(this, writer);
-        } catch (JsonIOException | IOException ex) {
-            Utils.getLogger().log(Level.SEVERE, "Failed to save Java versions file", ex);
+        } catch (JsonIOException | IOException e) {
+            Utils.getLogger().log(Level.SEVERE, "Failed to save Java versions file", e);
         }
     }
 }

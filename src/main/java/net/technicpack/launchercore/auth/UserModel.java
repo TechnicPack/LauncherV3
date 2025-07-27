@@ -79,11 +79,11 @@ public class UserModel {
             user.login(this);
             addUser(user);
             setCurrentUser(user);
-        } catch (SessionException | ResponseException ex) {
+        } catch (SessionException | ResponseException e) {
             setCurrentUser(null);
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "Login Error", JOptionPane.ERROR_MESSAGE);
-        } catch (AuthenticationException ex) {
-            Utils.getLogger().log(Level.SEVERE, "Authentication error, running in offline mode", ex);
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Login Error", JOptionPane.ERROR_MESSAGE);
+        } catch (AuthenticationException e) {
+            Utils.getLogger().log(Level.SEVERE, "Authentication error, running in offline mode", e);
             JOptionPane.showMessageDialog(null, "Due to an authentication error, you're playing in offline mode.\n\nUntil you are properly logged in you won't be able to connect to multiplayer servers.", "Offline mode", JOptionPane.WARNING_MESSAGE);
             // Create offline mode user
             setCurrentUser(new MicrosoftUser(user.getId(), user.getUsername()));

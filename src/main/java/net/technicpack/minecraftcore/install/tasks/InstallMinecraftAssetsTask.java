@@ -123,8 +123,8 @@ public class InstallMinecraftAssetsTask implements IInstallTask<IMinecraftVersio
             }
 
             return jsonObject;
-        } catch (JsonParseException ex) {
-            throw new IOException(String.format("Failed to load assets index file %s", assetsIndex), ex);
+        } catch (JsonParseException e) {
+            throw new IOException(String.format("Failed to load assets index file %s", assetsIndex), e);
         }
     }
 

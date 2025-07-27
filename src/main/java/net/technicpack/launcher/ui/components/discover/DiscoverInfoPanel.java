@@ -123,9 +123,9 @@ public class DiscoverInfoPanel extends JPanel {
             try {
                 Path localCache = fileSystem.getCacheDirectory().resolve("discover.html");
                 panel.setDocument(getDiscoverDocument(runnableAccessDiscover, localCache), runnableAccessDiscover);
-            } catch (Exception ex) {
+            } catch (Exception e) {
                 //Can't load document from internet- don't beef
-                ex.printStackTrace();
+                e.printStackTrace();
 
                 triggerLoadListener();
             }
@@ -181,8 +181,8 @@ public class DiscoverInfoPanel extends JPanel {
                 }
                 return doc;
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         return null;
@@ -191,8 +191,8 @@ public class DiscoverInfoPanel extends JPanel {
     protected Document getDiscoverDocumentFromLocalCache(Path localCache) {
         try (InputStream stream = Files.newInputStream(localCache)) {
             return XMLResource.load(stream).getDocument();
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         return null;

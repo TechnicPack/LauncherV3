@@ -63,7 +63,7 @@ public class InitialV3Migrator implements IMigrator {
             }
 
             settings.setLatestNewsArticle(maxNewsId);
-        } catch (RestfulAPIException ex) {
+        } catch (RestfulAPIException e) {
             //Just kill the exception & go with ID 0
         }
 

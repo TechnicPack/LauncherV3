@@ -162,8 +162,8 @@ public class LauncherMain {
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ex) {
-            Utils.getLogger().log(Level.SEVERE, "Failed to set system look and feel", ex);
+        } catch (Exception e) {
+            Utils.getLogger().log(Level.SEVERE, "Failed to set system look and feel", e);
         }
 
         ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
@@ -179,8 +179,8 @@ public class LauncherMain {
             jc.setAcceptUnknownOptions(true);
             // Parse the arguments into the params object
             jc.parse(argv);
-        } catch (ParameterException ex) {
-            ex.printStackTrace();
+        } catch (ParameterException e) {
+            e.printStackTrace();
         }
 
         TechnicSettings settings;
@@ -227,7 +227,7 @@ public class LauncherMain {
 
         try {
             build = Integer.parseInt(buildNumber.getBuildNumber());
-        } catch (NumberFormatException ex) {
+        } catch (NumberFormatException e) {
             //This is probably a debug build or something, build number is invalid
         }
 
@@ -375,8 +375,8 @@ public class LauncherMain {
                                 .map(InetAddress::getHostAddress)
                                 .collect(Collectors.joining(", "));
                         Utils.getLogger().info(String.format("%s resolves to [%s]", domain, ips));
-                    } catch (UnknownHostException ex) {
-                        Utils.getLogger().log(Level.SEVERE, String.format("Failed to resolve %s: %s", domain, ex));
+                    } catch (UnknownHostException e) {
+                        Utils.getLogger().log(Level.SEVERE, String.format("Failed to resolve %s: %s", domain, e));
                     }
                 }))
                 .toArray(CompletableFuture[]::new);

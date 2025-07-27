@@ -110,9 +110,9 @@ public final class FileBasedJavaRuntime implements IJavaRuntime {
                     osArch = line.substring("os.arch =".length()).trim();
                 }
             }
-        } catch (IOException ex) {
+        } catch (IOException e) {
             // ignore, it should never happen
-            Sentry.captureException(ex);
+            Sentry.captureException(e);
         }
 
         is64Bit = osArch != null && osArch.contains("64");

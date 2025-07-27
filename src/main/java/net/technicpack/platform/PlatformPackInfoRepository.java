@@ -60,8 +60,8 @@ public class PlatformPackInfoRepository implements IAuthoritativePackSource {
             info = getInfoFromPlatformInfo(platformInfo);
 
             return info;
-        } catch (RestfulAPIException ex) {
-            Utils.getLogger().log(Level.WARNING, "Unable to load platform pack " + slug, ex);
+        } catch (RestfulAPIException e) {
+            Utils.getLogger().log(Level.WARNING, "Unable to load platform pack " + slug, e);
             return null;
         }
     }
@@ -76,8 +76,8 @@ public class PlatformPackInfoRepository implements IAuthoritativePackSource {
                     return platformInfo;
                 else
                     return new CombinedPackInfo(solderInfo, platformInfo);
-            } catch (RestfulAPIException ex) {
-                Utils.getLogger().log(Level.SEVERE, "Failed to query Solder for modpack " + platformInfo.getName(), ex);
+            } catch (RestfulAPIException e) {
+                Utils.getLogger().log(Level.SEVERE, "Failed to query Solder for modpack " + platformInfo.getName(), e);
                 return platformInfo;
             }
         } else {

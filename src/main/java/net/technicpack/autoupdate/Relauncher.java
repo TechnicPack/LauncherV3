@@ -80,11 +80,11 @@ public class Relauncher {
         try {
             URI uri = clazz.getProtectionDomain().getCodeSource().getLocation().toURI();
             return Paths.get(uri).toString();
-        } catch (URISyntaxException ex) {
+        } catch (URISyntaxException e) {
             // This should never happen, but this is here just in case it does
             System.err.println("Failed to get running path for class: " + clazz.getName());
             //noinspection CallToPrintStackTrace
-            ex.printStackTrace();
+            e.printStackTrace();
             System.exit(255);
             return null; // Unreachable but required for compilation
         }
@@ -233,9 +233,9 @@ public class Relauncher {
 
         try {
             pb.start();
-        } catch (IOException ex) {
+        } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "Your OS has prevented this relaunch from completing.  You may need to add an exception in your security software.", "Relaunch Failed", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
+            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }

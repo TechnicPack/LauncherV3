@@ -243,8 +243,8 @@ public class ResourceLoader {
     public BufferedImage getImage(String imageName) {
         try {
             return ImageIO.read(ResourceLoader.class.getResourceAsStream(getResourcePath("/" + imageName)));
-        } catch (IOException ex) {
-            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+        } catch (IOException e) {
+            Utils.getLogger().log(Level.SEVERE, e.getMessage(), e);
             return null;
         }
     }

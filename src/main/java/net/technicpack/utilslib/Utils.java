@@ -98,8 +98,8 @@ public class Utils {
                 URL redirectUrl;
                 try {
                     redirectUrl = new URL(newUrl);
-                } catch (MalformedURLException ex) {
-                    throw new DownloadException("Invalid Redirect URL: " + url, ex);
+                } catch (MalformedURLException e) {
+                    throw new DownloadException("Invalid Redirect URL: " + url, e);
                 }
 
                 conn = openHttpConnection(redirectUrl);
@@ -114,8 +114,8 @@ public class Utils {
             } else {
                 return false;
             }
-        } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Got an error when pinging " + urlLoc, ex);
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Got an error when pinging " + urlLoc, e);
             return false;
         }
     }
@@ -175,8 +175,8 @@ public class Utils {
 
         try {
             urlObject = new URL(url);
-        } catch (MalformedURLException ex) {
-            throw new DownloadException("Invalid URL: " + url, ex);
+        } catch (MalformedURLException e) {
+            throw new DownloadException("Invalid URL: " + url, e);
         }
 
         return urlObject;

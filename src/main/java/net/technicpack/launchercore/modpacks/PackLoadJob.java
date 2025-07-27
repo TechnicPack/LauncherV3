@@ -108,7 +108,7 @@ public class PackLoadJob implements Runnable {
         for (Thread thread : threads) {
             try {
                 thread.join();
-            } catch (InterruptedException ex) {
+            } catch (InterruptedException e) {
             }
         }
 

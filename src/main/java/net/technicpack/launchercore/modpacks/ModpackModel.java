@@ -415,8 +415,8 @@ public class ModpackModel {
             try {
                 FileUtils.copyDirectory(installedDirectory, targetDirectory);
                 FileUtils.cleanDirectory(installedDirectory);
-            } catch (IOException ex) {
-                Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+            } catch (IOException e) {
+                Utils.getLogger().log(Level.SEVERE, e.getMessage(), e);
                 return;
             }
         }
@@ -525,8 +525,8 @@ public class ModpackModel {
         if (getInstalledDirectory() != null && getInstalledDirectory().exists()) {
             try {
                 FileUtils.deleteDirectory(getInstalledDirectory());
-            } catch (IOException ex) {
-                Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+            } catch (IOException e) {
+                Utils.getLogger().log(Level.SEVERE, e.getMessage(), e);
             }
         }
 
@@ -534,8 +534,8 @@ public class ModpackModel {
         if (Files.isDirectory(assets)) {
             try {
                 FileUtils.deleteDirectory(assets.toFile());
-            } catch (IOException ex) {
-                Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+            } catch (IOException e) {
+                Utils.getLogger().log(Level.SEVERE, e.getMessage(), e);
             }
         }
 

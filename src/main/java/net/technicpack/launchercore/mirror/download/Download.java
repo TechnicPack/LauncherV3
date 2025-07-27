@@ -81,8 +81,8 @@ public class Download implements Runnable {
                     URL redirectUrl;
                     try {
                         redirectUrl = new URL(redirUrlText);
-                    } catch (MalformedURLException ex) {
-                        throw new DownloadException("Invalid Redirect URL: " + url, ex);
+                    } catch (MalformedURLException e) {
+                        throw new DownloadException("Invalid Redirect URL: " + url, e);
                     }
 
                     conn = Utils.openHttpConnection(redirectUrl);
@@ -150,7 +150,7 @@ public class Download implements Runnable {
 
             Utils.getLogger().fine(String.format("Download completed: %d bytes in %.3f seconds (%.2f MB/s)",
                     fileLength, durationSeconds, fileLength / durationSeconds / (1024 * 1024)));
-        } catch (ClosedByInterruptException ex) {
+        } catch (ClosedByInterruptException e) {
             result = Result.FAILURE;
         } catch (PermissionDeniedException e) {
             exception = e;
@@ -177,7 +177,7 @@ public class Download implements Runnable {
             while ((is.get() == null) && (iterationCount++ < 5)) {
                 try {
                     stream.join(1000L);
-                } catch (InterruptedException ignore) {
+                } catch (InterruptedException e) {
                 }
             }
 
@@ -191,7 +191,7 @@ public class Download implements Runnable {
             try {
                 stream.interrupt();
                 stream.join();
-            } catch (InterruptedException ignore) {
+            } catch (InterruptedException e) {
             }
         }
 
@@ -241,7 +241,7 @@ public class Download implements Runnable {
                 if (e.getMessage().equalsIgnoreCase("Permission denied: connect")) {
                     permDenied.set(true);
                 }
-            } catch (IOException ignore) {
+            } catch (IOException e) {
             }
         }
     }
