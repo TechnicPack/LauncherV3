@@ -33,22 +33,27 @@ import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.MD5FileVerifier;
 import net.technicpack.launchercore.install.verifiers.SHA256FileVerifier;
 import net.technicpack.rest.RestfulAPIException;
+import net.technicpack.utilslib.Utils;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.logging.Level;
 
 public class QueryUpdateStream implements IInstallTask<Void> {
+    private final String description;
+    private final ITasksQueue<Void> downloadTasks;
+    private final IUpdateStream updateStream;
+    private final LauncherFileSystem fileSystem;
+    private final Relauncher relauncher;
+    private final Collection<IInstallTask<Void>> postDownloadTasks;
 
-    private String description;
-    private ITasksQueue<Void> downloadTasks;
-    private IUpdateStream updateStream;
-    private LauncherFileSystem fileSystem;
-    private Relauncher relauncher;
-    private Collection<IInstallTask<Void>> postDownloadTasks;
-
-    public QueryUpdateStream(String description, IUpdateStream stream, ITasksQueue<Void> downloadTasks, LauncherFileSystem fileSystem, Relauncher relauncher, Collection<IInstallTask<Void>> postDownloadTasks) {
+    public QueryUpdateStream(String description, IUpdateStream stream, ITasksQueue<Void> downloadTasks,
+                             LauncherFileSystem fileSystem, Relauncher relauncher,
+                             Collection<IInstallTask<Void>> postDownloadTasks) {
         this.description = description;
         this.downloadTasks = downloadTasks;
         this.updateStream = stream;
@@ -69,60 +74,75 @@ public class QueryUpdateStream implements IInstallTask<Void> {
 
     @Override
     public void runTask(InstallTasksQueue<Void> queue) throws IOException {
+        StreamVersion version;
         try {
-            StreamVersion version = updateStream.getStreamVersion(relauncher.getStreamName());
+            version = updateStream.getStreamVersion(relauncher.getStreamName());
 
-            if (version == null || version.getBuild() == 0)
-                return;
-
-            for(LauncherResource resource : version.getResources()) {
-                IFileVerifier verifier;
-
-                if (resource.getSha256() != null && !resource.getSha256().isEmpty()) {
-                    verifier = new SHA256FileVerifier(resource.getSha256());
-                } else if (resource.getMd5() != null && !resource.getMd5().isEmpty()) {
-                    verifier = new MD5FileVerifier(resource.getMd5());
-                } else {
-                    verifier = null;
-                }
-
-                File targetFile = fileSystem.getLauncherAssetsDirectory().resolve(resource.getFilename()).toFile();
-
-                if (targetFile.exists() && verifier.isFileValid(targetFile)) {
-                    continue;
-                }
-
-                DownloadFileTask<Void> downloadFileTask;
-
-                String zstdUrl = resource.getZstdUrl();
-                if (zstdUrl != null && !zstdUrl.isEmpty()) {
-                    downloadFileTask = new DownloadFileTask<>(zstdUrl, targetFile, verifier, resource.getFilename());
-                    downloadFileTask.setDecompressor(CompressorStreamFactory.ZSTANDARD);
-                } else {
-                    downloadFileTask = new DownloadFileTask<>(resource.getUrl(), targetFile, verifier, resource.getFilename());
-                }
-
-                downloadTasks.addTask(downloadFileTask);
-            }
-
-            if (relauncher.isSkipUpdate() || version.getBuild() == relauncher.getCurrentBuild()) {
+            if (version == null || version.getBuild() == 0) {
                 return;
             }
-
-            String updateUrl;
-            String runningPath = relauncher.getRunningPath();
-
-            if (runningPath == null) {
-                throw new DownloadException("Could not load a running path for currently-executing launcher.");
-            }
-
-            if (runningPath.endsWith(".exe"))
-                updateUrl = version.getExeUrl();
-            else
-                updateUrl = version.getJarUrl();
-
-            downloadTasks.addTask(new DownloadUpdate(updateUrl, relauncher, postDownloadTasks));
         } catch (RestfulAPIException e) {
+            Utils.getLogger().log(Level.SEVERE, "Failed to query update stream", e);
+            return;
         }
+
+        // Launcher resources
+        for (LauncherResource resource : version.getResources()) {
+            IFileVerifier verifier = createFileVerifier(resource);
+
+            File targetFile = fileSystem.getLauncherAssetsDirectory().resolve(resource.getFilename()).toFile();
+
+            if (targetFile.exists() && verifier != null && verifier.isFileValid(targetFile)) {
+                continue;
+            }
+
+            downloadTasks.addTask(createDownloadTask(resource, targetFile, verifier));
+        }
+
+        // Launcher update
+        if (relauncher.isSkipUpdate() || version.getBuild() == relauncher.getCurrentBuild()) {
+            return;
+        }
+
+        String runningPath = relauncher.getRunningPath();
+
+        if (runningPath == null) {
+            throw new DownloadException("Could not load a running path for currently-executing launcher.");
+        }
+
+        String updateUrl;
+        if (runningPath.endsWith(".exe")) {
+            updateUrl = version.getExeUrl();
+        } else {
+            updateUrl = version.getJarUrl();
+        }
+
+        downloadTasks.addTask(new DownloadUpdate(updateUrl, relauncher, postDownloadTasks));
+    }
+
+    private static @Nullable IFileVerifier createFileVerifier(LauncherResource resource) {
+        IFileVerifier verifier;
+        if (resource.getSha256() != null && !resource.getSha256().isEmpty()) {
+            verifier = new SHA256FileVerifier(resource.getSha256());
+        } else if (resource.getMd5() != null && !resource.getMd5().isEmpty()) {
+            verifier = new MD5FileVerifier(resource.getMd5());
+        } else {
+            verifier = null;
+        }
+        return verifier;
+    }
+
+    private static @NotNull DownloadFileTask<Void> createDownloadTask(LauncherResource resource, File targetFile,
+                                                                      IFileVerifier verifier) throws DownloadException {
+        DownloadFileTask<Void> downloadFileTask;
+
+        String zstdUrl = resource.getZstdUrl();
+        if (zstdUrl != null && !zstdUrl.isEmpty()) {
+            downloadFileTask = new DownloadFileTask<>(zstdUrl, targetFile, verifier, resource.getFilename());
+            downloadFileTask.setDecompressor(CompressorStreamFactory.ZSTANDARD);
+        } else {
+            downloadFileTask = new DownloadFileTask<>(resource.getUrl(), targetFile, verifier, resource.getFilename());
+        }
+        return downloadFileTask;
     }
 }
