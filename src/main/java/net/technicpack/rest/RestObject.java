@@ -22,6 +22,7 @@ package net.technicpack.rest;
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonSyntaxException;
 import net.technicpack.launchercore.TechnicConstants;
 
 import java.io.BufferedReader;
@@ -39,7 +40,7 @@ public abstract class RestObject {
 
     public static <T extends RestObject> T getRestObject(Class<T> restObject, String url) throws RestfulAPIException {
         try {
-            URLConnection conn = new URI(url).toURL().openConnection();
+            URLConnection conn = new URL(url).openConnection();
             conn.setRequestProperty("User-Agent", TechnicConstants.getUserAgent());
             conn.setConnectTimeout(15000);
             conn.setReadTimeout(15000);
@@ -61,8 +62,8 @@ public abstract class RestObject {
             return result;
         } catch (SocketTimeoutException e) {
             throw new RestfulAPIException(String.format("Timed out accessing URL [%s]", url), e);
-        } catch (URISyntaxException | MalformedURLException e) {
-            throw new RestfulAPIException(String.format("Invalid URI [%s]", url), e);
+        } catch (MalformedURLException e) {
+            throw new RestfulAPIException(String.format("Invalid URL [%s]", url), e);
         } catch (JsonIOException | IOException e) {
             throw new RestfulAPIException(String.format("Error accessing URL [%s]", url), e);
         } catch (JsonParseException e) {
