@@ -232,7 +232,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         installProgress.stateChanged("Initializing...", 0);
         installProgress.setVisible(true);
         installProgressPlaceholder.setVisible(false);
-        setupPlayButtonText(pack, userModel.getCurrentUser());
+        userChanged(userModel.getCurrentUser());
         invalidate();
     }
 
