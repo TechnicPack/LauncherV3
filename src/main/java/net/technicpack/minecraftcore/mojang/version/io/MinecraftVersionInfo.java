@@ -53,9 +53,7 @@ public class MinecraftVersionInfo implements IMinecraftVersionInfo {
         } else if (raw.minecraftArguments != null && !raw.minecraftArguments.isEmpty()) {
             arguments = LaunchArguments.fromLegacyString(raw.minecraftArguments);
         } else {
-            arguments = null;
-            // TODO: uncomment this when we're no longer using this for Forge install_profile.json
-            //            throw new IllegalArgumentException("No arguments found");
+            throw new IllegalArgumentException("No arguments found");
         }
 
         libraries = raw.libraries;

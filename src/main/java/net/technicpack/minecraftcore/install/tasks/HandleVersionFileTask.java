@@ -19,6 +19,10 @@
 
 package net.technicpack.minecraftcore.install.tasks;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.exception.DownloadException;
@@ -31,8 +35,6 @@ import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.MinecraftVersionInfoBuilder;
-import net.technicpack.minecraftcore.mojang.version.builder.FileMinecraftVersionInfoBuilder;
-import net.technicpack.minecraftcore.mojang.version.builder.retrievers.ZipMinecraftVersionInfoRetriever;
 import net.technicpack.minecraftcore.mojang.version.io.Artifact;
 import net.technicpack.minecraftcore.mojang.version.io.Downloads;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
@@ -40,12 +42,16 @@ import org.apache.maven.artifact.versioning.ComparableVersion;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
 public class HandleVersionFileTask implements IInstallTask<IMinecraftVersionInfo> {
@@ -172,10 +178,6 @@ public class HandleVersionFileTask implements IInstallTask<IMinecraftVersionInfo
         final boolean hasModernMinecraftForge = MojangUtils.hasModernMinecraftForge(version);
 
         if (hasModernMinecraftForge || hasNeoForge) {
-            File profileJson = new File(pack.getBinDir(), "install_profile.json");
-            ZipMinecraftVersionInfoRetriever zipVersionRetriever = new ZipMinecraftVersionInfoRetriever(new File(pack.getBinDir(), "modpack.jar"));
-            IMinecraftVersionInfo installerVersion = new FileMinecraftVersionInfoBuilder(profileJson, zipVersionRetriever, null).buildVersionFromKey("install_profile");
-
             // These are for Minecraft Forge. They're invalid (but safe) with NeoForge
             final String[] versionIdParts = version.getId().split("-", 3);
             final boolean is1_12_2 = versionIdParts[0].equals("1.12.2");
@@ -213,7 +215,31 @@ public class HandleVersionFileTask implements IInstallTask<IMinecraftVersionInfo
             }
 
             // Process the install_profile.json (installer) libraries
-            List<Library> dedupedInstallerLibraries = installerVersion.getLibraries().stream().filter(distinctByKey(Library::getName)).collect(Collectors.toList());
+            List<Library> installerLibraries;
+            try (JarFile modpackJar = new JarFile(new File(pack.getBinDir(), "modpack.jar"))) {
+                JarEntry entry = modpackJar.getJarEntry("install_profile.json");
+
+                if (entry == null) {
+                    throw new RuntimeException("modpack.jar does not contain the install_profile.json file");
+                }
+
+                try (InputStream inputStream = modpackJar.getInputStream(entry);
+                     InputStreamReader reader = new InputStreamReader(inputStream)) {
+                    JsonElement root = JsonParser.parseReader(reader);
+                    JsonObject rootObj = root.getAsJsonObject();
+                    JsonElement librariesElement = rootObj.get("libraries");
+
+                    if (librariesElement == null || !librariesElement.isJsonArray()) {
+                        throw new RuntimeException("install_profile.json does not contain libraries");
+                    }
+
+                    installerLibraries = MojangUtils.getGson().fromJson(librariesElement, new TypeToken<List<Library>>() {}.getType());
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to extract libraries from install_profile.json", e);
+            }
+
+            List<Library> dedupedInstallerLibraries = installerLibraries.stream().filter(distinctByKey(Library::getName)).collect(Collectors.toList());
 
             for (Library library : dedupedInstallerLibraries) {
                 if (library.isMinecraftForge() && is1_12_2) {
