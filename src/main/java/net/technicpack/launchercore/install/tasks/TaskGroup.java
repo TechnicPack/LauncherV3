@@ -24,9 +24,7 @@ import net.technicpack.launchercore.install.IWeightedTasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 public class TaskGroup<T> implements IWeightedTasksQueue<T>, IInstallTask<T> {
     private final String groupName;
@@ -46,7 +44,11 @@ public class TaskGroup<T> implements IWeightedTasksQueue<T>, IInstallTask<T> {
 
     @Override
     public String getTaskDescription() {
-        return groupName.replace("%s", currentTaskDescription);
+        try {
+            return String.format(Locale.ENGLISH, groupName, currentTaskDescription);
+        } catch (IllegalFormatException e) {
+            return groupName;
+        }
     }
 
     @Override
