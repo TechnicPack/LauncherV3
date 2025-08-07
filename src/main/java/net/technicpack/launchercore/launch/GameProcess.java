@@ -19,9 +19,11 @@
 
 package net.technicpack.launchercore.launch;
 
+import java.util.concurrent.CompletableFuture;
+
 public class GameProcess {
     private final Process process;
-    private ProcessExitListener exitListener;
+    private final CompletableFuture<Void> exitFuture = new CompletableFuture<>();
     private final ProcessMonitorThread monitorThread;
 
     public GameProcess(Process process, String userAccessToken) {
@@ -31,15 +33,15 @@ public class GameProcess {
         this.monitorThread.start();
     }
 
-    public ProcessExitListener getExitListener() {
-        return exitListener;
-    }
-
     public void setExitListener(ProcessExitListener exitListener) {
-        this.exitListener = exitListener;
+        exitFuture.thenRun(exitListener::onProcessExit);
     }
 
     public Process getProcess() {
         return process;
+    }
+
+    public void setProcessExited() {
+        exitFuture.complete(null);
     }
 }

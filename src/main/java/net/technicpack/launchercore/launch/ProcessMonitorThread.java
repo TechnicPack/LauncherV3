@@ -29,7 +29,6 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 public class ProcessMonitorThread extends Thread {
-
     private final GameProcess process;
     private final String userAccessToken;
     private final Logger logger;
@@ -72,9 +71,7 @@ public class ProcessMonitorThread extends Thread {
             this.logger.log(Level.SEVERE, "Interrupted while waiting for process to exit", e);
             this.interrupt();
         } finally {
-            if (process.getExitListener() != null) {
-                process.getExitListener().onProcessExit();
-            }
+            process.setProcessExited();
         }
     }
 }
