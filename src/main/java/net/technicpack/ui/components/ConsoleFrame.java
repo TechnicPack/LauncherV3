@@ -40,9 +40,10 @@ public class ConsoleFrame extends JFrame implements MouseListener {
     private final SimpleAttributeSet warnAttributes;
     private final SimpleAttributeSet debugAttributes;
     private final SimpleAttributeSet defaultAttributes = new SimpleAttributeSet();
-    private JTextPane textComponent;
+    private JTextPane textPane;
     private Document document;
     private int numLines;
+    private JScrollPane scrollPane;
 
     /**
      * Construct the frame.
@@ -82,31 +83,38 @@ public class ConsoleFrame extends JFrame implements MouseListener {
     public AttributeSet getErrorAttributes() { return errorAttributes; }
     public AttributeSet getWarnAttributes() { return warnAttributes; }
     public AttributeSet getDebugAttributes() { return debugAttributes; }
-    public void setCaretPosition(int position) { textComponent.setCaretPosition(position); }
+    public void setCaretPosition(int position) { textPane.setCaretPosition(position); }
+
+    public JTextPane getTextPane() {
+        return textPane;
+    }
+
+    public JScrollPane getScrollPane() {
+        return scrollPane;
+    }
 
     /**
      * Build the interface.
      */
     private void buildUI() {
-        this.textComponent = new JTextPane();
-        textComponent.addMouseListener(this);
-        textComponent.setFont(getMonospaceFont());
-        textComponent.setEditable(false);
+        this.textPane = new JTextPane();
+        textPane.addMouseListener(this);
+        textPane.setFont(getMonospaceFont());
+        textPane.setEditable(false);
 
-        DefaultCaret caret = (DefaultCaret) textComponent.getCaret();
+        DefaultCaret caret = (DefaultCaret) textPane.getCaret();
         caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
 
-        document = textComponent.getDocument();
-        document.addDocumentListener(new LimitLinesDocumentListener(numLines));
+        document = textPane.getDocument();
 
-        textComponent.setBackground(Color.BLACK);
-        textComponent.setForeground(Color.WHITE);
+        textPane.setBackground(Color.BLACK);
+        textPane.setForeground(Color.WHITE);
 
-        JScrollPane scrollText = new JScrollPane(textComponent);
-        scrollText.setBorder(null);
-        scrollText.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPane = new JScrollPane(textPane);
+        scrollPane.setBorder(null);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
-        add(scrollText, BorderLayout.CENTER);
+        add(scrollPane, BorderLayout.CENTER);
     }
 
     /**
@@ -171,11 +179,11 @@ public class ConsoleFrame extends JFrame implements MouseListener {
         public ContextMenu() {
             copy = new JMenuItem("Copy");
             add(copy);
-            copy.addActionListener(e -> textComponent.copy());
+            copy.addActionListener(e -> textPane.copy());
 
             clear = new JMenuItem("Clear");
             add(clear);
-            clear.addActionListener(e -> textComponent.setText(null));
+            clear.addActionListener(e -> textPane.setText(null));
         }
     }
 }
