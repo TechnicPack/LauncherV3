@@ -103,12 +103,6 @@ public class InstallJavaRuntimeTask implements IInstallTask<IMinecraftVersionInf
         // Then, create the links
         processSymlinks(manifest, runtimeRoot);
 
-        // Lastly, write the .version file.
-        // There is also a .sha1 file, which appears to be used by the vanilla launcher to cache integrity checks,
-        // which we don't need for now.
-        Path runtimeVersionFile = runtimeRoot.resolve(".version");
-        Files.write(runtimeVersionFile, runtimeInfo.getComponent().getBytes(StandardCharsets.UTF_8));
-
         // Set the Mojang JRE as the Java runtime associated to this modpack
         final IJavaRuntime runtime = getJavaRuntime(runtimeRoot);
         IMinecraftVersionInfo version = queue.getMetadata();
