@@ -203,7 +203,8 @@ public class InstallJavaRuntimeTask implements IInstallTask<IMinecraftVersionInf
             Path link = runtimeRoot.resolve(path);
             ensurePathIsSafe(runtimeRoot, link);
 
-            Path target = runtimeRoot.resolve(runtimeFile.getTarget());
+            // The target path is relative to the link itself, not the runtime root
+            Path target = link.resolve(runtimeFile.getTarget());
             ensurePathIsSafe(runtimeRoot, target);
 
             // We add it to the download queue so it runs after all the files exist
