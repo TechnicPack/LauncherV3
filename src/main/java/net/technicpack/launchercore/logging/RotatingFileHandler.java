@@ -30,6 +30,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
 
 import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.CREATE;
 
 public class RotatingFileHandler extends StreamHandler {
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -53,14 +54,11 @@ public class RotatingFileHandler extends StreamHandler {
     }
 
     private synchronized void updateOutputFile() {
-        // Close the output stream, in case it's open
-        this.close();
-
         currentFilename = buildFilename();
         try {
-            OutputStream out = Files.newOutputStream(this.logsDirectory.resolve(currentFilename), APPEND);
+            OutputStream out = Files.newOutputStream(this.logsDirectory.resolve(currentFilename), CREATE, APPEND);
             setOutputStream(out);
-        } catch (IOException ignored) {
+        } catch (IOException ex) {
             // We can't really log exceptions if the logger doesn't work
             // TODO: implement ErrorManager that doesn't write to System.err
         }
