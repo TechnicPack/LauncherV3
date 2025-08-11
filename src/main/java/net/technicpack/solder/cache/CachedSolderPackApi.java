@@ -141,10 +141,15 @@ public class CachedSolderPackApi implements ISolderPackApi {
     }
 
     private void saveForeverCache() {
-        try (Writer writer = Files.newBufferedWriter(cachePath, StandardCharsets.UTF_8)) {
-            Utils.getGson().toJson(rootInfoCache, writer);
+        try {
+            Files.createDirectories(cachePath.getParent());
+
+            try (Writer writer = Files.newBufferedWriter(cachePath, StandardCharsets.UTF_8)) {
+                Utils.getGson().toJson(rootInfoCache, writer);
+            }
         } catch (JsonIOException | IOException e) {
-            Utils.getLogger().log(Level.SEVERE, String.format("Failed to save Solder cache for modpack \"%s\"", packSlug), e);
+            Utils.getLogger()
+                 .log(Level.SEVERE, String.format("Failed to save Solder cache for modpack \"%s\"", packSlug), e);
         }
     }
 

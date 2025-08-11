@@ -172,8 +172,12 @@ public class ModpackCachePlatformApi implements IPlatformApi {
                                    .resolve(info.getName())
                                    .resolve("cache.json");
 
-        try (Writer writer = Files.newBufferedWriter(cacheFile, StandardCharsets.UTF_8)) {
-            Utils.getGson().toJson(info, writer);
+        try {
+            Files.createDirectories(cacheFile.getParent());
+
+            try (Writer writer = Files.newBufferedWriter(cacheFile, StandardCharsets.UTF_8)) {
+                Utils.getGson().toJson(info, writer);
+            }
         } catch (JsonIOException | IOException e) {
             Utils.getLogger().log(Level.SEVERE, String.format("Failed to save pack cache %s", cacheFile), e);
         }
