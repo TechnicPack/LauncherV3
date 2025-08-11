@@ -170,7 +170,7 @@ public class ConsoleHandler extends Handler {
         trimDocument(document);
 
         final JScrollPane scrollPane = consoleFrame.getScrollPane();
-        final boolean shouldScroll = isScrollAtBottom(scrollPane);
+        final boolean shouldScroll = true;
 
         // Only scroll to bottom if we were already at the bottom
         if (shouldScroll) {
