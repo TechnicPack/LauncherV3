@@ -39,14 +39,15 @@ import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentListAdapter;
 import net.technicpack.utilslib.DateTypeAdapter;
 import net.technicpack.utilslib.LowerCaseEnumTypeAdapterFactory;
+import net.technicpack.utilslib.Utils;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Date;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -156,19 +157,40 @@ public class MojangUtils {
         return !mcVersion.equals("1.12.2");
     }
 
-    public static JavaRuntimesIndex getJavaRuntimesIndex() {
+    public static JavaRuntimesIndex getJavaRuntimesIndex(Path cachedIndexPath) {
         if (javaRuntimesIndex != null)
             return javaRuntimesIndex;
 
+        // First, try to get a fresh version of the index
         try {
             HttpRequest request = REQUEST_FACTORY.buildGetRequest(new GenericUrl(RUNTIMES_URL));
             HttpResponse httpResponse = request.execute();
             try (Reader reader = new BufferedReader(new InputStreamReader(httpResponse.getContent(), StandardCharsets.UTF_8))) {
                 javaRuntimesIndex = gson.fromJson(reader, JavaRuntimesIndex.class);
+                // Save it to a cache file so we can use it if requests fail in the future
+                try (Writer writer = Files.newBufferedWriter(cachedIndexPath, StandardCharsets.UTF_8)) {
+                    gson.toJson(javaRuntimesIndex, writer);
+                } catch (IOException ex) {
+                    Utils.getLogger().log(Level.WARNING, "Failed to save Java runtimes index to cache", ex);
+                }
                 return javaRuntimesIndex;
             }
         } catch (JsonParseException | IOException e) {
-            e.printStackTrace();
+            Utils.getLogger().log(Level.SEVERE, "Failed to get Java runtimes index", e);
+
+            if (Files.exists(cachedIndexPath)) {
+                // If we failed to get a fresh version, try to use the cached version
+                Utils.getLogger().log(Level.WARNING, "Using cached Java runtimes index");
+                try (Reader reader = Files.newBufferedReader(cachedIndexPath, StandardCharsets.UTF_8)) {
+                    return gson.fromJson(reader, JavaRuntimesIndex.class);
+                } catch (IOException ex) {
+                    Utils.getLogger().log(Level.SEVERE, "Failed to load Java runtimes index from cache", ex);
+                }
+            } else {
+                Utils.getLogger().log(Level.SEVERE, "No cached Java runtimes index found");
+            }
+
+            // When everything else fails, return null
             return null;
         }
     }

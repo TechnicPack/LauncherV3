@@ -76,7 +76,7 @@ public class EnsureJavaRuntimeManifestTask implements IInstallTask<IMinecraftVer
 
         final String runtimeName = runtimeInfo.getComponent();
 
-        JavaRuntimesIndex availableRuntimes = MojangUtils.getJavaRuntimesIndex();
+        JavaRuntimesIndex availableRuntimes = MojangUtils.getJavaRuntimesIndex(runtimesDirectory.resolve("_index.json"));
 
         if (availableRuntimes == null) {
             throw new DownloadException("Failed to get Mojang JRE information");
