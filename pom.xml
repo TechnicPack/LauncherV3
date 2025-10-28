@@ -91,7 +91,7 @@
         <dependency>
             <groupId>com.github.luben</groupId>
             <artifactId>zstd-jni</artifactId>
-            <version>1.5.7-4</version>
+            <version>1.5.7-6</version>
         </dependency>
         <!-- For LZMA, used by commons-compress -->
         <dependency>
