@@ -24,6 +24,10 @@
       "changelogUrl": "https://commons.apache.org/proper/commons-io/changes.html"
     },
     {
+      "matchPackageNames": ["commons-codec:commons-codec"],
+      "changelogUrl": "https://commons.apache.org/proper/commons-codec/changes.html",
+    },
+    {
       "matchPackageNames": ["com.google.oauth-client:*"],
       "groupName": "google-oauth-client"
     },
