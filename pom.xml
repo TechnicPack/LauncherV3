@@ -163,7 +163,7 @@
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry</artifactId>
-            <version>8.25.0</version>
+            <version>8.26.0</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
