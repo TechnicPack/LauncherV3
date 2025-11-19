@@ -13,7 +13,7 @@
       // Flying Saucer requires Java 11 in 9.5.0, and Java 17 in 9.6.0 (https://github.com/flyingsaucerproject/flyingsaucer?tab=readme-ov-file#getting-flying-saucer),
       // so these changes are pending that, since we're still targeting Java 8.
       "matchPackageNames": ["org.xhtmlrenderer:flying-saucer-core"],
-      "allowedVersions": "<9.5.0",
+      "allowedVersions": "<9.5.0"
     },
     {
       "matchPackageNames": ["com.akathist.maven.plugins.launch4j:launch4j-maven-plugin"],
@@ -25,7 +25,11 @@
     },
     {
       "matchPackageNames": ["commons-codec:commons-codec"],
-      "changelogUrl": "https://commons.apache.org/proper/commons-codec/changes.html",
+      "changelogUrl": "https://commons.apache.org/proper/commons-codec/changes.html"
+    },
+    {
+      "matchPackageNames": ["org.apache.commons:commons-lang3"],
+      "changelogUrl": "https://commons.apache.org/proper/commons-lang/changes.html"
     },
     {
       "matchPackageNames": ["com.google.oauth-client:*"],
