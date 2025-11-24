@@ -7,7 +7,7 @@
     ":semanticCommitTypeAll(build)",
     ":separateMajorReleases"
   ],
-  "minimumReleaseAge": 7,
+  "minimumReleaseAge": "7 days",
   "rangeStrategy": "bump",
   "packageRules": [
     {
