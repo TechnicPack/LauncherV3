@@ -402,23 +402,20 @@ public class LauncherMain {
     private static void updateJavaTrustStore() {
         final String javaVersion = System.getProperty("java.version");
 
-        if (JavaUtils.compareVersions(javaVersion, "1.8.0_141") >= 0) {
-            Utils.getLogger().info(String.format("Don't need to update Java trust store; Java version is recent enough (%s)", javaVersion));
-            return;
-        }
+        final char[] defaultTrustStorePassword = "changeit".toCharArray();
 
         try {
             // Load the default trust store
             KeyStore defaultTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             final Path defaultKsPath = Paths.get(System.getProperty("java.home"), "lib", "security", "cacerts");
             try (InputStream is = Files.newInputStream(defaultKsPath)) {
-                defaultTrustStore.load(is, "changeit".toCharArray());
+                defaultTrustStore.load(is, defaultTrustStorePassword);
             }
 
             // Load our custom trust store
             KeyStore technicTrustStore = KeyStore.getInstance("JKS");
             try (InputStream is = LauncherMain.class.getResourceAsStream("/net/technicpack/launcher/resources/technicKeystore.jks")) {
-                technicTrustStore.load(is, "technicrootca".toCharArray());
+                technicTrustStore.load(is, defaultTrustStorePassword);
             }
 
             // Create a new, empty trust store to merge the default and custom ones
@@ -437,6 +434,8 @@ public class LauncherMain {
                 mergedTrustStore.setCertificateEntry(alias, cert);
             }
 
+            boolean updated = false;
+
             // Copy the custom trust store entries
             Enumeration<String> technicAliases = technicTrustStore.aliases();
             while (technicAliases.hasMoreElements()) {
@@ -449,6 +448,7 @@ public class LauncherMain {
                 if (!mergedTrustStore.containsAlias(alias)) {
                     Utils.getLogger().log(Level.FINE, String.format("Adding certificate with alias '%s', fingerprint %s", alias, getCertificateFingerprint(cert)));
                     mergedTrustStore.setCertificateEntry(alias, cert);
+                    updated = true;
                 }
             }
 
@@ -461,7 +461,9 @@ public class LauncherMain {
 
             HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
 
-            Utils.getLogger().log(Level.INFO, "Updated Java trust store with new root certificates successfully");
+            if (updated) {
+                Utils.getLogger().log(Level.INFO, "Updated Java trust store with new root certificates successfully");
+            }
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | KeyManagementException e) {
             Utils.getLogger().log(Level.WARNING, "Failed to update Java trust store. Problems might happen with TLS connections", e);
         }
