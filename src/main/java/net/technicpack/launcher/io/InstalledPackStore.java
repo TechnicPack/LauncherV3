@@ -40,6 +40,8 @@ public class InstalledPackStore {
     @SuppressWarnings("java:S2065")
     private transient Path storePath;
 
+    private final transient Object storeLock = new Object();
+
     private Map<String, InstalledPack> installedPacks = new HashMap<>();
     private List<String> byIndex = new ArrayList<>();
     private String selected = null;
@@ -84,9 +86,11 @@ public class InstalledPackStore {
     }
 
     protected void setStorePath(Path storePath) {
-        this.storePath = storePath;
+        synchronized (storeLock) {
+            this.storePath = storePath;
 
-        cleanUpLegacyEntries();
+            cleanUpLegacyEntries();
+        }
     }
 
     public Map<String, InstalledPack> getInstalledPacks() {
@@ -107,43 +111,48 @@ public class InstalledPackStore {
     }
 
     public InstalledPack put(InstalledPack installedPack) {
-        InstalledPack pack = installedPacks.put(installedPack.getName(), installedPack);
-        if (pack == null) {
-            byIndex.add(installedPack.getName());
+        synchronized (storeLock) {
+            InstalledPack pack = installedPacks.put(installedPack.getName(), installedPack);
+            if (pack == null) {
+                byIndex.add(installedPack.getName());
+            }
+            save();
+            return pack;
         }
-        save();
-        return pack;
     }
 
     public InstalledPack remove(String name) {
-        InstalledPack pack = installedPacks.remove(name);
-        if (pack != null) {
-            byIndex.remove(name);
+        synchronized (storeLock) {
+            InstalledPack pack = installedPacks.remove(name);
+            if (pack != null) {
+                byIndex.remove(name);
+            }
+            save();
+            return pack;
         }
-        save();
-        return pack;
     }
 
-    // TODO: all of this should be syncronized on the file
     public void save() {
-        // First we write to a temp file, then we move that file to the intended path.
-        // This way, we won't end up with an empty file if we fail to write to it.
+        synchronized (storeLock) {
+            // First we write to a temp file, then we move that file to the intended path.
+            // This way, we won't end up with an empty file if we fail to write to it.
 
-        Path tmp = storePath.resolveSibling(storePath.getFileName() + ".tmp");
+            Path tmp = storePath.resolveSibling(storePath.getFileName() + ".tmp");
 
-        try (Writer writer = Files.newBufferedWriter(tmp, StandardCharsets.UTF_8)) {
-            Utils.getGson().toJson(this, writer);
+            try (Writer writer = Files.newBufferedWriter(tmp, StandardCharsets.UTF_8)) {
+                Utils.getGson().toJson(this, writer);
 
-            Files.move(tmp, storePath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-        } catch (IOException | JsonIOException e) {
-            // Clean up the temp file
-            try {
-                Files.deleteIfExists(tmp);
-            } catch (IOException ignored) {
-                // We can safely continue, even if the temp wasn't deleted
+                Files.move(tmp, storePath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            } catch (IOException | JsonIOException e) {
+                // Clean up the temp file
+                try {
+                    Files.deleteIfExists(tmp);
+                } catch (IOException ignored) {
+                    // We can safely continue, even if the temp wasn't deleted
+                }
+
+                Utils.getLogger().log(Level.SEVERE, String.format("Failed to save installedPacks to %s", storePath), e);
             }
-
-            Utils.getLogger().log(Level.SEVERE, String.format("Failed to save installedPacks to %s", storePath), e);
         }
     }
 }
