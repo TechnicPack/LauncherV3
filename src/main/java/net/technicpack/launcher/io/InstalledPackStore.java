@@ -139,8 +139,11 @@ public class InstalledPackStore {
 
             Path tmp = storePath.resolveSibling(storePath.getFileName() + ".tmp");
 
-            try (Writer writer = Files.newBufferedWriter(tmp, StandardCharsets.UTF_8)) {
-                Utils.getGson().toJson(this, writer);
+            try {
+                // Separate try-with-resources so the writer is closed and flushed before we move the file
+                try (Writer writer = Files.newBufferedWriter(tmp, StandardCharsets.UTF_8)) {
+                    Utils.getGson().toJson(this, writer);
+                }
 
                 Files.move(tmp, storePath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
             } catch (IOException | JsonIOException e) {
@@ -148,7 +151,7 @@ public class InstalledPackStore {
                 try {
                     Files.deleteIfExists(tmp);
                 } catch (IOException ignored) {
-                    // We can safely continue, even if the temp wasn't deleted
+                    // We can safely continue, even if the temporary file wasn't deleted
                 }
 
                 Utils.getLogger().log(Level.SEVERE, String.format("Failed to save installedPacks to %s", storePath), e);
