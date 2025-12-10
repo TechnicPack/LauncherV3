@@ -50,7 +50,7 @@ public class FmlLibsManager {
     /**
      * Retrieves a copy of the FML libraries for the specified Minecraft version.
      * @param version Minecraft version string, e.g. "1.5.2"
-     * @return Map of library file name to hash, or empty map if unknown version
+     * @return Map of library file name to hash, or empty map if none are applicable
      */
     public static Map<String, String> getLibsForVersion(String version) {
         Map<String, String> libs = versionFmlLibs.get(version);
