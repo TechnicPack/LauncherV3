@@ -125,11 +125,15 @@ public class ConsoleFrame extends JFrame implements MouseListener {
     public static Font getMonospaceFont() {
         for (String fontName : monospaceFontNames) {
             Font font = new Font(fontName, Font.PLAIN, 14);
-            if (!font.getFamily().equalsIgnoreCase("Dialog")) {
+
+            // Check if the font is actually available and not a fallback
+            if (!font.getFamily().equals(Font.DIALOG)) {
                 return font;
             }
         }
-        return new Font("Monospace", Font.PLAIN, 14);
+
+        // Fallback to the logical monospaced font
+        return new Font(Font.MONOSPACED, Font.PLAIN, 14);
     }
 
     @Override
