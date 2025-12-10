@@ -23,8 +23,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
@@ -33,14 +34,21 @@ import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
 
 public class RotatingFileHandler extends StreamHandler {
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    private Path logsDirectory;
     private final String filenameFormat;
-    private String currentFilename;
+    private final BlockingQueue<LogRecord> logQueue = new LinkedBlockingQueue<>();
+    private final Thread loggingThread;
+    private Path logsDirectory;
+    private LocalDate currentDate;
+    private volatile boolean running = true;
 
     public RotatingFileHandler(Path logsDirectory, String filenameFormat) {
         this.filenameFormat = filenameFormat;
         setLogsDirectory(logsDirectory);
+
+        // Start the logging thread
+        loggingThread = new Thread(this::processQueue, "AsyncLoggerThread");
+        loggingThread.setDaemon(true);
+        loggingThread.start();
     }
 
     private synchronized void setLogsDirectory(Path logsDirectory) {
@@ -50,11 +58,15 @@ public class RotatingFileHandler extends StreamHandler {
 
         this.logsDirectory = logsDirectory;
 
+        currentDate = LocalDate.now();
         updateOutputFile();
     }
 
     private synchronized void updateOutputFile() {
-        currentFilename = buildFilename();
+        updateOutputFile(buildFilename());
+    }
+
+    private synchronized void updateOutputFile(String currentFilename) {
         try {
             OutputStream out = Files.newOutputStream(this.logsDirectory.resolve(currentFilename), CREATE, APPEND);
             setOutputStream(out);
@@ -65,25 +77,50 @@ public class RotatingFileHandler extends StreamHandler {
     }
 
     private String buildFilename() {
-        return String.format(filenameFormat, dateFormat.format(new Date()));
-    }
-
-    private synchronized void changeFileIfNeeded() {
-        final String newFilename = buildFilename();
-        if (!currentFilename.equals(newFilename)) {
-            final String oldPath = currentFilename;
-
-            currentFilename = newFilename;
-            // TODO: make this not have to call buildFilename() again
-            updateOutputFile();
-            super.publish(new LogRecord(Level.INFO, String.format("Continued from %s", oldPath)));
-        }
+        return String.format(filenameFormat, currentDate.toString());
     }
 
     @Override
-    public synchronized void publish(LogRecord record) {
-        changeFileIfNeeded();
-        super.publish(record);
-        flush();
+    public void publish(LogRecord record) {
+        if (!running || !isLoggable(record)) return;
+        logQueue.offer(record); // Add to queue
+    }
+
+    private void processQueue() {
+        while (running || !logQueue.isEmpty()) {
+            try {
+                LogRecord record = logQueue.take();
+                synchronized (this) {
+                    // Rotate the file if the date has changed
+                    final LocalDate today = LocalDate.now();
+
+                    if (!today.equals(currentDate)) {
+                        final String oldPath = buildFilename();
+
+                        currentDate = today;
+                        updateOutputFile(buildFilename());
+
+                        publish(new LogRecord(Level.INFO, String.format("Continued from %s", oldPath)));
+                    }
+
+                    // Write the actual log record
+                    super.publish(record);
+                    flush();
+                }
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    public void shutdownHandler() {
+        running = false;
+        loggingThread.interrupt();
+        try {
+            loggingThread.join();
+        } catch (InterruptedException ignored) {
+            Thread.currentThread().interrupt();
+        }
+        super.close();
     }
 }
