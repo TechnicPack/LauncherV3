@@ -42,19 +42,14 @@ public class ConsoleFrame extends JFrame implements MouseListener {
     private final SimpleAttributeSet defaultAttributes = new SimpleAttributeSet();
     private JTextPane textPane;
     private Document document;
-    private int numLines;
     private JScrollPane scrollPane;
 
     /**
      * Construct the frame.
-     *
-     * @param numLines number of lines to show at a time
      */
-    public ConsoleFrame(int numLines, Image frameIcon) {
+    public ConsoleFrame(Image frameIcon) {
         super("Technic Launcher Console");
         setModalExclusionType(Dialog.ModalExclusionType.TOOLKIT_EXCLUDE);
-
-        this.numLines = numLines;
 
         this.highlightedAttributes = new SimpleAttributeSet();
         StyleConstants.setForeground(highlightedAttributes, Color.BLACK);
@@ -83,7 +78,6 @@ public class ConsoleFrame extends JFrame implements MouseListener {
     public AttributeSet getErrorAttributes() { return errorAttributes; }
     public AttributeSet getWarnAttributes() { return warnAttributes; }
     public AttributeSet getDebugAttributes() { return debugAttributes; }
-    public void setCaretPosition(int position) { textPane.setCaretPosition(position); }
 
     public JTextPane getTextPane() {
         return textPane;

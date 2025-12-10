@@ -333,7 +333,7 @@ public class LauncherMain {
         logger.setUseParentHandlers(false);
         logger.addHandler(fileHandler);
 
-        consoleFrame = new ConsoleFrame(2500, resources.getImage("icon.png"));
+        consoleFrame = new ConsoleFrame(resources.getImage("icon.png"));
         ConsoleHandler consoleHandler = new ConsoleHandler(consoleFrame);
         consoleHandler.setFormatter(new ConsoleLogFormatter());
         logger.addHandler(consoleHandler);
