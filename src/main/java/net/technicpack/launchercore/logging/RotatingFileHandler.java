@@ -100,7 +100,7 @@ public class RotatingFileHandler extends StreamHandler {
                         currentDate = today;
                         updateOutputFile(buildFilename());
 
-                        publish(new LogRecord(Level.INFO, String.format("Continued from %s", oldPath)));
+                        super.publish(new LogRecord(Level.INFO, String.format("Continued from %s", oldPath)));
                     }
 
                     // Write the actual log record
