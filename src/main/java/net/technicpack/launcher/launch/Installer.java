@@ -278,8 +278,14 @@ public class Installer {
                 showErrorDialog(e.getMessage());
             } catch (Exception e) {
                 Utils.getLogger().log(Level.SEVERE, "Exception caught during modpack installation or launch.", e);
-                Sentry.captureException(e);
-                showErrorDialog(String.format("Unknown error: %s", e.getMessage()));
+                // Provide a more friendly error message if the OS blocks a process from being launched.
+                // This error message always contains "CreateProcess error=5," on Windows.
+                if (e instanceof IOException && e.getMessage().contains("CreateProcess error=5,")) {
+                    showErrorDialog(resources.getString("process.error.accessdenied", e.getLocalizedMessage()));
+                } else {
+                    Sentry.captureException(e);
+                    showErrorDialog(String.format("Unknown error: %s", e.getMessage()));
+                }
             } finally {
                 if (!doLaunch || !isGameProcessRunning()) {
                     SwingUtilities.invokeLater(frame::launchCompleted);
