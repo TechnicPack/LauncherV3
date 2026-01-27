@@ -388,6 +388,8 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
         });
         header.add(closeButton);
 
+        registerDragHandle(header);
+
         SimpleTabPane centerPanel = new SimpleTabPane();
         centerPanel.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
         centerPanel.setForeground(UIConstants.COLOR_GREY_TEXT);

@@ -426,6 +426,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
         header.add(rightHeaderPanel);
 
+        registerDragHandle(header);
+
         /////////////////////////////////////////////////////////////
         // CENTRAL AREA
         /////////////////////////////////////////////////////////////

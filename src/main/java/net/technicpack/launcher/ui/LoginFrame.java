@@ -106,6 +106,7 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         nameSelect = null;
 
         initComponents();
+        registerDragHandle(getContentPane());
 
         refreshSelectedUsers();
 

@@ -19,61 +19,77 @@
 
 package net.technicpack.ui.controls;
 
-import javax.swing.JFrame;
-import java.awt.event.InputEvent;
+import javax.swing.*;
+import javax.swing.text.JTextComponent;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 
-public class DraggableFrame extends JFrame implements MouseListener, MouseMotionListener {
+public class DraggableFrame extends JFrame {
     private int dragGripX;
     private int dragGripY;
 
     public DraggableFrame() {
         super();
-        setUndecorated(true);
+
+        String desktop = System.getenv("XDG_SESSION_DESKTOP");
+        // Cosmic, for some reason, makes dragging the window completely impossible unless it's
+        // done through the window decoration. It also resizes the windows regardless of
+        // the setResizable(false) call.
+        if (desktop == null || !desktop.equalsIgnoreCase("COSMIC")) {
+            setUndecorated(true);
+        }
+
         setResizable(false);
-        addMouseListener(this);
-        addMouseMotionListener(this);
     }
 
-    @Override
-    public void mouseClicked(MouseEvent e) {
+    /**
+     * Call this from any child class to make a specific component
+     * (like a header or background) responsible for dragging the window.
+     */
+    protected void registerDragHandle(Container container) {
+        MouseAdapter dragListener = new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    dragGripX = e.getXOnScreen() - getX();
+                    dragGripY = e.getYOnScreen() - getY();
+                }
+            }
 
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    setLocation(e.getXOnScreen() - dragGripX, e.getYOnScreen() - dragGripY);
+
+                    Toolkit.getDefaultToolkit().sync();
+                }
+            }
+        };
+
+        applyDraggableRecursively(container, dragListener);
     }
 
-    @Override
-    public void mousePressed(MouseEvent e) {
-        if (e.getButton() == MouseEvent.BUTTON1) {
-            dragGripX = e.getX();
-            dragGripY = e.getY();
+    private void applyDraggableRecursively(Component comp, MouseAdapter listener) {
+        // 1. Interactive types that should NEVER be turned into drag handles
+        if (comp instanceof AbstractButton || comp instanceof JComboBox || comp instanceof JTextComponent || comp instanceof JScrollBar || comp instanceof JScrollPane) {
+            return;
         }
-    }
 
-    @Override
-    public void mouseReleased(MouseEvent e) {
+        // Check if this specific component is already "interested" in the mouse
+        boolean hasListeners = comp.getMouseListeners().length > 0 || comp.getMouseMotionListeners().length > 0;
 
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseDragged(MouseEvent e) {
-        if ((e.getModifiersEx() & InputEvent.BUTTON1_DOWN_MASK) != 0) {
-            this.setLocation(e.getXOnScreen() - dragGripX, e.getYOnScreen() - dragGripY);
+        // We only add our drag listener if the component is "silent"
+        if (!hasListeners) {
+            comp.addMouseListener(listener);
+            comp.addMouseMotionListener(listener);
         }
-    }
 
-    @Override
-    public void mouseMoved(MouseEvent e) {
-
+        // Always descend into containers (JPanels, Boxes) to find their silent children
+        if (comp instanceof Container) {
+            for (Component child : ((Container) comp).getComponents()) {
+                applyDraggableRecursively(child, listener);
+            }
+        }
     }
 }
