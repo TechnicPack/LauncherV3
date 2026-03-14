@@ -41,14 +41,12 @@ import java.nio.file.Path;
 public class EnsureJavaRuntimeManifestTask implements IInstallTask<IMinecraftVersionInfo> {
     private final Path runtimesDirectory;
     private final ModpackModel modpack;
-    private final ITasksQueue<IMinecraftVersionInfo> fetchJavaManifest;
     private final ITasksQueue<IMinecraftVersionInfo> examineJavaQueue;
     private final ITasksQueue<IMinecraftVersionInfo> downloadJavaQueue;
 
-    public EnsureJavaRuntimeManifestTask(Path runtimesDirectory, ModpackModel modpack, ITasksQueue<IMinecraftVersionInfo> fetchJavaManifest, ITasksQueue<IMinecraftVersionInfo> examineJavaQueue, ITasksQueue<IMinecraftVersionInfo> downloadJavaQueue) {
+    public EnsureJavaRuntimeManifestTask(Path runtimesDirectory, ModpackModel modpack, ITasksQueue<IMinecraftVersionInfo> examineJavaQueue, ITasksQueue<IMinecraftVersionInfo> downloadJavaQueue) {
         this.runtimesDirectory = runtimesDirectory;
         this.modpack = modpack;
-        this.fetchJavaManifest = fetchJavaManifest;
         this.examineJavaQueue = examineJavaQueue;
         this.downloadJavaQueue = downloadJavaQueue;
     }
@@ -64,7 +62,7 @@ public class EnsureJavaRuntimeManifestTask implements IInstallTask<IMinecraftVer
     }
 
     @Override
-    public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) throws IOException {
+    public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) throws IOException, InterruptedException {
         IMinecraftVersionInfo version = queue.getMetadata();
 
         VersionJavaInfo runtimeInfo = version.getMojangRuntimeInformation();
@@ -97,10 +95,10 @@ public class EnsureJavaRuntimeManifestTask implements IInstallTask<IMinecraftVer
         IFileVerifier fileVerifier = new SHA1FileVerifier(runtimeDownload.getSha1());
 
         if (!Files.isRegularFile(output) || !fileVerifier.isFileValid(output)) {
-            fetchJavaManifest.addTask(new DownloadFileTask<>(runtimeDownload.getUrl(), output.toFile(), fileVerifier));
+            new DownloadFileTask<IMinecraftVersionInfo>(runtimeDownload.getUrl(), output.toFile(), fileVerifier).runTask(queue);
         }
 
-        examineJavaQueue.addTask(new InstallJavaRuntimeTask(runtimesDirectory, output, runtimeInfo, examineJavaQueue, downloadJavaQueue));
+        examineJavaQueue.addTask(new InstallJavaRuntimeTask(runtimesDirectory, output, runtimeInfo, downloadJavaQueue));
     }
 
 }

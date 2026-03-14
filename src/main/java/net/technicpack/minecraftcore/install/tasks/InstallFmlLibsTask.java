@@ -23,18 +23,15 @@ public class InstallFmlLibsTask implements IInstallTask<IMinecraftVersionInfo> {
     private final ModpackModel pack;
     private final LauncherFileSystem fileSystem;
     private final Modpack modpack;
-    private final ITasksQueue<IMinecraftVersionInfo> verifyingFiles;
     private final ITasksQueue<IMinecraftVersionInfo> downloadLibraryQueue;
     private final ITasksQueue<IMinecraftVersionInfo> copyLibraryQueue;
 
     public InstallFmlLibsTask(ModpackModel pack, LauncherFileSystem fileSystem, Modpack modpack,
-                              ITasksQueue<IMinecraftVersionInfo> verifyingFiles,
                               ITasksQueue<IMinecraftVersionInfo> downloadLibraryQueue,
                               ITasksQueue<IMinecraftVersionInfo> copyLibraryQueue) {
         this.pack = pack;
         this.fileSystem = fileSystem;
         this.modpack = modpack;
-        this.verifyingFiles = verifyingFiles;
         this.downloadLibraryQueue = downloadLibraryQueue;
         this.copyLibraryQueue = copyLibraryQueue;
     }
@@ -64,7 +61,10 @@ public class InstallFmlLibsTask implements IInstallTask<IMinecraftVersionInfo> {
         Files.createDirectories(fmlLibsCache);
         File modpackFmlLibDir = new File(pack.getInstalledDirectory(), "lib");
 
-        fmlLibs.forEach((name, sha1) -> {
+        for (Map.Entry<String, String> entry : fmlLibs.entrySet()) {
+            String name = entry.getKey();
+            String sha1 = entry.getValue();
+
             SHA1FileVerifier verifier = null;
 
             if (!sha1.isEmpty()) {
@@ -79,9 +79,9 @@ public class InstallFmlLibsTask implements IInstallTask<IMinecraftVersionInfo> {
                         .withUrl(TechnicConstants.TECHNIC_FML_LIB_REPO + name)
                         .withVerifier(verifier);
 
-                verifyingFiles.addTask(ensureFileTask);
+                ensureFileTask.runTask(queue);
                 copyLibraryQueue.addTask(new CopyFileTask<>(cached, target));
             }
-        });
+        }
     }
 }

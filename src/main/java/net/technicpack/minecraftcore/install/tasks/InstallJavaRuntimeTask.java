@@ -52,16 +52,13 @@ public class InstallJavaRuntimeTask implements IInstallTask<IMinecraftVersionInf
     private final Path runtimesDirectory;
     private final Path runtimeManifestFile;
     private final VersionJavaInfo runtimeInfo;
-    private final ITasksQueue<IMinecraftVersionInfo> examineJavaQueue;
     private final ITasksQueue<IMinecraftVersionInfo> downloadJavaQueue;
 
     public InstallJavaRuntimeTask(Path runtimesDirectory, Path runtimeManifestFile, VersionJavaInfo runtimeInfo,
-                                  ITasksQueue<IMinecraftVersionInfo> examineJavaQueue,
                                   ITasksQueue<IMinecraftVersionInfo> downloadJavaQueue) {
         this.runtimesDirectory = runtimesDirectory;
         this.runtimeManifestFile = runtimeManifestFile;
         this.runtimeInfo = runtimeInfo;
-        this.examineJavaQueue = examineJavaQueue;
         this.downloadJavaQueue = downloadJavaQueue;
     }
 
@@ -98,7 +95,7 @@ public class InstallJavaRuntimeTask implements IInstallTask<IMinecraftVersionInf
         processDirectories(manifest, runtimeRoot);
 
         // Then, download the files
-        processFiles(manifest, runtimeRoot);
+        processFiles(manifest, runtimeRoot, queue);
 
         // Then, create the links
         processSymlinks(manifest, runtimeRoot);
@@ -139,7 +136,7 @@ public class InstallJavaRuntimeTask implements IInstallTask<IMinecraftVersionInf
         }
     }
 
-    private void processFiles(JavaRuntimeManifest manifest, Path runtimeRoot) throws IOException {
+    private void processFiles(JavaRuntimeManifest manifest, Path runtimeRoot, InstallTasksQueue<IMinecraftVersionInfo> queue) throws IOException {
         String path;
         JavaRuntimeFile runtimeFile;
         for (Map.Entry<String, JavaRuntimeFile> entry : manifest.getFiles().entrySet()) {
@@ -184,7 +181,7 @@ public class InstallJavaRuntimeTask implements IInstallTask<IMinecraftVersionInf
                 ensureFileTask.withExecutableBitSet();
             }
 
-            examineJavaQueue.addTask(ensureFileTask);
+            ensureFileTask.runTask(queue);
         }
     }
 
@@ -207,7 +204,7 @@ public class InstallJavaRuntimeTask implements IInstallTask<IMinecraftVersionInf
             Path target = link.resolve(runtimeFile.getTarget());
             ensurePathIsSafe(runtimeRoot, target);
 
-            // We add it to the download queue so it runs after all the files exist
+            // Add to download queue so symlinks are created after all files are downloaded
             downloadJavaQueue.addTask(new EnsureLinkedFileTask<>(link, target));
         }
     }

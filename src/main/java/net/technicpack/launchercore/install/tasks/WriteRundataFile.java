@@ -14,12 +14,18 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 public class WriteRundataFile implements IInstallTask<IMinecraftVersionInfo> {
-    private ModpackModel modpackModel;
-    private Modpack modpack;
+    private final ModpackModel modpackModel;
+    private final Modpack modpack;
+    private final boolean forceWrite;
 
     public WriteRundataFile(ModpackModel modpackModel, Modpack modpack) {
+        this(modpackModel, modpack, true);
+    }
+
+    public WriteRundataFile(ModpackModel modpackModel, Modpack modpack, boolean forceWrite) {
         this.modpackModel = modpackModel;
         this.modpack = modpack;
+        this.forceWrite = forceWrite;
     }
 
     @Override
@@ -36,6 +42,14 @@ public class WriteRundataFile implements IInstallTask<IMinecraftVersionInfo> {
     public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) throws IOException {
         if ((modpack.getJava() == null || modpack.getJava().isEmpty()) && (modpack.getMemory() == null || modpack.getMemory().isEmpty()))
             return;
+
+        if (!forceWrite) {
+            File runDataFile = new File(modpackModel.getBinDir(), "runData");
+            if (runDataFile.exists())
+                return;
+            if (modpackModel.isLocalOnly())
+                return;
+        }
 
         File file = modpackModel.getBinDir();
         File runDataFile = new File(file, "runData");

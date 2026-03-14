@@ -32,6 +32,7 @@ public class TaskGroup<T> implements IWeightedTasksQueue<T>, IInstallTask<T> {
     private final Map<IInstallTask<T>, Float> taskWeights = new HashMap<>();
     private final Object taskListLock = new Object();
 
+    private boolean executing = false;
     private float totalWeight = 0;
     private float completedWeight = 0;
 
@@ -74,6 +75,7 @@ public class TaskGroup<T> implements IWeightedTasksQueue<T>, IInstallTask<T> {
 
     @Override
     public void runTask(InstallTasksQueue<T> queue) throws IOException, InterruptedException {
+        executing = true;
         // The check is in the first synchronized block because isEmpty() isn't atomic
         while (true) {
             if (Thread.currentThread().isInterrupted()) {
@@ -115,6 +117,10 @@ public class TaskGroup<T> implements IWeightedTasksQueue<T>, IInstallTask<T> {
     @Override
     public void addTask(IInstallTask<T> task, float weight) {
         synchronized (taskListLock) {
+            if (executing) {
+                throw new IllegalStateException(
+                        String.format("Cannot add task \"%s\" to TaskGroup \"%s\" while it is executing", task.getTaskDescription(), groupName));
+            }
             taskList.addLast(task);
             taskWeights.put(task, weight);
             totalWeight += weight;
@@ -124,6 +130,10 @@ public class TaskGroup<T> implements IWeightedTasksQueue<T>, IInstallTask<T> {
     @Override
     public void addNextTask(IInstallTask<T> task, float weight) {
         synchronized (taskListLock) {
+            if (executing) {
+                throw new IllegalStateException(
+                        String.format("Cannot add task \"%s\" to TaskGroup \"%s\" while it is executing", task.getTaskDescription(), groupName));
+            }
             taskList.addFirst(task);
             taskWeights.put(task, weight);
             totalWeight += weight;

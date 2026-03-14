@@ -29,7 +29,6 @@ import net.technicpack.launchercore.exception.*;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.ModpackInstaller;
 import net.technicpack.launchercore.install.ModpackVersion;
-import net.technicpack.launchercore.install.tasks.CheckRunDataFile;
 import net.technicpack.launchercore.install.tasks.TaskGroup;
 import net.technicpack.launchercore.install.tasks.WriteRundataFile;
 import net.technicpack.launchercore.launch.GameProcess;
@@ -374,10 +373,10 @@ public class Installer {
                 examineModpackData.addTask(new CleanupAndExtractModpackTask(pack, modpackData, verifyingFiles, downloadingMods, installingMods));
                 rundataTaskGroup.addTask(new WriteRundataFile(pack, modpackData));
             } else {
-                rundataTaskGroup.addTask(new CheckRunDataFile(pack, modpackData, rundataTaskGroup));
+                rundataTaskGroup.addTask(new WriteRundataFile(pack, modpackData, false));
             }
 
-            verifyingFiles.addTask(new InstallFmlLibsTask(pack, fileSystem, modpackData, verifyingFiles, installingLibs, installingLibs));
+            verifyingFiles.addTask(new InstallFmlLibsTask(pack, fileSystem, modpackData, installingLibs, installingLibs));
 
             checkVersionFile.addTask(new VerifyVersionFilePresentTask(pack, minecraft, versionBuilder));
             examineVersionFile.addTask(new HandleVersionFileTask().withPack(pack)
@@ -391,7 +390,7 @@ public class Installer {
                                                                   .withJavaRuntime(selectedJavaRuntime));
             examineVersionFile.addTask(new EnsureAssetsIndexTask(fileSystem.getAssetsDirectory().toFile(), pack, installingMinecraft, examineIndex, verifyingAssets, installingAssets, installingAssets));
 
-            fetchJavaManifest.addTask(new EnsureJavaRuntimeManifestTask(fileSystem.getRuntimesDirectory(), pack, fetchJavaManifest, examineJava, downloadJava));
+            fetchJavaManifest.addTask(new EnsureJavaRuntimeManifestTask(fileSystem.getRuntimesDirectory(), pack, examineJava, downloadJava));
 
             // Check if we need to regenerate the Minecraft jar. This is necessary if:
             // - A reinstall was requested (or forced, via modpack version update)
