@@ -226,7 +226,19 @@ public class TechnicSettings implements ILaunchOptions {
 
     public void save() {
         // TODO: this should probably be syncronized and use a temp file
-        try (Writer writer = Files.newBufferedWriter(settingsFile.toPath(), StandardCharsets.UTF_8)) {
+        Path settingsPath = settingsFile.toPath();
+        Path settingsParent = settingsPath.getParent();
+
+        try {
+            if (settingsParent != null) {
+                Files.createDirectories(settingsParent);
+            }
+        } catch (IOException e) {
+            Utils.getLogger().log(Level.SEVERE, String.format("Failed to create settings directory %s", settingsParent), e);
+            return;
+        }
+
+        try (Writer writer = Files.newBufferedWriter(settingsPath, StandardCharsets.UTF_8)) {
             Utils.getGson().toJson(this, writer);
         } catch (IOException e) {
             Utils.getLogger().log(Level.SEVERE, String.format("Failed to save settings %s", settingsFile), e);
