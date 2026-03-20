@@ -22,7 +22,7 @@ google-http-client = "2.1.0"
 slf4j = "2.0.17"
 sentry = "8.35.0"
 sentry-gradle-plugin = "6.2.0"
-annotations = "26.0.2-1"
+annotations = "26.1.0"
 
 [libraries]
 joda-time = { module = "joda-time:joda-time", version.ref = "joda-time" }
