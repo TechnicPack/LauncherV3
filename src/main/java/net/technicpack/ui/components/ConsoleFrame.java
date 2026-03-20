@@ -34,7 +34,15 @@ import java.awt.event.MouseListener;
  */
 public class ConsoleFrame extends JFrame implements MouseListener {
     private static final long serialVersionUID = 1L;
-    private static String[] monospaceFontNames = {"Consolas", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Lucida Console"};
+    private static String[] monospaceFontNames = {
+            "Consolas",
+            "Liberation Mono",
+            "Nimbus Mono",
+            "Hack",
+            "DejaVu Sans Mono",
+            "Bitstream Vera Sans Mono",
+            "Lucida Console"
+    };
     private final SimpleAttributeSet highlightedAttributes;
     private final SimpleAttributeSet errorAttributes;
     private final SimpleAttributeSet warnAttributes;
