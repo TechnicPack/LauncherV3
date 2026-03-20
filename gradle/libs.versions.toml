@@ -1,8 +1,8 @@
 [versions]
 shadow = "8.3.10"
 launch4j = "4.0.0"
-junit-jupiter = "5.10.2"
-junit-platform = "1.10.2"
+junit-jupiter = "5.14.3"
+junit-platform = "1.14.3"
 joda-time = "2.14.1"
 jcommander = "1.82"
 gson = "2.13.2"
