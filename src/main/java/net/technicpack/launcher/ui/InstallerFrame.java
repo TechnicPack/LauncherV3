@@ -178,7 +178,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
                 try {
                     copyInstallRoot(oldRoot, newRoot, false);
                     LauncherMain.moveLogFileTo(new LauncherFileSystem(newRoot.toPath()));
-                    cleanupInstallRoot(oldRoot, true);
+                    cleanupInstallRoot(oldRoot, shouldKeepSettingsFileOnStandardCleanup(oldRoot, OperatingSystem.getOperatingSystem().getTechnicDirectory()));
                 } catch (IOException e) {
                     Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ", e);
                 }
@@ -337,6 +337,11 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
                 FileUtils.forceDelete(entry);
             }
         }
+    }
+
+    static boolean shouldKeepSettingsFileOnStandardCleanup(File oldRoot, File defaultRoot) {
+        return oldRoot.toPath().toAbsolutePath().normalize()
+                .equals(defaultRoot.toPath().toAbsolutePath().normalize());
     }
 
     protected void selectPortable() {

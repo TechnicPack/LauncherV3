@@ -42,17 +42,31 @@ class InstallerFrameCopyTest {
     }
 
     @Test
-    void standardInstallCleanupKeepsRootSettingsFile() throws IOException {
+    void standardInstallCleanupKeepsRootSettingsFileWhenOldRootIsDefault() throws IOException {
         Path oldRoot = tempDir.resolve("old-root");
         Path oldRootSubdir = oldRoot.resolve("modpacks");
         Files.createDirectories(oldRootSubdir);
         Files.write(oldRoot.resolve("settings.json"), "{}".getBytes(StandardCharsets.UTF_8));
         Files.write(oldRootSubdir.resolve("pack.txt"), "ok".getBytes(StandardCharsets.UTF_8));
 
-        InstallerFrame.cleanupInstallRoot(oldRoot.toFile(), true);
+        boolean keepSettingsFile = InstallerFrame.shouldKeepSettingsFileOnStandardCleanup(oldRoot.toFile(), oldRoot.toFile());
+        InstallerFrame.cleanupInstallRoot(oldRoot.toFile(), keepSettingsFile);
 
         assertTrue(Files.exists(oldRoot.resolve("settings.json")));
         assertFalse(Files.exists(oldRootSubdir));
+    }
+
+    @Test
+    void standardInstallCleanupDeletesRootSettingsFileWhenOldRootIsNotDefault() throws IOException {
+        Path oldRoot = tempDir.resolve("old-root");
+        Path defaultRoot = tempDir.resolve("default-root");
+        Files.createDirectories(oldRoot);
+        Files.write(oldRoot.resolve("settings.json"), "{}".getBytes(StandardCharsets.UTF_8));
+
+        boolean keepSettingsFile = InstallerFrame.shouldKeepSettingsFileOnStandardCleanup(oldRoot.toFile(), defaultRoot.toFile());
+        InstallerFrame.cleanupInstallRoot(oldRoot.toFile(), keepSettingsFile);
+
+        assertFalse(Files.exists(oldRoot));
     }
 
     @Test

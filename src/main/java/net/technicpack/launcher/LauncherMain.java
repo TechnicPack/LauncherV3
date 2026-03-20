@@ -214,6 +214,7 @@ public class LauncherMain {
         TechnicConstants.setBuildNumber(buildNumber);
 
         setupLogging(fileSystem, resources);
+        sanitizeLegacyStandardInstallSettings(settings, fileSystem);
 
         final boolean displayConsole = settings.getShowConsole();
         if (displayConsole) {
@@ -319,6 +320,46 @@ public class LauncherMain {
                         "Cannot run inside OneDrive", JOptionPane.ERROR_MESSAGE);
             }
         }
+    }
+
+    private static void sanitizeLegacyStandardInstallSettings(TechnicSettings settings, LauncherFileSystem fileSystem) {
+        try {
+            Path archivedSettingsFile = archiveLegacyInstallSettingsFile(
+                    fileSystem.getRootDirectory(),
+                    OperatingSystem.getOperatingSystem().getTechnicDirectory().toPath(),
+                    settings.isPortable()
+            );
+            if (archivedSettingsFile != null) {
+                Utils.getLogger().log(Level.INFO, "Archived legacy install settings file to {0}", archivedSettingsFile);
+            }
+        } catch (IOException e) {
+            Utils.getLogger().log(Level.WARNING, String.format("Failed to archive legacy install settings file in %s", fileSystem.getRootDirectory()), e);
+        }
+    }
+
+    static Path archiveLegacyInstallSettingsFile(Path installRoot, Path defaultRoot, boolean portable) throws IOException {
+        if (portable) {
+            return null;
+        }
+
+        Path normalizedInstallRoot = installRoot.toAbsolutePath().normalize();
+        Path normalizedDefaultRoot = defaultRoot.toAbsolutePath().normalize();
+        if (normalizedInstallRoot.equals(normalizedDefaultRoot)) {
+            return null;
+        }
+
+        Path staleInstallSettingsFile = normalizedInstallRoot.resolve("settings.json");
+        if (!Files.exists(staleInstallSettingsFile)) {
+            return null;
+        }
+
+        Path archivedSettingsFile = normalizedInstallRoot.resolve("settings.json.legacy");
+        if (Files.exists(archivedSettingsFile)) {
+            archivedSettingsFile = normalizedInstallRoot.resolve("settings.json.legacy." + System.currentTimeMillis());
+        }
+
+        Files.move(staleInstallSettingsFile, archivedSettingsFile);
+        return archivedSettingsFile;
     }
 
     private static void setupLogging(LauncherFileSystem fileSystem, ResourceLoader resources) {
