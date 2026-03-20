@@ -1,5 +1,5 @@
 [versions]
-shadow = "8.3.6"
+shadow = "8.3.10"
 launch4j = "4.0.0"
 junit-jupiter = "5.10.2"
 junit-platform = "1.10.2"
