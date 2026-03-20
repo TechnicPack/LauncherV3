@@ -4,6 +4,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import edu.sc.seis.launch4j.Launch4jPluginExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.GradleException
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.plugins.JavaApplication
 import org.gradle.api.tasks.Exec
@@ -16,6 +17,7 @@ import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.register
 import java.nio.charset.StandardCharsets
+import java.util.jar.JarFile
 
 class LauncherPackagingPlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -65,6 +67,8 @@ class LauncherPackagingPlugin : Plugin<Project> {
 
                 minimize {
                     exclude(dependency("org.ccil.cowan.tagsoup:.*:.*"))
+                    // Keep SLF4J provider classes that are loaded via ServiceLoader.
+                    exclude(dependency("org.slf4j:slf4j-nop:.*"))
                     exclude(project(":"))
                 }
 
@@ -86,6 +90,61 @@ class LauncherPackagingPlugin : Plugin<Project> {
 
             tasks.named<Jar>("jar") {
                 enabled = false
+            }
+
+            val verifyShadowJarServices = tasks.register("verifyShadowJarServices") {
+                group = "verification"
+                description = "Verifies ServiceLoader providers referenced in the shadow jar exist."
+                dependsOn(shadowJarTask)
+
+                val shadowJarArchive = tasks.named<ShadowJar>("shadowJar").flatMap { it.archiveFile }
+                inputs.file(shadowJarArchive)
+
+                doLast {
+                    val shadowJarFile = shadowJarArchive.get().asFile
+
+                    JarFile(shadowJarFile).use { jar ->
+                        val entryNames = jar.entries().asSequence()
+                                .map { it.name }
+                                .toSet()
+
+                        val serviceEntries = entryNames.asSequence()
+                                .filter { it.startsWith("META-INF/services/") && !it.endsWith("/") }
+                                .toList()
+
+                        val missingProviders = mutableListOf<String>()
+
+                        for (serviceEntry in serviceEntries) {
+                            val serviceFile = jar.getJarEntry(serviceEntry) ?: continue
+                            val providers = jar.getInputStream(serviceFile)
+                                    .bufferedReader(StandardCharsets.UTF_8)
+                                    .use { reader ->
+                                        reader.lineSequence()
+                                                .map { it.substringBefore('#').trim() }
+                                                .filter { it.isNotEmpty() }
+                                                .toList()
+                                    }
+
+                            for (provider in providers) {
+                                val providerClassPath = provider.replace('.', '/') + ".class"
+                                if (!entryNames.contains(providerClassPath)) {
+                                    missingProviders += "$serviceEntry -> $provider"
+                                }
+                            }
+                        }
+
+                        if (missingProviders.isNotEmpty()) {
+                            throw GradleException(
+                                    "Shadow jar has unresolved ServiceLoader providers:\n" +
+                                            missingProviders.joinToString("\n")
+                            )
+                        }
+                    }
+                }
+            }
+
+            tasks.named("check") {
+                dependsOn(verifyShadowJarServices)
             }
 
             tasks.named("startScripts") {
