@@ -73,3 +73,6 @@ jobs:
 
       - name: Update dependency graph
         uses: gradle/actions/dependency-submission@v5.0.2
+        with:
+          dependency-graph: generate-and-submit
+          dependency-graph-continue-on-failure: true
