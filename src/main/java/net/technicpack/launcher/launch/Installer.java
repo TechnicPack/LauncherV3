@@ -280,7 +280,7 @@ public class Installer {
                 Utils.getLogger().log(Level.SEVERE, "Exception caught during modpack installation or launch.", e);
                 // Provide a more friendly error message if the OS blocks a process from being launched.
                 // This error message always contains "CreateProcess error=5," on Windows.
-                if (e instanceof IOException && e.getMessage().contains("CreateProcess error=5,")) {
+                if (e instanceof IOException && isCreateProcessAccessDenied((IOException) e)) {
                     showErrorDialog(resources.getString("process.error.accessdenied", e.getLocalizedMessage()));
                 } else {
                     Sentry.captureException(e);
@@ -417,5 +417,10 @@ public class Installer {
 
             return new ChainedMinecraftVersionInfoBuilder(zipVersionBuilder, webVersionBuilder);
         }
+    }
+
+    static boolean isCreateProcessAccessDenied(IOException exception) {
+        String message = exception.getMessage();
+        return message != null && message.contains("CreateProcess error=5,");
     }
 }
