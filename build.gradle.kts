@@ -24,10 +24,13 @@ java {
 
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = StandardCharsets.UTF_8.name()
-    options.release.set(targetJavaRelease)
     options.compilerArgs.add("-Xlint:all")
     options.isDeprecation = true
     options.isWarnings = true
+}
+
+tasks.named<JavaCompile>("compileJava") {
+    options.release.set(targetJavaRelease)
 }
 
 dependencies {
@@ -80,6 +83,6 @@ sentry {
 tasks.test {
     useJUnitPlatform()
     javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(8)
+        languageVersion = runtimeJavaVersion
     })
 }
