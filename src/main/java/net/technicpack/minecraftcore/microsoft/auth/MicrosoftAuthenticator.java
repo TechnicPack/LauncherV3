@@ -151,7 +151,9 @@ public class MicrosoftAuthenticator {
         }
 
         try {
-            if (!credential.refreshToken()) {
+            final Long expiresInSeconds = credential.getExpiresInSeconds();
+            final boolean shouldRefresh = expiresInSeconds == null || expiresInSeconds <= 86400;
+            if (shouldRefresh && !credential.refreshToken()) {
                 // Refresh request failed
                 throw new SessionException("Microsoft login expired or is invalid");
             }
