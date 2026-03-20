@@ -14,10 +14,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6.0.2
 
       - name: Calculate build number
         run: echo "BUILD_NUMBER=$(($RUN_ID + 1050))" >> "$GITHUB_ENV"
@@ -25,13 +25,13 @@ jobs:
           RUN_ID: ${{ github.run_number }}
 
       - name: Set up JDK 25 (LTS)
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v5.2.0
         with:
           java-version: '25'
           distribution: 'temurin'
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5.0.2
 
       - name: Build with Gradle
         env:
@@ -61,7 +61,7 @@ jobs:
           } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Archive artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: launcher-${{ env.BUILD_NUMBER }}
           path: |
@@ -72,4 +72,4 @@ jobs:
           compression-level: 0
 
       - name: Update dependency graph
-        uses: gradle/actions/dependency-submission@v4
+        uses: gradle/actions/dependency-submission@v5.0.2
