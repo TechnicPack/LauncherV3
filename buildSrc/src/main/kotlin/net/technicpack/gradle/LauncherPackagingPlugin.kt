@@ -37,6 +37,7 @@ class LauncherPackagingPlugin : Plugin<Project> {
 
             tasks.named<ProcessResources>("processResources") {
                 duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+                inputs.property("buildNumber", buildNumber)
 
                 from(layout.projectDirectory.file("LICENSE.txt"))
 
@@ -80,8 +81,38 @@ class LauncherPackagingPlugin : Plugin<Project> {
                 }
             }
 
+            val shadowJarTask = tasks.named("shadowJar")
+            val createExeTask = tasks.named("createExe")
+
             tasks.named<Jar>("jar") {
                 enabled = false
+            }
+
+            tasks.named("startScripts") {
+                dependsOn(shadowJarTask)
+                dependsOn(createExeTask)
+            }
+
+            tasks.named("distTar") {
+                dependsOn(shadowJarTask)
+                dependsOn(createExeTask)
+            }
+
+            tasks.named("distZip") {
+                dependsOn(shadowJarTask)
+                dependsOn(createExeTask)
+            }
+
+            tasks.named("startShadowScripts") {
+                dependsOn(createExeTask)
+            }
+
+            tasks.named("shadowDistTar") {
+                dependsOn(createExeTask)
+            }
+
+            tasks.named("shadowDistZip") {
+                dependsOn(createExeTask)
             }
 
             extensions.configure<Launch4jPluginExtension> {
@@ -114,11 +145,11 @@ class LauncherPackagingPlugin : Plugin<Project> {
             }
 
             tasks.named("createExe") {
-                dependsOn(tasks.named("shadowJar"))
+                dependsOn(shadowJarTask)
             }
 
             val packageOsx = tasks.register<Zip>("packageOsx") {
-                dependsOn(tasks.named("shadowJar"))
+                dependsOn(shadowJarTask)
                 mustRunAfter(tasks.named("createExe"))
 
                 archiveBaseName.set("launcher")
@@ -159,7 +190,7 @@ class LauncherPackagingPlugin : Plugin<Project> {
             }
 
             val signShadowJar = tasks.register<Exec>("signShadowJar") {
-                dependsOn(tasks.named("shadowJar"))
+                dependsOn(shadowJarTask)
                 onlyIf { System.getenv("CERT_KEYSTORE") != null }
 
                 doFirst {
@@ -190,7 +221,7 @@ class LauncherPackagingPlugin : Plugin<Project> {
             tasks.register("package") {
                 group = "build"
                 description = "Builds fat JAR, Windows EXE, and macOS app zip."
-                dependsOn(tasks.named("shadowJar"), tasks.named("createExe"), packageOsx, signShadowJar)
+                dependsOn(shadowJarTask, tasks.named("createExe"), packageOsx, signShadowJar)
             }
         }
     }
