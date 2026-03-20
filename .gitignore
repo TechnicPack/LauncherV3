@@ -2,6 +2,7 @@
 *.ear
 *.iml
 *.jar
+!gradle/wrapper/gradle-wrapper.jar
 *.war
 .idea/
 .vscode/
