@@ -18,8 +18,8 @@
       "allowedVersions": "<9.5.0"
     },
     {
-      "matchPackageNames": ["com.akathist.maven.plugins.launch4j:launch4j-maven-plugin"],
-      "changelogUrl": "https://github.com/orphan-oss/launch4j-maven-plugin/releases"
+      "matchPackageNames": ["edu.sc.seis.launch4j:edu.sc.seis.launch4j.gradle.plugin"],
+      "changelogUrl": "https://github.com/TheBoegl/gradle-launch4j/releases"
     },
     {
       "matchPackageNames": ["commons-io:commons-io"],

@@ -10,3 +10,5 @@ launcherv3.properties
 launcherv3.xml
 module_launcherv3.xml
 target/
+.gradle/
+build/

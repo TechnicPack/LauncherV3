@@ -29,16 +29,23 @@ import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class ResourceLoader {
+    private static final ResourceBundle.Control UTF8_PROPERTIES_CONTROL = new Utf8PropertiesControl();
+
     private final Collection<IRelocalizableResource> resources = new LinkedList<>();
     private ResourceBundle stringData;
     private Locale currentLocale;
@@ -127,7 +134,7 @@ public class ResourceLoader {
 
     public void setLocale(Locale locale) {
         currentLocale = locale;
-        stringData = ResourceBundle.getBundle(dottedResourcePath + "lang.UIText", locale);
+        stringData = ResourceBundle.getBundle(dottedResourcePath + "lang.UIText", locale, UTF8_PROPERTIES_CONTROL);
         relocalizeResources();
     }
 
@@ -324,5 +331,40 @@ public class ResourceLoader {
 
     public void unregisterResource(IRelocalizableResource resource) {
         resources.remove(resource);
+    }
+
+    private static final class Utf8PropertiesControl extends ResourceBundle.Control {
+        @Override
+        public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
+                throws IllegalAccessException, InstantiationException, IOException {
+            if (!"java.properties".equals(format)) {
+                return super.newBundle(baseName, locale, format, loader, reload);
+            }
+
+            String bundleName = toBundleName(baseName, locale);
+            String resourceName = toResourceName(bundleName, "properties");
+
+            InputStream stream;
+            if (reload) {
+                URL url = loader.getResource(resourceName);
+                if (url == null) {
+                    return null;
+                }
+                URLConnection connection = url.openConnection();
+                connection.setUseCaches(false);
+                stream = connection.getInputStream();
+            } else {
+                stream = loader.getResourceAsStream(resourceName);
+            }
+
+            if (stream == null) {
+                return null;
+            }
+
+            try (InputStream in = new BufferedInputStream(stream);
+                 InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
+                return new PropertyResourceBundle(reader);
+            }
+        }
     }
 }

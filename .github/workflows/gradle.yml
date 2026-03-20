@@ -1,0 +1,51 @@
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: [ "master" ]
+    paths-ignore:
+      - '.gitignore'
+      - 'COPYING.txt'
+      - 'LICENSE*'
+      - 'README.md'
+      - 'renovate.json5'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Calculate build number
+        run: echo "BUILD_NUMBER=$(($RUN_ID + 1050))" >> "$GITHUB_ENV"
+        env:
+          RUN_ID: ${{ github.run_number }}
+
+      - name: Set up JDK 25 (LTS)
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build with Gradle
+        run: ./gradlew clean test package --no-daemon
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: launcher-${{ env.BUILD_NUMBER }}
+          path: |
+            build/libs/launcher-*.jar
+            build/libs/launcher-*.exe
+            build/distributions/launcher-*-osx.app.zip
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Update dependency graph
+        uses: gradle/actions/dependency-submission@v4
