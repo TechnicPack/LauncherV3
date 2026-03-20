@@ -96,6 +96,8 @@ class LauncherPackagingPlugin : Plugin<Project> {
                 group = "verification"
                 description = "Verifies ServiceLoader providers referenced in the shadow jar exist."
                 dependsOn(shadowJarTask)
+                // createExe and shadowJar both write to build/libs; enforce ordering for Gradle 9 validation.
+                mustRunAfter(createExeTask)
 
                 val shadowJarArchive = tasks.named<ShadowJar>("shadowJar").flatMap { it.archiveFile }
                 inputs.file(shadowJarArchive)
