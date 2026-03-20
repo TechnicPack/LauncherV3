@@ -176,12 +176,9 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
             if (oldRoot.exists() && !oldRoot.getAbsolutePath().equals(newRoot.getAbsolutePath())) {
                 rootHasChanged = true;
                 try {
-                    if (!newRoot.exists())
-                        newRoot.mkdirs();
-
-                    FileUtils.copyDirectory(oldRoot, newRoot);
+                    copyInstallRoot(oldRoot, newRoot, false);
                     LauncherMain.moveLogFileTo(new LauncherFileSystem(newRoot.toPath()));
-                    FileUtils.deleteDirectory(oldRoot);
+                    cleanupInstallRoot(oldRoot, true);
                 } catch (IOException e) {
                     Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ", e);
                 }
@@ -262,12 +259,9 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
             if (oldRoot.exists() && !oldRoot.getAbsolutePath().equals(newRoot.getAbsolutePath())) {
                 try {
-                    if (!newRoot.exists())
-                        newRoot.mkdirs();
-
-                    FileUtils.copyDirectory(oldRoot, newRoot);
+                    copyInstallRoot(oldRoot, newRoot, true);
                     LauncherMain.moveLogFileTo(new LauncherFileSystem(newRoot.toPath()));
-                    FileUtils.deleteDirectory(oldRoot);
+                    cleanupInstallRoot(oldRoot, false);
                 } catch (IOException e) {
                     Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ", e);
                 }
@@ -304,6 +298,45 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
             System.exit(0);
         });
         thread.start();
+    }
+
+    static void copyInstallRoot(File oldRoot, File newRoot, boolean includeSettingsFile) throws IOException {
+        if (!newRoot.exists() && !newRoot.mkdirs()) {
+            throw new IOException("Failed to create destination directory " + newRoot);
+        }
+
+        if (includeSettingsFile) {
+            FileUtils.copyDirectory(oldRoot, newRoot);
+            return;
+        }
+
+        File rootSettingsFile = new File(oldRoot, "settings.json");
+        FileUtils.copyDirectory(oldRoot, newRoot, pathname -> !pathname.equals(rootSettingsFile));
+    }
+
+    static void cleanupInstallRoot(File oldRoot, boolean keepSettingsFile) throws IOException {
+        if (!keepSettingsFile) {
+            FileUtils.deleteDirectory(oldRoot);
+            return;
+        }
+
+        File rootSettingsFile = new File(oldRoot, "settings.json");
+        File[] oldRootEntries = oldRoot.listFiles();
+        if (oldRootEntries == null) {
+            return;
+        }
+
+        for (File entry : oldRootEntries) {
+            if (entry.equals(rootSettingsFile)) {
+                continue;
+            }
+
+            if (entry.isDirectory()) {
+                FileUtils.deleteDirectory(entry);
+            } else {
+                FileUtils.forceDelete(entry);
+            }
+        }
     }
 
     protected void selectPortable() {
