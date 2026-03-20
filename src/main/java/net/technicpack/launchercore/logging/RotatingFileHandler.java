@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
@@ -37,9 +38,9 @@ public class RotatingFileHandler extends StreamHandler {
     private final String filenameFormat;
     private final BlockingQueue<LogRecord> logQueue = new LinkedBlockingQueue<>();
     private final Thread loggingThread;
+    private final AtomicBoolean running = new AtomicBoolean(true);
     private Path logsDirectory;
     private LocalDate currentDate;
-    private volatile boolean running = true;
 
     public RotatingFileHandler(Path logsDirectory, String filenameFormat) {
         this.filenameFormat = filenameFormat;
@@ -82,12 +83,12 @@ public class RotatingFileHandler extends StreamHandler {
 
     @Override
     public void publish(LogRecord record) {
-        if (!running || !isLoggable(record)) return;
+        if (!running.get() || !isLoggable(record)) return;
         logQueue.offer(record); // Add to queue
     }
 
     private void processQueue() {
-        while (running || !logQueue.isEmpty()) {
+        while (running.get() || !logQueue.isEmpty()) {
             try {
                 LogRecord record = logQueue.take();
                 synchronized (this) {
@@ -108,13 +109,19 @@ public class RotatingFileHandler extends StreamHandler {
                     flush();
                 }
             } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
+                if (running.get()) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
             }
         }
     }
 
     public void shutdownHandler() {
-        running = false;
+        if (!running.compareAndSet(true, false)) {
+            return;
+        }
+
         loggingThread.interrupt();
         try {
             loggingThread.join();
@@ -122,5 +129,10 @@ public class RotatingFileHandler extends StreamHandler {
             Thread.currentThread().interrupt();
         }
         super.close();
+    }
+
+    @Override
+    public void close() {
+        shutdownHandler();
     }
 }

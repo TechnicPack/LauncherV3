@@ -137,6 +137,7 @@ public class LauncherMain {
     };
     private static ConsoleFrame consoleFrame;
     private static IBuildNumber buildNumber;
+    private static RotatingFileHandler currentFileHandler;
 
     public static void main(String[] argv) {
         // Initialize Sentry
@@ -323,15 +324,12 @@ public class LauncherMain {
     private static void setupLogging(LauncherFileSystem fileSystem, ResourceLoader resources) {
         System.out.println("Setting up logging"); // NOSONAR - Logging system not initialized yet
         final Logger logger = Utils.getLogger();
-        Path logsDirectory = fileSystem.getLogsDirectory();
-        RotatingFileHandler fileHandler = new RotatingFileHandler(logsDirectory, "techniclauncher_%s.log");
-        fileHandler.setFormatter(new BuildLogFormatter(buildNumber.getBuildNumber()));
 
         for (Handler h : logger.getHandlers()) {
             logger.removeHandler(h);
         }
         logger.setUseParentHandlers(false);
-        logger.addHandler(fileHandler);
+        swapLogFileHandler(logger, createLogFileHandler(fileSystem.getLogsDirectory()));
 
         consoleFrame = new ConsoleFrame(resources.getImage("icon.png"));
         ConsoleHandler consoleHandler = new ConsoleHandler(consoleFrame);
@@ -346,6 +344,34 @@ public class LauncherMain {
             logger.log(Level.SEVERE, String.format("Unhandled exception in thread %s", t), e);
             Sentry.captureException(e);
         });
+    }
+
+    public static synchronized void moveLogFileTo(LauncherFileSystem fileSystem) {
+        if (currentFileHandler == null) {
+            return;
+        }
+
+        final Logger logger = Utils.getLogger();
+        swapLogFileHandler(logger, createLogFileHandler(fileSystem.getLogsDirectory()));
+    }
+
+    private static RotatingFileHandler createLogFileHandler(Path logsDirectory) {
+        String currentBuildNumber = buildNumber != null ? buildNumber.getBuildNumber() : "0";
+        RotatingFileHandler fileHandler = new RotatingFileHandler(logsDirectory, "techniclauncher_%s.log");
+        fileHandler.setFormatter(new BuildLogFormatter(currentBuildNumber));
+        return fileHandler;
+    }
+
+    private static void swapLogFileHandler(Logger logger, RotatingFileHandler newFileHandler) {
+        logger.addHandler(newFileHandler);
+
+        RotatingFileHandler oldFileHandler = currentFileHandler;
+        currentFileHandler = newFileHandler;
+
+        if (oldFileHandler != null && oldFileHandler != newFileHandler) {
+            logger.removeHandler(oldFileHandler);
+            oldFileHandler.close();
+        }
     }
 
     /**

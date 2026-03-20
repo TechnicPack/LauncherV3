@@ -20,6 +20,7 @@ package net.technicpack.launcher.ui;
 
 import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.autoupdate.tasks.CopyLauncherPackage;
+import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.autoupdate.VersionFileBuildNumber;
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launcher.settings.StartupParameters;
@@ -179,9 +180,10 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
                         newRoot.mkdirs();
 
                     FileUtils.copyDirectory(oldRoot, newRoot);
+                    LauncherMain.moveLogFileTo(new LauncherFileSystem(newRoot.toPath()));
                     FileUtils.deleteDirectory(oldRoot);
                 } catch (IOException e) {
-                    Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ",e);
+                    Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ", e);
                 }
             }
 
@@ -264,9 +266,10 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
                         newRoot.mkdirs();
 
                     FileUtils.copyDirectory(oldRoot, newRoot);
+                    LauncherMain.moveLogFileTo(new LauncherFileSystem(newRoot.toPath()));
                     FileUtils.deleteDirectory(oldRoot);
                 } catch (IOException e) {
-                    Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ",e);
+                    Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ", e);
                 }
             }
 
