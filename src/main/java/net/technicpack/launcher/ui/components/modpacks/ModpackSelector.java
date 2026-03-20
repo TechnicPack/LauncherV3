@@ -235,7 +235,13 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
                 findMoreWidget.setWidgetData(resources.getString("launcher.packselector.badapi"));
                 findMoreUrl = "https://www.technicpack.net/";
             } else {
-                findMoreUrl = allModpacks.values().iterator().next().getModpack().getWebSite();
+                ModpackWidget firstWidget = firstValidWidget();
+                if (firstWidget != null) {
+                    findMoreUrl = firstWidget.getModpack().getWebSite();
+                } else {
+                    findMoreWidget.setWidgetData(resources.getString("launcher.packselector.badapi"));
+                    findMoreUrl = "https://www.technicpack.net/";
+                }
             }
         }
 
@@ -248,7 +254,13 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
     }
 
     private List<ModpackWidget> sortPacks() {
-        List<ModpackWidget> sortedPacks = new LinkedList<>(allModpacks.values());
+        List<ModpackWidget> sortedPacks = new LinkedList<>();
+        for (ModpackWidget widget : allModpacks.values()) {
+            if (widget != null && widget.getModpack() != null) {
+                sortedPacks.add(widget);
+            }
+        }
+
         sortedPacks.sort((o1, o2) -> {
             int priorityCompare = Integer.compare(o2.getModpack().getPriority(), o1.getModpack().getPriority());
             if (priorityCompare != 0) {
@@ -264,6 +276,15 @@ public class ModpackSelector extends TintablePanel implements IModpackContainer,
             }
         });
         return sortedPacks;
+    }
+
+    private ModpackWidget firstValidWidget() {
+        for (ModpackWidget widget : allModpacks.values()) {
+            if (widget != null && widget.getModpack() != null) {
+                return widget;
+            }
+        }
+        return null;
     }
 
     protected void addModpackInternal(ModpackModel modpack) {
