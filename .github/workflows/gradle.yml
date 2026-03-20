@@ -38,6 +38,28 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: ./gradlew clean test package --no-daemon
 
+      - name: Add promotion shortcuts
+        env:
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          promote_url="https://github.com/${REPOSITORY}/actions/workflows/promote.yml"
+
+          {
+            echo "## Promotion Shortcuts"
+            echo ""
+            echo "CLI commands for this exact build:"
+            echo ""
+            echo "\`gh workflow run promote.yml -f channel=beta -f run_id=${RUN_ID}\`"
+            echo "\`gh workflow run promote.yml -f channel=stable -f run_id=${RUN_ID}\`"
+            echo ""
+            echo "Web UI:"
+            echo "${promote_url}"
+            echo ""
+            echo "Use \`run_id=${RUN_ID}\` in the **Run workflow** form."
+          } >> "${GITHUB_STEP_SUMMARY}"
+
       - name: Archive artifacts
         uses: actions/upload-artifact@v6
         with:

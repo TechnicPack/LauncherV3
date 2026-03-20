@@ -1,0 +1,264 @@
+name: Promote Launcher Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: Promotion channel
+        required: true
+        type: choice
+        options:
+          - beta
+          - stable
+      build_number:
+        description: Build number to promote (for example 1052). Leave blank to use the latest successful build.
+        required: false
+        type: string
+      run_id:
+        description: Optional GitHub Actions run id from the Gradle workflow. Overrides build_number.
+        required: false
+        type: string
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    env:
+      GRADLE_WORKFLOW_FILE: gradle.yml
+      REMOTE_HOST: ${{ secrets.LAUNCHER_REMOTE_HOST }}
+      REMOTE_USER: ${{ secrets.LAUNCHER_REMOTE_USER }}
+      REMOTE_BASE_DIR: ${{ secrets.LAUNCHER_REMOTE_BASE_DIR }}
+      DISCORD_WEBHOOK_ID: ${{ secrets.DISCORD_WEBHOOK_ID }}
+      LAUNCHER_UPDATE_BASE_URL: ${{ secrets.LAUNCHER_UPDATE_BASE_URL }}
+      LAUNCHER_VERSION_UPDATE_BASE_URL: ${{ secrets.LAUNCHER_VERSION_UPDATE_BASE_URL }}
+
+    steps:
+      - name: Resolve Build Run
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_BUILD_NUMBER: ${{ inputs.build_number }}
+          INPUT_RUN_ID: ${{ inputs.run_id }}
+        run: |
+          set -euo pipefail
+
+          auth_header="Authorization: Bearer ${GH_TOKEN}"
+          api_header="Accept: application/vnd.github+json"
+
+          if [[ -n "${INPUT_RUN_ID}" ]]; then
+            run_id="${INPUT_RUN_ID}"
+          elif [[ -n "${INPUT_BUILD_NUMBER}" ]]; then
+            artifact_name="launcher-${INPUT_BUILD_NUMBER}"
+            run_id=""
+
+            for page in $(seq 1 20); do
+              artifacts_json="$(curl -fsSL \
+                -H "${auth_header}" \
+                -H "${api_header}" \
+                "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100&page=${page}")"
+
+              run_id="$(jq -r \
+                --arg artifact_name "${artifact_name}" \
+                '.artifacts[]
+                | select(.expired == false)
+                | select(.name == $artifact_name)
+                | .workflow_run.id' <<<"${artifacts_json}" | head -n1)"
+
+              if [[ -n "${run_id}" && "${run_id}" != "null" ]]; then
+                break
+              fi
+
+              artifact_count="$(jq -r '.artifacts | length' <<<"${artifacts_json}")"
+              if [[ "${artifact_count}" -lt 100 ]]; then
+                break
+              fi
+            done
+
+            if [[ -z "${run_id}" || "${run_id}" == "null" ]]; then
+              echo "::error::No non-expired artifact named ${artifact_name} was found."
+              exit 1
+            fi
+          else
+            runs_json="$(curl -fsSL \
+              -H "${auth_header}" \
+              -H "${api_header}" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/${GRADLE_WORKFLOW_FILE}/runs?branch=master&event=push&per_page=20")"
+
+            run_id="$(jq -r '[.workflow_runs[] | select(.conclusion == "success")] | .[0].id' <<<"${runs_json}")"
+
+            if [[ -z "${run_id}" || "${run_id}" == "null" ]]; then
+              echo "::error::No successful runs were found for ${GRADLE_WORKFLOW_FILE} on master."
+              exit 1
+            fi
+          fi
+
+          echo "run_id=${run_id}" >> "${GITHUB_OUTPUT}"
+          echo "Selected run id: ${run_id}"
+
+      - name: Download Build Artifacts
+        id: artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ steps.resolve.outputs.run_id }}
+        run: |
+          set -euo pipefail
+
+          auth_header="Authorization: Bearer ${GH_TOKEN}"
+          api_header="Accept: application/vnd.github+json"
+
+          artifacts_json="$(curl -fsSL \
+            -H "${auth_header}" \
+            -H "${api_header}" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}/artifacts?per_page=100")"
+
+          artifact_id="$(jq -r '.artifacts[] | select(.name | startswith("launcher-")) | .id' <<<"${artifacts_json}" | head -n1)"
+          artifact_name="$(jq -r '.artifacts[] | select(.name | startswith("launcher-")) | .name' <<<"${artifacts_json}" | head -n1)"
+
+          if [[ -z "${artifact_id}" || "${artifact_id}" == "null" ]]; then
+            echo "::error::No launcher artifact was found on run ${RUN_ID}."
+            exit 1
+          fi
+
+          curl -fsSL \
+            -H "${auth_header}" \
+            -H "${api_header}" \
+            -L "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}/zip" \
+            -o launcher-artifacts.zip
+
+          rm -rf launcher-artifacts
+          mkdir -p launcher-artifacts
+          unzip -q launcher-artifacts.zip -d launcher-artifacts
+
+          jar_path="$(find launcher-artifacts -type f -name 'launcher-4.0-*.jar' | head -n1)"
+          exe_path="$(find launcher-artifacts -type f -name 'launcher-4.0-*.exe' | head -n1)"
+          osx_path="$(find launcher-artifacts -type f -name 'launcher-4.0-*-osx.app.zip' | head -n1)"
+
+          if [[ -z "${jar_path}" || -z "${exe_path}" || -z "${osx_path}" ]]; then
+            echo "::error::Expected jar/exe/osx artifacts were not found in downloaded artifact ${artifact_name}."
+            exit 1
+          fi
+
+          build_number="$(basename "${jar_path}" | sed -E 's/^launcher-4\.0-([0-9]+)\.jar$/\1/')"
+          if [[ -z "${build_number}" || ! "${build_number}" =~ ^[0-9]+$ ]]; then
+            echo "::error::Failed to parse build number from $(basename "${jar_path}")."
+            exit 1
+          fi
+
+          echo "jar_path=${jar_path}" >> "${GITHUB_OUTPUT}"
+          echo "exe_path=${exe_path}" >> "${GITHUB_OUTPUT}"
+          echo "osx_path=${osx_path}" >> "${GITHUB_OUTPUT}"
+          echo "build_number=${build_number}" >> "${GITHUB_OUTPUT}"
+          echo "artifact_name=${artifact_name}" >> "${GITHUB_OUTPUT}"
+
+      - name: Validate Secrets
+        env:
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          PLATFORM_API_KEY: ${{ secrets.PLATFORM_API_KEY }}
+          DISCORD_WEBHOOK_TOKEN: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
+        run: |
+          set -euo pipefail
+          missing=0
+          for var_name in \
+            DEPLOY_SSH_PRIVATE_KEY \
+            PLATFORM_API_KEY \
+            DISCORD_WEBHOOK_TOKEN \
+            REMOTE_HOST \
+            REMOTE_USER \
+            REMOTE_BASE_DIR \
+            DISCORD_WEBHOOK_ID \
+            LAUNCHER_UPDATE_BASE_URL \
+            LAUNCHER_VERSION_UPDATE_BASE_URL; do
+            if [[ -z "${!var_name}" ]]; then
+              echo "::error::Missing required secret: ${var_name}"
+              missing=1
+            fi
+          done
+          if [[ "${missing}" -ne 0 ]]; then
+            exit 1
+          fi
+
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${DEPLOY_SSH_PRIVATE_KEY}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${REMOTE_HOST}" >> ~/.ssh/known_hosts
+
+      - name: Upload Promoted Artifacts
+        id: upload
+        env:
+          CHANNEL: ${{ inputs.channel }}
+          BUILD_NUMBER: ${{ steps.artifact.outputs.build_number }}
+          JAR_PATH: ${{ steps.artifact.outputs.jar_path }}
+          EXE_PATH: ${{ steps.artifact.outputs.exe_path }}
+          OSX_PATH: ${{ steps.artifact.outputs.osx_path }}
+        run: |
+          set -euo pipefail
+
+          if [[ "${CHANNEL}" == "beta" ]]; then
+            stream="beta4"
+            pointer="beta"
+          elif [[ "${CHANNEL}" == "stable" ]]; then
+            stream="stable4"
+            pointer="stable"
+          else
+            echo "::error::Unsupported channel: ${CHANNEL}"
+            exit 1
+          fi
+
+          remote_dir="${REMOTE_BASE_DIR}/${BUILD_NUMBER}"
+
+          ssh "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p '${remote_dir}'"
+
+          scp "${EXE_PATH}" "${REMOTE_USER}@${REMOTE_HOST}:${remote_dir}/TechnicLauncher.exe"
+          scp "${JAR_PATH}" "${REMOTE_USER}@${REMOTE_HOST}:${remote_dir}/TechnicLauncher.jar"
+          scp "${OSX_PATH}" "${REMOTE_USER}@${REMOTE_HOST}:${remote_dir}/TechnicLauncher.app.zip"
+
+          ssh "${REMOTE_USER}@${REMOTE_HOST}" "cd '${REMOTE_BASE_DIR}' && ln -sfn '${BUILD_NUMBER}' '${pointer}'"
+
+          echo "stream=${stream}" >> "${GITHUB_OUTPUT}"
+
+      - name: Refresh Launcher APIs
+        env:
+          BUILD_NUMBER: ${{ steps.artifact.outputs.build_number }}
+          STREAM: ${{ steps.upload.outputs.stream }}
+          PLATFORM_API_KEY: ${{ secrets.PLATFORM_API_KEY }}
+        run: |
+          set -euo pipefail
+          launcher_update_base="${LAUNCHER_UPDATE_BASE_URL%/}"
+          launcher_version_base="${LAUNCHER_VERSION_UPDATE_BASE_URL%/}"
+          curl -s -S "${launcher_update_base}/${STREAM}/${BUILD_NUMBER}?k=${PLATFORM_API_KEY}"
+          curl -s -S "${launcher_version_base}/${STREAM}/update?k=${PLATFORM_API_KEY}"
+
+      - name: Notify Discord
+        env:
+          CHANNEL: ${{ inputs.channel }}
+          BUILD_NUMBER: ${{ steps.artifact.outputs.build_number }}
+          DISCORD_WEBHOOK_TOKEN: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
+        run: |
+          set -euo pipefail
+          curl -s -S \
+            "https://discord.com/api/webhooks/${DISCORD_WEBHOOK_ID}/${DISCORD_WEBHOOK_TOKEN}?wait=true" \
+            --data-urlencode "content=New launcher ${CHANNEL} build: ${BUILD_NUMBER}"
+
+      - name: Promotion Summary
+        env:
+          CHANNEL: ${{ inputs.channel }}
+          RUN_ID: ${{ steps.resolve.outputs.run_id }}
+          BUILD_NUMBER: ${{ steps.artifact.outputs.build_number }}
+          ARTIFACT_NAME: ${{ steps.artifact.outputs.artifact_name }}
+        run: |
+          {
+            echo "## Promotion Complete"
+            echo ""
+            echo "- Channel: \`${CHANNEL}\`"
+            echo "- Build number: \`${BUILD_NUMBER}\`"
+            echo "- Source run id: \`${RUN_ID}\`"
+            echo "- Source artifact: \`${ARTIFACT_NAME}\`"
+          } >> "${GITHUB_STEP_SUMMARY}"
