@@ -34,6 +34,8 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build with Gradle
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: ./gradlew clean test package --no-daemon
 
       - name: Archive artifacts

@@ -3,6 +3,7 @@ import java.nio.charset.StandardCharsets
 
 plugins {
     id("net.technicpack.launcher-packaging")
+    alias(libs.plugins.sentry.jvm)
 }
 
 group = "net.technicpack"
@@ -54,6 +55,23 @@ dependencies {
 
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+val sentryAuthToken = providers.environmentVariable("SENTRY_AUTH_TOKEN").orNull
+
+sentry {
+    // Keep dependency graph controlled in our own build script.
+    autoInstallation.enabled.set(false)
+    includeDependenciesReport.set(false)
+
+    // Match old Maven behavior: upload source bundles only when auth token is available.
+    includeSourceContext.set(sentryAuthToken != null)
+
+    if (sentryAuthToken != null) {
+        org.set("technic-pack")
+        projectName.set("launcher")
+        authToken.set(sentryAuthToken)
+    }
 }
 
 tasks.test {

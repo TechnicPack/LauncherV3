@@ -21,6 +21,7 @@ google-oauth-client = "1.39.0"
 google-http-client = "2.0.2"
 slf4j = "2.0.17"
 sentry = "8.27.1"
+sentry-gradle-plugin = "6.2.0"
 annotations = "26.0.2-1"
 
 [libraries]
@@ -54,3 +55,4 @@ junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher
 [plugins]
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 launch4j = { id = "edu.sc.seis.launch4j", version.ref = "launch4j" }
+sentry-jvm = { id = "io.sentry.jvm.gradle", version.ref = "sentry-gradle-plugin" }
