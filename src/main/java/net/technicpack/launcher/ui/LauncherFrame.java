@@ -112,6 +112,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     NewsInfoPanel newsInfoPanel;
     ModpackInfoPanel modpackPanel;
     DiscoverInfoPanel discoverInfoPanel;
+    private JButton logoutButton;
 
     public LauncherFrame(final ResourceLoader resources, final ImageRepository<IUserType> skinRepository, final UserModel userModel, final TechnicSettings settings, final ModpackSelector modpackSelector, final ImageRepository<ModpackModel> iconRepo, final ImageRepository<ModpackModel> logoRepo, final ImageRepository<ModpackModel> backgroundRepo, final Installer installer, final ImageRepository<AuthorshipInfo> avatarRepo, final IPlatformApi platformApi, final LauncherFileSystem fileSystem, final InstalledPackStore packStore, final StartupParameters params, final DiscoverInfoPanel discoverInfoPanel, final JavaVersionRepository javaVersions, final FileJavaSource fileJavaSource, final IBuildNumber buildNumber, final IDiscordApi discordApi) {
         super();
@@ -175,10 +176,25 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     protected void minimizeWindow() { this.setState(Frame.ICONIFIED); }
 
-    protected void logout() {
-        if (installer.isCurrentlyRunning())
-            return;
+    protected void disableLogoutButton(String tooltipText) {
+        logoutButton.setEnabled(false);
+        logoutButton.setToolTipText(tooltipText);
+        logoutButton.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+    }
 
+    protected void enableLogoutButton() {
+        logoutButton.setEnabled(true);
+        logoutButton.setToolTipText(null);
+        logoutButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    }
+
+    protected void logout() {
+        if (installer.isCurrentlyRunning()) {
+            disableLogoutButton("Cannot logout, modpack installation in progress.");
+            return;
+        }
+
+        disableLogoutButton("Cannot logout, already logging out...");
         userModel.setCurrentUser(null);
     }
 
@@ -232,6 +248,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         installProgress.stateChanged("Initializing...", 0);
         installProgress.setVisible(true);
         installProgressPlaceholder.setVisible(false);
+        disableLogoutButton("Cannot logout, modpack installation in progress.");
         userChanged(userModel.getCurrentUser());
         invalidate();
     }
@@ -285,6 +302,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
             installProgressPlaceholder.setVisible(true);
 
             userModel.setCurrentUser(userModel.getCurrentUser());
+            enableLogoutButton();
 
             invalidate();
         } finally {
@@ -500,15 +518,15 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         dashText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
         footer.add(dashText);
 
-        JButton logout = new JButton(resources.getString("launcher.user.logout"));
-        logout.setBorder(BorderFactory.createEmptyBorder());
-        logout.setContentAreaFilled(false);
-        logout.setFocusable(false);
-        logout.setForeground(UIConstants.COLOR_WHITE_TEXT);
-        logout.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        logout.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
-        logout.addActionListener(e -> logout());
-        footer.add(logout);
+        logoutButton = new JButton(resources.getString("launcher.user.logout"));
+        logoutButton.setBorder(BorderFactory.createEmptyBorder());
+        logoutButton.setContentAreaFilled(false);
+        logoutButton.setFocusable(false);
+        logoutButton.setForeground(UIConstants.COLOR_WHITE_TEXT);
+        logoutButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        logoutButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
+        logoutButton.addActionListener(e -> logout());
+        footer.add(logoutButton);
 
         installProgress = new ProgressBar();
         installProgress.setForeground(Color.white);
@@ -572,6 +590,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         else {
             this.setVisible(true);
             userWidget.setUser(user);
+            enableLogoutButton();
 
             if (modpackSelector.getSelectedPack() != null)
                 setupPlayButtonText(modpackSelector.getSelectedPack(), user);

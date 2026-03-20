@@ -125,6 +125,8 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
             if (nameSelect.isVisible())
                 nameSelect.grabFocus();
 
+            enableLoginButton();
+
             SwingUtilities.invokeLater(() -> {
                 invalidate();
                 repaint();
@@ -373,12 +375,25 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
         addMicrosoft.setVisible(visible);
     }
 
+    private void disableLoginButton() {
+        login.setEnabled(false);
+    }
+
+    private void enableLoginButton() {
+        login.setEnabled(true);
+    }
+
     private void login(IUserType user) {
+        Utils.getLogger().log(Level.INFO, "Logging in as {0}", user.getDisplayName());
+        disableLoginButton();
+        boolean loginCompleted = false;
+
         try {
             user.login(userModel);
             userModel.addUser(user);
             userModel.setCurrentUser(user);
             setCurrentUser(user);
+            loginCompleted = true;
         } catch (SessionException e) {
             showMessageDialog(
                     this, "Please log in again for user " + user.getDisplayName(),
@@ -396,6 +411,11 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
                     "Offline mode", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE)) {
                 userModel.setLastUser(user);
                 userModel.setCurrentUser(new MicrosoftUser(user.getId(), user.getUsername()));
+                loginCompleted = true;
+            }
+        } finally {
+            if (!loginCompleted) {
+                enableLoginButton();
             }
         }
     }
