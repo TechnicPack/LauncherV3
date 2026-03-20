@@ -1,5 +1,4 @@
 [versions]
-shadow = "9.3.2"
 launch4j = "4.0.0"
 junit-jupiter = "6.0.3"
 junit-platform = "6.0.3"
@@ -53,6 +52,5 @@ junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "jun
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
 
 [plugins]
-shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 launch4j = { id = "edu.sc.seis.launch4j", version.ref = "launch4j" }
 sentry-jvm = { id = "io.sentry.jvm.gradle", version.ref = "sentry-gradle-plugin" }
