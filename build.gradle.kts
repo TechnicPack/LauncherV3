@@ -9,6 +9,8 @@ plugins {
 group = "net.technicpack"
 val buildNumber = providers.environmentVariable("BUILD_NUMBER").orElse("0").get()
 version = "4.0-$buildNumber"
+val runtimeJavaVersion = JavaLanguageVersion.of(25)
+val targetJavaRelease = 8
 
 repositories {
     mavenCentral()
@@ -16,12 +18,13 @@ repositories {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(8)
+        languageVersion = runtimeJavaVersion
     }
 }
 
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = StandardCharsets.UTF_8.name()
+    options.release.set(targetJavaRelease)
     options.compilerArgs.add("-Xlint:all")
     options.isDeprecation = true
     options.isWarnings = true
