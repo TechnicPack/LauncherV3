@@ -51,7 +51,8 @@ import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.SplatPane;
 import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.controls.feeds.CountCircle;
-import net.technicpack.ui.controls.installation.ProgressBar;
+import net.technicpack.ui.controls.installation.InstallationProgressDisplay;
+import net.technicpack.ui.controls.installation.InstallationProgressSlot;
 import net.technicpack.ui.lang.IRelocalizableResource;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.DesktopUtils;
@@ -68,7 +69,9 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     public static final String TAB_NEWS = "news";
 
     private static final int FRAME_WIDTH = 1194;
-    private static final int FRAME_HEIGHT = 718;
+    private static final int FRAME_HEIGHT = 727;
+    private static final int FOOTER_USER_SECTION_GAP = 4;
+    private static final String FOOTER_SEPARATOR_TEXT = "|";
 
     private ResourceLoader resources;
     private final UserModel userModel;
@@ -99,8 +102,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private JPanel infoSwap;
 
     private UserWidget userWidget;
-    private ProgressBar installProgress;
-    private Component installProgressPlaceholder;
+    private InstallationProgressDisplay installProgress;
+    private InstallationProgressSlot installProgressSlot;
     private RoundedButton playButton;
     private ModpackSelector modpackSelector;
     private NewsSelector newsSelector;
@@ -113,6 +116,14 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     ModpackInfoPanel modpackPanel;
     DiscoverInfoPanel discoverInfoPanel;
     private JButton logoutButton;
+
+    static int footerUserSectionGap() {
+        return FOOTER_USER_SECTION_GAP;
+    }
+
+    static String footerSeparatorText() {
+        return FOOTER_SEPARATOR_TEXT;
+    }
 
     public LauncherFrame(final ResourceLoader resources, final ImageRepository<IUserType> skinRepository, final UserModel userModel, final TechnicSettings settings, final ModpackSelector modpackSelector, final ImageRepository<ModpackModel> iconRepo, final ImageRepository<ModpackModel> logoRepo, final ImageRepository<ModpackModel> backgroundRepo, final Installer installer, final ImageRepository<AuthorshipInfo> avatarRepo, final IPlatformApi platformApi, final LauncherFileSystem fileSystem, final InstalledPackStore packStore, final StartupParameters params, final DiscoverInfoPanel discoverInfoPanel, final JavaVersionRepository javaVersions, final FileJavaSource fileJavaSource, final IBuildNumber buildNumber, final IDiscordApi discordApi) {
         super();
@@ -239,18 +250,18 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         //otherwise, just use the installed version
         String installBuild = getInstallBuild(forceInstall, pack, installedVersion);
 
+        installProgressSlot.showProgress();
+        installProgress.stateChanged("Initializing...", 0);
+        disableLogoutButton("Cannot logout, modpack installation in progress.");
+        userChanged(userModel.getCurrentUser());
+        footer.revalidate();
+        footer.repaint();
+
         if (requiresInstall) {
             installer.justInstall(resources, pack, installBuild, forceInstall, this, installProgress);
         } else {
             installer.installAndRun(resources, pack, installBuild, forceInstall, this, installProgress);
         }
-
-        installProgress.stateChanged("Initializing...", 0);
-        installProgress.setVisible(true);
-        installProgressPlaceholder.setVisible(false);
-        disableLogoutButton("Cannot logout, modpack installation in progress.");
-        userChanged(userModel.getCurrentUser());
-        invalidate();
     }
 
     private static boolean shouldRequestInstall(ModpackModel pack, ModpackVersion installedVersion) {
@@ -298,13 +309,12 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         }
 
         try {
-            installProgress.setVisible(false);
-            installProgressPlaceholder.setVisible(true);
+            installProgressSlot.hideProgress();
 
             userModel.setCurrentUser(userModel.getCurrentUser());
             enableLogoutButton();
-
-            invalidate();
+            footer.revalidate();
+            footer.repaint();
         } finally {
             launchCompletedRequested.set(false);
         }
@@ -505,18 +515,26 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         footer = new TintablePanel();
         footer.setTintColor(UIConstants.COLOR_CENTRAL_BACK);
         footer.setBackground(UIConstants.COLOR_FOOTER);
-        footer.setLayout(new BoxLayout(footer, BoxLayout.LINE_AXIS));
+        footer.setLayout(new BorderLayout(18, 0));
         footer.setForeground(UIConstants.COLOR_WHITE_TEXT);
-        footer.setBorder(BorderFactory.createEmptyBorder(3,6,3,12));
+        footer.setBorder(BorderFactory.createEmptyBorder(4, 10, 4, 10));
+
+        JPanel footerUserSection = new JPanel();
+        footerUserSection.setOpaque(false);
+        footerUserSection.setLayout(new BoxLayout(footerUserSection, BoxLayout.LINE_AXIS));
 
         userWidget = new UserWidget(resources, skinRepository);
+        userWidget.setAlignmentY(Component.CENTER_ALIGNMENT);
         userWidget.setMaximumSize(userWidget.getPreferredSize());
-        footer.add(userWidget);
+        footerUserSection.add(userWidget);
+        footerUserSection.add(Box.createHorizontalStrut(footerUserSectionGap()));
 
-        JLabel dashText = new JLabel("| ");
+        JLabel dashText = new JLabel(footerSeparatorText());
         dashText.setForeground(UIConstants.COLOR_WHITE_TEXT);
         dashText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
-        footer.add(dashText);
+        dashText.setAlignmentY(Component.CENTER_ALIGNMENT);
+        footerUserSection.add(dashText);
+        footerUserSection.add(Box.createHorizontalStrut(footerUserSectionGap()));
 
         logoutButton = new JButton(resources.getString("launcher.user.logout"));
         logoutButton.setBorder(BorderFactory.createEmptyBorder());
@@ -525,30 +543,50 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         logoutButton.setForeground(UIConstants.COLOR_WHITE_TEXT);
         logoutButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         logoutButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
+        logoutButton.setAlignmentY(Component.CENTER_ALIGNMENT);
         logoutButton.addActionListener(e -> logout());
-        footer.add(logoutButton);
+        footerUserSection.add(logoutButton);
+        footer.add(footerUserSection, BorderLayout.WEST);
 
-        installProgress = new ProgressBar();
-        installProgress.setForeground(Color.white);
-        installProgress.setBackground(UIConstants.COLOR_GREEN);
-        installProgress.setBorder(BorderFactory.createEmptyBorder(5, 45, 4, 45));
-        installProgress.setIcon(resources.getIcon("download_icon.png"));
-        installProgress.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 12));
-        installProgress.setVisible(false);
-        footer.add(installProgress);
+        installProgress = new InstallationProgressDisplay();
+        installProgress.getOverallProgressBar().setForeground(Color.white);
+        installProgress.getOverallProgressBar().setBackground(UIConstants.COLOR_GREEN);
+        installProgress.getOverallProgressBar().setBackFill(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        installProgress.getOverallProgressBar().setBorder(BorderFactory.createEmptyBorder(3, 20, 2, 20));
+        installProgress.getOverallProgressBar().setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 12));
+        installProgress.getCurrentItemCaptionLabel().setForeground(UIConstants.COLOR_WHITE_TEXT);
+        installProgress.getCurrentItemCaptionLabel().setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 11));
+        installProgress.getCurrentItemLabel().setForeground(UIConstants.COLOR_WHITE_TEXT);
+        installProgress.getCurrentItemLabel().setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 11));
+        installProgress.getCurrentItemProgressBar().setTrackColor(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        installProgress.getCurrentItemProgressBar().setFillColor(UIConstants.COLOR_SERVER);
+        installProgress.getCurrentItemProgressBar().setOutlineColor(new Color(121, 133, 145, 180));
+        installProgressSlot = new InstallationProgressSlot(installProgress, 560);
 
-        installProgressPlaceholder = Box.createHorizontalGlue();
-        footer.add(installProgressPlaceholder);
+        JPanel footerCenterSection = new JPanel();
+        footerCenterSection.setOpaque(false);
+        footerCenterSection.setLayout(new BoxLayout(footerCenterSection, BoxLayout.LINE_AXIS));
+        footerCenterSection.add(Box.createHorizontalGlue());
+        footerCenterSection.add(installProgressSlot);
+        footerCenterSection.add(Box.createHorizontalGlue());
+        footer.add(footerCenterSection, BorderLayout.CENTER);
 
         JButton buildCtrl = new JButton(resources.getIcon("akliz-logo.png"));
         buildCtrl.setBorder(BorderFactory.createEmptyBorder());
+        buildCtrl.setMargin(new Insets(0, 0, 0, 0));
         buildCtrl.setContentAreaFilled(false);
         buildCtrl.setHorizontalTextPosition(SwingConstants.RIGHT);
         buildCtrl.setHorizontalAlignment(SwingConstants.RIGHT);
         buildCtrl.setFocusable(false);
         buildCtrl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        buildCtrl.setMaximumSize(buildCtrl.getPreferredSize());
         buildCtrl.addActionListener(e -> DesktopUtils.browseUrl("https://www.akliz.net/technic"));
-        footer.add(buildCtrl);
+        JPanel footerBrandSection = new JPanel();
+        footerBrandSection.setOpaque(false);
+        footerBrandSection.setLayout(new BoxLayout(footerBrandSection, BoxLayout.LINE_AXIS));
+        buildCtrl.setAlignmentY(Component.CENTER_ALIGNMENT);
+        footerBrandSection.add(buildCtrl);
+        footer.add(footerBrandSection, BorderLayout.EAST);
 
         getRootPane().getContentPane().add(footer, BorderLayout.PAGE_END);
 

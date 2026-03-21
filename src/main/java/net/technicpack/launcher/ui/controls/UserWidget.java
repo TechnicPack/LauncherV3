@@ -27,9 +27,12 @@ import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.ImageUtils;
 
 import javax.swing.ImageIcon;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
 
@@ -49,10 +52,13 @@ public class UserWidget extends JPanel implements IImageJobListener<IUserType> {
 
     private void initComponents(ResourceLoader resources) {
         setOpaque(false);
+        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 
         avatar = new JLabel();
         avatar.setIcon(resources.getIcon("news/authorHelm.png"));
+        avatar.setAlignmentY(Component.CENTER_ALIGNMENT);
         this.add(avatar);
+        this.add(Box.createHorizontalStrut(4));
 
         String fullText = resources.getString("launcher.user.logged");
 
@@ -80,22 +86,29 @@ public class UserWidget extends JPanel implements IImageJobListener<IUserType> {
         JLabel staticText = new JLabel(preText);
         staticText.setForeground(UIConstants.COLOR_WHITE_TEXT);
         staticText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
+        staticText.setAlignmentY(Component.CENTER_ALIGNMENT);
 
-        if (!preText.isEmpty())
+        if (!preText.isEmpty()) {
             this.add(staticText);
+            this.add(Box.createHorizontalStrut(4));
+        }
 
         userName = new JLabel("");
         userName.setForeground(UIConstants.COLOR_WHITE_TEXT);
         userName.setBackground(Color.white);
         userName.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 17, Font.BOLD));
+        userName.setAlignmentY(Component.CENTER_ALIGNMENT);
         this.add(userName);
 
         staticText = new JLabel(postText);
         staticText.setForeground(UIConstants.COLOR_WHITE_TEXT);
         staticText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
+        staticText.setAlignmentY(Component.CENTER_ALIGNMENT);
 
-        if (!postText.isEmpty())
+        if (!postText.isEmpty()) {
+            this.add(Box.createHorizontalStrut(4));
             this.add(staticText);
+        }
     }
 
     public void setUser(IUserType user) {

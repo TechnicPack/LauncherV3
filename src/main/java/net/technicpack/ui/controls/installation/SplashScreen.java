@@ -22,12 +22,15 @@ package net.technicpack.ui.controls.installation;
 import net.technicpack.utilslib.Utils;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class SplashScreen extends JFrame {
+    private static final int PROGRESS_HORIZONTAL_PADDING = 14;
+    private static final int PROGRESS_BOTTOM_PADDING = 10;
     protected final ImageIcon image;
-    private ProgressBar progressBar = null;
+    private InstallationProgressDisplay progressDisplay = null;
 
     public SplashScreen(Image img, int barHeight) {
         setUndecorated(true);
@@ -58,22 +61,9 @@ public class SplashScreen extends JFrame {
         container.add(background, BorderLayout.CENTER);
 
         if (barHeight > 0) {
-            JPanel panel = new JPanel();
-            panel.setOpaque(false);
-            container.add(panel, BorderLayout.SOUTH);
-
-            panel.setLayout(new BorderLayout());
-
-            JPanel progressPanel = new JPanel();
-            progressPanel.setOpaque(false);
-            progressPanel.setLayout(new BoxLayout(progressPanel, BoxLayout.PAGE_AXIS));
-            panel.add(progressPanel, BorderLayout.CENTER);
-            panel.add(Box.createVerticalStrut(barHeight+barHeight-5), BorderLayout.EAST);
-
-            progressBar = new ProgressBar();
-            progressPanel.add(Box.createVerticalStrut(barHeight-5));
-            progressPanel.add(progressBar);
-
+            progressDisplay = new InstallationProgressDisplay();
+            progressDisplay.configureForSplash(computeProgressDisplayWidth(image.getIconWidth()));
+            container.add(createProgressFooter(progressDisplay), BorderLayout.SOUTH);
         }
 
         // Finalize
@@ -88,5 +78,25 @@ public class SplashScreen extends JFrame {
         }
     }
 
-    public ProgressBar getProgressBar() { return progressBar; }
+    public InstallationProgressDisplay getProgressDisplay() { return progressDisplay; }
+
+    public ProgressBar getProgressBar() {
+        if (progressDisplay == null) {
+            return null;
+        }
+        return progressDisplay.getOverallProgressBar();
+    }
+
+    static int computeProgressDisplayWidth(int imageWidth) {
+        return Math.max(160, imageWidth - (PROGRESS_HORIZONTAL_PADDING * 2));
+    }
+
+    static JPanel createProgressFooter(InstallationProgressDisplay progressDisplay) {
+        JPanel footer = new JPanel(new BorderLayout());
+        footer.setOpaque(true);
+        footer.setBackground(Color.BLACK);
+        footer.setBorder(new EmptyBorder(4, PROGRESS_HORIZONTAL_PADDING, PROGRESS_BOTTOM_PADDING, PROGRESS_HORIZONTAL_PADDING));
+        footer.add(progressDisplay, BorderLayout.CENTER);
+        return footer;
+    }
 }

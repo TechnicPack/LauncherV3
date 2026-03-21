@@ -26,6 +26,7 @@ import javax.swing.SwingUtilities;
 import java.awt.*;
 
 public class ProgressBar extends JLabel implements DownloadListener {
+    private static final int TEXT_EDGE_PADDING = 4;
     float progressPct;
     private Color backFillColor = null;
 
@@ -96,27 +97,44 @@ public class ProgressBar extends JLabel implements DownloadListener {
         g2d.setFont(getFont());
         int textY = y + ((height - g2d.getFontMetrics().getHeight()) / 2) + g2d.getFontMetrics().getAscent();
         String pctText = String.format(java.util.Locale.ROOT, "%.2f%%", progressPct * 100.0f);
+        int textEdgeInset = computeTextEdgeInset(height);
 
-        int textX = (x+width) - (height/4) - g2d.getFontMetrics().stringWidth(pctText);
+        int textX = (x + width) - textEdgeInset - g2d.getFontMetrics().stringWidth(pctText);
         g2d.drawString(pctText, textX, textY);
 
         g2d.clipRect(x, y, textX-x-3, height);
-        g2d.drawString(getText(), x+(height/4)+iconWidth, textY);
+        g2d.drawString(getText(), x + textEdgeInset + iconWidth, textY);
         g2d.setClip(clip);
+    }
+
+    static int computeTextEdgeInset(int barHeight) {
+        if (barHeight <= 0) {
+            return TEXT_EDGE_PADDING;
+        }
+        return (barHeight / 2) + TEXT_EDGE_PADDING;
     }
 
     @Override
     public Dimension getMaximumSize() {
+        if (isMaximumSizeSet()) {
+            return super.getMaximumSize();
+        }
         return new Dimension(32000,32000);
     }
 
     @Override
     public Dimension getMinimumSize() {
+        if (isMinimumSizeSet()) {
+            return super.getMinimumSize();
+        }
         return new Dimension(0,0);
     }
 
     @Override
     public Dimension getPreferredSize() {
+        if (isPreferredSizeSet()) {
+            return super.getPreferredSize();
+        }
         return new Dimension(0,0);
     }
 
