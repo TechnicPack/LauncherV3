@@ -47,6 +47,7 @@ public class ParallelTaskGroup<T> implements IInstallTask<T>, IWeightedTasksQueu
     private final ExecutorService executor;
 
     private final Object taskListLock = new Object();
+    private boolean sealed = false;
 
     public ParallelTaskGroup(String name) {
         this.groupName = name;
@@ -65,6 +66,7 @@ public class ParallelTaskGroup<T> implements IInstallTask<T>, IWeightedTasksQueu
 
     @Override
     public void runTask(InstallTasksQueue<T> queue) throws IOException, InterruptedException {
+        seal();
         List<CompletableFuture<Void>> futures = new ArrayList<>();
 
         for (IInstallTask<T> task : taskList) {
@@ -123,6 +125,7 @@ public class ParallelTaskGroup<T> implements IInstallTask<T>, IWeightedTasksQueu
     @Override
     public void addTask(IInstallTask<T> task, float weight) {
         synchronized (taskListLock) {
+            ensureMutable();
             taskList.add(task);
             taskWeights.put(task, weight);
             totalWeight += weight;
@@ -137,9 +140,28 @@ public class ParallelTaskGroup<T> implements IInstallTask<T>, IWeightedTasksQueu
     @Override
     public void addNextTask(IInstallTask<T> task, float weight) {
         synchronized (taskListLock) {
+            ensureMutable();
             taskList.add(0, task);
             taskWeights.put(task, weight);
             totalWeight += weight;
+        }
+    }
+
+    public boolean isSealed() {
+        synchronized (taskListLock) {
+            return sealed;
+        }
+    }
+
+    public void seal() {
+        synchronized (taskListLock) {
+            sealed = true;
+        }
+    }
+
+    private void ensureMutable() {
+        if (sealed) {
+            throw new IllegalStateException("Cannot mutate a task group after execution has started");
         }
     }
 }

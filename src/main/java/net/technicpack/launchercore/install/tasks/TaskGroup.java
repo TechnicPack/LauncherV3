@@ -37,6 +37,7 @@ public class TaskGroup<T> implements IWeightedTasksQueue<T>, IInstallTask<T> {
 
     private IInstallTask<T> currentTask;
     private String currentTaskDescription = "";
+    private boolean sealed = false;
 
     public TaskGroup(String name) {
         this.groupName = name;
@@ -74,6 +75,7 @@ public class TaskGroup<T> implements IWeightedTasksQueue<T>, IInstallTask<T> {
 
     @Override
     public void runTask(InstallTasksQueue<T> queue) throws IOException, InterruptedException {
+        seal();
         // The check is in the first synchronized block because isEmpty() isn't atomic
         while (true) {
             if (Thread.currentThread().isInterrupted()) {
@@ -115,6 +117,7 @@ public class TaskGroup<T> implements IWeightedTasksQueue<T>, IInstallTask<T> {
     @Override
     public void addTask(IInstallTask<T> task, float weight) {
         synchronized (taskListLock) {
+            ensureMutable();
             taskList.addLast(task);
             taskWeights.put(task, weight);
             totalWeight += weight;
@@ -124,11 +127,29 @@ public class TaskGroup<T> implements IWeightedTasksQueue<T>, IInstallTask<T> {
     @Override
     public void addNextTask(IInstallTask<T> task, float weight) {
         synchronized (taskListLock) {
+            ensureMutable();
             taskList.addFirst(task);
             taskWeights.put(task, weight);
             totalWeight += weight;
         }
     }
 
+    public boolean isSealed() {
+        synchronized (taskListLock) {
+            return sealed;
+        }
+    }
+
+    public void seal() {
+        synchronized (taskListLock) {
+            sealed = true;
+        }
+    }
+
+    private void ensureMutable() {
+        if (sealed) {
+            throw new IllegalStateException("Cannot mutate a task group after execution has started");
+        }
+    }
 
 }

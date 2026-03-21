@@ -31,21 +31,24 @@ public class InstallTasksQueue<T> implements ITasksQueue<T> {
     private final LinkedList<IInstallTask<T>> tasks;
     private IInstallTask<T> currentTask;
     private T metadata;
+    private boolean sealed;
 
     public InstallTasksQueue(DownloadListener listener) {
         this.listener = listener;
         this.tasks = new LinkedList<>();
         this.currentTask = null;
+        this.sealed = false;
     }
 
     public void refreshProgress() {
-        if (listener != null)
+        if (listener != null && currentTask != null)
             listener.stateChanged(currentTask.getTaskDescription(), currentTask.getTaskProgress());
     }
 
     public void runAllTasks() throws IOException, InterruptedException {
+        seal();
         while (!tasks.isEmpty()) {
-            currentTask = tasks.removeFirst();
+            beginTaskExecution(tasks.removeFirst());
             Sentry.addBreadcrumb(String.format("Running task: \"%s\" (%s)", currentTask.getTaskDescription(), currentTask.getClass().getSimpleName()));
             refreshProgress();
             currentTask.runTask(this);
@@ -53,10 +56,12 @@ public class InstallTasksQueue<T> implements ITasksQueue<T> {
     }
 
     public void addNextTask(IInstallTask<T> task) {
+        ensureMutable();
         tasks.addFirst(task);
     }
 
     public void addTask(IInstallTask<T> task) {
+        ensureMutable();
         tasks.addLast(task);
     }
 
@@ -67,4 +72,23 @@ public class InstallTasksQueue<T> implements ITasksQueue<T> {
     public void setMetadata(T metadata) { this.metadata = metadata; }
 
     public T getMetadata() { return this.metadata; }
+
+    public void seal() {
+        sealed = true;
+    }
+
+    public boolean isSealed() {
+        return sealed;
+    }
+
+    public void beginTaskExecution(IInstallTask<T> task) {
+        seal();
+        currentTask = task;
+    }
+
+    private void ensureMutable() {
+        if (sealed) {
+            throw new IllegalStateException("Cannot mutate a task queue after execution has started");
+        }
+    }
 }

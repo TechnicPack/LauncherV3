@@ -20,6 +20,8 @@
 package net.technicpack.launchercore.install.tasks;
 
 import net.technicpack.launchercore.install.InstallTasksQueue;
+import net.technicpack.launchercore.install.plan.NodeProgressReporter;
+import net.technicpack.launchercore.progress.CurrentItemMode;
 import net.technicpack.launchercore.util.DownloadListener;
 
 import java.io.IOException;
@@ -28,6 +30,7 @@ public abstract class ListenerTask<T> implements IInstallTask<T>, DownloadListen
 
     private float taskProgress;
     private InstallTasksQueue<T> queue;
+    private transient NodeProgressReporter progressReporter;
 
     protected ListenerTask() {
         taskProgress = 0;
@@ -47,8 +50,22 @@ public abstract class ListenerTask<T> implements IInstallTask<T>, DownloadListen
         this.queue = queue;
     }
 
+    public void setProgressReporter(NodeProgressReporter progressReporter) {
+        this.progressReporter = progressReporter;
+    }
+
     public void stateChanged(String fileName, float progress) {
         this.taskProgress = progress;
-        this.queue.refreshProgress();
+        if (progressReporter != null) {
+            if (progress > 0.0f) {
+                progressReporter.updateCurrentItem(fileName, CurrentItemMode.DETERMINATE, progress);
+                progressReporter.updateNodeProgress(progress);
+            } else {
+                progressReporter.updateCurrentItem(fileName, CurrentItemMode.INDETERMINATE, null);
+            }
+        }
+        if (this.queue != null) {
+            this.queue.refreshProgress();
+        }
     }
 }

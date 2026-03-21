@@ -36,13 +36,12 @@ public class ModpackInstaller {
         this.platformApi = platformApi;
     }
 
-    public IMinecraftVersionInfo installPack(InstallTasksQueue<IMinecraftVersionInfo> tasksQueue, ModpackModel modpack, String build) throws IOException, InterruptedException {
+    public void preparePack(ModpackModel modpack) {
         modpack.save();
         modpack.initDirectories();
+    }
 
-        ModpackVersion installedVersion = modpack.getInstalledVersion();
-        tasksQueue.runAllTasks();
-
+    public void completeInstall(ModpackModel modpack, String build, ModpackVersion installedVersion) throws IOException {
         ModpackVersion versionFile = new ModpackVersion(build, false);
         versionFile.save(new File(modpack.getBinDir(), "version"));
 
@@ -50,7 +49,13 @@ public class ModpackInstaller {
             platformApi.incrementPackInstalls(modpack.getName());
             Utils.sendTracking("installModpack", modpack.getName(), modpack.getBuild(), clientId);
         }
+    }
 
+    public IMinecraftVersionInfo installPack(InstallTasksQueue<IMinecraftVersionInfo> tasksQueue, ModpackModel modpack, String build) throws IOException, InterruptedException {
+        preparePack(modpack);
+        ModpackVersion installedVersion = modpack.getInstalledVersion();
+        tasksQueue.runAllTasks();
+        completeInstall(modpack, build, installedVersion);
         return tasksQueue.getMetadata();
     }
 }

@@ -26,14 +26,14 @@ import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.components.FixRunDataDialog;
 import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.exception.*;
-import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.ModpackInstaller;
 import net.technicpack.launchercore.install.ModpackVersion;
-import net.technicpack.launchercore.install.tasks.CheckRunDataFile;
-import net.technicpack.launchercore.install.tasks.TaskGroup;
-import net.technicpack.launchercore.install.tasks.WriteRundataFile;
+import net.technicpack.launchercore.install.plan.ExecutionPlan;
+import net.technicpack.launchercore.install.plan.PlanExecutor;
 import net.technicpack.launchercore.launch.GameProcess;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
+import net.technicpack.launchercore.progress.ExecutionProgressListener;
+import net.technicpack.launchercore.progress.ExecutionProgressListeners;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.RunData;
@@ -62,7 +62,6 @@ import javax.swing.SwingUtilities;
 import java.io.File;
 import java.io.IOException;
 import java.nio.channels.ClosedByInterruptException;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.zip.ZipException;
 
@@ -162,17 +161,40 @@ public class Installer {
             setGameProcess(null);
 
             try {
-                InstallTasksQueue<IMinecraftVersionInfo> tasksQueue = new InstallTasksQueue<>(listener);
-                MinecraftVersionInfoBuilder versionBuilder = createVersionBuilder(tasksQueue);
+                ExecutionProgressListener progressListener = ExecutionProgressListeners.adapt(listener);
+                MinecraftVersionInfoBuilder versionBuilder = createVersionBuilder(listener);
                 JavaVersionRepository javaVersions = launcher.getJavaVersions();
 
                 final boolean mojangJavaWanted = settings.shouldUseMojangJava();
 
                 IMinecraftVersionInfo version;
+                installer.preparePack(pack);
 
-                buildTasksQueue(tasksQueue, build, versionBuilder, javaVersions.getSelectedVersion(), mojangJavaWanted);
+                PackInfo packInfo = pack.getPackInfo();
+                if (packInfo == null) {
+                    throw new InstallException("No modpack information found, cannot install or launch modpack.");
+                }
 
-                version = installer.installPack(tasksQueue, pack, build);
+                Modpack modpackData = packInfo.getModpack(build);
+                if (modpackData.getGameVersion() == null) {
+                    throw new InstallException("No game version found for modpack, cannot install or launch modpack.");
+                }
+
+                ModpackVersion installedVersion = pack.getInstalledVersion();
+                boolean jarRegenerationRequired = doFullInstall || (installedVersion != null && installedVersion.isLegacy());
+
+                ImmutableInstallerPlanner planner = new ImmutableInstallerPlanner(resources, pack, modpackData, fileSystem,
+                        versionBuilder, settings, javaVersions.getSelectedVersion(), doFullInstall, mojangJavaWanted,
+                        jarRegenerationRequired, () -> isCancelledByUser);
+                ImmutableInstallerPlanner.InstallExecutionContext context = new ImmutableInstallerPlanner.InstallExecutionContext();
+                PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext> executor = new PlanExecutor<>(progressListener);
+
+                executePlan(executor, planner.buildPreparationPlan(), context);
+                executePlan(executor, planner.buildVersionDiscoveryPlan(), context);
+                executePlan(executor, planner.buildInstallPlan(context), context);
+
+                version = context.getResolvedVersion();
+                installer.completeInstall(pack, build, installedVersion);
 
                 if (doLaunch) {
                     if (version == null) {
@@ -307,105 +329,18 @@ public class Installer {
             showErrorDialog(resources.getString("launcher.installerror.title"), message);
         }
 
-        private void buildTasksQueue(InstallTasksQueue<IMinecraftVersionInfo> queue, String build,
-                                     MinecraftVersionInfoBuilder versionBuilder, IJavaRuntime selectedJavaRuntime,
-                                     boolean mojangJavaWanted) throws IOException, InstallException {
-            PackInfo packInfo = pack.getPackInfo();
-
-            // Abort modpack install/launch if we don't have the necessary information.
-            // This can happen if a modpack is local-only and doesn't have cached information.
-            if (packInfo == null) {
-                throw new InstallException("No modpack information found, cannot install or launch modpack.");
-            }
-
-            Modpack modpackData = packInfo.getModpack(build);
-
-            if (modpackData.getGameVersion() == null) {
-                throw new InstallException("No game version found for modpack, cannot install or launch modpack.");
-            }
-
-            String minecraft = modpackData.getGameVersion();
-            ModpackVersion installedVersion = pack.getInstalledVersion();
-
-            TaskGroup<IMinecraftVersionInfo> examineModpackData = new TaskGroup<>(resources.getString("install.message.examiningmodpack"));
-            TaskGroup<IMinecraftVersionInfo> verifyingFiles = new TaskGroup<>(resources.getString("install.message.verifyingfiles"));
-            TaskGroup<IMinecraftVersionInfo> downloadingMods = new TaskGroup<>(resources.getString("install.message.downloadmods"));
-            TaskGroup<IMinecraftVersionInfo> installingMods = new TaskGroup<>(resources.getString("install.message.installmods"));
-            TaskGroup<IMinecraftVersionInfo> checkVersionFile = new TaskGroup<>(resources.getString("install.message.checkversionfile"));
-            TaskGroup<IMinecraftVersionInfo> installVersionFile = new TaskGroup<>(resources.getString("install.message.installversionfile"));
-            TaskGroup<IMinecraftVersionInfo> rundataTaskGroup = new TaskGroup<>(resources.getString("install.message.runData"));
-            TaskGroup<IMinecraftVersionInfo> examineVersionFile = new TaskGroup<>(resources.getString("install.message.examiningversionfile"));
-            TaskGroup<IMinecraftVersionInfo> grabLibs = new TaskGroup<>(resources.getString("install.message.grablibraries"));
-            TaskGroup<IMinecraftVersionInfo> checkNonMavenLibs = new TaskGroup<>(resources.getString("install.message.nonmavenlibs"));
-            TaskGroup<IMinecraftVersionInfo> installingLibs = new TaskGroup<>(resources.getString("install.message.installlibs"));
-            TaskGroup<IMinecraftVersionInfo> installingMinecraft = new TaskGroup<>(resources.getString("install.message.installminecraft"));
-            TaskGroup<IMinecraftVersionInfo> examineIndex = new TaskGroup<>(resources.getString("install.message.examiningindex"));
-            TaskGroup<IMinecraftVersionInfo> verifyingAssets = new TaskGroup<>(resources.getString("install.message.verifyassets"));
-            TaskGroup<IMinecraftVersionInfo> installingAssets = new TaskGroup<>(resources.getString("install.message.installassets"));
-            TaskGroup<IMinecraftVersionInfo> fetchJavaManifest = new TaskGroup<>("Obtaining Java runtime information...");
-            TaskGroup<IMinecraftVersionInfo> examineJava = new TaskGroup<>("Examining Java runtime...");
-            TaskGroup<IMinecraftVersionInfo> downloadJava = new TaskGroup<>("Downloading Java runtime...");
-
-            queue.addTask(examineModpackData);
-            queue.addTask(verifyingFiles);
-            queue.addTask(downloadingMods);
-            queue.addTask(installingMods);
-            queue.addTask(checkVersionFile);
-            queue.addTask(installVersionFile);
-            queue.addTask(rundataTaskGroup);
-            queue.addTask(examineVersionFile);
-            queue.addTask(grabLibs);
-            queue.addTask(checkNonMavenLibs);
-            queue.addTask(installingLibs);
-            queue.addTask(installingMinecraft);
-            queue.addTask(examineIndex);
-            queue.addTask(verifyingAssets);
-            queue.addTask(installingAssets);
-            if (mojangJavaWanted) {
-                queue.addTask(fetchJavaManifest);
-                queue.addTask(examineJava);
-                queue.addTask(downloadJava);
-            }
-            if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX) {
-                queue.addTask(new RenameJnilibToDylibTask(pack));
-            }
-
-            if (doFullInstall) {
-                examineModpackData.addTask(new CleanupAndExtractModpackTask(pack, modpackData, verifyingFiles, downloadingMods, installingMods));
-                rundataTaskGroup.addTask(new WriteRundataFile(pack, modpackData));
-            } else {
-                rundataTaskGroup.addTask(new CheckRunDataFile(pack, modpackData, rundataTaskGroup));
-            }
-
-            verifyingFiles.addTask(new InstallFmlLibsTask(pack, fileSystem, modpackData, verifyingFiles, installingLibs, installingLibs));
-
-            checkVersionFile.addTask(new VerifyVersionFilePresentTask(pack, minecraft, versionBuilder));
-            examineVersionFile.addTask(new HandleVersionFileTask().withPack(pack)
-                                                                  .withFileSystem(fileSystem)
-                                                                  .withCheckNonMavenLibsQueue(checkNonMavenLibs)
-                                                                  .withCheckLibraryQueue(grabLibs)
-                                                                  .withDownloadLibraryQueue(installingLibs)
-                                                                  .withCopyLibraryQueue(installingLibs)
-                                                                  .withVersionBuilder(versionBuilder)
-                                                                  .withLaunchOptions(settings)
-                                                                  .withJavaRuntime(selectedJavaRuntime));
-            examineVersionFile.addTask(new EnsureAssetsIndexTask(fileSystem.getAssetsDirectory().toFile(), pack, installingMinecraft, examineIndex, verifyingAssets, installingAssets, installingAssets));
-
-            fetchJavaManifest.addTask(new EnsureJavaRuntimeManifestTask(fileSystem.getRuntimesDirectory(), pack, fetchJavaManifest, examineJava, downloadJava));
-
-            // Check if we need to regenerate the Minecraft jar. This is necessary if:
-            // - A reinstall was requested (or forced, via modpack version update)
-            // - The installed version is marked as legacy
-            boolean jarRegenerationRequired = doFullInstall || (installedVersion != null && installedVersion.isLegacy());
-
-            installingMinecraft.addTask(new InstallMinecraftIfNecessaryTask(pack, minecraft, fileSystem.getCacheDirectory(), jarRegenerationRequired));
+        private void executePlan(PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext> executor,
+                                 ExecutionPlan<ImmutableInstallerPlanner.InstallExecutionContext> plan,
+                                 ImmutableInstallerPlanner.InstallExecutionContext context)
+                throws IOException, InterruptedException {
+            executor.execute(plan, context);
         }
 
-        private MinecraftVersionInfoBuilder createVersionBuilder(InstallTasksQueue<IMinecraftVersionInfo> tasksQueue) {
+        private MinecraftVersionInfoBuilder createVersionBuilder(DownloadListener listener) {
             ZipMinecraftVersionInfoRetriever zipVersionRetriever = new ZipMinecraftVersionInfoRetriever(new File(pack.getBinDir(), "modpack.jar"));
-            HttpMinecraftVersionInfoRetriever fallbackVersionRetriever = new HttpMinecraftVersionInfoRetriever(TechnicConstants.VERSIONS_BASE_URL, tasksQueue.getDownloadListener());
+            HttpMinecraftVersionInfoRetriever fallbackVersionRetriever = new HttpMinecraftVersionInfoRetriever(TechnicConstants.VERSIONS_BASE_URL, listener);
 
-            ArrayList<MinecraftVersionInfoRetriever> fallbackRetrievers = new ArrayList<>(1);
+            java.util.ArrayList<MinecraftVersionInfoRetriever> fallbackRetrievers = new java.util.ArrayList<>(1);
             fallbackRetrievers.add(fallbackVersionRetriever);
 
             File versionJson = new File(pack.getBinDir(), "version.json");
