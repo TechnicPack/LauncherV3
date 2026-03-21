@@ -19,17 +19,12 @@
 
 package net.technicpack.autoupdate;
 
-import net.technicpack.autoupdate.tasks.CopyLauncherPackage;
-import net.technicpack.autoupdate.tasks.LaunchLauncherMode;
-import net.technicpack.autoupdate.tasks.LaunchMoverMode;
-import net.technicpack.autoupdate.tasks.QueryUpdateStream;
 import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.ui.UIConstants;
-import net.technicpack.launchercore.install.InstallTasksQueue;
-import net.technicpack.launchercore.install.tasks.IInstallTask;
-import net.technicpack.launchercore.install.tasks.TaskGroup;
+import net.technicpack.launchercore.install.plan.ExecutionPlan;
+import net.technicpack.launchercore.install.plan.PlanExecutor;
 import net.technicpack.ui.controls.installation.SplashScreen;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.OperatingSystem;
@@ -42,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -49,6 +45,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class Relauncher {
+    private static final String LAUNCHER_ASSET_PROGRESS_TEMPLATE = "%s";
 
     private final String stream;
     private final int currentBuild;
@@ -117,37 +114,49 @@ public class Relauncher {
         return parameters.isSkipUpdate();
     }
 
-    public InstallTasksQueue<Void> buildMoverTasks() {
-        InstallTasksQueue<Void> queue = new InstallTasksQueue<>(null);
-
-        queue.addTask(new CopyLauncherPackage(resources.getString("updater.mover"), new File(parameters.getMoveTarget()), this));
-        queue.addTask(new LaunchLauncherMode(resources.getString("updater.finallaunch"), this, parameters.getMoveTarget(), parameters.isLegacyMover()));
-
-        return queue;
+    public ExecutionPlan<UpdatePlanner.UpdateContext> buildMoverPlan() {
+        UpdatePlanner planner = new UpdatePlanner(fileSystem);
+        return planner.planMover(new UpdatePlanner.MoverPlanRequest(
+                Paths.get(parameters.getMoveTarget()),
+                parameters.isLegacyMover(),
+                resources.getString("updater.mover"),
+                resources.getString("updater.finallaunch")
+        ));
     }
 
-    public InstallTasksQueue<Void> buildUpdaterTasks() {
+    public ExecutionPlan<UpdatePlanner.UpdateContext> buildUpdaterPlan() throws IOException {
         screen = new SplashScreen(resources.getImage("launch_splash.png"), 30);
         Color bg = UIConstants.COLOR_FORM_ELEMENT_INTERNAL;
         screen.getContentPane().setBackground(new Color (bg.getRed(),bg.getGreen(),bg.getBlue(),255));
-        screen.getProgressBar().setForeground(Color.white);
-        screen.getProgressBar().setBackground(UIConstants.COLOR_GREEN);
-        screen.getProgressBar().setBackFill(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
-        screen.getProgressBar().setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 12));
+        screen.getProgressDisplay().getOverallProgressBar().setForeground(Color.white);
+        screen.getProgressDisplay().getOverallProgressBar().setBackground(UIConstants.COLOR_GREEN);
+        screen.getProgressDisplay().getOverallProgressBar().setBackFill(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
+        screen.getProgressDisplay().getOverallProgressBar().setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 12));
+        screen.getProgressDisplay().getCurrentItemCaptionLabel().setForeground(UIConstants.COLOR_DIM_TEXT);
+        screen.getProgressDisplay().getCurrentItemCaptionLabel().setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 10));
+        screen.getProgressDisplay().getCurrentItemLabel().setForeground(Color.white);
+        screen.getProgressDisplay().getCurrentItemLabel().setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 11));
+        screen.getProgressDisplay().getCurrentItemProgressBar().setTrackColor(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+        screen.getProgressDisplay().getCurrentItemProgressBar().setFillColor(UIConstants.COLOR_SERVER);
+        screen.getProgressDisplay().getCurrentItemProgressBar().setOutlineColor(new Color(121, 133, 145, 180));
+        screen.getProgressDisplay().overallChanged(getUpdateText(), 0.0f);
         screen.pack();
         screen.setLocationRelativeTo(null);
         screen.setVisible(true);
 
-        InstallTasksQueue<Void> queue = new InstallTasksQueue<>(screen.getProgressBar());
-
-        ArrayList<IInstallTask<Void>> postDownloadTasks = new ArrayList<>();
-        postDownloadTasks.add(new LaunchMoverMode(resources.getString("updater.launchmover"), getTempLauncher(), this));
-
-        TaskGroup<Void> downloadFilesGroup = new TaskGroup<>(resources.getString("updater.downloads"));
-        queue.addTask(new QueryUpdateStream(resources.getString("updater.query"), updateStream, downloadFilesGroup, getFileSystem(), this, postDownloadTasks));
-        queue.addTask(downloadFilesGroup);
-
-        return queue;
+        UpdatePlanner planner = new UpdatePlanner(fileSystem);
+        return planner.planUpdater(updateStream, new UpdatePlanner.UpdatePlanRequest(
+                stream,
+                currentBuild,
+                isSkipUpdate(),
+                isUpdateOnly(),
+                getRunningPath(),
+                getTempLauncher().toPath(),
+                getUpdateText(),
+                resources.getString("updater.launchmover"),
+                LAUNCHER_ASSET_PROGRESS_TEMPLATE,
+                getUpdateText()
+        ));
     }
 
     /**
@@ -185,22 +194,23 @@ public class Relauncher {
                 needsReboot = true;
         }
 
-        InstallTasksQueue<Void> updateTasksQueue;
+        ExecutionPlan<UpdatePlanner.UpdateContext> updatePlan;
         if (isMover()) {
-            updateTasksQueue = buildMoverTasks();
+            updatePlan = buildMoverPlan();
         } else if (needsReboot && getCurrentBuild() > 0) {
             relaunch();
             return false;
         } else if (getCurrentBuild() < 1) {
             return true;
         } else {
-            updateTasksQueue = buildUpdaterTasks();
+            updatePlan = buildUpdaterPlan();
         }
 
-        if (updateTasksQueue == null)
+        if (updatePlan == null)
             return true;
 
-        updateTasksQueue.runAllTasks();
+        new PlanExecutor<UpdatePlanner.UpdateContext>(screen == null ? null : screen.getProgressDisplay())
+                .execute(updatePlan, new UpdatePlanner.UpdateContext(this));
         updateComplete();
 
         return !didUpdate && !isUpdateOnly();
@@ -218,6 +228,30 @@ public class Relauncher {
         Path destPath = fileSystem.getRootDirectory().resolve(String.format("temp.%s", extension));
 
         return destPath.toFile();
+    }
+
+    public void copyToMoveTarget(Path targetPath) throws IOException {
+        Path currentPath = Paths.get(getRunningPath());
+
+        Utils.getLogger().info(String.format("Copying running package from %s to %s", currentPath, targetPath));
+
+        if (currentPath.equals(targetPath)) {
+            throw new IOException("Source and destination paths are the same!");
+        }
+
+        try {
+            Files.deleteIfExists(targetPath);
+            Files.createDirectories(targetPath.getParent());
+            Files.copy(currentPath, targetPath);
+        } catch (IOException e) {
+            Utils.getLogger().log(java.util.logging.Level.SEVERE, "Error copying package", e);
+            throw e;
+        }
+
+        File targetFile = targetPath.toFile();
+        if (!targetFile.setExecutable(true, true)) {
+            Utils.getLogger().warning("Failed to set executable flag on package");
+        }
     }
 
     public void launch(String launchPath, List<String> args) {
