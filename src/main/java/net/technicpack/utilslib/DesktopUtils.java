@@ -25,8 +25,11 @@ import javax.swing.SwingWorker;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public class DesktopUtils {
@@ -78,20 +81,71 @@ public class DesktopUtils {
         new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() {
-                Utils.getLogger().info("Attempting to open "+file.getAbsolutePath());
-                String asciiUri = file.toURI().toASCIIString();
-                Utils.getLogger().info("Using "+asciiUri);
-                if (asciiUri.startsWith("file:") && !asciiUri.startsWith("file://"))
-                    asciiUri = asciiUri.replaceFirst("file:", "file://");
-                Utils.getLogger().info("Intermediary path "+asciiUri);
-                try {
-                    Desktop.getDesktop().open(new File(new URI(asciiUri).getPath()));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                open(file, DesktopUtils::canOpenWithDesktop, DesktopUtils::openWithDesktop, DesktopUtils::launchProcess, OperatingSystem.getOperatingSystem());
 
                 return null;
             }
         }.execute();
+    }
+
+    static void open(File file,
+                     BooleanSupplier canOpenWithDesktop,
+                     Consumer<File> desktopOpen,
+                     Consumer<String[]> processLauncher,
+                     OperatingSystem operatingSystem) {
+        Utils.getLogger().info("Attempting to open " + file.getAbsolutePath());
+
+        try {
+            if (canOpenWithDesktop.getAsBoolean()) {
+                desktopOpen.accept(file);
+                return;
+            }
+        } catch (RuntimeException e) {
+            Utils.getLogger().log(Level.WARNING, String.format("Desktop open failed for %s", file.getAbsolutePath()), e);
+        }
+
+        try {
+            openWithFallback(file, processLauncher, operatingSystem);
+        } catch (RuntimeException e) {
+            Utils.getLogger().log(Level.SEVERE, String.format("Unable to open %s", file.getAbsolutePath()), e);
+        }
+    }
+
+    private static boolean canOpenWithDesktop() {
+        return Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.OPEN);
+    }
+
+    private static void openWithDesktop(File file) {
+        try {
+            Desktop.getDesktop().open(file);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private static void launchProcess(String[] command) {
+        try {
+            new ProcessBuilder(command).start();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private static void openWithFallback(File file, Consumer<String[]> processLauncher, OperatingSystem operatingSystem) {
+        String path = file.getAbsolutePath();
+        switch (operatingSystem) {
+            case LINUX:
+                processLauncher.accept(new String[]{"xdg-open", path});
+                break;
+            case OSX:
+                processLauncher.accept(new String[]{"open", path});
+                break;
+            case WINDOWS:
+                processLauncher.accept(new String[]{"explorer.exe", path});
+                break;
+            case UNKNOWN:
+            default:
+                throw new IllegalStateException(String.format("No folder-opening fallback available for operating system %s", operatingSystem));
+        }
     }
 }
