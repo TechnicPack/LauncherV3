@@ -2,6 +2,7 @@ import org.gradle.jvm.toolchain.JavaLanguageVersion
 import java.nio.charset.StandardCharsets
 
 plugins {
+    id("com.diffplug.spotless") version "8.4.0"
     id("net.technicpack.launcher-packaging")
     alias(libs.plugins.sentry.jvm)
 }
@@ -14,6 +15,25 @@ val targetJavaRelease = 8
 
 repositories {
     mavenCentral()
+}
+
+spotless {
+    ratchetFrom("origin/master")
+
+    java {
+        target("src/*/java/**/*.java")
+        googleJavaFormat()
+    }
+
+    kotlin {
+        target("buildSrc/src/**/*.kt")
+        ktlint()
+    }
+
+    kotlinGradle {
+        target("*.gradle.kts", "buildSrc/*.gradle.kts")
+        ktlint()
+    }
 }
 
 java {
@@ -82,7 +102,13 @@ sentry {
 
 tasks.test {
     useJUnitPlatform()
-    javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion = runtimeJavaVersion
-    })
+    javaLauncher.set(
+        javaToolchains.launcherFor {
+            languageVersion = runtimeJavaVersion
+        },
+    )
+}
+
+tasks.named("check") {
+    dependsOn("spotlessCheck")
 }
