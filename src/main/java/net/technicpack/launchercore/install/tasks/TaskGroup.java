@@ -20,136 +20,136 @@
 package net.technicpack.launchercore.install.tasks;
 
 import io.sentry.Sentry;
+import java.io.IOException;
+import java.util.*;
 import net.technicpack.launchercore.install.IWeightedTasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 
-import java.io.IOException;
-import java.util.*;
-
 public class TaskGroup<T> implements IWeightedTasksQueue<T>, IInstallTask<T> {
-    private final String groupName;
-    private final LinkedList<IInstallTask<T>> taskList = new LinkedList<>();
-    private final Map<IInstallTask<T>, Float> taskWeights = new HashMap<>();
-    private final Object taskListLock = new Object();
+  private final String groupName;
+  private final LinkedList<IInstallTask<T>> taskList = new LinkedList<>();
+  private final Map<IInstallTask<T>, Float> taskWeights = new HashMap<>();
+  private final Object taskListLock = new Object();
 
-    private float totalWeight = 0;
-    private float completedWeight = 0;
+  private float totalWeight = 0;
+  private float completedWeight = 0;
 
-    private IInstallTask<T> currentTask;
-    private String currentTaskDescription = "";
-    private boolean sealed = false;
+  private IInstallTask<T> currentTask;
+  private String currentTaskDescription = "";
+  private boolean sealed = false;
 
-    public TaskGroup(String name) {
-        this.groupName = name;
+  public TaskGroup(String name) {
+    this.groupName = name;
+  }
+
+  @Override
+  public String getTaskDescription() {
+    try {
+      return String.format(Locale.ENGLISH, groupName, currentTaskDescription);
+    } catch (IllegalFormatException e) {
+      return groupName;
     }
+  }
 
-    @Override
-    public String getTaskDescription() {
-        try {
-            return String.format(Locale.ENGLISH, groupName, currentTaskDescription);
-        } catch (IllegalFormatException e) {
-            return groupName;
+  @Override
+  public float getTaskProgress() {
+    synchronized (taskListLock) {
+      if (totalWeight == 0) {
+        return 0;
+      }
+
+      // The formula is:
+      // progress = (completedWeight + (currentTaskFractionDone * currentTaskWeight)) / totalWeight
+      // * 100
+
+      float progress = completedWeight;
+
+      if (currentTask != null) {
+        float currentTaskWeight = taskWeights.getOrDefault(currentTask, 1.0f);
+        progress += (currentTask.getTaskProgress() / 100.0f) * currentTaskWeight;
+      }
+
+      return (progress / totalWeight) * 100.0f;
+    }
+  }
+
+  @Override
+  public void runTask(InstallTasksQueue<T> queue) throws IOException, InterruptedException {
+    seal();
+    // The check is in the first synchronized block because isEmpty() isn't atomic
+    while (true) {
+      if (Thread.currentThread().isInterrupted()) {
+        throw new InterruptedException();
+      }
+
+      synchronized (taskListLock) {
+        if (taskList.isEmpty()) {
+          break;
         }
+        currentTask = taskList.removeFirst();
+        currentTaskDescription = currentTask.getTaskDescription();
+      }
+
+      Sentry.addBreadcrumb(
+          String.format("TaskGroup \"%s\" running task \"%s\"", groupName, currentTaskDescription));
+      currentTask.runTask(queue);
+      Sentry.addBreadcrumb(
+          String.format(
+              "TaskGroup \"%s\" finished task \"%s\"", groupName, currentTaskDescription));
+
+      synchronized (taskListLock) {
+        queue.refreshProgress();
+        completedWeight += taskWeights.getOrDefault(currentTask, 1.0f);
+        taskWeights.remove(currentTask);
+      }
     }
+  }
 
-    @Override
-    public float getTaskProgress() {
-        synchronized (taskListLock) {
-            if (totalWeight == 0) {
-                return 0;
-            }
+  @Override
+  public void addNextTask(IInstallTask<T> task) {
+    addNextTask(task, 1.0f);
+  }
 
-            // The formula is:
-            // progress = (completedWeight + (currentTaskFractionDone * currentTaskWeight)) / totalWeight * 100
+  @Override
+  public void addTask(IInstallTask<T> task) {
+    addTask(task, 1.0f);
+  }
 
-            float progress = completedWeight;
-
-            if (currentTask != null) {
-                float currentTaskWeight = taskWeights.getOrDefault(currentTask, 1.0f);
-                progress += (currentTask.getTaskProgress() / 100.0f) * currentTaskWeight;
-            }
-
-            return (progress / totalWeight) * 100.0f;
-        }
+  @Override
+  public void addTask(IInstallTask<T> task, float weight) {
+    synchronized (taskListLock) {
+      ensureMutable();
+      taskList.addLast(task);
+      taskWeights.put(task, weight);
+      totalWeight += weight;
     }
+  }
 
-    @Override
-    public void runTask(InstallTasksQueue<T> queue) throws IOException, InterruptedException {
-        seal();
-        // The check is in the first synchronized block because isEmpty() isn't atomic
-        while (true) {
-            if (Thread.currentThread().isInterrupted()) {
-                throw new InterruptedException();
-            }
-
-            synchronized (taskListLock) {
-                if (taskList.isEmpty()) {
-                    break;
-                }
-                currentTask = taskList.removeFirst();
-                currentTaskDescription = currentTask.getTaskDescription();
-            }
-
-            Sentry.addBreadcrumb(String.format("TaskGroup \"%s\" running task \"%s\"", groupName,
-                                               currentTaskDescription));
-            currentTask.runTask(queue);
-            Sentry.addBreadcrumb(String.format("TaskGroup \"%s\" finished task \"%s\"", groupName,
-                                               currentTaskDescription));
-
-            synchronized (taskListLock) {
-                queue.refreshProgress();
-                completedWeight += taskWeights.getOrDefault(currentTask, 1.0f);
-                taskWeights.remove(currentTask);
-            }
-        }
+  @Override
+  public void addNextTask(IInstallTask<T> task, float weight) {
+    synchronized (taskListLock) {
+      ensureMutable();
+      taskList.addFirst(task);
+      taskWeights.put(task, weight);
+      totalWeight += weight;
     }
+  }
 
-    @Override
-    public void addNextTask(IInstallTask<T> task) {
-        addNextTask(task, 1.0f);
+  public boolean isSealed() {
+    synchronized (taskListLock) {
+      return sealed;
     }
+  }
 
-    @Override
-    public void addTask(IInstallTask<T> task) {
-        addTask(task, 1.0f);
+  public void seal() {
+    synchronized (taskListLock) {
+      sealed = true;
     }
+  }
 
-    @Override
-    public void addTask(IInstallTask<T> task, float weight) {
-        synchronized (taskListLock) {
-            ensureMutable();
-            taskList.addLast(task);
-            taskWeights.put(task, weight);
-            totalWeight += weight;
-        }
+  private void ensureMutable() {
+    if (sealed) {
+      throw new IllegalStateException("Cannot mutate a task group after execution has started");
     }
-
-    @Override
-    public void addNextTask(IInstallTask<T> task, float weight) {
-        synchronized (taskListLock) {
-            ensureMutable();
-            taskList.addFirst(task);
-            taskWeights.put(task, weight);
-            totalWeight += weight;
-        }
-    }
-
-    public boolean isSealed() {
-        synchronized (taskListLock) {
-            return sealed;
-        }
-    }
-
-    public void seal() {
-        synchronized (taskListLock) {
-            sealed = true;
-        }
-    }
-
-    private void ensureMutable() {
-        if (sealed) {
-            throw new IllegalStateException("Cannot mutate a task group after execution has started");
-        }
-    }
-
+  }
 }

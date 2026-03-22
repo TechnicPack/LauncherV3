@@ -19,139 +19,141 @@
 
 package net.technicpack.ui.controls.installation;
 
-import net.technicpack.launchercore.util.DownloadListener;
-
+import java.awt.*;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
-import java.awt.*;
+import net.technicpack.launchercore.util.DownloadListener;
 
 public class ProgressBar extends JLabel implements DownloadListener {
-    private static final int TEXT_EDGE_PADDING = 4;
-    float progressPct;
-    private Color backFillColor = null;
+  private static final int TEXT_EDGE_PADDING = 4;
+  float progressPct;
+  private Color backFillColor = null;
 
-    public ProgressBar() {
-        super("");
+  public ProgressBar() {
+    super("");
+  }
+
+  public Color getBackFill() {
+    return backFillColor;
+  }
+
+  public void setBackFill(Color backFill) {
+    backFillColor = backFill;
+  }
+
+  @Override
+  public void paint(Graphics g) {
+    Graphics2D g2d = (Graphics2D) g;
+
+    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    g2d.setRenderingHint(
+        RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+    g2d.setRenderingHint(
+        RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+
+    int width = getWidth() - 3;
+    int height = getHeight() - 3;
+    int x = 1;
+    int y = 1;
+
+    Insets insets = new Insets(0, 0, 0, 0);
+
+    if (getBorder() != null) insets = getBorder().getBorderInsets(this);
+
+    x += insets.left;
+    y += insets.top;
+
+    width -= (insets.left + insets.right);
+    height -= (insets.top + insets.bottom);
+
+    Shape clip = g2d.getClip();
+
+    if (getBackFill() != null) {
+      g2d.setColor(getBackFill());
+      g2d.clipRect(x, y, width, height);
+      g2d.fillRoundRect(x, y, width, height, height, height);
     }
 
-    public Color getBackFill() { return backFillColor; }
-    public void setBackFill(Color backFill) { backFillColor = backFill; }
+    g2d.setColor(getBackground());
 
-    @Override
-    public void paint(Graphics g) {
-        Graphics2D g2d = (Graphics2D)g;
+    float clipWidth = progressPct * (float) width;
+    g2d.clipRect(x, y, (int) clipWidth, height);
+    g2d.fillRoundRect(x, y, width, height, height, height);
+    g2d.setClip(clip);
 
-        g2d.setRenderingHint(
-                RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setRenderingHint(
-                RenderingHints.KEY_TEXT_ANTIALIASING,
-                RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-        g2d.setRenderingHint(
-                RenderingHints.KEY_FRACTIONALMETRICS,
-                RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+    g2d.setColor(getForeground());
+    Stroke stroke = g2d.getStroke();
+    g2d.setStroke(new BasicStroke(2));
+    g2d.drawRoundRect(x, y, width, height, height, height);
+    g2d.setStroke(stroke);
 
-        int width = getWidth()-3;
-        int height = getHeight()-3;
-        int x = 1;
-        int y = 1;
-
-        Insets insets = new Insets(0,0,0,0);
-
-        if (getBorder() != null)
-            insets = getBorder().getBorderInsets(this);
-
-        x += insets.left;
-        y += insets.top;
-
-        width -= (insets.left + insets.right);
-        height -= (insets.top + insets.bottom);
-
-        Shape clip = g2d.getClip();
-
-        if (getBackFill() != null) {
-            g2d.setColor(getBackFill());
-            g2d.clipRect(x, y, width, height);
-            g2d.fillRoundRect(x, y, width, height, height, height);
-        }
-
-        g2d.setColor(getBackground());
-
-        float clipWidth = progressPct * (float)width;
-        g2d.clipRect(x, y, (int)clipWidth, height);
-        g2d.fillRoundRect(x, y, width, height, height, height);
-        g2d.setClip(clip);
-
-        g2d.setColor(getForeground());
-        Stroke stroke = g2d.getStroke();
-        g2d.setStroke(new BasicStroke(2));
-        g2d.drawRoundRect(x, y, width, height, height, height);
-        g2d.setStroke(stroke);
-
-        int iconWidth = 0;
-        if (this.getIcon() != null) {
-            this.getIcon().paintIcon(this, g2d, x+(height/4), y + (height/2 - this.getIcon().getIconHeight()/2));
-            iconWidth = this.getIcon().getIconWidth() + this.getIconTextGap();
-        }
-
-        g2d.setFont(getFont());
-        int textY = y + ((height - g2d.getFontMetrics().getHeight()) / 2) + g2d.getFontMetrics().getAscent();
-        String pctText = String.format(java.util.Locale.ROOT, "%.2f%%", progressPct * 100.0f);
-        int textEdgeInset = computeTextEdgeInset(height);
-
-        int textX = (x + width) - textEdgeInset - g2d.getFontMetrics().stringWidth(pctText);
-        g2d.drawString(pctText, textX, textY);
-
-        g2d.clipRect(x, y, textX-x-3, height);
-        g2d.drawString(getText(), x + textEdgeInset + iconWidth, textY);
-        g2d.setClip(clip);
+    int iconWidth = 0;
+    if (this.getIcon() != null) {
+      this.getIcon()
+          .paintIcon(
+              this, g2d, x + (height / 4), y + (height / 2 - this.getIcon().getIconHeight() / 2));
+      iconWidth = this.getIcon().getIconWidth() + this.getIconTextGap();
     }
 
-    static int computeTextEdgeInset(int barHeight) {
-        if (barHeight <= 0) {
-            return TEXT_EDGE_PADDING;
-        }
-        return (barHeight / 2) + TEXT_EDGE_PADDING;
+    g2d.setFont(getFont());
+    int textY =
+        y + ((height - g2d.getFontMetrics().getHeight()) / 2) + g2d.getFontMetrics().getAscent();
+    String pctText = String.format(java.util.Locale.ROOT, "%.2f%%", progressPct * 100.0f);
+    int textEdgeInset = computeTextEdgeInset(height);
+
+    int textX = (x + width) - textEdgeInset - g2d.getFontMetrics().stringWidth(pctText);
+    g2d.drawString(pctText, textX, textY);
+
+    g2d.clipRect(x, y, textX - x - 3, height);
+    g2d.drawString(getText(), x + textEdgeInset + iconWidth, textY);
+    g2d.setClip(clip);
+  }
+
+  static int computeTextEdgeInset(int barHeight) {
+    if (barHeight <= 0) {
+      return TEXT_EDGE_PADDING;
+    }
+    return (barHeight / 2) + TEXT_EDGE_PADDING;
+  }
+
+  @Override
+  public Dimension getMaximumSize() {
+    if (isMaximumSizeSet()) {
+      return super.getMaximumSize();
+    }
+    return new Dimension(32000, 32000);
+  }
+
+  @Override
+  public Dimension getMinimumSize() {
+    if (isMinimumSizeSet()) {
+      return super.getMinimumSize();
+    }
+    return new Dimension(0, 0);
+  }
+
+  @Override
+  public Dimension getPreferredSize() {
+    if (isPreferredSizeSet()) {
+      return super.getPreferredSize();
+    }
+    return new Dimension(0, 0);
+  }
+
+  protected void setProgress(final String progressText, final float progress) {
+    if (!SwingUtilities.isEventDispatchThread()) {
+      SwingUtilities.invokeLater(() -> setProgress(progressText, progress));
+      return;
     }
 
-    @Override
-    public Dimension getMaximumSize() {
-        if (isMaximumSizeSet()) {
-            return super.getMaximumSize();
-        }
-        return new Dimension(32000,32000);
-    }
+    setText(progressText);
+    this.progressPct = progress / 100.0f;
 
-    @Override
-    public Dimension getMinimumSize() {
-        if (isMinimumSizeSet()) {
-            return super.getMinimumSize();
-        }
-        return new Dimension(0,0);
-    }
+    repaint();
+  }
 
-    @Override
-    public Dimension getPreferredSize() {
-        if (isPreferredSizeSet()) {
-            return super.getPreferredSize();
-        }
-        return new Dimension(0,0);
-    }
-
-    protected void setProgress(final String progressText, final float progress) {
-        if (!SwingUtilities.isEventDispatchThread()) {
-            SwingUtilities.invokeLater(() -> setProgress(progressText, progress));
-            return;
-        }
-
-        setText(progressText);
-        this.progressPct = progress / 100.0f;
-
-        repaint();
-    }
-
-    @Override
-    public void stateChanged(String fileName, float progress) {
-        setProgress(fileName, progress);
-    }
+  @Override
+  public void stateChanged(String fileName, float progress) {
+    setProgress(fileName, progress);
+  }
 }

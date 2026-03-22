@@ -5,6 +5,28 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.BooleanSupplier;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launchercore.TechnicConstants;
@@ -58,921 +80,1052 @@ import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.function.BooleanSupplier;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 class ImmutableInstallerPlanner {
-    private static final String PREPARE_PHASE = "prepare-modpack";
-    private static final String INSTALL_MODS_PHASE = "install-mods";
-    private static final String RUN_DATA_PHASE = "run-data";
-    private static final String CHECK_VERSION_PHASE = "check-version";
-    private static final String EXAMINE_VERSION_PHASE = "examine-version";
-    private static final String INSTALL_LIBS_PHASE = "install-libs";
-    private static final String INSTALL_MINECRAFT_PHASE = "install-minecraft";
-    private static final String INSTALL_ASSETS_PHASE = "install-assets";
-    private static final String INSTALL_JAVA_PHASE = "install-java";
-    private static final String FIX_NATIVE_PHASE = "fix-natives";
+  private static final String PREPARE_PHASE = "prepare-modpack";
+  private static final String INSTALL_MODS_PHASE = "install-mods";
+  private static final String RUN_DATA_PHASE = "run-data";
+  private static final String CHECK_VERSION_PHASE = "check-version";
+  private static final String EXAMINE_VERSION_PHASE = "examine-version";
+  private static final String INSTALL_LIBS_PHASE = "install-libs";
+  private static final String INSTALL_MINECRAFT_PHASE = "install-minecraft";
+  private static final String INSTALL_ASSETS_PHASE = "install-assets";
+  private static final String INSTALL_JAVA_PHASE = "install-java";
+  private static final String FIX_NATIVE_PHASE = "fix-natives";
 
-    private static final String VIRTUAL_FIELD = "virtual";
-    private static final String MAP_TO_RESOURCES_FIELD = "map_to_resources";
-    private static final String OBJECTS_FIELD = "objects";
-    private static final String SIZE_FIELD = "size";
-    private static final String HASH_FIELD = "hash";
+  private static final String VIRTUAL_FIELD = "virtual";
+  private static final String MAP_TO_RESOURCES_FIELD = "map_to_resources";
+  private static final String OBJECTS_FIELD = "objects";
+  private static final String SIZE_FIELD = "size";
+  private static final String HASH_FIELD = "hash";
 
-    private final ResourceLoader resources;
-    private final ModpackModel pack;
-    private final Modpack modpackData;
-    private final LauncherFileSystem fileSystem;
-    private final MinecraftVersionInfoBuilder versionBuilder;
-    private final TechnicSettings settings;
-    private final IJavaRuntime selectedJavaRuntime;
-    private final boolean doFullInstall;
-    private final boolean mojangJavaWanted;
-    private final boolean jarRegenerationRequired;
-    private final String minecraftVersion;
-    private final BooleanSupplier cancellationCheck;
+  private final ResourceLoader resources;
+  private final ModpackModel pack;
+  private final Modpack modpackData;
+  private final LauncherFileSystem fileSystem;
+  private final MinecraftVersionInfoBuilder versionBuilder;
+  private final TechnicSettings settings;
+  private final IJavaRuntime selectedJavaRuntime;
+  private final boolean doFullInstall;
+  private final boolean mojangJavaWanted;
+  private final boolean jarRegenerationRequired;
+  private final String minecraftVersion;
+  private final BooleanSupplier cancellationCheck;
 
-    ImmutableInstallerPlanner(ResourceLoader resources, ModpackModel pack, Modpack modpackData,
-                              LauncherFileSystem fileSystem, MinecraftVersionInfoBuilder versionBuilder,
-                              TechnicSettings settings, IJavaRuntime selectedJavaRuntime, boolean doFullInstall,
-                              boolean mojangJavaWanted, boolean jarRegenerationRequired,
-                              BooleanSupplier cancellationCheck) {
-        this.resources = resources;
-        this.pack = pack;
-        this.modpackData = modpackData;
-        this.fileSystem = fileSystem;
-        this.versionBuilder = versionBuilder;
-        this.settings = settings;
-        this.selectedJavaRuntime = selectedJavaRuntime;
-        this.doFullInstall = doFullInstall;
-        this.mojangJavaWanted = mojangJavaWanted;
-        this.jarRegenerationRequired = jarRegenerationRequired;
-        this.minecraftVersion = modpackData.getGameVersion();
-        this.cancellationCheck = cancellationCheck;
+  ImmutableInstallerPlanner(
+      ResourceLoader resources,
+      ModpackModel pack,
+      Modpack modpackData,
+      LauncherFileSystem fileSystem,
+      MinecraftVersionInfoBuilder versionBuilder,
+      TechnicSettings settings,
+      IJavaRuntime selectedJavaRuntime,
+      boolean doFullInstall,
+      boolean mojangJavaWanted,
+      boolean jarRegenerationRequired,
+      BooleanSupplier cancellationCheck) {
+    this.resources = resources;
+    this.pack = pack;
+    this.modpackData = modpackData;
+    this.fileSystem = fileSystem;
+    this.versionBuilder = versionBuilder;
+    this.settings = settings;
+    this.selectedJavaRuntime = selectedJavaRuntime;
+    this.doFullInstall = doFullInstall;
+    this.mojangJavaWanted = mojangJavaWanted;
+    this.jarRegenerationRequired = jarRegenerationRequired;
+    this.minecraftVersion = modpackData.getGameVersion();
+    this.cancellationCheck = cancellationCheck;
+  }
+
+  ExecutionPlan<InstallExecutionContext> buildPreparationPlan() {
+    PlanBuilder<InstallExecutionContext> builder = new PlanBuilder<>();
+    builder.addPhase(PREPARE_PHASE, resources.getString("install.message.examiningmodpack"));
+    builder.addPhase(INSTALL_MODS_PHASE, resources.getString("install.message.installmods"));
+    builder.addPhase(RUN_DATA_PHASE, resources.getString("install.message.runData"));
+
+    if (doFullInstall) {
+      builder.addNode(
+          "cleanup-modpack",
+          PREPARE_PHASE,
+          "Wiping Folders",
+          1.0f,
+          (context, reporter) -> cleanupModpackDirectories());
+      builder.addNode(
+          "install-modpack-contents",
+          INSTALL_MODS_PHASE,
+          "Installing Modpack Contents",
+          Math.max(1.0f, modpackData.getMods().size()),
+          Collections.singletonList("cleanup-modpack"),
+          (context, reporter) -> installModpackContents(reporter));
+      builder.addNode(
+          "cleanup-modpack-cache",
+          INSTALL_MODS_PHASE,
+          "Cleaning Modpack Cache",
+          1.0f,
+          Collections.singletonList("install-modpack-contents"),
+          new LegacyTaskPlanAction<InstallExecutionContext, IMinecraftVersionInfo>(
+              new CleanupModpackCacheTask(pack, modpackData),
+              InstallExecutionContext::getResolvedVersion));
     }
 
-    ExecutionPlan<InstallExecutionContext> buildPreparationPlan() {
-        PlanBuilder<InstallExecutionContext> builder = new PlanBuilder<>();
-        builder.addPhase(PREPARE_PHASE, resources.getString("install.message.examiningmodpack"));
-        builder.addPhase(INSTALL_MODS_PHASE, resources.getString("install.message.installmods"));
-        builder.addPhase(RUN_DATA_PHASE, resources.getString("install.message.runData"));
-
-        if (doFullInstall) {
-            builder.addNode("cleanup-modpack", PREPARE_PHASE, "Wiping Folders", 1.0f,
-                    (context, reporter) -> cleanupModpackDirectories());
-            builder.addNode("install-modpack-contents", INSTALL_MODS_PHASE, "Installing Modpack Contents",
-                    Math.max(1.0f, modpackData.getMods().size()),
-                    Collections.singletonList("cleanup-modpack"),
-                    (context, reporter) -> installModpackContents(reporter));
-            builder.addNode("cleanup-modpack-cache", INSTALL_MODS_PHASE, "Cleaning Modpack Cache", 1.0f,
-                    Collections.singletonList("install-modpack-contents"),
-                    new LegacyTaskPlanAction<InstallExecutionContext, IMinecraftVersionInfo>(
-                            new CleanupModpackCacheTask(pack, modpackData),
-                            InstallExecutionContext::getResolvedVersion));
-        }
-
-        if (shouldWriteRunData()) {
-            Collection<String> dependencies = doFullInstall
-                    ? Collections.singletonList("cleanup-modpack-cache")
-                    : Collections.<String>emptyList();
-            builder.addNode("write-run-data", RUN_DATA_PHASE, "Writing Runtime Data", 1.0f, dependencies,
-                    new LegacyTaskPlanAction<InstallExecutionContext, IMinecraftVersionInfo>(
-                            new WriteRundataFile(pack, modpackData),
-                            InstallExecutionContext::getResolvedVersion));
-        }
-
-        return builder.build();
+    if (shouldWriteRunData()) {
+      Collection<String> dependencies =
+          doFullInstall
+              ? Collections.singletonList("cleanup-modpack-cache")
+              : Collections.<String>emptyList();
+      builder.addNode(
+          "write-run-data",
+          RUN_DATA_PHASE,
+          "Writing Runtime Data",
+          1.0f,
+          dependencies,
+          new LegacyTaskPlanAction<InstallExecutionContext, IMinecraftVersionInfo>(
+              new WriteRundataFile(pack, modpackData),
+              InstallExecutionContext::getResolvedVersion));
     }
 
-    ExecutionPlan<InstallExecutionContext> buildVersionDiscoveryPlan() {
-        PlanBuilder<InstallExecutionContext> builder = new PlanBuilder<>();
-        builder.addPhase(CHECK_VERSION_PHASE, resources.getString("install.message.checkversionfile"));
-        builder.addPhase(EXAMINE_VERSION_PHASE, resources.getString("install.message.examiningversionfile"));
+    return builder.build();
+  }
 
-        builder.addNode("resolve-version", CHECK_VERSION_PHASE, "Retrieving Modpack Version", 1.0f,
-                (context, reporter) -> context.setResolvedVersion(resolveVersion()));
-        builder.addNode("prepare-version", EXAMINE_VERSION_PHASE, "Processing version.", 1.0f,
-                Collections.singletonList("resolve-version"),
-                (context, reporter) -> prepareResolvedVersion(context));
-        return builder.build();
+  ExecutionPlan<InstallExecutionContext> buildVersionDiscoveryPlan() {
+    PlanBuilder<InstallExecutionContext> builder = new PlanBuilder<>();
+    builder.addPhase(CHECK_VERSION_PHASE, resources.getString("install.message.checkversionfile"));
+    builder.addPhase(
+        EXAMINE_VERSION_PHASE, resources.getString("install.message.examiningversionfile"));
+
+    builder.addNode(
+        "resolve-version",
+        CHECK_VERSION_PHASE,
+        "Retrieving Modpack Version",
+        1.0f,
+        (context, reporter) -> context.setResolvedVersion(resolveVersion()));
+    builder.addNode(
+        "prepare-version",
+        EXAMINE_VERSION_PHASE,
+        "Processing version.",
+        1.0f,
+        Collections.singletonList("resolve-version"),
+        (context, reporter) -> prepareResolvedVersion(context));
+    return builder.build();
+  }
+
+  ExecutionPlan<InstallExecutionContext> buildInstallPlan(InstallExecutionContext context)
+      throws IOException {
+    Objects.requireNonNull(
+        context.getResolvedVersion(), "Resolved version must exist before building install plan");
+
+    PlanBuilder<InstallExecutionContext> builder = new PlanBuilder<>();
+    builder.addPhase(INSTALL_LIBS_PHASE, resources.getString("install.message.installlibs"));
+    builder.addPhase(
+        INSTALL_MINECRAFT_PHASE, resources.getString("install.message.installminecraft"));
+    builder.addPhase(INSTALL_ASSETS_PHASE, resources.getString("install.message.installassets"));
+    if (mojangJavaWanted && context.getResolvedVersion().getMojangRuntimeInformation() != null) {
+      builder.addPhase(INSTALL_JAVA_PHASE, "Downloading Java runtime...");
+    }
+    if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX) {
+      builder.addPhase(FIX_NATIVE_PHASE, "Fixing OSX natives");
     }
 
-    ExecutionPlan<InstallExecutionContext> buildInstallPlan(InstallExecutionContext context) throws IOException {
-        Objects.requireNonNull(context.getResolvedVersion(), "Resolved version must exist before building install plan");
-
-        PlanBuilder<InstallExecutionContext> builder = new PlanBuilder<>();
-        builder.addPhase(INSTALL_LIBS_PHASE, resources.getString("install.message.installlibs"));
-        builder.addPhase(INSTALL_MINECRAFT_PHASE, resources.getString("install.message.installminecraft"));
-        builder.addPhase(INSTALL_ASSETS_PHASE, resources.getString("install.message.installassets"));
-        if (mojangJavaWanted && context.getResolvedVersion().getMojangRuntimeInformation() != null) {
-            builder.addPhase(INSTALL_JAVA_PHASE, "Downloading Java runtime...");
-        }
-        if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX) {
-            builder.addPhase(FIX_NATIVE_PHASE, "Fixing OSX natives");
-        }
-
-        Map<String, String> fmlLibs = FmlLibsManager.getLibsForVersion(minecraftVersion);
-        if (!fmlLibs.isEmpty()) {
-            builder.addNode("install-fml-libraries", INSTALL_LIBS_PHASE, "Installing FML libraries",
-                    Math.max(1.0f, fmlLibs.size()),
-                    (installContext, reporter) -> installFmlLibraries(fmlLibs, reporter));
-        }
-
-        if (!context.getLibrariesToInstall().isEmpty()) {
-            builder.addNode("install-version-libraries", INSTALL_LIBS_PHASE, "Installing Version Libraries",
-                    Math.max(1.0f, context.getLibrariesToInstall().size()),
-                    (installContext, reporter) -> installVersionLibraries(installContext, reporter));
-        }
-
-        builder.addNode("install-minecraft", INSTALL_MINECRAFT_PHASE, "Installing Minecraft", 1.0f,
-                new LegacyTaskPlanAction<InstallExecutionContext, IMinecraftVersionInfo>(
-                        new InstallMinecraftIfNecessaryTask(pack, minecraftVersion, fileSystem.getCacheDirectory(),
-                                jarRegenerationRequired),
-                        InstallExecutionContext::getResolvedVersion));
-
-        builder.addNode("install-assets", INSTALL_ASSETS_PHASE, "Checking Minecraft Assets", 1.0f,
-                (installContext, reporter) -> installAssets(installContext, reporter));
-
-        if (mojangJavaWanted && context.getResolvedVersion().getMojangRuntimeInformation() != null) {
-            builder.addNode("install-java-runtime", INSTALL_JAVA_PHASE, "Installing Java runtime", 1.0f,
-                    (installContext, reporter) -> installJavaRuntime(installContext, reporter));
-        }
-
-        if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX) {
-            Collection<String> renameDependencies = context.getLibrariesToInstall().isEmpty()
-                    ? Collections.<String>emptyList()
-                    : Collections.singletonList("install-version-libraries");
-            builder.addNode("rename-jnilib", FIX_NATIVE_PHASE, "Fixing OSX natives", 1.0f, renameDependencies,
-                    new LegacyTaskPlanAction<InstallExecutionContext, IMinecraftVersionInfo>(
-                            new RenameJnilibToDylibTask(pack),
-                            InstallExecutionContext::getResolvedVersion));
-        }
-
-        return builder.build();
+    Map<String, String> fmlLibs = FmlLibsManager.getLibsForVersion(minecraftVersion);
+    if (!fmlLibs.isEmpty()) {
+      builder.addNode(
+          "install-fml-libraries",
+          INSTALL_LIBS_PHASE,
+          "Installing FML libraries",
+          Math.max(1.0f, fmlLibs.size()),
+          (installContext, reporter) -> installFmlLibraries(fmlLibs, reporter));
     }
 
-    private boolean shouldWriteRunData() {
-        if (doFullInstall) {
-            return true;
-        }
-
-        if (pack.isLocalOnly()) {
-            return false;
-        }
-
-        return !new File(pack.getBinDir(), "runData").exists();
+    if (!context.getLibrariesToInstall().isEmpty()) {
+      builder.addNode(
+          "install-version-libraries",
+          INSTALL_LIBS_PHASE,
+          "Installing Version Libraries",
+          Math.max(1.0f, context.getLibrariesToInstall().size()),
+          (installContext, reporter) -> installVersionLibraries(installContext, reporter));
     }
 
-    private void cleanupModpackDirectories() throws IOException {
-        final File binDir = pack.getBinDir();
+    builder.addNode(
+        "install-minecraft",
+        INSTALL_MINECRAFT_PHASE,
+        "Installing Minecraft",
+        1.0f,
+        new LegacyTaskPlanAction<InstallExecutionContext, IMinecraftVersionInfo>(
+            new InstallMinecraftIfNecessaryTask(
+                pack, minecraftVersion, fileSystem.getCacheDirectory(), jarRegenerationRequired),
+            InstallExecutionContext::getResolvedVersion));
 
-        removeFile(new File(binDir, "version.json"));
-        removeFile(new File(binDir, "install_profile.json"));
+    builder.addNode(
+        "install-assets",
+        INSTALL_ASSETS_PHASE,
+        "Checking Minecraft Assets",
+        1.0f,
+        (installContext, reporter) -> installAssets(installContext, reporter));
 
-        File[] binFiles = binDir.listFiles();
-        if (binFiles != null) {
-            final Pattern minecraftVersionPattern = Pattern.compile("^\\d++(\\.\\d++)++\\.json$");
-            for (File binFile : binFiles) {
-                if (minecraftVersionPattern.matcher(binFile.getName()).matches()) {
-                    removeFile(binFile);
-                }
-            }
-        }
-
-        removeFile(new File(binDir, "runData"));
-        removeFile(new File(binDir, "modpack.jar"));
-
-        deleteMods(pack.getModsDir());
-        deleteMods(pack.getCoremodsDir());
-        deleteMods(new File(pack.getInstalledDirectory(), "Flan"));
+    if (mojangJavaWanted && context.getResolvedVersion().getMojangRuntimeInformation() != null) {
+      builder.addNode(
+          "install-java-runtime",
+          INSTALL_JAVA_PHASE,
+          "Installing Java runtime",
+          1.0f,
+          (installContext, reporter) -> installJavaRuntime(installContext, reporter));
     }
 
-    private void installModpackContents(NodeProgressReporter reporter) throws IOException, InterruptedException {
-        if (modpackData.getMods().isEmpty()) {
-            reporter.updateNodeProgress(100.0f);
-            return;
-        }
-
-        IZipFileFilter zipFilter = new ModpackZipFilter(pack);
-        final File cacheDir = pack.getCacheDir();
-        final File modpackInstallDirectory = pack.getInstalledDirectory();
-        Set<File> processedFiles = new LinkedHashSet<>(modpackData.getMods().size());
-        int index = 0;
-
-        for (Mod mod : modpackData.getMods()) {
-            throwIfCancelled();
-            File cacheFile = mod.generateSafeCacheFile(cacheDir);
-
-            if (!processedFiles.add(cacheFile)) {
-                throw new IOException("Detected overlapping files for modpack " + pack.getName() + ": " + cacheFile.getName());
-            }
-
-            IFileVerifier verifier = createModpackVerifier(mod);
-            NodeProgressReporter itemReporter = createItemReporter(reporter, index++, modpackData.getMods().size());
-
-            if (!cacheFile.exists() || !verifier.isFileValid(cacheFile)) {
-                downloadFile(mod.getUrl(), cacheFile, verifier, cacheFile.getName(), itemReporter, null, false);
-            }
-
-            executeLeafTask(new UnzipFileTask<IMinecraftVersionInfo>(cacheFile, modpackInstallDirectory, zipFilter), null,
-                    itemReporter);
-            reporter.updateNodeProgress(percentage(index, modpackData.getMods().size()));
-        }
+    if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX) {
+      Collection<String> renameDependencies =
+          context.getLibrariesToInstall().isEmpty()
+              ? Collections.<String>emptyList()
+              : Collections.singletonList("install-version-libraries");
+      builder.addNode(
+          "rename-jnilib",
+          FIX_NATIVE_PHASE,
+          "Fixing OSX natives",
+          1.0f,
+          renameDependencies,
+          new LegacyTaskPlanAction<InstallExecutionContext, IMinecraftVersionInfo>(
+              new RenameJnilibToDylibTask(pack), InstallExecutionContext::getResolvedVersion));
     }
 
-    private IMinecraftVersionInfo resolveVersion() throws IOException, InterruptedException {
-        IMinecraftVersionInfo version = versionBuilder.buildVersionFromKey(minecraftVersion);
+    return builder.build();
+  }
 
-        if (version == null && pack.isLocalOnly()) {
-            throw new PackNotAvailableOfflineException(pack.getDisplayName());
-        }
-        if (version == null) {
-            throw new DownloadException("The version.json file was invalid.");
-        }
-
-        version.setJavaRuntime(selectedJavaRuntime);
-        return version;
+  private boolean shouldWriteRunData() {
+    if (doFullInstall) {
+      return true;
     }
 
-    private void prepareResolvedVersion(InstallExecutionContext context) throws IOException {
-        IMinecraftVersionInfo version = context.getResolvedVersion();
-        List<Library> librariesToInstall = new ArrayList<>();
-        LinkedHashMap<String, Library> dedupedLibraries = new LinkedHashMap<>();
+    if (pack.isLocalOnly()) {
+      return false;
+    }
 
-        boolean isLegacy = MojangUtils.isLegacyVersion(version.getParentVersion());
-        if (isLegacy) {
-            Library legacyWrapper = new Library(
-                    "net.technicpack:legacywrapper:1.2.1",
-                    TechnicConstants.TECHNIC_LIB_REPO + "net/technicpack/legacywrapper/1.2.1/legacywrapper-1.2.1.jar",
-                    "741cbc946421a5a59188a51108e1ce5cb5674681",
-                    77327
-            );
-            version.addLibrary(legacyWrapper);
-            version.setMainClass("net.technicpack.legacywrapper.Launch");
+    return !new File(pack.getBinDir(), "runData").exists();
+  }
+
+  private void cleanupModpackDirectories() throws IOException {
+    final File binDir = pack.getBinDir();
+
+    removeFile(new File(binDir, "version.json"));
+    removeFile(new File(binDir, "install_profile.json"));
+
+    File[] binFiles = binDir.listFiles();
+    if (binFiles != null) {
+      final Pattern minecraftVersionPattern = Pattern.compile("^\\d++(\\.\\d++)++\\.json$");
+      for (File binFile : binFiles) {
+        if (minecraftVersionPattern.matcher(binFile.getName()).matches()) {
+          removeFile(binFile);
+        }
+      }
+    }
+
+    removeFile(new File(binDir, "runData"));
+    removeFile(new File(binDir, "modpack.jar"));
+
+    deleteMods(pack.getModsDir());
+    deleteMods(pack.getCoremodsDir());
+    deleteMods(new File(pack.getInstalledDirectory(), "Flan"));
+  }
+
+  private void installModpackContents(NodeProgressReporter reporter)
+      throws IOException, InterruptedException {
+    if (modpackData.getMods().isEmpty()) {
+      reporter.updateNodeProgress(100.0f);
+      return;
+    }
+
+    IZipFileFilter zipFilter = new ModpackZipFilter(pack);
+    final File cacheDir = pack.getCacheDir();
+    final File modpackInstallDirectory = pack.getInstalledDirectory();
+    Set<File> processedFiles = new LinkedHashSet<>(modpackData.getMods().size());
+    int index = 0;
+
+    for (Mod mod : modpackData.getMods()) {
+      throwIfCancelled();
+      File cacheFile = mod.generateSafeCacheFile(cacheDir);
+
+      if (!processedFiles.add(cacheFile)) {
+        throw new IOException(
+            "Detected overlapping files for modpack "
+                + pack.getName()
+                + ": "
+                + cacheFile.getName());
+      }
+
+      IFileVerifier verifier = createModpackVerifier(mod);
+      NodeProgressReporter itemReporter =
+          createItemReporter(reporter, index++, modpackData.getMods().size());
+
+      if (!cacheFile.exists() || !verifier.isFileValid(cacheFile)) {
+        downloadFile(
+            mod.getUrl(), cacheFile, verifier, cacheFile.getName(), itemReporter, null, false);
+      }
+
+      executeLeafTask(
+          new UnzipFileTask<IMinecraftVersionInfo>(cacheFile, modpackInstallDirectory, zipFilter),
+          null,
+          itemReporter);
+      reporter.updateNodeProgress(percentage(index, modpackData.getMods().size()));
+    }
+  }
+
+  private IMinecraftVersionInfo resolveVersion() throws IOException, InterruptedException {
+    IMinecraftVersionInfo version = versionBuilder.buildVersionFromKey(minecraftVersion);
+
+    if (version == null && pack.isLocalOnly()) {
+      throw new PackNotAvailableOfflineException(pack.getDisplayName());
+    }
+    if (version == null) {
+      throw new DownloadException("The version.json file was invalid.");
+    }
+
+    version.setJavaRuntime(selectedJavaRuntime);
+    return version;
+  }
+
+  private void prepareResolvedVersion(InstallExecutionContext context) throws IOException {
+    IMinecraftVersionInfo version = context.getResolvedVersion();
+    List<Library> librariesToInstall = new ArrayList<>();
+    LinkedHashMap<String, Library> dedupedLibraries = new LinkedHashMap<>();
+
+    boolean isLegacy = MojangUtils.isLegacyVersion(version.getParentVersion());
+    if (isLegacy) {
+      Library legacyWrapper =
+          new Library(
+              "net.technicpack:legacywrapper:1.2.1",
+              TechnicConstants.TECHNIC_LIB_REPO
+                  + "net/technicpack/legacywrapper/1.2.1/legacywrapper-1.2.1.jar",
+              "741cbc946421a5a59188a51108e1ce5cb5674681",
+              77327);
+      version.addLibrary(legacyWrapper);
+      version.setMainClass("net.technicpack.legacywrapper.Launch");
+    }
+
+    final boolean hasNeoForge = MojangUtils.hasNeoForge(version);
+    final boolean hasModernMinecraftForge = MojangUtils.hasModernMinecraftForge(version);
+
+    if (hasModernMinecraftForge || hasNeoForge) {
+      final String[] versionIdParts = version.getId().split("-", 3);
+      final boolean is1_12_2 = versionIdParts[0].equals("1.12.2");
+
+      if (is1_12_2) {
+        for (Library library : version.getLibrariesForCurrentOS(settings, selectedJavaRuntime)) {
+          if (library.getGradleGroup().equals("net.minecraftforge")
+              && library.getGradleArtifact().equals("forge")
+              && (library.getGradleClassifier() == null
+                  || library.getGradleClassifier().isEmpty())) {
+            String oldName = library.getName();
+            library.setName(library.getName() + ":universal");
+            Downloads downloads = library.getDownloads();
+            Artifact artifact = downloads.getArtifact();
+            artifact.setUrl("https://maven.minecraftforge.net/" + library.getArtifactPath());
+            library.setName(oldName);
+            break;
+          }
+        }
+      }
+
+      for (Library library : readInstallerLibraries()) {
+        if (library.isMinecraftForge() && is1_12_2) {
+          continue;
         }
 
-        final boolean hasNeoForge = MojangUtils.hasNeoForge(version);
-        final boolean hasModernMinecraftForge = MojangUtils.hasModernMinecraftForge(version);
-
-        if (hasModernMinecraftForge || hasNeoForge) {
-            final String[] versionIdParts = version.getId().split("-", 3);
-            final boolean is1_12_2 = versionIdParts[0].equals("1.12.2");
-
-            if (is1_12_2) {
-                for (Library library : version.getLibrariesForCurrentOS(settings, selectedJavaRuntime)) {
-                    if (library.getGradleGroup().equals("net.minecraftforge")
-                            && library.getGradleArtifact().equals("forge")
-                            && (library.getGradleClassifier() == null || library.getGradleClassifier().isEmpty())) {
-                        String oldName = library.getName();
-                        library.setName(library.getName() + ":universal");
-                        Downloads downloads = library.getDownloads();
-                        Artifact artifact = downloads.getArtifact();
-                        artifact.setUrl("https://maven.minecraftforge.net/" + library.getArtifactPath());
-                        library.setName(oldName);
-                        break;
-                    }
-                }
-            }
-
-            for (Library library : readInstallerLibraries()) {
-                if (library.isMinecraftForge() && is1_12_2) {
-                    continue;
-                }
-
-                if (library.getGradleGroup().equals("net.minecraftforge")
-                        && library.getGradleArtifact().equals("forge")
-                        && library.getGradleClassifier() != null
-                        && library.getGradleClassifier().equals("universal")
-                        && !is1_12_2) {
-                    Downloads downloads = library.getDownloads();
-                    Artifact artifact = downloads.getArtifact();
-                    if (artifact.getUrl() == null || artifact.getUrl().isEmpty()) {
-                        artifact.setUrl("https://maven.minecraftforge.net/" + library.getArtifactPath());
-                    }
-                }
-
-                dedupedLibraries.put(library.getName(), library);
-            }
-
-            if (!is1_12_2) {
-                Library forgeWrapper = new Library(
-                        "io.github.zekerzhayard:ForgeWrapper:1.6.0-technic",
-                        TechnicConstants.TECHNIC_LIB_REPO + "io/github/zekerzhayard/ForgeWrapper/1.6.0-technic/ForgeWrapper-1.6.0-technic.jar",
-                        "8764cbf4c7ded7ac0ad9136a0070bbfeee8813cf",
-                        34944
-                );
-                version.prependLibrary(forgeWrapper);
-                version.setMainClass("io.github.zekerzhayard.forgewrapper.installer.Main");
-
-                for (Library library : version.getLibrariesForCurrentOS(settings, selectedJavaRuntime)) {
-                    if (library.getGradleGroup().equals("net.minecraftforge")
-                            && library.getGradleArtifact().equals("forge")
-                            && (library.getGradleClassifier() == null || library.getGradleClassifier().isEmpty())) {
-                        String oldName = library.getName();
-                        library.setName(library.getName() + ":launcher");
-                        Downloads downloads = library.getDownloads();
-                        Artifact artifact = downloads.getArtifact();
-                        if (artifact.getUrl() == null || artifact.getUrl().isEmpty()) {
-                            artifact.setUrl("https://maven.minecraftforge.net/" + library.getArtifactPath());
-                        }
-                        library.setName(oldName);
-                        break;
-                    }
-
-                    if (library.getGradleGroup().equals("net.minecraftforge")
-                            && library.getGradleArtifact().equals("forge")
-                            && library.getGradleClassifier() != null
-                            && library.getGradleClassifier().equals("client")) {
-                        version.removeLibrary(library.getName());
-                    }
-                }
-            }
+        if (library.getGradleGroup().equals("net.minecraftforge")
+            && library.getGradleArtifact().equals("forge")
+            && library.getGradleClassifier() != null
+            && library.getGradleClassifier().equals("universal")
+            && !is1_12_2) {
+          Downloads downloads = library.getDownloads();
+          Artifact artifact = downloads.getArtifact();
+          if (artifact.getUrl() == null || artifact.getUrl().isEmpty()) {
+            artifact.setUrl("https://maven.minecraftforge.net/" + library.getArtifactPath());
+          }
         }
+
+        dedupedLibraries.put(library.getName(), library);
+      }
+
+      if (!is1_12_2) {
+        Library forgeWrapper =
+            new Library(
+                "io.github.zekerzhayard:ForgeWrapper:1.6.0-technic",
+                TechnicConstants.TECHNIC_LIB_REPO
+                    + "io/github/zekerzhayard/ForgeWrapper/1.6.0-technic/ForgeWrapper-1.6.0-technic.jar",
+                "8764cbf4c7ded7ac0ad9136a0070bbfeee8813cf",
+                34944);
+        version.prependLibrary(forgeWrapper);
+        version.setMainClass("io.github.zekerzhayard.forgewrapper.installer.Main");
 
         for (Library library : version.getLibrariesForCurrentOS(settings, selectedJavaRuntime)) {
-            if (library.isMinecraftForge() && !hasModernMinecraftForge) {
-                version.removeLibrary(library.getName());
-                continue;
+          if (library.getGradleGroup().equals("net.minecraftforge")
+              && library.getGradleArtifact().equals("forge")
+              && (library.getGradleClassifier() == null
+                  || library.getGradleClassifier().isEmpty())) {
+            String oldName = library.getName();
+            library.setName(library.getName() + ":launcher");
+            Downloads downloads = library.getDownloads();
+            Artifact artifact = downloads.getArtifact();
+            if (artifact.getUrl() == null || artifact.getUrl().isEmpty()) {
+              artifact.setUrl("https://maven.minecraftforge.net/" + library.getArtifactPath());
             }
+            library.setName(oldName);
+            break;
+          }
 
-            if (isLegacy && library.getName().startsWith("net.minecraft:launchwrapper:")) {
-                version.removeLibrary(library.getName());
-                continue;
-            }
-
-            if (library.isLog4j()
-                    && (new ComparableVersion(library.getGradleVersion())).compareTo(new ComparableVersion("2.16.0")) < 0) {
-                Library fixedLog4j = createPatchedLog4j(library);
-                version.addLibrary(fixedLog4j);
-                dedupedLibraries.put(fixedLog4j.getName(), fixedLog4j);
-                version.removeLibrary(library.getName());
-                continue;
-            }
-
-            dedupedLibraries.put(library.getName(), library);
+          if (library.getGradleGroup().equals("net.minecraftforge")
+              && library.getGradleArtifact().equals("forge")
+              && library.getGradleClassifier() != null
+              && library.getGradleClassifier().equals("client")) {
+            version.removeLibrary(library.getName());
+          }
         }
-
-        librariesToInstall.addAll(dedupedLibraries.values());
-        context.setLibrariesToInstall(librariesToInstall);
+      }
     }
 
-    private void installFmlLibraries(Map<String, String> fmlLibs, NodeProgressReporter reporter) throws IOException, InterruptedException {
-        Path fmlLibsCache = fileSystem.getCacheDirectory().resolve("fmllibs");
-        Files.createDirectories(fmlLibsCache);
-        File modpackFmlLibDir = new File(pack.getInstalledDirectory(), "lib");
+    for (Library library : version.getLibrariesForCurrentOS(settings, selectedJavaRuntime)) {
+      if (library.isMinecraftForge() && !hasModernMinecraftForge) {
+        version.removeLibrary(library.getName());
+        continue;
+      }
 
-        int index = 0;
-        for (Map.Entry<String, String> entry : fmlLibs.entrySet()) {
-            throwIfCancelled();
-            String name = entry.getKey();
-            String sha1 = entry.getValue();
-            SHA1FileVerifier verifier = sha1.isEmpty() ? null : new SHA1FileVerifier(sha1);
-            File cached = fmlLibsCache.resolve(name).toFile();
-            File target = new File(modpackFmlLibDir, name);
+      if (isLegacy && library.getName().startsWith("net.minecraft:launchwrapper:")) {
+        version.removeLibrary(library.getName());
+        continue;
+      }
 
-            NodeProgressReporter itemReporter = createItemReporter(reporter, index, fmlLibs.size());
-            if (!target.exists() || (verifier != null && !verifier.isFileValid(target))) {
-                downloadFile(TechnicConstants.TECHNIC_FML_LIB_REPO + name, cached, verifier, name, itemReporter, null, false);
-                executeLeafTask(new CopyFileTask<IMinecraftVersionInfo>(cached, target), null, itemReporter);
-            }
+      if (library.isLog4j()
+          && (new ComparableVersion(library.getGradleVersion()))
+                  .compareTo(new ComparableVersion("2.16.0"))
+              < 0) {
+        Library fixedLog4j = createPatchedLog4j(library);
+        version.addLibrary(fixedLog4j);
+        dedupedLibraries.put(fixedLog4j.getName(), fixedLog4j);
+        version.removeLibrary(library.getName());
+        continue;
+      }
 
-            index++;
-            reporter.updateNodeProgress(percentage(index, fmlLibs.size()));
-        }
+      dedupedLibraries.put(library.getName(), library);
     }
 
-    private void installVersionLibraries(InstallExecutionContext context, NodeProgressReporter reporter) throws IOException, InterruptedException {
-        List<Library> libraries = context.getLibrariesToInstall();
-        if (libraries.isEmpty()) {
-            reporter.updateNodeProgress(100.0f);
-            return;
-        }
+    librariesToInstall.addAll(dedupedLibraries.values());
+    context.setLibrariesToInstall(librariesToInstall);
+  }
 
-        int index = 0;
-        for (Library library : libraries) {
-            throwIfCancelled();
-            NodeProgressReporter itemReporter = createItemReporter(reporter, index, libraries.size());
-            installVersionLibrary(context, library, itemReporter);
-            index++;
-            reporter.updateNodeProgress(percentage(index, libraries.size()));
-        }
+  private void installFmlLibraries(Map<String, String> fmlLibs, NodeProgressReporter reporter)
+      throws IOException, InterruptedException {
+    Path fmlLibsCache = fileSystem.getCacheDirectory().resolve("fmllibs");
+    Files.createDirectories(fmlLibsCache);
+    File modpackFmlLibDir = new File(pack.getInstalledDirectory(), "lib");
+
+    int index = 0;
+    for (Map.Entry<String, String> entry : fmlLibs.entrySet()) {
+      throwIfCancelled();
+      String name = entry.getKey();
+      String sha1 = entry.getValue();
+      SHA1FileVerifier verifier = sha1.isEmpty() ? null : new SHA1FileVerifier(sha1);
+      File cached = fmlLibsCache.resolve(name).toFile();
+      File target = new File(modpackFmlLibDir, name);
+
+      NodeProgressReporter itemReporter = createItemReporter(reporter, index, fmlLibs.size());
+      if (!target.exists() || (verifier != null && !verifier.isFileValid(target))) {
+        downloadFile(
+            TechnicConstants.TECHNIC_FML_LIB_REPO + name,
+            cached,
+            verifier,
+            name,
+            itemReporter,
+            null,
+            false);
+        executeLeafTask(
+            new CopyFileTask<IMinecraftVersionInfo>(cached, target), null, itemReporter);
+      }
+
+      index++;
+      reporter.updateNodeProgress(percentage(index, fmlLibs.size()));
+    }
+  }
+
+  private void installVersionLibraries(
+      InstallExecutionContext context, NodeProgressReporter reporter)
+      throws IOException, InterruptedException {
+    List<Library> libraries = context.getLibrariesToInstall();
+    if (libraries.isEmpty()) {
+      reporter.updateNodeProgress(100.0f);
+      return;
     }
 
-    private void installVersionLibrary(InstallExecutionContext context, Library library, NodeProgressReporter reporter)
-            throws IOException, InterruptedException {
-        String nativeClassifier = null;
-        File extractDirectory = null;
-        if (library.getNatives() != null) {
-            nativeClassifier = library.getNatives().get(OperatingSystem.getOperatingSystem());
-            if (nativeClassifier != null) {
-                extractDirectory = new File(pack.getBinDir(), "natives");
-            }
-        }
+    int index = 0;
+    for (Library library : libraries) {
+      throwIfCancelled();
+      NodeProgressReporter itemReporter = createItemReporter(reporter, index, libraries.size());
+      installVersionLibrary(context, library, itemReporter);
+      index++;
+      reporter.updateNodeProgress(percentage(index, libraries.size()));
+    }
+  }
 
-        final String bitness = context.getResolvedVersion().getJavaRuntime().getBitness();
-        String path = library.getArtifactPath(nativeClassifier).replace("${arch}", bitness);
-        Path cache = fileSystem.getCacheDirectory().resolve(path);
-        if (cache.getParent() != null) {
-            Files.createDirectories(cache.getParent());
-        }
-
-        String sha1 = library.getArtifactSha1(nativeClassifier);
-        IFileVerifier verifier = (sha1 != null && !sha1.isEmpty())
-                ? new SHA1FileVerifier(sha1)
-                : new ValidZipFileVerifier();
-
-        boolean cacheValid = Files.isRegularFile(cache) && verifier.isFileValid(cache);
-        String url = null;
-        if (!cacheValid) {
-            url = library.getDownloadUrl(path).replace("${arch}", bitness);
-            if (sha1 == null || sha1.isEmpty()) {
-                String md5 = Utils.getETag(url);
-                if (md5 != null && !md5.isEmpty()) {
-                    verifier = new MD5FileVerifier(md5);
-                }
-            }
-
-            downloadFile(url, cache.toFile(), verifier, library.getName(), reporter, null, false);
-        }
-
-        if (extractDirectory != null) {
-            IZipFileFilter filter = null;
-            if (library.getExtract() != null) {
-                filter = new ExtractRulesFileFilter(library.getExtract());
-            }
-            executeLeafTask(new UnzipFileTask<IMinecraftVersionInfo>(cache.toFile(), extractDirectory, filter),
-                    context.getResolvedVersion(), reporter);
-        }
+  private void installVersionLibrary(
+      InstallExecutionContext context, Library library, NodeProgressReporter reporter)
+      throws IOException, InterruptedException {
+    String nativeClassifier = null;
+    File extractDirectory = null;
+    if (library.getNatives() != null) {
+      nativeClassifier = library.getNatives().get(OperatingSystem.getOperatingSystem());
+      if (nativeClassifier != null) {
+        extractDirectory = new File(pack.getBinDir(), "natives");
+      }
     }
 
-    private void installAssets(InstallExecutionContext context, NodeProgressReporter reporter) throws IOException, InterruptedException {
-        IMinecraftVersionInfo version = context.getResolvedVersion();
-        AssetIndex assetIndex = version.getAssetIndex();
-        if (assetIndex == null) {
-            throw new RuntimeException("No asset index detected, cannot continue");
-        }
-
-        File assetsDirectory = fileSystem.getAssetsDirectory().toFile();
-        File assetsFile = new File(assetsDirectory + File.separator + "indexes", assetIndex.getId() + ".json");
-        File parent = assetsFile.getParentFile();
-        if (parent != null) {
-            parent.mkdirs();
-        }
-
-        IFileVerifier indexVerifier = assetIndex.getSha1() != null
-                ? new SHA1FileVerifier(assetIndex.getSha1())
-                : new ValidJsonFileVerifier(MojangUtils.getGson());
-
-        if (!assetsFile.exists() || !indexVerifier.isFileValid(assetsFile)) {
-            downloadFile(assetIndex.getUrl(), assetsFile, indexVerifier, assetIndex.getId() + ".json", reporter, null, false);
-        }
-
-        JsonObject obj = readAssetsIndex(assetsFile.toPath());
-        boolean isVirtual = obj.has(VIRTUAL_FIELD) && obj.get(VIRTUAL_FIELD).isJsonPrimitive()
-                && obj.get(VIRTUAL_FIELD).getAsBoolean();
-        boolean mapToResources = obj.has(MAP_TO_RESOURCES_FIELD) && obj.get(MAP_TO_RESOURCES_FIELD).isJsonPrimitive()
-                && obj.get(MAP_TO_RESOURCES_FIELD).getAsBoolean();
-
-        version.setAreAssetsVirtual(isVirtual);
-        version.setAssetsMapToResources(mapToResources);
-
-        JsonObject allAssets = obj.getAsJsonObject(OBJECTS_FIELD);
-        if (allAssets == null) {
-            throw new DownloadException("The assets json file was invalid.");
-        }
-
-        String assetsKey = version.getAssetsKey();
-        if (assetsKey == null || assetsKey.isEmpty()) {
-            assetsKey = "legacy";
-        }
-
-        List<Map.Entry<String, JsonElement>> assets = new ArrayList<>(allAssets.entrySet());
-        int index = 0;
-        for (Map.Entry<String, JsonElement> assetObj : assets) {
-            throwIfCancelled();
-            NodeProgressReporter itemReporter = createItemReporter(reporter, index, assets.size());
-            processAsset(assetObj, assetsKey, isVirtual, mapToResources, assetsDirectory.getAbsolutePath(),
-                    itemReporter);
-            index++;
-            reporter.updateNodeProgress(percentage(index, assets.size()));
-        }
+    final String bitness = context.getResolvedVersion().getJavaRuntime().getBitness();
+    String path = library.getArtifactPath(nativeClassifier).replace("${arch}", bitness);
+    Path cache = fileSystem.getCacheDirectory().resolve(path);
+    if (cache.getParent() != null) {
+      Files.createDirectories(cache.getParent());
     }
 
-    private void processAsset(Map.Entry<String, JsonElement> assetObj, String assetsKey, boolean isVirtual,
-                              boolean mapToResources, String assetsDirectory, NodeProgressReporter reporter)
-            throws IOException, InterruptedException {
-        String assetPath = assetObj.getKey();
-        JsonObject assetData = assetObj.getValue().getAsJsonObject();
-        String hash = assetData.get(HASH_FIELD).getAsString();
-        long size = assetData.get(SIZE_FIELD).getAsLong();
+    String sha1 = library.getArtifactSha1(nativeClassifier);
+    IFileVerifier verifier =
+        (sha1 != null && !sha1.isEmpty()) ? new SHA1FileVerifier(sha1) : new ValidZipFileVerifier();
 
-        if (hash == null || hash.isEmpty()) {
-            throw new DownloadException(String.format("No hash provided for %s", assetPath));
-        }
-
-        IFileVerifier verifier = hash.length() == 40 ? new SHA1FileVerifier(hash) : new FileSizeVerifier(size);
-        File target = new File(String.format("%s/objects/%s", assetsDirectory, hash.substring(0, 2)), hash);
-        Files.createDirectories(target.getParentFile().toPath());
-        downloadFile(MojangUtils.getResourceUrl(hash), target, verifier, assetPath, reporter, null, false);
-
-        File cloneTo = null;
-        if (isVirtual) {
-            cloneTo = new File(String.format("%s/virtual/%s/%s", assetsDirectory, assetsKey, assetPath));
-        } else if (mapToResources) {
-            cloneTo = new File(pack.getResourcesDir(), assetPath);
-        }
-
-        if (cloneTo != null && !cloneTo.exists()) {
-            Files.createDirectories(cloneTo.getParentFile().toPath());
-            executeLeafTask(new CopyFileTask<IMinecraftVersionInfo>(target, cloneTo), null, reporter);
-        }
-    }
-
-    private void installJavaRuntime(InstallExecutionContext context, NodeProgressReporter reporter)
-            throws IOException, InterruptedException {
-        IMinecraftVersionInfo version = context.getResolvedVersion();
-        VersionJavaInfo runtimeInfo = version.getMojangRuntimeInformation();
-        if (runtimeInfo == null) {
-            reporter.updateNodeProgress(100.0f);
-            return;
-        }
-
-        final String runtimeName = runtimeInfo.getComponent();
-        JavaRuntimesIndex availableRuntimes = MojangUtils.getJavaRuntimesIndex(fileSystem.getRuntimesDirectory().resolve("_index.json"));
-        if (availableRuntimes == null) {
-            throw new DownloadException("Failed to get Mojang JRE information");
-        }
-
-        JavaRuntime manifestInfo = availableRuntimes.getRuntimeForCurrentOS(runtimeName);
-        if (manifestInfo == null) {
-            throw new DownloadException("A Mojang JRE is not available for the current OS");
-        }
-
-        Download runtimeDownload = manifestInfo.getManifest();
-        Path manifestPath = fileSystem.getRuntimesDirectory().resolve("manifests").resolve(runtimeName + ".json");
-        Files.createDirectories(manifestPath.getParent());
-        downloadFile(runtimeDownload.getUrl(), manifestPath.toFile(), new SHA1FileVerifier(runtimeDownload.getSha1()),
-                runtimeName + ".json", reporter, null, false);
-
-        JavaRuntimeManifest manifest = readJavaRuntimeManifest(manifestPath);
-        Path runtimeRoot = fileSystem.getRuntimesDirectory().resolve(runtimeInfo.getComponent());
-        ensurePathIsSafe(fileSystem.getRuntimesDirectory(), runtimeRoot);
-        Files.createDirectories(runtimeRoot);
-
-        processJavaDirectories(manifest, runtimeRoot);
-
-        List<Map.Entry<String, JavaRuntimeFile>> actionableEntries = manifest.getFiles().entrySet().stream()
-                .filter(entry -> entry.getValue().getType() != JavaRuntimeFileType.DIRECTORY)
-                .collect(Collectors.toList());
-
-        int index = 0;
-        for (Map.Entry<String, JavaRuntimeFile> entry : actionableEntries) {
-            throwIfCancelled();
-            NodeProgressReporter itemReporter = createItemReporter(reporter, index, actionableEntries.size());
-            processJavaEntry(runtimeRoot, entry, context.getResolvedVersion(), itemReporter);
-            index++;
-            reporter.updateNodeProgress(percentage(index, actionableEntries.size()));
-        }
-
-        version.setJavaRuntime(getJavaRuntime(runtimeRoot));
-    }
-
-    private void processJavaDirectories(JavaRuntimeManifest manifest, Path runtimeRoot) throws IOException {
-        for (Map.Entry<String, JavaRuntimeFile> entry : manifest.getFiles().entrySet()) {
-            if (entry.getValue().getType() != JavaRuntimeFileType.DIRECTORY) {
-                continue;
-            }
-
-            Path dir = runtimeRoot.resolve(entry.getKey());
-            ensurePathIsSafe(runtimeRoot, dir);
-            Files.createDirectories(dir);
-        }
-    }
-
-    private void processJavaEntry(Path runtimeRoot, Map.Entry<String, JavaRuntimeFile> entry,
-                                  IMinecraftVersionInfo version, NodeProgressReporter reporter)
-            throws IOException, InterruptedException {
-        String path = entry.getKey();
-        JavaRuntimeFile runtimeFile = entry.getValue();
-
-        if (runtimeFile.getType() == JavaRuntimeFileType.FILE) {
-            Path target = runtimeRoot.resolve(path);
-            ensurePathIsSafe(runtimeRoot, target);
-            Files.createDirectories(target.getParent());
-
-            Download rawDownload = runtimeFile.getDownloads().getRaw();
-            Download lzmaDownload = runtimeFile.getDownloads().getLzma();
-            IFileVerifier verifier = new SHA1FileVerifier(rawDownload.getSha1());
-            boolean useLzma = lzmaDownload != null && !lzmaDownload.getUrl().isEmpty()
-                    && ((double) lzmaDownload.getSize() / rawDownload.getSize() <= 0.66);
-
-            String url = useLzma ? lzmaDownload.getUrl() : rawDownload.getUrl();
-            String decompressor = useLzma ? CompressorStreamFactory.LZMA : null;
-
-            downloadFile(url, target.toFile(), verifier, target.getFileName().toString(), reporter, decompressor,
-                    runtimeFile.isExecutable());
-            return;
-        }
-
-        if (runtimeFile.getType() == JavaRuntimeFileType.LINK) {
-            Path link = runtimeRoot.resolve(path);
-            ensurePathIsSafe(runtimeRoot, link);
-            Path target = link.resolve(runtimeFile.getTarget());
-            ensurePathIsSafe(runtimeRoot, target);
-            executeLeafTask(new EnsureLinkedFileTask<IMinecraftVersionInfo>(link, target), version, reporter);
-        }
-    }
-
-    private static Library createPatchedLog4j(Library library) {
-        final String[] libNameParts = library.getName().split(":");
-        String log4jVersion = libNameParts[2].equals("2.0-beta9") ? "2.0-beta9-fixed" : "2.16.0";
-        String artifactName = libNameParts[1];
-
-        String sha1;
-        int size;
-        if ("2.16.0".equals(log4jVersion)) {
-            switch (artifactName) {
-                case "log4j-api":
-                    sha1 = "f821a18687126c2e2f227038f540e7953ad2cc8c";
-                    size = 301892;
-                    break;
-                case "log4j-core":
-                    sha1 = "539a445388aee52108700f26d9644989e7916e7c";
-                    size = 1789565;
-                    break;
-                case "log4j-slf4j18-impl":
-                    sha1 = "0c880a059056df5725f5d8d1035276d9749eba6d";
-                    size = 21249;
-                    break;
-                default:
-                    throw new RuntimeException("Unknown log4j artifact " + artifactName + ", cannot continue");
-            }
-        } else {
-            switch (artifactName) {
-                case "log4j-api":
-                    sha1 = "b61eaf2e64d8b0277e188262a8b771bbfa1502b3";
-                    size = 107347;
-                    break;
-                case "log4j-core":
-                    sha1 = "677991ea2d7426f76309a73739cecf609679492c";
-                    size = 677588;
-                    break;
-                default:
-                    throw new RuntimeException("Unknown log4j artifact " + artifactName + ", cannot continue");
-            }
-        }
-
-        String url = String.format(TechnicConstants.TECHNIC_LIB_REPO
-                + "org/apache/logging/log4j/%1$s/%2$s/%1$s-%2$s.jar", artifactName, log4jVersion);
-        return new Library(
-                "org.apache.logging.log4j:" + artifactName + ":" + log4jVersion,
-                url,
-                sha1,
-                size
-        );
-    }
-
-    private List<Library> readInstallerLibraries() throws IOException {
-        try (JarFile modpackJar = new JarFile(new File(pack.getBinDir(), "modpack.jar"))) {
-            JarEntry entry = modpackJar.getJarEntry("install_profile.json");
-            if (entry == null) {
-                throw new RuntimeException("modpack.jar does not contain the install_profile.json file");
-            }
-
-            try (InputStream inputStream = modpackJar.getInputStream(entry);
-                 InputStreamReader reader = new InputStreamReader(inputStream)) {
-                JsonElement root = JsonParser.parseReader(reader);
-                JsonObject rootObj = root.getAsJsonObject();
-                JsonElement librariesElement = rootObj.get("libraries");
-
-                if (librariesElement == null || !librariesElement.isJsonArray()) {
-                    throw new RuntimeException("install_profile.json does not contain libraries");
-                }
-
-                List<Library> libraries = MojangUtils.getGson().fromJson(librariesElement,
-                        new TypeToken<List<Library>>() { }.getType());
-                if (libraries == null) {
-                    return Collections.emptyList();
-                }
-
-                LinkedHashMap<String, Library> deduped = new LinkedHashMap<>();
-                for (Library library : libraries) {
-                    deduped.putIfAbsent(library.getName(), library);
-                }
-                return new ArrayList<>(deduped.values());
-            }
-        }
-    }
-
-    private JsonObject readAssetsIndex(Path assetsIndex) throws IOException {
-        try (Reader reader = Files.newBufferedReader(assetsIndex, StandardCharsets.UTF_8)) {
-            JsonObject jsonObject = MojangUtils.getGson().fromJson(reader, JsonObject.class);
-            if (jsonObject == null) {
-                throw new DownloadException(String.format("The assets file %s is invalid", assetsIndex));
-            }
-            return jsonObject;
-        } catch (JsonParseException e) {
-            throw new IOException(String.format("Failed to load assets index file %s", assetsIndex), e);
-        }
-    }
-
-    private JavaRuntimeManifest readJavaRuntimeManifest(Path runtimeManifestFile) throws IOException {
-        try (Reader reader = Files.newBufferedReader(runtimeManifestFile, StandardCharsets.UTF_8)) {
-            JavaRuntimeManifest manifest = MojangUtils.getGson().fromJson(reader, JavaRuntimeManifest.class);
-            if (manifest == null) {
-                throw new DownloadException("The Java runtime manifest is invalid.");
-            }
-            return manifest;
-        } catch (JsonParseException e) {
-            throw new IOException("Failed to parse Java runtime manifest", e);
-        }
-    }
-
-    private void downloadFile(String url, File destination, IFileVerifier verifier, String description,
-                              NodeProgressReporter reporter, String decompressor, boolean executable)
-            throws IOException, InterruptedException {
-        throwIfCancelled();
-        if (destination.exists() && (verifier == null || verifier.isFileValid(destination))) {
-            reporter.updateNodeProgress(100.0f);
-            return;
-        }
-
-        DownloadFilePlanAction<Void> action = new DownloadFilePlanAction<>(url, destination, verifier, description);
-        if (decompressor != null) {
-            action.withDecompressor(decompressor);
-        }
-        if (executable) {
-            action.withExecutable();
-        }
-        action.execute(null, reporter);
-        throwIfCancelled();
-    }
-
-    private void executeLeafTask(net.technicpack.launchercore.install.tasks.IInstallTask<IMinecraftVersionInfo> task,
-                                 IMinecraftVersionInfo metadata, NodeProgressReporter reporter)
-            throws IOException, InterruptedException {
-        throwIfCancelled();
-        InstallExecutionContext context = new InstallExecutionContext();
-        context.setResolvedVersion(metadata);
-        new LegacyTaskPlanAction<InstallExecutionContext, IMinecraftVersionInfo>(task,
-                InstallExecutionContext::getResolvedVersion).execute(context, reporter);
-        throwIfCancelled();
-    }
-
-    private void throwIfCancelled() throws InterruptedException {
-        throwIfCancelled(cancellationCheck);
-    }
-
-    static void throwIfCancelled(BooleanSupplier cancellationCheck) throws InterruptedException {
-        if (Thread.currentThread().isInterrupted() || cancellationCheck.getAsBoolean()) {
-            throw new InterruptedException();
-        }
-    }
-
-    static void throwIfInterrupted() throws InterruptedException {
-        if (Thread.currentThread().isInterrupted()) {
-            throw new InterruptedException();
-        }
-    }
-
-    private static NodeProgressReporter createItemReporter(NodeProgressReporter reporter, int index, int total) {
-        final float start = percentage(index, total);
-        final float end = percentage(index + 1, total);
-
-        return new NodeProgressReporter() {
-            @Override
-            public void updateNodeProgress(float percent) {
-                reporter.updateNodeProgress(start + ((end - start) * clamp(percent) / 100.0f));
-            }
-
-            @Override
-            public void updateCurrentItem(String label, net.technicpack.launchercore.progress.CurrentItemMode mode,
-                                          Float percent) {
-                reporter.updateCurrentItem(label, mode, percent);
-            }
-        };
-    }
-
-    private static float percentage(int completed, int total) {
-        if (total <= 0) {
-            return 100.0f;
-        }
-        return ((float) completed / (float) total) * 100.0f;
-    }
-
-    private static float clamp(float percent) {
-        if (percent < 0.0f) {
-            return 0.0f;
-        }
-        if (percent > 100.0f) {
-            return 100.0f;
-        }
-        return percent;
-    }
-
-    private static IFileVerifier createModpackVerifier(Mod mod) {
-        String md5 = mod.getMd5();
+    boolean cacheValid = Files.isRegularFile(cache) && verifier.isFileValid(cache);
+    String url = null;
+    if (!cacheValid) {
+      url = library.getDownloadUrl(path).replace("${arch}", bitness);
+      if (sha1 == null || sha1.isEmpty()) {
+        String md5 = Utils.getETag(url);
         if (md5 != null && !md5.isEmpty()) {
-            return new MD5FileVerifier(md5);
+          verifier = new MD5FileVerifier(md5);
         }
-        return new ValidZipFileVerifier();
+      }
+
+      downloadFile(url, cache.toFile(), verifier, library.getName(), reporter, null, false);
     }
 
-    private void deleteMods(File modsDir) throws CacheDeleteException {
-        if (modsDir == null || !modsDir.exists() || !modsDir.isDirectory()) {
-            return;
-        }
+    if (extractDirectory != null) {
+      IZipFileFilter filter = null;
+      if (library.getExtract() != null) {
+        filter = new ExtractRulesFileFilter(library.getExtract());
+      }
+      executeLeafTask(
+          new UnzipFileTask<IMinecraftVersionInfo>(cache.toFile(), extractDirectory, filter),
+          context.getResolvedVersion(),
+          reporter);
+    }
+  }
 
-        File[] mods = modsDir.listFiles();
-        if (mods == null) {
-            return;
-        }
-
-        for (File mod : mods) {
-            if (mod.isDirectory()) {
-                deleteMods(mod);
-                continue;
-            }
-
-            if (mod.getName().endsWith(".zip") || mod.getName().endsWith(".jar") || mod.getName().endsWith(".litemod")) {
-                removeFile(mod);
-            }
-        }
+  private void installAssets(InstallExecutionContext context, NodeProgressReporter reporter)
+      throws IOException, InterruptedException {
+    IMinecraftVersionInfo version = context.getResolvedVersion();
+    AssetIndex assetIndex = version.getAssetIndex();
+    if (assetIndex == null) {
+      throw new RuntimeException("No asset index detected, cannot continue");
     }
 
-    private void removeFile(File file) throws CacheDeleteException {
-        if (file.exists()) {
-            try {
-                Files.delete(file.toPath());
-            } catch (IOException e) {
-                throw new CacheDeleteException(file.getAbsolutePath(), e);
-            }
-        }
+    File assetsDirectory = fileSystem.getAssetsDirectory().toFile();
+    File assetsFile =
+        new File(assetsDirectory + File.separator + "indexes", assetIndex.getId() + ".json");
+    File parent = assetsFile.getParentFile();
+    if (parent != null) {
+      parent.mkdirs();
     }
 
-    private void ensurePathIsSafe(Path root, Path target) {
-        Path normalizedRoot = root.normalize();
-        Path normalizedTarget = target.normalize();
-        if (!normalizedTarget.startsWith(normalizedRoot)) {
-            throw new SecurityException(
-                    String.format("JRE entry attempted to be placed outside of JRE root folder: %s", target)
-            );
-        }
+    IFileVerifier indexVerifier =
+        assetIndex.getSha1() != null
+            ? new SHA1FileVerifier(assetIndex.getSha1())
+            : new ValidJsonFileVerifier(MojangUtils.getGson());
+
+    if (!assetsFile.exists() || !indexVerifier.isFileValid(assetsFile)) {
+      downloadFile(
+          assetIndex.getUrl(),
+          assetsFile,
+          indexVerifier,
+          assetIndex.getId() + ".json",
+          reporter,
+          null,
+          false);
     }
 
-    private static @NotNull IJavaRuntime getJavaRuntime(Path runtimeRoot) {
-        final OperatingSystem os = OperatingSystem.getOperatingSystem();
-        final Path runtimeExecutable;
+    JsonObject obj = readAssetsIndex(assetsFile.toPath());
+    boolean isVirtual =
+        obj.has(VIRTUAL_FIELD)
+            && obj.get(VIRTUAL_FIELD).isJsonPrimitive()
+            && obj.get(VIRTUAL_FIELD).getAsBoolean();
+    boolean mapToResources =
+        obj.has(MAP_TO_RESOURCES_FIELD)
+            && obj.get(MAP_TO_RESOURCES_FIELD).isJsonPrimitive()
+            && obj.get(MAP_TO_RESOURCES_FIELD).getAsBoolean();
 
-        if (os == OperatingSystem.WINDOWS) {
-            runtimeExecutable = runtimeRoot.resolve("bin/javaw.exe");
-        } else if (os == OperatingSystem.OSX) {
-            runtimeExecutable = runtimeRoot.resolve("jre.bundle/Contents/Home/bin/java");
-        } else {
-            runtimeExecutable = runtimeRoot.resolve("bin/java");
-        }
+    version.setAreAssetsVirtual(isVirtual);
+    version.setAssetsMapToResources(mapToResources);
 
-        return new net.technicpack.launchercore.launch.java.version.FileBasedJavaRuntime(runtimeExecutable);
+    JsonObject allAssets = obj.getAsJsonObject(OBJECTS_FIELD);
+    if (allAssets == null) {
+      throw new DownloadException("The assets json file was invalid.");
     }
 
-    static class InstallExecutionContext {
-        private IMinecraftVersionInfo resolvedVersion;
-        private List<Library> librariesToInstall = Collections.emptyList();
-
-        IMinecraftVersionInfo getResolvedVersion() {
-            return resolvedVersion;
-        }
-
-        void setResolvedVersion(IMinecraftVersionInfo resolvedVersion) {
-            this.resolvedVersion = resolvedVersion;
-        }
-
-        List<Library> getLibrariesToInstall() {
-            return librariesToInstall;
-        }
-
-        void setLibrariesToInstall(List<Library> librariesToInstall) {
-            this.librariesToInstall = librariesToInstall == null ? Collections.<Library>emptyList() : librariesToInstall;
-        }
+    String assetsKey = version.getAssetsKey();
+    if (assetsKey == null || assetsKey.isEmpty()) {
+      assetsKey = "legacy";
     }
+
+    List<Map.Entry<String, JsonElement>> assets = new ArrayList<>(allAssets.entrySet());
+    int index = 0;
+    for (Map.Entry<String, JsonElement> assetObj : assets) {
+      throwIfCancelled();
+      NodeProgressReporter itemReporter = createItemReporter(reporter, index, assets.size());
+      processAsset(
+          assetObj,
+          assetsKey,
+          isVirtual,
+          mapToResources,
+          assetsDirectory.getAbsolutePath(),
+          itemReporter);
+      index++;
+      reporter.updateNodeProgress(percentage(index, assets.size()));
+    }
+  }
+
+  private void processAsset(
+      Map.Entry<String, JsonElement> assetObj,
+      String assetsKey,
+      boolean isVirtual,
+      boolean mapToResources,
+      String assetsDirectory,
+      NodeProgressReporter reporter)
+      throws IOException, InterruptedException {
+    String assetPath = assetObj.getKey();
+    JsonObject assetData = assetObj.getValue().getAsJsonObject();
+    String hash = assetData.get(HASH_FIELD).getAsString();
+    long size = assetData.get(SIZE_FIELD).getAsLong();
+
+    if (hash == null || hash.isEmpty()) {
+      throw new DownloadException(String.format("No hash provided for %s", assetPath));
+    }
+
+    IFileVerifier verifier =
+        hash.length() == 40 ? new SHA1FileVerifier(hash) : new FileSizeVerifier(size);
+    File target =
+        new File(String.format("%s/objects/%s", assetsDirectory, hash.substring(0, 2)), hash);
+    Files.createDirectories(target.getParentFile().toPath());
+    downloadFile(
+        MojangUtils.getResourceUrl(hash), target, verifier, assetPath, reporter, null, false);
+
+    File cloneTo = null;
+    if (isVirtual) {
+      cloneTo = new File(String.format("%s/virtual/%s/%s", assetsDirectory, assetsKey, assetPath));
+    } else if (mapToResources) {
+      cloneTo = new File(pack.getResourcesDir(), assetPath);
+    }
+
+    if (cloneTo != null && !cloneTo.exists()) {
+      Files.createDirectories(cloneTo.getParentFile().toPath());
+      executeLeafTask(new CopyFileTask<IMinecraftVersionInfo>(target, cloneTo), null, reporter);
+    }
+  }
+
+  private void installJavaRuntime(InstallExecutionContext context, NodeProgressReporter reporter)
+      throws IOException, InterruptedException {
+    IMinecraftVersionInfo version = context.getResolvedVersion();
+    VersionJavaInfo runtimeInfo = version.getMojangRuntimeInformation();
+    if (runtimeInfo == null) {
+      reporter.updateNodeProgress(100.0f);
+      return;
+    }
+
+    final String runtimeName = runtimeInfo.getComponent();
+    JavaRuntimesIndex availableRuntimes =
+        MojangUtils.getJavaRuntimesIndex(fileSystem.getRuntimesDirectory().resolve("_index.json"));
+    if (availableRuntimes == null) {
+      throw new DownloadException("Failed to get Mojang JRE information");
+    }
+
+    JavaRuntime manifestInfo = availableRuntimes.getRuntimeForCurrentOS(runtimeName);
+    if (manifestInfo == null) {
+      throw new DownloadException("A Mojang JRE is not available for the current OS");
+    }
+
+    Download runtimeDownload = manifestInfo.getManifest();
+    Path manifestPath =
+        fileSystem.getRuntimesDirectory().resolve("manifests").resolve(runtimeName + ".json");
+    Files.createDirectories(manifestPath.getParent());
+    downloadFile(
+        runtimeDownload.getUrl(),
+        manifestPath.toFile(),
+        new SHA1FileVerifier(runtimeDownload.getSha1()),
+        runtimeName + ".json",
+        reporter,
+        null,
+        false);
+
+    JavaRuntimeManifest manifest = readJavaRuntimeManifest(manifestPath);
+    Path runtimeRoot = fileSystem.getRuntimesDirectory().resolve(runtimeInfo.getComponent());
+    ensurePathIsSafe(fileSystem.getRuntimesDirectory(), runtimeRoot);
+    Files.createDirectories(runtimeRoot);
+
+    processJavaDirectories(manifest, runtimeRoot);
+
+    List<Map.Entry<String, JavaRuntimeFile>> actionableEntries =
+        manifest.getFiles().entrySet().stream()
+            .filter(entry -> entry.getValue().getType() != JavaRuntimeFileType.DIRECTORY)
+            .collect(Collectors.toList());
+
+    int index = 0;
+    for (Map.Entry<String, JavaRuntimeFile> entry : actionableEntries) {
+      throwIfCancelled();
+      NodeProgressReporter itemReporter =
+          createItemReporter(reporter, index, actionableEntries.size());
+      processJavaEntry(runtimeRoot, entry, context.getResolvedVersion(), itemReporter);
+      index++;
+      reporter.updateNodeProgress(percentage(index, actionableEntries.size()));
+    }
+
+    version.setJavaRuntime(getJavaRuntime(runtimeRoot));
+  }
+
+  private void processJavaDirectories(JavaRuntimeManifest manifest, Path runtimeRoot)
+      throws IOException {
+    for (Map.Entry<String, JavaRuntimeFile> entry : manifest.getFiles().entrySet()) {
+      if (entry.getValue().getType() != JavaRuntimeFileType.DIRECTORY) {
+        continue;
+      }
+
+      Path dir = runtimeRoot.resolve(entry.getKey());
+      ensurePathIsSafe(runtimeRoot, dir);
+      Files.createDirectories(dir);
+    }
+  }
+
+  private void processJavaEntry(
+      Path runtimeRoot,
+      Map.Entry<String, JavaRuntimeFile> entry,
+      IMinecraftVersionInfo version,
+      NodeProgressReporter reporter)
+      throws IOException, InterruptedException {
+    String path = entry.getKey();
+    JavaRuntimeFile runtimeFile = entry.getValue();
+
+    if (runtimeFile.getType() == JavaRuntimeFileType.FILE) {
+      Path target = runtimeRoot.resolve(path);
+      ensurePathIsSafe(runtimeRoot, target);
+      Files.createDirectories(target.getParent());
+
+      Download rawDownload = runtimeFile.getDownloads().getRaw();
+      Download lzmaDownload = runtimeFile.getDownloads().getLzma();
+      IFileVerifier verifier = new SHA1FileVerifier(rawDownload.getSha1());
+      boolean useLzma =
+          lzmaDownload != null
+              && !lzmaDownload.getUrl().isEmpty()
+              && ((double) lzmaDownload.getSize() / rawDownload.getSize() <= 0.66);
+
+      String url = useLzma ? lzmaDownload.getUrl() : rawDownload.getUrl();
+      String decompressor = useLzma ? CompressorStreamFactory.LZMA : null;
+
+      downloadFile(
+          url,
+          target.toFile(),
+          verifier,
+          target.getFileName().toString(),
+          reporter,
+          decompressor,
+          runtimeFile.isExecutable());
+      return;
+    }
+
+    if (runtimeFile.getType() == JavaRuntimeFileType.LINK) {
+      Path link = runtimeRoot.resolve(path);
+      ensurePathIsSafe(runtimeRoot, link);
+      Path target = link.resolve(runtimeFile.getTarget());
+      ensurePathIsSafe(runtimeRoot, target);
+      executeLeafTask(
+          new EnsureLinkedFileTask<IMinecraftVersionInfo>(link, target), version, reporter);
+    }
+  }
+
+  private static Library createPatchedLog4j(Library library) {
+    final String[] libNameParts = library.getName().split(":");
+    String log4jVersion = libNameParts[2].equals("2.0-beta9") ? "2.0-beta9-fixed" : "2.16.0";
+    String artifactName = libNameParts[1];
+
+    String sha1;
+    int size;
+    if ("2.16.0".equals(log4jVersion)) {
+      switch (artifactName) {
+        case "log4j-api":
+          sha1 = "f821a18687126c2e2f227038f540e7953ad2cc8c";
+          size = 301892;
+          break;
+        case "log4j-core":
+          sha1 = "539a445388aee52108700f26d9644989e7916e7c";
+          size = 1789565;
+          break;
+        case "log4j-slf4j18-impl":
+          sha1 = "0c880a059056df5725f5d8d1035276d9749eba6d";
+          size = 21249;
+          break;
+        default:
+          throw new RuntimeException(
+              "Unknown log4j artifact " + artifactName + ", cannot continue");
+      }
+    } else {
+      switch (artifactName) {
+        case "log4j-api":
+          sha1 = "b61eaf2e64d8b0277e188262a8b771bbfa1502b3";
+          size = 107347;
+          break;
+        case "log4j-core":
+          sha1 = "677991ea2d7426f76309a73739cecf609679492c";
+          size = 677588;
+          break;
+        default:
+          throw new RuntimeException(
+              "Unknown log4j artifact " + artifactName + ", cannot continue");
+      }
+    }
+
+    String url =
+        String.format(
+            TechnicConstants.TECHNIC_LIB_REPO + "org/apache/logging/log4j/%1$s/%2$s/%1$s-%2$s.jar",
+            artifactName,
+            log4jVersion);
+    return new Library(
+        "org.apache.logging.log4j:" + artifactName + ":" + log4jVersion, url, sha1, size);
+  }
+
+  private List<Library> readInstallerLibraries() throws IOException {
+    try (JarFile modpackJar = new JarFile(new File(pack.getBinDir(), "modpack.jar"))) {
+      JarEntry entry = modpackJar.getJarEntry("install_profile.json");
+      if (entry == null) {
+        throw new RuntimeException("modpack.jar does not contain the install_profile.json file");
+      }
+
+      try (InputStream inputStream = modpackJar.getInputStream(entry);
+          InputStreamReader reader = new InputStreamReader(inputStream)) {
+        JsonElement root = JsonParser.parseReader(reader);
+        JsonObject rootObj = root.getAsJsonObject();
+        JsonElement librariesElement = rootObj.get("libraries");
+
+        if (librariesElement == null || !librariesElement.isJsonArray()) {
+          throw new RuntimeException("install_profile.json does not contain libraries");
+        }
+
+        List<Library> libraries =
+            MojangUtils.getGson()
+                .fromJson(librariesElement, new TypeToken<List<Library>>() {}.getType());
+        if (libraries == null) {
+          return Collections.emptyList();
+        }
+
+        LinkedHashMap<String, Library> deduped = new LinkedHashMap<>();
+        for (Library library : libraries) {
+          deduped.putIfAbsent(library.getName(), library);
+        }
+        return new ArrayList<>(deduped.values());
+      }
+    }
+  }
+
+  private JsonObject readAssetsIndex(Path assetsIndex) throws IOException {
+    try (Reader reader = Files.newBufferedReader(assetsIndex, StandardCharsets.UTF_8)) {
+      JsonObject jsonObject = MojangUtils.getGson().fromJson(reader, JsonObject.class);
+      if (jsonObject == null) {
+        throw new DownloadException(String.format("The assets file %s is invalid", assetsIndex));
+      }
+      return jsonObject;
+    } catch (JsonParseException e) {
+      throw new IOException(String.format("Failed to load assets index file %s", assetsIndex), e);
+    }
+  }
+
+  private JavaRuntimeManifest readJavaRuntimeManifest(Path runtimeManifestFile) throws IOException {
+    try (Reader reader = Files.newBufferedReader(runtimeManifestFile, StandardCharsets.UTF_8)) {
+      JavaRuntimeManifest manifest =
+          MojangUtils.getGson().fromJson(reader, JavaRuntimeManifest.class);
+      if (manifest == null) {
+        throw new DownloadException("The Java runtime manifest is invalid.");
+      }
+      return manifest;
+    } catch (JsonParseException e) {
+      throw new IOException("Failed to parse Java runtime manifest", e);
+    }
+  }
+
+  private void downloadFile(
+      String url,
+      File destination,
+      IFileVerifier verifier,
+      String description,
+      NodeProgressReporter reporter,
+      String decompressor,
+      boolean executable)
+      throws IOException, InterruptedException {
+    throwIfCancelled();
+    if (destination.exists() && (verifier == null || verifier.isFileValid(destination))) {
+      reporter.updateNodeProgress(100.0f);
+      return;
+    }
+
+    DownloadFilePlanAction<Void> action =
+        new DownloadFilePlanAction<>(url, destination, verifier, description);
+    if (decompressor != null) {
+      action.withDecompressor(decompressor);
+    }
+    if (executable) {
+      action.withExecutable();
+    }
+    action.execute(null, reporter);
+    throwIfCancelled();
+  }
+
+  private void executeLeafTask(
+      net.technicpack.launchercore.install.tasks.IInstallTask<IMinecraftVersionInfo> task,
+      IMinecraftVersionInfo metadata,
+      NodeProgressReporter reporter)
+      throws IOException, InterruptedException {
+    throwIfCancelled();
+    InstallExecutionContext context = new InstallExecutionContext();
+    context.setResolvedVersion(metadata);
+    new LegacyTaskPlanAction<InstallExecutionContext, IMinecraftVersionInfo>(
+            task, InstallExecutionContext::getResolvedVersion)
+        .execute(context, reporter);
+    throwIfCancelled();
+  }
+
+  private void throwIfCancelled() throws InterruptedException {
+    throwIfCancelled(cancellationCheck);
+  }
+
+  static void throwIfCancelled(BooleanSupplier cancellationCheck) throws InterruptedException {
+    if (Thread.currentThread().isInterrupted() || cancellationCheck.getAsBoolean()) {
+      throw new InterruptedException();
+    }
+  }
+
+  static void throwIfInterrupted() throws InterruptedException {
+    if (Thread.currentThread().isInterrupted()) {
+      throw new InterruptedException();
+    }
+  }
+
+  private static NodeProgressReporter createItemReporter(
+      NodeProgressReporter reporter, int index, int total) {
+    final float start = percentage(index, total);
+    final float end = percentage(index + 1, total);
+
+    return new NodeProgressReporter() {
+      @Override
+      public void updateNodeProgress(float percent) {
+        reporter.updateNodeProgress(start + ((end - start) * clamp(percent) / 100.0f));
+      }
+
+      @Override
+      public void updateCurrentItem(
+          String label, net.technicpack.launchercore.progress.CurrentItemMode mode, Float percent) {
+        reporter.updateCurrentItem(label, mode, percent);
+      }
+    };
+  }
+
+  private static float percentage(int completed, int total) {
+    if (total <= 0) {
+      return 100.0f;
+    }
+    return ((float) completed / (float) total) * 100.0f;
+  }
+
+  private static float clamp(float percent) {
+    if (percent < 0.0f) {
+      return 0.0f;
+    }
+    if (percent > 100.0f) {
+      return 100.0f;
+    }
+    return percent;
+  }
+
+  private static IFileVerifier createModpackVerifier(Mod mod) {
+    String md5 = mod.getMd5();
+    if (md5 != null && !md5.isEmpty()) {
+      return new MD5FileVerifier(md5);
+    }
+    return new ValidZipFileVerifier();
+  }
+
+  private void deleteMods(File modsDir) throws CacheDeleteException {
+    if (modsDir == null || !modsDir.exists() || !modsDir.isDirectory()) {
+      return;
+    }
+
+    File[] mods = modsDir.listFiles();
+    if (mods == null) {
+      return;
+    }
+
+    for (File mod : mods) {
+      if (mod.isDirectory()) {
+        deleteMods(mod);
+        continue;
+      }
+
+      if (mod.getName().endsWith(".zip")
+          || mod.getName().endsWith(".jar")
+          || mod.getName().endsWith(".litemod")) {
+        removeFile(mod);
+      }
+    }
+  }
+
+  private void removeFile(File file) throws CacheDeleteException {
+    if (file.exists()) {
+      try {
+        Files.delete(file.toPath());
+      } catch (IOException e) {
+        throw new CacheDeleteException(file.getAbsolutePath(), e);
+      }
+    }
+  }
+
+  private void ensurePathIsSafe(Path root, Path target) {
+    Path normalizedRoot = root.normalize();
+    Path normalizedTarget = target.normalize();
+    if (!normalizedTarget.startsWith(normalizedRoot)) {
+      throw new SecurityException(
+          String.format("JRE entry attempted to be placed outside of JRE root folder: %s", target));
+    }
+  }
+
+  private static @NotNull IJavaRuntime getJavaRuntime(Path runtimeRoot) {
+    final OperatingSystem os = OperatingSystem.getOperatingSystem();
+    final Path runtimeExecutable;
+
+    if (os == OperatingSystem.WINDOWS) {
+      runtimeExecutable = runtimeRoot.resolve("bin/javaw.exe");
+    } else if (os == OperatingSystem.OSX) {
+      runtimeExecutable = runtimeRoot.resolve("jre.bundle/Contents/Home/bin/java");
+    } else {
+      runtimeExecutable = runtimeRoot.resolve("bin/java");
+    }
+
+    return new net.technicpack.launchercore.launch.java.version.FileBasedJavaRuntime(
+        runtimeExecutable);
+  }
+
+  static class InstallExecutionContext {
+    private IMinecraftVersionInfo resolvedVersion;
+    private List<Library> librariesToInstall = Collections.emptyList();
+
+    IMinecraftVersionInfo getResolvedVersion() {
+      return resolvedVersion;
+    }
+
+    void setResolvedVersion(IMinecraftVersionInfo resolvedVersion) {
+      this.resolvedVersion = resolvedVersion;
+    }
+
+    List<Library> getLibrariesToInstall() {
+      return librariesToInstall;
+    }
+
+    void setLibrariesToInstall(List<Library> librariesToInstall) {
+      this.librariesToInstall =
+          librariesToInstall == null ? Collections.<Library>emptyList() : librariesToInstall;
+    }
+  }
 }

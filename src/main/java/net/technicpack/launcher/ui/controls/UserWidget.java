@@ -18,6 +18,15 @@
 
 package net.technicpack.launcher.ui.controls;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.image.BufferedImage;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.image.IImageJobListener;
@@ -26,107 +35,96 @@ import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.ImageUtils;
 
-import javax.swing.ImageIcon;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.image.BufferedImage;
-
 public class UserWidget extends JPanel implements IImageJobListener<IUserType> {
 
-    private ImageRepository<IUserType> skinRepository;
+  private ImageRepository<IUserType> skinRepository;
 
-    private JLabel userName;
-    private JLabel avatar;
-    private IUserType currentUser;
+  private JLabel userName;
+  private JLabel avatar;
+  private IUserType currentUser;
 
-    public UserWidget(ResourceLoader resources, ImageRepository<IUserType> skinRepository) {
-        this.skinRepository = skinRepository;
+  public UserWidget(ResourceLoader resources, ImageRepository<IUserType> skinRepository) {
+    this.skinRepository = skinRepository;
 
-        initComponents(resources);
+    initComponents(resources);
+  }
+
+  private void initComponents(ResourceLoader resources) {
+    setOpaque(false);
+    setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+
+    avatar = new JLabel();
+    avatar.setIcon(resources.getIcon("news/authorHelm.png"));
+    avatar.setAlignmentY(Component.CENTER_ALIGNMENT);
+    this.add(avatar);
+    this.add(Box.createHorizontalStrut(4));
+
+    String fullText = resources.getString("launcher.user.logged");
+
+    int endPreText = fullText.indexOf("{0}");
+    int startPostText = endPreText + 3;
+    String preText;
+    String postText = "";
+
+    if (endPreText < 0) {
+      preText = fullText;
+    } else {
+      if (endPreText == 0) {
+        preText = "";
+      } else {
+        preText = fullText.substring(0, endPreText);
+      }
+
+      if (startPostText >= fullText.length()) {
+        postText = "";
+      } else {
+        postText = fullText.substring(startPostText);
+      }
     }
 
-    private void initComponents(ResourceLoader resources) {
-        setOpaque(false);
-        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+    JLabel staticText = new JLabel(preText);
+    staticText.setForeground(UIConstants.COLOR_WHITE_TEXT);
+    staticText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
+    staticText.setAlignmentY(Component.CENTER_ALIGNMENT);
 
-        avatar = new JLabel();
-        avatar.setIcon(resources.getIcon("news/authorHelm.png"));
-        avatar.setAlignmentY(Component.CENTER_ALIGNMENT);
-        this.add(avatar);
-        this.add(Box.createHorizontalStrut(4));
-
-        String fullText = resources.getString("launcher.user.logged");
-
-        int endPreText = fullText.indexOf("{0}");
-        int startPostText = endPreText + 3;
-        String preText;
-        String postText = "";
-
-        if (endPreText < 0) {
-            preText = fullText;
-        } else {
-            if (endPreText == 0) {
-                preText = "";
-            } else {
-                preText = fullText.substring(0, endPreText);
-            }
-
-            if (startPostText >= fullText.length()) {
-                postText = "";
-            } else {
-                postText = fullText.substring(startPostText);
-            }
-        }
-
-        JLabel staticText = new JLabel(preText);
-        staticText.setForeground(UIConstants.COLOR_WHITE_TEXT);
-        staticText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
-        staticText.setAlignmentY(Component.CENTER_ALIGNMENT);
-
-        if (!preText.isEmpty()) {
-            this.add(staticText);
-            this.add(Box.createHorizontalStrut(4));
-        }
-
-        userName = new JLabel("");
-        userName.setForeground(UIConstants.COLOR_WHITE_TEXT);
-        userName.setBackground(Color.white);
-        userName.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 17, Font.BOLD));
-        userName.setAlignmentY(Component.CENTER_ALIGNMENT);
-        this.add(userName);
-
-        staticText = new JLabel(postText);
-        staticText.setForeground(UIConstants.COLOR_WHITE_TEXT);
-        staticText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
-        staticText.setAlignmentY(Component.CENTER_ALIGNMENT);
-
-        if (!postText.isEmpty()) {
-            this.add(Box.createHorizontalStrut(4));
-            this.add(staticText);
-        }
+    if (!preText.isEmpty()) {
+      this.add(staticText);
+      this.add(Box.createHorizontalStrut(4));
     }
 
-    public void setUser(IUserType user) {
-        currentUser = user;
-        userName.setText(user.getDisplayName());
+    userName = new JLabel("");
+    userName.setForeground(UIConstants.COLOR_WHITE_TEXT);
+    userName.setBackground(Color.white);
+    userName.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 17, Font.BOLD));
+    userName.setAlignmentY(Component.CENTER_ALIGNMENT);
+    this.add(userName);
 
-        ImageJob<IUserType> job = skinRepository.startImageJob(currentUser);
-        job.addJobListener(this);
-        refreshFace(job.getImage());
-    }
+    staticText = new JLabel(postText);
+    staticText.setForeground(UIConstants.COLOR_WHITE_TEXT);
+    staticText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
+    staticText.setAlignmentY(Component.CENTER_ALIGNMENT);
 
-    private void refreshFace(BufferedImage image) {
-        avatar.setIcon(new ImageIcon(ImageUtils.scaleWithAspectWidth(image, 30)));
+    if (!postText.isEmpty()) {
+      this.add(Box.createHorizontalStrut(4));
+      this.add(staticText);
     }
+  }
 
-    @Override
-    public void jobComplete(ImageJob<IUserType> job) {
-        if (job.getJobData() == currentUser)
-            refreshFace(job.getImage());
-    }
+  public void setUser(IUserType user) {
+    currentUser = user;
+    userName.setText(user.getDisplayName());
+
+    ImageJob<IUserType> job = skinRepository.startImageJob(currentUser);
+    job.addJobListener(this);
+    refreshFace(job.getImage());
+  }
+
+  private void refreshFace(BufferedImage image) {
+    avatar.setIcon(new ImageIcon(ImageUtils.scaleWithAspectWidth(image, 30)));
+  }
+
+  @Override
+  public void jobComplete(ImageJob<IUserType> job) {
+    if (job.getJobData() == currentUser) refreshFace(job.getImage());
+  }
 }

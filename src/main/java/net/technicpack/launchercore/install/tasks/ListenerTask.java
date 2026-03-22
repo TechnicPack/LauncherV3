@@ -19,53 +19,52 @@
 
 package net.technicpack.launchercore.install.tasks;
 
+import java.io.IOException;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.plan.NodeProgressReporter;
 import net.technicpack.launchercore.progress.CurrentItemMode;
 import net.technicpack.launchercore.util.DownloadListener;
 
-import java.io.IOException;
-
 public abstract class ListenerTask<T> implements IInstallTask<T>, DownloadListener {
 
-    private float taskProgress;
-    private InstallTasksQueue<T> queue;
-    private transient NodeProgressReporter progressReporter;
+  private float taskProgress;
+  private InstallTasksQueue<T> queue;
+  private transient NodeProgressReporter progressReporter;
 
-    protected ListenerTask() {
-        taskProgress = 0;
-    }
+  protected ListenerTask() {
+    taskProgress = 0;
+  }
 
-    @Override
-    public float getTaskProgress() {
-        return this.taskProgress;
-    }
+  @Override
+  public float getTaskProgress() {
+    return this.taskProgress;
+  }
 
-    @Override
-    public void runTask(InstallTasksQueue<T> queue) throws IOException, InterruptedException {
-        this.queue = queue;
-    }
+  @Override
+  public void runTask(InstallTasksQueue<T> queue) throws IOException, InterruptedException {
+    this.queue = queue;
+  }
 
-    protected void setQueue(InstallTasksQueue<T> queue) {
-        this.queue = queue;
-    }
+  protected void setQueue(InstallTasksQueue<T> queue) {
+    this.queue = queue;
+  }
 
-    public void setProgressReporter(NodeProgressReporter progressReporter) {
-        this.progressReporter = progressReporter;
-    }
+  public void setProgressReporter(NodeProgressReporter progressReporter) {
+    this.progressReporter = progressReporter;
+  }
 
-    public void stateChanged(String fileName, float progress) {
-        this.taskProgress = progress;
-        if (progressReporter != null) {
-            if (progress > 0.0f) {
-                progressReporter.updateCurrentItem(fileName, CurrentItemMode.DETERMINATE, progress);
-                progressReporter.updateNodeProgress(progress);
-            } else {
-                progressReporter.updateCurrentItem(fileName, CurrentItemMode.INDETERMINATE, null);
-            }
-        }
-        if (this.queue != null) {
-            this.queue.refreshProgress();
-        }
+  public void stateChanged(String fileName, float progress) {
+    this.taskProgress = progress;
+    if (progressReporter != null) {
+      if (progress > 0.0f) {
+        progressReporter.updateCurrentItem(fileName, CurrentItemMode.DETERMINATE, progress);
+        progressReporter.updateNodeProgress(progress);
+      } else {
+        progressReporter.updateCurrentItem(fileName, CurrentItemMode.INDETERMINATE, null);
+      }
     }
+    if (this.queue != null) {
+      this.queue.refreshProgress();
+    }
+  }
 }

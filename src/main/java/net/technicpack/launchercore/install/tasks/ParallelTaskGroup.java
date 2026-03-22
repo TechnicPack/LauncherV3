@@ -19,10 +19,6 @@
 
 package net.technicpack.launchercore.install.tasks;
 
-import net.technicpack.launchercore.exception.DownloadException;
-import net.technicpack.launchercore.install.IWeightedTasksQueue;
-import net.technicpack.launchercore.install.InstallTasksQueue;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -34,134 +30,142 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import net.technicpack.launchercore.exception.DownloadException;
+import net.technicpack.launchercore.install.IWeightedTasksQueue;
+import net.technicpack.launchercore.install.InstallTasksQueue;
 
 public class ParallelTaskGroup<T> implements IInstallTask<T>, IWeightedTasksQueue<T> {
-    private final String groupName;
-    private final Map<IInstallTask<T>, Float> taskWeights = new LinkedHashMap<>();
-    private final List<IInstallTask<T>> taskList = new ArrayList<>();
-    private float totalWeight = 0f;
+  private final String groupName;
+  private final Map<IInstallTask<T>, Float> taskWeights = new LinkedHashMap<>();
+  private final List<IInstallTask<T>> taskList = new ArrayList<>();
+  private float totalWeight = 0f;
 
-    private final AtomicInteger completedTasks = new AtomicInteger(0);
-    private final AtomicReference<String> currentFile = new AtomicReference<>("");
+  private final AtomicInteger completedTasks = new AtomicInteger(0);
+  private final AtomicReference<String> currentFile = new AtomicReference<>("");
 
-    private final ExecutorService executor;
+  private final ExecutorService executor;
 
-    private final Object taskListLock = new Object();
-    private boolean sealed = false;
+  private final Object taskListLock = new Object();
+  private boolean sealed = false;
 
-    public ParallelTaskGroup(String name) {
-        this.groupName = name;
-        this.executor = createDefaultExecutor();
-    }
+  public ParallelTaskGroup(String name) {
+    this.groupName = name;
+    this.executor = createDefaultExecutor();
+  }
 
-    private static ExecutorService createDefaultExecutor() {
-        int maxThreads = Math.min(64, Runtime.getRuntime().availableProcessors());
-        return Executors.newFixedThreadPool(maxThreads, r -> {
-            Thread t = new Thread(r);
-            t.setName(String.format("ParallelTaskGroup-%d", t.getId()));
-            t.setDaemon(true);
-            return t;
+  private static ExecutorService createDefaultExecutor() {
+    int maxThreads = Math.min(64, Runtime.getRuntime().availableProcessors());
+    return Executors.newFixedThreadPool(
+        maxThreads,
+        r -> {
+          Thread t = new Thread(r);
+          t.setName(String.format("ParallelTaskGroup-%d", t.getId()));
+          t.setDaemon(true);
+          return t;
         });
-    }
+  }
 
-    @Override
-    public void runTask(InstallTasksQueue<T> queue) throws IOException, InterruptedException {
-        seal();
-        List<CompletableFuture<Void>> futures = new ArrayList<>();
+  @Override
+  public void runTask(InstallTasksQueue<T> queue) throws IOException, InterruptedException {
+    seal();
+    List<CompletableFuture<Void>> futures = new ArrayList<>();
 
-        for (IInstallTask<T> task : taskList) {
-            futures.add(CompletableFuture.runAsync(() -> {
+    for (IInstallTask<T> task : taskList) {
+      futures.add(
+          CompletableFuture.runAsync(
+              () -> {
                 try {
-                    currentFile.set(task.getTaskDescription());
-                    task.runTask(queue);
-                    completedTasks.incrementAndGet();
-                    queue.refreshProgress();
+                  currentFile.set(task.getTaskDescription());
+                  task.runTask(queue);
+                  completedTasks.incrementAndGet();
+                  queue.refreshProgress();
                 } catch (IOException e) {
-                    throw new CompletionException(e);
+                  throw new CompletionException(e);
                 } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new CompletionException(e);
+                  Thread.currentThread().interrupt();
+                  throw new CompletionException(e);
                 }
-            }, executor));
-        }
-
-        try {
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-        } catch (CompletionException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof IOException) throw (IOException) cause;
-            if (cause instanceof InterruptedException) throw (InterruptedException) cause;
-            throw new DownloadException(cause);
-        } finally {
-            executor.shutdown();
-        }
+              },
+              executor));
     }
 
-    @Override
-    public String getTaskDescription() {
-        return groupName.replace("%s", currentFile.get());
+    try {
+      CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+    } catch (CompletionException e) {
+      Throwable cause = e.getCause();
+      if (cause instanceof IOException) throw (IOException) cause;
+      if (cause instanceof InterruptedException) throw (InterruptedException) cause;
+      throw new DownloadException(cause);
+    } finally {
+      executor.shutdown();
     }
+  }
 
-    @Override
-    public float getTaskProgress() {
-        synchronized (taskListLock) {
-            if (taskList.isEmpty() || totalWeight == 0) return 0;
+  @Override
+  public String getTaskDescription() {
+    return groupName.replace("%s", currentFile.get());
+  }
 
-            float completedWeight = 0;
-            for (IInstallTask<T> task : taskList) {
-                float weight = taskWeights.getOrDefault(task, 1.0f);
-                completedWeight += (task.getTaskProgress() / 100f) * weight;
-            }
+  @Override
+  public float getTaskProgress() {
+    synchronized (taskListLock) {
+      if (taskList.isEmpty() || totalWeight == 0) return 0;
 
-            return (completedWeight / totalWeight) * 100f;
-        }
+      float completedWeight = 0;
+      for (IInstallTask<T> task : taskList) {
+        float weight = taskWeights.getOrDefault(task, 1.0f);
+        completedWeight += (task.getTaskProgress() / 100f) * weight;
+      }
+
+      return (completedWeight / totalWeight) * 100f;
     }
+  }
 
-    @Override
-    public void addTask(IInstallTask<T> task) {
-        addTask(task, 1.0f);
-    }
+  @Override
+  public void addTask(IInstallTask<T> task) {
+    addTask(task, 1.0f);
+  }
 
-    @Override
-    public void addTask(IInstallTask<T> task, float weight) {
-        synchronized (taskListLock) {
-            ensureMutable();
-            taskList.add(task);
-            taskWeights.put(task, weight);
-            totalWeight += weight;
-        }
+  @Override
+  public void addTask(IInstallTask<T> task, float weight) {
+    synchronized (taskListLock) {
+      ensureMutable();
+      taskList.add(task);
+      taskWeights.put(task, weight);
+      totalWeight += weight;
     }
+  }
 
-    @Override
-    public void addNextTask(IInstallTask<T> task) {
-        addNextTask(task, 1.0f);
-    }
+  @Override
+  public void addNextTask(IInstallTask<T> task) {
+    addNextTask(task, 1.0f);
+  }
 
-    @Override
-    public void addNextTask(IInstallTask<T> task, float weight) {
-        synchronized (taskListLock) {
-            ensureMutable();
-            taskList.add(0, task);
-            taskWeights.put(task, weight);
-            totalWeight += weight;
-        }
+  @Override
+  public void addNextTask(IInstallTask<T> task, float weight) {
+    synchronized (taskListLock) {
+      ensureMutable();
+      taskList.add(0, task);
+      taskWeights.put(task, weight);
+      totalWeight += weight;
     }
+  }
 
-    public boolean isSealed() {
-        synchronized (taskListLock) {
-            return sealed;
-        }
+  public boolean isSealed() {
+    synchronized (taskListLock) {
+      return sealed;
     }
+  }
 
-    public void seal() {
-        synchronized (taskListLock) {
-            sealed = true;
-        }
+  public void seal() {
+    synchronized (taskListLock) {
+      sealed = true;
     }
+  }
 
-    private void ensureMutable() {
-        if (sealed) {
-            throw new IllegalStateException("Cannot mutate a task group after execution has started");
-        }
+  private void ensureMutable() {
+    if (sealed) {
+      throw new IllegalStateException("Cannot mutate a task group after execution has started");
     }
+  }
 }

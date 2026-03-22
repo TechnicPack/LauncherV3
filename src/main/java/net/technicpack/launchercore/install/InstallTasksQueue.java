@@ -20,75 +20,81 @@
 package net.technicpack.launchercore.install;
 
 import io.sentry.Sentry;
+import java.io.IOException;
+import java.util.LinkedList;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.util.DownloadListener;
 
-import java.io.IOException;
-import java.util.LinkedList;
-
 public class InstallTasksQueue<T> implements ITasksQueue<T> {
-    private final DownloadListener listener;
-    private final LinkedList<IInstallTask<T>> tasks;
-    private IInstallTask<T> currentTask;
-    private T metadata;
-    private boolean sealed;
+  private final DownloadListener listener;
+  private final LinkedList<IInstallTask<T>> tasks;
+  private IInstallTask<T> currentTask;
+  private T metadata;
+  private boolean sealed;
 
-    public InstallTasksQueue(DownloadListener listener) {
-        this.listener = listener;
-        this.tasks = new LinkedList<>();
-        this.currentTask = null;
-        this.sealed = false;
+  public InstallTasksQueue(DownloadListener listener) {
+    this.listener = listener;
+    this.tasks = new LinkedList<>();
+    this.currentTask = null;
+    this.sealed = false;
+  }
+
+  public void refreshProgress() {
+    if (listener != null && currentTask != null)
+      listener.stateChanged(currentTask.getTaskDescription(), currentTask.getTaskProgress());
+  }
+
+  public void runAllTasks() throws IOException, InterruptedException {
+    seal();
+    while (!tasks.isEmpty()) {
+      beginTaskExecution(tasks.removeFirst());
+      Sentry.addBreadcrumb(
+          String.format(
+              "Running task: \"%s\" (%s)",
+              currentTask.getTaskDescription(), currentTask.getClass().getSimpleName()));
+      refreshProgress();
+      currentTask.runTask(this);
     }
+  }
 
-    public void refreshProgress() {
-        if (listener != null && currentTask != null)
-            listener.stateChanged(currentTask.getTaskDescription(), currentTask.getTaskProgress());
+  public void addNextTask(IInstallTask<T> task) {
+    ensureMutable();
+    tasks.addFirst(task);
+  }
+
+  public void addTask(IInstallTask<T> task) {
+    ensureMutable();
+    tasks.addLast(task);
+  }
+
+  public DownloadListener getDownloadListener() {
+    return this.listener;
+  }
+
+  public void setMetadata(T metadata) {
+    this.metadata = metadata;
+  }
+
+  public T getMetadata() {
+    return this.metadata;
+  }
+
+  public void seal() {
+    sealed = true;
+  }
+
+  public boolean isSealed() {
+    return sealed;
+  }
+
+  public void beginTaskExecution(IInstallTask<T> task) {
+    seal();
+    currentTask = task;
+  }
+
+  private void ensureMutable() {
+    if (sealed) {
+      throw new IllegalStateException("Cannot mutate a task queue after execution has started");
     }
-
-    public void runAllTasks() throws IOException, InterruptedException {
-        seal();
-        while (!tasks.isEmpty()) {
-            beginTaskExecution(tasks.removeFirst());
-            Sentry.addBreadcrumb(String.format("Running task: \"%s\" (%s)", currentTask.getTaskDescription(), currentTask.getClass().getSimpleName()));
-            refreshProgress();
-            currentTask.runTask(this);
-        }
-    }
-
-    public void addNextTask(IInstallTask<T> task) {
-        ensureMutable();
-        tasks.addFirst(task);
-    }
-
-    public void addTask(IInstallTask<T> task) {
-        ensureMutable();
-        tasks.addLast(task);
-    }
-
-    public DownloadListener getDownloadListener() {
-        return this.listener;
-    }
-
-    public void setMetadata(T metadata) { this.metadata = metadata; }
-
-    public T getMetadata() { return this.metadata; }
-
-    public void seal() {
-        sealed = true;
-    }
-
-    public boolean isSealed() {
-        return sealed;
-    }
-
-    public void beginTaskExecution(IInstallTask<T> task) {
-        seal();
-        currentTask = task;
-    }
-
-    private void ensureMutable() {
-        if (sealed) {
-            throw new IllegalStateException("Cannot mutate a task queue after execution has started");
-        }
-    }
+  }
 }

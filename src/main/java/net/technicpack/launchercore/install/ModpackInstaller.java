@@ -19,43 +19,45 @@
 
 package net.technicpack.launchercore.install;
 
+import java.io.File;
+import java.io.IOException;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.utilslib.Utils;
 
-import java.io.File;
-import java.io.IOException;
-
 public class ModpackInstaller {
-    private final IPlatformApi platformApi;
-    private final String clientId;
+  private final IPlatformApi platformApi;
+  private final String clientId;
 
-    public ModpackInstaller(IPlatformApi platformApi, String clientId) {
-        this.clientId = clientId;
-        this.platformApi = platformApi;
+  public ModpackInstaller(IPlatformApi platformApi, String clientId) {
+    this.clientId = clientId;
+    this.platformApi = platformApi;
+  }
+
+  public void preparePack(ModpackModel modpack) {
+    modpack.save();
+    modpack.initDirectories();
+  }
+
+  public void completeInstall(ModpackModel modpack, String build, ModpackVersion installedVersion)
+      throws IOException {
+    ModpackVersion versionFile = new ModpackVersion(build, false);
+    versionFile.save(new File(modpack.getBinDir(), "version"));
+
+    if (installedVersion == null) {
+      platformApi.incrementPackInstalls(modpack.getName());
+      Utils.sendTracking("installModpack", modpack.getName(), modpack.getBuild(), clientId);
     }
+  }
 
-    public void preparePack(ModpackModel modpack) {
-        modpack.save();
-        modpack.initDirectories();
-    }
-
-    public void completeInstall(ModpackModel modpack, String build, ModpackVersion installedVersion) throws IOException {
-        ModpackVersion versionFile = new ModpackVersion(build, false);
-        versionFile.save(new File(modpack.getBinDir(), "version"));
-
-        if (installedVersion == null) {
-            platformApi.incrementPackInstalls(modpack.getName());
-            Utils.sendTracking("installModpack", modpack.getName(), modpack.getBuild(), clientId);
-        }
-    }
-
-    public IMinecraftVersionInfo installPack(InstallTasksQueue<IMinecraftVersionInfo> tasksQueue, ModpackModel modpack, String build) throws IOException, InterruptedException {
-        preparePack(modpack);
-        ModpackVersion installedVersion = modpack.getInstalledVersion();
-        tasksQueue.runAllTasks();
-        completeInstall(modpack, build, installedVersion);
-        return tasksQueue.getMetadata();
-    }
+  public IMinecraftVersionInfo installPack(
+      InstallTasksQueue<IMinecraftVersionInfo> tasksQueue, ModpackModel modpack, String build)
+      throws IOException, InterruptedException {
+    preparePack(modpack);
+    ModpackVersion installedVersion = modpack.getInstalledVersion();
+    tasksQueue.runAllTasks();
+    completeInstall(modpack, build, installedVersion);
+    return tasksQueue.getMetadata();
+  }
 }
