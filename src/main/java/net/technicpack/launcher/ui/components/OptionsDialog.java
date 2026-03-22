@@ -65,6 +65,10 @@ import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.Locale;
 
@@ -72,8 +76,10 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
     private static final int DIALOG_WIDTH = 830;
     private static final int DIALOG_HEIGHT = 564;
+    private static final int CLIENT_ID_VISIBLE_SUFFIX = 4;
 
     private final TechnicSettings settings;
+    private boolean clientIdRevealed;
 
     private boolean hasShownStreamInfo = false;
     private ResourceLoader resources;
@@ -181,8 +187,74 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     }
 
     protected void copyCid() {
-        StringSelection selection = new StringSelection(clientId.getText());
+        StringSelection selection = new StringSelection(settings.getClientId());
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
+    }
+
+    private void setClientIdRevealed(boolean revealed) {
+        clientIdRevealed = revealed;
+        refreshClientIdField();
+    }
+
+    private void refreshClientIdField() {
+        if (clientId == null) {
+            return;
+        }
+
+        String actualClientId = settings.getClientId();
+        clientId.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+        clientId.setText(clientIdRevealed
+                ? actualClientId
+                : resources.getString("launcheroptions.id.hidden", getClientIdSuffix(actualClientId)));
+    }
+
+    static String getClientIdSuffix(String clientId) {
+        if (clientId == null || clientId.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder visibleSuffix = new StringBuilder(CLIENT_ID_VISIBLE_SUFFIX);
+        int visibleCharacters = 0;
+
+        for (int i = clientId.length() - 1; i >= 0; i--) {
+            char currentCharacter = clientId.charAt(i);
+
+            if (Character.isLetterOrDigit(currentCharacter)) {
+                visibleSuffix.append(currentCharacter);
+                visibleCharacters++;
+                if (visibleCharacters == CLIENT_ID_VISIBLE_SUFFIX) {
+                    break;
+                }
+            }
+        }
+
+        return visibleSuffix.reverse().toString();
+    }
+
+    private void configureClientIdField() {
+        clientId.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                setClientIdRevealed(true);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                setClientIdRevealed(false);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                setClientIdRevealed(false);
+            }
+        });
+
+        clientId.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                setClientIdRevealed(false);
+            }
+        });
     }
 
     protected void changeShowConsole() {
@@ -375,7 +447,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         wrapperCommand.getDocument().addDocumentListener(wrapperCommandListener);
 
         installField.setText(settings.getTechnicRoot().getAbsolutePath());
-        clientId.setText(settings.getClientId());
+        setClientIdRevealed(false);
 
         for (ActionListener listener : showConsole.getActionListeners())
             showConsole.removeActionListener(listener);
@@ -794,8 +866,9 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         clientId.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
         clientId.setHighlighter(null);
         clientId.setEditable(false);
-        clientId.setCursor(null);
+        clientId.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         clientId.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 8));
+        configureClientIdField();
         panel.add(clientId, new GridBagConstraints(1, 4, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(8, 16, 8, 16), 0, 16));
 
         RoundedButton copyButton = new RoundedButton(resources.getString("launcheroptions.id.copy"));
