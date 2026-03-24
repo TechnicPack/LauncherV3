@@ -13,3 +13,4 @@ module_launcherv3.xml
 target/
 .gradle/
 build/
+node_modules/
