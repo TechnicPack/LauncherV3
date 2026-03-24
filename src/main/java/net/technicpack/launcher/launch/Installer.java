@@ -152,6 +152,23 @@ public class Installer {
     }
   }
 
+  Modpack preparePackForInstall(ModpackModel pack, String build)
+      throws InstallException, BuildInaccessibleException {
+    PackInfo packInfo = pack.getPackInfo();
+    if (packInfo == null) {
+      throw new InstallException("No modpack information found, cannot install or launch modpack.");
+    }
+
+    Modpack modpackData = packInfo.getModpack(build);
+    if (modpackData.getGameVersion() == null) {
+      throw new InstallException(
+          "No game version found for modpack, cannot install or launch modpack.");
+    }
+
+    installer.preparePack(pack);
+    return modpackData;
+  }
+
   private class InstallerThread extends Thread {
     private final DownloadListener listener;
     private final ModpackModel pack;
@@ -199,19 +216,7 @@ public class Installer {
         final boolean mojangJavaWanted = settings.shouldUseMojangJava();
 
         IMinecraftVersionInfo version;
-        installer.preparePack(pack);
-
-        PackInfo packInfo = pack.getPackInfo();
-        if (packInfo == null) {
-          throw new InstallException(
-              "No modpack information found, cannot install or launch modpack.");
-        }
-
-        Modpack modpackData = packInfo.getModpack(build);
-        if (modpackData.getGameVersion() == null) {
-          throw new InstallException(
-              "No game version found for modpack, cannot install or launch modpack.");
-        }
+        Modpack modpackData = preparePackForInstall(pack, build);
 
         ModpackVersion installedVersion = pack.getInstalledVersion();
         boolean jarRegenerationRequired =

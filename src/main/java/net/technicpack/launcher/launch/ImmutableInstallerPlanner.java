@@ -327,16 +327,55 @@ class ImmutableInstallerPlanner {
 
   private void installModpackContents(NodeProgressReporter reporter)
       throws IOException, InterruptedException {
-    if (modpackData.getMods().isEmpty()) {
+    List<PreparedModpackArchive> archives = prepareModpackArchives();
+    if (archives.isEmpty()) {
       reporter.updateNodeProgress(100.0f);
       return;
     }
 
     IZipFileFilter zipFilter = new ModpackZipFilter(pack);
-    final File cacheDir = pack.getCacheDir();
     final File modpackInstallDirectory = pack.getInstalledDirectory();
+    int totalSteps = archives.size() * 2;
+    int stepIndex = 0;
+
+    for (PreparedModpackArchive archive : archives) {
+      throwIfCancelled();
+      NodeProgressReporter itemReporter = createItemReporter(reporter, stepIndex, totalSteps);
+      if (!archive.cacheFile.exists() || !archive.verifier.isFileValid(archive.cacheFile)) {
+        downloadFile(
+            archive.mod.getUrl(),
+            archive.cacheFile,
+            archive.verifier,
+            archive.cacheFile.getName(),
+            itemReporter,
+            null,
+            false);
+      } else {
+        itemReporter.updateNodeProgress(100.0f);
+      }
+      stepIndex++;
+      reporter.updateNodeProgress(percentage(stepIndex, totalSteps));
+    }
+
+    for (int archiveIndex = archives.size() - 1; archiveIndex >= 0; archiveIndex--) {
+      throwIfCancelled();
+      PreparedModpackArchive archive = archives.get(archiveIndex);
+      NodeProgressReporter itemReporter = createItemReporter(reporter, stepIndex, totalSteps);
+      executeLeafTask(
+          new UnzipFileTask<IMinecraftVersionInfo>(
+              archive.cacheFile, modpackInstallDirectory, zipFilter),
+          null,
+          itemReporter);
+      stepIndex++;
+      reporter.updateNodeProgress(percentage(stepIndex, totalSteps));
+    }
+  }
+
+  private List<PreparedModpackArchive> prepareModpackArchives()
+      throws IOException, InterruptedException {
+    final File cacheDir = pack.getCacheDir();
     Set<File> processedFiles = new LinkedHashSet<>(modpackData.getMods().size());
-    int index = 0;
+    List<PreparedModpackArchive> archives = new ArrayList<>(modpackData.getMods().size());
 
     for (Mod mod : modpackData.getMods()) {
       throwIfCancelled();
@@ -350,21 +389,10 @@ class ImmutableInstallerPlanner {
                 + cacheFile.getName());
       }
 
-      IFileVerifier verifier = createModpackVerifier(mod);
-      NodeProgressReporter itemReporter =
-          createItemReporter(reporter, index++, modpackData.getMods().size());
-
-      if (!cacheFile.exists() || !verifier.isFileValid(cacheFile)) {
-        downloadFile(
-            mod.getUrl(), cacheFile, verifier, cacheFile.getName(), itemReporter, null, false);
-      }
-
-      executeLeafTask(
-          new UnzipFileTask<IMinecraftVersionInfo>(cacheFile, modpackInstallDirectory, zipFilter),
-          null,
-          itemReporter);
-      reporter.updateNodeProgress(percentage(index, modpackData.getMods().size()));
+      archives.add(new PreparedModpackArchive(mod, cacheFile, createModpackVerifier(mod)));
     }
+
+    return archives;
   }
 
   private IMinecraftVersionInfo resolveVersion() throws IOException, InterruptedException {
@@ -762,19 +790,27 @@ class ImmutableInstallerPlanner {
 
     processJavaDirectories(manifest, runtimeRoot);
 
-    List<Map.Entry<String, JavaRuntimeFile>> actionableEntries =
-        manifest.getFiles().entrySet().stream()
-            .filter(entry -> entry.getValue().getType() != JavaRuntimeFileType.DIRECTORY)
-            .collect(Collectors.toList());
+    List<Map.Entry<String, JavaRuntimeFile>> fileEntries =
+        collectJavaEntries(manifest, JavaRuntimeFileType.FILE);
+    List<Map.Entry<String, JavaRuntimeFile>> linkEntries =
+        collectJavaEntries(manifest, JavaRuntimeFileType.LINK);
+    int totalEntries = fileEntries.size() + linkEntries.size();
 
     int index = 0;
-    for (Map.Entry<String, JavaRuntimeFile> entry : actionableEntries) {
+    for (Map.Entry<String, JavaRuntimeFile> entry : fileEntries) {
       throwIfCancelled();
-      NodeProgressReporter itemReporter =
-          createItemReporter(reporter, index, actionableEntries.size());
+      NodeProgressReporter itemReporter = createItemReporter(reporter, index, totalEntries);
       processJavaEntry(runtimeRoot, entry, context.getResolvedVersion(), itemReporter);
       index++;
-      reporter.updateNodeProgress(percentage(index, actionableEntries.size()));
+      reporter.updateNodeProgress(percentage(index, totalEntries));
+    }
+
+    for (Map.Entry<String, JavaRuntimeFile> entry : linkEntries) {
+      throwIfCancelled();
+      NodeProgressReporter itemReporter = createItemReporter(reporter, index, totalEntries);
+      processJavaEntry(runtimeRoot, entry, context.getResolvedVersion(), itemReporter);
+      index++;
+      reporter.updateNodeProgress(percentage(index, totalEntries));
     }
 
     version.setJavaRuntime(getJavaRuntime(runtimeRoot));
@@ -791,6 +827,13 @@ class ImmutableInstallerPlanner {
       ensurePathIsSafe(runtimeRoot, dir);
       Files.createDirectories(dir);
     }
+  }
+
+  private List<Map.Entry<String, JavaRuntimeFile>> collectJavaEntries(
+      JavaRuntimeManifest manifest, JavaRuntimeFileType type) {
+    return manifest.getFiles().entrySet().stream()
+        .filter(entry -> entry.getValue().getType() == type)
+        .collect(Collectors.toList());
   }
 
   private void processJavaEntry(
@@ -1126,6 +1169,18 @@ class ImmutableInstallerPlanner {
     void setLibrariesToInstall(List<Library> librariesToInstall) {
       this.librariesToInstall =
           librariesToInstall == null ? Collections.<Library>emptyList() : librariesToInstall;
+    }
+  }
+
+  private static final class PreparedModpackArchive {
+    private final Mod mod;
+    private final File cacheFile;
+    private final IFileVerifier verifier;
+
+    private PreparedModpackArchive(Mod mod, File cacheFile, IFileVerifier verifier) {
+      this.mod = mod;
+      this.cacheFile = cacheFile;
+      this.verifier = verifier;
     }
   }
 }
