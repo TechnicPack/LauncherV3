@@ -503,6 +503,11 @@ class ImmutableInstallerPlannerTest {
     }
 
     @Override
+    public ArgumentList getDefaultUserJavaArguments() {
+      return null;
+    }
+
+    @Override
     public List<Library> getLibraries() {
       return Collections.emptyList();
     }

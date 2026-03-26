@@ -1,31 +1,39 @@
 package net.technicpack.minecraftcore.mojang.version.io;
 
+import com.google.gson.annotations.SerializedName;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings({"unused"})
 public class LaunchArguments {
-	private ArgumentList game;
-	private ArgumentList jvm;
+  private ArgumentList game;
+  private ArgumentList jvm;
 
-    private LaunchArguments() {
-        // Empty constructor for GSON
-    }
+  @SerializedName("default-user-jvm")
+  private ArgumentList defaultUserJvm;
 
-    public static LaunchArguments fromLegacyString(String minecraftArguments) {
-        LaunchArguments args = new LaunchArguments();
-        args.game = ArgumentList.fromString(minecraftArguments);
-        args.jvm = null;
-        return args;
-    }
+  private LaunchArguments() {
+    // Empty constructor for GSON
+  }
 
-	public ArgumentList getGameArgs() {
-		return game;
-	}
+  public static LaunchArguments fromLegacyString(String minecraftArguments) {
+    LaunchArguments args = new LaunchArguments();
+    args.game = ArgumentList.fromString(minecraftArguments);
+    args.jvm = null;
+    return args;
+  }
 
-    @Nullable
-	public ArgumentList getJvmArgs() {
-		return jvm;
-	}
+  public ArgumentList getGameArgs() {
+    return game;
+  }
 
+  @Nullable
+  public ArgumentList getJvmArgs() {
+    return jvm;
+  }
+
+  @Nullable
+  public ArgumentList getDefaultUserJavaArguments() {
+    return defaultUserJvm;
+  }
 }

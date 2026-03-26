@@ -24,13 +24,17 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.launcher.io.LauncherFileSystem;
+import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.exception.InstallException;
@@ -148,13 +152,9 @@ public class MinecraftLauncher {
     StringSubstitutor paramDereferencer =
         createParamDereferencer(pack, version, nativesDir, cpString, launchOpts);
 
-    // Prepend custom JVM arguments
-    String customJvmArgs = options.getOptions().getJavaArgs();
-    if (StringUtils.isNotEmpty(customJvmArgs)) {
-      customJvmArgs = customJvmArgs.replaceAll("[\\r\\n]", " ");
-      for (String customJvmArg : customJvmArgs.split(" +")) {
-        commands.addRaw(customJvmArg);
-      }
+    for (String launcherJvmArg :
+        resolveLauncherJvmArgs(version, launchOpts, javaRuntime, paramDereferencer, memory)) {
+      commands.addRaw(launcherJvmArg);
     }
 
     // build jvm args
@@ -172,8 +172,9 @@ public class MinecraftLauncher {
       }
     }
 
-    commands.addRaw("-Xms" + memory + "m");
-    commands.addRaw("-Xmx" + memory + "m");
+    for (String launcherMemoryArg : buildLauncherMemoryArgs(memory)) {
+      commands.addRaw(launcherMemoryArg);
+    }
 
     if (!RunData.isJavaVersionAtLeast(launchJavaVersion, "1.8")) {
       int permSize = 128;
@@ -289,6 +290,86 @@ public class MinecraftLauncher {
 
     // TODO: Add all the other less important commands
     return commands.collect();
+  }
+
+  static List<String> resolveLauncherJvmArgs(
+      IMinecraftVersionInfo version,
+      ILaunchOptions launchOptions,
+      IJavaRuntime javaRuntime,
+      StringSubstitutor dereferencer,
+      long memoryMb) {
+    if (!launchOptions.isUsingDefaultJavaArgs()) {
+      return splitJvmArgString(launchOptions.getJavaArgs());
+    }
+
+    ArgumentList defaultUserJvm = version.getDefaultUserJavaArguments();
+    if (defaultUserJvm == null) {
+      return splitJvmArgString(TechnicSettings.DEFAULT_JAVA_ARGS);
+    }
+
+    return filterVersionDefaultUserJvmArgs(
+        defaultUserJvm.resolve(launchOptions, javaRuntime, dereferencer), memoryMb);
+  }
+
+  static List<String> buildLauncherMemoryArgs(long memoryMb) {
+    return Collections.singletonList("-Xmx" + memoryMb + "m");
+  }
+
+  private static List<String> filterVersionDefaultUserJvmArgs(List<String> args, long memoryMb) {
+    List<String> filteredArgs = new ArrayList<>();
+
+    for (String arg : args) {
+      if (arg.startsWith("-Xmx")) {
+        continue;
+      }
+
+      if (arg.startsWith("-Xms")) {
+        Long initialHeapMb = parseHeapArgMb(arg, "-Xms");
+        if (initialHeapMb != null && initialHeapMb > memoryMb) {
+          continue;
+        }
+      }
+
+      filteredArgs.add(arg);
+    }
+
+    return filteredArgs;
+  }
+
+  private static List<String> splitJvmArgString(String args) {
+    if (StringUtils.isBlank(args)) {
+      return Collections.emptyList();
+    }
+
+    String normalizedArgs = args.replaceAll("[\\r\\n]", " ");
+    List<String> splitArgs = new ArrayList<>();
+
+    for (String arg : normalizedArgs.split(" +")) {
+      if (!arg.isEmpty()) {
+        splitArgs.add(arg);
+      }
+    }
+
+    return splitArgs;
+  }
+
+  private static Long parseHeapArgMb(String arg, String prefix) {
+    String value = arg.substring(prefix.length()).trim().toUpperCase(Locale.ROOT);
+
+    try {
+      if (value.endsWith("G")) {
+        return Long.parseLong(value.substring(0, value.length() - 1)) * 1024L;
+      }
+      if (value.endsWith("M")) {
+        return Long.parseLong(value.substring(0, value.length() - 1));
+      }
+      if (value.endsWith("K")) {
+        return Long.parseLong(value.substring(0, value.length() - 1)) / 1024L;
+      }
+      return Long.parseLong(value) / (1024L * 1024L);
+    } catch (NumberFormatException ex) {
+      return null;
+    }
   }
 
   private StringSubstitutor createParamDereferencer(

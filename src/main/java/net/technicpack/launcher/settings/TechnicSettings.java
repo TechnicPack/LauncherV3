@@ -19,13 +19,6 @@
 package net.technicpack.launcher.settings;
 
 import com.google.gson.annotations.SerializedName;
-import net.technicpack.launchercore.launch.java.JavaVersionRepository;
-import net.technicpack.launchercore.util.LaunchAction;
-import net.technicpack.minecraftcore.launch.ILaunchOptions;
-import net.technicpack.minecraftcore.launch.WindowType;
-import net.technicpack.utilslib.Utils;
-import org.jetbrains.annotations.NotNull;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
@@ -34,224 +27,287 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 import java.util.logging.Level;
+import net.technicpack.launchercore.launch.java.JavaVersionRepository;
+import net.technicpack.launchercore.util.LaunchAction;
+import net.technicpack.minecraftcore.launch.ILaunchOptions;
+import net.technicpack.minecraftcore.launch.WindowType;
+import net.technicpack.utilslib.Utils;
+import org.jetbrains.annotations.NotNull;
 
 public class TechnicSettings implements ILaunchOptions {
-    public static final String STABLE = "stable";
-    public static final String BETA = "beta";
+  public static final String STABLE = "stable";
+  public static final String BETA = "beta";
 
-    // These are the default JVM args in the vanilla launcher
-    public static final String DEFAULT_JAVA_ARGS = "-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M";
+  // These are the default JVM args in the vanilla launcher
+  public static final String DEFAULT_JAVA_ARGS =
+      "-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M";
 
-    private static final String PORTABLE_MODE = "portable";
+  private static final String PORTABLE_MODE = "portable";
 
-    private transient File settingsFile;
-    private transient File technicRoot;
-    private int memory;
-    private LaunchAction launchAction = LaunchAction.HIDE;
-    private String buildStream = STABLE;
-    private boolean showConsole = true;
-    private String languageCode = "default";
-    private String clientId = UUID.randomUUID().toString();
-    private String directory;
-    private String javaArgs;
-    private String wrapperCommand;
-    private int latestNewsArticle;
-    private boolean launchToModpacks;
-    private String javaVersion = JavaVersionRepository.VERSION_LATEST_64BIT;
-    private boolean autoAcceptRequirements = false;
-    /**
-     * User prefers 64 bit if true, 32 bit otherwise
-     */
-    @SerializedName("javaBitness")
-    private boolean prefer64Bit = true;
+  private transient File settingsFile;
+  private transient File technicRoot;
+  private int memory;
+  private LaunchAction launchAction = LaunchAction.HIDE;
+  private String buildStream = STABLE;
+  private boolean showConsole = true;
+  private String languageCode = "default";
+  private String clientId = UUID.randomUUID().toString();
+  private String directory;
+  private String javaArgs;
+  private String wrapperCommand;
+  private int latestNewsArticle;
+  private boolean launchToModpacks;
+  private String javaVersion = JavaVersionRepository.VERSION_LATEST_64BIT;
+  private boolean autoAcceptRequirements = false;
 
-    private String launcherSettingsVersion = "2";
+  /** User prefers 64 bit if true, 32 bit otherwise */
+  @SerializedName("javaBitness")
+  private boolean prefer64Bit = true;
 
-    private WindowType windowType = WindowType.DEFAULT;
-    private int windowWidth = 0;
-    private int windowHeight = 0;
-    private boolean enableStencilBuffer = true;
-    private boolean useMojangJava = true;
+  private String launcherSettingsVersion = "2";
 
-    public File getFilePath() { return this.settingsFile; }
-    public void setFilePath(File settingsFile) {
-        this.settingsFile = settingsFile;
+  private WindowType windowType = WindowType.DEFAULT;
+  private int windowWidth = 0;
+  private int windowHeight = 0;
+  private boolean enableStencilBuffer = true;
+  private boolean useMojangJava = true;
+
+  public File getFilePath() {
+    return this.settingsFile;
+  }
+
+  public void setFilePath(File settingsFile) {
+    this.settingsFile = settingsFile;
+  }
+
+  public File getTechnicRoot() {
+    if (technicRoot == null || !technicRoot.exists()) buildTechnicRoot();
+
+    return technicRoot;
+  }
+
+  public Path getTechnicRootPath() {
+    return getTechnicRoot().toPath().toAbsolutePath();
+  }
+
+  public String getLauncherSettingsVersion() {
+    return launcherSettingsVersion;
+  }
+
+  public void setLauncherSettingsVersion(String version) {
+    this.launcherSettingsVersion = version;
+  }
+
+  public boolean isPortable() {
+    return directory != null && directory.equalsIgnoreCase(PORTABLE_MODE);
+  }
+
+  public void setPortable() {
+    directory = PORTABLE_MODE;
+  }
+
+  public void installTo(String directory) {
+    this.directory = directory;
+  }
+
+  public int getMemory() {
+    return memory;
+  }
+
+  public void setMemory(int memory) {
+    this.memory = memory;
+    save();
+  }
+
+  @NotNull
+  public LaunchAction getLaunchAction() {
+    if (launchAction == null) {
+      return LaunchAction.HIDE;
+    }
+    return launchAction;
+  }
+
+  public void setLaunchAction(LaunchAction launchAction) {
+    this.launchAction = launchAction;
+    save();
+  }
+
+  public String getBuildStream() {
+    return buildStream;
+  }
+
+  public void setBuildStream(String buildStream) {
+    this.buildStream = buildStream;
+    save();
+  }
+
+  public String getJavaVersion() {
+    return javaVersion;
+  }
+
+  public void setJavaVersion(String javaVersion) {
+    this.javaVersion = javaVersion;
+    save();
+  }
+
+  public boolean getPrefer64Bit() {
+    return prefer64Bit;
+  }
+
+  public void setPrefer64Bit(boolean prefer64Bit) {
+    this.prefer64Bit = prefer64Bit;
+    save();
+  }
+
+  public boolean getShowConsole() {
+    return showConsole;
+  }
+
+  public void setShowConsole(boolean showConsole) {
+    this.showConsole = showConsole;
+    save();
+  }
+
+  // Whether to launch into the modpacks tab directly or launch to the discover tab
+  public boolean getLaunchToModpacks() {
+    return launchToModpacks;
+  }
+
+  public void setLaunchToModpacks(boolean launchToModpacks) {
+    this.launchToModpacks = launchToModpacks;
+    save();
+  }
+
+  public String getLanguageCode() {
+    return languageCode;
+  }
+
+  public void setLanguageCode(String languageCode) {
+    this.languageCode = languageCode;
+    save();
+  }
+
+  public int getLatestNewsArticle() {
+    return latestNewsArticle;
+  }
+
+  public void setLatestNewsArticle(int latestNewsArticle) {
+    this.latestNewsArticle = latestNewsArticle;
+    save();
+  }
+
+  public boolean shouldAutoAcceptModpackRequirements() {
+    return autoAcceptRequirements;
+  }
+
+  public void setAutoAcceptModpackRequirements(boolean value) {
+    this.autoAcceptRequirements = value;
+    save();
+  }
+
+  public WindowType getLaunchWindowType() {
+    return windowType;
+  }
+
+  public void setLaunchWindowType(WindowType type) {
+    this.windowType = type;
+    save();
+  }
+
+  public int getCustomWidth() {
+    return windowWidth;
+  }
+
+  public int getCustomHeight() {
+    return windowHeight;
+  }
+
+  public void setLaunchWindowDimensions(int width, int height) {
+    this.windowWidth = width;
+    this.windowHeight = height;
+    save();
+  }
+
+  public boolean shouldUseStencilBuffer() {
+    return enableStencilBuffer;
+  }
+
+  public void setUseStencilBuffer(boolean stencilBuffer) {
+    this.enableStencilBuffer = stencilBuffer;
+    save();
+  }
+
+  public String getClientId() {
+    return clientId;
+  }
+
+  public String getJavaArgs() {
+    if (isUsingDefaultJavaArgs()) {
+      return DEFAULT_JAVA_ARGS;
+    }
+    return javaArgs;
+  }
+
+  @Override
+  public boolean isUsingDefaultJavaArgs() {
+    return javaArgs == null || javaArgs.isEmpty() || javaArgs.equalsIgnoreCase(DEFAULT_JAVA_ARGS);
+  }
+
+  public void setJavaArgs(String args) {
+    if (args == null || args.isEmpty() || args.equalsIgnoreCase(DEFAULT_JAVA_ARGS)) {
+      javaArgs = null;
+    } else {
+      javaArgs = args;
+    }
+  }
+
+  public String getWrapperCommand() {
+    return wrapperCommand;
+  }
+
+  public void setWrapperCommand(String wrapperCommand) {
+    this.wrapperCommand = wrapperCommand;
+  }
+
+  public boolean shouldUseMojangJava() {
+    return useMojangJava;
+  }
+
+  public void setUseMojangJava(boolean useMojangJava) {
+    this.useMojangJava = useMojangJava;
+  }
+
+  public void save() {
+    // TODO: this should probably be syncronized and use a temp file
+    Path settingsPath = settingsFile.toPath();
+    Path settingsParent = settingsPath.getParent();
+
+    try {
+      if (settingsParent != null) {
+        Files.createDirectories(settingsParent);
+      }
+    } catch (IOException e) {
+      Utils.getLogger()
+          .log(
+              Level.SEVERE,
+              String.format("Failed to create settings directory %s", settingsParent),
+              e);
+      return;
     }
 
-    public File getTechnicRoot() {
-        if (technicRoot == null || !technicRoot.exists())
-            buildTechnicRoot();
-
-        return technicRoot;
+    try (Writer writer = Files.newBufferedWriter(settingsPath, StandardCharsets.UTF_8)) {
+      Utils.getGson().toJson(this, writer);
+    } catch (IOException e) {
+      Utils.getLogger()
+          .log(Level.SEVERE, String.format("Failed to save settings %s", settingsFile), e);
     }
+  }
 
-    public Path getTechnicRootPath() {
-        return getTechnicRoot().toPath().toAbsolutePath();
-    }
+  protected void buildTechnicRoot() {
+    if (directory == null || directory.isEmpty() || directory.equalsIgnoreCase(PORTABLE_MODE))
+      technicRoot = settingsFile.getParentFile();
+    else technicRoot = new File(directory);
 
-    public String getLauncherSettingsVersion() { return launcherSettingsVersion; }
-    public void setLauncherSettingsVersion(String version) { this.launcherSettingsVersion = version; }
-
-    public boolean isPortable() {
-        return directory != null && directory.equalsIgnoreCase(PORTABLE_MODE);
-    }
-
-    public void setPortable() {
-        directory = PORTABLE_MODE;
-    }
-
-    public void installTo(String directory) {
-        this.directory = directory;
-    }
-
-    public int getMemory() { return memory; }
-    public void setMemory(int memory) {
-        this.memory = memory;
-        save();
-    }
-
-    @NotNull
-    public LaunchAction getLaunchAction() {
-        if (launchAction == null) {
-            return LaunchAction.HIDE;
-        }
-        return launchAction;
-    }
-    public void setLaunchAction(LaunchAction launchAction) {
-        this.launchAction = launchAction;
-        save();
-    }
-
-    public String getBuildStream() { return buildStream; }
-    public void setBuildStream(String buildStream) {
-        this.buildStream = buildStream;
-        save();
-    }
-
-    public String getJavaVersion() { return javaVersion; }
-    public void setJavaVersion(String javaVersion) {
-        this.javaVersion = javaVersion;
-        save();
-    }
-
-    public boolean getPrefer64Bit() { return prefer64Bit; }
-    public void setPrefer64Bit(boolean prefer64Bit) {
-        this.prefer64Bit = prefer64Bit;
-        save();
-    }
-
-    public boolean getShowConsole() { return showConsole; }
-    public void setShowConsole(boolean showConsole) {
-        this.showConsole = showConsole;
-        save();
-    }
-
-    //Whether to launch into the modpacks tab directly or launch to the discover tab
-    public boolean getLaunchToModpacks() { return launchToModpacks; }
-    public void setLaunchToModpacks(boolean launchToModpacks) {
-        this.launchToModpacks = launchToModpacks;
-        save();
-    }
-
-    public String getLanguageCode() { return languageCode; }
-    public void setLanguageCode(String languageCode) {
-        this.languageCode = languageCode;
-        save();
-    }
-
-    public int getLatestNewsArticle() { return latestNewsArticle; }
-    public void setLatestNewsArticle(int latestNewsArticle)
-    {
-        this.latestNewsArticle = latestNewsArticle;
-        save();
-    }
-
-    public boolean shouldAutoAcceptModpackRequirements() { return autoAcceptRequirements; }
-    public void setAutoAcceptModpackRequirements(boolean value) {
-        this.autoAcceptRequirements = value;
-        save();
-    }
-
-    public WindowType getLaunchWindowType() { return windowType; }
-    public void setLaunchWindowType(WindowType type) {
-        this.windowType = type;
-        save();
-    }
-
-    public int getCustomWidth() { return windowWidth; }
-    public int getCustomHeight() { return windowHeight; }
-    public void setLaunchWindowDimensions(int width, int height) {
-        this.windowWidth = width;
-        this.windowHeight = height;
-        save();
-    }
-
-    public boolean shouldUseStencilBuffer() { return enableStencilBuffer; }
-    public void setUseStencilBuffer(boolean stencilBuffer) {
-        this.enableStencilBuffer = stencilBuffer;
-        save();
-    }
-
-    public String getClientId() { return clientId; }
-
-    public String getJavaArgs() {
-        if (javaArgs == null || javaArgs.isEmpty()) {
-            return DEFAULT_JAVA_ARGS;
-        }
-        return javaArgs;
-    }
-    public void setJavaArgs(String args) {
-        if (args != null && args.equalsIgnoreCase(DEFAULT_JAVA_ARGS)) {
-            javaArgs = null;
-        } else {
-            javaArgs = args;
-        }
-    }
-
-    public String getWrapperCommand() {
-        return wrapperCommand;
-    }
-
-    public void setWrapperCommand(String wrapperCommand) {
-        this.wrapperCommand = wrapperCommand;
-    }
-
-    public boolean shouldUseMojangJava() {
-        return useMojangJava;
-    }
-
-    public void setUseMojangJava(boolean useMojangJava) {
-        this.useMojangJava = useMojangJava;
-    }
-
-    public void save() {
-        // TODO: this should probably be syncronized and use a temp file
-        Path settingsPath = settingsFile.toPath();
-        Path settingsParent = settingsPath.getParent();
-
-        try {
-            if (settingsParent != null) {
-                Files.createDirectories(settingsParent);
-            }
-        } catch (IOException e) {
-            Utils.getLogger().log(Level.SEVERE, String.format("Failed to create settings directory %s", settingsParent), e);
-            return;
-        }
-
-        try (Writer writer = Files.newBufferedWriter(settingsPath, StandardCharsets.UTF_8)) {
-            Utils.getGson().toJson(this, writer);
-        } catch (IOException e) {
-            Utils.getLogger().log(Level.SEVERE, String.format("Failed to save settings %s", settingsFile), e);
-        }
-    }
-
-    protected void buildTechnicRoot() {
-        if (directory == null || directory.isEmpty() || directory.equalsIgnoreCase(PORTABLE_MODE))
-            technicRoot = settingsFile.getParentFile();
-        else
-            technicRoot = new File(directory);
-
-        if (!technicRoot.exists())
-            technicRoot.mkdirs();
-    }
+    if (!technicRoot.exists()) technicRoot.mkdirs();
+  }
 }

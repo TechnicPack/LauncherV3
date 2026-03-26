@@ -19,62 +19,64 @@
 
 package net.technicpack.minecraftcore.mojang.version;
 
+import java.util.List;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.mojang.version.io.*;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 
-import java.util.List;
-
 public interface IMinecraftVersionInfo {
-    String getId();
+  String getId();
 
-    ReleaseType getType();
+  ReleaseType getType();
 
-    ArgumentList getMinecraftArguments();
+  ArgumentList getMinecraftArguments();
 
-    ArgumentList getJavaArguments();
+  ArgumentList getJavaArguments();
 
-    List<Library> getLibraries();
+  ArgumentList getDefaultUserJavaArguments();
 
-    List<Library> getLibrariesForCurrentOS(ILaunchOptions options, IJavaRuntime runtime);
+  List<Library> getLibraries();
 
-    String getMainClass();
+  List<Library> getLibrariesForCurrentOS(ILaunchOptions options, IJavaRuntime runtime);
 
-    void setMainClass(String mainClass);
+  String getMainClass();
 
-    List<Rule> getRules();
+  void setMainClass(String mainClass);
 
-    String getAssetsKey();
+  List<Rule> getRules();
 
-    AssetIndex getAssetIndex();
+  String getAssetsKey();
 
-    GameDownloads getDownloads();
+  AssetIndex getAssetIndex();
 
-    String getParentVersion();
+  GameDownloads getDownloads();
 
-    boolean getAreAssetsVirtual();
+  String getParentVersion();
 
-    void setAreAssetsVirtual(boolean areAssetsVirtual);
+  boolean getAreAssetsVirtual();
 
-    boolean getAssetsMapToResources();
+  void setAreAssetsVirtual(boolean areAssetsVirtual);
 
-    void setAssetsMapToResources(boolean mapToResources);
+  boolean getAssetsMapToResources();
 
-    void addLibrary(Library library);
+  void setAssetsMapToResources(boolean mapToResources);
 
-    void prependLibrary(Library library);
+  void addLibrary(Library library);
 
-    /**
-     * Get information about the Mojang JRE
-     * @return The Mojang JRE information.<br>If there isn't one associated with the version.json manifest file, null
-     * will be returned.
-     */
-    VersionJavaInfo getMojangRuntimeInformation();
+  void prependLibrary(Library library);
 
-    void removeLibrary(String libraryName);
+  /**
+   * Get information about the Mojang JRE
+   *
+   * @return The Mojang JRE information.<br>
+   *     If there isn't one associated with the version.json manifest file, null will be returned.
+   */
+  VersionJavaInfo getMojangRuntimeInformation();
 
-    IJavaRuntime getJavaRuntime();
+  void removeLibrary(String libraryName);
 
-    void setJavaRuntime(IJavaRuntime runtime);
+  IJavaRuntime getJavaRuntime();
+
+  void setJavaRuntime(IJavaRuntime runtime);
 }

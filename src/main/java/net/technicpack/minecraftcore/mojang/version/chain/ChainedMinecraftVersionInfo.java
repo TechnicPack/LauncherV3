@@ -19,6 +19,9 @@
 
 package net.technicpack.minecraftcore.mojang.version.chain;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
@@ -26,212 +29,221 @@ import net.technicpack.minecraftcore.mojang.version.io.*;
 import net.technicpack.minecraftcore.mojang.version.io.argument.Argument;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class ChainedMinecraftVersionInfo implements IMinecraftVersionInfo {
 
-    private List<IMinecraftVersionInfo> chain;
+  private List<IMinecraftVersionInfo> chain;
 
-    public ChainedMinecraftVersionInfo(IMinecraftVersionInfo rootVersion) {
-        chain = new LinkedList<>();
-        chain.add(rootVersion);
-    }
+  public ChainedMinecraftVersionInfo(IMinecraftVersionInfo rootVersion) {
+    chain = new LinkedList<>();
+    chain.add(rootVersion);
+  }
 
-    @Override
-    public String getId() {
-        return chain.get(0).getId();
-    }
+  @Override
+  public String getId() {
+    return chain.get(0).getId();
+  }
 
-    @Override
-    public ReleaseType getType() {
-        return chain.get(0).getType();
-    }
+  @Override
+  public ReleaseType getType() {
+    return chain.get(0).getType();
+  }
 
-    @Override
-    public ArgumentList getMinecraftArguments() {
-        ArgumentList.Builder allArguments = new ArgumentList.Builder();
+  @Override
+  public ArgumentList getMinecraftArguments() {
+    ArgumentList.Builder allArguments = new ArgumentList.Builder();
 
-        for (IMinecraftVersionInfo version : chain) {
-            if (version.getMinecraftArguments() != null) {
-                for (Argument arg : version.getMinecraftArguments().getArguments()) {
-                    allArguments.addArgument(arg);
-                }
-            }
+    for (IMinecraftVersionInfo version : chain) {
+      if (version.getMinecraftArguments() != null) {
+        for (Argument arg : version.getMinecraftArguments().getArguments()) {
+          allArguments.addArgument(arg);
         }
-
-        return allArguments.build();
+      }
     }
 
-    @Override
-    public ArgumentList getJavaArguments() {
-        ArgumentList.Builder allArguments = new ArgumentList.Builder();
+    return allArguments.build();
+  }
 
-        for (IMinecraftVersionInfo version : chain) {
-            if (version.getJavaArguments() != null) {
-                for (Argument arg : version.getJavaArguments().getArguments()) {
-                    allArguments.addArgument(arg);
-                }
-            }
+  @Override
+  public ArgumentList getJavaArguments() {
+    ArgumentList.Builder allArguments = new ArgumentList.Builder();
+
+    for (IMinecraftVersionInfo version : chain) {
+      if (version.getJavaArguments() != null) {
+        for (Argument arg : version.getJavaArguments().getArguments()) {
+          allArguments.addArgument(arg);
         }
-
-        return allArguments.build();
+      }
     }
 
-    @Override
-    public List<Library> getLibraries() {
-        List<Library> allLibraries = new LinkedList<>();
+    return allArguments.build();
+  }
 
-        for (IMinecraftVersionInfo version : chain) {
-            if (version.getLibraries() != null)
-                allLibraries.addAll(0, version.getLibraries());
+  @Override
+  public ArgumentList getDefaultUserJavaArguments() {
+    ArgumentList.Builder allArguments = new ArgumentList.Builder();
+    boolean hasDefaultUserJavaArguments = false;
+
+    for (IMinecraftVersionInfo version : chain) {
+      if (version.getDefaultUserJavaArguments() != null) {
+        hasDefaultUserJavaArguments = true;
+        for (Argument arg : version.getDefaultUserJavaArguments().getArguments()) {
+          allArguments.addArgument(arg);
         }
-
-        return allLibraries.stream().distinct().collect(Collectors.toList());
+      }
     }
 
-    @Override
-    public List<Library> getLibrariesForCurrentOS(ILaunchOptions options, IJavaRuntime runtime) {
-        List<Library> allLibraries = new LinkedList<>();
-
-        for (int i = chain.size() - 1; i >= 0; i--) {
-            IMinecraftVersionInfo version = chain.get(i);
-            List<Library> librariesForCurrentOS = version.getLibrariesForCurrentOS(options, runtime);
-            if (librariesForCurrentOS != null)
-                allLibraries.addAll(0, librariesForCurrentOS);
-        }
-
-        return allLibraries.stream().distinct().collect(Collectors.toList());
+    if (!hasDefaultUserJavaArguments) {
+      return null;
     }
 
-    @Override
-    public String getMainClass() {
-        for (IMinecraftVersionInfo version : chain) {
-            if (version.getMainClass() != null)
-                return version.getMainClass();
-        }
+    return allArguments.build();
+  }
 
-        return null;
+  @Override
+  public List<Library> getLibraries() {
+    List<Library> allLibraries = new LinkedList<>();
+
+    for (IMinecraftVersionInfo version : chain) {
+      if (version.getLibraries() != null) allLibraries.addAll(0, version.getLibraries());
     }
 
-    @Override
-    public void setMainClass(String mainClass) {
-        chain.get(0).setMainClass(mainClass);
+    return allLibraries.stream().distinct().collect(Collectors.toList());
+  }
+
+  @Override
+  public List<Library> getLibrariesForCurrentOS(ILaunchOptions options, IJavaRuntime runtime) {
+    List<Library> allLibraries = new LinkedList<>();
+
+    for (int i = chain.size() - 1; i >= 0; i--) {
+      IMinecraftVersionInfo version = chain.get(i);
+      List<Library> librariesForCurrentOS = version.getLibrariesForCurrentOS(options, runtime);
+      if (librariesForCurrentOS != null) allLibraries.addAll(0, librariesForCurrentOS);
     }
 
-    @Override
-    public List<Rule> getRules() {
-        List<Rule> allRules = new LinkedList<>();
+    return allLibraries.stream().distinct().collect(Collectors.toList());
+  }
 
-        for (IMinecraftVersionInfo version : chain) {
-            if (version.getRules() != null)
-                allRules.addAll(0, version.getRules());
-        }
-
-        return allRules;
+  @Override
+  public String getMainClass() {
+    for (IMinecraftVersionInfo version : chain) {
+      if (version.getMainClass() != null) return version.getMainClass();
     }
 
-    @Override
-    public AssetIndex getAssetIndex() {
-        for (IMinecraftVersionInfo version : chain) {
-            if (version.getAssetIndex() != null)
-                return version.getAssetIndex();
-        }
+    return null;
+  }
 
-        return null;
+  @Override
+  public void setMainClass(String mainClass) {
+    chain.get(0).setMainClass(mainClass);
+  }
+
+  @Override
+  public List<Rule> getRules() {
+    List<Rule> allRules = new LinkedList<>();
+
+    for (IMinecraftVersionInfo version : chain) {
+      if (version.getRules() != null) allRules.addAll(0, version.getRules());
     }
 
-    @Override
-    public String getAssetsKey() {
-        for (IMinecraftVersionInfo version : chain) {
-            if (version.getAssetsKey() != null)
-                return version.getAssetsKey();
-        }
+    return allRules;
+  }
 
-        return null;
+  @Override
+  public AssetIndex getAssetIndex() {
+    for (IMinecraftVersionInfo version : chain) {
+      if (version.getAssetIndex() != null) return version.getAssetIndex();
     }
 
-    @Override
-    public GameDownloads getDownloads() {
-        for (IMinecraftVersionInfo version : chain) {
-            if (version.getDownloads() != null)
-                return version.getDownloads();
-        }
+    return null;
+  }
 
-        return null;
+  @Override
+  public String getAssetsKey() {
+    for (IMinecraftVersionInfo version : chain) {
+      if (version.getAssetsKey() != null) return version.getAssetsKey();
     }
 
-    @Override
-    public boolean getAreAssetsVirtual() {
-        return chain.get(0).getAreAssetsVirtual();
+    return null;
+  }
+
+  @Override
+  public GameDownloads getDownloads() {
+    for (IMinecraftVersionInfo version : chain) {
+      if (version.getDownloads() != null) return version.getDownloads();
     }
 
-    @Override
-    public void setAreAssetsVirtual(boolean areAssetsVirtual) {
-        chain.get(0).setAreAssetsVirtual(areAssetsVirtual);
+    return null;
+  }
+
+  @Override
+  public boolean getAreAssetsVirtual() {
+    return chain.get(0).getAreAssetsVirtual();
+  }
+
+  @Override
+  public void setAreAssetsVirtual(boolean areAssetsVirtual) {
+    chain.get(0).setAreAssetsVirtual(areAssetsVirtual);
+  }
+
+  @Override
+  public boolean getAssetsMapToResources() {
+    return chain.get(0).getAssetsMapToResources();
+  }
+
+  @Override
+  public void setAssetsMapToResources(boolean mapToResources) {
+    chain.get(0).setAssetsMapToResources(mapToResources);
+  }
+
+  @Override
+  public String getParentVersion() {
+    return chain.get(chain.size() - 1).getId();
+  }
+
+  @Override
+  public void addLibrary(Library library) {
+    chain.get(0).addLibrary(library);
+  }
+
+  @Override
+  public void prependLibrary(Library library) {
+    chain.get(0).prependLibrary(library);
+  }
+
+  @Override
+  public VersionJavaInfo getMojangRuntimeInformation() {
+    for (IMinecraftVersionInfo version : chain) {
+      if (version.getMojangRuntimeInformation() != null)
+        return version.getMojangRuntimeInformation();
     }
 
-    @Override
-    public boolean getAssetsMapToResources() {
-        return chain.get(0).getAssetsMapToResources();
+    return null;
+  }
+
+  @Override
+  public void removeLibrary(String libraryName) {
+    for (IMinecraftVersionInfo version : chain) {
+      version.removeLibrary(libraryName);
+    }
+  }
+
+  @Override
+  public IJavaRuntime getJavaRuntime() {
+    for (IMinecraftVersionInfo version : chain) {
+      if (version.getJavaRuntime() != null) return version.getJavaRuntime();
     }
 
-    @Override
-    public void setAssetsMapToResources(boolean mapToResources) {
-        chain.get(0).setAssetsMapToResources(mapToResources);
+    return null;
+  }
+
+  @Override
+  public void setJavaRuntime(IJavaRuntime runtime) {
+    for (IMinecraftVersionInfo version : chain) {
+      version.setJavaRuntime(runtime);
     }
+  }
 
-    @Override
-    public String getParentVersion() {
-        return chain.get(chain.size() - 1).getId();
-    }
-
-    @Override
-    public void addLibrary(Library library) {
-        chain.get(0).addLibrary(library);
-    }
-
-    @Override
-    public void prependLibrary(Library library) {
-        chain.get(0).prependLibrary(library);
-    }
-
-    @Override
-    public VersionJavaInfo getMojangRuntimeInformation() {
-        for (IMinecraftVersionInfo version : chain) {
-            if (version.getMojangRuntimeInformation() != null)
-                return version.getMojangRuntimeInformation();
-        }
-
-        return null;
-    }
-
-    @Override
-    public void removeLibrary(String libraryName) {
-        for (IMinecraftVersionInfo version : chain) {
-            version.removeLibrary(libraryName);
-        }
-    }
-
-    @Override
-    public IJavaRuntime getJavaRuntime() {
-        for (IMinecraftVersionInfo version : chain) {
-            if (version.getJavaRuntime() != null)
-                return version.getJavaRuntime();
-        }
-
-        return null;
-    }
-
-    @Override
-    public void setJavaRuntime(IJavaRuntime runtime) {
-        for (IMinecraftVersionInfo version : chain) {
-            version.setJavaRuntime(runtime);
-        }
-    }
-
-    public void addVersionToChain(IMinecraftVersionInfo version) {
-        chain.add(version);
-    }
+  public void addVersionToChain(IMinecraftVersionInfo version) {
+    chain.add(version);
+  }
 }

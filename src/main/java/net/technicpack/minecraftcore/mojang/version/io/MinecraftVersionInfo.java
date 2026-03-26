@@ -19,185 +19,212 @@
 
 package net.technicpack.minecraftcore.mojang.version.io;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @SuppressWarnings("java:S2065")
 public class MinecraftVersionInfo implements IMinecraftVersionInfo {
-    private final String id;
-    private final ReleaseType type;
-    private final LaunchArguments arguments;
-    private final List<Library> libraries;
-    private final List<Rule> rules;
-    private final String assets;
-    private final AssetIndex assetIndex;
-    private final GameDownloads downloads;
-    private final String inheritsFrom;
-    private final VersionJavaInfo javaVersion;
-    private String mainClass;
+  private final String id;
+  private final ReleaseType type;
+  private final LaunchArguments arguments;
+  private final List<Library> libraries;
+  private final List<Rule> rules;
+  private final String assets;
+  private final AssetIndex assetIndex;
+  private final GameDownloads downloads;
+  private final String inheritsFrom;
+  private final VersionJavaInfo javaVersion;
+  private String mainClass;
 
-    private transient boolean areAssetsVirtual;
-    private transient boolean mapToResources;
-    private transient IJavaRuntime javaRuntime;
+  private transient boolean areAssetsVirtual;
+  private transient boolean mapToResources;
+  private transient IJavaRuntime javaRuntime;
 
-    MinecraftVersionInfo(MinecraftVersionInfoRaw raw) {
-        id = raw.id;
-        type = raw.type;
-        if (raw.arguments != null) {
-            arguments = raw.arguments;
-        } else if (raw.minecraftArguments != null && !raw.minecraftArguments.isEmpty()) {
-            arguments = LaunchArguments.fromLegacyString(raw.minecraftArguments);
-        } else {
-            throw new IllegalArgumentException("No arguments found");
-        }
-
-        libraries = raw.libraries;
-        mainClass = raw.mainClass;
-        rules = raw.rules;
-        assets = raw.assets;
-        assetIndex = raw.assetIndex;
-        downloads = raw.downloads;
-        inheritsFrom = raw.inheritsFrom;
-        javaVersion = raw.javaVersion;
+  MinecraftVersionInfo(MinecraftVersionInfoRaw raw) {
+    id = raw.id;
+    type = raw.type;
+    if (raw.arguments != null) {
+      arguments = raw.arguments;
+    } else if (raw.minecraftArguments != null && !raw.minecraftArguments.isEmpty()) {
+      arguments = LaunchArguments.fromLegacyString(raw.minecraftArguments);
+    } else {
+      throw new IllegalArgumentException("No arguments found");
     }
 
-    @Override
-    public String getId() {
-        return id;
-    }
+    libraries = raw.libraries;
+    mainClass = raw.mainClass;
+    rules = raw.rules;
+    assets = raw.assets;
+    assetIndex = raw.assetIndex;
+    downloads = raw.downloads;
+    inheritsFrom = raw.inheritsFrom;
+    javaVersion = raw.javaVersion;
+  }
 
-    @Override
-    public ReleaseType getType() {
-        return type;
-    }
+  @Override
+  public String getId() {
+    return id;
+  }
 
-    @Override
-    public ArgumentList getMinecraftArguments() {
-        return arguments.getGameArgs();
-    }
+  @Override
+  public ReleaseType getType() {
+    return type;
+  }
 
-    @Override
-    public ArgumentList getJavaArguments() {
-        return arguments.getJvmArgs();
-    }
+  @Override
+  public ArgumentList getMinecraftArguments() {
+    return arguments.getGameArgs();
+  }
 
-    @Override
-    public List<Library> getLibraries() {
-        return libraries;
-    }
+  @Override
+  public ArgumentList getJavaArguments() {
+    return arguments.getJvmArgs();
+  }
 
-    @Override
-    public List<Library> getLibrariesForCurrentOS(ILaunchOptions options, IJavaRuntime runtime) {
-        return libraries.stream().filter(x -> x.isForCurrentOS(options, runtime)).distinct().collect(Collectors.toList());
-    }
+  @Override
+  public ArgumentList getDefaultUserJavaArguments() {
+    return arguments.getDefaultUserJavaArguments();
+  }
 
-    @Override
-    public String getMainClass() {
-        return mainClass;
-    }
+  @Override
+  public List<Library> getLibraries() {
+    return libraries;
+  }
 
-    @Override
-    public void setMainClass(String mainClass) {
-        this.mainClass = mainClass;
-    }
+  @Override
+  public List<Library> getLibrariesForCurrentOS(ILaunchOptions options, IJavaRuntime runtime) {
+    return libraries.stream()
+        .filter(x -> x.isForCurrentOS(options, runtime))
+        .distinct()
+        .collect(Collectors.toList());
+  }
 
-    @Override
-    public List<Rule> getRules() {
-        return rules;
-    }
+  @Override
+  public String getMainClass() {
+    return mainClass;
+  }
 
-    @Override
-    public String getAssetsKey() {
-        return assets;
-    }
+  @Override
+  public void setMainClass(String mainClass) {
+    this.mainClass = mainClass;
+  }
 
-    @Override
-    public AssetIndex getAssetIndex() {
-        return assetIndex;
-    }
+  @Override
+  public List<Rule> getRules() {
+    return rules;
+  }
 
-    @Override
-    public GameDownloads getDownloads() {
-        return downloads;
-    }
+  @Override
+  public String getAssetsKey() {
+    return assets;
+  }
 
-    @Override
-    public String getParentVersion() {
-        return inheritsFrom;
-    }
+  @Override
+  public AssetIndex getAssetIndex() {
+    return assetIndex;
+  }
 
-    @Override
-    public boolean getAreAssetsVirtual() {
-        return areAssetsVirtual;
-    }
+  @Override
+  public GameDownloads getDownloads() {
+    return downloads;
+  }
 
-    @Override
-    public void setAreAssetsVirtual(boolean areAssetsVirtual) {
-        this.areAssetsVirtual = areAssetsVirtual;
-    }
+  @Override
+  public String getParentVersion() {
+    return inheritsFrom;
+  }
 
-    @Override
-    public boolean getAssetsMapToResources() {
-        return mapToResources;
-    }
+  @Override
+  public boolean getAreAssetsVirtual() {
+    return areAssetsVirtual;
+  }
 
-    @Override
-    public void setAssetsMapToResources(boolean mapToResources) {
-        this.mapToResources = mapToResources;
-    }
+  @Override
+  public void setAreAssetsVirtual(boolean areAssetsVirtual) {
+    this.areAssetsVirtual = areAssetsVirtual;
+  }
 
-    @Override
-    public void addLibrary(Library library) {
-        libraries.add(library);
-    }
+  @Override
+  public boolean getAssetsMapToResources() {
+    return mapToResources;
+  }
 
-    @Override
-    public void prependLibrary(Library library) {
-        libraries.add(0, library);
-    }
+  @Override
+  public void setAssetsMapToResources(boolean mapToResources) {
+    this.mapToResources = mapToResources;
+  }
 
-    @Override
-    public VersionJavaInfo getMojangRuntimeInformation() {
-        return javaVersion;
-    }
+  @Override
+  public void addLibrary(Library library) {
+    libraries.add(library);
+  }
 
-    @Override
-    public void removeLibrary(String libraryName) {
-        libraries.removeIf(library -> library.getName().equals(libraryName));
-    }
+  @Override
+  public void prependLibrary(Library library) {
+    libraries.add(0, library);
+  }
 
-    @Override
-    public IJavaRuntime getJavaRuntime() {
-        return javaRuntime;
-    }
+  @Override
+  public VersionJavaInfo getMojangRuntimeInformation() {
+    return javaVersion;
+  }
 
-    @Override
-    public void setJavaRuntime(IJavaRuntime runtime) {
-        this.javaRuntime = runtime;
-    }
+  @Override
+  public void removeLibrary(String libraryName) {
+    libraries.removeIf(library -> library.getName().equals(libraryName));
+  }
 
-    @Override
-    public String toString() {
-        return "MinecraftVersionInfo{" +
-                "id='" + id + '\'' +
-                ", type=" + type +
-                ", arguments=" + arguments +
-                ", libraries=" + libraries +
-                ", mainClass='" + mainClass + '\'' +
-                ", rules=" + rules +
-                ", assets='" + assets + '\'' +
-                ", assetIndex=" + assetIndex +
-                ", downloads=" + downloads +
-                ", inheritsFrom='" + inheritsFrom + '\'' +
-                ", javaVersion=" + javaVersion +
-                ", areAssetsVirtual=" + areAssetsVirtual +
-                ", mapToResources=" + mapToResources +
-                ", javaRuntime=" + javaRuntime +
-                '}';
-    }
+  @Override
+  public IJavaRuntime getJavaRuntime() {
+    return javaRuntime;
+  }
+
+  @Override
+  public void setJavaRuntime(IJavaRuntime runtime) {
+    this.javaRuntime = runtime;
+  }
+
+  @Override
+  public String toString() {
+    return "MinecraftVersionInfo{"
+        + "id='"
+        + id
+        + '\''
+        + ", type="
+        + type
+        + ", arguments="
+        + arguments
+        + ", defaultUserJavaArguments="
+        + getDefaultUserJavaArguments()
+        + ", libraries="
+        + libraries
+        + ", mainClass='"
+        + mainClass
+        + '\''
+        + ", rules="
+        + rules
+        + ", assets='"
+        + assets
+        + '\''
+        + ", assetIndex="
+        + assetIndex
+        + ", downloads="
+        + downloads
+        + ", inheritsFrom='"
+        + inheritsFrom
+        + '\''
+        + ", javaVersion="
+        + javaVersion
+        + ", areAssetsVirtual="
+        + areAssetsVirtual
+        + ", mapToResources="
+        + mapToResources
+        + ", javaRuntime="
+        + javaRuntime
+        + '}';
+  }
 }
