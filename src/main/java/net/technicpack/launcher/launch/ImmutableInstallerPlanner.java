@@ -68,7 +68,9 @@ import net.technicpack.minecraftcore.mojang.version.io.Artifact;
 import net.technicpack.minecraftcore.mojang.version.io.AssetIndex;
 import net.technicpack.minecraftcore.mojang.version.io.Download;
 import net.technicpack.minecraftcore.mojang.version.io.Downloads;
+import net.technicpack.minecraftcore.mojang.version.io.ExtractRules;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
+import net.technicpack.minecraftcore.mojang.version.io.Rule;
 import net.technicpack.minecraftcore.mojang.version.io.VersionJavaInfo;
 import net.technicpack.rest.io.Mod;
 import net.technicpack.rest.io.Modpack;
@@ -412,7 +414,7 @@ class ImmutableInstallerPlanner {
   private void prepareResolvedVersion(InstallExecutionContext context) throws IOException {
     IMinecraftVersionInfo version = context.getResolvedVersion();
     List<Library> librariesToInstall = new ArrayList<>();
-    LinkedHashMap<String, Library> dedupedLibraries = new LinkedHashMap<>();
+    LinkedHashMap<InstallLibraryKey, Library> dedupedLibraries = new LinkedHashMap<>();
 
     boolean isLegacy = MojangUtils.isLegacyVersion(version.getParentVersion());
     if (isLegacy) {
@@ -468,7 +470,7 @@ class ImmutableInstallerPlanner {
           }
         }
 
-        dedupedLibraries.put(library.getName(), library);
+        putLibraryIfAbsent(dedupedLibraries, library);
       }
 
       if (!is1_12_2) {
@@ -525,12 +527,12 @@ class ImmutableInstallerPlanner {
               < 0) {
         Library fixedLog4j = createPatchedLog4j(library);
         version.addLibrary(fixedLog4j);
-        dedupedLibraries.put(fixedLog4j.getName(), fixedLog4j);
+        putLibraryIfAbsent(dedupedLibraries, fixedLog4j);
         version.removeLibrary(library.getName());
         continue;
       }
 
-      dedupedLibraries.put(library.getName(), library);
+      putLibraryIfAbsent(dedupedLibraries, library);
     }
 
     librariesToInstall.addAll(dedupedLibraries.values());
@@ -956,13 +958,18 @@ class ImmutableInstallerPlanner {
           return Collections.emptyList();
         }
 
-        LinkedHashMap<String, Library> deduped = new LinkedHashMap<>();
+        LinkedHashMap<InstallLibraryKey, Library> deduped = new LinkedHashMap<>();
         for (Library library : libraries) {
-          deduped.putIfAbsent(library.getName(), library);
+          putLibraryIfAbsent(deduped, library);
         }
         return new ArrayList<>(deduped.values());
       }
     }
+  }
+
+  private static void putLibraryIfAbsent(
+      Map<InstallLibraryKey, Library> dedupedLibraries, Library library) {
+    dedupedLibraries.putIfAbsent(InstallLibraryKey.from(library), library);
   }
 
   private JsonObject readAssetsIndex(Path assetsIndex) throws IOException {
@@ -1181,6 +1188,52 @@ class ImmutableInstallerPlanner {
       this.mod = mod;
       this.cacheFile = cacheFile;
       this.verifier = verifier;
+    }
+  }
+
+  private static final class InstallLibraryKey {
+    private final String normalizedName;
+    private final List<Rule> rules;
+    private final Map<OperatingSystem, String> natives;
+    private final ExtractRules extract;
+
+    private InstallLibraryKey(
+        String normalizedName,
+        List<Rule> rules,
+        Map<OperatingSystem, String> natives,
+        ExtractRules extract) {
+      this.normalizedName = normalizedName;
+      this.rules = rules;
+      this.natives = natives;
+      this.extract = extract;
+    }
+
+    private static InstallLibraryKey from(Library library) {
+      return new InstallLibraryKey(
+          library.getNormalizedName(),
+          library.getRules(),
+          library.getNatives(),
+          library.getExtract());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      InstallLibraryKey that = (InstallLibraryKey) o;
+      return Objects.equals(normalizedName, that.normalizedName)
+          && Objects.equals(rules, that.rules)
+          && Objects.equals(natives, that.natives)
+          && Objects.equals(extract, that.extract);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(normalizedName, rules, natives, extract);
     }
   }
 }

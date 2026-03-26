@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
@@ -40,6 +41,7 @@ import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.io.AssetIndex;
 import net.technicpack.minecraftcore.mojang.version.io.GameDownloads;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
+import net.technicpack.minecraftcore.mojang.version.io.MinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.io.ReleaseType;
 import net.technicpack.minecraftcore.mojang.version.io.Rule;
 import net.technicpack.minecraftcore.mojang.version.io.VersionJavaInfo;
@@ -205,6 +207,74 @@ class ImmutableInstallerPlannerTest {
     } finally {
       server.stop(0);
     }
+  }
+
+  @Test
+  void versionDiscoveryKeepsNativeAndClasspathLibrariesWithSameCoordinates() throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher"));
+    InstalledPack installedPack =
+        new InstalledPack(
+            "test-pack", InstalledPack.RECOMMENDED, tempDir.resolve("pack").toString());
+    ModpackModel pack = new ModpackModel(installedPack, null, null, fileSystem);
+    pack.initDirectories();
+
+    Modpack modpackData = GSON.fromJson("{\"minecraft\":\"1.16.5\",\"mods\":[]}", Modpack.class);
+    IMinecraftVersionInfo version =
+        MojangUtils.getGson()
+            .fromJson(
+                "{"
+                    + "\"id\":\"test-pack\","
+                    + "\"type\":\"release\","
+                    + "\"mainClass\":\"example.Main\","
+                    + "\"inheritsFrom\":\"1.16.5\","
+                    + "\"minecraftArguments\":\"--demo\","
+                    + "\"libraries\":["
+                    + "{\"name\":\"org.lwjgl:lwjgl:3.2.2\"},"
+                    + "{"
+                    + "\"name\":\"org.lwjgl:lwjgl:3.2.2\","
+                    + "\"natives\":{"
+                    + "\"linux\":\"natives-linux\","
+                    + "\"windows\":\"natives-windows\","
+                    + "\"osx\":\"natives-macos\""
+                    + "}"
+                    + "}"
+                    + "]"
+                    + "}",
+                MinecraftVersionInfo.class);
+
+    ImmutableInstallerPlanner planner =
+        new ImmutableInstallerPlanner(
+            new TestResourceLoader(),
+            pack,
+            modpackData,
+            fileSystem,
+            key -> version,
+            new TechnicSettings(),
+            new FakeJavaRuntime(),
+            false,
+            false,
+            false,
+            () -> false);
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+
+    new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
+        .execute(planner.buildVersionDiscoveryPlan(), context);
+
+    List<Library> librariesToInstall = context.getLibrariesToInstall();
+    assertEquals(2, librariesToInstall.size());
+    assertEquals(
+        1,
+        librariesToInstall.stream()
+            .filter(library -> library.getName().equals("org.lwjgl:lwjgl:3.2.2"))
+            .filter(library -> library.getNatives() == null)
+            .count());
+    assertEquals(
+        1,
+        librariesToInstall.stream()
+            .filter(library -> library.getName().equals("org.lwjgl:lwjgl:3.2.2"))
+            .filter(library -> library.getNatives() != null)
+            .count());
   }
 
   private static void writeZip(Path zipPath, String entryName, String contents) throws IOException {
@@ -450,6 +520,43 @@ class ImmutableInstallerPlannerTest {
     @Override
     public void setJavaRuntime(IJavaRuntime runtime) {
       this.runtime = runtime;
+    }
+  }
+
+  private static final class FakeJavaRuntime implements IJavaRuntime {
+    @Override
+    public File getExecutableFile() {
+      return new File("java");
+    }
+
+    @Override
+    public String getVersion() {
+      return "17";
+    }
+
+    @Override
+    public String getVendor() {
+      return "Test";
+    }
+
+    @Override
+    public String getOsArch() {
+      return "amd64";
+    }
+
+    @Override
+    public String getBitness() {
+      return "64";
+    }
+
+    @Override
+    public boolean is64Bit() {
+      return true;
+    }
+
+    @Override
+    public boolean isValid() {
+      return true;
     }
   }
 }
