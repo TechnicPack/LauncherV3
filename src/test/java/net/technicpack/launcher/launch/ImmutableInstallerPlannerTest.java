@@ -277,6 +277,69 @@ class ImmutableInstallerPlannerTest {
             .count());
   }
 
+  @Test
+  void versionDiscoveryKeepsNativeEntriesThatNeedPlainArtifactFallback() throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher-fallback"));
+    InstalledPack installedPack =
+        new InstalledPack(
+            "fallback-pack",
+            InstalledPack.RECOMMENDED,
+            tempDir.resolve("pack-fallback").toString());
+    ModpackModel pack = new ModpackModel(installedPack, null, null, fileSystem);
+    pack.initDirectories();
+
+    Modpack modpackData = GSON.fromJson("{\"minecraft\":\"1.16.5\",\"mods\":[]}", Modpack.class);
+    IMinecraftVersionInfo version =
+        MojangUtils.getGson()
+            .fromJson(
+                "{"
+                    + "\"id\":\"fallback-pack\","
+                    + "\"type\":\"release\","
+                    + "\"mainClass\":\"example.Main\","
+                    + "\"inheritsFrom\":\"1.16.5\","
+                    + "\"minecraftArguments\":\"--demo\","
+                    + "\"libraries\":["
+                    + "{"
+                    + "\"name\":\"com.mojang:text2speech:1.11.3\","
+                    + "\"downloads\":{"
+                    + "\"artifact\":{\"sha1\":\"plain\",\"size\":1,\"url\":\"https://example/plain.jar\"},"
+                    + "\"classifiers\":{"
+                    + "\"natives-linux\":{\"sha1\":\"native-linux\",\"size\":1,\"url\":\"https://example/native-linux.jar\"},"
+                    + "\"natives-windows\":{\"sha1\":\"native-win\",\"size\":1,\"url\":\"https://example/native-win.jar\"}"
+                    + "}"
+                    + "},"
+                    + "\"natives\":{\"linux\":\"natives-linux\",\"windows\":\"natives-windows\"}"
+                    + "},"
+                    + "{"
+                    + "\"name\":\"com.mojang:text2speech:1.11.3\","
+                    + "\"downloads\":{\"artifact\":{\"sha1\":\"plain\",\"size\":1,\"url\":\"https://example/plain.jar\"}}"
+                    + "}"
+                    + "]"
+                    + "}",
+                MinecraftVersionInfo.class);
+
+    ImmutableInstallerPlanner planner =
+        new ImmutableInstallerPlanner(
+            new TestResourceLoader(),
+            pack,
+            modpackData,
+            fileSystem,
+            key -> version,
+            new TechnicSettings(),
+            new FakeJavaRuntime(),
+            false,
+            false,
+            false,
+            () -> false);
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+
+    new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
+        .execute(planner.buildVersionDiscoveryPlan(), context);
+
+    assertEquals(2, context.getLibrariesToInstall().size());
+  }
+
   private static void writeZip(Path zipPath, String entryName, String contents) throws IOException {
     Files.createDirectories(zipPath.getParent());
     try (ZipOutputStream output = new ZipOutputStream(Files.newOutputStream(zipPath))) {

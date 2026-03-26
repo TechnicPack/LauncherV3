@@ -595,30 +595,24 @@ class ImmutableInstallerPlanner {
   private void installVersionLibrary(
       InstallExecutionContext context, Library library, NodeProgressReporter reporter)
       throws IOException, InterruptedException {
-    String nativeClassifier = null;
-    File extractDirectory = null;
-    if (library.getNatives() != null) {
-      nativeClassifier = library.getNatives().get(OperatingSystem.getOperatingSystem());
-      if (nativeClassifier != null) {
-        extractDirectory = new File(pack.getBinDir(), "natives");
-      }
-    }
+    File extractDirectory =
+        library.shouldExtractToNativesDirectory() ? new File(pack.getBinDir(), "natives") : null;
 
     final String bitness = context.getResolvedVersion().getJavaRuntime().getBitness();
-    String path = library.getArtifactPath(nativeClassifier).replace("${arch}", bitness);
+    String path = library.getInstallArtifactPathForCurrentOs().replace("${arch}", bitness);
     Path cache = fileSystem.getCacheDirectory().resolve(path);
     if (cache.getParent() != null) {
       Files.createDirectories(cache.getParent());
     }
 
-    String sha1 = library.getArtifactSha1(nativeClassifier);
+    String sha1 = library.getInstallArtifactSha1ForCurrentOs();
     IFileVerifier verifier =
         (sha1 != null && !sha1.isEmpty()) ? new SHA1FileVerifier(sha1) : new ValidZipFileVerifier();
 
     boolean cacheValid = Files.isRegularFile(cache) && verifier.isFileValid(cache);
     String url = null;
     if (!cacheValid) {
-      url = library.getDownloadUrl(path).replace("${arch}", bitness);
+      url = library.getInstallDownloadUrlForCurrentOs(bitness);
       if (sha1 == null || sha1.isEmpty()) {
         String md5 = Utils.getETag(url);
         if (md5 != null && !md5.isEmpty()) {
