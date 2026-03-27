@@ -22,6 +22,37 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import io.sentry.Sentry;
 import io.sentry.protocol.User;
+import java.awt.Color;
+import java.awt.GraphicsEnvironment;
+import java.awt.Toolkit;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.*;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+import javax.swing.*;
 import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.autoupdate.http.HttpUpdateStream;
@@ -87,589 +118,691 @@ import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 import org.joda.time.DateTime;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
-import javax.swing.*;
-import java.awt.Color;
-import java.awt.GraphicsEnvironment;
-import java.awt.Toolkit;
-import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.*;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.Locale;
-import java.util.concurrent.CompletableFuture;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 public class LauncherMain {
 
-    private static final Locale[] supportedLanguages = new Locale[]{
-            Locale.ENGLISH,
-            Locale.forLanguageTag("pt-BR"),
-            Locale.forLanguageTag("pt-PT"),
-            Locale.forLanguageTag("cs"),
-            Locale.GERMAN,
-            Locale.FRENCH,
-            Locale.ITALIAN,
-            Locale.forLanguageTag("hu"),
-            Locale.forLanguageTag("pl"),
-            Locale.CHINA,
-            Locale.TAIWAN,
-            Locale.forLanguageTag("nl-NL"),
-            Locale.forLanguageTag("sk"),
-    };
-    private static ConsoleFrame consoleFrame;
-    private static IBuildNumber buildNumber;
-    private static RotatingFileHandler currentFileHandler;
+  private static final Locale[] supportedLanguages =
+      new Locale[] {
+        Locale.ENGLISH,
+        Locale.forLanguageTag("pt-BR"),
+        Locale.forLanguageTag("pt-PT"),
+        Locale.forLanguageTag("cs"),
+        Locale.GERMAN,
+        Locale.FRENCH,
+        Locale.ITALIAN,
+        Locale.forLanguageTag("hu"),
+        Locale.forLanguageTag("pl"),
+        Locale.CHINA,
+        Locale.TAIWAN,
+        Locale.forLanguageTag("nl-NL"),
+        Locale.forLanguageTag("sk"),
+      };
+  private static ConsoleFrame consoleFrame;
+  private static IBuildNumber buildNumber;
+  private static RotatingFileHandler currentFileHandler;
 
-    public static void main(String[] argv) {
-        // Initialize Sentry
-        Sentry.init(options -> {
-            options.setDsn("https://4741ed8316eaefd3fa537240d8800c62@o4508140473417728.ingest.us.sentry.io/4509542931431424");
-            options.setTag("launcherPath", LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+  public static void main(String[] argv) {
+    // Initialize Sentry
+    Sentry.init(
+        options -> {
+          options.setDsn(
+              "https://4741ed8316eaefd3fa537240d8800c62@o4508140473417728.ingest.us.sentry.io/4509542931431424");
+          options.setTag(
+              "launcherPath",
+              LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().getPath());
         });
 
-        // Initialize the AWT desktop properties on Linux before any invocations are done
-        // https://github.com/JFormDesigner/FlatLaf/issues/405#issuecomment-960242342
-        try {
-            Toolkit.getDefaultToolkit().getDesktopProperty("dummy");
-        } catch (Exception e) {
-            // Ignore any AWT exceptions, but log them to Sentry
-            Sentry.captureException(e);
-        }
+    // Initialize the AWT desktop properties on Linux before any invocations are done
+    // https://github.com/JFormDesigner/FlatLaf/issues/405#issuecomment-960242342
+    try {
+      Toolkit.getDefaultToolkit().getDesktopProperty("dummy");
+    } catch (Exception e) {
+      // Ignore any AWT exceptions, but log them to Sentry
+      Sentry.captureException(e);
+    }
 
-        runHeadlessCheck();
+    runHeadlessCheck();
 
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-            Utils.getLogger().log(Level.SEVERE, "Failed to set system look and feel", e);
-        }
+    try {
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    } catch (Exception e) {
+      Utils.getLogger().log(Level.SEVERE, "Failed to set system look and feel", e);
+    }
 
-        ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
+    ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
 
-        StartupParameters params = new StartupParameters(argv);
-        try {
-            JCommander jc = JCommander.newBuilder()
-                    .addObject(params)
-                    .build();
-            // Allow options to be case-insensitive
-            jc.setCaseSensitiveOptions(false);
-            // Ignore extra unknown options
-            jc.setAcceptUnknownOptions(true);
-            // Parse the arguments into the params object
-            jc.parse(argv);
-        } catch (ParameterException e) {
-            e.printStackTrace();
-        }
+    StartupParameters params = new StartupParameters(argv);
+    try {
+      JCommander jc = JCommander.newBuilder().addObject(params).build();
+      // Allow options to be case-insensitive
+      jc.setCaseSensitiveOptions(false);
+      // Ignore extra unknown options
+      jc.setAcceptUnknownOptions(true);
+      // Parse the arguments into the params object
+      jc.parse(argv);
+    } catch (ParameterException e) {
+      e.printStackTrace();
+    }
 
-        TechnicSettings settings;
+    TechnicSettings settings;
 
-        settings = SettingsFactory.buildSettingsObject(Relauncher.getRunningPath(LauncherMain.class), params.isMover());
+    settings =
+        SettingsFactory.buildSettingsObject(
+            Relauncher.getRunningPath(LauncherMain.class), params.isMover());
 
-        if (settings == null) {
-            showSetupWindow(params);
-            return;
-        }
+    if (settings == null) {
+      showSetupWindow(params);
+      return;
+    }
 
-        User sentryUser = new User();
-        sentryUser.setId(settings.getClientId());
-        Sentry.setUser(sentryUser);
+    User sentryUser = new User();
+    sentryUser.setId(settings.getClientId());
+    Sentry.setUser(sentryUser);
 
-        LauncherFileSystem fileSystem = new LauncherFileSystem(settings.getTechnicRootPath());
-        ResourceLoader resources = new ResourceLoader(fileSystem, "net", "technicpack", "launcher", "resources");
-        resources.setSupportedLanguages(supportedLanguages);
-        resources.setLocale(settings.getLanguageCode());
+    LauncherFileSystem fileSystem = new LauncherFileSystem(settings.getTechnicRootPath());
+    ResourceLoader resources =
+        new ResourceLoader(fileSystem, "net", "technicpack", "launcher", "resources");
+    resources.setSupportedLanguages(supportedLanguages);
+    resources.setLocale(settings.getLanguageCode());
 
-        // Sanity check
-        checkIfRunningInsideOneDrive(fileSystem.getRootDirectory());
+    // Sanity check
+    checkIfRunningInsideOneDrive(fileSystem.getRootDirectory());
 
-        if (params.getBuildNumber() != null && !params.getBuildNumber().isEmpty())
-            buildNumber = new CommandLineBuildNumber(params);
-        else
-            buildNumber = new VersionFileBuildNumber(resources);
+    if (params.getBuildNumber() != null && !params.getBuildNumber().isEmpty())
+      buildNumber = new CommandLineBuildNumber(params);
+    else buildNumber = new VersionFileBuildNumber(resources);
 
-        Sentry.configureScope(scope -> {
-            scope.setTag("buildNumber", buildNumber.getBuildNumber());
-            scope.setTag("updateStream", settings.getBuildStream());
+    Sentry.configureScope(
+        scope -> {
+          scope.setTag("buildNumber", buildNumber.getBuildNumber());
+          scope.setTag("updateStream", settings.getBuildStream());
         });
 
-        TechnicConstants.setBuildNumber(buildNumber);
+    TechnicConstants.setBuildNumber(buildNumber);
 
-        setupLogging(fileSystem, resources);
-        sanitizeLegacyStandardInstallSettings(settings, fileSystem);
+    setupLogging(fileSystem, resources);
+    sanitizeLegacyStandardInstallSettings(settings, fileSystem);
 
-        final boolean displayConsole = settings.getShowConsole();
-        if (displayConsole) {
-            SwingUtilities.invokeLater(() -> setConsoleVisible(true));
-        }
-
-        int build = -1;
-
-        try {
-            build = Integer.parseInt(buildNumber.getBuildNumber());
-        } catch (NumberFormatException e) {
-            //This is probably a debug build or something, build number is invalid
-        }
-
-        // These 2 need to happen *before* the launcher or the updater run so we have valuable debug information and so
-        // we can properly use websites that use Let's Encrypt (and other current certs not supported by old Java versions)
-        runStartupDebug();
-        updateJavaTrustStore();
-
-        Relauncher launcher = new Relauncher(new HttpUpdateStream("https://api.technicpack.net/launcher/"), settings.getBuildStream()+"4", build, fileSystem, resources, params);
-
-        try {
-            if (launcher.runAutoUpdater()) {
-                startLauncher(settings, params, fileSystem, resources);
-            }
-        } catch (InterruptedException e) {
-            // Launcher update was interrupted, show an error message and exit
-            Utils.getLogger().log(Level.SEVERE, "Launcher update interrupted", e);
-            showStartupError(resources, resources.getString("updater.error.interrupt"));
-            // Restore the interrupted status
-            Thread.currentThread().interrupt();
-            System.exit(1);
-        } catch (DownloadException e) {
-            // There was an error downloading the launcher resources, show an error message and exit
-            Utils.getLogger().log(Level.SEVERE, "Failed to download launcher resources", e);
-            Sentry.captureException(e);
-            showStartupError(resources, resources.getString("updater.error.download", e.getMessage()));
-            System.exit(1);
-        } catch (IOException e) {
-            // An unknown IO error occurred, show an error message and exit
-            Utils.getLogger().log(Level.SEVERE, "IOException when starting launcher", e);
-            Sentry.captureException(e);
-            showStartupError(resources, resources.getString("updater.error.io", e.getMessage()));
-            System.exit(1);
-        }
+    final boolean displayConsole = settings.getShowConsole();
+    if (displayConsole) {
+      SwingUtilities.invokeLater(() -> setConsoleVisible(true));
     }
 
-    /**
-     * Checks if the launcher is running in a headless environment and terminate if so.
-     */
-    @SuppressWarnings("java:S106")
-    private static void runHeadlessCheck() {
-        if (GraphicsEnvironment.isHeadless()) {
-            System.err.println("Technic Launcher cannot run in headless mode. Please run it in a graphical environment.");
-            System.exit(1);
-        }
+    int build = -1;
+
+    try {
+      build = Integer.parseInt(buildNumber.getBuildNumber());
+    } catch (NumberFormatException e) {
+      // This is probably a debug build or something, build number is invalid
     }
 
-    private static void showStartupError(ResourceLoader resources, String message) {
+    // These 2 need to happen *before* the launcher or the updater run so we have valuable debug
+    // information and so
+    // we can properly use websites that use Let's Encrypt (and other current certs not supported by
+    // old Java versions)
+    runStartupDebug();
+    updateJavaTrustStore();
+
+    Relauncher launcher =
+        new Relauncher(
+            new HttpUpdateStream("https://api.technicpack.net/launcher/"),
+            settings.getBuildStream() + "4",
+            build,
+            fileSystem,
+            resources,
+            params);
+
+    try {
+      if (launcher.runAutoUpdater()) {
+        startLauncher(settings, params, fileSystem, resources);
+      }
+    } catch (InterruptedException e) {
+      // Launcher update was interrupted, show an error message and exit
+      Utils.getLogger().log(Level.SEVERE, "Launcher update interrupted", e);
+      showStartupError(resources, resources.getString("updater.error.interrupt"));
+      // Restore the interrupted status
+      Thread.currentThread().interrupt();
+      System.exit(1);
+    } catch (DownloadException e) {
+      // There was an error downloading the launcher resources, show an error message and exit
+      Utils.getLogger().log(Level.SEVERE, "Failed to download launcher resources", e);
+      Sentry.captureException(e);
+      showStartupError(resources, resources.getString("updater.error.download", e.getMessage()));
+      System.exit(1);
+    } catch (IOException e) {
+      // An unknown IO error occurred, show an error message and exit
+      Utils.getLogger().log(Level.SEVERE, "IOException when starting launcher", e);
+      Sentry.captureException(e);
+      showStartupError(resources, resources.getString("updater.error.io", e.getMessage()));
+      System.exit(1);
+    }
+  }
+
+  /** Checks if the launcher is running in a headless environment and terminate if so. */
+  @SuppressWarnings("java:S106")
+  private static void runHeadlessCheck() {
+    if (GraphicsEnvironment.isHeadless()) {
+      System.err.println(
+          "Technic Launcher cannot run in headless mode. Please run it in a graphical environment.");
+      System.exit(1);
+    }
+  }
+
+  private static void showStartupError(ResourceLoader resources, String message) {
+    JOptionPane.showMessageDialog(
+        null, message, resources.getString("updater.error.title"), JOptionPane.ERROR_MESSAGE);
+  }
+
+  /**
+   * Sets the visibility of the console frame.
+   *
+   * @param visible true to show the console, false to hide it
+   */
+  public static void setConsoleVisible(boolean visible) {
+    if (consoleFrame != null) {
+      consoleFrame.setVisible(visible);
+    }
+  }
+
+  private static void showSetupWindow(StartupParameters params) {
+    ResourceLoader installerResources =
+        new ResourceLoader(null, "net", "technicpack", "launcher", "resources");
+    installerResources.setSupportedLanguages(supportedLanguages);
+    installerResources.setLocale(ResourceLoader.DEFAULT_LOCALE);
+    InstallerFrame dialog = new InstallerFrame(installerResources, params);
+    dialog.setVisible(true);
+  }
+
+  private static void checkIfRunningInsideOneDrive(Path rootDir) {
+    if (OperatingSystem.getOperatingSystem() != OperatingSystem.WINDOWS) {
+      return;
+    }
+
+    for (String varName : new String[] {"OneDrive", "OneDriveConsumer"}) {
+      String varValue = System.getenv(varName);
+      if (varValue == null || varValue.isEmpty()) {
+        continue;
+      }
+
+      Path oneDrivePath = Paths.get(varValue);
+
+      if (rootDir.startsWith(oneDrivePath)) {
         JOptionPane.showMessageDialog(
-                null,
-                message,
-                resources.getString("updater.error.title"),
-                JOptionPane.ERROR_MESSAGE
-        );
+            null,
+            "Technic Launcher cannot run inside OneDrive. Please move it out of OneDrive, in the launcher settings.",
+            "Cannot run inside OneDrive",
+            JOptionPane.ERROR_MESSAGE);
+      }
+    }
+  }
+
+  private static void sanitizeLegacyStandardInstallSettings(
+      TechnicSettings settings, LauncherFileSystem fileSystem) {
+    try {
+      Path archivedSettingsFile =
+          archiveLegacyInstallSettingsFile(
+              fileSystem.getRootDirectory(),
+              OperatingSystem.getOperatingSystem().getTechnicDirectory().toPath(),
+              settings.isPortable());
+      if (archivedSettingsFile != null) {
+        Utils.getLogger()
+            .log(Level.INFO, "Archived legacy install settings file to {0}", archivedSettingsFile);
+      }
+    } catch (IOException e) {
+      Utils.getLogger()
+          .log(
+              Level.WARNING,
+              String.format(
+                  "Failed to archive legacy install settings file in %s",
+                  fileSystem.getRootDirectory()),
+              e);
+    }
+  }
+
+  static Path archiveLegacyInstallSettingsFile(Path installRoot, Path defaultRoot, boolean portable)
+      throws IOException {
+    if (portable) {
+      return null;
     }
 
-    /**
-     * Sets the visibility of the console frame.
-     *
-     * @param visible true to show the console, false to hide it
-     */
-    public static void setConsoleVisible(boolean visible) {
-        if (consoleFrame != null) {
-            consoleFrame.setVisible(visible);
-        }
+    Path normalizedInstallRoot = installRoot.toAbsolutePath().normalize();
+    Path normalizedDefaultRoot = defaultRoot.toAbsolutePath().normalize();
+    if (normalizedInstallRoot.equals(normalizedDefaultRoot)) {
+      return null;
     }
 
-    private static void showSetupWindow(StartupParameters params) {
-        ResourceLoader installerResources = new ResourceLoader(null, "net", "technicpack", "launcher", "resources");
-        installerResources.setSupportedLanguages(supportedLanguages);
-        installerResources.setLocale(ResourceLoader.DEFAULT_LOCALE);
-        InstallerFrame dialog = new InstallerFrame(installerResources, params);
-        dialog.setVisible(true);
+    Path staleInstallSettingsFile = normalizedInstallRoot.resolve("settings.json");
+    if (!Files.exists(staleInstallSettingsFile)) {
+      return null;
     }
 
-    private static void checkIfRunningInsideOneDrive(Path rootDir) {
-        if (OperatingSystem.getOperatingSystem() != OperatingSystem.WINDOWS) {
-            return;
-        }
-
-        for (String varName : new String[]{"OneDrive", "OneDriveConsumer"}) {
-            String varValue = System.getenv(varName);
-            if (varValue == null || varValue.isEmpty()) {
-                continue;
-            }
-
-            Path oneDrivePath = Paths.get(varValue);
-
-            if (rootDir.startsWith(oneDrivePath)) {
-                JOptionPane.showMessageDialog(null,
-                        "Technic Launcher cannot run inside OneDrive. Please move it out of OneDrive, in the launcher settings.",
-                        "Cannot run inside OneDrive", JOptionPane.ERROR_MESSAGE);
-            }
-        }
+    Path archivedSettingsFile = normalizedInstallRoot.resolve("settings.json.legacy");
+    if (Files.exists(archivedSettingsFile)) {
+      archivedSettingsFile =
+          normalizedInstallRoot.resolve("settings.json.legacy." + System.currentTimeMillis());
     }
 
-    private static void sanitizeLegacyStandardInstallSettings(TechnicSettings settings, LauncherFileSystem fileSystem) {
-        try {
-            Path archivedSettingsFile = archiveLegacyInstallSettingsFile(
-                    fileSystem.getRootDirectory(),
-                    OperatingSystem.getOperatingSystem().getTechnicDirectory().toPath(),
-                    settings.isPortable()
-            );
-            if (archivedSettingsFile != null) {
-                Utils.getLogger().log(Level.INFO, "Archived legacy install settings file to {0}", archivedSettingsFile);
-            }
-        } catch (IOException e) {
-            Utils.getLogger().log(Level.WARNING, String.format("Failed to archive legacy install settings file in %s", fileSystem.getRootDirectory()), e);
-        }
+    Files.move(staleInstallSettingsFile, archivedSettingsFile);
+    return archivedSettingsFile;
+  }
+
+  private static void setupLogging(LauncherFileSystem fileSystem, ResourceLoader resources) {
+    System.out.println("Setting up logging"); // NOSONAR - Logging system not initialized yet
+    final Logger logger = Utils.getLogger();
+
+    for (Handler h : logger.getHandlers()) {
+      logger.removeHandler(h);
     }
+    logger.setUseParentHandlers(false);
+    swapLogFileHandler(logger, createLogFileHandler(fileSystem.getLogsDirectory()));
 
-    static Path archiveLegacyInstallSettingsFile(Path installRoot, Path defaultRoot, boolean portable) throws IOException {
-        if (portable) {
-            return null;
-        }
+    consoleFrame = new ConsoleFrame(resources.getImage("icon.png"));
+    ConsoleHandler consoleHandler = new ConsoleHandler(consoleFrame);
+    consoleHandler.setFormatter(new ConsoleLogFormatter());
+    logger.addHandler(consoleHandler);
 
-        Path normalizedInstallRoot = installRoot.toAbsolutePath().normalize();
-        Path normalizedDefaultRoot = defaultRoot.toAbsolutePath().normalize();
-        if (normalizedInstallRoot.equals(normalizedDefaultRoot)) {
-            return null;
-        }
+    // TODO: remove this when things no longer print to stdout or stderr
+    System.setOut(new PrintStream(new LoggerOutputStream(Level.INFO, logger), true));
+    System.setErr(new PrintStream(new LoggerOutputStream(Level.SEVERE, logger), true));
 
-        Path staleInstallSettingsFile = normalizedInstallRoot.resolve("settings.json");
-        if (!Files.exists(staleInstallSettingsFile)) {
-            return null;
-        }
-
-        Path archivedSettingsFile = normalizedInstallRoot.resolve("settings.json.legacy");
-        if (Files.exists(archivedSettingsFile)) {
-            archivedSettingsFile = normalizedInstallRoot.resolve("settings.json.legacy." + System.currentTimeMillis());
-        }
-
-        Files.move(staleInstallSettingsFile, archivedSettingsFile);
-        return archivedSettingsFile;
-    }
-
-    private static void setupLogging(LauncherFileSystem fileSystem, ResourceLoader resources) {
-        System.out.println("Setting up logging"); // NOSONAR - Logging system not initialized yet
-        final Logger logger = Utils.getLogger();
-
-        for (Handler h : logger.getHandlers()) {
-            logger.removeHandler(h);
-        }
-        logger.setUseParentHandlers(false);
-        swapLogFileHandler(logger, createLogFileHandler(fileSystem.getLogsDirectory()));
-
-        consoleFrame = new ConsoleFrame(resources.getImage("icon.png"));
-        ConsoleHandler consoleHandler = new ConsoleHandler(consoleFrame);
-        consoleHandler.setFormatter(new ConsoleLogFormatter());
-        logger.addHandler(consoleHandler);
-
-        // TODO: remove this when things no longer print to stdout or stderr
-        System.setOut(new PrintStream(new LoggerOutputStream(Level.INFO, logger), true));
-        System.setErr(new PrintStream(new LoggerOutputStream(Level.SEVERE, logger), true));
-
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
-            logger.log(Level.SEVERE, String.format("Unhandled exception in thread %s", t), e);
-            Sentry.captureException(e);
+    Thread.setDefaultUncaughtExceptionHandler(
+        (t, e) -> {
+          logger.log(Level.SEVERE, String.format("Unhandled exception in thread %s", t), e);
+          Sentry.captureException(e);
         });
+  }
+
+  public static synchronized void moveLogFileTo(LauncherFileSystem fileSystem) {
+    if (currentFileHandler == null) {
+      return;
     }
 
-    public static synchronized void moveLogFileTo(LauncherFileSystem fileSystem) {
-        if (currentFileHandler == null) {
-            return;
+    final Logger logger = Utils.getLogger();
+    swapLogFileHandler(logger, createLogFileHandler(fileSystem.getLogsDirectory()));
+  }
+
+  private static RotatingFileHandler createLogFileHandler(Path logsDirectory) {
+    String currentBuildNumber = buildNumber != null ? buildNumber.getBuildNumber() : "0";
+    RotatingFileHandler fileHandler =
+        new RotatingFileHandler(logsDirectory, "techniclauncher_%s.log");
+    fileHandler.setFormatter(new BuildLogFormatter(currentBuildNumber));
+    return fileHandler;
+  }
+
+  private static void swapLogFileHandler(Logger logger, RotatingFileHandler newFileHandler) {
+    logger.addHandler(newFileHandler);
+
+    RotatingFileHandler oldFileHandler = currentFileHandler;
+    currentFileHandler = newFileHandler;
+
+    if (oldFileHandler != null && oldFileHandler != newFileHandler) {
+      logger.removeHandler(oldFileHandler);
+      oldFileHandler.close();
+    }
+  }
+
+  /** Runs the startup debug, including OS information and DNS resolution for key hostnames. */
+  private static void runStartupDebug() {
+    Utils.getLogger()
+        .info(String.format("OS: %s", System.getProperty("os.name").toLowerCase(Locale.ROOT)));
+    Utils.getLogger()
+        .info(String.format("Identified as %s", OperatingSystem.getOperatingSystem().getName()));
+    Utils.getLogger()
+        .info(
+            String.format(
+                "Java: %s %s-bit (%s)",
+                System.getProperty("java.version"), JavaUtils.JAVA_BITNESS, JavaUtils.OS_ARCH));
+    final String[] domains = {
+      "minecraft.net",
+      "session.minecraft.net",
+      "textures.minecraft.net",
+      "libraries.minecraft.net",
+      "account.mojang.com",
+      "www.technicpack.net",
+      "launcher.technicpack.net",
+      "api.technicpack.net",
+      "mirror.technicpack.net",
+      "solder.technicpack.net",
+      "files.minecraftforge.net",
+      "user.auth.xboxlive.com",
+      "xsts.auth.xboxlive.com",
+      "api.minecraftservices.com",
+      "launchermeta.mojang.com",
+      "piston-meta.mojang.com",
+    };
+
+    // Run DNS resolution asynchronously
+    CompletableFuture<?>[] dnsFutures =
+        Arrays.stream(domains)
+            .map(
+                domain ->
+                    CompletableFuture.runAsync(
+                        () -> {
+                          try {
+                            String ips =
+                                Arrays.stream(InetAddress.getAllByName(domain))
+                                    .map(InetAddress::getHostAddress)
+                                    .collect(Collectors.joining(", "));
+                            Utils.getLogger()
+                                .info(String.format("%s resolves to [%s]", domain, ips));
+                          } catch (UnknownHostException e) {
+                            Utils.getLogger()
+                                .log(
+                                    Level.SEVERE,
+                                    String.format("Failed to resolve %s: %s", domain, e));
+                          }
+                        }))
+            .toArray(CompletableFuture[]::new);
+
+    // Wait for all DNS resolution tasks to complete
+    CompletableFuture.allOf(dnsFutures).join();
+  }
+
+  private static String getCertificateFingerprint(Certificate cert) {
+    try {
+      MessageDigest md = MessageDigest.getInstance("SHA-256");
+      byte[] der = cert.getEncoded();
+      md.update(der);
+      byte[] digest = md.digest();
+      StringBuilder sb = new StringBuilder();
+      for (byte b : digest) {
+        sb.append(String.format("%02X:", b));
+      }
+      sb.setLength(sb.length() - 1);
+      return sb.toString();
+    } catch (CertificateEncodingException | NoSuchAlgorithmException e) {
+      Utils.getLogger().log(Level.WARNING, "Failed to get certificate fingerprint", e);
+      return "unknown";
+    }
+  }
+
+  private static void updateJavaTrustStore() {
+    final String javaVersion = System.getProperty("java.version");
+
+    final char[] defaultTrustStorePassword = "changeit".toCharArray();
+
+    try {
+      // Load the default trust store
+      KeyStore defaultTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+      final Path defaultKsPath =
+          Paths.get(System.getProperty("java.home"), "lib", "security", "cacerts");
+      try (InputStream is = Files.newInputStream(defaultKsPath)) {
+        defaultTrustStore.load(is, defaultTrustStorePassword);
+      }
+
+      // Load our custom trust store
+      KeyStore technicTrustStore = KeyStore.getInstance("JKS");
+      try (InputStream is =
+          LauncherMain.class.getResourceAsStream(
+              "/net/technicpack/launcher/resources/technicKeystore.jks")) {
+        technicTrustStore.load(is, defaultTrustStorePassword);
+      }
+
+      // Create a new, empty trust store to merge the default and custom ones
+      KeyStore mergedTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+      mergedTrustStore.load(null, null);
+
+      // Copy the default trust store entries
+      Enumeration<String> defaultAliases = defaultTrustStore.aliases();
+      while (defaultAliases.hasMoreElements()) {
+        String alias = defaultAliases.nextElement();
+        Certificate cert = defaultTrustStore.getCertificate(alias);
+        if (cert == null) {
+          Utils.getLogger()
+              .log(
+                  Level.WARNING,
+                  String.format(
+                      "Certificate for alias '%s' in default trust store is null", alias));
+          continue;
         }
+        mergedTrustStore.setCertificateEntry(alias, cert);
+      }
 
-        final Logger logger = Utils.getLogger();
-        swapLogFileHandler(logger, createLogFileHandler(fileSystem.getLogsDirectory()));
-    }
+      boolean updated = false;
 
-    private static RotatingFileHandler createLogFileHandler(Path logsDirectory) {
-        String currentBuildNumber = buildNumber != null ? buildNumber.getBuildNumber() : "0";
-        RotatingFileHandler fileHandler = new RotatingFileHandler(logsDirectory, "techniclauncher_%s.log");
-        fileHandler.setFormatter(new BuildLogFormatter(currentBuildNumber));
-        return fileHandler;
-    }
-
-    private static void swapLogFileHandler(Logger logger, RotatingFileHandler newFileHandler) {
-        logger.addHandler(newFileHandler);
-
-        RotatingFileHandler oldFileHandler = currentFileHandler;
-        currentFileHandler = newFileHandler;
-
-        if (oldFileHandler != null && oldFileHandler != newFileHandler) {
-            logger.removeHandler(oldFileHandler);
-            oldFileHandler.close();
+      // Copy the custom trust store entries
+      Enumeration<String> technicAliases = technicTrustStore.aliases();
+      while (technicAliases.hasMoreElements()) {
+        String alias = technicAliases.nextElement();
+        Certificate cert = technicTrustStore.getCertificate(alias);
+        if (cert == null) {
+          Utils.getLogger()
+              .log(
+                  Level.WARNING,
+                  String.format(
+                      "Certificate for alias '%s' in Technic trust store is null", alias));
+          continue;
         }
-    }
-
-    /**
-     * Runs the startup debug, including OS information and DNS resolution for key hostnames.
-     */
-    private static void runStartupDebug() {
-        Utils.getLogger().info(String.format("OS: %s", System.getProperty("os.name").toLowerCase(Locale.ROOT)));
-        Utils.getLogger().info(String.format("Identified as %s", OperatingSystem.getOperatingSystem().getName()));
-        Utils.getLogger().info(String.format("Java: %s %s-bit (%s)", System.getProperty("java.version"), JavaUtils.JAVA_BITNESS, JavaUtils.OS_ARCH));
-        final String[] domains = {
-                "minecraft.net", "session.minecraft.net", "textures.minecraft.net", "libraries.minecraft.net",
-                "account.mojang.com", "www.technicpack.net", "launcher.technicpack.net", "api.technicpack.net",
-                "mirror.technicpack.net", "solder.technicpack.net", "files.minecraftforge.net",
-                "user.auth.xboxlive.com", "xsts.auth.xboxlive.com", "api.minecraftservices.com",
-                "launchermeta.mojang.com", "piston-meta.mojang.com",
-        };
-
-        // Run DNS resolution asynchronously
-        CompletableFuture<?>[] dnsFutures = Arrays.stream(domains)
-                .map(domain -> CompletableFuture.runAsync(() -> {
-                    try {
-                        String ips = Arrays.stream(InetAddress.getAllByName(domain))
-                                .map(InetAddress::getHostAddress)
-                                .collect(Collectors.joining(", "));
-                        Utils.getLogger().info(String.format("%s resolves to [%s]", domain, ips));
-                    } catch (UnknownHostException e) {
-                        Utils.getLogger().log(Level.SEVERE, String.format("Failed to resolve %s: %s", domain, e));
-                    }
-                }))
-                .toArray(CompletableFuture[]::new);
-
-        // Wait for all DNS resolution tasks to complete
-        CompletableFuture.allOf(dnsFutures).join();
-    }
-
-    private static String getCertificateFingerprint(Certificate cert) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] der = cert.getEncoded();
-            md.update(der);
-            byte[] digest = md.digest();
-            StringBuilder sb = new StringBuilder();
-            for (byte b : digest) {
-                sb.append(String.format("%02X:", b));
-            }
-            sb.setLength(sb.length() - 1);
-            return sb.toString();
-        } catch (CertificateEncodingException | NoSuchAlgorithmException e) {
-            Utils.getLogger().log(Level.WARNING, "Failed to get certificate fingerprint", e);
-            return "unknown";
+        if (!mergedTrustStore.containsAlias(alias)) {
+          Utils.getLogger()
+              .log(
+                  Level.FINE,
+                  String.format(
+                      "Adding certificate with alias '%s', fingerprint %s",
+                      alias, getCertificateFingerprint(cert)));
+          mergedTrustStore.setCertificateEntry(alias, cert);
+          updated = true;
         }
+      }
+
+      // Initialize the SSL context with the merged trust store
+      TrustManagerFactory tmf =
+          TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+      tmf.init(mergedTrustStore);
+
+      SSLContext sslContext = SSLContext.getInstance("TLS");
+      sslContext.init(null, tmf.getTrustManagers(), new SecureRandom());
+
+      HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+
+      if (updated) {
+        Utils.getLogger()
+            .log(Level.INFO, "Updated Java trust store with new root certificates successfully");
+      }
+    } catch (KeyStoreException
+        | IOException
+        | NoSuchAlgorithmException
+        | CertificateException
+        | KeyManagementException e) {
+      Utils.getLogger()
+          .log(
+              Level.WARNING,
+              "Failed to update Java trust store. Problems might happen with TLS connections",
+              e);
     }
+  }
 
-    private static void updateJavaTrustStore() {
-        final String javaVersion = System.getProperty("java.version");
+  /**
+   * Creates a thread that will delete all log files older than a week.
+   *
+   * @param fileSystem The launcher filesystem to use for finding the logs directory.
+   * @return A thread that will perform the cleanup.
+   */
+  private static Thread createCleanupLogsThread(LauncherFileSystem fileSystem) {
+    Thread cleanupLogsThread =
+        new Thread(
+            () -> {
+              final Path logsDir = fileSystem.getLogsDirectory();
 
-        final char[] defaultTrustStorePassword = "changeit".toCharArray();
-
-        try {
-            // Load the default trust store
-            KeyStore defaultTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            final Path defaultKsPath = Paths.get(System.getProperty("java.home"), "lib", "security", "cacerts");
-            try (InputStream is = Files.newInputStream(defaultKsPath)) {
-                defaultTrustStore.load(is, defaultTrustStorePassword);
-            }
-
-            // Load our custom trust store
-            KeyStore technicTrustStore = KeyStore.getInstance("JKS");
-            try (InputStream is = LauncherMain.class.getResourceAsStream("/net/technicpack/launcher/resources/technicKeystore.jks")) {
-                technicTrustStore.load(is, defaultTrustStorePassword);
-            }
-
-            // Create a new, empty trust store to merge the default and custom ones
-            KeyStore mergedTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            mergedTrustStore.load(null, null);
-
-            // Copy the default trust store entries
-            Enumeration<String> defaultAliases = defaultTrustStore.aliases();
-            while (defaultAliases.hasMoreElements()) {
-                String alias = defaultAliases.nextElement();
-                Certificate cert = defaultTrustStore.getCertificate(alias);
-                if (cert == null) {
-                    Utils.getLogger().log(Level.WARNING, String.format("Certificate for alias '%s' in default trust store is null", alias));
-                    continue;
-                }
-                mergedTrustStore.setCertificateEntry(alias, cert);
-            }
-
-            boolean updated = false;
-
-            // Copy the custom trust store entries
-            Enumeration<String> technicAliases = technicTrustStore.aliases();
-            while (technicAliases.hasMoreElements()) {
-                String alias = technicAliases.nextElement();
-                Certificate cert = technicTrustStore.getCertificate(alias);
-                if (cert == null) {
-                    Utils.getLogger().log(Level.WARNING, String.format("Certificate for alias '%s' in Technic trust store is null", alias));
-                    continue;
-                }
-                if (!mergedTrustStore.containsAlias(alias)) {
-                    Utils.getLogger().log(Level.FINE, String.format("Adding certificate with alias '%s', fingerprint %s", alias, getCertificateFingerprint(cert)));
-                    mergedTrustStore.setCertificateEntry(alias, cert);
-                    updated = true;
-                }
-            }
-
-            // Initialize the SSL context with the merged trust store
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            tmf.init(mergedTrustStore);
-
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, tmf.getTrustManagers(), new SecureRandom());
-
-            HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
-
-            if (updated) {
-                Utils.getLogger().log(Level.INFO, "Updated Java trust store with new root certificates successfully");
-            }
-        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | KeyManagementException e) {
-            Utils.getLogger().log(Level.WARNING, "Failed to update Java trust store. Problems might happen with TLS connections", e);
-        }
-    }
-
-    /**
-     * Creates a thread that will delete all log files older than a week.
-     *
-     * @param fileSystem The launcher filesystem to use for finding the logs directory.
-     * @return A thread that will perform the cleanup.
-     */
-    private static Thread createCleanupLogsThread(LauncherFileSystem fileSystem) {
-        Thread cleanupLogsThread = new Thread(() -> {
-            final Path logsDir = fileSystem.getLogsDirectory();
-
-            if (!Files.exists(logsDir)) {
+              if (!Files.exists(logsDir)) {
                 // Directory doesn't exist, nothing to clean up
                 return;
-            }
+              }
 
-            final DateTime aWeekAgo = DateTime.now().minusWeeks(1);
-            try (Stream<Path> walk = Files.walk(logsDir, 1)) {
-                walk.filter(p -> Files.isRegularFile(p) && p.toString().endsWith(".log")).forEach(p -> {
-                    try {
-                        DateTime dateTime = new DateTime(Files.getLastModifiedTime(p).toMillis());
+              final DateTime aWeekAgo = DateTime.now().minusWeeks(1);
+              try (Stream<Path> walk = Files.walk(logsDir, 1)) {
+                walk.filter(p -> Files.isRegularFile(p) && p.toString().endsWith(".log"))
+                    .forEach(
+                        p -> {
+                          try {
+                            DateTime dateTime =
+                                new DateTime(Files.getLastModifiedTime(p).toMillis());
 
-                        if (dateTime.isBefore(aWeekAgo)) {
-                            Files.deleteIfExists(p);
-                        }
-                    } catch (IOException e) {
-                        Utils.getLogger().log(Level.WARNING, String.format("Failed to delete old log file: %s", p), e);
-                    }
-                });
-            } catch (IOException e) {
+                            if (dateTime.isBefore(aWeekAgo)) {
+                              Files.deleteIfExists(p);
+                            }
+                          } catch (IOException e) {
+                            Utils.getLogger()
+                                .log(
+                                    Level.WARNING,
+                                    String.format("Failed to delete old log file: %s", p),
+                                    e);
+                          }
+                        });
+              } catch (IOException e) {
                 Utils.getLogger().log(Level.WARNING, "Failed to clean up log files", e);
-            }
-        });
-        cleanupLogsThread.setDaemon(true);
-        return cleanupLogsThread;
-    }
+              }
+            });
+    cleanupLogsThread.setDaemon(true);
+    return cleanupLogsThread;
+  }
 
-    private static void startLauncher(final TechnicSettings settings, StartupParameters startupParameters, final LauncherFileSystem fileSystem,
-                                      ResourceLoader resources) {
-        UIManager.put("ComboBox.disabledBackground", UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
-        UIManager.put("ComboBox.disabledForeground", UIConstants.COLOR_GREY_TEXT);
-        System.setProperty("xr.load.xml-reader", "org.ccil.cowan.tagsoup.Parser");
+  private static void startLauncher(
+      final TechnicSettings settings,
+      StartupParameters startupParameters,
+      final LauncherFileSystem fileSystem,
+      ResourceLoader resources) {
+    UIManager.put("ComboBox.disabledBackground", UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+    UIManager.put("ComboBox.disabledForeground", UIConstants.COLOR_GREY_TEXT);
+    System.setProperty("xr.load.xml-reader", "org.ccil.cowan.tagsoup.Parser");
 
-        // Remove all log files older than a week
-        Thread cleanupLogsThread = createCleanupLogsThread(fileSystem);
-        cleanupLogsThread.start();
+    // Remove all log files older than a week
+    Thread cleanupLogsThread = createCleanupLogsThread(fileSystem);
+    cleanupLogsThread.start();
 
-        final SplashScreen splash = new SplashScreen(resources.getImage("launch_splash.png"), 0);
-        Color bg = UIConstants.COLOR_FORM_ELEMENT_INTERNAL;
-        splash.getContentPane().setBackground(new Color(bg.getRed(), bg.getGreen(), bg.getBlue(), 255));
-        splash.pack();
-        splash.setLocationRelativeTo(null);
-        splash.setVisible(true);
+    final SplashScreen splash = new SplashScreen(resources.getImage("launch_splash.png"), 0);
+    Color bg = UIConstants.COLOR_FORM_ELEMENT_INTERNAL;
+    splash.getContentPane().setBackground(new Color(bg.getRed(), bg.getGreen(), bg.getBlue(), 255));
+    splash.pack();
+    splash.setLocationRelativeTo(null);
+    splash.setVisible(true);
 
-        JavaVersionRepository javaVersions = new JavaVersionRepository();
-        (new InstalledJavaSource()).enumerateVersions(javaVersions);
-        FileJavaSource javaVersionFile = FileJavaSource.load(new File(settings.getTechnicRoot(), "javaVersions.json"));
-        javaVersionFile.enumerateVersions(javaVersions);
-        javaVersions.selectVersion(settings.getJavaVersion(), settings.getPrefer64Bit());
+    JavaVersionRepository javaVersions = new JavaVersionRepository();
+    (new InstalledJavaSource()).enumerateVersions(javaVersions);
+    FileJavaSource javaVersionFile =
+        FileJavaSource.load(new File(settings.getTechnicRoot(), "javaVersions.json"));
+    javaVersionFile.enumerateVersions(javaVersions);
+    javaVersions.selectVersion(settings.getJavaVersion(), settings.getPrefer64Bit());
 
-        UserStore userStore = UserStore.load(fileSystem.getRootDirectory().resolve("users.json"));
-        MicrosoftAuthenticator microsoftAuthenticator = new MicrosoftAuthenticator(fileSystem.getRootDirectory().resolve("oauth").toFile());
-        UserModel userModel = new UserModel(userStore, microsoftAuthenticator);
+    UserStore userStore = UserStore.load(fileSystem.getRootDirectory().resolve("users.json"));
+    MicrosoftAuthenticator microsoftAuthenticator =
+        new MicrosoftAuthenticator(fileSystem.getRootDirectory().resolve("oauth").toFile());
+    UserModel userModel = new UserModel(userStore, microsoftAuthenticator);
 
-        IModpackResourceType iconType = new IconResourceType();
-        IModpackResourceType logoType = new LogoResourceType();
-        IModpackResourceType backgroundType = new BackgroundResourceType();
+    IModpackResourceType iconType = new IconResourceType();
+    IModpackResourceType logoType = new LogoResourceType();
+    IModpackResourceType backgroundType = new BackgroundResourceType();
 
-        PackResourceMapper iconMapper = new PackResourceMapper(fileSystem, resources.getImage("icon.png"), iconType);
-        ImageRepository<ModpackModel> iconRepo = new ImageRepository<>(iconMapper, new PackImageStore(iconType));
-        ImageRepository<ModpackModel> logoRepo = new ImageRepository<>(new PackResourceMapper(fileSystem,
-                resources.getImage("modpack/ModImageFiller.png"), logoType), new PackImageStore(logoType));
-        ImageRepository<ModpackModel> backgroundRepo = new ImageRepository<>(new PackResourceMapper(fileSystem, null, backgroundType),
-                new PackImageStore(backgroundType));
+    PackResourceMapper iconMapper =
+        new PackResourceMapper(fileSystem, resources.getImage("icon.png"), iconType);
+    ImageRepository<ModpackModel> iconRepo =
+        new ImageRepository<>(iconMapper, new PackImageStore(iconType));
+    ImageRepository<ModpackModel> logoRepo =
+        new ImageRepository<>(
+            new PackResourceMapper(
+                fileSystem, resources.getImage("modpack/ModImageFiller.png"), logoType),
+            new PackImageStore(logoType));
+    ImageRepository<ModpackModel> backgroundRepo =
+        new ImageRepository<>(
+            new PackResourceMapper(fileSystem, null, backgroundType),
+            new PackImageStore(backgroundType));
 
-        ImageRepository<IUserType> skinRepo = new ImageRepository<>(new TechnicFaceMapper(fileSystem, resources),
-                new MinotarFaceImageStore("https://minotar.net/"));
+    ImageRepository<IUserType> skinRepo =
+        new ImageRepository<>(
+            new TechnicFaceMapper(fileSystem, resources),
+            new MinotarFaceImageStore("https://minotar.net/"));
 
-        ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<>(new TechnicAvatarMapper(fileSystem, resources),
-                new WebAvatarImageStore());
+    ImageRepository<AuthorshipInfo> avatarRepo =
+        new ImageRepository<>(
+            new TechnicAvatarMapper(fileSystem, resources), new WebAvatarImageStore());
 
-        HttpSolderApi httpSolder = new HttpSolderApi(settings.getClientId());
-        ISolderApi solder = new CachedSolderApi(fileSystem, httpSolder, 60 * 60);
-        HttpPlatformApi httpPlatform = new HttpPlatformApi("https://api.technicpack.net/", buildNumber.getBuildNumber());
+    HttpSolderApi httpSolder = new HttpSolderApi(settings.getClientId());
+    ISolderApi solder = new CachedSolderApi(fileSystem, httpSolder, 60 * 60);
+    HttpPlatformApi httpPlatform =
+        new HttpPlatformApi("https://api.technicpack.net/", buildNumber.getBuildNumber());
 
-        IPlatformApi platform = new ModpackCachePlatformApi(httpPlatform, 60 * 60, fileSystem);
-        IPlatformSearchApi platformSearch = new HttpPlatformSearchApi("https://api.technicpack.net/", buildNumber.getBuildNumber());
+    IPlatformApi platform = new ModpackCachePlatformApi(httpPlatform, 60 * 60, fileSystem);
+    IPlatformSearchApi platformSearch =
+        new HttpPlatformSearchApi("https://api.technicpack.net/", buildNumber.getBuildNumber());
 
-        InstalledPackStore packStore = InstalledPackStore.load(fileSystem.getRootDirectory().resolve("installedPacks"));
-        IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(platform, solder);
+    InstalledPackStore packStore =
+        InstalledPackStore.load(fileSystem.getRootDirectory().resolve("installedPacks"));
+    IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(platform, solder);
 
-        ArrayList<IMigrator> migrators = new ArrayList<>(1);
-        migrators.add(new InitialV3Migrator(platform));
-        migrators.add(new ResetJvmArgsIfDefaultString());
-        migrators.add(new DefaultMemorySentinelMigration());
-        SettingsFactory.migrateSettings(settings, packStore, fileSystem, userStore, migrators);
+    ArrayList<IMigrator> migrators = new ArrayList<>(1);
+    migrators.add(new InitialV3Migrator(platform));
+    migrators.add(new ResetJvmArgsIfDefaultString());
+    migrators.add(new DefaultMemorySentinelMigration());
+    SettingsFactory.migrateSettings(settings, packStore, fileSystem, userStore, migrators);
 
-        PackLoader packList = new PackLoader(fileSystem, packStore, packInfoRepository);
-        ModpackSelector selector = new ModpackSelector(resources, packList, new SolderPackSource("https://solder.technicpack.net/api/", solder),
-                solder, platform, platformSearch, iconRepo);
-        selector.setBorder(BorderFactory.createEmptyBorder());
-        userModel.addAuthListener(selector);
+    PackLoader packList = new PackLoader(fileSystem, packStore, packInfoRepository);
+    ModpackSelector selector =
+        new ModpackSelector(
+            resources,
+            packList,
+            new SolderPackSource("https://solder.technicpack.net/api/", solder),
+            solder,
+            platform,
+            platformSearch,
+            iconRepo);
+    selector.setBorder(BorderFactory.createEmptyBorder());
+    userModel.addAuthListener(selector);
 
-        resources.registerResource(selector);
+    resources.registerResource(selector);
 
-        DiscoverInfoPanel discoverInfoPanel = new DiscoverInfoPanel(resources, startupParameters.getDiscoverUrl(), platform, fileSystem, selector);
+    DiscoverInfoPanel discoverInfoPanel =
+        new DiscoverInfoPanel(
+            resources, startupParameters.getDiscoverUrl(), platform, fileSystem, selector);
 
-        MinecraftLauncher launcher = new MinecraftLauncher(platform, fileSystem, userModel, javaVersions, buildNumber);
-        ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());
-        Installer installer = new Installer(startupParameters, fileSystem, modpackInstaller, launcher, settings, iconMapper);
+    MinecraftLauncher launcher =
+        new MinecraftLauncher(platform, fileSystem, userModel, javaVersions, buildNumber);
+    ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());
+    Installer installer =
+        new Installer(
+            startupParameters, fileSystem, modpackInstaller, launcher, settings, iconMapper);
 
-        IDiscordApi discordApi = new HttpDiscordApi("https://discord.com/api");
-        discordApi = new CachedDiscordApi(discordApi, 600, 60);
+    IDiscordApi discordApi = new HttpDiscordApi("https://discord.com/api");
+    discordApi = new CachedDiscordApi(discordApi, 600, 60);
 
-        final LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, selector, iconRepo, logoRepo, backgroundRepo,
-                installer, avatarRepo, platform, fileSystem, packStore, startupParameters, discoverInfoPanel, javaVersions, javaVersionFile,
-                buildNumber, discordApi);
-        userModel.addAuthListener(frame);
+    final LauncherFrame frame =
+        new LauncherFrame(
+            resources,
+            skinRepo,
+            userModel,
+            settings,
+            selector,
+            iconRepo,
+            logoRepo,
+            backgroundRepo,
+            installer,
+            avatarRepo,
+            platform,
+            fileSystem,
+            packStore,
+            startupParameters,
+            discoverInfoPanel,
+            javaVersions,
+            javaVersionFile,
+            buildNumber,
+            discordApi);
+    userModel.addAuthListener(frame);
 
-        ActionListener listener = e -> {
-            splash.dispose();
-            if (settings.getLaunchToModpacks()) frame.selectTab(LauncherFrame.TAB_MODPACKS);
+    ActionListener listener =
+        e -> {
+          splash.dispose();
+          if (settings.getLaunchToModpacks()) frame.selectTab(LauncherFrame.TAB_MODPACKS);
         };
 
-        discoverInfoPanel.setLoadListener(listener);
+    discoverInfoPanel.setLoadListener(listener);
 
-        LoginFrame login = new LoginFrame(resources, settings, userModel, skinRepo);
-        userModel.addAuthListener(login);
-        userModel.addAuthListener(user -> {
-            if (user == null) splash.dispose();
+    LoginFrame login = new LoginFrame(resources, settings, userModel, skinRepo);
+    userModel.addAuthListener(login);
+    userModel.addAuthListener(
+        user -> {
+          if (user == null) splash.dispose();
         });
 
-        userModel.startupAuth();
+    userModel.startupAuth();
 
-        Utils.sendTracking("runLauncher", "run", buildNumber.getBuildNumber(), settings.getClientId());
-    }
+    Utils.sendTracking("runLauncher", "run", buildNumber.getBuildNumber(), settings.getClientId());
+  }
 }
