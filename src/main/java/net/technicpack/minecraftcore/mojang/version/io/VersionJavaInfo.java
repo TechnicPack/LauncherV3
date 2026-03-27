@@ -2,18 +2,18 @@ package net.technicpack.minecraftcore.mojang.version.io;
 
 @SuppressWarnings("unused")
 public class VersionJavaInfo {
-    private String component;
-    private int majorVersion;
+  private String component;
+  private int majorVersion;
 
-    private VersionJavaInfo() {
-        // Empty constructor for GSON
-    }
+  private VersionJavaInfo() {
+    // Empty constructor for GSON
+  }
 
-    public String getComponent() {
-        return component;
-    }
+  public String getComponent() {
+    return component;
+  }
 
-    public int getMajorVersion() {
-        return majorVersion;
-    }
+  public int getMajorVersion() {
+    return majorVersion;
+  }
 }

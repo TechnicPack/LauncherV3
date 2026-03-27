@@ -18,6 +18,9 @@
 
 package net.technicpack.launcher.settings.migration;
 
+import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
 import net.technicpack.launcher.io.InstalledPackStore;
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launcher.io.UserStore;
@@ -28,60 +31,59 @@ import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.io.NewsArticle;
 import net.technicpack.rest.RestfulAPIException;
 
-import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
-
 public class InitialV3Migrator implements IMigrator {
-    private IPlatformApi platformApi;
+  private IPlatformApi platformApi;
 
-    public InitialV3Migrator(IPlatformApi platformApi) {
-        this.platformApi = platformApi;
+  public InitialV3Migrator(IPlatformApi platformApi) {
+    this.platformApi = platformApi;
+  }
+
+  @Override
+  public String getMigrationVersion() {
+    return "0";
+  }
+
+  @Override
+  public String getMigratedVersion() {
+    return "1";
+  }
+
+  @Override
+  public void migrate(
+      TechnicSettings settings,
+      InstalledPackStore packStore,
+      LauncherFileSystem fileSystem,
+      UserStore users) {
+    // A fresh install/upgrade from v2 shouldn't show the latest news as being new
+    int maxNewsId = 0;
+
+    try {
+      for (NewsArticle article : platformApi.getNews().getArticles()) {
+        int newsId = article.getId();
+
+        if (newsId > maxNewsId) maxNewsId = newsId;
+      }
+
+      settings.setLatestNewsArticle(maxNewsId);
+    } catch (RestfulAPIException e) {
+      // Just kill the exception & go with ID 0
     }
 
-    @Override
-    public String getMigrationVersion() {
-        return "0";
+    List<ModpackModel> deletePacks = new LinkedList<>();
+    for (String packName : packStore.getPackNames()) {
+      InstalledPack pack = packStore.getInstalledPacks().get(packName);
+      ModpackModel model = new ModpackModel(pack, null, packStore, fileSystem);
+
+      File installedDirectory = model.getInstalledDirectory();
+      if (installedDirectory == null || !installedDirectory.exists()) {
+        deletePacks.add(model);
+      }
     }
 
-    @Override
-    public String getMigratedVersion() {
-        return "1";
+    for (ModpackModel deletePack : deletePacks) {
+      deletePack.delete();
     }
 
-    @Override
-    public void migrate(TechnicSettings settings, InstalledPackStore packStore, LauncherFileSystem fileSystem, UserStore users) {
-        //A fresh install/upgrade from v2 shouldn't show the latest news as being new
-        int maxNewsId = 0;
-
-        try {
-            for (NewsArticle article : platformApi.getNews().getArticles()) {
-                int newsId = article.getId();
-
-                if (newsId > maxNewsId)
-                    maxNewsId = newsId;
-            }
-
-            settings.setLatestNewsArticle(maxNewsId);
-        } catch (RestfulAPIException e) {
-            //Just kill the exception & go with ID 0
-        }
-
-        List<ModpackModel> deletePacks = new LinkedList<>();
-        for (String packName : packStore.getPackNames()) {
-            InstalledPack pack = packStore.getInstalledPacks().get(packName);
-            ModpackModel model = new ModpackModel(pack, null, packStore, fileSystem);
-
-            File installedDirectory = model.getInstalledDirectory();
-            if (installedDirectory == null || !installedDirectory.exists()) {
-                deletePacks.add(model);
-            }
-        }
-
-        for (ModpackModel deletePack : deletePacks) {
-            deletePack.delete();
-        }
-
-        packStore.save();
-    }
+    packStore.save();
+  }
 }

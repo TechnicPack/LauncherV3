@@ -19,28 +19,33 @@
 
 package net.technicpack.minecraftcore.mojang.version.builder.retrievers;
 
+import java.io.File;
+import java.io.IOException;
 import net.technicpack.launchercore.install.verifiers.ValidJsonFileVerifier;
 import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.builder.MinecraftVersionInfoRetriever;
 import net.technicpack.utilslib.Utils;
 
-import java.io.File;
-import java.io.IOException;
-
 public class HttpMinecraftVersionInfoRetriever implements MinecraftVersionInfoRetriever {
 
-    private String baseUrl;
-    private DownloadListener listener;
+  private String baseUrl;
+  private DownloadListener listener;
 
-    public HttpMinecraftVersionInfoRetriever(String baseUrl, DownloadListener listener) {
-        this.baseUrl = baseUrl;
-        this.listener = listener;
-    }
+  public HttpMinecraftVersionInfoRetriever(String baseUrl, DownloadListener listener) {
+    this.baseUrl = baseUrl;
+    this.listener = listener;
+  }
 
-    @Override
-    public void retrieveVersion(File target, String key) throws InterruptedException, IOException {
-        String url = baseUrl + key + "/" + key + ".json";
-        Utils.downloadFile(url, target.getName(), target.getAbsolutePath(), null, new ValidJsonFileVerifier(MojangUtils.getGson()), listener);
-    }
+  @Override
+  public void retrieveVersion(File target, String key) throws InterruptedException, IOException {
+    String url = baseUrl + key + "/" + key + ".json";
+    Utils.downloadFile(
+        url,
+        target.getName(),
+        target.getAbsolutePath(),
+        null,
+        new ValidJsonFileVerifier(MojangUtils.getGson()),
+        listener);
+  }
 }

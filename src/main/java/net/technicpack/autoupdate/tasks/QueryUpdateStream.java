@@ -19,6 +19,10 @@
 
 package net.technicpack.autoupdate.tasks;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.logging.Level;
 import net.technicpack.autoupdate.IUpdateStream;
 import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.autoupdate.io.LauncherResource;
@@ -38,111 +42,114 @@ import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.logging.Level;
-
 public class QueryUpdateStream implements IInstallTask<Void> {
-    private final String description;
-    private final ITasksQueue<Void> downloadTasks;
-    private final IUpdateStream updateStream;
-    private final LauncherFileSystem fileSystem;
-    private final Relauncher relauncher;
-    private final Collection<IInstallTask<Void>> postDownloadTasks;
+  private final String description;
+  private final ITasksQueue<Void> downloadTasks;
+  private final IUpdateStream updateStream;
+  private final LauncherFileSystem fileSystem;
+  private final Relauncher relauncher;
+  private final Collection<IInstallTask<Void>> postDownloadTasks;
 
-    public QueryUpdateStream(String description, IUpdateStream stream, ITasksQueue<Void> downloadTasks,
-                             LauncherFileSystem fileSystem, Relauncher relauncher,
-                             Collection<IInstallTask<Void>> postDownloadTasks) {
-        this.description = description;
-        this.downloadTasks = downloadTasks;
-        this.updateStream = stream;
-        this.fileSystem = fileSystem;
-        this.relauncher = relauncher;
-        this.postDownloadTasks = postDownloadTasks;
+  public QueryUpdateStream(
+      String description,
+      IUpdateStream stream,
+      ITasksQueue<Void> downloadTasks,
+      LauncherFileSystem fileSystem,
+      Relauncher relauncher,
+      Collection<IInstallTask<Void>> postDownloadTasks) {
+    this.description = description;
+    this.downloadTasks = downloadTasks;
+    this.updateStream = stream;
+    this.fileSystem = fileSystem;
+    this.relauncher = relauncher;
+    this.postDownloadTasks = postDownloadTasks;
+  }
+
+  @Override
+  public String getTaskDescription() {
+    return description;
+  }
+
+  @Override
+  public float getTaskProgress() {
+    return 0;
+  }
+
+  @Override
+  public void runTask(InstallTasksQueue<Void> queue) throws IOException {
+    StreamVersion version;
+    try {
+      version = updateStream.getStreamVersion(relauncher.getStreamName());
+
+      if (version == null || version.getBuild() == 0) {
+        return;
+      }
+    } catch (RestfulAPIException e) {
+      Utils.getLogger().log(Level.SEVERE, "Failed to query update stream", e);
+      return;
     }
 
-    @Override
-    public String getTaskDescription() {
-        return description;
+    // Launcher resources
+    for (LauncherResource resource : version.getResources()) {
+      IFileVerifier verifier = createFileVerifier(resource);
+
+      File targetFile =
+          fileSystem.getLauncherAssetsDirectory().resolve(resource.getFilename()).toFile();
+
+      if (targetFile.exists() && verifier != null && verifier.isFileValid(targetFile)) {
+        continue;
+      }
+
+      downloadTasks.addTask(createDownloadTask(resource, targetFile, verifier));
     }
 
-    @Override
-    public float getTaskProgress() {
-        return 0;
+    // Launcher update
+    if (relauncher.isSkipUpdate() || version.getBuild() == relauncher.getCurrentBuild()) {
+      return;
     }
 
-    @Override
-    public void runTask(InstallTasksQueue<Void> queue) throws IOException {
-        StreamVersion version;
-        try {
-            version = updateStream.getStreamVersion(relauncher.getStreamName());
+    String runningPath = relauncher.getRunningPath();
 
-            if (version == null || version.getBuild() == 0) {
-                return;
-            }
-        } catch (RestfulAPIException e) {
-            Utils.getLogger().log(Level.SEVERE, "Failed to query update stream", e);
-            return;
-        }
-
-        // Launcher resources
-        for (LauncherResource resource : version.getResources()) {
-            IFileVerifier verifier = createFileVerifier(resource);
-
-            File targetFile = fileSystem.getLauncherAssetsDirectory().resolve(resource.getFilename()).toFile();
-
-            if (targetFile.exists() && verifier != null && verifier.isFileValid(targetFile)) {
-                continue;
-            }
-
-            downloadTasks.addTask(createDownloadTask(resource, targetFile, verifier));
-        }
-
-        // Launcher update
-        if (relauncher.isSkipUpdate() || version.getBuild() == relauncher.getCurrentBuild()) {
-            return;
-        }
-
-        String runningPath = relauncher.getRunningPath();
-
-        if (runningPath == null) {
-            throw new DownloadException("Could not load a running path for currently-executing launcher.");
-        }
-
-        String updateUrl;
-        if (runningPath.endsWith(".exe")) {
-            updateUrl = version.getExeUrl();
-        } else {
-            updateUrl = version.getJarUrl();
-        }
-
-        downloadTasks.addTask(new DownloadUpdate(updateUrl, relauncher, postDownloadTasks));
+    if (runningPath == null) {
+      throw new DownloadException(
+          "Could not load a running path for currently-executing launcher.");
     }
 
-    private static @Nullable IFileVerifier createFileVerifier(LauncherResource resource) {
-        IFileVerifier verifier;
-        if (resource.getSha256() != null && !resource.getSha256().isEmpty()) {
-            verifier = new SHA256FileVerifier(resource.getSha256());
-        } else if (resource.getMd5() != null && !resource.getMd5().isEmpty()) {
-            verifier = new MD5FileVerifier(resource.getMd5());
-        } else {
-            verifier = null;
-        }
-        return verifier;
+    String updateUrl;
+    if (runningPath.endsWith(".exe")) {
+      updateUrl = version.getExeUrl();
+    } else {
+      updateUrl = version.getJarUrl();
     }
 
-    private static @NotNull DownloadFileTask<Void> createDownloadTask(LauncherResource resource, File targetFile,
-                                                                      IFileVerifier verifier) throws DownloadException {
-        DownloadFileTask<Void> downloadFileTask;
+    downloadTasks.addTask(new DownloadUpdate(updateUrl, relauncher, postDownloadTasks));
+  }
 
-        String zstdUrl = resource.getZstdUrl();
-        if (zstdUrl != null && !zstdUrl.isEmpty()) {
-            downloadFileTask = new DownloadFileTask<>(zstdUrl, targetFile, verifier, resource.getFilename());
-            downloadFileTask.setDecompressor(CompressorStreamFactory.ZSTANDARD);
-        } else {
-            downloadFileTask = new DownloadFileTask<>(resource.getUrl(), targetFile, verifier, resource.getFilename());
-        }
-        return downloadFileTask;
+  private static @Nullable IFileVerifier createFileVerifier(LauncherResource resource) {
+    IFileVerifier verifier;
+    if (resource.getSha256() != null && !resource.getSha256().isEmpty()) {
+      verifier = new SHA256FileVerifier(resource.getSha256());
+    } else if (resource.getMd5() != null && !resource.getMd5().isEmpty()) {
+      verifier = new MD5FileVerifier(resource.getMd5());
+    } else {
+      verifier = null;
     }
+    return verifier;
+  }
+
+  private static @NotNull DownloadFileTask<Void> createDownloadTask(
+      LauncherResource resource, File targetFile, IFileVerifier verifier) throws DownloadException {
+    DownloadFileTask<Void> downloadFileTask;
+
+    String zstdUrl = resource.getZstdUrl();
+    if (zstdUrl != null && !zstdUrl.isEmpty()) {
+      downloadFileTask =
+          new DownloadFileTask<>(zstdUrl, targetFile, verifier, resource.getFilename());
+      downloadFileTask.setDecompressor(CompressorStreamFactory.ZSTANDARD);
+    } else {
+      downloadFileTask =
+          new DownloadFileTask<>(resource.getUrl(), targetFile, verifier, resource.getFilename());
+    }
+    return downloadFileTask;
+  }
 }

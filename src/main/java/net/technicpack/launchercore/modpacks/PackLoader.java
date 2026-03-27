@@ -19,29 +19,43 @@
 
 package net.technicpack.launchercore.modpacks;
 
+import java.util.Collection;
 import net.technicpack.launcher.io.InstalledPackStore;
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
 import net.technicpack.launchercore.modpacks.sources.IModpackTagBuilder;
 import net.technicpack.launchercore.modpacks.sources.IPackSource;
 
-import java.util.Collection;
-
 public class PackLoader {
-    private InstalledPackStore packStore;
-    private IAuthoritativePackSource authoritativeSource;
-    private LauncherFileSystem fileSystem;
+  private InstalledPackStore packStore;
+  private IAuthoritativePackSource authoritativeSource;
+  private LauncherFileSystem fileSystem;
 
-    public PackLoader(LauncherFileSystem fileSystem, InstalledPackStore packStore, IAuthoritativePackSource packInfos) {
-        this.packStore = packStore;
-        this.authoritativeSource = packInfos;
-        this.fileSystem = fileSystem;
-    }
+  public PackLoader(
+      LauncherFileSystem fileSystem,
+      InstalledPackStore packStore,
+      IAuthoritativePackSource packInfos) {
+    this.packStore = packStore;
+    this.authoritativeSource = packInfos;
+    this.fileSystem = fileSystem;
+  }
 
-    public PackLoadJob createRepositoryLoadJob(IModpackContainer container, Collection<IPackSource> packSources, IModpackTagBuilder tagBuilder, boolean doLoadRepository) {
-        PackLoadJob job = new PackLoadJob(fileSystem, packStore, authoritativeSource, packSources, container, tagBuilder, doLoadRepository);
-        Thread thread = new Thread(job);
-        thread.start();
-        return job;
-    }
+  public PackLoadJob createRepositoryLoadJob(
+      IModpackContainer container,
+      Collection<IPackSource> packSources,
+      IModpackTagBuilder tagBuilder,
+      boolean doLoadRepository) {
+    PackLoadJob job =
+        new PackLoadJob(
+            fileSystem,
+            packStore,
+            authoritativeSource,
+            packSources,
+            container,
+            tagBuilder,
+            doLoadRepository);
+    Thread thread = new Thread(job);
+    thread.start();
+    return job;
+  }
 }

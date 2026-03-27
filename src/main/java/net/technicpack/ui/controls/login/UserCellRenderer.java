@@ -19,6 +19,12 @@
 
 package net.technicpack.ui.controls.login;
 
+import java.awt.Component;
+import java.util.HashMap;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JList;
+import javax.swing.ListCellRenderer;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.image.IImageJobListener;
 import net.technicpack.launchercore.image.ImageJob;
@@ -27,54 +33,57 @@ import net.technicpack.ui.controls.list.AdvancedCellRenderer;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.ImageUtils;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JList;
-import javax.swing.ListCellRenderer;
-import java.awt.Component;
-import java.util.HashMap;
+public class UserCellRenderer extends AdvancedCellRenderer<IUserType>
+    implements ListCellRenderer<IUserType>, IImageJobListener<IUserType> {
+  private Icon addUserIcon;
 
-public class UserCellRenderer extends AdvancedCellRenderer<IUserType> implements ListCellRenderer<IUserType>, IImageJobListener<IUserType> {
-    private Icon addUserIcon;
+  private ImageRepository<IUserType> mSkinRepo;
 
-    private ImageRepository<IUserType> mSkinRepo;
+  private static final int ICON_WIDTH = 32;
+  private static final int ICON_HEIGHT = 32;
 
-    private static final int ICON_WIDTH = 32;
-    private static final int ICON_HEIGHT = 32;
+  private HashMap<String, Icon> headMap = new HashMap<>();
 
-    private HashMap<String, Icon> headMap = new HashMap<>();
+  public UserCellRenderer(ResourceLoader resources, ImageRepository<IUserType> skinRepo) {
+    this.mSkinRepo = skinRepo;
+    addUserIcon = resources.getIcon("add_user.png");
+  }
 
-    public UserCellRenderer(ResourceLoader resources, ImageRepository<IUserType> skinRepo) {
-        this.mSkinRepo = skinRepo;
-        addUserIcon = resources.getIcon("add_user.png");
+  @Override
+  public Component getListCellRendererComponent(
+      JList<? extends IUserType> list,
+      IUserType user,
+      int index,
+      boolean isSelected,
+      boolean cellHasFocus) {
+    super.getListCellRendererComponent(list, user, index, isSelected, cellHasFocus);
+
+    if (!headMap.containsKey(user.getUsername())) {
+      ImageJob<IUserType> job = mSkinRepo.startImageJob(user);
+      job.addJobListener(this);
+      headMap.put(
+          user.getUsername(),
+          new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
     }
 
-    @Override
-    public Component getListCellRendererComponent(JList<? extends IUserType> list, IUserType user, int index, boolean isSelected, boolean cellHasFocus) {
-        super.getListCellRendererComponent(list, user, index, isSelected, cellHasFocus);
+    Icon head = headMap.get(user.getUsername());
 
-        if (!headMap.containsKey(user.getUsername())) {
-            ImageJob<IUserType> job = mSkinRepo.startImageJob(user);
-            job.addJobListener(this);
-            headMap.put(user.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
-        }
-
-        Icon head = headMap.get(user.getUsername());
-
-        if (head != null) {
-            this.setIcon(head);
-        }
-
-        return this;
+    if (head != null) {
+      this.setIcon(head);
     }
 
-    @Override
-    public void jobComplete(ImageJob<IUserType> job) {
-        IUserType user = job.getJobData();
-        headMap.remove(user.getUsername());
+    return this;
+  }
 
-        headMap.put(user.getUsername(), new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
+  @Override
+  public void jobComplete(ImageJob<IUserType> job) {
+    IUserType user = job.getJobData();
+    headMap.remove(user.getUsername());
 
-        this.invalidate();
-    }
+    headMap.put(
+        user.getUsername(),
+        new ImageIcon(ImageUtils.scaleImage(job.getImage(), ICON_WIDTH, ICON_HEIGHT)));
+
+    this.invalidate();
+  }
 }

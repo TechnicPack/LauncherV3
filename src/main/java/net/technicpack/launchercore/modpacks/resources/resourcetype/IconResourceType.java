@@ -23,13 +23,13 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.rest.io.Resource;
 
 public class IconResourceType implements IModpackResourceType {
-    @Override
-    public Resource getResource(ModpackModel modpack) {
-        return modpack.getIcon();
-    }
+  @Override
+  public Resource getResource(ModpackModel modpack) {
+    return modpack.getIcon();
+  }
 
-    @Override
-    public String getImageName() {
-        return "icon.png";
-    }
+  @Override
+  public String getImageName() {
+    return "icon.png";
+  }
 }

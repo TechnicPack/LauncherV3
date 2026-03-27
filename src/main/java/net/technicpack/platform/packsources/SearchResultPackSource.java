@@ -19,6 +19,7 @@
 
 package net.technicpack.platform.packsources;
 
+import java.util.*;
 import net.technicpack.launchercore.modpacks.sources.IPackSource;
 import net.technicpack.platform.IPlatformSearchApi;
 import net.technicpack.platform.io.SearchResult;
@@ -26,50 +27,47 @@ import net.technicpack.platform.io.SearchResultsData;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.rest.io.PackInfo;
 
-import java.util.*;
-
 public class SearchResultPackSource implements IPackSource {
-    private IPlatformSearchApi platformApi;
-    private String searchTerms;
-    private Map<String, Integer> resultPriorities = new HashMap<>();
+  private IPlatformSearchApi platformApi;
+  private String searchTerms;
+  private Map<String, Integer> resultPriorities = new HashMap<>();
 
-    public SearchResultPackSource(IPlatformSearchApi platformApi, String searchTerms) {
-        this.platformApi = platformApi;
-        this.searchTerms = searchTerms;
+  public SearchResultPackSource(IPlatformSearchApi platformApi, String searchTerms) {
+    this.platformApi = platformApi;
+    this.searchTerms = searchTerms;
+  }
+
+  @Override
+  public String getSourceName() {
+    return "Modpack search results for query '" + searchTerms + "'";
+  }
+
+  @Override
+  // Get PlatformPackInfo objects for every result from the given search terms.
+  public Collection<PackInfo> getPublicPacks() {
+    resultPriorities.clear();
+    // Get results from server
+    SearchResultsData results;
+    try {
+      results = platformApi.getSearchResults(searchTerms);
+    } catch (RestfulAPIException e) {
+      return Collections.emptySet();
     }
 
-    @Override
-    public String getSourceName() {
-        return "Modpack search results for query '" + searchTerms + "'";
+    ArrayList<PackInfo> resultPacks = new ArrayList<>(results.getResults().length);
+
+    int priority = 100;
+    for (SearchResult result : results.getResults()) {
+      resultPacks.add(new SearchResultPackInfo(result));
+      resultPriorities.put(result.getSlug(), priority--);
     }
 
-    @Override
-    //Get PlatformPackInfo objects for every result from the given search terms.
-    public Collection<PackInfo> getPublicPacks() {
-        resultPriorities.clear();
-        //Get results from server
-        SearchResultsData results;
-        try {
-            results = platformApi.getSearchResults(searchTerms);
-        } catch (RestfulAPIException e) {
-            return Collections.emptySet();
-        }
+    return resultPacks;
+  }
 
-        ArrayList<PackInfo> resultPacks = new ArrayList<>(results.getResults().length);
-
-        int priority = 100;
-        for (SearchResult result : results.getResults()) {
-            resultPacks.add(new SearchResultPackInfo(result));
-            resultPriorities.put(result.getSlug(), priority--);
-        }
-
-        return resultPacks;
-    }
-
-    @Override
-    public int getPriority(PackInfo info) {
-        if (resultPriorities.containsKey(info.getName()))
-            return resultPriorities.get(info.getName());
-        return 0;
-    }
+  @Override
+  public int getPriority(PackInfo info) {
+    if (resultPriorities.containsKey(info.getName())) return resultPriorities.get(info.getName());
+    return 0;
+  }
 }

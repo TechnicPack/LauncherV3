@@ -28,59 +28,61 @@ import net.technicpack.solder.io.SolderPackInfo;
 
 public class HttpSolderPackApi implements ISolderPackApi {
 
-    private final String baseUrl;
-    private final String modpackSlug;
-    private final String clientId;
-    private final String mirrorUrl;
+  private final String baseUrl;
+  private final String modpackSlug;
+  private final String clientId;
+  private final String mirrorUrl;
 
-    protected HttpSolderPackApi(String baseUrl, String modpackSlug, String clientId, String mirrorUrl) throws RestfulAPIException {
-        if (baseUrl == null) {
-            throw new RestfulAPIException(String.format("The Solder base URL for the modpack \"%s\" is null",
-                                                        modpackSlug));
-        }
-
-        if (mirrorUrl == null) {
-            throw new RestfulAPIException(String.format("The Solder mirror URL for the modpack \"%s\" is null",
-                                                        modpackSlug));
-        }
-
-        // Remove the right trailing slash from the base URL so we can format the URLs in a much cleaner manner
-        if (baseUrl.charAt(baseUrl.length() - 1) == '/') {
-            this.baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
-        } else {
-            this.baseUrl = baseUrl;
-        }
-        this.modpackSlug = modpackSlug;
-        this.clientId = clientId;
-        this.mirrorUrl = mirrorUrl;
+  protected HttpSolderPackApi(String baseUrl, String modpackSlug, String clientId, String mirrorUrl)
+      throws RestfulAPIException {
+    if (baseUrl == null) {
+      throw new RestfulAPIException(
+          String.format("The Solder base URL for the modpack \"%s\" is null", modpackSlug));
     }
 
-    @Override
-    public String getMirrorUrl() {
-        return mirrorUrl;
+    if (mirrorUrl == null) {
+      throw new RestfulAPIException(
+          String.format("The Solder mirror URL for the modpack \"%s\" is null", modpackSlug));
     }
 
-    @Override
-    public SolderPackInfo getPackInfoForBulk() throws RestfulAPIException {
-        return getPackInfo();
+    // Remove the right trailing slash from the base URL so we can format the URLs in a much cleaner
+    // manner
+    if (baseUrl.charAt(baseUrl.length() - 1) == '/') {
+      this.baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+    } else {
+      this.baseUrl = baseUrl;
     }
+    this.modpackSlug = modpackSlug;
+    this.clientId = clientId;
+    this.mirrorUrl = mirrorUrl;
+  }
 
-    @Override
-    public SolderPackInfo getPackInfo() throws RestfulAPIException {
-        String packUrl = String.format("%s/modpack/%s?cid=%s", baseUrl, modpackSlug, clientId);
-        SolderPackInfo info = RestObject.getRestObject(SolderPackInfo.class, packUrl);
-        info.setSolder(this);
-        return info;
+  @Override
+  public String getMirrorUrl() {
+    return mirrorUrl;
+  }
+
+  @Override
+  public SolderPackInfo getPackInfoForBulk() throws RestfulAPIException {
+    return getPackInfo();
+  }
+
+  @Override
+  public SolderPackInfo getPackInfo() throws RestfulAPIException {
+    String packUrl = String.format("%s/modpack/%s?cid=%s", baseUrl, modpackSlug, clientId);
+    SolderPackInfo info = RestObject.getRestObject(SolderPackInfo.class, packUrl);
+    info.setSolder(this);
+    return info;
+  }
+
+  @Override
+  public Modpack getPackBuild(String build) throws BuildInaccessibleException {
+    String url = String.format("%s/modpack/%s/%s?cid=%s", baseUrl, modpackSlug, build, clientId);
+
+    try {
+      return RestObject.getRestObject(Modpack.class, url);
+    } catch (RestfulAPIException e) {
+      throw new BuildInaccessibleException(modpackSlug, build, e);
     }
-
-    @Override
-    public Modpack getPackBuild(String build) throws BuildInaccessibleException {
-        String url = String.format("%s/modpack/%s/%s?cid=%s", baseUrl, modpackSlug, build, clientId);
-
-        try {
-            return RestObject.getRestObject(Modpack.class, url);
-        } catch (RestfulAPIException e) {
-            throw new BuildInaccessibleException(modpackSlug, build, e);
-        }
-    }
+  }
 }

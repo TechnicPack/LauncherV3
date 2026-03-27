@@ -22,5 +22,5 @@ package net.technicpack.minecraftcore.mojang.version;
 import java.io.IOException;
 
 public interface MinecraftVersionInfoBuilder {
-    IMinecraftVersionInfo buildVersionFromKey(String key) throws IOException, InterruptedException;
+  IMinecraftVersionInfo buildVersionFromKey(String key) throws IOException, InterruptedException;
 }

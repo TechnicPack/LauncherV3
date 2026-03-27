@@ -24,15 +24,15 @@ import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.rest.RestfulAPIException;
 
 public interface IPlatformApi {
-    PlatformPackInfo getPlatformPackInfoForBulk(String packSlug) throws RestfulAPIException;
+  PlatformPackInfo getPlatformPackInfoForBulk(String packSlug) throws RestfulAPIException;
 
-    PlatformPackInfo getPlatformPackInfo(String packSlug) throws RestfulAPIException;
+  PlatformPackInfo getPlatformPackInfo(String packSlug) throws RestfulAPIException;
 
-    void incrementPackRuns(String packSlug);
+  void incrementPackRuns(String packSlug);
 
-    void incrementPackInstalls(String packSlug);
+  void incrementPackInstalls(String packSlug);
 
-    NewsData getNews() throws RestfulAPIException;
+  NewsData getNews() throws RestfulAPIException;
 
-    String getPlatformUri(String slug);
+  String getPlatformUri(String slug);
 }

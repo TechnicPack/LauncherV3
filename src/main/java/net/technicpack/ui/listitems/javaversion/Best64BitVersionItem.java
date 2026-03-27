@@ -24,15 +24,17 @@ import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.ui.lang.ResourceLoader;
 
 public class Best64BitVersionItem extends JavaVersionItem {
-    public Best64BitVersionItem(IJavaRuntime version, ResourceLoader resourceLoader) {
-        super(version, resourceLoader);
-    }
+  public Best64BitVersionItem(IJavaRuntime version, ResourceLoader resourceLoader) {
+    super(version, resourceLoader);
+  }
 
-    @Override
-    public String getVersionNumber() { return JavaVersionRepository.VERSION_LATEST_64BIT; }
+  @Override
+  public String getVersionNumber() {
+    return JavaVersionRepository.VERSION_LATEST_64BIT;
+  }
 
-    @Override
-    public String toString() {
-        return getResourceLoader().getString("launcheroptions.java.best64version", super.toString());
-    }
+  @Override
+  public String toString() {
+    return getResourceLoader().getString("launcheroptions.java.best64version", super.toString());
+  }
 }

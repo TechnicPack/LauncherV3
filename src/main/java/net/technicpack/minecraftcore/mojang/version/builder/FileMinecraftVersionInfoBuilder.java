@@ -19,57 +19,57 @@
 
 package net.technicpack.minecraftcore.mojang.version.builder;
 
-import net.technicpack.minecraftcore.MojangUtils;
-import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
-import net.technicpack.minecraftcore.mojang.version.MinecraftVersionInfoBuilder;
-import net.technicpack.minecraftcore.mojang.version.io.MinecraftVersionInfo;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
+import net.technicpack.minecraftcore.MojangUtils;
+import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
+import net.technicpack.minecraftcore.mojang.version.MinecraftVersionInfoBuilder;
+import net.technicpack.minecraftcore.mojang.version.io.MinecraftVersionInfo;
 
 public class FileMinecraftVersionInfoBuilder implements MinecraftVersionInfoBuilder {
-    private File version;
-    private MinecraftVersionInfoRetriever retriever;
-    private List<MinecraftVersionInfoRetriever> fallbackRetrievers;
+  private File version;
+  private MinecraftVersionInfoRetriever retriever;
+  private List<MinecraftVersionInfoRetriever> fallbackRetrievers;
 
-    public FileMinecraftVersionInfoBuilder(File version, MinecraftVersionInfoRetriever retriever, List<MinecraftVersionInfoRetriever> fallbackRetrievers) {
-        this.version = version;
-        this.retriever = retriever;
-        this.fallbackRetrievers = fallbackRetrievers;
+  public FileMinecraftVersionInfoBuilder(
+      File version,
+      MinecraftVersionInfoRetriever retriever,
+      List<MinecraftVersionInfoRetriever> fallbackRetrievers) {
+    this.version = version;
+    this.retriever = retriever;
+    this.fallbackRetrievers = fallbackRetrievers;
+  }
+
+  @Override
+  public IMinecraftVersionInfo buildVersionFromKey(String key)
+      throws InterruptedException, IOException {
+    File target = version;
+
+    if (key != null) {
+      if (version.isDirectory()) {
+        String targetFile = key + ".json";
+        target = new File(version, targetFile);
+      }
+
+      if (retriever != null) retriever.retrieveVersion(target, key);
+
+      if (fallbackRetrievers != null) {
+        for (MinecraftVersionInfoRetriever fallbackRetriever : fallbackRetrievers) {
+          if (target.exists()) break;
+
+          fallbackRetriever.retrieveVersion(target, key);
+        }
+      }
     }
 
-    @Override
-    public IMinecraftVersionInfo buildVersionFromKey(String key) throws InterruptedException, IOException {
-        File target = version;
+    if (!target.exists()) return null;
 
-        if (key != null) {
-            if (version.isDirectory()) {
-                String targetFile = key + ".json";
-                target = new File(version, targetFile);
-            }
-
-            if (retriever != null)
-                retriever.retrieveVersion(target, key);
-
-            if (fallbackRetrievers != null) {
-                for (MinecraftVersionInfoRetriever fallbackRetriever : fallbackRetrievers) {
-                    if (target.exists())
-                        break;
-
-                    fallbackRetriever.retrieveVersion(target, key);
-                }
-            }
-        }
-
-        if (!target.exists())
-            return null;
-
-        try (Reader reader = Files.newBufferedReader(target.toPath(), StandardCharsets.UTF_8)) {
-            return MojangUtils.getGson().fromJson(reader, MinecraftVersionInfo.class);
-        }
+    try (Reader reader = Files.newBufferedReader(target.toPath(), StandardCharsets.UTF_8)) {
+      return MojangUtils.getGson().fromJson(reader, MinecraftVersionInfo.class);
     }
+  }
 }

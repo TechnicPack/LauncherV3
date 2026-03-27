@@ -21,8 +21,6 @@ package net.technicpack.launchercore.install;
 
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
-import net.technicpack.utilslib.Utils;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
@@ -30,54 +28,61 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.logging.Level;
+import net.technicpack.utilslib.Utils;
 
 public class ModpackVersion {
-    private String version;
-    private boolean legacy;
+  private String version;
+  private boolean legacy;
 
-    private ModpackVersion() {
-        // Empty constructor for GSON
+  private ModpackVersion() {
+    // Empty constructor for GSON
+  }
+
+  public ModpackVersion(String version, boolean legacy) {
+    this.version = version;
+    this.legacy = legacy;
+  }
+
+  public boolean isLegacy() {
+    return legacy;
+  }
+
+  public String getVersion() {
+    return version;
+  }
+
+  public static ModpackVersion load(File versionFile) {
+    if (!versionFile.exists()) {
+      Utils.getLogger()
+          .log(
+              Level.WARNING,
+              String.format(
+                  "Unable to load version from %s because it does not exist.", versionFile));
+      return null;
     }
 
-    public ModpackVersion(String version, boolean legacy) {
-        this.version = version;
-        this.legacy = legacy;
+    try {
+      try (Reader reader = Files.newBufferedReader(versionFile.toPath(), StandardCharsets.UTF_8)) {
+        return Utils.getGson().fromJson(reader, ModpackVersion.class);
+      }
+    } catch (JsonParseException | IOException e) {
+      Utils.getLogger()
+          .log(Level.WARNING, String.format("Unable to load version from %s", versionFile), e);
+      return null;
     }
+  }
 
-    public boolean isLegacy() {
-        return legacy;
+  public void save(File versionFile) {
+    try (Writer writer = Files.newBufferedWriter(versionFile.toPath(), StandardCharsets.UTF_8)) {
+      Utils.getGson().toJson(this, writer);
+    } catch (JsonIOException | IOException e) {
+      Utils.getLogger()
+          .log(Level.WARNING, String.format("Unable to save installed %s", versionFile), e);
     }
+  }
 
-    public String getVersion() {
-        return version;
-    }
-
-    public static ModpackVersion load(File versionFile) {
-        if (!versionFile.exists()) {
-            Utils.getLogger().log(Level.WARNING, String.format("Unable to load version from %s because it does not exist.", versionFile));
-            return null;
-        }
-
-        try {
-            try (Reader reader = Files.newBufferedReader(versionFile.toPath(), StandardCharsets.UTF_8)) {
-                return Utils.getGson().fromJson(reader, ModpackVersion.class);
-            }
-        } catch (JsonParseException | IOException e) {
-            Utils.getLogger().log(Level.WARNING, String.format("Unable to load version from %s", versionFile), e);
-            return null;
-        }
-    }
-
-    public void save(File versionFile) {
-        try (Writer writer = Files.newBufferedWriter(versionFile.toPath(), StandardCharsets.UTF_8)) {
-            Utils.getGson().toJson(this, writer);
-        } catch (JsonIOException | IOException e) {
-            Utils.getLogger().log(Level.WARNING, String.format("Unable to save installed %s", versionFile), e);
-        }
-    }
-
-    @Override
-    public String toString() {
-        return String.format("ModpackVersion{version='%s', legacy=%s}", version, legacy);
-    }
+  @Override
+  public String toString() {
+    return String.format("ModpackVersion{version='%s', legacy=%s}", version, legacy);
+  }
 }

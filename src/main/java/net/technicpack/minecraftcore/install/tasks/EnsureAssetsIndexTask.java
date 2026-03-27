@@ -19,6 +19,7 @@
 
 package net.technicpack.minecraftcore.install.tasks;
 
+import java.io.File;
 import net.technicpack.launchercore.install.ITasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.DownloadFileTask;
@@ -31,66 +32,76 @@ import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.io.AssetIndex;
 
-import java.io.File;
-
 public class EnsureAssetsIndexTask implements IInstallTask<IMinecraftVersionInfo> {
 
-    private final File assetsDirectory;
-    private final ModpackModel modpack;
-    private final ITasksQueue<IMinecraftVersionInfo> downloadIndexQueue;
-    private final ITasksQueue<IMinecraftVersionInfo> examineIndexQueue;
-    private final ITasksQueue<IMinecraftVersionInfo> checkAssetsQueue;
-    private final ITasksQueue<IMinecraftVersionInfo> downloadAssetsQueue;
-    private final ITasksQueue<IMinecraftVersionInfo> installAssetsQueue;
+  private final File assetsDirectory;
+  private final ModpackModel modpack;
+  private final ITasksQueue<IMinecraftVersionInfo> downloadIndexQueue;
+  private final ITasksQueue<IMinecraftVersionInfo> examineIndexQueue;
+  private final ITasksQueue<IMinecraftVersionInfo> checkAssetsQueue;
+  private final ITasksQueue<IMinecraftVersionInfo> downloadAssetsQueue;
+  private final ITasksQueue<IMinecraftVersionInfo> installAssetsQueue;
 
-    public EnsureAssetsIndexTask(File assetsDirectory, ModpackModel modpack, ITasksQueue<IMinecraftVersionInfo> downloadIndexQueue, ITasksQueue<IMinecraftVersionInfo> examineIndexQueue, ITasksQueue<IMinecraftVersionInfo> checkAssetsQueue, ITasksQueue<IMinecraftVersionInfo> downloadAssetsQueue, ITasksQueue<IMinecraftVersionInfo> installAssetsQueue) {
-        this.assetsDirectory = assetsDirectory;
-        this.modpack = modpack;
-        this.downloadIndexQueue = downloadIndexQueue;
-        this.examineIndexQueue = examineIndexQueue;
-        this.checkAssetsQueue = checkAssetsQueue;
-        this.downloadAssetsQueue = downloadAssetsQueue;
-        this.installAssetsQueue = installAssetsQueue;
+  public EnsureAssetsIndexTask(
+      File assetsDirectory,
+      ModpackModel modpack,
+      ITasksQueue<IMinecraftVersionInfo> downloadIndexQueue,
+      ITasksQueue<IMinecraftVersionInfo> examineIndexQueue,
+      ITasksQueue<IMinecraftVersionInfo> checkAssetsQueue,
+      ITasksQueue<IMinecraftVersionInfo> downloadAssetsQueue,
+      ITasksQueue<IMinecraftVersionInfo> installAssetsQueue) {
+    this.assetsDirectory = assetsDirectory;
+    this.modpack = modpack;
+    this.downloadIndexQueue = downloadIndexQueue;
+    this.examineIndexQueue = examineIndexQueue;
+    this.checkAssetsQueue = checkAssetsQueue;
+    this.downloadAssetsQueue = downloadAssetsQueue;
+    this.installAssetsQueue = installAssetsQueue;
+  }
+
+  @Override
+  public String getTaskDescription() {
+    return "Retrieving assets index";
+  }
+
+  @Override
+  public float getTaskProgress() {
+    return 0;
+  }
+
+  @Override
+  public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) {
+    IMinecraftVersionInfo version = queue.getMetadata();
+
+    AssetIndex assetIndex = version.getAssetIndex();
+
+    if (assetIndex == null) {
+      throw new RuntimeException("No asset index detected, cannot continue");
     }
 
-    @Override
-    public String getTaskDescription() {
-        return "Retrieving assets index";
+    String assetsUrl = assetIndex.getUrl();
+
+    File assetsFile =
+        new File(assetsDirectory + File.separator + "indexes", assetIndex.getId() + ".json");
+
+    (new File(assetsFile.getParent())).mkdirs();
+
+    IFileVerifier fileVerifier;
+
+    if (assetIndex.getSha1() != null) fileVerifier = new SHA1FileVerifier(assetIndex.getSha1());
+    else fileVerifier = new ValidJsonFileVerifier(MojangUtils.getGson());
+
+    if (!assetsFile.exists() || !fileVerifier.isFileValid(assetsFile)) {
+      downloadIndexQueue.addTask(new DownloadFileTask<>(assetsUrl, assetsFile, fileVerifier));
     }
 
-    @Override
-    public float getTaskProgress() {
-        return 0;
-    }
-
-    @Override
-    public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) {
-        IMinecraftVersionInfo version = queue.getMetadata();
-
-        AssetIndex assetIndex = version.getAssetIndex();
-
-        if (assetIndex == null) {
-            throw new RuntimeException("No asset index detected, cannot continue");
-        }
-
-        String assetsUrl = assetIndex.getUrl();
-
-        File assetsFile = new File(assetsDirectory + File.separator + "indexes", assetIndex.getId() + ".json");
-
-        (new File(assetsFile.getParent())).mkdirs();
-
-        IFileVerifier fileVerifier;
-
-        if (assetIndex.getSha1() != null)
-            fileVerifier = new SHA1FileVerifier(assetIndex.getSha1());
-        else
-            fileVerifier = new ValidJsonFileVerifier(MojangUtils.getGson());
-
-        if (!assetsFile.exists() || !fileVerifier.isFileValid(assetsFile)) {
-            downloadIndexQueue.addTask(new DownloadFileTask<>(assetsUrl, assetsFile, fileVerifier));
-        }
-
-        examineIndexQueue.addTask(new InstallMinecraftAssetsTask(modpack, assetsDirectory.getAbsolutePath(), assetsFile, checkAssetsQueue, downloadAssetsQueue, installAssetsQueue));
-    }
-
+    examineIndexQueue.addTask(
+        new InstallMinecraftAssetsTask(
+            modpack,
+            assetsDirectory.getAbsolutePath(),
+            assetsFile,
+            checkAssetsQueue,
+            downloadAssetsQueue,
+            installAssetsQueue));
+  }
 }

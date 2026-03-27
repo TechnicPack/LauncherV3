@@ -18,6 +18,16 @@
 
 package net.technicpack.launcher.ui;
 
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.logging.Level;
+import javax.swing.*;
+import javax.swing.border.LineBorder;
 import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.autoupdate.tasks.CopyLauncherPackage;
 import net.technicpack.launcher.LauncherMain;
@@ -40,600 +50,910 @@ import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 
-import javax.swing.*;
-import javax.swing.border.LineBorder;
-import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.logging.Level;
-
 public class InstallerFrame extends DraggableFrame implements IRelocalizableResource {
 
-    private static final int DIALOG_WIDTH = 610;
-    private static final int DIALOG_HEIGHT = 320;
+  private static final int DIALOG_WIDTH = 610;
+  private static final int DIALOG_HEIGHT = 320;
 
-    private ResourceLoader resources;
+  private ResourceLoader resources;
 
-    private Window mainFrame;
+  private Window mainFrame;
 
-    private JCheckBox standardDefaultDirectory;
-    private JTextField standardInstallDir;
-    private RoundedButton standardSelectButton;
-    private JTextField portableInstallDir;
-    private RoundedButton portableInstallButton;
-    private StartupParameters params;
+  private JCheckBox standardDefaultDirectory;
+  private JTextField standardInstallDir;
+  private RoundedButton standardSelectButton;
+  private JTextField portableInstallDir;
+  private RoundedButton portableInstallButton;
+  private StartupParameters params;
 
-    private JComboBox standardLanguages;
-    private JComboBox portableLanguages;
+  private JComboBox standardLanguages;
+  private JComboBox portableLanguages;
 
-    private TechnicSettings settings;
+  private TechnicSettings settings;
 
-    private JPanel glassPane;
+  private JPanel glassPane;
 
-    public InstallerFrame(ResourceLoader resources, StartupParameters params) {
-        this.resources = resources;
-        this.params = params;
-        this.settings = new TechnicSettings();
-        this.settings.setFilePath(new File(OperatingSystem.getOperatingSystem().getTechnicDirectory(), "settings.json"));
-        this.settings.getTechnicRoot();
+  public InstallerFrame(ResourceLoader resources, StartupParameters params) {
+    this.resources = resources;
+    this.params = params;
+    this.settings = new TechnicSettings();
+    this.settings.setFilePath(
+        new File(OperatingSystem.getOperatingSystem().getTechnicDirectory(), "settings.json"));
+    this.settings.getTechnicRoot();
 
-        addGlassPane();
+    addGlassPane();
 
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        relocalize(resources);
+    relocalize(resources);
+  }
+
+  public InstallerFrame(
+      ResourceLoader resources,
+      StartupParameters params,
+      TechnicSettings settings,
+      Window mainFrame) {
+    this.settings = settings;
+    this.resources = resources;
+    this.params = params;
+    this.mainFrame = mainFrame;
+
+    if (mainFrame != null) {
+      mainFrame.setVisible(false);
     }
 
-    public InstallerFrame(ResourceLoader resources, StartupParameters params, TechnicSettings settings, Window mainFrame) {
-        this.settings = settings;
-        this.resources = resources;
-        this.params = params;
-        this.mainFrame = mainFrame;
+    addGlassPane();
 
-        if (mainFrame != null) {
-            mainFrame.setVisible(false);
-        }
+    relocalize(resources);
+  }
 
-        addGlassPane();
-
-        relocalize(resources);
-    }
-
-    private void addGlassPane() {
-        glassPane = new JPanel() {
-            @Override
-            public void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                g.setColor(UIConstants.COLOR_CENTRAL_BACK);
-                g.fillRect(0, 0, getWidth(), getHeight());
-            }
+  private void addGlassPane() {
+    glassPane =
+        new JPanel() {
+          @Override
+          public void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            g.setColor(UIConstants.COLOR_CENTRAL_BACK);
+            g.fillRect(0, 0, getWidth(), getHeight());
+          }
         };
-        glassPane.addMouseListener(new MouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                e.consume();
-            }
+    glassPane.addMouseListener(
+        new MouseListener() {
+          @Override
+          public void mouseClicked(MouseEvent e) {
+            e.consume();
+          }
 
-            @Override
-            public void mousePressed(MouseEvent e) {
-                e.consume();
-            }
+          @Override
+          public void mousePressed(MouseEvent e) {
+            e.consume();
+          }
 
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                e.consume();
-            }
+          @Override
+          public void mouseReleased(MouseEvent e) {
+            e.consume();
+          }
 
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                e.consume();
-            }
+          @Override
+          public void mouseEntered(MouseEvent e) {
+            e.consume();
+          }
 
-            @Override
-            public void mouseExited(MouseEvent e) {
-                e.consume();
-            }
+          @Override
+          public void mouseExited(MouseEvent e) {
+            e.consume();
+          }
         });
-        glassPane.setOpaque(false);
-        glassPane.setLayout(new GridBagLayout());
+    glassPane.setOpaque(false);
+    glassPane.setLayout(new GridBagLayout());
 
-        JLabel spinner = new JLabel(resources.getIcon("loader.gif"));
-        glassPane.add(spinner);
-        setGlassPane(glassPane);
-    }
+    JLabel spinner = new JLabel(resources.getIcon("loader.gif"));
+    glassPane.add(spinner);
+    setGlassPane(glassPane);
+  }
 
-    protected void standardLanguageChanged() {
-        String langCode = ((LanguageItem)standardLanguages.getSelectedItem()).getLangCode();
-        settings.setLanguageCode(langCode);
-        resources.setLocale(langCode);
-    }
+  protected void standardLanguageChanged() {
+    String langCode = ((LanguageItem) standardLanguages.getSelectedItem()).getLangCode();
+    settings.setLanguageCode(langCode);
+    resources.setLocale(langCode);
+  }
 
-    protected void portableLanguageChanged() {
-        String langCode = ((LanguageItem)portableLanguages.getSelectedItem()).getLangCode();
-        settings.setLanguageCode(langCode);
-        resources.setLocale(langCode);
-    }
+  protected void portableLanguageChanged() {
+    String langCode = ((LanguageItem) portableLanguages.getSelectedItem()).getLangCode();
+    settings.setLanguageCode(langCode);
+    resources.setLocale(langCode);
+  }
 
-    protected void standardInstall() {
-        glassPane.setVisible(true);
+  protected void standardInstall() {
+    glassPane.setVisible(true);
 
-        Thread thread = new Thread(() -> {
-            File oldSettings = settings.getFilePath();
-            File newSettings = new File(OperatingSystem.getOperatingSystem().getTechnicDirectory(), "settings.json");
+    Thread thread =
+        new Thread(
+            () -> {
+              File oldSettings = settings.getFilePath();
+              File newSettings =
+                  new File(
+                      OperatingSystem.getOperatingSystem().getTechnicDirectory(), "settings.json");
 
-            if (oldSettings.exists() && !oldSettings.getAbsolutePath().equals(newSettings.getAbsolutePath())) {
+              if (oldSettings.exists()
+                  && !oldSettings.getAbsolutePath().equals(newSettings.getAbsolutePath())) {
                 oldSettings.delete();
-            }
+              }
 
-            File oldRoot = settings.getTechnicRoot();
-            File newRoot = new File(standardInstallDir.getText());
-            boolean rootHasChanged = false;
+              File oldRoot = settings.getTechnicRoot();
+              File newRoot = new File(standardInstallDir.getText());
+              boolean rootHasChanged = false;
 
-            if (oldRoot.exists() && !oldRoot.getAbsolutePath().equals(newRoot.getAbsolutePath())) {
+              if (oldRoot.exists()
+                  && !oldRoot.getAbsolutePath().equals(newRoot.getAbsolutePath())) {
                 rootHasChanged = true;
                 try {
-                    copyInstallRoot(oldRoot, newRoot, false);
-                    LauncherMain.moveLogFileTo(new LauncherFileSystem(newRoot.toPath()));
-                    cleanupInstallRoot(oldRoot, shouldKeepSettingsFileOnStandardCleanup(oldRoot, OperatingSystem.getOperatingSystem().getTechnicDirectory()));
+                  copyInstallRoot(oldRoot, newRoot, false);
+                  LauncherMain.moveLogFileTo(new LauncherFileSystem(newRoot.toPath()));
+                  cleanupInstallRoot(
+                      oldRoot,
+                      shouldKeepSettingsFileOnStandardCleanup(
+                          oldRoot, OperatingSystem.getOperatingSystem().getTechnicDirectory()));
                 } catch (IOException e) {
-                    Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ", e);
+                  Utils.getLogger()
+                      .log(Level.SEVERE, "Copying install to new directory failed: ", e);
                 }
-            }
+              }
 
-            settings.setFilePath(newSettings);
+              settings.setFilePath(newSettings);
 
-            if (settings.isPortable() || rootHasChanged || !standardInstallDir.getText().equals(OperatingSystem.getOperatingSystem().getTechnicDirectory().getAbsolutePath()))
-                settings.installTo(standardInstallDir.getText());
-            settings.getTechnicRoot();
-            settings.setLanguageCode(((LanguageItem)standardLanguages.getSelectedItem()).getLangCode());
-            settings.save();
+              if (settings.isPortable()
+                  || rootHasChanged
+                  || !standardInstallDir
+                      .getText()
+                      .equals(
+                          OperatingSystem.getOperatingSystem()
+                              .getTechnicDirectory()
+                              .getAbsolutePath())) settings.installTo(standardInstallDir.getText());
+              settings.getTechnicRoot();
+              settings.setLanguageCode(
+                  ((LanguageItem) standardLanguages.getSelectedItem()).getLangCode());
+              settings.save();
 
-            // FIXME: temporary workaround to suppress the "file not found" warning on first run
-            Path installedPacks = newRoot.toPath().resolve("installedPacks");
-            try {
+              // FIXME: temporary workaround to suppress the "file not found" warning on first run
+              Path installedPacks = newRoot.toPath().resolve("installedPacks");
+              try {
                 if (!Files.exists(installedPacks)) {
-                    Files.createFile(installedPacks);
+                  Files.createFile(installedPacks);
                 }
-            } catch (IOException e) {
+              } catch (IOException e) {
                 // ignore for now
-            }
-            Path usersJson = newRoot.toPath().resolve("users.json");
-            try {
+              }
+              Path usersJson = newRoot.toPath().resolve("users.json");
+              try {
                 if (!Files.exists(usersJson)) {
-                    Files.createFile(usersJson);
+                  Files.createFile(usersJson);
                 }
-            } catch (IOException e) {
+              } catch (IOException e) {
                 // ignore for now
-            }
+              }
 
-            VersionFileBuildNumber buildNumber = new VersionFileBuildNumber(resources);
-            Utils.sendTracking("installLauncher", "standard", buildNumber.getBuildNumber(), settings.getClientId());
+              VersionFileBuildNumber buildNumber = new VersionFileBuildNumber(resources);
+              Utils.sendTracking(
+                  "installLauncher",
+                  "standard",
+                  buildNumber.getBuildNumber(),
+                  settings.getClientId());
 
-            Relauncher relauncher = new Relauncher(null, settings.getBuildStream(), 0, new LauncherFileSystem(settings.getTechnicRootPath()), resources, params);
-            String currentPath = relauncher.getRunningPath();
-            relauncher.launch(currentPath, params.getArgs());
-            System.exit(0);
-        });
-        thread.start();
+              Relauncher relauncher =
+                  new Relauncher(
+                      null,
+                      settings.getBuildStream(),
+                      0,
+                      new LauncherFileSystem(settings.getTechnicRootPath()),
+                      resources,
+                      params);
+              String currentPath = relauncher.getRunningPath();
+              relauncher.launch(currentPath, params.getArgs());
+              System.exit(0);
+            });
+    thread.start();
+  }
+
+  protected void portableInstall() {
+    final Relauncher relauncher =
+        new Relauncher(
+            null,
+            settings.getBuildStream(),
+            0,
+            new LauncherFileSystem(settings.getTechnicRootPath()),
+            resources,
+            params);
+    String currentPath = relauncher.getRunningPath();
+    String launcher =
+        (currentPath.endsWith(".exe")) ? "TechnicLauncher.exe" : "TechnicLauncher.jar";
+
+    String targetPath = new File(portableInstallDir.getText(), launcher).getAbsolutePath();
+    File targetExe = new File(portableInstallDir.getText(), launcher);
+
+    if (!(new File(currentPath).equals(targetExe))) {
+      if (targetExe.exists() && !targetExe.delete()) {
+        JOptionPane.showMessageDialog(
+            this,
+            resources.getString("installer.portable.replacefailed"),
+            resources.getString("installer.portable.replacefailtitle"),
+            JOptionPane.ERROR_MESSAGE);
+        return;
+      }
+      CopyLauncherPackage copyTask = new CopyLauncherPackage("", targetExe, relauncher);
+      try {
+        copyTask.runTask(null);
+      } catch (Exception e) {
+        // TODO: fix this to actually show the error
+        JOptionPane.showMessageDialog(
+            this,
+            resources.getString("installer.portable.replacefailed"),
+            resources.getString("installer.portable.replacefailtitle"),
+            JOptionPane.ERROR_MESSAGE);
+        return;
+      }
     }
 
-    protected void portableInstall() {
-        final Relauncher relauncher = new Relauncher(null, settings.getBuildStream(), 0, new LauncherFileSystem(settings.getTechnicRootPath()), resources, params);
-        String currentPath = relauncher.getRunningPath();
-        String launcher = (currentPath.endsWith(".exe"))?"TechnicLauncher.exe":"TechnicLauncher.jar";
+    glassPane.setVisible(true);
 
-        String targetPath = new File(portableInstallDir.getText(), launcher).getAbsolutePath();
-        File targetExe = new File(portableInstallDir.getText(), launcher);
+    final String threadTargetPath = targetPath;
+    Thread thread =
+        new Thread(
+            () -> {
+              File oldRoot = settings.getTechnicRoot();
+              File newRoot = new File(portableInstallDir.getText(), "technic");
 
-        if (!(new File(currentPath).equals(targetExe))) {
-            if (targetExe.exists() && !targetExe.delete()) {
-                JOptionPane.showMessageDialog(this, resources.getString("installer.portable.replacefailed"), resources.getString("installer.portable.replacefailtitle"), JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            CopyLauncherPackage copyTask = new CopyLauncherPackage("", targetExe, relauncher);
-            try {
-                copyTask.runTask(null);
-            } catch (Exception e) {
-                // TODO: fix this to actually show the error
-                JOptionPane.showMessageDialog(this, resources.getString("installer.portable.replacefailed"), resources.getString("installer.portable.replacefailtitle"), JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-        }
+              File oldSettingsFile = settings.getFilePath();
+              File newSettingsFile = new File(newRoot, "settings.json");
 
-        glassPane.setVisible(true);
-
-        final String threadTargetPath = targetPath;
-        Thread thread = new Thread(() -> {
-            File oldRoot = settings.getTechnicRoot();
-            File newRoot = new File(portableInstallDir.getText(), "technic");
-
-            File oldSettingsFile = settings.getFilePath();
-            File newSettingsFile = new File(newRoot, "settings.json");
-
-            if (oldSettingsFile.exists() && !oldSettingsFile.getAbsolutePath().equals(newSettingsFile.getAbsolutePath()))
+              if (oldSettingsFile.exists()
+                  && !oldSettingsFile.getAbsolutePath().equals(newSettingsFile.getAbsolutePath()))
                 oldSettingsFile.delete();
 
-            if (oldRoot.exists() && !oldRoot.getAbsolutePath().equals(newRoot.getAbsolutePath())) {
+              if (oldRoot.exists()
+                  && !oldRoot.getAbsolutePath().equals(newRoot.getAbsolutePath())) {
                 try {
-                    copyInstallRoot(oldRoot, newRoot, true);
-                    LauncherMain.moveLogFileTo(new LauncherFileSystem(newRoot.toPath()));
-                    cleanupInstallRoot(oldRoot, false);
+                  copyInstallRoot(oldRoot, newRoot, true);
+                  LauncherMain.moveLogFileTo(new LauncherFileSystem(newRoot.toPath()));
+                  cleanupInstallRoot(oldRoot, false);
                 } catch (IOException e) {
-                    Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ", e);
+                  Utils.getLogger()
+                      .log(Level.SEVERE, "Copying install to new directory failed: ", e);
                 }
-            }
+              }
 
-            settings.setPortable();
-            settings.setFilePath(newSettingsFile);
-            settings.getTechnicRoot();
-            settings.setLanguageCode(((LanguageItem)portableLanguages.getSelectedItem()).getLangCode());
-            settings.save();
+              settings.setPortable();
+              settings.setFilePath(newSettingsFile);
+              settings.getTechnicRoot();
+              settings.setLanguageCode(
+                  ((LanguageItem) portableLanguages.getSelectedItem()).getLangCode());
+              settings.save();
 
-            // FIXME: temporary workaround to suppress the "file not found" warning on first run
-            Path installedPacks = newRoot.toPath().resolve("installedPacks");
-            try {
+              // FIXME: temporary workaround to suppress the "file not found" warning on first run
+              Path installedPacks = newRoot.toPath().resolve("installedPacks");
+              try {
                 if (!Files.exists(installedPacks)) {
-                    Files.createFile(installedPacks);
+                  Files.createFile(installedPacks);
                 }
-            } catch (IOException e) {
+              } catch (IOException e) {
                 // ignore for now
-            }
-            Path usersJson = newRoot.toPath().resolve("users.json");
-            try {
+              }
+              Path usersJson = newRoot.toPath().resolve("users.json");
+              try {
                 if (!Files.exists(usersJson)) {
-                    Files.createFile(usersJson);
+                  Files.createFile(usersJson);
                 }
-            } catch (IOException e) {
+              } catch (IOException e) {
                 // ignore for now
-            }
+              }
 
-            VersionFileBuildNumber buildNumber = new VersionFileBuildNumber(resources);
-            Utils.sendTracking("installLauncher", "portable", buildNumber.getBuildNumber(), settings.getClientId());
+              VersionFileBuildNumber buildNumber = new VersionFileBuildNumber(resources);
+              Utils.sendTracking(
+                  "installLauncher",
+                  "portable",
+                  buildNumber.getBuildNumber(),
+                  settings.getClientId());
 
-            relauncher.launch(threadTargetPath, params.getArgs());
-            System.exit(0);
+              relauncher.launch(threadTargetPath, params.getArgs());
+              System.exit(0);
+            });
+    thread.start();
+  }
+
+  static void copyInstallRoot(File oldRoot, File newRoot, boolean includeSettingsFile)
+      throws IOException {
+    if (!newRoot.exists() && !newRoot.mkdirs()) {
+      throw new IOException("Failed to create destination directory " + newRoot);
+    }
+
+    if (includeSettingsFile) {
+      FileUtils.copyDirectory(oldRoot, newRoot);
+      return;
+    }
+
+    File rootSettingsFile = new File(oldRoot, "settings.json");
+    FileUtils.copyDirectory(oldRoot, newRoot, pathname -> !pathname.equals(rootSettingsFile));
+  }
+
+  static void cleanupInstallRoot(File oldRoot, boolean keepSettingsFile) throws IOException {
+    if (!keepSettingsFile) {
+      FileUtils.deleteDirectory(oldRoot);
+      return;
+    }
+
+    File rootSettingsFile = new File(oldRoot, "settings.json");
+    File[] oldRootEntries = oldRoot.listFiles();
+    if (oldRootEntries == null) {
+      return;
+    }
+
+    for (File entry : oldRootEntries) {
+      if (entry.equals(rootSettingsFile)) {
+        continue;
+      }
+
+      if (entry.isDirectory()) {
+        FileUtils.deleteDirectory(entry);
+      } else {
+        FileUtils.forceDelete(entry);
+      }
+    }
+  }
+
+  static boolean shouldKeepSettingsFileOnStandardCleanup(File oldRoot, File defaultRoot) {
+    return oldRoot
+        .toPath()
+        .toAbsolutePath()
+        .normalize()
+        .equals(defaultRoot.toPath().toAbsolutePath().normalize());
+  }
+
+  protected void selectPortable() {
+    JFileChooser chooser = new JFileChooser();
+    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+    int result = chooser.showOpenDialog(this);
+
+    if (result == JFileChooser.APPROVE_OPTION) {
+      portableInstallDir.setText(chooser.getSelectedFile().getAbsolutePath());
+      portableInstallButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+      portableInstallButton.setEnabled(true);
+    }
+  }
+
+  protected void selectStandard() {
+    File installDir = new File(standardInstallDir.getText());
+
+    while (!installDir.exists()) {
+      installDir = installDir.getParentFile();
+    }
+
+    JFileChooser chooser = new JFileChooser(installDir);
+    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+    int result = chooser.showOpenDialog(this);
+
+    if (result == JFileChooser.APPROVE_OPTION) {
+      File[] files = chooser.getSelectedFile().listFiles();
+      if (files == null || files.length > 0) {
+        JOptionPane.showMessageDialog(
+            this,
+            resources.getString("modpackoptions.move.errortext"),
+            resources.getString("modpackoptions.move.errortitle"),
+            JOptionPane.ERROR_MESSAGE);
+        return;
+      }
+
+      standardInstallDir.setText(chooser.getSelectedFile().getAbsolutePath());
+    }
+  }
+
+  protected void useDefaultDirectoryChanged() {
+    if (!standardDefaultDirectory.isSelected()) {
+      standardInstallDir.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+      standardInstallDir.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 10));
+      standardSelectButton.setEnabled(true);
+      standardSelectButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+    } else {
+      standardInstallDir.setForeground(UIConstants.COLOR_SCROLL_THUMB);
+      standardInstallDir.setBorder(new RoundBorder(UIConstants.COLOR_SCROLL_THUMB, 1, 10));
+      standardSelectButton.setEnabled(false);
+      standardSelectButton.setForeground(UIConstants.COLOR_GREY_TEXT);
+      standardInstallDir.setText(
+          OperatingSystem.getOperatingSystem().getTechnicDirectory().getAbsolutePath());
+    }
+  }
+
+  private void initComponents() {
+    setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
+    setIconImage(resources.getImage("icon.png"));
+    setLayout(new BorderLayout());
+
+    JPanel header = new JPanel();
+    header.setBackground(Color.black);
+    header.setLayout(new BoxLayout(header, BoxLayout.LINE_AXIS));
+    header.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
+    add(header, BorderLayout.PAGE_START);
+
+    JLabel title = new JLabel(resources.getString("launcher.installer.title"));
+    title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
+    title.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+    title.setForeground(UIConstants.COLOR_WHITE_TEXT);
+    title.setOpaque(false);
+    title.setIcon(resources.getIcon("options_cog.png"));
+    header.add(title);
+
+    header.add(Box.createHorizontalGlue());
+
+    JButton closeButton = new JButton();
+    closeButton.setIcon(resources.getIcon("close.png"));
+    closeButton.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    closeButton.setContentAreaFilled(false);
+    closeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    closeButton.setFocusPainted(false);
+    closeButton.addActionListener(
+        e -> {
+          if (mainFrame != null) mainFrame.setVisible(true);
+          dispose();
         });
-        thread.start();
+    header.add(closeButton);
+
+    registerDragHandle(header);
+
+    SimpleTabPane centerPanel = new SimpleTabPane();
+    centerPanel.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+    centerPanel.setForeground(UIConstants.COLOR_GREY_TEXT);
+    centerPanel.setSelectedBackground(UIConstants.COLOR_BLUE);
+    centerPanel.setSelectedForeground(UIConstants.COLOR_WHITE_TEXT);
+    centerPanel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
+    centerPanel.setOpaque(true);
+    add(centerPanel, BorderLayout.CENTER);
+
+    JPanel standardInstallPanel = new JPanel();
+    standardInstallPanel.setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
+
+    setupStandardInstall(standardInstallPanel);
+
+    JPanel portableModePanel = new JPanel();
+    portableModePanel.setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
+
+    setupPortableMode(portableModePanel);
+
+    centerPanel.addTab(
+        resources.getString("launcher.installer.standard").toUpperCase(), standardInstallPanel);
+    centerPanel.addTab(
+        resources.getString("launcher.installer.portable").toUpperCase(), portableModePanel);
+
+    if (settings.isPortable()) {
+      centerPanel.setSelectedIndex(1);
+    } else centerPanel.setSelectedIndex(0);
+
+    setLocationRelativeTo(null);
+  }
+
+  private void setupStandardInstall(JPanel panel) {
+    panel.setLayout(new GridBagLayout());
+
+    JLabel standardSpiel =
+        new JLabel(
+            "<html><body align=\"left\" style='margin-right:10px;'>"
+                + resources.getString("launcher.installer.standardspiel")
+                + "</body></html>");
+    standardSpiel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+    standardSpiel.setForeground(UIConstants.COLOR_WHITE_TEXT);
+    standardSpiel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    panel.add(
+        standardSpiel,
+        new GridBagConstraints(
+            0,
+            0,
+            3,
+            1,
+            1.0,
+            0.0,
+            GridBagConstraints.CENTER,
+            GridBagConstraints.BOTH,
+            new Insets(9, 0, 0, 3),
+            0,
+            0));
+
+    panel.add(
+        Box.createGlue(),
+        new GridBagConstraints(
+            0,
+            1,
+            3,
+            1,
+            1.0,
+            0.7,
+            GridBagConstraints.CENTER,
+            GridBagConstraints.BOTH,
+            new Insets(0, 0, 0, 0),
+            0,
+            0));
+
+    standardDefaultDirectory = new JCheckBox(resources.getString("launcher.installer.default"));
+    standardDefaultDirectory.setOpaque(false);
+    standardDefaultDirectory.setHorizontalAlignment(SwingConstants.RIGHT);
+    standardDefaultDirectory.setBorder(BorderFactory.createEmptyBorder());
+    standardDefaultDirectory.setIconTextGap(0);
+    standardDefaultDirectory.setSelectedIcon(resources.getIcon("checkbox_closed.png"));
+    standardDefaultDirectory.setIcon(resources.getIcon("checkbox_open.png"));
+    standardDefaultDirectory.setFocusPainted(false);
+    standardDefaultDirectory.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+    standardDefaultDirectory.setForeground(UIConstants.COLOR_WHITE_TEXT);
+    standardDefaultDirectory.setIconTextGap(6);
+    standardDefaultDirectory.setSelected(
+        settings.isPortable()
+            || settings
+                .getTechnicRoot()
+                .getAbsolutePath()
+                .equals(
+                    OperatingSystem.getOperatingSystem().getTechnicDirectory().getAbsolutePath()));
+    standardDefaultDirectory.addActionListener(e -> useDefaultDirectoryChanged());
+    panel.add(
+        standardDefaultDirectory,
+        new GridBagConstraints(
+            0,
+            2,
+            3,
+            1,
+            0,
+            0,
+            GridBagConstraints.WEST,
+            GridBagConstraints.NONE,
+            new Insets(0, 24, 12, 0),
+            0,
+            0));
+
+    JLabel installFolderLabel = new JLabel(resources.getString("launcher.installer.folder"));
+    installFolderLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+    installFolderLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
+    panel.add(
+        installFolderLabel,
+        new GridBagConstraints(
+            0,
+            3,
+            1,
+            1,
+            0,
+            0,
+            GridBagConstraints.WEST,
+            GridBagConstraints.NONE,
+            new Insets(0, 24, 0, 8),
+            0,
+            0));
+
+    String installDir =
+        OperatingSystem.getOperatingSystem().getTechnicDirectory().getAbsolutePath();
+
+    if (!settings.isPortable()) installDir = settings.getTechnicRoot().getAbsolutePath();
+
+    standardInstallDir = new JTextField(installDir);
+    standardInstallDir.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+    standardInstallDir.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+    standardInstallDir.setHighlighter(null);
+    standardInstallDir.setEditable(false);
+    standardInstallDir.setCursor(null);
+    panel.add(
+        standardInstallDir,
+        new GridBagConstraints(
+            1,
+            3,
+            1,
+            1,
+            1,
+            0,
+            GridBagConstraints.CENTER,
+            GridBagConstraints.BOTH,
+            new Insets(0, 5, 0, 5),
+            0,
+            16));
+
+    standardSelectButton = new RoundedButton(resources.getString("launcher.installer.select"));
+    standardSelectButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+    standardSelectButton.setContentAreaFilled(false);
+    standardSelectButton.setHoverForeground(UIConstants.COLOR_BLUE);
+    standardSelectButton.addActionListener(e -> selectStandard());
+    panel.add(
+        standardSelectButton,
+        new GridBagConstraints(
+            2,
+            3,
+            1,
+            1,
+            0,
+            0,
+            GridBagConstraints.CENTER,
+            GridBagConstraints.BOTH,
+            new Insets(0, 5, 0, 16),
+            0,
+            0));
+
+    useDefaultDirectoryChanged();
+
+    panel.add(
+        Box.createGlue(),
+        new GridBagConstraints(
+            0,
+            4,
+            3,
+            1,
+            1.0,
+            1.0,
+            GridBagConstraints.CENTER,
+            GridBagConstraints.BOTH,
+            new Insets(0, 0, 0, 0),
+            0,
+            0));
+
+    String defaultLocaleText = resources.getString("launcheroptions.language.default");
+    if (!resources.isDefaultLocaleSupported()) {
+      defaultLocaleText =
+          defaultLocaleText.concat(
+              " (" + resources.getString("launcheroptions.language.unavailable") + ")");
     }
 
-    static void copyInstallRoot(File oldRoot, File newRoot, boolean includeSettingsFile) throws IOException {
-        if (!newRoot.exists() && !newRoot.mkdirs()) {
-            throw new IOException("Failed to create destination directory " + newRoot);
-        }
+    standardLanguages = new JComboBox();
+    UIUtils.populateLanguageSelector(defaultLocaleText, standardLanguages, resources, settings);
+    standardLanguages.setBorder(new RoundBorder(UIConstants.COLOR_SCROLL_THUMB, 1, 10));
+    standardLanguages.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
+    standardLanguages.setUI(
+        new LanguageCellUI(
+            new RoundedBorderFormatter(new LineBorder(Color.black, 1)),
+            UIConstants.COLOR_SCROLL_TRACK,
+            UIConstants.COLOR_SCROLL_THUMB));
+    standardLanguages.setForeground(UIConstants.COLOR_WHITE_TEXT);
+    standardLanguages.setBackground(UIConstants.COLOR_SELECTOR_BACK);
+    standardLanguages.setRenderer(
+        new LanguageCellRenderer(
+            resources, "globe.png", UIConstants.COLOR_SELECTOR_BACK, UIConstants.COLOR_WHITE_TEXT));
+    standardLanguages.setEditable(false);
+    standardLanguages.setFocusable(false);
+    standardLanguages.addActionListener(e -> standardLanguageChanged());
+    panel.add(
+        standardLanguages,
+        new GridBagConstraints(
+            0,
+            5,
+            1,
+            0,
+            0,
+            0,
+            GridBagConstraints.SOUTHWEST,
+            GridBagConstraints.NONE,
+            new Insets(0, 8, 8, 0),
+            0,
+            0));
 
-        if (includeSettingsFile) {
-            FileUtils.copyDirectory(oldRoot, newRoot);
-            return;
-        }
+    RoundedButton install = new RoundedButton(resources.getString("launcher.installer.install"));
+    install.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+    install.setContentAreaFilled(false);
+    install.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+    install.setHoverForeground(UIConstants.COLOR_BLUE);
+    install.setBorder(BorderFactory.createEmptyBorder(5, 17, 10, 17));
+    install.addActionListener(e -> standardInstall());
+    panel.add(
+        install,
+        new GridBagConstraints(
+            1,
+            5,
+            2,
+            1,
+            0,
+            0,
+            GridBagConstraints.EAST,
+            GridBagConstraints.VERTICAL,
+            new Insets(0, 0, 8, 8),
+            0,
+            0));
+  }
 
-        File rootSettingsFile = new File(oldRoot, "settings.json");
-        FileUtils.copyDirectory(oldRoot, newRoot, pathname -> !pathname.equals(rootSettingsFile));
+  private void setupPortableMode(JPanel panel) {
+    panel.setLayout(new GridBagLayout());
+
+    JLabel portableSpiel =
+        new JLabel(
+            "<html><body align=\"left\" style='margin-right:10px;'>"
+                + resources.getString("launcher.installer.portablespiel")
+                + "</body></html>");
+    portableSpiel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+    portableSpiel.setForeground(UIConstants.COLOR_WHITE_TEXT);
+    portableSpiel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    panel.add(
+        portableSpiel,
+        new GridBagConstraints(
+            0,
+            0,
+            3,
+            1,
+            1.0,
+            0.0,
+            GridBagConstraints.CENTER,
+            GridBagConstraints.BOTH,
+            new Insets(9, 8, 9, 3),
+            0,
+            0));
+
+    panel.add(
+        Box.createGlue(),
+        new GridBagConstraints(
+            0,
+            1,
+            3,
+            1,
+            1.0,
+            0.7,
+            GridBagConstraints.CENTER,
+            GridBagConstraints.BOTH,
+            new Insets(0, 0, 0, 0),
+            0,
+            0));
+
+    JLabel installFolderLabel = new JLabel(resources.getString("launcher.installer.folder"));
+    installFolderLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+    installFolderLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
+    panel.add(
+        installFolderLabel,
+        new GridBagConstraints(
+            0,
+            2,
+            1,
+            1,
+            0,
+            0,
+            GridBagConstraints.WEST,
+            GridBagConstraints.NONE,
+            new Insets(0, 24, 0, 8),
+            0,
+            0));
+
+    String installDir = "";
+    if (settings.isPortable()) installDir = settings.getTechnicRoot().getAbsolutePath();
+
+    portableInstallDir = new JTextField(installDir);
+    portableInstallDir.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+    portableInstallDir.setForeground(UIConstants.COLOR_BLUE);
+    portableInstallDir.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+    portableInstallDir.setHighlighter(null);
+    portableInstallDir.setEditable(false);
+    portableInstallDir.setCursor(null);
+    portableInstallDir.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 8));
+    panel.add(
+        portableInstallDir,
+        new GridBagConstraints(
+            1,
+            2,
+            1,
+            1,
+            1,
+            0,
+            GridBagConstraints.CENTER,
+            GridBagConstraints.BOTH,
+            new Insets(0, 5, 0, 5),
+            0,
+            16));
+
+    RoundedButton selectInstall =
+        new RoundedButton(resources.getString("launcher.installer.select"));
+    selectInstall.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+    selectInstall.setContentAreaFilled(false);
+    selectInstall.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+    selectInstall.setHoverForeground(UIConstants.COLOR_BLUE);
+    selectInstall.addActionListener(e -> selectPortable());
+    panel.add(
+        selectInstall,
+        new GridBagConstraints(
+            2,
+            2,
+            1,
+            1,
+            0,
+            0,
+            GridBagConstraints.CENTER,
+            GridBagConstraints.BOTH,
+            new Insets(0, 5, 0, 16),
+            0,
+            0));
+
+    panel.add(
+        Box.createGlue(),
+        new GridBagConstraints(
+            0,
+            3,
+            3,
+            1,
+            1.0,
+            1.0,
+            GridBagConstraints.CENTER,
+            GridBagConstraints.BOTH,
+            new Insets(0, 0, 0, 0),
+            0,
+            0));
+
+    String defaultLocaleText = resources.getString("launcheroptions.language.default");
+    if (!resources.isDefaultLocaleSupported()) {
+      defaultLocaleText =
+          defaultLocaleText.concat(
+              " (" + resources.getString("launcheroptions.language.unavailable") + ")");
     }
 
-    static void cleanupInstallRoot(File oldRoot, boolean keepSettingsFile) throws IOException {
-        if (!keepSettingsFile) {
-            FileUtils.deleteDirectory(oldRoot);
-            return;
-        }
+    portableLanguages = new JComboBox();
+    UIUtils.populateLanguageSelector(defaultLocaleText, portableLanguages, resources, settings);
+    portableLanguages.setBorder(new RoundBorder(UIConstants.COLOR_SCROLL_THUMB, 1, 10));
+    portableLanguages.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
+    portableLanguages.setUI(
+        new LanguageCellUI(
+            new RoundedBorderFormatter(new LineBorder(Color.black, 1)),
+            UIConstants.COLOR_SCROLL_TRACK,
+            UIConstants.COLOR_SCROLL_THUMB));
+    portableLanguages.setForeground(UIConstants.COLOR_WHITE_TEXT);
+    portableLanguages.setBackground(UIConstants.COLOR_SELECTOR_BACK);
+    portableLanguages.setRenderer(
+        new LanguageCellRenderer(
+            resources, "globe.png", UIConstants.COLOR_SELECTOR_BACK, UIConstants.COLOR_WHITE_TEXT));
+    portableLanguages.setEditable(false);
+    portableLanguages.setFocusable(false);
+    portableLanguages.addActionListener(e -> portableLanguageChanged());
+    panel.add(
+        portableLanguages,
+        new GridBagConstraints(
+            0,
+            4,
+            1,
+            0,
+            0,
+            0,
+            GridBagConstraints.SOUTHWEST,
+            GridBagConstraints.NONE,
+            new Insets(0, 8, 8, 0),
+            0,
+            0));
 
-        File rootSettingsFile = new File(oldRoot, "settings.json");
-        File[] oldRootEntries = oldRoot.listFiles();
-        if (oldRootEntries == null) {
-            return;
-        }
+    portableInstallButton = new RoundedButton(resources.getString("launcher.installer.install"));
+    portableInstallButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+    portableInstallButton.setContentAreaFilled(false);
+    portableInstallButton.setForeground(UIConstants.COLOR_GREY_TEXT);
+    portableInstallButton.setHoverForeground(UIConstants.COLOR_BLUE);
+    portableInstallButton.setBorder(BorderFactory.createEmptyBorder(5, 17, 10, 17));
+    portableInstallButton.addActionListener(e -> portableInstall());
+    portableInstallButton.setEnabled(false);
 
-        for (File entry : oldRootEntries) {
-            if (entry.equals(rootSettingsFile)) {
-                continue;
-            }
-
-            if (entry.isDirectory()) {
-                FileUtils.deleteDirectory(entry);
-            } else {
-                FileUtils.forceDelete(entry);
-            }
-        }
+    if (!installDir.isEmpty()) {
+      portableInstallButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+      portableInstallButton.setEnabled(true);
     }
 
-    static boolean shouldKeepSettingsFileOnStandardCleanup(File oldRoot, File defaultRoot) {
-        return oldRoot.toPath().toAbsolutePath().normalize()
-                .equals(defaultRoot.toPath().toAbsolutePath().normalize());
-    }
+    panel.add(
+        portableInstallButton,
+        new GridBagConstraints(
+            1,
+            4,
+            2,
+            1,
+            0,
+            0,
+            GridBagConstraints.EAST,
+            GridBagConstraints.VERTICAL,
+            new Insets(0, 0, 8, 8),
+            0,
+            0));
+  }
 
-    protected void selectPortable() {
-        JFileChooser chooser = new JFileChooser();
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+  @Override
+  public void relocalize(ResourceLoader loader) {
+    this.resources = loader;
+    this.resources.registerResource(this);
 
-        int result = chooser.showOpenDialog(this);
+    setIconImage(this.resources.getImage("icon.png"));
 
-        if (result == JFileChooser.APPROVE_OPTION) {
-            portableInstallDir.setText(chooser.getSelectedFile().getAbsolutePath());
-            portableInstallButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
-            portableInstallButton.setEnabled(true);
-        }
-    }
+    // Wipe controls
+    this.getContentPane().removeAll();
+    this.setLayout(null);
 
-    protected void selectStandard() {
-        File installDir = new File(standardInstallDir.getText());
+    // Clear references to existing controls
 
-        while (!installDir.exists()) {
-            installDir = installDir.getParentFile();
-        }
-
-        JFileChooser chooser = new JFileChooser(installDir);
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-        int result = chooser.showOpenDialog(this);
-
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File[] files = chooser.getSelectedFile().listFiles();
-            if (files == null || files.length > 0) {
-                JOptionPane.showMessageDialog(this, resources.getString("modpackoptions.move.errortext"), resources.getString("modpackoptions.move.errortitle"), JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            standardInstallDir.setText(chooser.getSelectedFile().getAbsolutePath());
-        }
-    }
-
-    protected void useDefaultDirectoryChanged() {
-        if (!standardDefaultDirectory.isSelected()) {
-            standardInstallDir.setForeground(UIConstants.COLOR_BUTTON_BLUE);
-            standardInstallDir.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 10));
-            standardSelectButton.setEnabled(true);
-            standardSelectButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
-        } else {
-            standardInstallDir.setForeground(UIConstants.COLOR_SCROLL_THUMB);
-            standardInstallDir.setBorder(new RoundBorder(UIConstants.COLOR_SCROLL_THUMB, 1, 10));
-            standardSelectButton.setEnabled(false);
-            standardSelectButton.setForeground(UIConstants.COLOR_GREY_TEXT);
-            standardInstallDir.setText(OperatingSystem.getOperatingSystem().getTechnicDirectory().getAbsolutePath());
-        }
-    }
-
-    private void initComponents() {
-        setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
-        setIconImage(resources.getImage("icon.png"));
-        setLayout(new BorderLayout());
-
-        JPanel header = new JPanel();
-        header.setBackground(Color.black);
-        header.setLayout(new BoxLayout(header, BoxLayout.LINE_AXIS));
-        header.setBorder(BorderFactory.createEmptyBorder(4,8,4,8));
-        add(header, BorderLayout.PAGE_START);
-
-        JLabel title = new JLabel(resources.getString("launcher.installer.title"));
-        title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
-        title.setBorder(BorderFactory.createEmptyBorder(5,0,5,0));
-        title.setForeground(UIConstants.COLOR_WHITE_TEXT);
-        title.setOpaque(false);
-        title.setIcon(resources.getIcon("options_cog.png"));
-        header.add(title);
-
-        header.add(Box.createHorizontalGlue());
-
-        JButton closeButton = new JButton();
-        closeButton.setIcon(resources.getIcon("close.png"));
-        closeButton.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-        closeButton.setContentAreaFilled(false);
-        closeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        closeButton.setFocusPainted(false);
-        closeButton.addActionListener(e -> {
-            if (mainFrame != null)
-                mainFrame.setVisible(true);
-            dispose();
-        });
-        header.add(closeButton);
-
-        registerDragHandle(header);
-
-        SimpleTabPane centerPanel = new SimpleTabPane();
-        centerPanel.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
-        centerPanel.setForeground(UIConstants.COLOR_GREY_TEXT);
-        centerPanel.setSelectedBackground(UIConstants.COLOR_BLUE);
-        centerPanel.setSelectedForeground(UIConstants.COLOR_WHITE_TEXT);
-        centerPanel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        centerPanel.setOpaque(true);
-        add(centerPanel, BorderLayout.CENTER);
-
-        JPanel standardInstallPanel = new JPanel();
-        standardInstallPanel.setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
-
-        setupStandardInstall(standardInstallPanel);
-
-        JPanel portableModePanel = new JPanel();
-        portableModePanel.setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
-
-        setupPortableMode(portableModePanel);
-
-        centerPanel.addTab(resources.getString("launcher.installer.standard").toUpperCase(), standardInstallPanel);
-        centerPanel.addTab(resources.getString("launcher.installer.portable").toUpperCase(), portableModePanel);
-
-        if (settings.isPortable()) {
-            centerPanel.setSelectedIndex(1);
-        } else
-            centerPanel.setSelectedIndex(0);
-
-        setLocationRelativeTo(null);
-    }
-
-    private void setupStandardInstall(JPanel panel) {
-        panel.setLayout(new GridBagLayout());
-
-        JLabel standardSpiel = new JLabel("<html><body align=\"left\" style='margin-right:10px;'>"+resources.getString("launcher.installer.standardspiel")+"</body></html>");
-        standardSpiel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        standardSpiel.setForeground(UIConstants.COLOR_WHITE_TEXT);
-        standardSpiel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-        panel.add(standardSpiel, new GridBagConstraints(0, 0, 3, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(9, 0, 0, 3), 0, 0));
-
-        panel.add(Box.createGlue(), new GridBagConstraints(0, 1, 3, 1, 1.0, 0.7, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
-
-        standardDefaultDirectory = new JCheckBox(resources.getString("launcher.installer.default"));
-        standardDefaultDirectory.setOpaque(false);
-        standardDefaultDirectory.setHorizontalAlignment(SwingConstants.RIGHT);
-        standardDefaultDirectory.setBorder(BorderFactory.createEmptyBorder());
-        standardDefaultDirectory.setIconTextGap(0);
-        standardDefaultDirectory.setSelectedIcon(resources.getIcon("checkbox_closed.png"));
-        standardDefaultDirectory.setIcon(resources.getIcon("checkbox_open.png"));
-        standardDefaultDirectory.setFocusPainted(false);
-        standardDefaultDirectory.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        standardDefaultDirectory.setForeground(UIConstants.COLOR_WHITE_TEXT);
-        standardDefaultDirectory.setIconTextGap(6);
-        standardDefaultDirectory.setSelected(settings.isPortable() || settings.getTechnicRoot().getAbsolutePath().equals(OperatingSystem.getOperatingSystem().getTechnicDirectory().getAbsolutePath()));
-        standardDefaultDirectory.addActionListener(e -> useDefaultDirectoryChanged());
-        panel.add(standardDefaultDirectory, new GridBagConstraints(0, 2, 3, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,24,12,0),0,0));
-
-        JLabel installFolderLabel = new JLabel(resources.getString("launcher.installer.folder"));
-        installFolderLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        installFolderLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
-        panel.add(installFolderLabel, new GridBagConstraints(0, 3, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,24,0,8), 0,0));
-
-        String installDir = OperatingSystem.getOperatingSystem().getTechnicDirectory().getAbsolutePath();
-
-        if (!settings.isPortable())
-            installDir = settings.getTechnicRoot().getAbsolutePath();
-
-        standardInstallDir = new JTextField(installDir);
-        standardInstallDir.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        standardInstallDir.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
-        standardInstallDir.setHighlighter(null);
-        standardInstallDir.setEditable(false);
-        standardInstallDir.setCursor(null);
-        panel.add(standardInstallDir, new GridBagConstraints(1, 3, 1, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,5,0,5),0,16));
-
-        standardSelectButton = new RoundedButton(resources.getString("launcher.installer.select"));
-        standardSelectButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        standardSelectButton.setContentAreaFilled(false);
-        standardSelectButton.setHoverForeground(UIConstants.COLOR_BLUE);
-        standardSelectButton.addActionListener(e -> selectStandard());
-        panel.add(standardSelectButton, new GridBagConstraints(2, 3, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,5,0,16), 0,0));
-
-        useDefaultDirectoryChanged();
-
-        panel.add(Box.createGlue(), new GridBagConstraints(0, 4, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
-
-        String defaultLocaleText = resources.getString("launcheroptions.language.default");
-        if (!resources.isDefaultLocaleSupported()) {
-            defaultLocaleText = defaultLocaleText.concat(" (" + resources.getString("launcheroptions.language.unavailable") + ")");
-        }
-
-        standardLanguages = new JComboBox();
-        UIUtils.populateLanguageSelector(defaultLocaleText, standardLanguages, resources, settings);
-        standardLanguages.setBorder(new RoundBorder(UIConstants.COLOR_SCROLL_THUMB, 1, 10));
-        standardLanguages.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        standardLanguages.setUI(new LanguageCellUI(new RoundedBorderFormatter(new LineBorder(Color.black, 1)), UIConstants.COLOR_SCROLL_TRACK, UIConstants.COLOR_SCROLL_THUMB));
-        standardLanguages.setForeground(UIConstants.COLOR_WHITE_TEXT);
-        standardLanguages.setBackground(UIConstants.COLOR_SELECTOR_BACK);
-        standardLanguages.setRenderer(new LanguageCellRenderer(resources, "globe.png", UIConstants.COLOR_SELECTOR_BACK, UIConstants.COLOR_WHITE_TEXT));
-        standardLanguages.setEditable(false);
-        standardLanguages.setFocusable(false);
-        standardLanguages.addActionListener(e -> standardLanguageChanged());
-        panel.add(standardLanguages, new GridBagConstraints(0, 5, 1, 0, 0, 0, GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE, new Insets(0,8,8,0), 0,0));
-
-        RoundedButton install = new RoundedButton(resources.getString("launcher.installer.install"));
-        install.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        install.setContentAreaFilled(false);
-        install.setForeground(UIConstants.COLOR_BUTTON_BLUE);
-        install.setHoverForeground(UIConstants.COLOR_BLUE);
-        install.setBorder(BorderFactory.createEmptyBorder(5, 17, 10, 17));
-        install.addActionListener(e -> standardInstall());
-        panel.add(install, new GridBagConstraints(1, 5, 2, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.VERTICAL, new Insets(0, 0, 8, 8), 0, 0));
-
-    }
-
-    private void setupPortableMode(JPanel panel) {
-        panel.setLayout(new GridBagLayout());
-
-        JLabel portableSpiel = new JLabel("<html><body align=\"left\" style='margin-right:10px;'>"+resources.getString("launcher.installer.portablespiel")+"</body></html>");
-        portableSpiel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        portableSpiel.setForeground(UIConstants.COLOR_WHITE_TEXT);
-        portableSpiel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-        panel.add(portableSpiel, new GridBagConstraints(0, 0, 3, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(9, 8, 9, 3), 0, 0));
-
-        panel.add(Box.createGlue(), new GridBagConstraints(0, 1, 3, 1, 1.0, 0.7, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
-
-        JLabel installFolderLabel = new JLabel(resources.getString("launcher.installer.folder"));
-        installFolderLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        installFolderLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
-        panel.add(installFolderLabel, new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,24,0,8), 0,0));
-
-        String installDir = "";
-        if (settings.isPortable())
-            installDir = settings.getTechnicRoot().getAbsolutePath();
-
-        portableInstallDir = new JTextField(installDir);
-        portableInstallDir.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        portableInstallDir.setForeground(UIConstants.COLOR_BLUE);
-        portableInstallDir.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
-        portableInstallDir.setHighlighter(null);
-        portableInstallDir.setEditable(false);
-        portableInstallDir.setCursor(null);
-        portableInstallDir.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 8));
-        panel.add(portableInstallDir, new GridBagConstraints(1, 2, 1, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,5,0,5),0,16));
-
-        RoundedButton selectInstall = new RoundedButton(resources.getString("launcher.installer.select"));
-        selectInstall.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        selectInstall.setContentAreaFilled(false);
-        selectInstall.setForeground(UIConstants.COLOR_BUTTON_BLUE);
-        selectInstall.setHoverForeground(UIConstants.COLOR_BLUE);
-        selectInstall.addActionListener(e -> selectPortable());
-        panel.add(selectInstall, new GridBagConstraints(2, 2, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,5,0,16), 0,0));
-
-        panel.add(Box.createGlue(), new GridBagConstraints(0, 3, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
-
-        String defaultLocaleText = resources.getString("launcheroptions.language.default");
-        if (!resources.isDefaultLocaleSupported()) {
-            defaultLocaleText = defaultLocaleText.concat(" (" + resources.getString("launcheroptions.language.unavailable") + ")");
-        }
-
-        portableLanguages = new JComboBox();
-        UIUtils.populateLanguageSelector(defaultLocaleText, portableLanguages, resources, settings);
-        portableLanguages.setBorder(new RoundBorder(UIConstants.COLOR_SCROLL_THUMB, 1, 10));
-        portableLanguages.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        portableLanguages.setUI(new LanguageCellUI(new RoundedBorderFormatter(new LineBorder(Color.black, 1)), UIConstants.COLOR_SCROLL_TRACK, UIConstants.COLOR_SCROLL_THUMB));
-        portableLanguages.setForeground(UIConstants.COLOR_WHITE_TEXT);
-        portableLanguages.setBackground(UIConstants.COLOR_SELECTOR_BACK);
-        portableLanguages.setRenderer(new LanguageCellRenderer(resources, "globe.png", UIConstants.COLOR_SELECTOR_BACK, UIConstants.COLOR_WHITE_TEXT));
-        portableLanguages.setEditable(false);
-        portableLanguages.setFocusable(false);
-        portableLanguages.addActionListener(e -> portableLanguageChanged());
-        panel.add(portableLanguages, new GridBagConstraints(0, 4, 1, 0, 0, 0, GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE, new Insets(0,8,8,0), 0,0));
-
-        portableInstallButton = new RoundedButton(resources.getString("launcher.installer.install"));
-        portableInstallButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-        portableInstallButton.setContentAreaFilled(false);
-        portableInstallButton.setForeground(UIConstants.COLOR_GREY_TEXT);
-        portableInstallButton.setHoverForeground(UIConstants.COLOR_BLUE);
-        portableInstallButton.setBorder(BorderFactory.createEmptyBorder(5, 17, 10, 17));
-        portableInstallButton.addActionListener(e -> portableInstall());
-        portableInstallButton.setEnabled(false);
-
-        if (!installDir.isEmpty()) {
-            portableInstallButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
-            portableInstallButton.setEnabled(true);
-        }
-
-        panel.add(portableInstallButton, new GridBagConstraints(1, 4, 2, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.VERTICAL, new Insets(0,0,8,8), 0,0));
-    }
-
-    @Override
-    public void relocalize(ResourceLoader loader) {
-        this.resources = loader;
-        this.resources.registerResource(this);
-
-        setIconImage(this.resources.getImage("icon.png"));
-
-        //Wipe controls
-        this.getContentPane().removeAll();
-        this.setLayout(null);
-
-        //Clear references to existing controls
-
-        initComponents();
-        invalidate();
-    }
+    initComponents();
+    invalidate();
+  }
 }

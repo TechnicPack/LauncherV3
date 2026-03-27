@@ -20,9 +20,6 @@ package net.technicpack.launcher.io;
 
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
-import net.technicpack.launchercore.modpacks.InstalledPack;
-import net.technicpack.utilslib.Utils;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -35,127 +32,136 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import net.technicpack.launchercore.modpacks.InstalledPack;
+import net.technicpack.utilslib.Utils;
 
 public class InstalledPackStore {
-    @SuppressWarnings("java:S2065")
-    private transient Path storePath;
+  @SuppressWarnings("java:S2065")
+  private transient Path storePath;
 
-    private final transient Object storeLock = new Object();
+  private final transient Object storeLock = new Object();
 
-    private Map<String, InstalledPack> installedPacks = new HashMap<>();
-    private List<String> byIndex = new ArrayList<>();
-    private String selected = null;
+  private Map<String, InstalledPack> installedPacks = new HashMap<>();
+  private List<String> byIndex = new ArrayList<>();
+  private String selected = null;
 
-    public InstalledPackStore(Path storePath) {
-        setStorePath(storePath);
+  public InstalledPackStore(Path storePath) {
+    setStorePath(storePath);
+  }
+
+  @SuppressWarnings("unused")
+  private InstalledPackStore() {
+    // Empty constructor for GSON
+  }
+
+  public static InstalledPackStore load(Path storePath) {
+    if (!Files.exists(storePath)) {
+      Utils.getLogger()
+          .log(
+              Level.WARNING,
+              String.format(
+                  "Unable to load installedPacks from %s because it does not exist", storePath));
+      return new InstalledPackStore(storePath);
     }
 
-    @SuppressWarnings("unused")
-    private InstalledPackStore() {
-        // Empty constructor for GSON
-    }
+    try {
+      try (Reader reader = Files.newBufferedReader(storePath, StandardCharsets.UTF_8)) {
+        InstalledPackStore parsedList = Utils.getGson().fromJson(reader, InstalledPackStore.class);
 
-    public static InstalledPackStore load(Path storePath) {
-        if (!Files.exists(storePath)) {
-            Utils.getLogger().log(Level.WARNING, String.format("Unable to load installedPacks from %s because it does not exist", storePath));
-            return new InstalledPackStore(storePath);
+        if (parsedList == null) {
+          return new InstalledPackStore(storePath);
         }
 
+        parsedList.setStorePath(storePath);
+        return parsedList;
+      }
+    } catch (JsonParseException | IOException e) {
+      Utils.getLogger()
+          .log(Level.SEVERE, String.format("Failed to load installedPacks from %s", storePath), e);
+      return new InstalledPackStore(storePath);
+    }
+  }
+
+  protected void cleanUpLegacyEntries() {
+    // HACK: "And that's why.... you don't put view data in the model."
+    /////////// - J. Walter Weatherman, Software Developer
+    installedPacks.remove("addpack");
+    byIndex.remove("addpack");
+  }
+
+  protected void setStorePath(Path storePath) {
+    synchronized (storeLock) {
+      this.storePath = storePath;
+
+      cleanUpLegacyEntries();
+    }
+  }
+
+  public Map<String, InstalledPack> getInstalledPacks() {
+    return installedPacks;
+  }
+
+  public List<String> getPackNames() {
+    return byIndex;
+  }
+
+  public String getSelectedSlug() {
+    return selected;
+  }
+
+  public void setSelectedSlug(String slug) {
+    selected = slug;
+    save();
+  }
+
+  public InstalledPack put(InstalledPack installedPack) {
+    synchronized (storeLock) {
+      InstalledPack pack = installedPacks.put(installedPack.getName(), installedPack);
+      if (pack == null) {
+        byIndex.add(installedPack.getName());
+      }
+      save();
+      return pack;
+    }
+  }
+
+  public InstalledPack remove(String name) {
+    synchronized (storeLock) {
+      InstalledPack pack = installedPacks.remove(name);
+      if (pack != null) {
+        byIndex.remove(name);
+      }
+      save();
+      return pack;
+    }
+  }
+
+  public void save() {
+    synchronized (storeLock) {
+      // First we write to a temp file, then we move that file to the intended path.
+      // This way, we won't end up with an empty file if we fail to write to it.
+
+      Path tmp = storePath.resolveSibling(storePath.getFileName() + ".tmp");
+
+      try {
+        // Separate try-with-resources so the writer is closed and flushed before we move the file
+        try (Writer writer = Files.newBufferedWriter(tmp, StandardCharsets.UTF_8)) {
+          Utils.getGson().toJson(this, writer);
+        }
+
+        Files.move(
+            tmp, storePath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+      } catch (IOException | JsonIOException e) {
+        // Clean up the temp file
         try {
-            try (Reader reader = Files.newBufferedReader(storePath, StandardCharsets.UTF_8)) {
-                InstalledPackStore parsedList = Utils.getGson().fromJson(reader, InstalledPackStore.class);
-
-                if (parsedList == null) {
-                    return new InstalledPackStore(storePath);
-                }
-
-                parsedList.setStorePath(storePath);
-                return parsedList;
-            }
-        } catch (JsonParseException | IOException e) {
-            Utils.getLogger().log(Level.SEVERE, String.format("Failed to load installedPacks from %s", storePath), e);
-            return new InstalledPackStore(storePath);
+          Files.deleteIfExists(tmp);
+        } catch (IOException ignored) {
+          // We can safely continue, even if the temporary file wasn't deleted
         }
+
+        Utils.getLogger()
+            .log(Level.SEVERE, String.format("Failed to save installedPacks to %s", storePath), e);
+      }
     }
-
-    protected void cleanUpLegacyEntries() {
-        //HACK: "And that's why.... you don't put view data in the model."
-        /////////// - J. Walter Weatherman, Software Developer
-        installedPacks.remove("addpack");
-        byIndex.remove("addpack");
-    }
-
-    protected void setStorePath(Path storePath) {
-        synchronized (storeLock) {
-            this.storePath = storePath;
-
-            cleanUpLegacyEntries();
-        }
-    }
-
-    public Map<String, InstalledPack> getInstalledPacks() {
-        return installedPacks;
-    }
-
-    public List<String> getPackNames() {
-        return byIndex;
-    }
-
-    public String getSelectedSlug() {
-        return selected;
-    }
-
-    public void setSelectedSlug(String slug) {
-        selected = slug;
-        save();
-    }
-
-    public InstalledPack put(InstalledPack installedPack) {
-        synchronized (storeLock) {
-            InstalledPack pack = installedPacks.put(installedPack.getName(), installedPack);
-            if (pack == null) {
-                byIndex.add(installedPack.getName());
-            }
-            save();
-            return pack;
-        }
-    }
-
-    public InstalledPack remove(String name) {
-        synchronized (storeLock) {
-            InstalledPack pack = installedPacks.remove(name);
-            if (pack != null) {
-                byIndex.remove(name);
-            }
-            save();
-            return pack;
-        }
-    }
-
-    public void save() {
-        synchronized (storeLock) {
-            // First we write to a temp file, then we move that file to the intended path.
-            // This way, we won't end up with an empty file if we fail to write to it.
-
-            Path tmp = storePath.resolveSibling(storePath.getFileName() + ".tmp");
-
-            try {
-                // Separate try-with-resources so the writer is closed and flushed before we move the file
-                try (Writer writer = Files.newBufferedWriter(tmp, StandardCharsets.UTF_8)) {
-                    Utils.getGson().toJson(this, writer);
-                }
-
-                Files.move(tmp, storePath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-            } catch (IOException | JsonIOException e) {
-                // Clean up the temp file
-                try {
-                    Files.deleteIfExists(tmp);
-                } catch (IOException ignored) {
-                    // We can safely continue, even if the temporary file wasn't deleted
-                }
-
-                Utils.getLogger().log(Level.SEVERE, String.format("Failed to save installedPacks to %s", storePath), e);
-            }
-        }
-    }
+  }
 }

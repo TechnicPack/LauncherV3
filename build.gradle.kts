@@ -18,8 +18,6 @@ repositories {
 }
 
 spotless {
-    ratchetFrom("origin/master")
-
     java {
         target("src/*/java/**/*.java")
         googleJavaFormat()

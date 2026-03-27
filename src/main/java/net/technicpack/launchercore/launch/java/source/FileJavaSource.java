@@ -21,66 +21,65 @@ package net.technicpack.launchercore.launch.java.source;
 
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
-import net.technicpack.launchercore.launch.java.IVersionSource;
-import net.technicpack.launchercore.launch.java.JavaVersionRepository;
-import net.technicpack.launchercore.launch.java.version.FileBasedJavaRuntime;
-import net.technicpack.utilslib.Utils;
-
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+import net.technicpack.launchercore.launch.java.IVersionSource;
+import net.technicpack.launchercore.launch.java.JavaVersionRepository;
+import net.technicpack.launchercore.launch.java.version.FileBasedJavaRuntime;
+import net.technicpack.utilslib.Utils;
 
-/**
- * Loads versions from an external file
- */
+/** Loads versions from an external file */
 public class FileJavaSource implements IVersionSource {
-    @SuppressWarnings("java:S2065")
-    private transient File loadedFile;
+  @SuppressWarnings("java:S2065")
+  private transient File loadedFile;
 
-    private List<FileBasedJavaRuntime> versions = new ArrayList<>();
+  private List<FileBasedJavaRuntime> versions = new ArrayList<>();
 
-    protected FileJavaSource(File loadFile) {
-        this.loadedFile = loadFile;
+  protected FileJavaSource(File loadFile) {
+    this.loadedFile = loadFile;
+  }
+
+  protected void setLoadedFile(File loadedFile) {
+    this.loadedFile = loadedFile;
+  }
+
+  @Override
+  public void enumerateVersions(JavaVersionRepository repository) {
+    // Add all valid Java runtimes to the repository, and remove any invalid ones
+    // If any were removed, then we save the cleaned up list
+    if (versions.removeIf(version -> !repository.addVersion(version))) {
+      save();
     }
+  }
 
-    protected void setLoadedFile(File loadedFile) { this.loadedFile = loadedFile; }
+  public void addVersion(FileBasedJavaRuntime version) {
+    versions.add(version);
+    save();
+  }
 
-    @Override
-    public void enumerateVersions(JavaVersionRepository repository) {
-        // Add all valid Java runtimes to the repository, and remove any invalid ones
-        // If any were removed, then we save the cleaned up list
-        if (versions.removeIf(version -> !repository.addVersion(version))) {
-            save();
-        }
+  public static FileJavaSource load(File file) {
+    if (file == null || !file.exists()) return new FileJavaSource(file);
+
+    try (FileInputStream fis = new FileInputStream(file);
+        InputStreamReader reader = new InputStreamReader(fis, StandardCharsets.UTF_8)) {
+      FileJavaSource source = Utils.getGson().fromJson(reader, FileJavaSource.class);
+      source.setLoadedFile(file);
+      return source;
+    } catch (JsonParseException | IOException e) {
+      Utils.getLogger().log(Level.SEVERE, "Failed to load Java versions file", e);
+      return new FileJavaSource(file);
     }
+  }
 
-    public void addVersion(FileBasedJavaRuntime version) {
-        versions.add(version);
-        save();
+  public void save() {
+    try (Writer writer = Files.newBufferedWriter(loadedFile.toPath())) {
+      Utils.getGson().toJson(this, writer);
+    } catch (JsonIOException | IOException e) {
+      Utils.getLogger().log(Level.SEVERE, "Failed to save Java versions file", e);
     }
-
-    public static FileJavaSource load(File file) {
-        if (file == null || !file.exists()) return new FileJavaSource(file);
-
-        try (FileInputStream fis = new FileInputStream(file);
-             InputStreamReader reader = new InputStreamReader(fis, StandardCharsets.UTF_8)) {
-            FileJavaSource source = Utils.getGson().fromJson(reader, FileJavaSource.class);
-            source.setLoadedFile(file);
-            return source;
-        } catch (JsonParseException | IOException e) {
-            Utils.getLogger().log(Level.SEVERE, "Failed to load Java versions file", e);
-            return new FileJavaSource(file);
-        }
-    }
-
-    public void save() {
-        try (Writer writer = Files.newBufferedWriter(loadedFile.toPath())) {
-            Utils.getGson().toJson(this, writer);
-        } catch (JsonIOException | IOException e) {
-            Utils.getLogger().log(Level.SEVERE, "Failed to save Java versions file", e);
-        }
-    }
+  }
 }

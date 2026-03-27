@@ -18,6 +18,13 @@
 
 package net.technicpack.launcher.ui.components.modpacks;
 
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.image.BufferedImage;
+import javax.swing.*;
 import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.launcher.ui.controls.modpacks.ModpackTag;
 import net.technicpack.launchercore.image.IImageJobListener;
@@ -28,229 +35,215 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.ImageUtils;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.image.BufferedImage;
-
 public class ModpackBanner extends JPanel implements IImageJobListener<ModpackModel> {
-    private ResourceLoader resources;
-    private ImageRepository<ModpackModel> iconRepo;
-    private ModpackModel currentModpack;
-    private ActionListener modpackOptionsListener;
+  private ResourceLoader resources;
+  private ImageRepository<ModpackModel> iconRepo;
+  private ModpackModel currentModpack;
+  private ActionListener modpackOptionsListener;
 
-    private JLabel modpackName;
-    private JPanel modpackTags;
-    private JLabel updateReady;
-    private JLabel versionText;
-    private JLabel installedVersion;
-    private JLabel modpackIcon;
-    private JLabel modpackOptions;
+  private JLabel modpackName;
+  private JPanel modpackTags;
+  private JLabel updateReady;
+  private JLabel versionText;
+  private JLabel installedVersion;
+  private JLabel modpackIcon;
+  private JLabel modpackOptions;
 
-    public ModpackBanner(ResourceLoader resources, ImageRepository<ModpackModel> iconRepo, ActionListener modpackOptionsListener) {
-        this.resources = resources;
-        this.iconRepo = iconRepo;
-        this.modpackOptionsListener = modpackOptionsListener;
+  public ModpackBanner(
+      ResourceLoader resources,
+      ImageRepository<ModpackModel> iconRepo,
+      ActionListener modpackOptionsListener) {
+    this.resources = resources;
+    this.iconRepo = iconRepo;
+    this.modpackOptionsListener = modpackOptionsListener;
 
-        initComponents();
+    initComponents();
+  }
+
+  public void setModpack(ModpackModel modpack) {
+    currentModpack = modpack;
+    modpackName.setText(modpack.getDisplayName());
+
+    modpackOptions.setVisible(!modpack.isLocalOnly() || modpack.getInstalledVersion() != null);
+
+    ModpackVersion packVersion = modpack.getInstalledVersion();
+
+    if (packVersion == null) {
+      updateReady.setVisible(false);
+      versionText.setVisible(false);
+      installedVersion.setVisible(false);
+    } else {
+      updateReady.setVisible(modpack.hasRecommendedUpdate());
+      versionText.setVisible(true);
+      installedVersion.setVisible(true);
+      installedVersion.setText(packVersion.getVersion());
     }
 
-    public void setModpack(ModpackModel modpack) {
-        currentModpack = modpack;
-        modpackName.setText(modpack.getDisplayName());
+    ImageJob<ModpackModel> job = iconRepo.startImageJob(modpack);
+    job.addJobListener(this);
 
-        modpackOptions.setVisible(!modpack.isLocalOnly() || modpack.getInstalledVersion() != null);
+    BufferedImage icon = job.getImage();
+    if (icon.getWidth() > 50 || icon.getHeight() > 50) icon = ImageUtils.scaleImage(icon, 50, 50);
 
-        ModpackVersion packVersion = modpack.getInstalledVersion();
+    modpackIcon.setIcon(new ImageIcon(icon));
 
-        if (packVersion == null) {
-            updateReady.setVisible(false);
-            versionText.setVisible(false);
-            installedVersion.setVisible(false);
-        } else {
-            updateReady.setVisible(modpack.hasRecommendedUpdate());
-            versionText.setVisible(true);
-            installedVersion.setVisible(true);
-            installedVersion.setText(packVersion.getVersion());
-        }
+    rebuildTags(modpack);
+  }
 
-        ImageJob<ModpackModel> job = iconRepo.startImageJob(modpack);
-        job.addJobListener(this);
+  protected void rebuildTags(ModpackModel modpack) {
+    modpackTags.removeAll();
 
-        BufferedImage icon = job.getImage();
-        if (icon.getWidth() > 50 || icon.getHeight() > 50)
-            icon = ImageUtils.scaleImage(icon, 50, 50);
+    if (modpack.isOfficial()) addTag("launcher.pack.tag.official", UIConstants.COLOR_BLUE);
 
-        modpackIcon.setIcon(new ImageIcon(icon));
+    if (modpack.getPackInfo() != null && modpack.getPackInfo().hasSolder())
+      addTag("launcher.pack.tag.solder", UIConstants.COLOR_GREEN);
 
-        rebuildTags(modpack);
+    if (modpack.isServerPack()) addTag("launcher.pack.tag.server", UIConstants.COLOR_SERVER);
+
+    if (modpack.isLocalOnly()) addTag("launcher.pack.tag.offline", UIConstants.COLOR_RED);
+
+    if (modpackTags.getComponentCount() == 0) {
+      modpackTags.add(Box.createRigidArea(new Dimension(8, 14)));
     }
 
-    protected void rebuildTags(ModpackModel modpack) {
-        modpackTags.removeAll();
+    revalidate();
+  }
 
-        if (modpack.isOfficial())
-            addTag("launcher.pack.tag.official", UIConstants.COLOR_BLUE);
+  protected void addTag(String textString, Color lineColor) {
+    modpackTags.add(Box.createRigidArea(new Dimension(5, 0)));
 
-        if (modpack.getPackInfo() != null && modpack.getPackInfo().hasSolder())
-            addTag("launcher.pack.tag.solder", UIConstants.COLOR_GREEN);
+    ModpackTag tag = new ModpackTag(resources.getString(textString));
+    tag.setForeground(Color.white);
+    tag.setBackground(lineColor);
+    tag.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 11));
+    modpackTags.add(tag);
+  }
 
-        if (modpack.isServerPack())
-            addTag("launcher.pack.tag.server", UIConstants.COLOR_SERVER);
+  protected void openModpackOptions() {
+    if (currentModpack != null)
+      modpackOptionsListener.actionPerformed(new ActionEvent(currentModpack, 0, ""));
+  }
 
-        if (modpack.isLocalOnly())
-            addTag("launcher.pack.tag.offline", UIConstants.COLOR_RED);
+  private void initComponents() {
+    this.setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+    this.add(Box.createRigidArea(new Dimension(20, 10)));
 
-        if (modpackTags.getComponentCount() == 0) {
-            modpackTags.add(Box.createRigidArea(new Dimension(8,14)));
-        }
+    modpackIcon = new JLabel();
+    modpackIcon.setIcon(resources.getIcon("icon.png"));
+    this.add(modpackIcon);
 
-        revalidate();
-    }
+    JPanel modpackNamePanel = new JPanel();
+    modpackNamePanel.setOpaque(false);
+    modpackNamePanel.setLayout(new BoxLayout(modpackNamePanel, BoxLayout.PAGE_AXIS));
+    this.add(modpackNamePanel);
 
-    protected void addTag(String textString, Color lineColor) {
-        modpackTags.add(Box.createRigidArea(new Dimension(5,0)));
+    modpackName = new JLabel("Modpack");
+    modpackName.setForeground(UIConstants.COLOR_WHITE_TEXT);
+    modpackName.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
+    modpackName.setHorizontalTextPosition(SwingConstants.LEFT);
+    modpackName.setAlignmentX(LEFT_ALIGNMENT);
+    modpackName.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+    modpackName.setOpaque(false);
+    modpackNamePanel.add(modpackName);
 
-        ModpackTag tag = new ModpackTag(resources.getString(textString));
-        tag.setForeground(Color.white);
-        tag.setBackground(lineColor);
-        tag.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 11));
-        modpackTags.add(tag);
-    }
+    modpackTags = new JPanel();
+    modpackTags.setLayout(new BoxLayout(modpackTags, BoxLayout.LINE_AXIS));
+    modpackTags.setBorder(BorderFactory.createEmptyBorder(0, 2, 2, 2));
+    modpackTags.setOpaque(false);
+    modpackTags.setAlignmentX(LEFT_ALIGNMENT);
 
-    protected void openModpackOptions() {
-        if (currentModpack != null)
-            modpackOptionsListener.actionPerformed(new ActionEvent(currentModpack, 0, ""));
-    }
+    modpackNamePanel.add(modpackTags);
 
-    private void initComponents() {
-        this.setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-        this.add(Box.createRigidArea(new Dimension(20, 10)));
+    this.add(Box.createHorizontalGlue());
 
-        modpackIcon = new JLabel();
-        modpackIcon.setIcon(resources.getIcon("icon.png"));
-        this.add(modpackIcon);
+    JPanel packDoodads = new JPanel();
+    packDoodads.setOpaque(false);
+    packDoodads.setLayout(new BoxLayout(packDoodads, BoxLayout.PAGE_AXIS));
 
-        JPanel modpackNamePanel = new JPanel();
-        modpackNamePanel.setOpaque(false);
-        modpackNamePanel.setLayout(new BoxLayout(modpackNamePanel, BoxLayout.PAGE_AXIS));
-        this.add(modpackNamePanel);
+    JPanel versionPanel = new JPanel();
+    versionPanel.setOpaque(false);
+    versionPanel.setLayout(new FlowLayout(FlowLayout.TRAILING));
+    versionPanel.setAlignmentX(RIGHT_ALIGNMENT);
+    packDoodads.add(versionPanel);
 
-        modpackName = new JLabel("Modpack");
-        modpackName.setForeground(UIConstants.COLOR_WHITE_TEXT);
-        modpackName.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
-        modpackName.setHorizontalTextPosition(SwingConstants.LEFT);
-        modpackName.setAlignmentX(LEFT_ALIGNMENT);
-        modpackName.setBorder(BorderFactory.createEmptyBorder(0,5,0,0));
-        modpackName.setOpaque(false);
-        modpackNamePanel.add(modpackName);
+    versionPanel.add(Box.createRigidArea(new Dimension(1, 20)));
 
-        modpackTags = new JPanel();
-        modpackTags.setLayout(new BoxLayout(modpackTags,BoxLayout.LINE_AXIS));
-        modpackTags.setBorder(BorderFactory.createEmptyBorder(0,2,2,2));
-        modpackTags.setOpaque(false);
-        modpackTags.setAlignmentX(LEFT_ALIGNMENT);
+    updateReady = new JLabel();
+    updateReady.setIcon(resources.getIcon("update_available.png"));
+    updateReady.setHorizontalTextPosition(SwingConstants.LEADING);
+    updateReady.setHorizontalAlignment(SwingConstants.RIGHT);
+    updateReady.setAlignmentX(RIGHT_ALIGNMENT);
+    updateReady.setVisible(false);
+    versionPanel.add(updateReady);
 
-        modpackNamePanel.add(modpackTags);
+    versionText = new JLabel(resources.getString("launcher.packbanner.version"));
+    versionText.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
+    versionText.setForeground(UIConstants.COLOR_WHITE_TEXT);
+    versionText.setHorizontalTextPosition(SwingConstants.LEADING);
+    versionText.setHorizontalAlignment(SwingConstants.RIGHT);
+    versionText.setAlignmentX(RIGHT_ALIGNMENT);
+    versionText.setVisible(false);
+    versionPanel.add(versionText);
 
-        this.add(Box.createHorizontalGlue());
+    installedVersion = new JLabel("1.0.7");
+    installedVersion.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
+    installedVersion.setForeground(UIConstants.COLOR_WHITE_TEXT);
+    installedVersion.setHorizontalTextPosition(SwingConstants.LEADING);
+    installedVersion.setHorizontalAlignment(SwingConstants.RIGHT);
+    installedVersion.setAlignmentX(RIGHT_ALIGNMENT);
+    installedVersion.setVisible(false);
+    versionPanel.add(installedVersion);
 
-        JPanel packDoodads = new JPanel();
-        packDoodads.setOpaque(false);
-        packDoodads.setLayout(new BoxLayout(packDoodads, BoxLayout.PAGE_AXIS));
+    packDoodads.add(Box.createRigidArea(new Dimension(0, 5)));
 
-        JPanel versionPanel = new JPanel();
-        versionPanel.setOpaque(false);
-        versionPanel.setLayout(new FlowLayout(FlowLayout.TRAILING));
-        versionPanel.setAlignmentX(RIGHT_ALIGNMENT);
-        packDoodads.add(versionPanel);
+    modpackOptions = new JLabel(resources.getString("launcher.packbanner.options"));
+    modpackOptions.setIcon(
+        new ImageIcon(
+            resources.colorImage(
+                resources.getImage("options_cog.png"), UIConstants.COLOR_BUTTON_BLUE)));
+    modpackOptions.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    Font font = resources.getFont(ResourceLoader.FONT_OPENSANS, 14);
+    modpackOptions.setFont(font);
+    modpackOptions.setForeground(UIConstants.COLOR_BLUE);
+    modpackOptions.setHorizontalTextPosition(SwingConstants.LEADING);
+    modpackOptions.setHorizontalAlignment(SwingConstants.RIGHT);
+    modpackOptions.setAlignmentX(RIGHT_ALIGNMENT);
 
-        versionPanel.add(Box.createRigidArea(new Dimension(1,20)));
+    modpackOptions.addMouseListener(
+        new MouseListener() {
+          @Override
+          public void mouseClicked(MouseEvent e) {
+            openModpackOptions();
+          }
 
-        updateReady = new JLabel();
-        updateReady.setIcon(resources.getIcon("update_available.png"));
-        updateReady.setHorizontalTextPosition(SwingConstants.LEADING);
-        updateReady.setHorizontalAlignment(SwingConstants.RIGHT);
-        updateReady.setAlignmentX(RIGHT_ALIGNMENT);
-        updateReady.setVisible(false);
-        versionPanel.add(updateReady);
+          @Override
+          public void mousePressed(MouseEvent e) {}
 
-        versionText = new JLabel(resources.getString("launcher.packbanner.version"));
-        versionText.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        versionText.setForeground(UIConstants.COLOR_WHITE_TEXT);
-        versionText.setHorizontalTextPosition(SwingConstants.LEADING);
-        versionText.setHorizontalAlignment(SwingConstants.RIGHT);
-        versionText.setAlignmentX(RIGHT_ALIGNMENT);
-        versionText.setVisible(false);
-        versionPanel.add(versionText);
+          @Override
+          public void mouseReleased(MouseEvent e) {}
 
-        installedVersion = new JLabel("1.0.7");
-        installedVersion.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        installedVersion.setForeground(UIConstants.COLOR_WHITE_TEXT);
-        installedVersion.setHorizontalTextPosition(SwingConstants.LEADING);
-        installedVersion.setHorizontalAlignment(SwingConstants.RIGHT);
-        installedVersion.setAlignmentX(RIGHT_ALIGNMENT);
-        installedVersion.setVisible(false);
-        versionPanel.add(installedVersion);
+          @Override
+          public void mouseEntered(MouseEvent e) {}
 
-        packDoodads.add(Box.createRigidArea(new Dimension(0, 5)));
-
-        modpackOptions = new JLabel(resources.getString("launcher.packbanner.options"));
-        modpackOptions.setIcon(new ImageIcon(resources.colorImage(resources.getImage("options_cog.png"), UIConstants.COLOR_BUTTON_BLUE)));
-        modpackOptions.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        Font font = resources.getFont(ResourceLoader.FONT_OPENSANS, 14);
-        modpackOptions.setFont(font);
-        modpackOptions.setForeground(UIConstants.COLOR_BLUE);
-        modpackOptions.setHorizontalTextPosition(SwingConstants.LEADING);
-        modpackOptions.setHorizontalAlignment(SwingConstants.RIGHT);
-        modpackOptions.setAlignmentX(RIGHT_ALIGNMENT);
-
-        modpackOptions.addMouseListener(new MouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                openModpackOptions();
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-
-            }
+          @Override
+          public void mouseExited(MouseEvent e) {}
         });
 
-        packDoodads.add(modpackOptions);
+    packDoodads.add(modpackOptions);
 
-        this.add(packDoodads);
-        this.add(Box.createRigidArea(new Dimension(8, 10)));
+    this.add(packDoodads);
+    this.add(Box.createRigidArea(new Dimension(8, 10)));
+  }
+
+  @Override
+  public void jobComplete(ImageJob<ModpackModel> job) {
+    if (currentModpack == job.getJobData()) {
+      BufferedImage icon = job.getImage();
+      if (icon.getWidth() > 50 || icon.getHeight() > 50) icon = ImageUtils.scaleImage(icon, 50, 50);
+
+      modpackIcon.setIcon(new ImageIcon(icon));
+      getParent().invalidate();
+      SwingUtilities.invokeLater(() -> getParent().repaint());
     }
-
-    @Override
-    public void jobComplete(ImageJob<ModpackModel> job) {
-        if (currentModpack == job.getJobData()) {
-            BufferedImage icon = job.getImage();
-            if (icon.getWidth() > 50 || icon.getHeight() > 50)
-                icon = ImageUtils.scaleImage(icon, 50, 50);
-
-            modpackIcon.setIcon(new ImageIcon(icon));
-            getParent().invalidate();
-            SwingUtilities.invokeLater(() -> getParent().repaint());
-        }
-    }
+  }
 }

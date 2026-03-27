@@ -18,6 +18,13 @@
 
 package net.technicpack.launcher.ui.controls.feeds;
 
+import java.awt.Dimension;
+import java.text.DateFormat;
+import java.util.Calendar;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.launcher.ui.controls.SelectorWidget;
 import net.technicpack.launchercore.image.IImageJobListener;
@@ -27,68 +34,66 @@ import net.technicpack.platform.io.NewsArticle;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.ImageUtils;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import java.awt.Dimension;
-import java.text.DateFormat;
-import java.util.Calendar;
-
 public class NewsWidget extends SelectorWidget implements IImageJobListener<AuthorshipInfo> {
-    private NewsArticle article;
-    private ImageJob<AuthorshipInfo> avatar;
-    private JLabel avatarView;
+  private NewsArticle article;
+  private ImageJob<AuthorshipInfo> avatar;
+  private JLabel avatarView;
 
-    public NewsWidget(ResourceLoader resources, NewsArticle article, ImageJob<AuthorshipInfo> avatar) {
-        super(resources);
+  public NewsWidget(
+      ResourceLoader resources, NewsArticle article, ImageJob<AuthorshipInfo> avatar) {
+    super(resources);
 
-        this.article = article;
-        this.avatar = avatar;
+    this.article = article;
+    this.avatar = avatar;
 
-        avatar.addJobListener(this);
+    avatar.addJobListener(this);
 
-        initComponents();
+    initComponents();
 
-        setAvatar(avatar);
-    }
+    setAvatar(avatar);
+  }
 
-    protected void initComponents() {
-        super.initComponents();
-        setBorder(BorderFactory.createEmptyBorder(8,10,8,15));
+  protected void initComponents() {
+    super.initComponents();
+    setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 15));
 
-        avatarView = new JLabel();
-        add(avatarView);
+    avatarView = new JLabel();
+    add(avatarView);
 
-        add(Box.createHorizontalStrut(10));
+    add(Box.createHorizontalStrut(10));
 
-        JLabel text = new JLabel(article.getTitle());
-        text.setFont(getResources().getFont(ResourceLoader.FONT_OPENSANS, 14));
-        text.setForeground(UIConstants.COLOR_WHITE_TEXT);
-        text.setPreferredSize(new Dimension(200, text.getPreferredSize().height));
-        add(text);
+    JLabel text = new JLabel(article.getTitle());
+    text.setFont(getResources().getFont(ResourceLoader.FONT_OPENSANS, 14));
+    text.setForeground(UIConstants.COLOR_WHITE_TEXT);
+    text.setPreferredSize(new Dimension(200, text.getPreferredSize().height));
+    add(text);
 
-        add(Box.createHorizontalGlue());
-        add(Box.createHorizontalStrut(5));
+    add(Box.createHorizontalGlue());
+    add(Box.createHorizontalStrut(5));
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(article.getDate());
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTime(article.getDate());
 
-        DateFormat format = DateFormat.getDateInstance(DateFormat.SHORT);
-        JLabel date = new JLabel(format.format(article.getDate()));
-        date.setFont(getResources().getFont(ResourceLoader.FONT_OPENSANS, 12));
-        date.setForeground(UIConstants.COLOR_DIM_TEXT);
-        add(date);
-    }
+    DateFormat format = DateFormat.getDateInstance(DateFormat.SHORT);
+    JLabel date = new JLabel(format.format(article.getDate()));
+    date.setFont(getResources().getFont(ResourceLoader.FONT_OPENSANS, 12));
+    date.setForeground(UIConstants.COLOR_DIM_TEXT);
+    add(date);
+  }
 
-    public NewsArticle getArticle() { return article; }
+  public NewsArticle getArticle() {
+    return article;
+  }
 
-    @Override
-    public void jobComplete(ImageJob<AuthorshipInfo> job) {
-        setAvatar(job);
-    }
+  @Override
+  public void jobComplete(ImageJob<AuthorshipInfo> job) {
+    setAvatar(job);
+  }
 
-    private void setAvatar(ImageJob<AuthorshipInfo> job) {
-        avatarView.setIcon(new ImageIcon(getResources().getCircleClippedImage(ImageUtils.scaleWithAspectWidth(job.getImage(), 32))));
-    }
+  private void setAvatar(ImageJob<AuthorshipInfo> job) {
+    avatarView.setIcon(
+        new ImageIcon(
+            getResources()
+                .getCircleClippedImage(ImageUtils.scaleWithAspectWidth(job.getImage(), 32))));
+  }
 }

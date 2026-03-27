@@ -19,15 +19,15 @@
 
 package net.technicpack.ui.controls.list;
 
+import java.awt.Color;
 import javax.swing.JComboBox;
 import javax.swing.plaf.basic.BasicComboPopup;
-import java.awt.Color;
 
 public class SimpleScrollPopup extends BasicComboPopup {
 
-    public SimpleScrollPopup(JComboBox combo, Color trackColor, Color thumbColor) {
-        super(combo);
-        scroller.getVerticalScrollBar().setUI(new SimpleScrollbarUI(trackColor, thumbColor));
-        invalidate();
-    }
+  public SimpleScrollPopup(JComboBox combo, Color trackColor, Color thumbColor) {
+    super(combo);
+    scroller.getVerticalScrollBar().setUI(new SimpleScrollbarUI(trackColor, thumbColor));
+    invalidate();
+  }
 }

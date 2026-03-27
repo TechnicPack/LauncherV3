@@ -19,6 +19,7 @@
 
 package net.technicpack.platform;
 
+import java.util.logging.Level;
 import net.technicpack.launchercore.modpacks.InstalledPack;
 import net.technicpack.launchercore.modpacks.packinfo.CombinedPackInfo;
 import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
@@ -30,58 +31,59 @@ import net.technicpack.solder.ISolderPackApi;
 import net.technicpack.solder.io.SolderPackInfo;
 import net.technicpack.utilslib.Utils;
 
-import java.util.logging.Level;
-
 public class PlatformPackInfoRepository implements IAuthoritativePackSource {
-    private IPlatformApi platform;
-    private ISolderApi solder;
+  private IPlatformApi platform;
+  private ISolderApi solder;
 
-    public PlatformPackInfoRepository(IPlatformApi platform, ISolderApi solder) {
-        this.platform = platform;
-        this.solder = solder;
+  public PlatformPackInfoRepository(IPlatformApi platform, ISolderApi solder) {
+    this.platform = platform;
+    this.solder = solder;
+  }
+
+  @Override
+  public PackInfo getPackInfo(InstalledPack pack) {
+    return getPlatformPackInfo(pack.getName());
+  }
+
+  @Override
+  public PackInfo getCompletePackInfo(PackInfo pack) {
+    return getPlatformPackInfo(pack.getName());
+  }
+
+  protected PackInfo getPlatformPackInfo(String slug) {
+    try {
+      PackInfo info;
+
+      PlatformPackInfo platformInfo = platform.getPlatformPackInfoForBulk(slug);
+
+      info = getInfoFromPlatformInfo(platformInfo);
+
+      return info;
+    } catch (RestfulAPIException e) {
+      Utils.getLogger().log(Level.WARNING, "Unable to load platform pack " + slug, e);
+      return null;
     }
+  }
 
-    @Override
-    public PackInfo getPackInfo(InstalledPack pack) {
-        return getPlatformPackInfo(pack.getName());
+  protected PackInfo getInfoFromPlatformInfo(PlatformPackInfo platformInfo) {
+    if (platformInfo != null && platformInfo.hasSolder()) {
+      try {
+        ISolderPackApi solderPack =
+            solder.getSolderPack(
+                platformInfo.getSolder(),
+                platformInfo.getName(),
+                solder.getMirrorUrl(platformInfo.getSolder()));
+        SolderPackInfo solderInfo = solderPack.getPackInfoForBulk();
+
+        if (solderInfo == null) return platformInfo;
+        else return new CombinedPackInfo(solderInfo, platformInfo);
+      } catch (RestfulAPIException e) {
+        Utils.getLogger()
+            .log(Level.SEVERE, "Failed to query Solder for modpack " + platformInfo.getName(), e);
+        return platformInfo;
+      }
+    } else {
+      return platformInfo;
     }
-
-    @Override
-    public PackInfo getCompletePackInfo(PackInfo pack) {
-        return getPlatformPackInfo(pack.getName());
-    }
-
-    protected PackInfo getPlatformPackInfo(String slug) {
-        try {
-            PackInfo info;
-
-            PlatformPackInfo platformInfo = platform.getPlatformPackInfoForBulk(slug);
-
-            info = getInfoFromPlatformInfo(platformInfo);
-
-            return info;
-        } catch (RestfulAPIException e) {
-            Utils.getLogger().log(Level.WARNING, "Unable to load platform pack " + slug, e);
-            return null;
-        }
-    }
-
-    protected PackInfo getInfoFromPlatformInfo(PlatformPackInfo platformInfo) {
-        if (platformInfo != null && platformInfo.hasSolder()) {
-            try {
-                ISolderPackApi solderPack = solder.getSolderPack(platformInfo.getSolder(), platformInfo.getName(), solder.getMirrorUrl(platformInfo.getSolder()));
-                SolderPackInfo solderInfo = solderPack.getPackInfoForBulk();
-
-                if (solderInfo == null)
-                    return platformInfo;
-                else
-                    return new CombinedPackInfo(solderInfo, platformInfo);
-            } catch (RestfulAPIException e) {
-                Utils.getLogger().log(Level.SEVERE, "Failed to query Solder for modpack " + platformInfo.getName(), e);
-                return platformInfo;
-            }
-        } else {
-            return platformInfo;
-        }
-    }
+  }
 }

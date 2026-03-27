@@ -20,17 +20,6 @@
 package net.technicpack.launchercore.logging;
 
 import io.sentry.Sentry;
-import net.technicpack.ui.components.ConsoleFrame;
-import net.technicpack.utilslib.Utils;
-
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
-import javax.swing.SwingUtilities;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.text.Element;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,165 +28,175 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTextPane;
+import javax.swing.SwingUtilities;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.Element;
+import net.technicpack.ui.components.ConsoleFrame;
+import net.technicpack.utilslib.Utils;
 
 public class ConsoleHandler extends Handler {
-    private final ConsoleFrame consoleFrame;
-    private final BlockingQueue<LogRecord> logQueue = new LinkedBlockingQueue<>();
-    private final Thread workerThread;
-    private volatile boolean running = true;
+  private final ConsoleFrame consoleFrame;
+  private final BlockingQueue<LogRecord> logQueue = new LinkedBlockingQueue<>();
+  private final Thread workerThread;
+  private volatile boolean running = true;
 
-    private static final int MAX_DOC_CHARS = 300_000;
-    private static final int MAX_LINES = 2500;
+  private static final int MAX_DOC_CHARS = 300_000;
+  private static final int MAX_LINES = 2500;
 
-    public ConsoleHandler(ConsoleFrame consoleFrame) {
-        this.consoleFrame = consoleFrame;
-        Utils.getLogger().info("Console Mode Activated");
+  public ConsoleHandler(ConsoleFrame consoleFrame) {
+    this.consoleFrame = consoleFrame;
+    Utils.getLogger().info("Console Mode Activated");
 
-        workerThread = new Thread(this::processLogs, "ConsoleHandler-Worker");
-        workerThread.setDaemon(true); // So it won't prevent app shutdown
-        workerThread.start();
+    workerThread = new Thread(this::processLogs, "ConsoleHandler-Worker");
+    workerThread.setDaemon(true); // So it won't prevent app shutdown
+    workerThread.start();
+  }
+
+  @Override
+  public void publish(LogRecord record) {
+    if (!isLoggable(record)) return;
+    logQueue.offer(record); // Won't block
+  }
+
+  private AttributeSet getAttributes(LogRecord record, String msg) {
+    AttributeSet attributes = consoleFrame.getDefaultAttributes();
+
+    final Level level = record.getLevel();
+
+    if (msg.startsWith("(!!)")) {
+      attributes = consoleFrame.getHighlightedAttributes();
+    } else if (level == Level.SEVERE) {
+      attributes = consoleFrame.getErrorAttributes();
+    } else if (level == Level.WARNING) {
+      attributes = consoleFrame.getWarnAttributes();
+    } else if (level.intValue() < Level.INFO.intValue()) {
+      attributes = consoleFrame.getDebugAttributes();
     }
 
-    @Override
-    public void publish(LogRecord record) {
-        if (!isLoggable(record)) return;
-        logQueue.offer(record); // Won't block
+    return attributes;
+  }
+
+  private void processLogs() {
+    try {
+      while (running) {
+        LogRecord first = logQueue.take(); // Blocks until one is available
+
+        List<LogRecord> batch = new ArrayList<>();
+        batch.add(first);
+        logQueue.drainTo(batch); // Grab rest of the available ones
+
+        SwingUtilities.invokeLater(() -> writeBatchToUI(batch));
+      }
+    } catch (InterruptedException ignored) {
+      Thread.currentThread().interrupt(); // Restore interrupt flag
     }
+  }
 
-    private AttributeSet getAttributes(LogRecord record, String msg) {
-        AttributeSet attributes = consoleFrame.getDefaultAttributes();
+  private void trimDocument(Document doc) {
+    try {
+      Element root = doc.getDefaultRootElement();
+      int lineCount = root.getElementCount();
 
-        final Level level = record.getLevel();
+      // First trim by line count
+      int excessLines = lineCount - MAX_LINES;
+      int offsetByLines = -1;
 
-        if (msg.startsWith("(!!)")) {
-            attributes = consoleFrame.getHighlightedAttributes();
-        } else if (level == Level.SEVERE) {
-            attributes = consoleFrame.getErrorAttributes();
-        } else if (level == Level.WARNING) {
-            attributes = consoleFrame.getWarnAttributes();
-        } else if (level.intValue() < Level.INFO.intValue()) {
-            attributes = consoleFrame.getDebugAttributes();
+      if (excessLines > 0) {
+        Element trimLine = root.getElement(excessLines - 1);
+        if (trimLine != null) {
+          offsetByLines = trimLine.getEndOffset();
         }
+      }
 
-        return attributes;
-    }
-
-    private void processLogs() {
-        try {
-            while (running) {
-                LogRecord first = logQueue.take(); // Blocks until one is available
-
-                List<LogRecord> batch = new ArrayList<>();
-                batch.add(first);
-                logQueue.drainTo(batch); // Grab rest of the available ones
-
-                SwingUtilities.invokeLater(() -> writeBatchToUI(batch));
-            }
-        } catch (InterruptedException ignored) {
-            Thread.currentThread().interrupt(); // Restore interrupt flag
+      // Then check char count — but snap to line boundary
+      int offsetByChars = -1;
+      if (doc.getLength() > MAX_DOC_CHARS) {
+        for (int i = 0; i < root.getElementCount(); i++) {
+          Element line = root.getElement(i);
+          if (line.getEndOffset() >= doc.getLength() - MAX_DOC_CHARS) {
+            offsetByChars = line.getEndOffset(); // full line
+            break;
+          }
         }
+      }
+
+      int finalTrimOffset = Math.max(offsetByLines, offsetByChars);
+
+      if (finalTrimOffset > 0 && finalTrimOffset < doc.getLength()) {
+        doc.remove(0, finalTrimOffset);
+      }
+
+    } catch (BadLocationException e) {
+      Sentry.captureException(e);
+    }
+  }
+
+  private boolean isScrollAtBottom(JScrollPane scrollPane) {
+    JScrollBar vertical = scrollPane.getVerticalScrollBar();
+    int bottom = vertical.getMaximum() - vertical.getVisibleAmount();
+    return vertical.getValue() >= (bottom - 30); // Allow slight margin
+  }
+
+  private void writeBatchToUI(List<LogRecord> batch) {
+    final Document document = consoleFrame.getDocument();
+
+    for (LogRecord record : batch) {
+      String msg;
+      try {
+        msg = getFormatter().format(record);
+      } catch (Exception e) {
+        Sentry.captureException(e);
+        continue;
+      }
+
+      final AttributeSet attributes = getAttributes(record, msg);
+      final String writeText = msg.replace("\n\n", "\n");
+
+      try {
+        int offset = document.getLength();
+        document.insertString(offset, writeText, attributes);
+      } catch (BadLocationException e) {
+        Sentry.captureException(e);
+      }
     }
 
-    private void trimDocument(Document doc) {
-        try {
-            Element root = doc.getDefaultRootElement();
-            int lineCount = root.getElementCount();
+    trimDocument(document);
 
-            // First trim by line count
-            int excessLines = lineCount - MAX_LINES;
-            int offsetByLines = -1;
+    final JScrollPane scrollPane = consoleFrame.getScrollPane();
+    final boolean shouldScroll = true;
 
-            if (excessLines > 0) {
-                Element trimLine = root.getElement(excessLines - 1);
-                if (trimLine != null) {
-                    offsetByLines = trimLine.getEndOffset();
-                }
-            }
-
-            // Then check char count — but snap to line boundary
-            int offsetByChars = -1;
-            if (doc.getLength() > MAX_DOC_CHARS) {
-                for (int i = 0; i < root.getElementCount(); i++) {
-                    Element line = root.getElement(i);
-                    if (line.getEndOffset() >= doc.getLength() - MAX_DOC_CHARS) {
-                        offsetByChars = line.getEndOffset(); // full line
-                        break;
-                    }
-                }
-            }
-
-            int finalTrimOffset = Math.max(offsetByLines, offsetByChars);
-
-            if (finalTrimOffset > 0 && finalTrimOffset < doc.getLength()) {
-                doc.remove(0, finalTrimOffset);
-            }
-
-        } catch (BadLocationException e) {
-            Sentry.captureException(e);
-        }
-    }
-
-    private boolean isScrollAtBottom(JScrollPane scrollPane) {
-        JScrollBar vertical = scrollPane.getVerticalScrollBar();
-        int bottom = vertical.getMaximum() - vertical.getVisibleAmount();
-        return vertical.getValue() >= (bottom - 30); // Allow slight margin
-    }
-
-
-    private void writeBatchToUI(List<LogRecord> batch) {
-        final Document document = consoleFrame.getDocument();
-
-        for (LogRecord record : batch) {
-            String msg;
+    // Only scroll to bottom if we were already at the bottom
+    if (shouldScroll) {
+      // Defer scrolling to allow the scroll pane and text pane to catch up.
+      // This is necessary because otherwise the scrolling will start "lagging" behind.
+      SwingUtilities.invokeLater(
+          () -> {
             try {
-                msg = getFormatter().format(record);
-            } catch (Exception e) {
-                Sentry.captureException(e);
-                continue;
-            }
-
-            final AttributeSet attributes = getAttributes(record, msg);
-            final String writeText = msg.replace("\n\n", "\n");
-
-            try {
-                int offset = document.getLength();
-                document.insertString(offset, writeText, attributes);
+              JTextPane textPane = consoleFrame.getTextPane();
+              Rectangle rect = textPane.modelToView(document.getLength());
+              if (rect != null) {
+                textPane.scrollRectToVisible(rect);
+              }
             } catch (BadLocationException e) {
-                Sentry.captureException(e);
+              Sentry.captureException(e);
             }
-        }
-
-        trimDocument(document);
-
-        final JScrollPane scrollPane = consoleFrame.getScrollPane();
-        final boolean shouldScroll = true;
-
-        // Only scroll to bottom if we were already at the bottom
-        if (shouldScroll) {
-            // Defer scrolling to allow the scroll pane and text pane to catch up.
-            // This is necessary because otherwise the scrolling will start "lagging" behind.
-            SwingUtilities.invokeLater(() -> {
-                try {
-                    JTextPane textPane = consoleFrame.getTextPane();
-                    Rectangle rect = textPane.modelToView(document.getLength());
-                    if (rect != null) {
-                        textPane.scrollRectToVisible(rect);
-                    }
-                } catch (BadLocationException e) {
-                    Sentry.captureException(e);
-                }
-            });
-        }
+          });
     }
+  }
 
-    @Override
-    public void flush() {
-        // Nothing to do
-    }
+  @Override
+  public void flush() {
+    // Nothing to do
+  }
 
-    @Override
-    public void close() {
-        running = false;
-        workerThread.interrupt(); // Wake up blocking take()
-    }
+  @Override
+  public void close() {
+    running = false;
+    workerThread.interrupt(); // Wake up blocking take()
+  }
 }

@@ -19,14 +19,13 @@
 
 package net.technicpack.launchercore.modpacks.sources;
 
+import java.util.Collection;
 import net.technicpack.rest.io.PackInfo;
 
-import java.util.Collection;
-
 public interface IPackSource {
-    String getSourceName();
+  String getSourceName();
 
-    Collection<PackInfo> getPublicPacks();
+  Collection<PackInfo> getPublicPacks();
 
-    int getPriority(PackInfo packInfo);
+  int getPriority(PackInfo packInfo);
 }

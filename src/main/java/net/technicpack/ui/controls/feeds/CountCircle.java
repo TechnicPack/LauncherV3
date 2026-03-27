@@ -19,61 +19,60 @@
 
 package net.technicpack.ui.controls.feeds;
 
-import javax.swing.JComponent;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
+import javax.swing.JComponent;
 
 public class CountCircle extends JComponent {
-    private int count;
+  private int count;
 
-    public CountCircle() {
-        setVisible(false);
-    }
+  public CountCircle() {
+    setVisible(false);
+  }
 
-    public int getCount() { return count; }
-    public void setCount(int count) {
-        if (count < 0)
-            count = 0;
+  public int getCount() {
+    return count;
+  }
 
-        this.count = count;
-        setVisible(count > 0);
-    }
+  public void setCount(int count) {
+    if (count < 0) count = 0;
 
-    public String getText() {
-        if (count > 9)
-            return "!";
-        else
-            return Integer.toString(count);
-    }
+    this.count = count;
+    setVisible(count > 0);
+  }
 
-    @Override
-    public void paint(Graphics g) {
-        Graphics2D g2d = (Graphics2D)g;
+  public String getText() {
+    if (count > 9) return "!";
+    else return Integer.toString(count);
+  }
 
-        g2d.setRenderingHint(
-                RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setRenderingHint(
-                RenderingHints.KEY_TEXT_ANTIALIASING,
-                RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-        g2d.setRenderingHint(
-                RenderingHints.KEY_FRACTIONALMETRICS,
-                RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-        String text = getText();
-        g2d.setFont(getFont());
+  @Override
+  public void paint(Graphics g) {
+    Graphics2D g2d = (Graphics2D) g;
 
-        Rectangle2D bounds = g2d.getFontMetrics().getStringBounds(text, g2d);
+    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    g2d.setRenderingHint(
+        RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+    g2d.setRenderingHint(
+        RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+    String text = getText();
+    g2d.setFont(getFont());
 
-        double radius = Math.max(bounds.getWidth(), bounds.getHeight());
-        int size = (int)Math.ceil(radius);
+    Rectangle2D bounds = g2d.getFontMetrics().getStringBounds(text, g2d);
 
-        g2d.setColor(getBackground());
-        g2d.fillOval(0, 0, size, size);
+    double radius = Math.max(bounds.getWidth(), bounds.getHeight());
+    int size = (int) Math.ceil(radius);
 
-        g2d.setColor(getForeground());
+    g2d.setColor(getBackground());
+    g2d.fillOval(0, 0, size, size);
 
-        g2d.drawString(text, (size/2) - (int)(0.5 + bounds.getWidth()/2), (size/2) - (int)(0.5 + bounds.getY() + bounds.getHeight()/2));
-    }
+    g2d.setColor(getForeground());
+
+    g2d.drawString(
+        text,
+        (size / 2) - (int) (0.5 + bounds.getWidth() / 2),
+        (size / 2) - (int) (0.5 + bounds.getY() + bounds.getHeight() / 2));
+  }
 }

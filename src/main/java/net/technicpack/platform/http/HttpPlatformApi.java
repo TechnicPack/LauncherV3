@@ -27,44 +27,44 @@ import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.utilslib.Utils;
 
 public class HttpPlatformApi implements IPlatformApi {
-    private String platformUrl;
-    private String launcherBuild;
+  private String platformUrl;
+  private String launcherBuild;
 
-    public HttpPlatformApi(String rootUrl, String launcherBuild) {
-        this.platformUrl = rootUrl;
-        this.launcherBuild = launcherBuild;
-    }
+  public HttpPlatformApi(String rootUrl, String launcherBuild) {
+    this.platformUrl = rootUrl;
+    this.launcherBuild = launcherBuild;
+  }
 
-    public String getPlatformUri(String packSlug) {
-        return platformUrl + "modpack/" + packSlug + "?build="+launcherBuild;
-    }
+  public String getPlatformUri(String packSlug) {
+    return platformUrl + "modpack/" + packSlug + "?build=" + launcherBuild;
+  }
 
-    @Override
-    public PlatformPackInfo getPlatformPackInfoForBulk(String packSlug) throws RestfulAPIException {
-        return getPlatformPackInfo(packSlug);
-    }
+  @Override
+  public PlatformPackInfo getPlatformPackInfoForBulk(String packSlug) throws RestfulAPIException {
+    return getPlatformPackInfo(packSlug);
+  }
 
-    @Override
-    public PlatformPackInfo getPlatformPackInfo(String packSlug) throws RestfulAPIException {
-        String url = getPlatformUri(packSlug);
-        return RestObject.getRestObject(PlatformPackInfo.class, url);
-    }
+  @Override
+  public PlatformPackInfo getPlatformPackInfo(String packSlug) throws RestfulAPIException {
+    String url = getPlatformUri(packSlug);
+    return RestObject.getRestObject(PlatformPackInfo.class, url);
+  }
 
-    @Override
-    public void incrementPackRuns(String packSlug) {
-        String url = platformUrl + "modpack/" + packSlug + "/stat/run?build="+launcherBuild;
-        Utils.pingHttpURL(url);
-    }
+  @Override
+  public void incrementPackRuns(String packSlug) {
+    String url = platformUrl + "modpack/" + packSlug + "/stat/run?build=" + launcherBuild;
+    Utils.pingHttpURL(url);
+  }
 
-    @Override
-    public void incrementPackInstalls(String packSlug) {
-        String url = platformUrl + "modpack/" + packSlug + "/stat/install?build="+launcherBuild;
-        Utils.pingHttpURL(url);
-    }
+  @Override
+  public void incrementPackInstalls(String packSlug) {
+    String url = platformUrl + "modpack/" + packSlug + "/stat/install?build=" + launcherBuild;
+    Utils.pingHttpURL(url);
+  }
 
-    @Override
-    public NewsData getNews() throws RestfulAPIException {
-        String url = platformUrl + "news?build="+launcherBuild;
-        return RestObject.getRestObject(NewsData.class, url);
-    }
+  @Override
+  public NewsData getNews() throws RestfulAPIException {
+    String url = platformUrl + "news?build=" + launcherBuild;
+    return RestObject.getRestObject(NewsData.class, url);
+  }
 }

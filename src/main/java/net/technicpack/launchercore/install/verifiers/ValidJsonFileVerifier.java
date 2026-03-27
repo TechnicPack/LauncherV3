@@ -23,8 +23,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import net.technicpack.utilslib.Utils;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
@@ -32,43 +30,53 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.logging.Level;
+import net.technicpack.utilslib.Utils;
 
 public class ValidJsonFileVerifier implements IFileVerifier {
-    private Gson validatingGson;
+  private Gson validatingGson;
 
-    public ValidJsonFileVerifier(Gson validatingGson) {
-        this.validatingGson = validatingGson;
+  public ValidJsonFileVerifier(Gson validatingGson) {
+    this.validatingGson = validatingGson;
+  }
+
+  @Override
+  public boolean isFileValid(File file) {
+    try (Reader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
+      JsonObject obj = validatingGson.fromJson(reader, JsonObject.class);
+
+      return (obj != null);
+    } catch (JsonIOException | IOException e) {
+      Utils.getLogger()
+          .log(
+              Level.SEVERE,
+              String.format("An I/O error happened while validating %s", file.getAbsolutePath()),
+              e);
+    } catch (JsonParseException e) {
+      Utils.getLogger()
+          .log(
+              Level.WARNING,
+              String.format("JSON validation failed for %s", file.getAbsolutePath()),
+              e);
+      return false;
     }
 
-    @Override
-    public boolean isFileValid(File file) {
-        try (Reader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
-            JsonObject obj = validatingGson.fromJson(reader, JsonObject.class);
+    return false;
+  }
 
-            return (obj != null);
-        } catch (JsonIOException | IOException e) {
-            Utils.getLogger().log(Level.SEVERE, String.format("An I/O error happened while validating %s", file.getAbsolutePath()), e);
-        } catch (JsonParseException e) {
-            Utils.getLogger().log(Level.WARNING, String.format("JSON validation failed for %s", file.getAbsolutePath()), e);
-            return false;
-        }
+  @Override
+  public boolean isFileValid(Path path) {
+    try (Reader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+      JsonObject obj = validatingGson.fromJson(reader, JsonObject.class);
 
-        return false;
+      return (obj != null);
+    } catch (JsonIOException | IOException e) {
+      Utils.getLogger()
+          .log(Level.SEVERE, String.format("An I/O error happened while validating %s", path), e);
+    } catch (JsonParseException e) {
+      Utils.getLogger().log(Level.WARNING, String.format("JSON validation failed for %s", path), e);
+      return false;
     }
 
-    @Override
-    public boolean isFileValid(Path path) {
-        try (Reader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
-            JsonObject obj = validatingGson.fromJson(reader, JsonObject.class);
-
-            return (obj != null);
-        } catch (JsonIOException | IOException e) {
-            Utils.getLogger().log(Level.SEVERE, String.format("An I/O error happened while validating %s", path), e);
-        } catch (JsonParseException e) {
-            Utils.getLogger().log(Level.WARNING, String.format("JSON validation failed for %s", path), e);
-            return false;
-        }
-
-        return false;
-    }
+    return false;
+  }
 }

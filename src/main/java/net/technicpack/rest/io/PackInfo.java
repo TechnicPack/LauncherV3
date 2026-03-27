@@ -19,56 +19,54 @@
 
 package net.technicpack.rest.io;
 
-
+import java.util.ArrayList;
+import java.util.List;
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
 import net.technicpack.platform.io.FeedItem;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public interface PackInfo {
 
-    String getName();
+  String getName();
 
-    String getDisplayName();
+  String getDisplayName();
 
-    String getWebSite();
+  String getWebSite();
 
-    Resource getIcon();
+  Resource getIcon();
 
-    Resource getBackground();
+  Resource getBackground();
 
-    Resource getLogo();
+  Resource getLogo();
 
-    String getRecommended();
+  String getRecommended();
 
-    String getLatest();
+  String getLatest();
 
-    List<String> getBuilds();
+  List<String> getBuilds();
 
-    ArrayList<FeedItem> getFeed();
+  ArrayList<FeedItem> getFeed();
 
-    String getDescription();
+  String getDescription();
 
-    Integer getRuns();
+  Integer getRuns();
 
-    Integer getInstalls();
+  Integer getInstalls();
 
-    Integer getLikes();
+  Integer getLikes();
 
-    Modpack getModpack(String build) throws BuildInaccessibleException;
+  Modpack getModpack(String build) throws BuildInaccessibleException;
 
-    boolean isComplete();
+  boolean isComplete();
 
-    boolean isLocal();
+  boolean isLocal();
 
-    boolean isServerPack();
+  boolean isServerPack();
 
-    boolean isOfficial();
+  boolean isOfficial();
 
-    boolean hasSolder();
+  boolean hasSolder();
 
-    @Nullable
-    String getDiscordId();
+  @Nullable
+  String getDiscordId();
 }

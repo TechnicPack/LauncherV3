@@ -19,60 +19,70 @@
 
 package net.technicpack.ui.controls.lang;
 
-import net.technicpack.launcher.ui.UIConstants;
-import net.technicpack.ui.lang.ResourceLoader;
-import net.technicpack.ui.listitems.LanguageItem;
-
+import java.awt.Color;
+import java.awt.Component;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
-import java.awt.Color;
-import java.awt.Component;
+import net.technicpack.launcher.ui.UIConstants;
+import net.technicpack.ui.lang.ResourceLoader;
+import net.technicpack.ui.listitems.LanguageItem;
 
-public class LanguageCellRenderer  extends JLabel implements ListCellRenderer<LanguageItem> {
+public class LanguageCellRenderer extends JLabel implements ListCellRenderer<LanguageItem> {
 
-    private ImageIcon globe;
+  private ImageIcon globe;
 
-    private final Color defaultBackground;
-    private final Color defaultForeground;
+  private final Color defaultBackground;
+  private final Color defaultForeground;
 
-    public LanguageCellRenderer(ResourceLoader resourceLoader, String langIcon, Color defaultBackground, Color defaultForeground) {
-        if (langIcon != null)
-            globe = resourceLoader.getIcon(langIcon);
-        this.defaultBackground = defaultBackground;
-        this.defaultForeground = defaultForeground;
+  public LanguageCellRenderer(
+      ResourceLoader resourceLoader,
+      String langIcon,
+      Color defaultBackground,
+      Color defaultForeground) {
+    if (langIcon != null) globe = resourceLoader.getIcon(langIcon);
+    this.defaultBackground = defaultBackground;
+    this.defaultForeground = defaultForeground;
 
-        setForeground(defaultForeground);
-        setBackground(defaultBackground);
-        setFont(resourceLoader.getFont(ResourceLoader.FONT_OPENSANS, 14));
-        setOpaque(true);
+    setForeground(defaultForeground);
+    setBackground(defaultBackground);
+    setFont(resourceLoader.getFont(ResourceLoader.FONT_OPENSANS, 14));
+    setOpaque(true);
+  }
+
+  @Override
+  public Component getListCellRendererComponent(
+      JList<? extends LanguageItem> list,
+      LanguageItem value,
+      int index,
+      boolean isSelected,
+      boolean cellHasFocus) {
+    setForeground(this.defaultForeground);
+    setBackground(this.defaultBackground);
+    setFont(
+        value
+            .getLanguageResources()
+            .getFont(ResourceLoader.FONT_OPENSANS, list.getFont().getSize()));
+    setText(value.toString());
+
+    Object selectedValue = list.getSelectedValue();
+
+    if (globe != null) {
+      if (!isSelected && selectedValue != null && selectedValue.equals(value)) {
+        setIcon(globe);
+      } else {
+        setIcon(null);
+      }
     }
 
-    @Override
-    public Component getListCellRendererComponent(JList<? extends LanguageItem> list, LanguageItem value, int index, boolean isSelected, boolean cellHasFocus) {
-        setForeground(this.defaultForeground);
-        setBackground(this.defaultBackground);
-        setFont(value.getLanguageResources().getFont(ResourceLoader.FONT_OPENSANS, list.getFont().getSize()));
-        setText(value.toString());
-
-        Object selectedValue = list.getSelectedValue();
-
-        if (globe != null) {
-            if (!isSelected && selectedValue != null && selectedValue.equals(value)) {
-                setIcon(globe);
-            } else {
-                setIcon(null);
-            }
-        }
-
-        // Set a lighter background for the currently selected option (on hover)
-        if (selectedValue != null && selectedValue.equals(value)) {
-            setBackground(UIConstants.COLOR_SELECTOR_OPTION);
-        } else {
-            setBackground(defaultBackground);
-        }
-
-        return this;
+    // Set a lighter background for the currently selected option (on hover)
+    if (selectedValue != null && selectedValue.equals(value)) {
+      setBackground(UIConstants.COLOR_SELECTOR_OPTION);
+    } else {
+      setBackground(defaultBackground);
     }
+
+    return this;
+  }
 }

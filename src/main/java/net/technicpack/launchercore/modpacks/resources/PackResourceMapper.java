@@ -19,6 +19,8 @@
 
 package net.technicpack.launchercore.modpacks.resources;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launchercore.image.IImageMapper;
 import net.technicpack.launchercore.modpacks.ModpackModel;
@@ -26,48 +28,49 @@ import net.technicpack.launchercore.modpacks.resources.resourcetype.IModpackReso
 import net.technicpack.rest.io.Resource;
 import net.technicpack.utilslib.CryptoUtils;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-
 public class PackResourceMapper implements IImageMapper<ModpackModel> {
 
-    private LauncherFileSystem fileSystem;
-    private BufferedImage defaultImage;
-    private IModpackResourceType resourceType;
+  private LauncherFileSystem fileSystem;
+  private BufferedImage defaultImage;
+  private IModpackResourceType resourceType;
 
-    public PackResourceMapper(LauncherFileSystem fileSystem, BufferedImage defaultImage, IModpackResourceType resourceType) {
-        this.fileSystem = fileSystem;
-        this.defaultImage = defaultImage;
-        this.resourceType = resourceType;
+  public PackResourceMapper(
+      LauncherFileSystem fileSystem,
+      BufferedImage defaultImage,
+      IModpackResourceType resourceType) {
+    this.fileSystem = fileSystem;
+    this.defaultImage = defaultImage;
+    this.resourceType = resourceType;
+  }
+
+  @Override
+  public boolean shouldDownloadImage(ModpackModel imageKey) {
+    Resource res = resourceType.getResource(imageKey);
+
+    if (res == null) {
+      return false;
     }
 
-    @Override
-    public boolean shouldDownloadImage(ModpackModel imageKey) {
-        Resource res = resourceType.getResource(imageKey);
+    final String md5 = res.getMd5();
 
-        if (res == null) {
-            return false;
-        }
-
-        final String md5 = res.getMd5();
-
-        if (md5 == null || md5.isEmpty()) {
-            return true;
-        }
-
-        return !CryptoUtils.checkMD5(getImageLocation(imageKey), md5);
+    if (md5 == null || md5.isEmpty()) {
+      return true;
     }
 
-    @Override
-    public File getImageLocation(ModpackModel imageKey) {
-        return fileSystem.getPackAssetsDirectory()
-                         .resolve(imageKey.getName())
-                         .resolve(resourceType.getImageName())
-                         .toFile();
-    }
+    return !CryptoUtils.checkMD5(getImageLocation(imageKey), md5);
+  }
 
-    @Override
-    public BufferedImage getDefaultImage() {
-        return defaultImage;
-    }
+  @Override
+  public File getImageLocation(ModpackModel imageKey) {
+    return fileSystem
+        .getPackAssetsDirectory()
+        .resolve(imageKey.getName())
+        .resolve(resourceType.getImageName())
+        .toFile();
+  }
+
+  @Override
+  public BufferedImage getDefaultImage() {
+    return defaultImage;
+  }
 }

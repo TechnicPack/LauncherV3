@@ -19,28 +19,29 @@
 
 package net.technicpack.autoupdate.io;
 
-import net.technicpack.rest.RestObject;
-
 import java.util.ArrayList;
 import java.util.List;
+import net.technicpack.rest.RestObject;
 
 @SuppressWarnings({"unused"})
 public class StreamVersion extends RestObject {
-    private int build;
-    private StreamUrls url;
-    private List<LauncherResource> resources = new ArrayList<>();
+  private int build;
+  private StreamUrls url;
+  private List<LauncherResource> resources = new ArrayList<>();
 
-    public int getBuild() {
-        return build;
-    }
+  public int getBuild() {
+    return build;
+  }
 
-    public String getExeUrl() {
-        return url.getExeUrl();
-    }
+  public String getExeUrl() {
+    return url.getExeUrl();
+  }
 
-    public String getJarUrl() {
-        return url.getJarUrl();
-    }
+  public String getJarUrl() {
+    return url.getJarUrl();
+  }
 
-    public List<LauncherResource> getResources() { return resources; }
+  public List<LauncherResource> getResources() {
+    return resources;
+  }
 }

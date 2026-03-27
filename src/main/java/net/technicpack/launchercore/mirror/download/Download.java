@@ -19,11 +19,6 @@
 
 package net.technicpack.launchercore.mirror.download;
 
-import net.technicpack.launchercore.exception.DownloadException;
-import net.technicpack.launchercore.exception.PermissionDeniedException;
-import net.technicpack.launchercore.util.DownloadListener;
-import net.technicpack.utilslib.Utils;
-
 import java.io.*;
 import java.net.*;
 import java.nio.channels.Channels;
@@ -31,273 +26,289 @@ import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.OverlappingFileLockException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import net.technicpack.launchercore.exception.DownloadException;
+import net.technicpack.launchercore.exception.PermissionDeniedException;
+import net.technicpack.launchercore.util.DownloadListener;
+import net.technicpack.utilslib.Utils;
 
 public class Download implements Runnable {
-    private static final long TIMEOUT = 30000;
+  private static final long TIMEOUT = 30000;
 
-    private URL url;
-    private long size = -1;
-    private long downloaded = 0;
-    private String outPath;
-    private String name;
-    private DownloadListener listener;
-    private Result result = Result.FAILURE;
-    private File outFile = null;
-    private Exception exception = null;
+  private URL url;
+  private long size = -1;
+  private long downloaded = 0;
+  private String outPath;
+  private String name;
+  private DownloadListener listener;
+  private Result result = Result.FAILURE;
+  private File outFile = null;
+  private Exception exception = null;
 
-    private final Object timeoutLock = new Object();
-    private final Object progressLock = new Object();
-    private boolean isTimedOut = false;
+  private final Object timeoutLock = new Object();
+  private final Object progressLock = new Object();
+  private boolean isTimedOut = false;
 
-    public Download(URL url, String name, String outPath) {
-        this.url = url;
-        this.outPath = outPath;
-        this.name = name;
+  public Download(URL url, String name, String outPath) {
+    this.url = url;
+    this.outPath = outPath;
+    this.name = name;
+  }
+
+  public float getProgress() {
+    if (size > 0) {
+      return (float) ((double) downloaded / size * 100);
+    } else {
+      return 0;
     }
+  }
 
-    public float getProgress() {
-        if (size > 0) {
-            return (float) ((double) downloaded / size * 100);
-        } else {
-            return 0;
+  public Exception getException() {
+    return exception;
+  }
+
+  @Override
+  @SuppressWarnings("unused")
+  public void run() {
+    try {
+      HttpURLConnection conn = Utils.openHttpConnection(url);
+      int response = conn.getResponseCode();
+      int responseFamily = response / 100;
+
+      if (responseFamily == 3) {
+        String redirUrlText = conn.getHeaderField("Location");
+        if (redirUrlText != null && !redirUrlText.isEmpty()) {
+          URL redirectUrl;
+          try {
+            redirectUrl = new URL(redirUrlText);
+          } catch (MalformedURLException e) {
+            throw new DownloadException("Invalid Redirect URL: " + url, e);
+          }
+
+          conn = Utils.openHttpConnection(redirectUrl);
+          response = conn.getResponseCode();
+          responseFamily = response / 100;
         }
+      }
+
+      if (response == 429) {
+        throw new DownloadException(
+            "The download is being rate limited (HTTP 429). Try again later.");
+      } else if (response == 404) {
+        throw new DownloadException("The specified URL does not exist (HTTP 404).");
+      } else if (responseFamily != 2) {
+        throw new DownloadException("The server issued a " + response + " response code.");
+      }
+
+      InputStream in = getConnectionInputStream(conn);
+
+      size = conn.getContentLengthLong();
+      outFile = new File(outPath);
+      outFile.delete();
+
+      long startTime = System.nanoTime();
+
+      try (CountingReadableByteChannel rbc =
+              new CountingReadableByteChannel(Channels.newChannel(in));
+          FileOutputStream fos = new FileOutputStream(outFile)) {
+        fos.getChannel().lock();
+
+        stateChanged();
+
+        Thread progress = new MonitorThread(rbc);
+        progress.start();
+
+        fos.getChannel().transferFrom(rbc, 0, size > 0 ? size : Long.MAX_VALUE);
+
+        in.close();
+        rbc.close();
+        progress.interrupt();
+
+        synchronized (timeoutLock) {
+          if (isTimedOut) {
+            return;
+          }
+        }
+
+        if (size > 0) {
+          long fileLength = outFile.length();
+          if (size == fileLength) {
+            result = Result.SUCCESS;
+          } else {
+            throw new DownloadException(
+                "File size doesn't match. Expected " + size + ", got " + fileLength);
+          }
+        } else {
+          result = Result.SUCCESS;
+        }
+      }
+
+      long endTime = System.nanoTime();
+
+      long durationNs = endTime - startTime;
+      double durationSeconds = durationNs / 1_000_000_000.0;
+
+      // Use actual file size for speed calc
+      long fileLength = outFile.length();
+
+      Utils.getLogger()
+          .fine(
+              String.format(
+                  "Download completed: %d bytes in %.3f seconds (%.2f MB/s)",
+                  fileLength, durationSeconds, fileLength / durationSeconds / (1024 * 1024)));
+    } catch (ClosedByInterruptException e) {
+      result = Result.FAILURE;
+    } catch (PermissionDeniedException e) {
+      exception = e;
+      result = Result.PERMISSION_DENIED;
+    } catch (OverlappingFileLockException e) {
+      exception = e;
+      result = Result.LOCK_FAILED;
+    } catch (DownloadException e) {
+      exception = e;
+      result = Result.FAILURE;
+    } catch (Exception e) {
+      exception = e;
+      e.printStackTrace();
+    }
+  }
+
+  protected InputStream getConnectionInputStream(final URLConnection urlconnection)
+      throws DownloadException {
+    final AtomicReference<InputStream> is = new AtomicReference<>();
+
+    for (int j = 0; (j < 3) && (is.get() == null); j++) {
+      StreamThread stream = new StreamThread(urlconnection, is);
+      stream.start();
+      int iterationCount = 0;
+      while ((is.get() == null) && (iterationCount++ < 5)) {
+        try {
+          stream.join(1000L);
+        } catch (InterruptedException e) {
+        }
+      }
+
+      if (stream.permDenied.get()) {
+        throw new PermissionDeniedException("Permission denied!");
+      }
+
+      if (is.get() != null) {
+        break;
+      }
+      try {
+        stream.interrupt();
+        stream.join();
+      } catch (InterruptedException e) {
+      }
     }
 
-    public Exception getException() {
-        return exception;
+    if (is.get() == null) {
+      throw new DownloadException("Unable to download file from " + urlconnection.getURL());
+    }
+    return new BufferedInputStream(is.get());
+  }
+
+  private void stateChanged() {
+    if (listener != null) {
+      listener.stateChanged(name, getProgress());
+    }
+
+    synchronized (progressLock) {
+      progressLock.notifyAll();
+    }
+  }
+
+  public void setListener(DownloadListener listener) {
+    this.listener = listener;
+  }
+
+  public Result getResult() {
+    return result;
+  }
+
+  public File getOutFile() {
+    return outFile;
+  }
+
+  private static class StreamThread extends Thread {
+    private final URLConnection urlconnection;
+    private final AtomicReference<InputStream> is;
+    public final AtomicBoolean permDenied = new AtomicBoolean(false);
+
+    public StreamThread(URLConnection urlconnection, AtomicReference<InputStream> is) {
+      this.urlconnection = urlconnection;
+      this.is = is;
     }
 
     @Override
-    @SuppressWarnings("unused")
     public void run() {
-        try {
-            HttpURLConnection conn = Utils.openHttpConnection(url);
-            int response = conn.getResponseCode();
-            int responseFamily = response / 100;
-
-            if (responseFamily == 3) {
-                String redirUrlText = conn.getHeaderField("Location");
-                if (redirUrlText != null && !redirUrlText.isEmpty()) {
-                    URL redirectUrl;
-                    try {
-                        redirectUrl = new URL(redirUrlText);
-                    } catch (MalformedURLException e) {
-                        throw new DownloadException("Invalid Redirect URL: " + url, e);
-                    }
-
-                    conn = Utils.openHttpConnection(redirectUrl);
-                    response = conn.getResponseCode();
-                    responseFamily = response / 100;
-                }
-            }
-
-            if (response == 429) {
-                throw new DownloadException("The download is being rate limited (HTTP 429). Try again later.");
-            } else if (response == 404) {
-                throw new DownloadException("The specified URL does not exist (HTTP 404).");
-            } else if (responseFamily != 2) {
-                throw new DownloadException("The server issued a " + response + " response code.");
-            }
-
-            InputStream in = getConnectionInputStream(conn);
-
-            size = conn.getContentLengthLong();
-            outFile = new File(outPath);
-            outFile.delete();
-
-            long startTime = System.nanoTime();
-
-            try (CountingReadableByteChannel rbc = new CountingReadableByteChannel(Channels.newChannel(in));
-                 FileOutputStream fos = new FileOutputStream(outFile)) {
-                fos.getChannel().lock();
-
-                stateChanged();
-
-                Thread progress = new MonitorThread(rbc);
-                progress.start();
-
-                fos.getChannel().transferFrom(rbc, 0, size > 0 ? size : Long.MAX_VALUE);
-
-                in.close();
-                rbc.close();
-                progress.interrupt();
-
-                synchronized (timeoutLock) {
-                    if (isTimedOut) {
-                        return;
-                    }
-                }
-
-                if (size > 0) {
-                    long fileLength = outFile.length();
-                    if (size == fileLength) {
-                        result = Result.SUCCESS;
-                    } else {
-                        throw new DownloadException("File size doesn't match. Expected " + size + ", got " + fileLength);
-                    }
-                } else {
-                    result = Result.SUCCESS;
-                }
-            }
-
-            long endTime = System.nanoTime();
-
-            long durationNs = endTime - startTime;
-            double durationSeconds = durationNs / 1_000_000_000.0;
-
-            // Use actual file size for speed calc
-            long fileLength = outFile.length();
-
-            Utils.getLogger().fine(String.format("Download completed: %d bytes in %.3f seconds (%.2f MB/s)",
-                    fileLength, durationSeconds, fileLength / durationSeconds / (1024 * 1024)));
-        } catch (ClosedByInterruptException e) {
-            result = Result.FAILURE;
-        } catch (PermissionDeniedException e) {
-            exception = e;
-            result = Result.PERMISSION_DENIED;
-        } catch (OverlappingFileLockException e) {
-            exception = e;
-            result = Result.LOCK_FAILED;
-        } catch (DownloadException e) {
-            exception = e;
-            result = Result.FAILURE;
-        } catch (Exception e) {
-            exception = e;
-            e.printStackTrace();
+      try {
+        is.set(urlconnection.getInputStream());
+      } catch (SocketException e) {
+        if (e.getMessage().equalsIgnoreCase("Permission denied: connect")) {
+          permDenied.set(true);
         }
+      } catch (IOException e) {
+      }
+    }
+  }
+
+  private class MonitorThread extends Thread {
+    private final CountingReadableByteChannel rbc;
+    private long last = System.currentTimeMillis();
+
+    public MonitorThread(CountingReadableByteChannel rbc) {
+      super("Download Monitor Thread");
+      this.setDaemon(true);
+      this.rbc = rbc;
     }
 
-    protected InputStream getConnectionInputStream(final URLConnection urlconnection) throws DownloadException {
-        final AtomicReference<InputStream> is = new AtomicReference<>();
-
-        for (int j = 0; (j < 3) && (is.get() == null); j++) {
-            StreamThread stream = new StreamThread(urlconnection, is);
-            stream.start();
-            int iterationCount = 0;
-            while ((is.get() == null) && (iterationCount++ < 5)) {
-                try {
-                    stream.join(1000L);
-                } catch (InterruptedException e) {
-                }
-            }
-
-            if (stream.permDenied.get()) {
-                throw new PermissionDeniedException("Permission denied!");
-            }
-
-            if (is.get() != null) {
-                break;
-            }
+    @Override
+    public void run() {
+      while (!this.isInterrupted()) {
+        long bytesRead = this.rbc.getBytesRead();
+        long bytesDelta = bytesRead - downloaded;
+        downloaded = bytesRead;
+        if (bytesDelta == 0) {
+          if ((System.currentTimeMillis() - last) > TIMEOUT) {
             try {
-                stream.interrupt();
-                stream.join();
-            } catch (InterruptedException e) {
+              rbc.close();
+            } catch (IOException | NullPointerException ignore) {
+              // We catch IOException and NullPointerException here because sometimes
+              // ReadableByteChannel
+              // can throw an NPE if we try to close it after the connection gets reset or otherwise
+              // broken, which can cause the ReadableByteChannel internals to be in an inconsistent
+              // state.
             }
+            timeout();
+            return;
+          }
+        } else {
+          last = System.currentTimeMillis();
         }
 
-        if (is.get() == null) {
-            throw new DownloadException("Unable to download file from " + urlconnection.getURL());
-        }
-        return new BufferedInputStream(is.get());
-    }
-
-    private void stateChanged() {
-        if (listener != null) {
-            listener.stateChanged(name, getProgress());
-        }
-
+        stateChanged();
         synchronized (progressLock) {
-            progressLock.notifyAll();
+          try {
+            progressLock.wait(33); // ~30.3 Hz
+          } catch (InterruptedException e) {
+            this.interrupt();
+            return;
+          }
         }
+      }
     }
 
-    public void setListener(DownloadListener listener) {
-        this.listener = listener;
+    private void timeout() {
+      synchronized (timeoutLock) {
+        isTimedOut = true;
+      }
     }
+  }
 
-    public Result getResult() {
-        return result;
-    }
-
-    public File getOutFile() {
-        return outFile;
-    }
-
-    private static class StreamThread extends Thread {
-        private final URLConnection urlconnection;
-        private final AtomicReference<InputStream> is;
-        public final AtomicBoolean permDenied = new AtomicBoolean(false);
-
-        public StreamThread(URLConnection urlconnection, AtomicReference<InputStream> is) {
-            this.urlconnection = urlconnection;
-            this.is = is;
-        }
-
-        @Override
-        public void run() {
-            try {
-                is.set(urlconnection.getInputStream());
-            } catch (SocketException e) {
-                if (e.getMessage().equalsIgnoreCase("Permission denied: connect")) {
-                    permDenied.set(true);
-                }
-            } catch (IOException e) {
-            }
-        }
-    }
-
-    private class MonitorThread extends Thread {
-        private final CountingReadableByteChannel rbc;
-        private long last = System.currentTimeMillis();
-
-        public MonitorThread(CountingReadableByteChannel rbc) {
-            super("Download Monitor Thread");
-            this.setDaemon(true);
-            this.rbc = rbc;
-        }
-
-        @Override
-        public void run() {
-            while (!this.isInterrupted()) {
-                long bytesRead = this.rbc.getBytesRead();
-                long bytesDelta = bytesRead - downloaded;
-                downloaded = bytesRead;
-                if (bytesDelta == 0) {
-                    if ((System.currentTimeMillis() - last) > TIMEOUT) {
-                        try {
-                            rbc.close();
-                        } catch (IOException | NullPointerException ignore) {
-                            // We catch IOException and NullPointerException here because sometimes ReadableByteChannel
-                            // can throw an NPE if we try to close it after the connection gets reset or otherwise
-                            // broken, which can cause the ReadableByteChannel internals to be in an inconsistent state.
-                        }
-                        timeout();
-                        return;
-                    }
-                } else {
-                    last = System.currentTimeMillis();
-                }
-
-                stateChanged();
-                synchronized (progressLock) {
-                    try {
-                        progressLock.wait(33); // ~30.3 Hz
-                    } catch (InterruptedException e) {
-                        this.interrupt();
-                        return;
-                    }
-                }
-            }
-        }
-
-        private void timeout() {
-            synchronized (timeoutLock) {
-                isTimedOut = true;
-            }
-        }
-    }
-
-    public enum Result {
-        SUCCESS, FAILURE, PERMISSION_DENIED, LOCK_FAILED
-    }
+  public enum Result {
+    SUCCESS,
+    FAILURE,
+    PERMISSION_DENIED,
+    LOCK_FAILED
+  }
 }

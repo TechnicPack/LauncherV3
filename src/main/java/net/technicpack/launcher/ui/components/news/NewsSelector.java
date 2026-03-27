@@ -18,6 +18,12 @@
 
 package net.technicpack.launcher.ui.components.news;
 
+import java.awt.*;
+import java.util.logging.Level;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.launcher.ui.controls.feeds.NewsWidget;
@@ -31,129 +37,163 @@ import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.Utils;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import java.awt.*;
-import java.util.logging.Level;
-
 public class NewsSelector extends JPanel {
-    private ResourceLoader resources;
-    private IPlatformApi platformApi;
-    private NewsWidget selectedItem;
-    private JPanel widgetHost;
-    private CountCircle circle;
-    private TechnicSettings settings;
-    private int newLatestNewsArticle;
+  private ResourceLoader resources;
+  private IPlatformApi platformApi;
+  private NewsWidget selectedItem;
+  private JPanel widgetHost;
+  private CountCircle circle;
+  private TechnicSettings settings;
+  private int newLatestNewsArticle;
 
-    private NewsInfoPanel panel;
+  private NewsInfoPanel panel;
 
-    private ImageRepository<AuthorshipInfo> avatarRepo;
+  private ImageRepository<AuthorshipInfo> avatarRepo;
 
-    public NewsSelector(ResourceLoader resources, NewsInfoPanel panel, IPlatformApi platformApi, ImageRepository<AuthorshipInfo> avatarRepo, CountCircle count, TechnicSettings settings) {
-        this.resources = resources;
-        this.platformApi = platformApi;
-        this.avatarRepo = avatarRepo;
-        this.panel = panel;
-        this.settings = settings;
-        this.circle = count;
+  public NewsSelector(
+      ResourceLoader resources,
+      NewsInfoPanel panel,
+      IPlatformApi platformApi,
+      ImageRepository<AuthorshipInfo> avatarRepo,
+      CountCircle count,
+      TechnicSettings settings) {
+    this.resources = resources;
+    this.platformApi = platformApi;
+    this.avatarRepo = avatarRepo;
+    this.panel = panel;
+    this.settings = settings;
+    this.circle = count;
 
-        initComponents();
-        downloadItems();
+    initComponents();
+    downloadItems();
+  }
+
+  protected void selectNewsItem(NewsWidget widget) {
+    if (selectedItem != null) selectedItem.setIsSelected(false);
+    selectedItem = widget;
+
+    if (selectedItem != null) selectedItem.setIsSelected(true);
+
+    panel.setArticle(selectedItem.getArticle());
+  }
+
+  private void initComponents() {
+    setLayout(new BorderLayout());
+    setBackground(UIConstants.COLOR_SELECTOR_BACK);
+
+    widgetHost = new JPanel();
+    widgetHost.setOpaque(false);
+    widgetHost.setLayout(new GridBagLayout());
+
+    JScrollPane scrollPane =
+        new JScrollPane(
+            widgetHost,
+            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    scrollPane.setBorder(BorderFactory.createEmptyBorder());
+    scrollPane.setOpaque(false);
+    scrollPane.getViewport().setOpaque(false);
+    scrollPane
+        .getVerticalScrollBar()
+        .setUI(
+            new SimpleScrollbarUI(UIConstants.COLOR_SCROLL_TRACK, UIConstants.COLOR_SCROLL_THUMB));
+    scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(10, 10));
+    scrollPane.getVerticalScrollBar().setUnitIncrement(12);
+    add(scrollPane, BorderLayout.CENTER);
+
+    GridBagConstraints constraints =
+        new GridBagConstraints(
+            0,
+            0,
+            1,
+            1,
+            1.0,
+            0.0,
+            GridBagConstraints.NORTH,
+            GridBagConstraints.HORIZONTAL,
+            new Insets(0, 0, 0, 0),
+            0,
+            0);
+
+    constraints.weighty = 1.0;
+    widgetHost.add(Box.createGlue(), constraints);
+  }
+
+  public void ping() {
+    settings.setLatestNewsArticle(newLatestNewsArticle);
+    circle.setVisible(false);
+  }
+
+  protected void loadNewsItems(NewsData news) {
+
+    int count = 0;
+    newLatestNewsArticle = settings.getLatestNewsArticle();
+    for (int i = 0; i < news.getArticles().size(); i++) {
+      if (news.getArticles().get(i).getId() > settings.getLatestNewsArticle()) {
+        count++;
+
+        if (news.getArticles().get(i).getId() > newLatestNewsArticle)
+          newLatestNewsArticle = news.getArticles().get(i).getId();
+      }
     }
 
-    protected void selectNewsItem(NewsWidget widget) {
-        if (selectedItem != null)
-            selectedItem.setIsSelected(false);
-        selectedItem = widget;
-
-        if (selectedItem != null)
-            selectedItem.setIsSelected(true);
-
-        panel.setArticle(selectedItem.getArticle());
+    if (count > 0) {
+      circle.setVisible(true);
+      circle.setCount(count);
+    } else {
+      circle.setVisible(false);
     }
 
-    private void initComponents() {
-        setLayout(new BorderLayout());
-        setBackground(UIConstants.COLOR_SELECTOR_BACK);
+    news.getArticles()
+        .sort((o1, o2) -> Long.compare(o2.getDate().getTime(), o1.getDate().getTime()));
 
-        widgetHost = new JPanel();
-        widgetHost.setOpaque(false);
-        widgetHost.setLayout(new GridBagLayout());
+    widgetHost.removeAll();
 
-        JScrollPane scrollPane = new JScrollPane(widgetHost, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.setOpaque(false);
-        scrollPane.getViewport().setOpaque(false);
-        scrollPane.getVerticalScrollBar().setUI(new SimpleScrollbarUI(UIConstants.COLOR_SCROLL_TRACK, UIConstants.COLOR_SCROLL_THUMB));
-        scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(10,10));
-        scrollPane.getVerticalScrollBar().setUnitIncrement(12);
-        add(scrollPane, BorderLayout.CENTER);
+    GridBagConstraints constraints =
+        new GridBagConstraints(
+            0,
+            0,
+            1,
+            1,
+            1.0,
+            0.0,
+            GridBagConstraints.NORTH,
+            GridBagConstraints.HORIZONTAL,
+            new Insets(0, 0, 0, 0),
+            0,
+            0);
 
-        GridBagConstraints constraints = new GridBagConstraints(0,0,1,1,1.0,0.0,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0);
+    for (int i = 0; i < news.getArticles().size(); i++) {
+      NewsWidget widget =
+          new NewsWidget(
+              resources,
+              news.getArticles().get(i),
+              avatarRepo.startImageJob(news.getArticles().get(i).getAuthorshipInfo()));
+      widget.addActionListener(
+          e -> {
+            if (e.getSource() instanceof NewsWidget) selectNewsItem((NewsWidget) e.getSource());
+          });
+      widgetHost.add(widget, constraints);
+      constraints.gridy++;
 
-        constraints.weighty = 1.0;
-        widgetHost.add(Box.createGlue(), constraints);
+      if (selectedItem == null) selectNewsItem(widget);
     }
 
-    public void ping() {
-        settings.setLatestNewsArticle(newLatestNewsArticle);
-        circle.setVisible(false);
-    }
+    constraints.weighty = 1.0;
+    widgetHost.add(Box.createGlue(), constraints);
+  }
 
-    protected void loadNewsItems(NewsData news) {
-
-        int count = 0;
-        newLatestNewsArticle = settings.getLatestNewsArticle();
-        for (int i = 0;i < news.getArticles().size(); i++) {
-            if (news.getArticles().get(i).getId() > settings.getLatestNewsArticle()) {
-                count++;
-
-                if (news.getArticles().get(i).getId() > newLatestNewsArticle)
-                    newLatestNewsArticle = news.getArticles().get(i).getId();
-            }
-        }
-
-        if (count > 0) {
-            circle.setVisible(true);
-            circle.setCount(count);
-        } else {
-            circle.setVisible(false);
-        }
-
-        news.getArticles().sort((o1, o2) -> Long.compare(o2.getDate().getTime(), o1.getDate().getTime()));
-
-        widgetHost.removeAll();
-
-        GridBagConstraints constraints = new GridBagConstraints(0,0,1,1,1.0,0.0,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0);
-
-        for (int i = 0; i < news.getArticles().size(); i++) {
-            NewsWidget widget = new NewsWidget(resources, news.getArticles().get(i), avatarRepo.startImageJob(news.getArticles().get(i).getAuthorshipInfo()));
-            widget.addActionListener(e -> {
-                if (e.getSource() instanceof NewsWidget)
-                    selectNewsItem((NewsWidget)e.getSource());
-            });
-            widgetHost.add(widget, constraints);
-            constraints.gridy++;
-
-            if (selectedItem == null)
-                selectNewsItem(widget);
-        }
-
-        constraints.weighty = 1.0;
-        widgetHost.add(Box.createGlue(), constraints);
-    }
-
-    private void downloadItems() {
-        Thread thread = new Thread(() -> {
-            try {
+  private void downloadItems() {
+    Thread thread =
+        new Thread(
+            () -> {
+              try {
                 loadNewsItems(platformApi.getNews());
-            } catch (RestfulAPIException e) {
+              } catch (RestfulAPIException e) {
                 Utils.getLogger().log(Level.WARNING, "Unable to load news", e);
-            }
-        });
+              }
+            });
 
-        thread.start();
-    }
+    thread.start();
+  }
 }

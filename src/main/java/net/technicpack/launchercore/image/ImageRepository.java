@@ -23,36 +23,33 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ImageRepository<T> {
-    private IImageMapper<T> mapper;
-    private IImageStore<T> store;
-    private Map<String, ImageJob<T>> allJobs = new HashMap<>();
+  private IImageMapper<T> mapper;
+  private IImageStore<T> store;
+  private Map<String, ImageJob<T>> allJobs = new HashMap<>();
 
-    public ImageRepository(IImageMapper<T> mapper, IImageStore<T> store) {
-        this.mapper = mapper;
-        this.store = store;
+  public ImageRepository(IImageMapper<T> mapper, IImageStore<T> store) {
+    this.mapper = mapper;
+    this.store = store;
+  }
+
+  public ImageJob<T> startImageJob(T key) {
+    String jobKey = store.getJobKey(key);
+
+    ImageJob<T> job;
+    if (allJobs.containsKey(jobKey)) job = allJobs.get(jobKey);
+    else {
+      job = new ImageJob<>(mapper, store);
+      allJobs.put(jobKey, job);
     }
 
-    public ImageJob<T> startImageJob(T key) {
-        String jobKey = store.getJobKey(key);
+    if (job.canRetry()) job.start(key);
 
-        ImageJob<T> job;
-        if (allJobs.containsKey(jobKey))
-            job = allJobs.get(jobKey);
-        else {
-            job = new ImageJob<>(mapper, store);
-            allJobs.put(jobKey, job);
-        }
+    return job;
+  }
 
-        if (job.canRetry())
-            job.start(key);
+  public void refreshRetry(T key) {
+    String jobKey = store.getJobKey(key);
 
-        return job;
-    }
-
-    public void refreshRetry(T key) {
-        String jobKey = store.getJobKey(key);
-
-        if (allJobs.containsKey(jobKey))
-            allJobs.get(jobKey).refreshRetry();
-    }
+    if (allJobs.containsKey(jobKey)) allJobs.get(jobKey).refreshRetry();
+  }
 }

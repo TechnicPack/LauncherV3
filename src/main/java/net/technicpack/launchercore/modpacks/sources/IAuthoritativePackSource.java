@@ -23,7 +23,7 @@ import net.technicpack.launchercore.modpacks.InstalledPack;
 import net.technicpack.rest.io.PackInfo;
 
 public interface IAuthoritativePackSource {
-    PackInfo getPackInfo(InstalledPack pack);
+  PackInfo getPackInfo(InstalledPack pack);
 
-    PackInfo getCompletePackInfo(PackInfo pack);
+  PackInfo getCompletePackInfo(PackInfo pack);
 }

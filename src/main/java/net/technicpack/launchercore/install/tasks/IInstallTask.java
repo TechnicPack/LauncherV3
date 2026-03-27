@@ -19,14 +19,13 @@
 
 package net.technicpack.launchercore.install.tasks;
 
+import java.io.IOException;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 
-import java.io.IOException;
-
 public interface IInstallTask<T> {
-    String getTaskDescription();
+  String getTaskDescription();
 
-    float getTaskProgress();
+  float getTaskProgress();
 
-    void runTask(InstallTasksQueue<T> queue) throws IOException, InterruptedException;
+  void runTask(InstallTasksQueue<T> queue) throws IOException, InterruptedException;
 }

@@ -20,5 +20,5 @@
 package net.technicpack.launchercore.install;
 
 public interface IVersionDataParser<VersionData> {
-    VersionData parseVersionData(String data);
+  VersionData parseVersionData(String data);
 }

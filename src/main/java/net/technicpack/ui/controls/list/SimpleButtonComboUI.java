@@ -19,47 +19,47 @@
 
 package net.technicpack.ui.controls.list;
 
-import net.technicpack.ui.controls.list.popupformatters.IPopupFormatter;
-import net.technicpack.ui.lang.ResourceLoader;
-
+import java.awt.Color;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.BasicComboPopup;
 import javax.swing.plaf.basic.ComboPopup;
-import java.awt.Color;
+import net.technicpack.ui.controls.list.popupformatters.IPopupFormatter;
+import net.technicpack.ui.lang.ResourceLoader;
 
 public class SimpleButtonComboUI extends BasicComboBoxUI {
 
-    private ResourceLoader resources;
+  private ResourceLoader resources;
 
-    private Color trackColor;
-    private Color thumbColor;
+  private Color trackColor;
+  private Color thumbColor;
 
-    private IPopupFormatter popupFormatter;
+  private IPopupFormatter popupFormatter;
 
-    public SimpleButtonComboUI(IPopupFormatter popupFormatter, ResourceLoader loader, Color trackColor, Color thumbColor) {
-        this.resources = loader;
-        this.trackColor = trackColor;
-        this.thumbColor = thumbColor;
-        this.popupFormatter = popupFormatter;
-    }
+  public SimpleButtonComboUI(
+      IPopupFormatter popupFormatter, ResourceLoader loader, Color trackColor, Color thumbColor) {
+    this.resources = loader;
+    this.trackColor = trackColor;
+    this.thumbColor = thumbColor;
+    this.popupFormatter = popupFormatter;
+  }
 
-    @Override
-    protected JButton createArrowButton() {
-        JButton button = new JButton();
-        button.setOpaque(false);
-        button.setContentAreaFilled(false);
-        button.setBorder(BorderFactory.createEmptyBorder());
-        button.setIcon(resources.getIcon("comboTriangle.png"));
-        button.setFocusPainted(false);
-        return button;
-    }
+  @Override
+  protected JButton createArrowButton() {
+    JButton button = new JButton();
+    button.setOpaque(false);
+    button.setContentAreaFilled(false);
+    button.setBorder(BorderFactory.createEmptyBorder());
+    button.setIcon(resources.getIcon("comboTriangle.png"));
+    button.setFocusPainted(false);
+    return button;
+  }
 
-    @Override
-    protected ComboPopup createPopup() {
-        BasicComboPopup comboPopup = new SimpleScrollPopup(comboBox, trackColor, thumbColor);
-        popupFormatter.formatPopup(comboPopup);
-        return comboPopup;
-    }
+  @Override
+  protected ComboPopup createPopup() {
+    BasicComboPopup comboPopup = new SimpleScrollPopup(comboBox, trackColor, thumbColor);
+    popupFormatter.formatPopup(comboPopup);
+    return comboPopup;
+  }
 }

@@ -19,12 +19,6 @@
 
 package net.technicpack.ui.lang;
 
-import net.technicpack.launcher.io.LauncherFileSystem;
-import net.technicpack.utilslib.Utils;
-import org.intellij.lang.annotations.MagicConstant;
-
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
@@ -33,338 +27,357 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.charset.StandardCharsets;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import net.technicpack.launcher.io.LauncherFileSystem;
+import net.technicpack.utilslib.Utils;
+import org.intellij.lang.annotations.MagicConstant;
 
 public class ResourceLoader {
-    private static final ResourceBundle.Control UTF8_PROPERTIES_CONTROL = new Utf8PropertiesControl();
+  private static final ResourceBundle.Control UTF8_PROPERTIES_CONTROL = new Utf8PropertiesControl();
 
-    private final Collection<IRelocalizableResource> resources = new LinkedList<>();
-    private ResourceBundle stringData;
-    private Locale currentLocale;
-    private final String dottedResourcePath;
-    private final String slashResourcePath;
-    private boolean isDefaultLocaleSupported = true;
-    private final Locale defaultLocale;
-    private final Path launcherAssets;
-    private Locale[] locales = { Locale.ENGLISH };
+  private final Collection<IRelocalizableResource> resources = new LinkedList<>();
+  private ResourceBundle stringData;
+  private Locale currentLocale;
+  private final String dottedResourcePath;
+  private final String slashResourcePath;
+  private boolean isDefaultLocaleSupported = true;
+  private final Locale defaultLocale;
+  private final Path launcherAssets;
+  private Locale[] locales = {Locale.ENGLISH};
 
-    public static final String DEFAULT_LOCALE = "default";
+  public static final String DEFAULT_LOCALE = "default";
 
-    public static final String FONT_OPENSANS = "OpenSans+Cyberbit.ttf";
-    public static final String FONT_RALEWAY = "Raleway+FireflySung.ttf";
+  public static final String FONT_OPENSANS = "OpenSans+Cyberbit.ttf";
+  public static final String FONT_RALEWAY = "Raleway+FireflySung.ttf";
 
-    private static final Map<String, Font> fontCache = new HashMap<>();
+  private static final Map<String, Font> fontCache = new HashMap<>();
 
-    public static final Font fallbackFont = new Font("SansSerif", Font.PLAIN, 12);
+  public static final Font fallbackFont = new Font("SansSerif", Font.PLAIN, 12);
 
-    public void setSupportedLanguages(Locale[] locales) {
-        this.locales = locales.clone();
+  public void setSupportedLanguages(Locale[] locales) {
+    this.locales = locales.clone();
+  }
+
+  public List<Locale> getSupportedLanguages() {
+    return Collections.unmodifiableList(Arrays.asList(locales));
+  }
+
+  public Font getFontByName(String fontName) {
+    if (fontCache.containsKey(fontName)) {
+      return fontCache.get(fontName);
     }
 
-    public List<Locale> getSupportedLanguages() {
-        return Collections.unmodifiableList(Arrays.asList(locales));
+    if (launcherAssets == null) {
+      return fallbackFont;
     }
 
-    public Font getFontByName(String fontName) {
-        if (fontCache.containsKey(fontName)) {
-            return fontCache.get(fontName);
+    Font font;
+    try {
+      try (InputStream fontStream = Files.newInputStream(launcherAssets.resolve(fontName))) {
+        font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
+      }
+      GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+      if (!genv.registerFont(font)) {
+        Utils.getLogger()
+            .log(Level.WARNING, String.format("Failed to register font: %s", fontName));
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      // Fallback
+      return fallbackFont;
+    }
+
+    fontCache.put(fontName, font);
+    return font;
+  }
+
+  public ResourceLoader(LauncherFileSystem fileSystem, String... resourcesPath) {
+    if (fileSystem == null) this.launcherAssets = null;
+    else this.launcherAssets = fileSystem.getLauncherAssetsDirectory();
+
+    dottedResourcePath = Arrays.stream(resourcesPath).collect(Collectors.joining(".", "", "."));
+    slashResourcePath = Arrays.stream(resourcesPath).collect(Collectors.joining("/", "/", ""));
+
+    Locale systemDefaultLocale = Locale.getDefault();
+    this.defaultLocale = matchClosestSupportedLocale(systemDefaultLocale);
+
+    if (!this.defaultLocale.getLanguage().equals(systemDefaultLocale.getLanguage()))
+      isDefaultLocaleSupported = false;
+  }
+
+  public ResourceLoader(ResourceLoader resourceLoader) {
+    this.dottedResourcePath = resourceLoader.dottedResourcePath;
+    this.slashResourcePath = resourceLoader.slashResourcePath;
+    this.defaultLocale = resourceLoader.defaultLocale;
+    this.isDefaultLocaleSupported = resourceLoader.isDefaultLocaleSupported;
+    this.stringData = resourceLoader.stringData;
+    this.currentLocale = resourceLoader.currentLocale;
+    this.locales = resourceLoader.locales;
+    this.launcherAssets = resourceLoader.launcherAssets;
+  }
+
+  public boolean isDefaultLocaleSupported() {
+    return this.isDefaultLocaleSupported;
+  }
+
+  public void setLocale(Locale locale) {
+    currentLocale = locale;
+    stringData =
+        ResourceBundle.getBundle(
+            dottedResourcePath + "lang.UIText", locale, UTF8_PROPERTIES_CONTROL);
+    relocalizeResources();
+  }
+
+  public void setLocale(String locale) {
+    setLocale(getLocaleFromCode(locale));
+  }
+
+  public ResourceLoader getVariant(Locale locale) {
+    ResourceLoader variant = new ResourceLoader(this);
+    variant.setSupportedLanguages(locales);
+    variant.setLocale(locale);
+    return variant;
+  }
+
+  public String getString(String stringKey, String... replacements) {
+    String outString = stringData.getString(stringKey);
+
+    for (int i = 0; i < replacements.length; i++) {
+      String find = String.format("{%d}", i);
+      String replace = replacements[i];
+
+      if (replace == null) {
+        throw new IllegalArgumentException("Replacement string cannot be null");
+      }
+
+      if (outString.contains(find)) {
+        outString = outString.replace(find, replace);
+      }
+    }
+
+    return outString;
+  }
+
+  public String getCodeFromLocale(Locale locale) {
+    if (locale.getLanguage().isEmpty()) {
+      return DEFAULT_LOCALE;
+    } else if (locale.getCountry().isEmpty()) {
+      return locale.getLanguage();
+    } else if (locale.getVariant().isEmpty()) {
+      return String.format("%s,%s", locale.getLanguage(), locale.getCountry());
+    } else {
+      return String.format(
+          "%s,%s,%s", locale.getLanguage(), locale.getCountry(), locale.getVariant());
+    }
+  }
+
+  public Locale getLocaleFromCode(String localeCode) {
+    if (localeCode == null || localeCode.isEmpty() || localeCode.equals(DEFAULT_LOCALE)) {
+      return defaultLocale;
+    }
+
+    String[] results = localeCode.split(",");
+    String language = "";
+    String country = "";
+    String variant = "";
+
+    if (results.length > 0) {
+      language = results[0];
+    }
+
+    if (results.length > 1) {
+      country = results[1];
+    }
+
+    if (results.length > 2) {
+      variant = results[2];
+    }
+
+    Locale definiteLocale = new Locale(language, country, variant);
+
+    return matchClosestSupportedLocale(definiteLocale);
+  }
+
+  private Locale matchClosestSupportedLocale(Locale definiteLocale) {
+    Locale bestSupportedLocale = null;
+    int bestLocaleScore = 0;
+    for (Locale testLocale : locales) {
+      int testScore = 0;
+
+      if (testLocale.getLanguage().equals(definiteLocale.getLanguage())) {
+        testScore++;
+
+        if (testLocale.getCountry().equals(definiteLocale.getCountry())) {
+          testScore++;
+
+          if (testLocale.getVariant().equals(definiteLocale.getVariant())) {
+            testScore++;
+          }
         }
+      }
 
-        if (launcherAssets == null) {
-            return fallbackFont;
+      if (testScore != 0 && testScore > bestLocaleScore) {
+        bestLocaleScore = testScore;
+        bestSupportedLocale = testLocale;
+      }
+    }
+
+    if (bestSupportedLocale != null) {
+      return bestSupportedLocale;
+    } else {
+      return Locale.getDefault();
+    }
+  }
+
+  public boolean hasResource(String name) {
+    return (ResourceLoader.class.getResource(getResourcePath("/" + name)) != null);
+  }
+
+  public ImageIcon getIcon(String iconName) {
+    return new ImageIcon(ResourceLoader.class.getResource(getResourcePath("/" + iconName)));
+  }
+
+  public BufferedImage getImage(String imageName) {
+    try {
+      return ImageIO.read(
+          ResourceLoader.class.getResourceAsStream(getResourcePath("/" + imageName)));
+    } catch (IOException e) {
+      Utils.getLogger().log(Level.SEVERE, e.getMessage(), e);
+      return null;
+    }
+  }
+
+  public InputStream getResourceAsStream(String path) {
+    return ResourceLoader.class.getResourceAsStream(getResourcePath(path));
+  }
+
+  public BufferedImage getCircleClippedImage(String imageName) {
+    BufferedImage contentImage = getImage(imageName);
+    return getCircleClippedImage(contentImage);
+  }
+
+  public BufferedImage colorImage(BufferedImage loadImg, Color color) {
+    BufferedImage img =
+        new BufferedImage(loadImg.getWidth(), loadImg.getHeight(), Transparency.TRANSLUCENT);
+    Graphics2D graphics = img.createGraphics();
+
+    graphics.setColor(color);
+    graphics.drawImage(loadImg, null, 0, 0);
+    graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_IN, 1.0f));
+    graphics.fillRect(0, 0, loadImg.getWidth(), loadImg.getHeight());
+
+    graphics.dispose();
+    return img;
+  }
+
+  public BufferedImage getCircleClippedImage(BufferedImage contentImage) {
+    // copy the picture to an image with transparency capabilities
+    BufferedImage outputImage =
+        new BufferedImage(
+            contentImage.getWidth(), contentImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
+    Graphics2D g2 = (Graphics2D) outputImage.getGraphics();
+    g2.drawImage(contentImage, 0, 0, null);
+
+    // Create the area around the circle to cut out
+    Area cutOutArea =
+        new Area(new Rectangle(0, 0, outputImage.getWidth(), outputImage.getHeight()));
+
+    int diameter = Math.min(outputImage.getWidth(), outputImage.getHeight());
+    cutOutArea.subtract(
+        new Area(
+            new Ellipse2D.Float(
+                (outputImage.getWidth() - diameter) / 2.0f,
+                (outputImage.getHeight() - diameter) / 2.0f,
+                diameter,
+                diameter)));
+
+    // Set the fill color to an opaque color
+    g2.setColor(Color.WHITE);
+    // Set the composite to clear pixels
+    g2.setComposite(AlphaComposite.Clear);
+    // Turn on antialiasing
+    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    // Clear the cut-out area
+    g2.fill(cutOutArea);
+
+    // dispose of the graphics object
+    g2.dispose();
+
+    return outputImage;
+  }
+
+  public Font getFont(String name, float size) {
+    return getFont(name, size, Font.PLAIN);
+  }
+
+  public Font getFont(
+      String name,
+      float size,
+      @MagicConstant(flags = {Font.PLAIN, Font.BOLD, Font.ITALIC}) int style) {
+    return getFontByName(name).deriveFont(style, size);
+  }
+
+  private void relocalizeResources() {
+    for (IRelocalizableResource resource : resources) {
+      resource.relocalize(this);
+    }
+  }
+
+  private String getResourcePath(String resource) {
+    return slashResourcePath + resource;
+  }
+
+  public void registerResource(IRelocalizableResource resource) {
+    if (!resources.contains(resource)) resources.add(resource);
+  }
+
+  public void unregisterResource(IRelocalizableResource resource) {
+    resources.remove(resource);
+  }
+
+  private static final class Utf8PropertiesControl extends ResourceBundle.Control {
+    @Override
+    public ResourceBundle newBundle(
+        String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
+        throws IllegalAccessException, InstantiationException, IOException {
+      if (!"java.properties".equals(format)) {
+        return super.newBundle(baseName, locale, format, loader, reload);
+      }
+
+      String bundleName = toBundleName(baseName, locale);
+      String resourceName = toResourceName(bundleName, "properties");
+
+      InputStream stream;
+      if (reload) {
+        URL url = loader.getResource(resourceName);
+        if (url == null) {
+          return null;
         }
+        URLConnection connection = url.openConnection();
+        connection.setUseCaches(false);
+        stream = connection.getInputStream();
+      } else {
+        stream = loader.getResourceAsStream(resourceName);
+      }
 
-        Font font;
-        try {
-            try (InputStream fontStream = Files.newInputStream(launcherAssets.resolve(fontName))) {
-                font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
-            }
-            GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            if (!genv.registerFont(font)) {
-                Utils.getLogger().log(Level.WARNING, String.format("Failed to register font: %s", fontName));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            // Fallback
-            return fallbackFont;
-        }
+      if (stream == null) {
+        return null;
+      }
 
-        fontCache.put(fontName, font);
-        return font;
+      try (InputStream in = new BufferedInputStream(stream);
+          InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
+        return new PropertyResourceBundle(reader);
+      }
     }
-
-    public ResourceLoader(LauncherFileSystem fileSystem, String... resourcesPath) {
-        if (fileSystem == null)
-            this.launcherAssets = null;
-        else
-            this.launcherAssets = fileSystem.getLauncherAssetsDirectory();
-
-        dottedResourcePath = Arrays.stream(resourcesPath).collect(Collectors.joining(".", "", "."));
-        slashResourcePath = Arrays.stream(resourcesPath).collect(Collectors.joining("/", "/", ""));
-
-        Locale systemDefaultLocale = Locale.getDefault();
-        this.defaultLocale = matchClosestSupportedLocale(systemDefaultLocale);
-
-        if(!this.defaultLocale.getLanguage().equals(systemDefaultLocale.getLanguage()))
-            isDefaultLocaleSupported = false;
-    }
-
-    public ResourceLoader(ResourceLoader resourceLoader) {
-        this.dottedResourcePath = resourceLoader.dottedResourcePath;
-        this.slashResourcePath = resourceLoader.slashResourcePath;
-        this.defaultLocale = resourceLoader.defaultLocale;
-        this.isDefaultLocaleSupported = resourceLoader.isDefaultLocaleSupported;
-        this.stringData = resourceLoader.stringData;
-        this.currentLocale = resourceLoader.currentLocale;
-        this.locales = resourceLoader.locales;
-        this.launcherAssets = resourceLoader.launcherAssets;
-    }
-
-    public boolean isDefaultLocaleSupported() {
-        return this.isDefaultLocaleSupported;
-    }
-
-    public void setLocale(Locale locale) {
-        currentLocale = locale;
-        stringData = ResourceBundle.getBundle(dottedResourcePath + "lang.UIText", locale, UTF8_PROPERTIES_CONTROL);
-        relocalizeResources();
-    }
-
-    public void setLocale(String locale) {
-        setLocale(getLocaleFromCode(locale));
-    }
-
-    public ResourceLoader getVariant(Locale locale) {
-        ResourceLoader variant = new ResourceLoader(this);
-        variant.setSupportedLanguages(locales);
-        variant.setLocale(locale);
-        return variant;
-    }
-
-    public String getString(String stringKey, String... replacements) {
-        String outString = stringData.getString(stringKey);
-
-        for (int i = 0; i < replacements.length; i++) {
-            String find = String.format("{%d}", i);
-            String replace = replacements[i];
-
-            if (replace == null) {
-                throw new IllegalArgumentException("Replacement string cannot be null");
-            }
-
-            if (outString.contains(find)) {
-                outString = outString.replace(find, replace);
-            }
-        }
-
-        return outString;
-    }
-
-    public String getCodeFromLocale(Locale locale) {
-        if (locale.getLanguage().isEmpty()) {
-            return DEFAULT_LOCALE;
-        } else if (locale.getCountry().isEmpty()) {
-            return locale.getLanguage();
-        } else if (locale.getVariant().isEmpty()) {
-            return String.format("%s,%s",locale.getLanguage(),locale.getCountry());
-        } else {
-            return String.format("%s,%s,%s", locale.getLanguage(), locale.getCountry(), locale.getVariant());
-        }
-    }
-
-    public Locale getLocaleFromCode(String localeCode) {
-        if (localeCode == null || localeCode.isEmpty() || localeCode.equals(DEFAULT_LOCALE)) {
-            return defaultLocale;
-        }
-
-        String[] results = localeCode.split(",");
-        String language = "";
-        String country = "";
-        String variant = "";
-
-        if (results.length > 0) {
-            language = results[0];
-        }
-
-        if (results.length > 1) {
-            country = results[1];
-        }
-
-        if (results.length > 2) {
-            variant = results[2];
-        }
-
-        Locale definiteLocale = new Locale(language,country,variant);
-
-        return matchClosestSupportedLocale(definiteLocale);
-    }
-
-    private Locale matchClosestSupportedLocale(Locale definiteLocale) {
-        Locale bestSupportedLocale = null;
-        int bestLocaleScore = 0;
-        for (Locale testLocale : locales) {
-            int testScore = 0;
-
-            if (testLocale.getLanguage().equals(definiteLocale.getLanguage())) {
-                testScore++;
-
-                if (testLocale.getCountry().equals(definiteLocale.getCountry())) {
-                    testScore++;
-
-                    if (testLocale.getVariant().equals(definiteLocale.getVariant())) {
-                        testScore++;
-                    }
-                }
-            }
-
-            if (testScore != 0 && testScore > bestLocaleScore) {
-                bestLocaleScore = testScore;
-                bestSupportedLocale = testLocale;
-            }
-        }
-
-        if (bestSupportedLocale != null) {
-            return bestSupportedLocale;
-        } else {
-            return Locale.getDefault();
-        }
-    }
-
-    public boolean hasResource(String name) {
-        return (ResourceLoader.class.getResource(getResourcePath("/"+name)) != null);
-    }
-
-    public ImageIcon getIcon(String iconName) {
-        return new ImageIcon(ResourceLoader.class.getResource(getResourcePath("/" + iconName)));
-    }
-
-    public BufferedImage getImage(String imageName) {
-        try {
-            return ImageIO.read(ResourceLoader.class.getResourceAsStream(getResourcePath("/" + imageName)));
-        } catch (IOException e) {
-            Utils.getLogger().log(Level.SEVERE, e.getMessage(), e);
-            return null;
-        }
-    }
-
-    public InputStream getResourceAsStream(String path) {
-        return ResourceLoader.class.getResourceAsStream(getResourcePath(path));
-    }
-
-    public BufferedImage getCircleClippedImage(String imageName) {
-        BufferedImage contentImage = getImage(imageName);
-        return getCircleClippedImage(contentImage);
-    }
-
-    public BufferedImage colorImage(BufferedImage loadImg, Color color) {
-        BufferedImage img = new BufferedImage(loadImg.getWidth(), loadImg.getHeight(),
-                Transparency.TRANSLUCENT);
-        Graphics2D graphics = img.createGraphics();
-
-        graphics.setColor(color);
-        graphics.drawImage(loadImg, null, 0, 0);
-        graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_IN, 1.0f));
-        graphics.fillRect(0, 0, loadImg.getWidth(), loadImg.getHeight());
-
-        graphics.dispose();
-        return img;
-    }
-
-    public BufferedImage getCircleClippedImage(BufferedImage contentImage) {
-        // copy the picture to an image with transparency capabilities
-        BufferedImage outputImage = new BufferedImage(contentImage.getWidth(), contentImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = (Graphics2D)outputImage.getGraphics();
-        g2.drawImage(contentImage, 0, 0, null);
-
-        // Create the area around the circle to cut out
-        Area cutOutArea = new Area(new Rectangle(0, 0, outputImage.getWidth(), outputImage.getHeight()));
-
-        int diameter = Math.min(outputImage.getWidth(), outputImage.getHeight());
-        cutOutArea.subtract(new Area(new Ellipse2D.Float((outputImage.getWidth() - diameter) / 2.0f, (outputImage.getHeight() - diameter) / 2.0f, diameter, diameter)));
-
-        // Set the fill color to an opaque color
-        g2.setColor(Color.WHITE);
-        // Set the composite to clear pixels
-        g2.setComposite(AlphaComposite.Clear);
-        // Turn on antialiasing
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        // Clear the cut-out area
-        g2.fill(cutOutArea);
-
-        // dispose of the graphics object
-        g2.dispose();
-
-        return outputImage;
-    }
-
-    public Font getFont(String name, float size) {
-        return getFont(name, size, Font.PLAIN);
-    }
-
-    public Font getFont(String name, float size,
-                        @MagicConstant(flags = {Font.PLAIN, Font.BOLD, Font.ITALIC}) int style) {
-        return getFontByName(name).deriveFont(style, size);
-    }
-
-    private void relocalizeResources() {
-        for(IRelocalizableResource resource : resources) {
-            resource.relocalize(this);
-        }
-    }
-
-    private String getResourcePath(String resource) {
-        return slashResourcePath + resource;
-    }
-
-    public void registerResource(IRelocalizableResource resource) {
-        if (!resources.contains(resource))
-            resources.add(resource);
-    }
-
-    public void unregisterResource(IRelocalizableResource resource) {
-        resources.remove(resource);
-    }
-
-    private static final class Utf8PropertiesControl extends ResourceBundle.Control {
-        @Override
-        public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
-                throws IllegalAccessException, InstantiationException, IOException {
-            if (!"java.properties".equals(format)) {
-                return super.newBundle(baseName, locale, format, loader, reload);
-            }
-
-            String bundleName = toBundleName(baseName, locale);
-            String resourceName = toResourceName(bundleName, "properties");
-
-            InputStream stream;
-            if (reload) {
-                URL url = loader.getResource(resourceName);
-                if (url == null) {
-                    return null;
-                }
-                URLConnection connection = url.openConnection();
-                connection.setUseCaches(false);
-                stream = connection.getInputStream();
-            } else {
-                stream = loader.getResourceAsStream(resourceName);
-            }
-
-            if (stream == null) {
-                return null;
-            }
-
-            try (InputStream in = new BufferedInputStream(stream);
-                 InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
-                return new PropertyResourceBundle(reader);
-            }
-        }
-    }
+  }
 }

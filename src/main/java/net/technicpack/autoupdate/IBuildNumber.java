@@ -20,5 +20,5 @@
 package net.technicpack.autoupdate;
 
 public interface IBuildNumber {
-    String getBuildNumber();
+  String getBuildNumber();
 }

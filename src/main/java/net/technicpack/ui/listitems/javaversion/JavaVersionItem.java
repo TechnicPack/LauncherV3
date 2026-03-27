@@ -24,27 +24,40 @@ import net.technicpack.ui.lang.ResourceLoader;
 
 public class JavaVersionItem {
 
-    private IJavaRuntime javaVersion;
-    private ResourceLoader resourceLoader;
+  private IJavaRuntime javaVersion;
+  private ResourceLoader resourceLoader;
 
-    public JavaVersionItem(IJavaRuntime javaVersion, ResourceLoader resourceLoader) {
-        this.javaVersion = javaVersion;
-        this.resourceLoader = resourceLoader;
-    }
+  public JavaVersionItem(IJavaRuntime javaVersion, ResourceLoader resourceLoader) {
+    this.javaVersion = javaVersion;
+    this.resourceLoader = resourceLoader;
+  }
 
-    public String getVersionNumber() { return javaVersion.getVersion(); }
-    public boolean is64Bit() { return javaVersion.is64Bit(); }
+  public String getVersionNumber() {
+    return javaVersion.getVersion();
+  }
 
-    public IJavaRuntime getJavaVersion() { return javaVersion; }
-    protected ResourceLoader getResourceLoader() { return resourceLoader; }
+  public boolean is64Bit() {
+    return javaVersion.is64Bit();
+  }
 
-    public String toString() {
-        String version = javaVersion.getVersion();
+  public IJavaRuntime getJavaVersion() {
+    return javaVersion;
+  }
 
-        String bitness = (javaVersion.is64Bit())?resourceLoader.getString("launcheroptions.java.64bit"):resourceLoader.getString("launcheroptions.java.32bit");
+  protected ResourceLoader getResourceLoader() {
+    return resourceLoader;
+  }
 
-        final String vendor = javaVersion.getVendor();
+  public String toString() {
+    String version = javaVersion.getVersion();
 
-        return vendor + " "  + version + " " + bitness;
-    }
+    String bitness =
+        (javaVersion.is64Bit())
+            ? resourceLoader.getString("launcheroptions.java.64bit")
+            : resourceLoader.getString("launcheroptions.java.32bit");
+
+    final String vendor = javaVersion.getVendor();
+
+    return vendor + " " + version + " " + bitness;
+  }
 }

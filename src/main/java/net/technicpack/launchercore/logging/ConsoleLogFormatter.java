@@ -27,24 +27,24 @@ import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
 public class ConsoleLogFormatter extends Formatter {
-    private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss.SSS");
+  private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 
-    public ConsoleLogFormatter() {}
+  public ConsoleLogFormatter() {}
 
-    @Override
-    public String format(LogRecord record) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(timeFormat.format(new Date(record.getMillis())));
-        builder.append(' ');
-        builder.append(formatMessage(record));
-        builder.append('\n');
+  @Override
+  public String format(LogRecord record) {
+    StringBuilder builder = new StringBuilder();
+    builder.append(timeFormat.format(new Date(record.getMillis())));
+    builder.append(' ');
+    builder.append(formatMessage(record));
+    builder.append('\n');
 
-        if (record.getThrown() != null) {
-            StringWriter writer = new StringWriter();
-            record.getThrown().printStackTrace(new PrintWriter(writer));
-            builder.append(writer);
-        }
-
-        return builder.toString();
+    if (record.getThrown() != null) {
+      StringWriter writer = new StringWriter();
+      record.getThrown().printStackTrace(new PrintWriter(writer));
+      builder.append(writer);
     }
+
+    return builder.toString();
+  }
 }

@@ -19,103 +19,96 @@
 
 package net.technicpack.launchercore.launch.java;
 
-import net.technicpack.launchercore.launch.java.version.CurrentJavaRuntime;
-
 import java.io.File;
 import java.util.*;
+import net.technicpack.launchercore.launch.java.version.CurrentJavaRuntime;
 
-/**
- * A repository of all the system Java runtimes available to launch Minecraft with
- */
+/** A repository of all the system Java runtimes available to launch Minecraft with */
 public class JavaVersionRepository {
-    public static final String VERSION_DEFAULT = "default";
-    public static final String VERSION_LATEST_64BIT = "64bit";
-    private final Map<File, IJavaRuntime> loadedVersions = new HashMap<>();
-    private final Collection<IJavaRuntime> versionCache = new LinkedList<>();
-    private IJavaRuntime selectedVersion;
+  public static final String VERSION_DEFAULT = "default";
+  public static final String VERSION_LATEST_64BIT = "64bit";
+  private final Map<File, IJavaRuntime> loadedVersions = new HashMap<>();
+  private final Collection<IJavaRuntime> versionCache = new LinkedList<>();
+  private IJavaRuntime selectedVersion;
 
-    public JavaVersionRepository() {
-        IJavaRuntime currentVersion = new CurrentJavaRuntime();
-        selectedVersion = currentVersion;
-        loadedVersions.put(null, currentVersion);
-        versionCache.add(currentVersion);
+  public JavaVersionRepository() {
+    IJavaRuntime currentVersion = new CurrentJavaRuntime();
+    selectedVersion = currentVersion;
+    loadedVersions.put(null, currentVersion);
+    versionCache.add(currentVersion);
+  }
+
+  public boolean addVersion(IJavaRuntime version) {
+    if (loadedVersions.containsKey(version.getExecutableFile()) || versionCache.contains(version))
+      return false;
+
+    if (!version.isValid()) return false;
+
+    File path = version.getExecutableFile();
+
+    loadedVersions.put(path, version);
+    versionCache.add(version);
+
+    if (selectedVersion == null) selectedVersion = version;
+
+    return true;
+  }
+
+  public IJavaRuntime getBest64BitVersion() {
+    return loadedVersions.values().stream()
+        .filter(IJavaRuntime::is64Bit)
+        .max(Comparator.comparing(IJavaRuntime::getVersion))
+        .orElse(null);
+  }
+
+  public Collection<IJavaRuntime> getVersions() {
+    return loadedVersions.values();
+  }
+
+  public IJavaRuntime getSelectedVersion() {
+    return selectedVersion;
+  }
+
+  public void selectVersion(String version, boolean is64Bit) {
+    selectedVersion = getVersion(version, is64Bit);
+  }
+
+  public void setSelectedVersion(IJavaRuntime version) {
+    if (version == null) throw new IllegalArgumentException("version cannot be null");
+
+    if (!loadedVersions.containsValue(version)) {
+      throw new IllegalArgumentException("version is not loaded");
     }
 
-    public boolean addVersion(IJavaRuntime version) {
-        if (loadedVersions.containsKey(version.getExecutableFile()) || versionCache.contains(version))
-            return false;
+    selectedVersion = version;
+  }
 
-        if (!version.isValid())
-            return false;
+  public IJavaRuntime getDefaultVersion() {
+    return loadedVersions.get(null);
+  }
 
-        File path = version.getExecutableFile();
-
-        loadedVersions.put(path, version);
-        versionCache.add(version);
-
-        if (selectedVersion == null)
-            selectedVersion = version;
-
-        return true;
+  public IJavaRuntime getVersion(String version, boolean is64Bit) {
+    if (version == null || version.isEmpty() || version.equals(VERSION_DEFAULT)) {
+      return getDefaultVersion();
     }
 
-    public IJavaRuntime getBest64BitVersion() {
-        return loadedVersions.values().stream()
-                .filter(IJavaRuntime::is64Bit)
-                .max(Comparator.comparing(IJavaRuntime::getVersion))
-                .orElse(null);
+    if (version.equals(VERSION_LATEST_64BIT)) {
+      IJavaRuntime best64BitVersion = getBest64BitVersion();
+      if (best64BitVersion == null) best64BitVersion = getDefaultVersion();
+      return best64BitVersion;
     }
 
-    public Collection<IJavaRuntime> getVersions() {
-        return loadedVersions.values();
+    for (IJavaRuntime checkVersion : versionCache) {
+      if (version.equals(checkVersion.getVersion()) && is64Bit == checkVersion.is64Bit())
+        return checkVersion;
     }
 
-    public IJavaRuntime getSelectedVersion() {
-        return selectedVersion;
+    IJavaRuntime specifiedVersion = loadedVersions.get(new File(version));
+
+    if (specifiedVersion == null) {
+      specifiedVersion = getDefaultVersion();
     }
 
-    public void selectVersion(String version, boolean is64Bit) {
-        selectedVersion = getVersion(version, is64Bit);
-    }
-
-    public void setSelectedVersion(IJavaRuntime version) {
-        if (version == null) throw new IllegalArgumentException("version cannot be null");
-
-        if (!loadedVersions.containsValue(version)) {
-            throw new IllegalArgumentException("version is not loaded");
-        }
-
-        selectedVersion = version;
-    }
-
-    public IJavaRuntime getDefaultVersion() {
-        return loadedVersions.get(null);
-    }
-
-    public IJavaRuntime getVersion(String version, boolean is64Bit) {
-        if (version == null || version.isEmpty() || version.equals(VERSION_DEFAULT)) {
-            return getDefaultVersion();
-        }
-
-        if (version.equals(VERSION_LATEST_64BIT)) {
-            IJavaRuntime best64BitVersion = getBest64BitVersion();
-            if (best64BitVersion == null)
-                best64BitVersion = getDefaultVersion();
-            return best64BitVersion;
-        }
-
-        for (IJavaRuntime checkVersion : versionCache) {
-            if (version.equals(checkVersion.getVersion()) && is64Bit == checkVersion.is64Bit())
-                return checkVersion;
-        }
-
-        IJavaRuntime specifiedVersion = loadedVersions.get(new File(version));
-
-        if (specifiedVersion == null) {
-            specifiedVersion = getDefaultVersion();
-        }
-
-        return specifiedVersion;
-    }
-
+    return specifiedVersion;
+  }
 }

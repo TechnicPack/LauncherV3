@@ -26,44 +26,42 @@ import java.util.Objects;
 
 @SuppressWarnings({"unused"})
 public class ExtractRules {
-	private List<String> exclude = new ArrayList<>();
+  private List<String> exclude = new ArrayList<>();
 
-	public ExtractRules() {
+  public ExtractRules() {}
 
-	}
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ExtractRules that = (ExtractRules) o;
+    return Objects.equals(exclude, that.exclude);
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		ExtractRules that = (ExtractRules) o;
-		return Objects.equals(exclude, that.exclude);
-	}
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(exclude);
+  }
 
-	@Override
-	public int hashCode() {
-		return Objects.hashCode(exclude);
-	}
+  public ExtractRules(String[] exclude) {
+    if (exclude != null) {
+      Collections.addAll(this.exclude, exclude);
+    }
+  }
 
-	public ExtractRules(String[] exclude) {
-		if (exclude != null) {
-			Collections.addAll(this.exclude, exclude);
-		}
-	}
+  public List<String> getExclude() {
+    return exclude;
+  }
 
-	public List<String> getExclude() {
-		return exclude;
-	}
+  public boolean shouldExtract(String path) {
+    if (this.exclude != null) {
+      for (String rule : this.exclude) {
+        if (path.startsWith(rule)) {
+          return false;
+        }
+      }
+    }
 
-	public boolean shouldExtract(String path) {
-		if (this.exclude != null) {
-			for (String rule : this.exclude) {
-				if (path.startsWith(rule)) {
-					return false;
-				}
-			}
-		}
-
-		return true;
-	}
+    return true;
+  }
 }

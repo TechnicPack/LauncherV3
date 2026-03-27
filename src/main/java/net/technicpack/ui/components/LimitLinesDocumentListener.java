@@ -27,77 +27,77 @@ import javax.swing.text.Document;
 import javax.swing.text.Element;
 
 /**
- * Adapted from http://tips4java.wordpress.com/2008/10/15/limit-lines-in-document/,
- * with updates from https://github.com/SKCraft/Launcher/pull/82
+ * Adapted from http://tips4java.wordpress.com/2008/10/15/limit-lines-in-document/, with updates
+ * from https://github.com/SKCraft/Launcher/pull/82
  */
 public class LimitLinesDocumentListener implements DocumentListener {
-    private int maximumLines;
-    private boolean isRemoving;
+  private int maximumLines;
+  private boolean isRemoving;
 
-    /**
-     * Specify the number of lines to be stored in the Document. Extra lines
-     * will be removed from the start of the Document.
-     *
-     * @param maximumLines number of lines
-     */
-    public LimitLinesDocumentListener(int maximumLines) {
-        setLimitLines(maximumLines);
-        this.isRemoving = false;
+  /**
+   * Specify the number of lines to be stored in the Document. Extra lines will be removed from the
+   * start of the Document.
+   *
+   * @param maximumLines number of lines
+   */
+  public LimitLinesDocumentListener(int maximumLines) {
+    setLimitLines(maximumLines);
+    this.isRemoving = false;
+  }
+
+  /**
+   * Set the maximum number of lines to be stored in the Document
+   *
+   * @param maximumLines number of lines
+   */
+  public void setLimitLines(int maximumLines) {
+    if (maximumLines < 1) {
+      throw new IllegalArgumentException("Maximum lines must be greater than 0");
     }
 
-    /**
-     * Set the maximum number of lines to be stored in the Document
-     *
-     * @param maximumLines number of lines
-     */
-    public void setLimitLines(int maximumLines) {
-        if (maximumLines < 1) {
-            throw new IllegalArgumentException("Maximum lines must be greater than 0");
-        }
+    this.maximumLines = maximumLines;
+  }
 
-        this.maximumLines = maximumLines;
+  @Override
+  public void insertUpdate(final DocumentEvent e) {
+    // Changes to the Document can not be done within the listener
+    // so we need to add the processing to the end of the EDT
+    if (!this.isRemoving) {
+      this.isRemoving = true;
+      SwingUtilities.invokeLater(() -> removeLines(e));
     }
+  }
 
-    @Override
-    public void insertUpdate(final DocumentEvent e) {
-        // Changes to the Document can not be done within the listener
-        // so we need to add the processing to the end of the EDT
-        if (!this.isRemoving) {
-            this.isRemoving = true;
-            SwingUtilities.invokeLater(() -> removeLines(e));
-        }
-    }
+  private void removeLines(DocumentEvent event) {
+    try {
+      // The root Element of the Document will tell us the total number
+      // of line in the Document.
+      Document document = event.getDocument();
+      Element root = document.getDefaultRootElement();
+      int excess = root.getElementCount() - maximumLines;
 
-    private void removeLines(DocumentEvent event) {
+      if (excess > 0) {
+        Element line = root.getElement(excess - 1);
+        int end = line.getEndOffset();
+
         try {
-            // The root Element of the Document will tell us the total number
-            // of line in the Document.
-            Document document = event.getDocument();
-            Element root = document.getDefaultRootElement();
-            int excess = root.getElementCount() - maximumLines;
-
-            if (excess > 0) {
-                Element line = root.getElement(excess - 1);
-                int end = line.getEndOffset();
-
-                try {
-                    document.remove(0, end);
-                } catch (BadLocationException e) {
-                    System.out.println(e);
-                }
-            }
-        } finally {
-            this.isRemoving = false;
+          document.remove(0, end);
+        } catch (BadLocationException e) {
+          System.out.println(e);
         }
+      }
+    } finally {
+      this.isRemoving = false;
     }
+  }
 
-    @Override
-    public void removeUpdate(DocumentEvent e) {
-        // unused
-    }
+  @Override
+  public void removeUpdate(DocumentEvent e) {
+    // unused
+  }
 
-    @Override
-    public void changedUpdate(DocumentEvent e) {
-        // unused
-    }
+  @Override
+  public void changedUpdate(DocumentEvent e) {
+    // unused
+  }
 }

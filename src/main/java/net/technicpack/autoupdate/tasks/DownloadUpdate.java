@@ -19,34 +19,34 @@
 
 package net.technicpack.autoupdate.tasks;
 
+import java.io.IOException;
+import java.util.Collection;
 import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.DownloadFileTask;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 
-import java.io.IOException;
-import java.util.Collection;
-
 public class DownloadUpdate extends DownloadFileTask<Void> {
-    private Relauncher relauncher;
-    private Collection<IInstallTask<Void>> postUpdateActions;
+  private Relauncher relauncher;
+  private Collection<IInstallTask<Void>> postUpdateActions;
 
-    public DownloadUpdate(String url, Relauncher relauncher, Collection<IInstallTask<Void>> postUpdateActions) {
-        super(url, relauncher.getTempLauncher(), null, relauncher.getUpdateText());
+  public DownloadUpdate(
+      String url, Relauncher relauncher, Collection<IInstallTask<Void>> postUpdateActions) {
+    super(url, relauncher.getTempLauncher(), null, relauncher.getUpdateText());
 
-        this.relauncher = relauncher;
-        this.postUpdateActions = postUpdateActions;
+    this.relauncher = relauncher;
+    this.postUpdateActions = postUpdateActions;
+  }
+
+  @Override
+  public void runTask(InstallTasksQueue<Void> queue) throws IOException, InterruptedException {
+    super.runTask(queue);
+
+    if (!relauncher.isUpdateOnly() && getDestination().exists()) {
+      for (IInstallTask<Void> task : postUpdateActions) {
+        queue.addTask(task);
+      }
     }
-
-    @Override
-    public void runTask(InstallTasksQueue<Void> queue) throws IOException, InterruptedException {
-        super.runTask(queue);
-
-        if (!relauncher.isUpdateOnly() && getDestination().exists()) {
-            for (IInstallTask<Void> task : postUpdateActions) {
-                queue.addTask(task);
-            }
-        }
-        relauncher.setUpdated();
-    }
+    relauncher.setUpdated();
+  }
 }

@@ -19,38 +19,40 @@
 
 package net.technicpack.rest.io;
 
+import java.util.ArrayList;
+import java.util.List;
 import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.rest.RestObject;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @SuppressWarnings({"unused"})
 public class Modpack extends RestObject {
-    private String minecraft;
-    private String java;
-    private String memory;
-    private List<Mod> mods;
+  private String minecraft;
+  private String java;
+  private String memory;
+  private List<Mod> mods;
 
-    public Modpack() {
+  public Modpack() {}
 
-    }
+  public Modpack(PlatformPackInfo info) {
+    minecraft = info.getGameVersion();
+    mods = new ArrayList<>();
+    Mod mod = new Mod(info.getName(), info.getRecommended(), info.getUrl(), "");
+    mods.add(mod);
+  }
 
-    public Modpack(PlatformPackInfo info) {
-        minecraft = info.getGameVersion();
-        mods = new ArrayList<>();
-        Mod mod = new Mod(info.getName(), info.getRecommended(), info.getUrl(), "");
-        mods.add(mod);
-    }
+  public String getGameVersion() {
+    return minecraft;
+  }
 
-    public String getGameVersion() {
-        return minecraft;
-    }
+  public List<Mod> getMods() {
+    return mods;
+  }
 
-    public List<Mod> getMods() {
-        return mods;
-    }
+  public String getJava() {
+    return java;
+  }
 
-    public String getJava() { return java; }
-    public String getMemory() { return memory; }
+  public String getMemory() {
+    return memory;
+  }
 }

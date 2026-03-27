@@ -24,29 +24,37 @@ import net.technicpack.launcher.io.UserStore;
 import net.technicpack.launcher.settings.TechnicSettings;
 
 public class ResetJvmArgsIfDefaultString implements IMigrator {
-    @Override
-    public String getMigrationVersion() {
-        return "1";
+  @Override
+  public String getMigrationVersion() {
+    return "1";
+  }
+
+  @Override
+  public String getMigratedVersion() {
+    return "2";
+  }
+
+  @Override
+  public void migrate(
+      TechnicSettings settings,
+      InstalledPackStore packStore,
+      LauncherFileSystem fileSystem,
+      UserStore users) {
+    // If the JVM flags are set to the default string we set it to null/empty string so we can
+    // change the defaults
+    // in the future.
+
+    // Null check
+    if (settings.getJavaArgs() == null) {
+      return;
     }
 
-    @Override
-    public String getMigratedVersion() {
-        return "2";
+    if (settings
+            .getJavaArgs()
+            .equalsIgnoreCase(
+                "-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M")
+        || settings.getJavaArgs().equalsIgnoreCase(TechnicSettings.DEFAULT_JAVA_ARGS)) {
+      settings.setJavaArgs(null);
     }
-
-    @Override
-    public void migrate(TechnicSettings settings, InstalledPackStore packStore, LauncherFileSystem fileSystem, UserStore users) {
-        // If the JVM flags are set to the default string we set it to null/empty string so we can change the defaults
-        // in the future.
-
-        // Null check
-        if (settings.getJavaArgs() == null) {
-            return;
-        }
-
-        if (settings.getJavaArgs().equalsIgnoreCase("-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M")
-                || settings.getJavaArgs().equalsIgnoreCase(TechnicSettings.DEFAULT_JAVA_ARGS)) {
-            settings.setJavaArgs(null);
-        }
-    }
+  }
 }

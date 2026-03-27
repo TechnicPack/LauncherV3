@@ -19,66 +19,61 @@
 
 package net.technicpack.ui.controls.borders;
 
-import net.technicpack.contrib.romainguy.FastBlurFilter;
-
-import javax.swing.border.AbstractBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import javax.swing.border.AbstractBorder;
+import net.technicpack.contrib.romainguy.FastBlurFilter;
 
 public class DropShadowBorder extends AbstractBorder {
-    private Color color;
-    private int thickness;
-    private Insets insets;
-    RenderingHints hints;
+  private Color color;
+  private int thickness;
+  private Insets insets;
+  RenderingHints hints;
 
-    public DropShadowBorder(
-            Color color) {
-        this(color, 3);
-    }
+  public DropShadowBorder(Color color) {
+    this(color, 3);
+  }
 
-    public DropShadowBorder(
-            Color color, int thickness) {
-        this.thickness = thickness;
-        this.color = color;
-        hints = new RenderingHints(
-                RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
+  public DropShadowBorder(Color color, int thickness) {
+    this.thickness = thickness;
+    this.color = color;
+    hints = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        insets = new Insets(thickness*4,thickness*4,thickness*4,thickness*4);
-    }
+    insets = new Insets(thickness * 4, thickness * 4, thickness * 4, thickness * 4);
+  }
 
-    @Override
-    public Insets getBorderInsets(Component c) {
-        return insets;
-    }
+  @Override
+  public Insets getBorderInsets(Component c) {
+    return insets;
+  }
 
-    @Override
-    public Insets getBorderInsets(Component c, Insets insets) {
-        return getBorderInsets(c);
-    }
+  @Override
+  public Insets getBorderInsets(Component c, Insets insets) {
+    return getBorderInsets(c);
+  }
 
-    @Override
-    public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-        BufferedImage shadow = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+  @Override
+  public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+    BufferedImage shadow = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 
-        Graphics2D g2 = shadow.createGraphics();
-        g2.setRenderingHints(hints);
-        Composite oldComposite = g2.getComposite();
-        AlphaComposite composite = AlphaComposite.getInstance(AlphaComposite.CLEAR, 0.0f);
-        g2.setComposite(composite);
-        g2.setColor(new Color(0, 0, 0, 0));
-        g2.fillRect(0, 0, width, height);
-        g2.setComposite(oldComposite);
-        g2.setColor(color);
-        g2.fillRect(thickness * 4, thickness * 4, width - (thickness * 8), height - (thickness * 8));
-        g2.dispose();
+    Graphics2D g2 = shadow.createGraphics();
+    g2.setRenderingHints(hints);
+    Composite oldComposite = g2.getComposite();
+    AlphaComposite composite = AlphaComposite.getInstance(AlphaComposite.CLEAR, 0.0f);
+    g2.setComposite(composite);
+    g2.setColor(new Color(0, 0, 0, 0));
+    g2.fillRect(0, 0, width, height);
+    g2.setComposite(oldComposite);
+    g2.setColor(color);
+    g2.fillRect(thickness * 4, thickness * 4, width - (thickness * 8), height - (thickness * 8));
+    g2.dispose();
 
-        FastBlurFilter blur = new FastBlurFilter(thickness);
-        shadow = blur.filter(shadow, null);
-        shadow = blur.filter(shadow, null);
-        shadow = blur.filter(shadow, null);
-        shadow = blur.filter(shadow, null);
+    FastBlurFilter blur = new FastBlurFilter(thickness);
+    shadow = blur.filter(shadow, null);
+    shadow = blur.filter(shadow, null);
+    shadow = blur.filter(shadow, null);
+    shadow = blur.filter(shadow, null);
 
-        g.drawImage(shadow, x, y, width, height, null);
-    }
+    g.drawImage(shadow, x, y, width, height, null);
+  }
 }

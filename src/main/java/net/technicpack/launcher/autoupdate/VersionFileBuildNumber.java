@@ -18,28 +18,27 @@
 
 package net.technicpack.launcher.autoupdate;
 
+import java.nio.charset.StandardCharsets;
 import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.ui.lang.ResourceLoader;
 import org.apache.commons.io.IOUtils;
 
-import java.nio.charset.StandardCharsets;
-
 public class VersionFileBuildNumber implements IBuildNumber {
-    private ResourceLoader resources;
+  private ResourceLoader resources;
 
-    public VersionFileBuildNumber(ResourceLoader resources) {
-        this.resources = resources;
+  public VersionFileBuildNumber(ResourceLoader resources) {
+    this.resources = resources;
+  }
+
+  @Override
+  public String getBuildNumber() {
+    String build = "0";
+    try {
+      build = IOUtils.toString(resources.getResourceAsStream("/version"), StandardCharsets.UTF_8);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
 
-    @Override
-    public String getBuildNumber() {
-        String build = "0";
-        try {
-            build = IOUtils.toString(resources.getResourceAsStream("/version"), StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return build;
-    }
+    return build;
+  }
 }

@@ -22,26 +22,26 @@ package net.technicpack.launchercore.launch;
 import java.util.concurrent.CompletableFuture;
 
 public class GameProcess {
-    private final Process process;
-    private final CompletableFuture<Void> exitFuture = new CompletableFuture<>();
-    private final ProcessMonitorThread monitorThread;
+  private final Process process;
+  private final CompletableFuture<Void> exitFuture = new CompletableFuture<>();
+  private final ProcessMonitorThread monitorThread;
 
-    public GameProcess(Process process, String userAccessToken) {
-        this.process = process;
+  public GameProcess(Process process, String userAccessToken) {
+    this.process = process;
 
-        this.monitorThread = new ProcessMonitorThread(this, userAccessToken);
-        this.monitorThread.start();
-    }
+    this.monitorThread = new ProcessMonitorThread(this, userAccessToken);
+    this.monitorThread.start();
+  }
 
-    public void setExitListener(ProcessExitListener exitListener) {
-        exitFuture.thenRun(exitListener::onProcessExit);
-    }
+  public void setExitListener(ProcessExitListener exitListener) {
+    exitFuture.thenRun(exitListener::onProcessExit);
+  }
 
-    public Process getProcess() {
-        return process;
-    }
+  public Process getProcess() {
+    return process;
+  }
 
-    public void setProcessExited() {
-        exitFuture.complete(null);
-    }
+  public void setProcessExited() {
+    exitFuture.complete(null);
+  }
 }

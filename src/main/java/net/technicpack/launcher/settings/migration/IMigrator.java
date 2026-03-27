@@ -24,7 +24,13 @@ import net.technicpack.launcher.io.UserStore;
 import net.technicpack.launcher.settings.TechnicSettings;
 
 public interface IMigrator {
-    String getMigrationVersion();
-    String getMigratedVersion();
-    void migrate(TechnicSettings settings, InstalledPackStore packStore, LauncherFileSystem fileSystem, UserStore users);
+  String getMigrationVersion();
+
+  String getMigratedVersion();
+
+  void migrate(
+      TechnicSettings settings,
+      InstalledPackStore packStore,
+      LauncherFileSystem fileSystem,
+      UserStore users);
 }

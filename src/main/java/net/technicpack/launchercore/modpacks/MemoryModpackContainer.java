@@ -6,52 +6,49 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MemoryModpackContainer implements IModpackContainer {
-    private Map<String, ModpackModel> modpacks = new HashMap<>();
-    private Map<IModpackContainer, IModpackContainer> passthroughContainers = new ConcurrentHashMap<>();
+  private Map<String, ModpackModel> modpacks = new HashMap<>();
+  private Map<IModpackContainer, IModpackContainer> passthroughContainers =
+      new ConcurrentHashMap<>();
 
-    public MemoryModpackContainer() {
-    }
+  public MemoryModpackContainer() {}
 
-    @Override
-    public void clear() {
-        modpacks.clear();
+  @Override
+  public void clear() {
+    modpacks.clear();
 
-        for (IModpackContainer container : passthroughContainers.values())
-            container.clear();
-    }
+    for (IModpackContainer container : passthroughContainers.values()) container.clear();
+  }
 
-    @Override
-    public void addModpackToContainer(ModpackModel modpack) {
-        modpacks.put(modpack.getName(), modpack);
+  @Override
+  public void addModpackToContainer(ModpackModel modpack) {
+    modpacks.put(modpack.getName(), modpack);
 
-        for (IModpackContainer container : passthroughContainers.values())
-            container.addModpackToContainer(modpack);
-    }
+    for (IModpackContainer container : passthroughContainers.values())
+      container.addModpackToContainer(modpack);
+  }
 
-    @Override
-    public void replaceModpackInContainer(ModpackModel modpack) {
-        if (modpacks.containsKey(modpack.getName()))
-            modpacks.put(modpack.getName(), modpack);
+  @Override
+  public void replaceModpackInContainer(ModpackModel modpack) {
+    if (modpacks.containsKey(modpack.getName())) modpacks.put(modpack.getName(), modpack);
 
-        for (IModpackContainer container : passthroughContainers.values())
-            container.replaceModpackInContainer(modpack);
-    }
+    for (IModpackContainer container : passthroughContainers.values())
+      container.replaceModpackInContainer(modpack);
+  }
 
-    @Override
-    public void refreshComplete() {
-        for (IModpackContainer container : passthroughContainers.values())
-            container.refreshComplete();
-    }
+  @Override
+  public void refreshComplete() {
+    for (IModpackContainer container : passthroughContainers.values()) container.refreshComplete();
+  }
 
-    public void addPassthroughContainer(IModpackContainer container) {
-        passthroughContainers.put(container, container);
-    }
+  public void addPassthroughContainer(IModpackContainer container) {
+    passthroughContainers.put(container, container);
+  }
 
-    public void removePassthroughContainer(IModpackContainer container) {
-        passthroughContainers.remove(container);
-    }
+  public void removePassthroughContainer(IModpackContainer container) {
+    passthroughContainers.remove(container);
+  }
 
-    public Collection<ModpackModel> getModpacks() {
-        return modpacks.values();
-    }
+  public Collection<ModpackModel> getModpacks() {
+    return modpacks.values();
+  }
 }

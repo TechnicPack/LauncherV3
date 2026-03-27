@@ -25,17 +25,17 @@ import java.io.File;
  * This interface represents a single version of java that can be used to launch a java-based game.
  */
 public interface IJavaRuntime {
-    File getExecutableFile();
+  File getExecutableFile();
 
-    String getVersion();
+  String getVersion();
 
-    String getVendor();
+  String getVendor();
 
-    String getOsArch();
+  String getOsArch();
 
-    String getBitness();
+  String getBitness();
 
-    boolean is64Bit();
+  boolean is64Bit();
 
-    boolean isValid();
+  boolean isValid();
 }

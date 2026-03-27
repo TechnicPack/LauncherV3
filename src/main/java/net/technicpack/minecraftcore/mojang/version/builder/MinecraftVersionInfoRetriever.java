@@ -23,5 +23,5 @@ import java.io.File;
 import java.io.IOException;
 
 public interface MinecraftVersionInfoRetriever {
-    void retrieveVersion(File file, String key) throws InterruptedException, IOException;
+  void retrieveVersion(File file, String key) throws InterruptedException, IOException;
 }

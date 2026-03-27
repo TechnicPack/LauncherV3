@@ -22,60 +22,62 @@ package net.technicpack.rest;
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonSyntaxException;
-import net.technicpack.launchercore.TechnicConstants;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import net.technicpack.launchercore.TechnicConstants;
 
 public abstract class RestObject {
-    private static final Gson gson = new Gson();
+  private static final Gson gson = new Gson();
 
-    @SuppressWarnings("unused")
-    private String error;
+  @SuppressWarnings("unused")
+  private String error;
 
-    public static <T extends RestObject> T getRestObject(Class<T> restObject, String url) throws RestfulAPIException {
-        try {
-            URLConnection conn = new URL(url).openConnection();
-            conn.setRequestProperty("User-Agent", TechnicConstants.getUserAgent());
-            conn.setConnectTimeout(15000);
-            conn.setReadTimeout(15000);
+  public static <T extends RestObject> T getRestObject(Class<T> restObject, String url)
+      throws RestfulAPIException {
+    try {
+      URLConnection conn = new URL(url).openConnection();
+      conn.setRequestProperty("User-Agent", TechnicConstants.getUserAgent());
+      conn.setConnectTimeout(15000);
+      conn.setReadTimeout(15000);
 
-            T result;
+      T result;
 
-            try (Reader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
-                result = gson.fromJson(reader, restObject);
-            }
+      try (Reader reader =
+          new BufferedReader(
+              new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+        result = gson.fromJson(reader, restObject);
+      }
 
-            if (result == null) {
-                throw new RestfulAPIException(String.format("Unable to access URL [%s]", url));
-            }
+      if (result == null) {
+        throw new RestfulAPIException(String.format("Unable to access URL [%s]", url));
+      }
 
-            if (result.hasError()) {
-                throw new RestfulAPIException(String.format("Error in response: %s", result.getError()));
-            }
+      if (result.hasError()) {
+        throw new RestfulAPIException(String.format("Error in response: %s", result.getError()));
+      }
 
-            return result;
-        } catch (SocketTimeoutException e) {
-            throw new RestfulAPIException(String.format("Timed out accessing URL [%s]", url), e);
-        } catch (MalformedURLException e) {
-            throw new RestfulAPIException(String.format("Invalid URL [%s]", url), e);
-        } catch (JsonIOException | IOException e) {
-            throw new RestfulAPIException(String.format("Error accessing URL [%s]", url), e);
-        } catch (JsonParseException e) {
-            throw new RestfulAPIException(String.format("Error parsing response JSON at URL [%s]", url), e);
-        }
+      return result;
+    } catch (SocketTimeoutException e) {
+      throw new RestfulAPIException(String.format("Timed out accessing URL [%s]", url), e);
+    } catch (MalformedURLException e) {
+      throw new RestfulAPIException(String.format("Invalid URL [%s]", url), e);
+    } catch (JsonIOException | IOException e) {
+      throw new RestfulAPIException(String.format("Error accessing URL [%s]", url), e);
+    } catch (JsonParseException e) {
+      throw new RestfulAPIException(
+          String.format("Error parsing response JSON at URL [%s]", url), e);
     }
+  }
 
-    public boolean hasError() {
-        return error != null;
-    }
+  public boolean hasError() {
+    return error != null;
+  }
 
-    public String getError() {
-        return error;
-    }
+  public String getError() {
+    return error;
+  }
 }

@@ -20,18 +20,18 @@
 package net.technicpack.minecraftcore.mojang.version.io;
 
 public enum ReleaseType {
-    SNAPSHOT("snapshot"),
-    RELEASE("release"),
-    OLD_BETA("old_beta"),
-    OLD_ALPHA("old_alpha");
+  SNAPSHOT("snapshot"),
+  RELEASE("release"),
+  OLD_BETA("old_beta"),
+  OLD_ALPHA("old_alpha");
 
-    private final String name;
+  private final String name;
 
-    ReleaseType(String name) {
-        this.name = name;
-    }
+  ReleaseType(String name) {
+    this.name = name;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 }

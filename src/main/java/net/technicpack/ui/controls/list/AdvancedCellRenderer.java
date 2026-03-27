@@ -19,54 +19,72 @@
 
 package net.technicpack.ui.controls.list;
 
+import java.awt.Color;
+import java.awt.Component;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
-import java.awt.Color;
-import java.awt.Component;
 
 public class AdvancedCellRenderer<T> extends JLabel implements ListCellRenderer<T> {
 
-    private Color selectedBackground;
-    private Color selectedForeground;
-    private Color unselectedBackground;
-    private Color unselectedForeground;
+  private Color selectedBackground;
+  private Color selectedForeground;
+  private Color unselectedBackground;
+  private Color unselectedForeground;
 
-    public AdvancedCellRenderer() {
-        setOpaque(true);
+  public AdvancedCellRenderer() {
+    setOpaque(true);
+  }
+
+  public Color getSelectedBackgroundColor() {
+    return selectedBackground;
+  }
+
+  public void setSelectedBackgroundColor(Color color) {
+    selectedBackground = color;
+  }
+
+  public Color getSelectedForegroundColor() {
+    return selectedForeground;
+  }
+
+  public void setSelectedForegroundColor(Color color) {
+    selectedForeground = color;
+  }
+
+  public Color getUnselectedBackgroundColor() {
+    return unselectedBackground;
+  }
+
+  public void setUnselectedBackgroundColor(Color color) {
+    unselectedBackground = color;
+  }
+
+  public Color getUnselectedForegroundColor() {
+    return unselectedForeground;
+  }
+
+  public void setUnselectedForegroundColor(Color color) {
+    unselectedForeground = color;
+  }
+
+  @Override
+  public Component getListCellRendererComponent(
+      JList<? extends T> list, T value, int index, boolean isSelected, boolean cellHasFocus) {
+    if (isSelected) {
+      setBackground(getSelectedBackgroundColor());
+      setForeground(getSelectedForegroundColor());
+    } else {
+      setBackground(getUnselectedBackgroundColor());
+      setForeground(getUnselectedForegroundColor());
     }
 
-    public Color getSelectedBackgroundColor() { return selectedBackground; }
-    public void setSelectedBackgroundColor(Color color) { selectedBackground = color; }
+    this.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 
-    public Color getSelectedForegroundColor() { return selectedForeground; }
-    public void setSelectedForegroundColor(Color color) { selectedForeground = color; }
+    if (value == null) this.setText("");
+    else this.setText(value.toString());
 
-    public Color getUnselectedBackgroundColor() { return unselectedBackground; }
-    public void setUnselectedBackgroundColor(Color color) { unselectedBackground = color; }
-
-    public Color getUnselectedForegroundColor() { return unselectedForeground; }
-    public void setUnselectedForegroundColor(Color color) { unselectedForeground = color; }
-
-    @Override
-    public Component getListCellRendererComponent(
-            JList<? extends T> list, T value, int index, boolean isSelected, boolean cellHasFocus) {
-        if (isSelected) {
-            setBackground(getSelectedBackgroundColor());
-            setForeground(getSelectedForegroundColor());
-        } else {
-            setBackground(getUnselectedBackgroundColor());
-            setForeground(getUnselectedForegroundColor());
-        }
-
-        this.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
-
-        if (value == null)
-            this.setText("");
-        else
-            this.setText(value.toString());
-
-        return this;
-    }
+    return this;
+  }
 }

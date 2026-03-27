@@ -23,9 +23,9 @@ import net.technicpack.rest.RestObject;
 
 @SuppressWarnings({"unused"})
 public class SearchResultsData extends RestObject {
-    private SearchResult[] modpacks;
+  private SearchResult[] modpacks;
 
-    public SearchResult[] getResults() {
-        return modpacks;
-    }
+  public SearchResult[] getResults() {
+    return modpacks;
+  }
 }

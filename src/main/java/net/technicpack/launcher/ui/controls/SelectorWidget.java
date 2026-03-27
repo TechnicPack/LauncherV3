@@ -18,37 +18,41 @@
 
 package net.technicpack.launcher.ui.controls;
 
-import net.technicpack.launcher.ui.UIConstants;
-import net.technicpack.ui.lang.ResourceLoader;
-
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import net.technicpack.launcher.ui.UIConstants;
+import net.technicpack.ui.lang.ResourceLoader;
 
 public class SelectorWidget extends JButton {
 
-    private ResourceLoader resources;
+  private ResourceLoader resources;
 
-    private boolean isSelected;
+  private boolean isSelected;
 
-    public SelectorWidget(ResourceLoader resources) {
-        this.resources = resources;
-    }
+  public SelectorWidget(ResourceLoader resources) {
+    this.resources = resources;
+  }
 
-    protected ResourceLoader getResources() { return resources; }
+  protected ResourceLoader getResources() {
+    return resources;
+  }
 
-    protected void initComponents() {
-        setBorder(BorderFactory.createEmptyBorder());
-        setBackground(UIConstants.COLOR_SELECTOR_BACK);
-        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-        setContentAreaFilled(false);
-        setOpaque(true);
-        setFocusPainted(false);
-    }
+  protected void initComponents() {
+    setBorder(BorderFactory.createEmptyBorder());
+    setBackground(UIConstants.COLOR_SELECTOR_BACK);
+    setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+    setContentAreaFilled(false);
+    setOpaque(true);
+    setFocusPainted(false);
+  }
 
-    public boolean isSelected() { return isSelected; }
-    public void setIsSelected(boolean isSelected) {
-        this.isSelected = isSelected;
-        setBackground(isSelected? UIConstants.COLOR_SELECTOR_OPTION: UIConstants.COLOR_SELECTOR_BACK);
-    }
+  public boolean isSelected() {
+    return isSelected;
+  }
+
+  public void setIsSelected(boolean isSelected) {
+    this.isSelected = isSelected;
+    setBackground(isSelected ? UIConstants.COLOR_SELECTOR_OPTION : UIConstants.COLOR_SELECTOR_BACK);
+  }
 }

@@ -24,25 +24,30 @@ import org.xhtmlrenderer.swing.ImageResourceLoader;
 import org.xhtmlrenderer.swing.MutableFSImage;
 
 /**
- * Denotes a URI pointing to an image that needs to be loaded. BackgroundImageLoaderItem are queued inside a
- * BackgroundImageLoader and loaded by a BackgroundImageLoaderThread.
+ * Denotes a URI pointing to an image that needs to be loaded. BackgroundImageLoaderItem are queued
+ * inside a BackgroundImageLoader and loaded by a BackgroundImageLoaderThread.
  */
 class ImageLoadItem {
-    final ImageResourceLoader _imageResourceLoader;
-    final String _uri;
-    final MutableFSImage _mfsImage;
-    final int _targetWidth;
-    final int _targetHeight;
+  final ImageResourceLoader _imageResourceLoader;
+  final String _uri;
+  final MutableFSImage _mfsImage;
+  final int _targetWidth;
+  final int _targetHeight;
 
-    public ImageLoadItem(final ImageResourceLoader imageResourceLoader, String uri, MutableFSImage fsi, int width, int height) {
-        this._imageResourceLoader = imageResourceLoader;
-        this._uri = uri;
-        this._mfsImage = fsi;
-        this._targetWidth = width;
-        this._targetHeight = height;
-    }
+  public ImageLoadItem(
+      final ImageResourceLoader imageResourceLoader,
+      String uri,
+      MutableFSImage fsi,
+      int width,
+      int height) {
+    this._imageResourceLoader = imageResourceLoader;
+    this._uri = uri;
+    this._mfsImage = fsi;
+    this._targetWidth = width;
+    this._targetHeight = height;
+  }
 
-    public boolean haveTargetDimensions() {
-        return _targetWidth > -1 && _targetHeight > -1;
-    }
+  public boolean haveTargetDimensions() {
+    return _targetWidth > -1 && _targetHeight > -1;
+  }
 }

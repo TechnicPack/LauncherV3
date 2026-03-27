@@ -19,128 +19,126 @@
 
 package net.technicpack.launchercore.image;
 
-import javax.imageio.ImageIO;
-import javax.swing.SwingUtilities;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.imageio.ImageIO;
+import javax.swing.SwingUtilities;
 
 public class ImageJob<T> {
-    protected IImageMapper<T> mapper;
-    protected IImageStore<T> store;
+  protected IImageMapper<T> mapper;
+  protected IImageStore<T> store;
 
-    private T lastJobData;
+  private T lastJobData;
 
-    protected boolean canRetry = true;
-    private final AtomicReference<BufferedImage> imageReference;
+  protected boolean canRetry = true;
+  private final AtomicReference<BufferedImage> imageReference;
 
-    private final Collection<IImageJobListener<T>> jobListeners = new LinkedList<>();
-    private Thread imageThread;
+  private final Collection<IImageJobListener<T>> jobListeners = new LinkedList<>();
+  private Thread imageThread;
 
-    public ImageJob(IImageMapper<T> mapper, IImageStore<T> store) {
-        this.mapper = mapper;
-        this.store = store;
+  public ImageJob(IImageMapper<T> mapper, IImageStore<T> store) {
+    this.mapper = mapper;
+    this.store = store;
 
-        imageReference = new AtomicReference<>();
-        imageReference.set(mapper.getDefaultImage());
+    imageReference = new AtomicReference<>();
+    imageReference.set(mapper.getDefaultImage());
+  }
+
+  public BufferedImage getImage() {
+    return imageReference.get();
+  }
+
+  public void addJobListener(IImageJobListener<T> listener) {
+    synchronized (jobListeners) {
+      jobListeners.add(listener);
     }
+  }
 
-    public BufferedImage getImage() {
-        return imageReference.get();
+  public void removeJobListener(IImageJobListener<T> listener) {
+    synchronized (jobListeners) {
+      jobListeners.remove(listener);
     }
+  }
 
-    public void addJobListener(IImageJobListener<T> listener) {
-        synchronized (jobListeners) {
-            jobListeners.add(listener);
+  public boolean canRetry() {
+    return canRetry;
+  }
+
+  public void refreshRetry() {
+    canRetry = true;
+  }
+
+  public T getJobData() {
+    return lastJobData;
+  }
+
+  protected void setImage(BufferedImage image) {
+    canRetry = false;
+    imageReference.set(image);
+
+    notifyComplete();
+  }
+
+  protected void notifyComplete() {
+    if (SwingUtilities.isEventDispatchThread()) {
+      synchronized (jobListeners) {
+        for (IImageJobListener<T> listener : jobListeners) {
+          listener.jobComplete(this);
         }
+      }
+    } else {
+      SwingUtilities.invokeLater(this::notifyComplete);
     }
+  }
 
-    public void removeJobListener(IImageJobListener<T> listener) {
-        synchronized (jobListeners) {
-            jobListeners.remove(listener);
-        }
-    }
+  public void start(final T jobData) {
+    lastJobData = jobData;
 
-    public boolean canRetry() {
-        return canRetry;
-    }
+    if (imageThread != null && imageThread.isAlive()) return;
 
-    public void refreshRetry() {
-        canRetry = true;
-    }
+    imageThread =
+        new Thread("Image Download: " + store.getJobKey(jobData)) {
+          @Override
+          public void run() {
+            try {
+              File imageLocation = mapper.getImageLocation(jobData);
 
-    public T getJobData() {
-        return lastJobData;
-    }
+              BufferedImage existingImage = null;
 
-    protected void setImage(BufferedImage image) {
-        canRetry = false;
-        imageReference.set(image);
-
-        notifyComplete();
-    }
-
-    protected void notifyComplete() {
-        if (SwingUtilities.isEventDispatchThread()) {
-            synchronized (jobListeners) {
-                for (IImageJobListener<T> listener : jobListeners) {
-                    listener.jobComplete(this);
-                }
-            }
-        } else {
-            SwingUtilities.invokeLater(this::notifyComplete);
-        }
-    }
-
-    public void start(final T jobData) {
-        lastJobData = jobData;
-
-        if (imageThread != null && imageThread.isAlive())
-            return;
-
-        imageThread = new Thread("Image Download: " + store.getJobKey(jobData)) {
-            @Override
-            public void run() {
+              if (imageLocation != null && imageLocation.exists()) {
                 try {
-                    File imageLocation = mapper.getImageLocation(jobData);
-
-                    BufferedImage existingImage = null;
-
-                    if (imageLocation != null && imageLocation.exists()) {
-                        try {
-                            existingImage = ImageIO.read(imageLocation);
-                        } catch (IOException e) {
-                            //Corrupt or missing- that's fine, just redownload it
-                        }
-                    }
-
-                    if (existingImage != null)
-                        setImage(existingImage);
-
-                    if (store.canDownloadImage(jobData, imageLocation) && (existingImage == null || mapper.shouldDownloadImage(jobData))) {
-                        if (imageLocation != null && !imageLocation.getParentFile().exists())
-                            imageLocation.getParentFile().mkdirs();
-
-                        store.downloadImage(jobData, imageLocation);
-
-                        try {
-                            BufferedImage newImage = ImageIO.read(imageLocation);
-
-                            if (newImage != null)
-                                setImage(newImage);
-                        } catch (IOException e) {
-                            //Again- probably something wrong with the image, so we'll just show the default
-                        }
-                    }
-                } finally {
-                    if (canRetry)
-                        canRetry = store.canRetry(jobData);
+                  existingImage = ImageIO.read(imageLocation);
+                } catch (IOException e) {
+                  // Corrupt or missing- that's fine, just redownload it
                 }
+              }
+
+              if (existingImage != null) setImage(existingImage);
+
+              if (store.canDownloadImage(jobData, imageLocation)
+                  && (existingImage == null || mapper.shouldDownloadImage(jobData))) {
+                if (imageLocation != null && !imageLocation.getParentFile().exists())
+                  imageLocation.getParentFile().mkdirs();
+
+                store.downloadImage(jobData, imageLocation);
+
+                try {
+                  BufferedImage newImage = ImageIO.read(imageLocation);
+
+                  if (newImage != null) setImage(newImage);
+                } catch (IOException e) {
+                  // Again- probably something wrong with the image, so we'll just show the default
+                }
+              }
+            } finally {
+              if (canRetry) canRetry = store.canRetry(jobData);
             }
+          }
         };
-        imageThread.start();
-    }
+    imageThread.start();
+  }
 }

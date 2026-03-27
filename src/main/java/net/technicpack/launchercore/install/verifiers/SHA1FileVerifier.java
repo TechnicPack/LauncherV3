@@ -19,45 +19,56 @@
 
 package net.technicpack.launchercore.install.verifiers;
 
+import java.io.File;
+import java.nio.file.Path;
 import net.technicpack.utilslib.CryptoUtils;
 import net.technicpack.utilslib.Utils;
 
-import java.io.File;
-import java.nio.file.Path;
-
 public class SHA1FileVerifier implements IFileVerifier {
-    private String expectedHash;
+  private String expectedHash;
 
-    public SHA1FileVerifier(String expectedHash) {
-        this.expectedHash = expectedHash;
-    }
+  public SHA1FileVerifier(String expectedHash) {
+    this.expectedHash = expectedHash;
+  }
 
-    public boolean isFileValid(File file) {
-        if (expectedHash == null || expectedHash.isEmpty())
-            return false;
+  public boolean isFileValid(File file) {
+    if (expectedHash == null || expectedHash.isEmpty()) return false;
 
-        String resultSha1 = CryptoUtils.getSHA1(file);
+    String resultSha1 = CryptoUtils.getSHA1(file);
 
-        boolean hashMatches = expectedHash.equalsIgnoreCase(resultSha1);
+    boolean hashMatches = expectedHash.equalsIgnoreCase(resultSha1);
 
-        if (!hashMatches)
-            Utils.getLogger().warning("SHA1 verification for " + file + " failed. Expected " + expectedHash + ", got " + resultSha1);
+    if (!hashMatches)
+      Utils.getLogger()
+          .warning(
+              "SHA1 verification for "
+                  + file
+                  + " failed. Expected "
+                  + expectedHash
+                  + ", got "
+                  + resultSha1);
 
-        return hashMatches;
-    }
+    return hashMatches;
+  }
 
-    @Override
-    public boolean isFileValid(Path path) {
-        if (expectedHash == null || expectedHash.isEmpty())
-            return false;
+  @Override
+  public boolean isFileValid(Path path) {
+    if (expectedHash == null || expectedHash.isEmpty()) return false;
 
-        String resultSha1 = CryptoUtils.getSHA1(path);
+    String resultSha1 = CryptoUtils.getSHA1(path);
 
-        boolean hashMatches = expectedHash.equalsIgnoreCase(resultSha1);
+    boolean hashMatches = expectedHash.equalsIgnoreCase(resultSha1);
 
-        if (!hashMatches)
-            Utils.getLogger().warning("SHA1 verification for " + path + " failed. Expected " + expectedHash + ", got " + resultSha1);
+    if (!hashMatches)
+      Utils.getLogger()
+          .warning(
+              "SHA1 verification for "
+                  + path
+                  + " failed. Expected "
+                  + expectedHash
+                  + ", got "
+                  + resultSha1);
 
-        return hashMatches;
-    }
+    return hashMatches;
+  }
 }

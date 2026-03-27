@@ -22,23 +22,23 @@ package net.technicpack.launchercore.auth;
 import net.technicpack.launchercore.exception.AuthenticationException;
 
 public interface IUserType {
-    String getUserType();
+  String getUserType();
 
-    String getId();
+  String getId();
 
-    String getUsername();
+  String getUsername();
 
-    String getDisplayName();
+  String getDisplayName();
 
-    String getAccessToken();
+  String getAccessToken();
 
-    String getSessionId();
+  String getSessionId();
 
-    String getMCUserType();
+  String getMCUserType();
 
-    String getUserProperties();
+  String getUserProperties();
 
-    boolean isOffline();
+  boolean isOffline();
 
-    void login(UserModel userModel) throws AuthenticationException;
+  void login(UserModel userModel) throws AuthenticationException;
 }

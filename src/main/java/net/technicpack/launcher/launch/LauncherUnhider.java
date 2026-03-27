@@ -18,39 +18,39 @@
 
 package net.technicpack.launcher.launch;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import javax.swing.SwingUtilities;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launchercore.launch.ProcessExitListener;
 import net.technicpack.launchercore.util.LaunchAction;
 
-import javax.swing.SwingUtilities;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 public class LauncherUnhider implements ProcessExitListener {
-    private final TechnicSettings settings;
-    private final LauncherFrame frame;
-    private final AtomicBoolean called = new AtomicBoolean(false);
+  private final TechnicSettings settings;
+  private final LauncherFrame frame;
+  private final AtomicBoolean called = new AtomicBoolean(false);
 
-    public LauncherUnhider(TechnicSettings settings, LauncherFrame frame) {
-        this.settings = settings;
-        this.frame = frame;
+  public LauncherUnhider(TechnicSettings settings, LauncherFrame frame) {
+    this.settings = settings;
+    this.frame = frame;
+  }
+
+  @Override
+  public void onProcessExit() {
+    // This ensures that we only run this function once
+    if (!called.compareAndSet(false, true)) {
+      return;
     }
 
-    @Override
-    public void onProcessExit() {
-        // This ensures that we only run this function once
-        if (!called.compareAndSet(false, true)) {
-            return;
-        }
+    LaunchAction action = settings.getLaunchAction();
 
-        LaunchAction action = settings.getLaunchAction();
+    SwingUtilities.invokeLater(
+        () -> {
+          if (action == LaunchAction.HIDE) {
+            frame.setVisible(true);
+          }
 
-        SwingUtilities.invokeLater(() -> {
-            if (action == LaunchAction.HIDE) {
-                frame.setVisible(true);
-            }
-
-            frame.launchCompleted();
+          frame.launchCompleted();
         });
-    }
+  }
 }

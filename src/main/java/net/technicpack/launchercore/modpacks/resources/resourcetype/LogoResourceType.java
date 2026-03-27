@@ -23,13 +23,13 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.rest.io.Resource;
 
 public class LogoResourceType implements IModpackResourceType {
-    @Override
-    public Resource getResource(ModpackModel modpack) {
-        return modpack.getLogo();
-    }
+  @Override
+  public Resource getResource(ModpackModel modpack) {
+    return modpack.getLogo();
+  }
 
-    @Override
-    public String getImageName() {
-        return "logo.png";
-    }
+  @Override
+  public String getImageName() {
+    return "logo.png";
+  }
 }

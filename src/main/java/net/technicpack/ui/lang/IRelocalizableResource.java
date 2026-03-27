@@ -20,5 +20,5 @@
 package net.technicpack.ui.lang;
 
 public interface IRelocalizableResource {
-    public void relocalize(ResourceLoader loader);
+  public void relocalize(ResourceLoader loader);
 }

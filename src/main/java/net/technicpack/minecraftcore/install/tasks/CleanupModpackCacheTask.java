@@ -19,6 +19,10 @@
 
 package net.technicpack.minecraftcore.install.tasks;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 import net.technicpack.launchercore.modpacks.ModpackModel;
@@ -27,51 +31,46 @@ import net.technicpack.rest.io.Mod;
 import net.technicpack.rest.io.Modpack;
 import org.apache.commons.io.FileUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-
 public class CleanupModpackCacheTask implements IInstallTask<IMinecraftVersionInfo> {
-	private ModpackModel pack;
-	private Modpack modpack;
+  private ModpackModel pack;
+  private Modpack modpack;
 
-	public CleanupModpackCacheTask(ModpackModel pack, Modpack modpack) {
-		this.pack = pack;
-		this.modpack = modpack;
-	}
+  public CleanupModpackCacheTask(ModpackModel pack, Modpack modpack) {
+    this.pack = pack;
+    this.modpack = modpack;
+  }
 
-	@Override
-	public String getTaskDescription() {
-		return "Cleaning Modpack Cache";
-	}
+  @Override
+  public String getTaskDescription() {
+    return "Cleaning Modpack Cache";
+  }
 
-	@Override
-	public float getTaskProgress() {
-		return 0;
-	}
+  @Override
+  public float getTaskProgress() {
+    return 0;
+  }
 
-	@Override
-	public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) throws IOException {
-		final File cacheDir = pack.getCacheDir();
+  @Override
+  public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) throws IOException {
+    final File cacheDir = pack.getCacheDir();
 
-		File[] files = cacheDir.listFiles();
+    File[] files = cacheDir.listFiles();
 
-		if (files == null) {
-			return;
-		}
+    if (files == null) {
+      return;
+    }
 
-		Set<File> keepFiles = new HashSet<>(modpack.getMods().size());
-		for (Mod mod : modpack.getMods()) {
-			keepFiles.add(mod.generateSafeCacheFile(cacheDir));
-		}
+    Set<File> keepFiles = new HashSet<>(modpack.getMods().size());
+    for (Mod mod : modpack.getMods()) {
+      keepFiles.add(mod.generateSafeCacheFile(cacheDir));
+    }
 
-		for (File file : files) {
-			if (keepFiles.contains(file)) {
-				continue;
-			}
+    for (File file : files) {
+      if (keepFiles.contains(file)) {
+        continue;
+      }
 
-			FileUtils.deleteQuietly(file);
-		}
-	}
+      FileUtils.deleteQuietly(file);
+    }
+  }
 }

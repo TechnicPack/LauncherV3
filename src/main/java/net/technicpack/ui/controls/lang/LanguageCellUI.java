@@ -19,42 +19,42 @@
 
 package net.technicpack.ui.controls.lang;
 
-import net.technicpack.ui.controls.list.SimpleScrollPopup;
-import net.technicpack.ui.controls.list.popupformatters.IPopupFormatter;
-
+import java.awt.Color;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.BasicComboPopup;
 import javax.swing.plaf.basic.ComboPopup;
-import java.awt.Color;
+import net.technicpack.ui.controls.list.SimpleScrollPopup;
+import net.technicpack.ui.controls.list.popupformatters.IPopupFormatter;
 
 public class LanguageCellUI extends BasicComboBoxUI {
 
-    private final Color trackColor;
-    private final Color thumbColor;
+  private final Color trackColor;
+  private final Color thumbColor;
 
-    private final IPopupFormatter popupFormatter;
+  private final IPopupFormatter popupFormatter;
 
-    public LanguageCellUI(IPopupFormatter popupFormatter, Color trackColor, Color thumbColor) {
-        this.popupFormatter = popupFormatter;
-        this.trackColor = trackColor;
-        this.thumbColor = thumbColor;
-    }
+  public LanguageCellUI(IPopupFormatter popupFormatter, Color trackColor, Color thumbColor) {
+    this.popupFormatter = popupFormatter;
+    this.trackColor = trackColor;
+    this.thumbColor = thumbColor;
+  }
 
-    @Override protected JButton createArrowButton() {
-        JButton button = new JButton();
-        button.setOpaque(false);
-        button.setContentAreaFilled(false);
-        button.setBorder(BorderFactory.createEmptyBorder());
-        button.setFocusPainted(false);
-        return button;
-    }
+  @Override
+  protected JButton createArrowButton() {
+    JButton button = new JButton();
+    button.setOpaque(false);
+    button.setContentAreaFilled(false);
+    button.setBorder(BorderFactory.createEmptyBorder());
+    button.setFocusPainted(false);
+    return button;
+  }
 
-    @Override
-    protected ComboPopup createPopup() {
-        BasicComboPopup comboPopup = new SimpleScrollPopup(comboBox, trackColor, thumbColor);
-        popupFormatter.formatPopup(comboPopup);
-        return comboPopup;
-    }
+  @Override
+  protected ComboPopup createPopup() {
+    BasicComboPopup comboPopup = new SimpleScrollPopup(comboBox, trackColor, thumbColor);
+    popupFormatter.formatPopup(comboPopup);
+    return comboPopup;
+  }
 }

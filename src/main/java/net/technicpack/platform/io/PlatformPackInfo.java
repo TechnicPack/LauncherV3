@@ -19,190 +19,214 @@
 
 package net.technicpack.platform.io;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import net.technicpack.rest.RestObject;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.rest.io.Resource;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 @SuppressWarnings({"unused"})
 public class PlatformPackInfo extends RestObject implements PackInfo {
-    private String name;
-    private String displayName;
-    private String url;
-    private String platformUrl;
-    private Resource icon;
-    private Resource logo;
-    private Resource background;
-    private String minecraft;
-    private String forge;
-    private String version;
-    private String solder;
-    private String description;
-    private Integer ratings;
-    private Integer runs;
-    private Integer installs;
-    private boolean isServer;
-    private boolean isOfficial;
-    private String discordServerId;
+  private String name;
+  private String displayName;
+  private String url;
+  private String platformUrl;
+  private Resource icon;
+  private Resource logo;
+  private Resource background;
+  private String minecraft;
+  private String forge;
+  private String version;
+  private String solder;
+  private String description;
+  private Integer ratings;
+  private Integer runs;
+  private Integer installs;
+  private boolean isServer;
+  private boolean isOfficial;
+  private String discordServerId;
 
-    private ArrayList<FeedItem> feed = new ArrayList<>();
+  private ArrayList<FeedItem> feed = new ArrayList<>();
 
-    private transient boolean isLocal = false;
+  private transient boolean isLocal = false;
 
-    public PlatformPackInfo() {
+  public PlatformPackInfo() {}
 
+  @Override
+  public String getName() {
+    return name;
+  }
+
+  @Override
+  public String getDisplayName() {
+    return displayName;
+  }
+
+  @Override
+  public String getWebSite() {
+    return platformUrl;
+  }
+
+  @Override
+  public Resource getIcon() {
+    return icon;
+  }
+
+  @Override
+  public Resource getBackground() {
+    return background;
+  }
+
+  @Override
+  public Resource getLogo() {
+    return logo;
+  }
+
+  protected String getVersion() {
+    if (hasSolder()) return null;
+
+    return version;
+  }
+
+  @Override
+  public String getRecommended() {
+    return getVersion();
+  }
+
+  @Override
+  public String getLatest() {
+    return getVersion();
+  }
+
+  @Override
+  public ArrayList<FeedItem> getFeed() {
+    return feed;
+  }
+
+  @Override
+  public String getDiscordId() {
+    return discordServerId;
+  }
+
+  @Override
+  public List<String> getBuilds() {
+    if (hasSolder()) {
+      // If this is a Solder modpack, then the Platform modpack version is ignored.
+      // Code can actually reach this if the Solder instance is offline, due to how combined modpack
+      // info works.
+      return Collections.emptyList();
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
+    List<String> builds = new ArrayList<>();
+    builds.add(version);
+    return builds;
+  }
 
-    @Override
-    public String getDisplayName() {
-        return displayName;
-    }
+  public String getGameVersion() {
+    return minecraft;
+  }
 
-    @Override
-    public String getWebSite() {
-        return platformUrl;
-    }
+  public String getForge() {
+    return forge;
+  }
 
-    @Override
-    public Resource getIcon() {
-        return icon;
-    }
+  public String getSolder() {
+    return solder;
+  }
 
-    @Override
-    public Resource getBackground() {
-        return background;
-    }
+  public boolean hasSolder() {
+    return solder != null && !solder.isEmpty();
+  }
 
-    @Override
-    public Resource getLogo() {
-        return logo;
-    }
+  public String getDescription() {
+    if (description == null)
+      return "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc facilisis congue dignissim. Aliquam posuere eros vel eros luctus molestie. Duis non massa vel orci sagittis semper. Pellentesque lorem diam, viverra in bibendum in, tincidunt in neque. Curabitur consectetur aliquam sem eget laoreet. Quisque eget turpis a velit semper dictum at ut neque. Nulla placerat odio eget neque commodo posuere. Nam porta lacus elit, a rutrum enim mollis vel.";
 
-    protected String getVersion() {
-        if (hasSolder())
-            return null;
+    return description;
+  }
 
-        return version;
-    }
+  public Integer getLikes() {
+    return ratings;
+  }
 
-    @Override
-    public String getRecommended() {
-        return getVersion();
-    }
+  public Integer getRuns() {
+    return runs;
+  }
 
-    @Override
-    public String getLatest() {
-        return getVersion();
-    }
+  public Integer getInstalls() {
+    return installs;
+  }
 
-    @Override
-    public ArrayList<FeedItem> getFeed() {
-        return feed;
-    }
+  public boolean isServerPack() {
+    return isServer;
+  }
 
-    @Override
-    public String getDiscordId() { return discordServerId; }
+  @Override
+  public Modpack getModpack(String build) {
+    return new Modpack(this);
+  }
 
-    @Override
-    public List<String> getBuilds() {
-        if (hasSolder()) {
-            // If this is a Solder modpack, then the Platform modpack version is ignored.
-            // Code can actually reach this if the Solder instance is offline, due to how combined modpack info works.
-            return Collections.emptyList();
-        }
+  @Override
+  public boolean isComplete() {
+    return true;
+  }
 
-        List<String> builds = new ArrayList<>();
-        builds.add(version);
-        return builds;
-    }
+  public String getUrl() {
+    return url;
+  }
 
-    public String getGameVersion() {
-        return minecraft;
-    }
+  public void setLocal() {
+    isLocal = true;
+  }
 
-    public String getForge() {
-        return forge;
-    }
+  @Override
+  public boolean isLocal() {
+    // If this modpack has a Solder instance set, and code has reached this point, that means that
+    // Solder is
+    // unreachable for some reason, and we should consider its Solder to be offline (and mark the
+    // pack as local)
+    if (hasSolder()) return true;
 
-    public String getSolder() {
-        return solder;
-    }
+    return isLocal;
+  }
 
-    public boolean hasSolder() {
-        return solder != null && !solder.isEmpty();
-    }
+  @Override
+  public boolean isOfficial() {
+    return isOfficial;
+  }
 
-    public String getDescription() {
-        if (description == null)
-            return "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc facilisis congue dignissim. Aliquam posuere eros vel eros luctus molestie. Duis non massa vel orci sagittis semper. Pellentesque lorem diam, viverra in bibendum in, tincidunt in neque. Curabitur consectetur aliquam sem eget laoreet. Quisque eget turpis a velit semper dictum at ut neque. Nulla placerat odio eget neque commodo posuere. Nam porta lacus elit, a rutrum enim mollis vel.";
-
-        return description;
-    }
-
-    public Integer getLikes() {
-        return ratings;
-    }
-
-    public Integer getRuns() {
-        return runs;
-    }
-
-    public Integer getInstalls() {
-        return installs;
-    }
-
-    public boolean isServerPack() { return isServer; }
-
-    @Override
-    public Modpack getModpack(String build) {
-        return new Modpack(this);
-    }
-
-    @Override
-    public boolean isComplete() {
-        return true;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setLocal() { isLocal = true; }
-    @Override
-    public boolean isLocal() {
-        // If this modpack has a Solder instance set, and code has reached this point, that means that Solder is
-        // unreachable for some reason, and we should consider its Solder to be offline (and mark the pack as local)
-        if (hasSolder())
-            return true;
-
-        return isLocal;
-    }
-
-    @Override
-    public boolean isOfficial() { return isOfficial; }
-
-    @Override
-    public String toString() {
-        return "PlatformPackInfo{" +
-                "name='" + name + '\'' +
-                ", displayName='" + displayName + '\'' +
-                ", url='" + url + '\'' +
-                ", icon=" + icon +
-                ", logo=" + logo +
-                ", background=" + background +
-                ", gameVersion='" + minecraft + '\'' +
-                ", forge='" + forge + '\'' +
-                ", version='" + version + '\'' +
-                ", solder='" + solder + '\'' +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "PlatformPackInfo{"
+        + "name='"
+        + name
+        + '\''
+        + ", displayName='"
+        + displayName
+        + '\''
+        + ", url='"
+        + url
+        + '\''
+        + ", icon="
+        + icon
+        + ", logo="
+        + logo
+        + ", background="
+        + background
+        + ", gameVersion='"
+        + minecraft
+        + '\''
+        + ", forge='"
+        + forge
+        + '\''
+        + ", version='"
+        + version
+        + '\''
+        + ", solder='"
+        + solder
+        + '\''
+        + '}';
+  }
 }

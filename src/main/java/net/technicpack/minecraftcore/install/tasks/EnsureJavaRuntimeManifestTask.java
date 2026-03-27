@@ -19,6 +19,9 @@
 
 package net.technicpack.minecraftcore.install.tasks;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.install.ITasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
@@ -34,73 +37,77 @@ import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.io.Download;
 import net.technicpack.minecraftcore.mojang.version.io.VersionJavaInfo;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 public class EnsureJavaRuntimeManifestTask implements IInstallTask<IMinecraftVersionInfo> {
-    private final Path runtimesDirectory;
-    private final ModpackModel modpack;
-    private final ITasksQueue<IMinecraftVersionInfo> fetchJavaManifest;
-    private final ITasksQueue<IMinecraftVersionInfo> examineJavaQueue;
-    private final ITasksQueue<IMinecraftVersionInfo> downloadJavaQueue;
+  private final Path runtimesDirectory;
+  private final ModpackModel modpack;
+  private final ITasksQueue<IMinecraftVersionInfo> fetchJavaManifest;
+  private final ITasksQueue<IMinecraftVersionInfo> examineJavaQueue;
+  private final ITasksQueue<IMinecraftVersionInfo> downloadJavaQueue;
 
-    public EnsureJavaRuntimeManifestTask(Path runtimesDirectory, ModpackModel modpack, ITasksQueue<IMinecraftVersionInfo> fetchJavaManifest, ITasksQueue<IMinecraftVersionInfo> examineJavaQueue, ITasksQueue<IMinecraftVersionInfo> downloadJavaQueue) {
-        this.runtimesDirectory = runtimesDirectory;
-        this.modpack = modpack;
-        this.fetchJavaManifest = fetchJavaManifest;
-        this.examineJavaQueue = examineJavaQueue;
-        this.downloadJavaQueue = downloadJavaQueue;
+  public EnsureJavaRuntimeManifestTask(
+      Path runtimesDirectory,
+      ModpackModel modpack,
+      ITasksQueue<IMinecraftVersionInfo> fetchJavaManifest,
+      ITasksQueue<IMinecraftVersionInfo> examineJavaQueue,
+      ITasksQueue<IMinecraftVersionInfo> downloadJavaQueue) {
+    this.runtimesDirectory = runtimesDirectory;
+    this.modpack = modpack;
+    this.fetchJavaManifest = fetchJavaManifest;
+    this.examineJavaQueue = examineJavaQueue;
+    this.downloadJavaQueue = downloadJavaQueue;
+  }
+
+  @Override
+  public String getTaskDescription() {
+    return "Retrieving Java runtime manifest";
+  }
+
+  @Override
+  public float getTaskProgress() {
+    return 0;
+  }
+
+  @Override
+  public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) throws IOException {
+    IMinecraftVersionInfo version = queue.getMetadata();
+
+    VersionJavaInfo runtimeInfo = version.getMojangRuntimeInformation();
+
+    if (runtimeInfo == null) {
+      // Nothing to do here, this version doesn't have a Mojang JRE
+      return;
     }
 
-    @Override
-    public String getTaskDescription() {
-        return "Retrieving Java runtime manifest";
+    final String runtimeName = runtimeInfo.getComponent();
+
+    JavaRuntimesIndex availableRuntimes =
+        MojangUtils.getJavaRuntimesIndex(runtimesDirectory.resolve("_index.json"));
+
+    if (availableRuntimes == null) {
+      throw new DownloadException("Failed to get Mojang JRE information");
     }
 
-    @Override
-    public float getTaskProgress() {
-        return 0;
+    JavaRuntime manifest = availableRuntimes.getRuntimeForCurrentOS(runtimeName);
+
+    if (manifest == null) {
+      throw new DownloadException("A Mojang JRE is not available for the current OS");
     }
 
-    @Override
-    public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) throws IOException {
-        IMinecraftVersionInfo version = queue.getMetadata();
+    Download runtimeDownload = manifest.getManifest();
 
-        VersionJavaInfo runtimeInfo = version.getMojangRuntimeInformation();
+    Path output = runtimesDirectory.resolve("manifests").resolve(runtimeName + ".json");
 
-        if (runtimeInfo == null) {
-            // Nothing to do here, this version doesn't have a Mojang JRE
-            return;
-        }
+    Files.createDirectories(output.getParent());
 
-        final String runtimeName = runtimeInfo.getComponent();
+    IFileVerifier fileVerifier = new SHA1FileVerifier(runtimeDownload.getSha1());
 
-        JavaRuntimesIndex availableRuntimes = MojangUtils.getJavaRuntimesIndex(runtimesDirectory.resolve("_index.json"));
-
-        if (availableRuntimes == null) {
-            throw new DownloadException("Failed to get Mojang JRE information");
-        }
-
-        JavaRuntime manifest = availableRuntimes.getRuntimeForCurrentOS(runtimeName);
-
-        if (manifest == null) {
-            throw new DownloadException("A Mojang JRE is not available for the current OS");
-        }
-
-        Download runtimeDownload = manifest.getManifest();
-
-        Path output = runtimesDirectory.resolve("manifests").resolve(runtimeName + ".json");
-
-        Files.createDirectories(output.getParent());
-
-        IFileVerifier fileVerifier = new SHA1FileVerifier(runtimeDownload.getSha1());
-
-        if (!Files.isRegularFile(output) || !fileVerifier.isFileValid(output)) {
-            fetchJavaManifest.addTask(new DownloadFileTask<>(runtimeDownload.getUrl(), output.toFile(), fileVerifier));
-        }
-
-        examineJavaQueue.addTask(new InstallJavaRuntimeTask(runtimesDirectory, output, runtimeInfo, examineJavaQueue, downloadJavaQueue));
+    if (!Files.isRegularFile(output) || !fileVerifier.isFileValid(output)) {
+      fetchJavaManifest.addTask(
+          new DownloadFileTask<>(runtimeDownload.getUrl(), output.toFile(), fileVerifier));
     }
 
+    examineJavaQueue.addTask(
+        new InstallJavaRuntimeTask(
+            runtimesDirectory, output, runtimeInfo, examineJavaQueue, downloadJavaQueue));
+  }
 }

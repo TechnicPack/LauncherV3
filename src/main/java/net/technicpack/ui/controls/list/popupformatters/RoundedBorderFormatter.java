@@ -19,21 +19,21 @@
 
 package net.technicpack.ui.controls.list.popupformatters;
 
+import java.awt.Color;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.plaf.basic.BasicComboPopup;
-import java.awt.Color;
 
 public class RoundedBorderFormatter implements IPopupFormatter {
-    private Border border;
+  private Border border;
 
-    public RoundedBorderFormatter(Border border) {
-        this.border = border;
-    }
+  public RoundedBorderFormatter(Border border) {
+    this.border = border;
+  }
 
-    @Override
-    public void formatPopup(BasicComboPopup popup) {
-        popup.setBorder(new LineBorder(Color.white, 1));
-        popup.setBorder(border);
-    }
+  @Override
+  public void formatPopup(BasicComboPopup popup) {
+    popup.setBorder(new LineBorder(Color.white, 1));
+    popup.setBorder(border);
+  }
 }

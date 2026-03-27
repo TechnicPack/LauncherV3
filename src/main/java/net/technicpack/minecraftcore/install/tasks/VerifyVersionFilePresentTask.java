@@ -19,6 +19,7 @@
 
 package net.technicpack.minecraftcore.install.tasks;
 
+import java.io.IOException;
 import net.technicpack.launchercore.exception.PackNotAvailableOfflineException;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
@@ -26,34 +27,34 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.MinecraftVersionInfoBuilder;
 
-import java.io.IOException;
-
 public class VerifyVersionFilePresentTask implements IInstallTask<IMinecraftVersionInfo> {
-	private MinecraftVersionInfoBuilder builder;
-    private String minecraftVersion;
-    private ModpackModel modpack;
+  private MinecraftVersionInfoBuilder builder;
+  private String minecraftVersion;
+  private ModpackModel modpack;
 
-	public VerifyVersionFilePresentTask(ModpackModel modpack, String minecraftVersion, MinecraftVersionInfoBuilder builder) {
-		this.builder = builder;
-        this.minecraftVersion = minecraftVersion;
-        this.modpack = modpack;
-	}
+  public VerifyVersionFilePresentTask(
+      ModpackModel modpack, String minecraftVersion, MinecraftVersionInfoBuilder builder) {
+    this.builder = builder;
+    this.minecraftVersion = minecraftVersion;
+    this.modpack = modpack;
+  }
 
-	@Override
-	public String getTaskDescription() {
-		return "Retrieving Modpack Version";
-	}
+  @Override
+  public String getTaskDescription() {
+    return "Retrieving Modpack Version";
+  }
 
-	@Override
-	public float getTaskProgress() {
-		return 0;
-	}
+  @Override
+  public float getTaskProgress() {
+    return 0;
+  }
 
-	@Override
-	public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) throws IOException, InterruptedException {
-        IMinecraftVersionInfo version = builder.buildVersionFromKey(minecraftVersion);
+  @Override
+  public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue)
+      throws IOException, InterruptedException {
+    IMinecraftVersionInfo version = builder.buildVersionFromKey(minecraftVersion);
 
-        if (version == null && modpack.isLocalOnly())
-            throw new PackNotAvailableOfflineException(modpack.getDisplayName());
-	}
+    if (version == null && modpack.isLocalOnly())
+      throw new PackNotAvailableOfflineException(modpack.getDisplayName());
+  }
 }

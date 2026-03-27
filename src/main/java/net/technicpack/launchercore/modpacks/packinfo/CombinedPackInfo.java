@@ -19,201 +19,171 @@
 
 package net.technicpack.launchercore.modpacks.packinfo;
 
+import java.util.ArrayList;
+import java.util.List;
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
 import net.technicpack.platform.io.FeedItem;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.rest.io.Resource;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class CombinedPackInfo implements PackInfo {
-    private PackInfo solderPackInfo;
-    private PackInfo platformPackInfo;
+  private PackInfo solderPackInfo;
+  private PackInfo platformPackInfo;
 
-    public CombinedPackInfo(PackInfo solderPackInfo, PackInfo platformPackInfo) {
-        this.solderPackInfo = solderPackInfo;
-        this.platformPackInfo = platformPackInfo;
-    }
+  public CombinedPackInfo(PackInfo solderPackInfo, PackInfo platformPackInfo) {
+    this.solderPackInfo = solderPackInfo;
+    this.platformPackInfo = platformPackInfo;
+  }
 
-    @Override
-    public String getName() {
-        if (platformPackInfo != null)
-            return platformPackInfo.getName();
-        if (solderPackInfo != null)
-            return solderPackInfo.getName();
+  @Override
+  public String getName() {
+    if (platformPackInfo != null) return platformPackInfo.getName();
+    if (solderPackInfo != null) return solderPackInfo.getName();
 
-        return null;
-    }
+    return null;
+  }
 
-    @Override
-    public String getDisplayName() {
-        if (platformPackInfo != null)
-            return platformPackInfo.getDisplayName();
-        if (solderPackInfo != null)
-            return solderPackInfo.getDisplayName();
+  @Override
+  public String getDisplayName() {
+    if (platformPackInfo != null) return platformPackInfo.getDisplayName();
+    if (solderPackInfo != null) return solderPackInfo.getDisplayName();
 
-        return null;
-    }
+    return null;
+  }
 
-    @Override
-    public String getWebSite() {
-        if (platformPackInfo != null)
-            return platformPackInfo.getWebSite();
-        if (solderPackInfo != null)
-            return solderPackInfo.getWebSite();
+  @Override
+  public String getWebSite() {
+    if (platformPackInfo != null) return platformPackInfo.getWebSite();
+    if (solderPackInfo != null) return solderPackInfo.getWebSite();
 
-        return null;
-    }
+    return null;
+  }
 
-    @Override
-    public String getDiscordId() {
-        if (platformPackInfo != null)
-            return platformPackInfo.getDiscordId();
+  @Override
+  public String getDiscordId() {
+    if (platformPackInfo != null) return platformPackInfo.getDiscordId();
 
-        return null;
-    }
+    return null;
+  }
 
-    @Override
-    public Resource getIcon() {
-        if (platformPackInfo != null)
-            return platformPackInfo.getIcon();
+  @Override
+  public Resource getIcon() {
+    if (platformPackInfo != null) return platformPackInfo.getIcon();
 
-        return null;
-    }
+    return null;
+  }
 
-    @Override
-    public Resource getBackground() {
-        if (platformPackInfo != null)
-            return platformPackInfo.getBackground();
-        return null;
-    }
+  @Override
+  public Resource getBackground() {
+    if (platformPackInfo != null) return platformPackInfo.getBackground();
+    return null;
+  }
 
-    @Override
-    public Resource getLogo() {
-        if (platformPackInfo != null)
-            return platformPackInfo.getLogo();
+  @Override
+  public Resource getLogo() {
+    if (platformPackInfo != null) return platformPackInfo.getLogo();
 
-        return null;
-    }
+    return null;
+  }
 
-    @Override
-    public String getRecommended() {
-        if (solderPackInfo != null)
-            return solderPackInfo.getRecommended();
-        if (platformPackInfo != null)
-            return platformPackInfo.getRecommended();
+  @Override
+  public String getRecommended() {
+    if (solderPackInfo != null) return solderPackInfo.getRecommended();
+    if (platformPackInfo != null) return platformPackInfo.getRecommended();
 
-        return null;
-    }
+    return null;
+  }
 
-    @Override
-    public String getLatest() {
-        if (solderPackInfo != null)
-            return solderPackInfo.getLatest();
-        if (platformPackInfo != null)
-            return platformPackInfo.getRecommended();
+  @Override
+  public String getLatest() {
+    if (solderPackInfo != null) return solderPackInfo.getLatest();
+    if (platformPackInfo != null) return platformPackInfo.getRecommended();
 
-        return null;
-    }
+    return null;
+  }
 
-    @Override
-    public List<String> getBuilds() {
-        if (solderPackInfo != null)
-            return solderPackInfo.getBuilds();
-        if (platformPackInfo != null)
-            return platformPackInfo.getBuilds();
+  @Override
+  public List<String> getBuilds() {
+    if (solderPackInfo != null) return solderPackInfo.getBuilds();
+    if (platformPackInfo != null) return platformPackInfo.getBuilds();
 
-        return new ArrayList<>(0);
-    }
+    return new ArrayList<>(0);
+  }
 
-    @Override
-    public ArrayList<FeedItem> getFeed() {
-        if (platformPackInfo != null)
-            return platformPackInfo.getFeed();
+  @Override
+  public ArrayList<FeedItem> getFeed() {
+    if (platformPackInfo != null) return platformPackInfo.getFeed();
 
-        return null;
-    }
+    return null;
+  }
 
-    @Override
-    public String getDescription() {
-        if (platformPackInfo != null)
-            return platformPackInfo.getDescription();
+  @Override
+  public String getDescription() {
+    if (platformPackInfo != null) return platformPackInfo.getDescription();
 
-        return null;
-    }
+    return null;
+  }
 
-    @Override
-    public Integer getRuns() {
-        if (platformPackInfo != null)
-            return platformPackInfo.getRuns();
-        return null;
-    }
+  @Override
+  public Integer getRuns() {
+    if (platformPackInfo != null) return platformPackInfo.getRuns();
+    return null;
+  }
 
-    @Override
-    public Integer getInstalls() {
-        if (platformPackInfo != null)
-            return platformPackInfo.getInstalls();
+  @Override
+  public Integer getInstalls() {
+    if (platformPackInfo != null) return platformPackInfo.getInstalls();
 
-        return null;
-    }
+    return null;
+  }
 
-    @Override
-    public Integer getLikes() {
-        if (platformPackInfo != null)
-            return platformPackInfo.getLikes();
+  @Override
+  public Integer getLikes() {
+    if (platformPackInfo != null) return platformPackInfo.getLikes();
 
-        return null;
-    }
+    return null;
+  }
 
-    @Override
-    public boolean isServerPack() {
-        if (platformPackInfo != null)
-            return platformPackInfo.isServerPack();
+  @Override
+  public boolean isServerPack() {
+    if (platformPackInfo != null) return platformPackInfo.isServerPack();
 
-        return false;
-    }
+    return false;
+  }
 
-    @Override
-    public boolean isOfficial() {
-        if (platformPackInfo != null)
-            return platformPackInfo.isOfficial();
+  @Override
+  public boolean isOfficial() {
+    if (platformPackInfo != null) return platformPackInfo.isOfficial();
 
-        return false;
-    }
+    return false;
+  }
 
-    @Override
-    public Modpack getModpack(String build) throws BuildInaccessibleException {
-        if (solderPackInfo != null)
-            return solderPackInfo.getModpack(build);
-        if (platformPackInfo != null)
-            return platformPackInfo.getModpack(build);
+  @Override
+  public Modpack getModpack(String build) throws BuildInaccessibleException {
+    if (solderPackInfo != null) return solderPackInfo.getModpack(build);
+    if (platformPackInfo != null) return platformPackInfo.getModpack(build);
 
-        return null;
-    }
+    return null;
+  }
 
-    @Override
-    public boolean isComplete() {
-        return (platformPackInfo != null);
-    }
+  @Override
+  public boolean isComplete() {
+    return (platformPackInfo != null);
+  }
 
-    @Override
-    public boolean isLocal() {
-        if (solderPackInfo != null)
-            return solderPackInfo.isLocal();
-        if (platformPackInfo != null)
-            return platformPackInfo.isLocal();
+  @Override
+  public boolean isLocal() {
+    if (solderPackInfo != null) return solderPackInfo.isLocal();
+    if (platformPackInfo != null) return platformPackInfo.isLocal();
 
-        return true;
-    }
+    return true;
+  }
 
-    @Override
-    public boolean hasSolder() {
-        if (solderPackInfo != null)
-            return solderPackInfo.hasSolder();
-        if (platformPackInfo != null)
-            return platformPackInfo.hasSolder();
-        return false;
-    }
+  @Override
+  public boolean hasSolder() {
+    if (solderPackInfo != null) return solderPackInfo.hasSolder();
+    if (platformPackInfo != null) return platformPackInfo.hasSolder();
+    return false;
+  }
 }

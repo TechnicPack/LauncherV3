@@ -24,54 +24,61 @@ import java.io.IOException;
 
 @SuppressWarnings({"unused"})
 public class Mod extends Resource {
-    private String name;
-    private String version;
+  private String name;
+  private String version;
 
-    public Mod() {
+  public Mod() {}
 
+  public Mod(String name, String version, String url, String md5) {
+    super(url, md5);
+    this.name = name;
+    this.version = version;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public String getVersion() {
+    return version;
+  }
+
+  public File generateSafeCacheFile(File cacheDir) throws IOException {
+    String filename;
+    if (version != null && !version.isEmpty()) {
+      filename = name + "-" + version + ".zip";
+    } else {
+      filename = name + ".zip";
     }
 
-    public Mod(String name, String version, String url, String md5) {
-        super(url, md5);
-        this.name = name;
-        this.version = version;
+    // Sanitize filename by replacing invalid characters
+    filename = filename.replaceAll("[\\\\/:*?\"<>|]", "-");
+
+    File filePath = new File(cacheDir, filename);
+
+    if (!filePath.toPath().normalize().startsWith(cacheDir.toPath())) {
+      throw new IOException(
+          "Unsafe mod cache path detected (" + filePath + ") with base " + cacheDir);
     }
 
-    public String getName() {
-        return name;
-    }
+    return filePath;
+  }
 
-    public String getVersion() {
-        return version;
-    }
-
-    public File generateSafeCacheFile(File cacheDir) throws IOException {
-        String filename;
-        if (version != null && !version.isEmpty()) {
-            filename = name + "-" + version + ".zip";
-        } else {
-            filename = name + ".zip";
-        }
-
-        // Sanitize filename by replacing invalid characters
-        filename = filename.replaceAll("[\\\\/:*?\"<>|]", "-");
-
-        File filePath = new File(cacheDir, filename);
-
-        if (!filePath.toPath().normalize().startsWith(cacheDir.toPath())) {
-            throw new IOException("Unsafe mod cache path detected (" + filePath + ") with base " + cacheDir);
-        }
-
-        return filePath;
-    }
-
-    @Override
-    public String toString() {
-        return "Mod{" +
-                "name='" + name + '\'' +
-                ", version='" + version + '\'' +
-                ", url='" + getUrl() + '\'' +
-                ", md5='" + getMd5() + '\'' +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "Mod{"
+        + "name='"
+        + name
+        + '\''
+        + ", version='"
+        + version
+        + '\''
+        + ", url='"
+        + getUrl()
+        + '\''
+        + ", md5='"
+        + getMd5()
+        + '\''
+        + '}';
+  }
 }

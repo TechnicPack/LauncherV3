@@ -19,69 +19,75 @@
 
 package net.technicpack.ui.controls;
 
-import javax.swing.JPanel;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import javax.swing.JPanel;
 
 public class TiledBackground extends JPanel {
-    private transient BufferedImage image;
-    private int imageWidth;
-    private int imageHeight;
-    private boolean filterImage;
+  private transient BufferedImage image;
+  private int imageWidth;
+  private int imageHeight;
+  private boolean filterImage;
 
-    public TiledBackground(BufferedImage image) {
-        setImage(image);
+  public TiledBackground(BufferedImage image) {
+    setImage(image);
+  }
+
+  public boolean getFilterImage() {
+    return filterImage;
+  }
+
+  public void setFilterImage(boolean filterImage) {
+    this.filterImage = filterImage;
+  }
+
+  public void setImage(BufferedImage image) {
+    this.image = image;
+
+    if (image != null) {
+      imageWidth = image.getWidth();
+      imageHeight = image.getHeight();
+    } else {
+      imageWidth = 0;
+      imageHeight = 0;
+    }
+  }
+
+  @Override
+  public void paintComponent(Graphics g) {
+    int destWidth = getWidth();
+    int destHeight = getHeight();
+
+    if (image == null) {
+      Color staticColor = new Color(this.getBackground().getRGB());
+      g.setColor(staticColor);
+      g.fillRect(0, 0, destWidth, destHeight);
+      return;
     }
 
-    public boolean getFilterImage() { return filterImage; }
-    public void setFilterImage(boolean filterImage) { this.filterImage = filterImage; }
+    int startY = 0;
 
-    public void setImage(BufferedImage image) {
-        this.image = image;
+    while (startY < destHeight) {
+      int startX = 0;
+      int nextStartY = startY + imageHeight;
 
-        if (image != null) {
-            imageWidth = image.getWidth();
-            imageHeight = image.getHeight();
-        } else {
-            imageWidth = 0;
-            imageHeight = 0;
-        }
+      while (startX < destWidth) {
+        int nextStartX = startX + imageWidth;
+
+        // draw
+        g.drawImage(
+            image, startX, startY, nextStartX, nextStartY, 0, 0, imageWidth, imageHeight, null);
+
+        startX = nextStartX;
+      }
+
+      startY = nextStartY;
     }
 
-    @Override
-    public void paintComponent(Graphics g) {
-        int destWidth = getWidth();
-        int destHeight = getHeight();
-
-        if (image == null) {
-            Color staticColor = new Color(this.getBackground().getRGB());
-            g.setColor(staticColor);
-            g.fillRect(0, 0, destWidth, destHeight);
-            return;
-        }
-
-        int startY = 0;
-
-        while (startY < destHeight) {
-            int startX = 0;
-            int nextStartY = startY + imageHeight;
-
-            while (startX < destWidth) {
-                int nextStartX = startX + imageWidth;
-
-                //draw
-                g.drawImage(image, startX, startY, nextStartX, nextStartY, 0, 0, imageWidth, imageHeight, null);
-
-                startX = nextStartX;
-            }
-
-            startY = nextStartY;
-        }
-
-        if (filterImage) {
-            g.setColor(getBackground());
-            g.fillRect(0, 0, destWidth, destHeight);
-        }
+    if (filterImage) {
+      g.setColor(getBackground());
+      g.fillRect(0, 0, destWidth, destHeight);
     }
+  }
 }

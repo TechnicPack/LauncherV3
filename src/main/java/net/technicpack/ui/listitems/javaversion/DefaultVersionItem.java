@@ -24,15 +24,17 @@ import net.technicpack.ui.lang.ResourceLoader;
 
 public class DefaultVersionItem extends JavaVersionItem {
 
-    public DefaultVersionItem(IJavaRuntime version, ResourceLoader resourceLoader) {
-        super(version, resourceLoader);
-    }
+  public DefaultVersionItem(IJavaRuntime version, ResourceLoader resourceLoader) {
+    super(version, resourceLoader);
+  }
 
-    @Override
-    public String getVersionNumber() { return "default"; }
+  @Override
+  public String getVersionNumber() {
+    return "default";
+  }
 
-    @Override
-    public String toString() {
-        return getResourceLoader().getString("launcheroptions.java.defaultversion", super.toString());
-    }
+  @Override
+  public String toString() {
+    return getResourceLoader().getString("launcheroptions.java.defaultversion", super.toString());
+  }
 }

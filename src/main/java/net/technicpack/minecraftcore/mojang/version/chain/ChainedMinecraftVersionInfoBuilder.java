@@ -19,56 +19,58 @@
 
 package net.technicpack.minecraftcore.mojang.version.chain;
 
+import java.io.IOException;
+import java.util.regex.Pattern;
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.MinecraftVersionInfoBuilder;
 
-import java.io.IOException;
-import java.util.regex.Pattern;
-
 public class ChainedMinecraftVersionInfoBuilder implements MinecraftVersionInfoBuilder {
-    private static final Pattern MINECRAFT_VERSION_PATTERN = Pattern.compile("^\\d++(\\.\\d++)++$");
+  private static final Pattern MINECRAFT_VERSION_PATTERN = Pattern.compile("^\\d++(\\.\\d++)++$");
 
-    private final MinecraftVersionInfoBuilder primaryBuilder;
-    private final MinecraftVersionInfoBuilder chainedBuilder;
+  private final MinecraftVersionInfoBuilder primaryBuilder;
+  private final MinecraftVersionInfoBuilder chainedBuilder;
 
-    public ChainedMinecraftVersionInfoBuilder(MinecraftVersionInfoBuilder primaryBuilder, MinecraftVersionInfoBuilder chainedBuilder) {
-        this.primaryBuilder = primaryBuilder;
-        this.chainedBuilder = chainedBuilder;
+  public ChainedMinecraftVersionInfoBuilder(
+      MinecraftVersionInfoBuilder primaryBuilder, MinecraftVersionInfoBuilder chainedBuilder) {
+    this.primaryBuilder = primaryBuilder;
+    this.chainedBuilder = chainedBuilder;
+  }
+
+  public IMinecraftVersionInfo buildVersionFromKey(String key)
+      throws InterruptedException, IOException {
+    IMinecraftVersionInfo primary = primaryBuilder.buildVersionFromKey(key);
+
+    if (primary == null) return null;
+
+    ChainedMinecraftVersionInfo chain = new ChainedMinecraftVersionInfo(primary);
+
+    IMinecraftVersionInfo latest = primary;
+
+    while (latest.getParentVersion() != null) {
+      latest = chainedBuilder.buildVersionFromKey(latest.getParentVersion());
+
+      if (latest == null) return null;
+
+      chain.addVersionToChain(latest);
     }
 
-    public IMinecraftVersionInfo buildVersionFromKey(String key) throws InterruptedException, IOException {
-        IMinecraftVersionInfo primary = primaryBuilder.buildVersionFromKey(key);
+    if (latest.getDownloads() == null) {
+      // HACK!
+      // For some reason the last version in the chain doesn't have any downloads/probably isn't a
+      // Mojang version file.
+      // This happens with Attack of the B-Team, because Forge 1.6.4 has "null" set in inheritsFrom,
+      // so the
+      // launcher never attempts to download the Mojang version json from our repo.
+      // So, we just guess the Minecraft version and forcefully add the Mojang version file here.
 
-        if (primary == null)
-            return null;
+      String[] parts = latest.getId().split("-");
+      if (!MINECRAFT_VERSION_PATTERN.matcher(parts[0]).matches())
+        throw new IOException(
+            "Latest version in version chain failed to resolve to a Minecraft version");
 
-        ChainedMinecraftVersionInfo chain = new ChainedMinecraftVersionInfo(primary);
-
-        IMinecraftVersionInfo latest = primary;
-
-        while (latest.getParentVersion() != null) {
-            latest = chainedBuilder.buildVersionFromKey(latest.getParentVersion());
-
-            if (latest == null)
-                return null;
-
-            chain.addVersionToChain(latest);
-        }
-
-        if (latest.getDownloads() == null) {
-            // HACK!
-            // For some reason the last version in the chain doesn't have any downloads/probably isn't a Mojang version file.
-            // This happens with Attack of the B-Team, because Forge 1.6.4 has "null" set in inheritsFrom, so the
-            // launcher never attempts to download the Mojang version json from our repo.
-            // So, we just guess the Minecraft version and forcefully add the Mojang version file here.
-
-            String[] parts = latest.getId().split("-");
-            if (!MINECRAFT_VERSION_PATTERN.matcher(parts[0]).matches())
-                throw new IOException("Latest version in version chain failed to resolve to a Minecraft version");
-
-            chain.addVersionToChain(chainedBuilder.buildVersionFromKey(parts[0]));
-        }
-
-        return chain;
+      chain.addVersionToChain(chainedBuilder.buildVersionFromKey(parts[0]));
     }
+
+    return chain;
+  }
 }

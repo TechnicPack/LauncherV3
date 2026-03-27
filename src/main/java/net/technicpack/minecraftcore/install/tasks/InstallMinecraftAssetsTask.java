@@ -22,6 +22,13 @@ package net.technicpack.minecraftcore.install.tasks;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Map;
 import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.install.ITasksQueue;
 import net.technicpack.launchercore.install.InstallTasksQueue;
@@ -36,141 +43,145 @@ import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.utilslib.Utils;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Map;
-
 public class InstallMinecraftAssetsTask implements IInstallTask<IMinecraftVersionInfo> {
-    private final ModpackModel modpack;
-    private final String assetsDirectory;
-    private final Path assetsIndex;
-    private final ITasksQueue<IMinecraftVersionInfo> checkAssetsQueue;
-    private final ITasksQueue<IMinecraftVersionInfo> downloadAssetsQueue;
-    private final ITasksQueue<IMinecraftVersionInfo> copyAssetsQueue;
+  private final ModpackModel modpack;
+  private final String assetsDirectory;
+  private final Path assetsIndex;
+  private final ITasksQueue<IMinecraftVersionInfo> checkAssetsQueue;
+  private final ITasksQueue<IMinecraftVersionInfo> downloadAssetsQueue;
+  private final ITasksQueue<IMinecraftVersionInfo> copyAssetsQueue;
 
-    private static final String VIRTUAL_FIELD = "virtual";
-    private static final String MAP_TO_RESOURCES_FIELD = "map_to_resources";
-    private static final String OBJECTS_FIELD = "objects";
-    private static final String SIZE_FIELD = "size";
-    private static final String HASH_FIELD = "hash";
+  private static final String VIRTUAL_FIELD = "virtual";
+  private static final String MAP_TO_RESOURCES_FIELD = "map_to_resources";
+  private static final String OBJECTS_FIELD = "objects";
+  private static final String SIZE_FIELD = "size";
+  private static final String HASH_FIELD = "hash";
 
-    public InstallMinecraftAssetsTask(ModpackModel modpack, String assetsDirectory, File assetsIndex, ITasksQueue<IMinecraftVersionInfo> checkAssetsQueue, ITasksQueue<IMinecraftVersionInfo> downloadAssetsQueue, ITasksQueue<IMinecraftVersionInfo> copyAssetsQueue) {
-        this.modpack = modpack;
-        this.assetsDirectory = assetsDirectory;
-        this.assetsIndex = assetsIndex.toPath();
-        this.checkAssetsQueue = checkAssetsQueue;
-        this.downloadAssetsQueue = downloadAssetsQueue;
-        this.copyAssetsQueue = copyAssetsQueue;
+  public InstallMinecraftAssetsTask(
+      ModpackModel modpack,
+      String assetsDirectory,
+      File assetsIndex,
+      ITasksQueue<IMinecraftVersionInfo> checkAssetsQueue,
+      ITasksQueue<IMinecraftVersionInfo> downloadAssetsQueue,
+      ITasksQueue<IMinecraftVersionInfo> copyAssetsQueue) {
+    this.modpack = modpack;
+    this.assetsDirectory = assetsDirectory;
+    this.assetsIndex = assetsIndex.toPath();
+    this.checkAssetsQueue = checkAssetsQueue;
+    this.downloadAssetsQueue = downloadAssetsQueue;
+    this.copyAssetsQueue = copyAssetsQueue;
+  }
+
+  @Override
+  public String getTaskDescription() {
+    return "Checking Minecraft Assets";
+  }
+
+  @Override
+  public float getTaskProgress() {
+    return 0;
+  }
+
+  @Override
+  public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) throws IOException {
+    JsonObject obj = readAssetsIndex();
+
+    boolean isVirtual = false;
+
+    if (obj.has(VIRTUAL_FIELD) && obj.get(VIRTUAL_FIELD).isJsonPrimitive()) {
+      isVirtual = obj.get(VIRTUAL_FIELD).getAsBoolean();
     }
 
-    @Override
-    public String getTaskDescription() {
-        return "Checking Minecraft Assets";
+    boolean mapToResources = false;
+
+    if (obj.has(MAP_TO_RESOURCES_FIELD) && obj.get(MAP_TO_RESOURCES_FIELD).isJsonPrimitive()) {
+      mapToResources = obj.get(MAP_TO_RESOURCES_FIELD).getAsBoolean();
     }
 
-    @Override
-    public float getTaskProgress() {
-        return 0;
+    IMinecraftVersionInfo version = queue.getMetadata();
+
+    version.setAreAssetsVirtual(isVirtual);
+    version.setAssetsMapToResources(mapToResources);
+
+    JsonObject allAssets = obj.get(OBJECTS_FIELD).getAsJsonObject();
+
+    if (allAssets == null) {
+      throw new DownloadException("The assets json file was invalid.");
     }
 
-    @Override
-    public void runTask(InstallTasksQueue<IMinecraftVersionInfo> queue) throws IOException {
-        JsonObject obj = readAssetsIndex();
-
-        boolean isVirtual = false;
-
-        if (obj.has(VIRTUAL_FIELD) && obj.get(VIRTUAL_FIELD).isJsonPrimitive()) {
-            isVirtual = obj.get(VIRTUAL_FIELD).getAsBoolean();
-        }
-
-        boolean mapToResources = false;
-
-        if (obj.has(MAP_TO_RESOURCES_FIELD) && obj.get(MAP_TO_RESOURCES_FIELD).isJsonPrimitive()) {
-            mapToResources = obj.get(MAP_TO_RESOURCES_FIELD).getAsBoolean();
-        }
-
-        IMinecraftVersionInfo version = queue.getMetadata();
-
-        version.setAreAssetsVirtual(isVirtual);
-        version.setAssetsMapToResources(mapToResources);
-
-        JsonObject allAssets = obj.get(OBJECTS_FIELD).getAsJsonObject();
-
-        if (allAssets == null) {
-            throw new DownloadException("The assets json file was invalid.");
-        }
-
-        String assetsKey = version.getAssetsKey();
-        if (assetsKey == null || assetsKey.isEmpty()) {
-            assetsKey = "legacy";
-        }
-
-        for (Map.Entry<String, JsonElement> assetObj : allAssets.entrySet()) {
-            processAsset(assetObj, assetsKey, isVirtual, mapToResources);
-        }
+    String assetsKey = version.getAssetsKey();
+    if (assetsKey == null || assetsKey.isEmpty()) {
+      assetsKey = "legacy";
     }
 
-    private JsonObject readAssetsIndex() throws IOException {
-        try (Reader reader = Files.newBufferedReader(assetsIndex, StandardCharsets.UTF_8)) {
-            JsonObject jsonObject = MojangUtils.getGson().fromJson(reader, JsonObject.class);
+    for (Map.Entry<String, JsonElement> assetObj : allAssets.entrySet()) {
+      processAsset(assetObj, assetsKey, isVirtual, mapToResources);
+    }
+  }
 
-            if (jsonObject == null) {
-                throw new DownloadException(String.format("The assets file %s is invalid", assetsIndex));
-            }
+  private JsonObject readAssetsIndex() throws IOException {
+    try (Reader reader = Files.newBufferedReader(assetsIndex, StandardCharsets.UTF_8)) {
+      JsonObject jsonObject = MojangUtils.getGson().fromJson(reader, JsonObject.class);
 
-            return jsonObject;
-        } catch (JsonParseException e) {
-            throw new IOException(String.format("Failed to load assets index file %s", assetsIndex), e);
-        }
+      if (jsonObject == null) {
+        throw new DownloadException(String.format("The assets file %s is invalid", assetsIndex));
+      }
+
+      return jsonObject;
+    } catch (JsonParseException e) {
+      throw new IOException(String.format("Failed to load assets index file %s", assetsIndex), e);
+    }
+  }
+
+  private void processAsset(
+      Map.Entry<String, JsonElement> assetObj,
+      String assetsKey,
+      boolean isVirtual,
+      boolean mapToResources)
+      throws IOException {
+    String assetPath = assetObj.getKey();
+    JsonObject assetData = assetObj.getValue().getAsJsonObject();
+
+    String hash = assetData.get(HASH_FIELD).getAsString();
+    long size = assetData.get(SIZE_FIELD).getAsLong();
+
+    if (hash == null || hash.isEmpty()) {
+      throw new DownloadException(String.format("No hash provided for %s", assetPath));
     }
 
-    private void processAsset(Map.Entry<String, JsonElement> assetObj, String assetsKey, boolean isVirtual, boolean mapToResources) throws IOException {
-        String assetPath = assetObj.getKey();
-        JsonObject assetData = assetObj.getValue().getAsJsonObject();
+    IFileVerifier verifier;
 
-        String hash = assetData.get(HASH_FIELD).getAsString();
-        long size = assetData.get(SIZE_FIELD).getAsLong();
-
-        if (hash == null || hash.isEmpty()) {
-            throw new DownloadException(String.format("No hash provided for %s", assetPath));
-        }
-
-        IFileVerifier verifier;
-
-        // Check if the hash is a SHA-1 hash (40 characters long)
-        if (hash.length() == 40) {
-            verifier = new SHA1FileVerifier(hash);
-        } else {
-            Utils.getLogger().warning(String.format("Using file size for validation of asset %s", assetPath));
-            verifier = new FileSizeVerifier(size);
-        }
-
-        File target = new File(String.format("%s/objects/%s", assetsDirectory, hash.substring(0, 2)), hash);
-        String url = MojangUtils.getResourceUrl(hash);
-
-        Files.createDirectories(target.getParentFile().toPath());
-
-        File cloneTo = null;
-
-        if (isVirtual) {
-            cloneTo = new File(String.format("%s/virtual/%s/%s", assetsDirectory, assetsKey, assetPath));
-        } else if (mapToResources) {
-            cloneTo = new File(modpack.getResourcesDir(), assetPath);
-        }
-
-        EnsureFileTask<IMinecraftVersionInfo> ensureFileTask = new EnsureFileTask<>(downloadAssetsQueue, target)
-                .withUrl(url)
-                .withVerifier(verifier);
-
-        checkAssetsQueue.addTask(ensureFileTask);
-
-        if (cloneTo != null && !cloneTo.exists()) {
-            Files.createDirectories(cloneTo.getParentFile().toPath());
-            copyAssetsQueue.addTask(new CopyFileTask<>(target, cloneTo));
-        }
+    // Check if the hash is a SHA-1 hash (40 characters long)
+    if (hash.length() == 40) {
+      verifier = new SHA1FileVerifier(hash);
+    } else {
+      Utils.getLogger()
+          .warning(String.format("Using file size for validation of asset %s", assetPath));
+      verifier = new FileSizeVerifier(size);
     }
+
+    File target =
+        new File(String.format("%s/objects/%s", assetsDirectory, hash.substring(0, 2)), hash);
+    String url = MojangUtils.getResourceUrl(hash);
+
+    Files.createDirectories(target.getParentFile().toPath());
+
+    File cloneTo = null;
+
+    if (isVirtual) {
+      cloneTo = new File(String.format("%s/virtual/%s/%s", assetsDirectory, assetsKey, assetPath));
+    } else if (mapToResources) {
+      cloneTo = new File(modpack.getResourcesDir(), assetPath);
+    }
+
+    EnsureFileTask<IMinecraftVersionInfo> ensureFileTask =
+        new EnsureFileTask<>(downloadAssetsQueue, target).withUrl(url).withVerifier(verifier);
+
+    checkAssetsQueue.addTask(ensureFileTask);
+
+    if (cloneTo != null && !cloneTo.exists()) {
+      Files.createDirectories(cloneTo.getParentFile().toPath());
+      copyAssetsQueue.addTask(new CopyFileTask<>(target, cloneTo));
+    }
+  }
 }

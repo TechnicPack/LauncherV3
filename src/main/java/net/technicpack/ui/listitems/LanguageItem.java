@@ -22,17 +22,25 @@ package net.technicpack.ui.listitems;
 import net.technicpack.ui.lang.ResourceLoader;
 
 public class LanguageItem {
-    private String langCode;
-    private String text;
-    private ResourceLoader languageResources;
+  private String langCode;
+  private String text;
+  private ResourceLoader languageResources;
 
-    public LanguageItem(String code, String defaultText, ResourceLoader languageResources) {
-        this.langCode = code;
-        this.text = defaultText;
-        this.languageResources = languageResources;
-    }
+  public LanguageItem(String code, String defaultText, ResourceLoader languageResources) {
+    this.langCode = code;
+    this.text = defaultText;
+    this.languageResources = languageResources;
+  }
 
-    public String getLangCode() { return langCode; }
-    public String toString() { return text; }
-    public ResourceLoader getLanguageResources() { return languageResources; }
+  public String getLangCode() {
+    return langCode;
+  }
+
+  public String toString() {
+    return text;
+  }
+
+  public ResourceLoader getLanguageResources() {
+    return languageResources;
+  }
 }

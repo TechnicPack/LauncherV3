@@ -19,6 +19,10 @@
 
 package net.technicpack.solder.http;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 import net.technicpack.rest.RestObject;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.solder.ISolderApi;
@@ -27,53 +31,52 @@ import net.technicpack.solder.io.FullModpacks;
 import net.technicpack.solder.io.Solder;
 import net.technicpack.solder.io.SolderPackInfo;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-
 public class HttpSolderApi implements ISolderApi {
-    private String clientId;
-    private final Map<String, String> mirrorUrls = new HashMap<>();
+  private String clientId;
+  private final Map<String, String> mirrorUrls = new HashMap<>();
 
-    public HttpSolderApi(String clientId) {
-        this.clientId = clientId;
+  public HttpSolderApi(String clientId) {
+    this.clientId = clientId;
+  }
+
+  @Override
+  public ISolderPackApi getSolderPack(String solderRoot, String modpackSlug, String mirrorUrl)
+      throws RestfulAPIException {
+    return new HttpSolderPackApi(solderRoot, modpackSlug, clientId, mirrorUrl);
+  }
+
+  @Override
+  public Collection<SolderPackInfo> getPublicSolderPacks(String solderRoot)
+      throws RestfulAPIException {
+    return internalGetPublicSolderPacks(solderRoot, this);
+  }
+
+  public String getMirrorUrl(String solderRoot) throws RestfulAPIException {
+    synchronized (mirrorUrls) {
+      if (!mirrorUrls.containsKey(solderRoot)) {
+        String allPacksUrl = solderRoot + "modpack";
+        Solder solder = RestObject.getRestObject(Solder.class, allPacksUrl);
+        mirrorUrls.put(solderRoot, solder.getMirrorUrl());
+      }
+
+      return mirrorUrls.get(solderRoot);
+    }
+  }
+
+  @Override
+  public Collection<SolderPackInfo> internalGetPublicSolderPacks(
+      String solderRoot, ISolderApi packFactory) throws RestfulAPIException {
+    LinkedList<SolderPackInfo> allPackApis = new LinkedList<>();
+    String allPacksUrl = solderRoot + "modpack?include=full&cid=" + clientId;
+
+    FullModpacks technic = RestObject.getRestObject(FullModpacks.class, allPacksUrl);
+    for (SolderPackInfo info : technic.getModpacks().values()) {
+      ISolderPackApi solder =
+          packFactory.getSolderPack(solderRoot, info.getName(), technic.getMirrorUrl());
+      info.setSolder(solder);
+      allPackApis.add(info);
     }
 
-    @Override
-    public ISolderPackApi getSolderPack(String solderRoot, String modpackSlug, String mirrorUrl) throws RestfulAPIException {
-        return new HttpSolderPackApi(solderRoot, modpackSlug, clientId, mirrorUrl);
-    }
-
-    @Override
-    public Collection<SolderPackInfo> getPublicSolderPacks(String solderRoot) throws RestfulAPIException {
-        return internalGetPublicSolderPacks(solderRoot, this);
-    }
-
-    public String getMirrorUrl(String solderRoot) throws RestfulAPIException {
-        synchronized (mirrorUrls) {
-            if (!mirrorUrls.containsKey(solderRoot)) {
-                String allPacksUrl = solderRoot + "modpack";
-                Solder solder = RestObject.getRestObject(Solder.class, allPacksUrl);
-                mirrorUrls.put(solderRoot, solder.getMirrorUrl());
-            }
-
-            return mirrorUrls.get(solderRoot);
-        }
-    }
-
-    @Override
-    public Collection<SolderPackInfo> internalGetPublicSolderPacks(String solderRoot, ISolderApi packFactory) throws RestfulAPIException {
-        LinkedList<SolderPackInfo> allPackApis = new LinkedList<>();
-        String allPacksUrl = solderRoot + "modpack?include=full&cid=" + clientId;
-
-        FullModpacks technic = RestObject.getRestObject(FullModpacks.class, allPacksUrl);
-        for (SolderPackInfo info : technic.getModpacks().values()) {
-            ISolderPackApi solder = packFactory.getSolderPack(solderRoot, info.getName(), technic.getMirrorUrl());
-            info.setSolder(solder);
-            allPackApis.add(info);
-        }
-
-        return allPackApis;
-    }
+    return allPackApis;
+  }
 }

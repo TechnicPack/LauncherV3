@@ -22,14 +22,14 @@ import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.launcher.settings.StartupParameters;
 
 public class CommandLineBuildNumber implements IBuildNumber {
-    private StartupParameters commandLineParams;
+  private StartupParameters commandLineParams;
 
-    public CommandLineBuildNumber(StartupParameters commandLineParams) {
-        this.commandLineParams = commandLineParams;
-    }
+  public CommandLineBuildNumber(StartupParameters commandLineParams) {
+    this.commandLineParams = commandLineParams;
+  }
 
-    @Override
-    public String getBuildNumber() {
-        return commandLineParams.getBuildNumber();
-    }
+  @Override
+  public String getBuildNumber() {
+    return commandLineParams.getBuildNumber();
+  }
 }

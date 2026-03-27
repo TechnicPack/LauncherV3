@@ -23,13 +23,13 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.rest.io.Resource;
 
 public class BackgroundResourceType implements IModpackResourceType {
-    @Override
-    public Resource getResource(ModpackModel modpack) {
-        return modpack.getBackground();
-    }
+  @Override
+  public Resource getResource(ModpackModel modpack) {
+    return modpack.getBackground();
+  }
 
-    @Override
-    public String getImageName() {
-        return "background.png";
-    }
+  @Override
+  public String getImageName() {
+    return "background.png";
+  }
 }

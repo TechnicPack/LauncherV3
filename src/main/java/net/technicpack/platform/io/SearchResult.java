@@ -21,24 +21,24 @@ package net.technicpack.platform.io;
 
 @SuppressWarnings({"unused"})
 public class SearchResult {
-    private int id;
-    private String name;
-    private String slug;
-    private String url;
+  private int id;
+  private String name;
+  private String slug;
+  private String url;
 
-    public int getId() {
-        return id;
-    }
+  public int getId() {
+    return id;
+  }
 
-    public String getDisplayName() {
-        return name;
-    }
+  public String getDisplayName() {
+    return name;
+  }
 
-    public String getSlug() {
-        return slug;
-    }
+  public String getSlug() {
+    return slug;
+  }
 
-    public String getUrl() {
-        return url;
-    }
+  public String getUrl() {
+    return url;
+  }
 }

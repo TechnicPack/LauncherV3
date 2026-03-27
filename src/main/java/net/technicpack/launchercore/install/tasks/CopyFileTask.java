@@ -19,33 +19,32 @@
 
 package net.technicpack.launchercore.install.tasks;
 
+import java.io.File;
+import java.io.IOException;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import org.apache.commons.io.FileUtils;
 
-import java.io.File;
-import java.io.IOException;
-
 public class CopyFileTask<T> implements IInstallTask<T> {
-    private File source;
-    private File destination;
+  private File source;
+  private File destination;
 
-    public CopyFileTask(File source, File destination) {
-        this.source = source;
-        this.destination = destination;
-    }
+  public CopyFileTask(File source, File destination) {
+    this.source = source;
+    this.destination = destination;
+  }
 
-    @Override
-    public String getTaskDescription() {
-        return "Copying files.";
-    }
+  @Override
+  public String getTaskDescription() {
+    return "Copying files.";
+  }
 
-    @Override
-    public float getTaskProgress() {
-        return 0;
-    }
+  @Override
+  public float getTaskProgress() {
+    return 0;
+  }
 
-    @Override
-    public void runTask(InstallTasksQueue<T> queue) throws IOException {
-        FileUtils.copyFile(this.source, this.destination);
-    }
+  @Override
+  public void runTask(InstallTasksQueue<T> queue) throws IOException {
+    FileUtils.copyFile(this.source, this.destination);
+  }
 }

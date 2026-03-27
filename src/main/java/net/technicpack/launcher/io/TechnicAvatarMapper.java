@@ -18,38 +18,38 @@
 
 package net.technicpack.launcher.io;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
 import net.technicpack.launchercore.image.IImageMapper;
 import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.ui.lang.ResourceLoader;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-
 public class TechnicAvatarMapper implements IImageMapper<AuthorshipInfo> {
-    private LauncherFileSystem fileSystem;
-    private BufferedImage defaultImage;
+  private LauncherFileSystem fileSystem;
+  private BufferedImage defaultImage;
 
-    public TechnicAvatarMapper(LauncherFileSystem fileSystem, ResourceLoader resources) {
-        this.fileSystem = fileSystem;
-        defaultImage = resources.getImage("icon.png");
-    }
+  public TechnicAvatarMapper(LauncherFileSystem fileSystem, ResourceLoader resources) {
+    this.fileSystem = fileSystem;
+    defaultImage = resources.getImage("icon.png");
+  }
 
-    @Override
-    public boolean shouldDownloadImage(AuthorshipInfo imageKey) {
-        return true;
-    }
+  @Override
+  public boolean shouldDownloadImage(AuthorshipInfo imageKey) {
+    return true;
+  }
 
-    @Override
-    public File getImageLocation(AuthorshipInfo imageKey) {
-        return fileSystem.getAssetsDirectory()
-                         .resolve("avatars")
-                         .resolve("gravitar")
-                         .resolve(imageKey.getUser() + ".png")
-                         .toFile();
-    }
+  @Override
+  public File getImageLocation(AuthorshipInfo imageKey) {
+    return fileSystem
+        .getAssetsDirectory()
+        .resolve("avatars")
+        .resolve("gravitar")
+        .resolve(imageKey.getUser() + ".png")
+        .toFile();
+  }
 
-    @Override
-    public BufferedImage getDefaultImage() {
-        return defaultImage;
-    }
+  @Override
+  public BufferedImage getDefaultImage() {
+    return defaultImage;
+  }
 }

@@ -20,6 +20,9 @@ package net.technicpack.launcher.ui.components.discover;
  * }}}
  */
 
+import java.awt.image.BufferedImage;
+import java.util.logging.Level;
+import javax.swing.SwingUtilities;
 import org.xhtmlrenderer.extend.FSImage;
 import org.xhtmlrenderer.resource.ImageResource;
 import org.xhtmlrenderer.swing.AWTFSImage;
@@ -27,60 +30,67 @@ import org.xhtmlrenderer.swing.ImageResourceLoader;
 import org.xhtmlrenderer.util.ImageUtil;
 import org.xhtmlrenderer.util.XRLog;
 
-import javax.swing.SwingUtilities;
-import java.awt.image.BufferedImage;
-import java.util.logging.Level;
-
-
 /**
- * A background thread (daemon, low priority) which reads BackgroundImageLoaderItem from a BackgroundImageQueue
- * and loads the images into memory. Once images have loaded, the item's MutableFSImage will receive the newly loaded
- * image via setImage(newImage). Images, once loaded, are always BufferedImages and will always be compatible with
- * the current screen's graphics configuration. If an image cannot be loaded (network failure), a 1 x 1 pixel image
- * will be returned instead and the problem will be logged.
+ * A background thread (daemon, low priority) which reads BackgroundImageLoaderItem from a
+ * BackgroundImageQueue and loads the images into memory. Once images have loaded, the item's
+ * MutableFSImage will receive the newly loaded image via setImage(newImage). Images, once loaded,
+ * are always BufferedImages and will always be compatible with the current screen's graphics
+ * configuration. If an image cannot be loaded (network failure), a 1 x 1 pixel image will be
+ * returned instead and the problem will be logged.
  */
 class ImageLoadWorker extends Thread {
-    private static volatile int counter = 0;
-    private final ImageLoadQueue queue;
+  private static volatile int counter = 0;
+  private final ImageLoadQueue queue;
 
-    public ImageLoadWorker(ImageLoadQueue queue) {
-        this.queue = queue;
-        setDaemon(true);
-        setPriority(Thread.MIN_PRIORITY);
-        setName("ImageLoadWorker(" + counter++ + ")");
-    }
+  public ImageLoadWorker(ImageLoadQueue queue) {
+    this.queue = queue;
+    setDaemon(true);
+    setPriority(Thread.MIN_PRIORITY);
+    setName("ImageLoadWorker(" + counter++ + ")");
+  }
 
-    public void run() {
-        try {
-            while (true) {
-                final ImageLoadItem loadItem = queue.getTask();
+  public void run() {
+    try {
+      while (true) {
+        final ImageLoadItem loadItem = queue.getTask();
 
-                if (ImageLoadQueue.isKillSwitch(loadItem)) {
-                    break;
-                }
-                final ImageResource ir = ImageResourceLoader.loadImageResourceFromUri(loadItem._uri);
-                FSImage awtfsImage = ir.getImage();
-                BufferedImage newImg = ((AWTFSImage) awtfsImage).getImage();
-                XRLog.load(Level.FINE, this + ", loaded " + loadItem._uri);
-
-                loadItem._imageResourceLoader.loaded(ir, newImg.getWidth(), newImg.getHeight());
-                final boolean wasScaled;
-                if (loadItem.haveTargetDimensions() && !ir.hasDimensions(loadItem._targetWidth, loadItem._targetHeight)) {
-                    XRLog.load(Level.FINE, this + ", scaling " + loadItem._uri + " to " + loadItem._targetWidth + ", " + loadItem._targetHeight);
-                    newImg = ImageUtil.getScaledInstance(newImg, loadItem._targetWidth, loadItem._targetHeight);
-                    ImageResource sir = new ImageResource(ir.getImageUri(), AWTFSImage.createImage(newImg));
-                    loadItem._imageResourceLoader.loaded(sir, newImg.getWidth(), newImg.getHeight());
-                    wasScaled = true;
-                } else {
-                    wasScaled = false;
-                }
-
-                // msfImage belongs to the Swing AWT thread
-                final BufferedImage newImg1 = newImg;
-                SwingUtilities.invokeLater(() -> loadItem._mfsImage.setImage(loadItem._uri, newImg1, wasScaled));
-            }
-        } catch (InterruptedException e) {
-            //
+        if (ImageLoadQueue.isKillSwitch(loadItem)) {
+          break;
         }
+        final ImageResource ir = ImageResourceLoader.loadImageResourceFromUri(loadItem._uri);
+        FSImage awtfsImage = ir.getImage();
+        BufferedImage newImg = ((AWTFSImage) awtfsImage).getImage();
+        XRLog.load(Level.FINE, this + ", loaded " + loadItem._uri);
+
+        loadItem._imageResourceLoader.loaded(ir, newImg.getWidth(), newImg.getHeight());
+        final boolean wasScaled;
+        if (loadItem.haveTargetDimensions()
+            && !ir.hasDimensions(loadItem._targetWidth, loadItem._targetHeight)) {
+          XRLog.load(
+              Level.FINE,
+              this
+                  + ", scaling "
+                  + loadItem._uri
+                  + " to "
+                  + loadItem._targetWidth
+                  + ", "
+                  + loadItem._targetHeight);
+          newImg =
+              ImageUtil.getScaledInstance(newImg, loadItem._targetWidth, loadItem._targetHeight);
+          ImageResource sir = new ImageResource(ir.getImageUri(), AWTFSImage.createImage(newImg));
+          loadItem._imageResourceLoader.loaded(sir, newImg.getWidth(), newImg.getHeight());
+          wasScaled = true;
+        } else {
+          wasScaled = false;
+        }
+
+        // msfImage belongs to the Swing AWT thread
+        final BufferedImage newImg1 = newImg;
+        SwingUtilities.invokeLater(
+            () -> loadItem._mfsImage.setImage(loadItem._uri, newImg1, wasScaled));
+      }
+    } catch (InterruptedException e) {
+      //
     }
+  }
 }

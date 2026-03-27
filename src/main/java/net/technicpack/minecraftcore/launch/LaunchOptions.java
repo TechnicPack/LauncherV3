@@ -21,43 +21,41 @@ package net.technicpack.minecraftcore.launch;
 
 public class LaunchOptions {
 
-    private String title;
-    private String iconPath;
-    private ILaunchOptions options;
+  private String title;
+  private String iconPath;
+  private ILaunchOptions options;
 
-    public LaunchOptions(String title, String iconPath, ILaunchOptions options) {
-        this.options = options;
-        this.title = title;
-        this.iconPath = iconPath;
+  public LaunchOptions(String title, String iconPath, ILaunchOptions options) {
+    this.options = options;
+    this.title = title;
+    this.iconPath = iconPath;
+  }
+
+  public String getTitle() {
+    return title;
+  }
+
+  public String getIconPath() {
+    return iconPath;
+  }
+
+  public ILaunchOptions getOptions() {
+    return options;
+  }
+
+  public void appendToCommands(LaunchCommandCollector commands) {
+    if (getTitle() != null) {
+      commands.addUnique("--title", title);
     }
 
-    public String getTitle() {
-        return title;
+    if (options.getLaunchWindowType() == WindowType.FULLSCREEN) commands.addUnique("--fullscreen");
+    else if (options.getLaunchWindowType() == WindowType.CUSTOM) {
+      commands.addUnique("--width", Integer.toString(options.getCustomWidth()));
+      commands.addUnique("--height", Integer.toString(options.getCustomHeight()));
     }
 
-    public String getIconPath() {
-        return iconPath;
+    if (getIconPath() != null) {
+      commands.addUnique("--icon", getIconPath());
     }
-
-    public ILaunchOptions getOptions() {
-        return options;
-    }
-
-    public void appendToCommands(LaunchCommandCollector commands) {
-        if (getTitle() != null) {
-            commands.addUnique("--title", title);
-        }
-
-        if (options.getLaunchWindowType() == WindowType.FULLSCREEN)
-            commands.addUnique("--fullscreen");
-        else if (options.getLaunchWindowType() == WindowType.CUSTOM) {
-            commands.addUnique("--width", Integer.toString(options.getCustomWidth()));
-            commands.addUnique("--height", Integer.toString(options.getCustomHeight()));
-        }
-
-        if (getIconPath() != null) {
-            commands.addUnique("--icon", getIconPath());
-        }
-    }
-
+  }
 }

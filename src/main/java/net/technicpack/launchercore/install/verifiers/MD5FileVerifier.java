@@ -19,45 +19,56 @@
 
 package net.technicpack.launchercore.install.verifiers;
 
+import java.io.File;
+import java.nio.file.Path;
 import net.technicpack.utilslib.CryptoUtils;
 import net.technicpack.utilslib.Utils;
 
-import java.io.File;
-import java.nio.file.Path;
-
 public class MD5FileVerifier implements IFileVerifier {
-    private final String expectedHash;
+  private final String expectedHash;
 
-    public MD5FileVerifier(String expectedHash) {
-        this.expectedHash = expectedHash;
-    }
+  public MD5FileVerifier(String expectedHash) {
+    this.expectedHash = expectedHash;
+  }
 
-    public boolean isFileValid(File file) {
-        if (expectedHash == null || expectedHash.isEmpty())
-            return false;
+  public boolean isFileValid(File file) {
+    if (expectedHash == null || expectedHash.isEmpty()) return false;
 
-        String resultMD5 = CryptoUtils.getMD5(file);
+    String resultMD5 = CryptoUtils.getMD5(file);
 
-        boolean hashMatches = expectedHash.equalsIgnoreCase(resultMD5);
+    boolean hashMatches = expectedHash.equalsIgnoreCase(resultMD5);
 
-        if (!hashMatches)
-            Utils.getLogger().warning("MD5 verification for " + file + " failed. Expected " + expectedHash + ", got " + resultMD5);
+    if (!hashMatches)
+      Utils.getLogger()
+          .warning(
+              "MD5 verification for "
+                  + file
+                  + " failed. Expected "
+                  + expectedHash
+                  + ", got "
+                  + resultMD5);
 
-        return hashMatches;
-    }
+    return hashMatches;
+  }
 
-    @Override
-    public boolean isFileValid(Path path) {
-        if (expectedHash == null || expectedHash.isEmpty())
-            return false;
+  @Override
+  public boolean isFileValid(Path path) {
+    if (expectedHash == null || expectedHash.isEmpty()) return false;
 
-        String resultMD5 = CryptoUtils.getMD5(path);
+    String resultMD5 = CryptoUtils.getMD5(path);
 
-        boolean hashMatches = expectedHash.equalsIgnoreCase(resultMD5);
+    boolean hashMatches = expectedHash.equalsIgnoreCase(resultMD5);
 
-        if (!hashMatches)
-            Utils.getLogger().warning("MD5 verification for " + path + " failed. Expected " + expectedHash + ", got " + resultMD5);
+    if (!hashMatches)
+      Utils.getLogger()
+          .warning(
+              "MD5 verification for "
+                  + path
+                  + " failed. Expected "
+                  + expectedHash
+                  + ", got "
+                  + resultMD5);
 
-        return hashMatches;
-    }
+    return hashMatches;
+  }
 }

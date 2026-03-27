@@ -19,24 +19,23 @@
 
 package net.technicpack.minecraftcore.mojang.version.builder.retrievers;
 
+import java.io.File;
+import java.io.IOException;
 import net.technicpack.minecraftcore.mojang.version.builder.MinecraftVersionInfoRetriever;
 import net.technicpack.utilslib.ZipUtils;
 
-import java.io.File;
-import java.io.IOException;
-
 public class ZipMinecraftVersionInfoRetriever implements MinecraftVersionInfoRetriever {
 
-    private File zip;
+  private File zip;
 
-    public ZipMinecraftVersionInfoRetriever(File sourceZip) {
-        this.zip = sourceZip;
-    }
+  public ZipMinecraftVersionInfoRetriever(File sourceZip) {
+    this.zip = sourceZip;
+  }
 
-    @Override
-    public void retrieveVersion(File target, String key) throws IOException, InterruptedException {
-        if (zip.exists()) {
-            ZipUtils.extractFile(zip, target.getParentFile(), target.getName());
-        }
+  @Override
+  public void retrieveVersion(File target, String key) throws IOException, InterruptedException {
+    if (zip.exists()) {
+      ZipUtils.extractFile(zip, target.getParentFile(), target.getName());
     }
+  }
 }

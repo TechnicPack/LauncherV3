@@ -19,6 +19,9 @@
 
 package net.technicpack.platform.packsources;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
 import net.technicpack.platform.io.FeedItem;
 import net.technicpack.platform.io.SearchResult;
@@ -26,113 +29,115 @@ import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.rest.io.Resource;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 public class SearchResultPackInfo implements PackInfo {
-    private SearchResult result;
+  private SearchResult result;
 
-    public SearchResultPackInfo(SearchResult result) {
-        this.result = result;
-    }
+  public SearchResultPackInfo(SearchResult result) {
+    this.result = result;
+  }
 
-    @Override
-    public String getName() {
-        return result.getSlug();
-    }
+  @Override
+  public String getName() {
+    return result.getSlug();
+  }
 
-    @Override
-    public String getDisplayName() {
-        return result.getDisplayName();
-    }
+  @Override
+  public String getDisplayName() {
+    return result.getDisplayName();
+  }
 
-    @Override
-    public String getDiscordId() { return null; }
+  @Override
+  public String getDiscordId() {
+    return null;
+  }
 
-    @Override
-    public String getWebSite() {
-        return null;
-    }
+  @Override
+  public String getWebSite() {
+    return null;
+  }
 
-    @Override
-    public Resource getIcon() {
-        return null;
-    }
+  @Override
+  public Resource getIcon() {
+    return null;
+  }
 
-    @Override
-    public Resource getBackground() {
-        return null;
-    }
+  @Override
+  public Resource getBackground() {
+    return null;
+  }
 
-    @Override
-    public Resource getLogo() {
-        return null;
-    }
+  @Override
+  public Resource getLogo() {
+    return null;
+  }
 
-    @Override
-    public String getRecommended() {
-        return null;
-    }
+  @Override
+  public String getRecommended() {
+    return null;
+  }
 
-    @Override
-    public String getLatest() {
-        return null;
-    }
+  @Override
+  public String getLatest() {
+    return null;
+  }
 
-    @Override
-    public List<String> getBuilds() {
-        return Collections.emptyList();
-    }
+  @Override
+  public List<String> getBuilds() {
+    return Collections.emptyList();
+  }
 
-    @Override
-    public ArrayList<FeedItem> getFeed() {
-        return new ArrayList<>();
-    }
+  @Override
+  public ArrayList<FeedItem> getFeed() {
+    return new ArrayList<>();
+  }
 
-    @Override
-    public String getDescription() {
-        return "";
-    }
+  @Override
+  public String getDescription() {
+    return "";
+  }
 
-    @Override
-    public Integer getRuns() {
-        return null;
-    }
+  @Override
+  public Integer getRuns() {
+    return null;
+  }
 
-    @Override
-    public Integer getInstalls() {
-        return null;
-    }
+  @Override
+  public Integer getInstalls() {
+    return null;
+  }
 
-    @Override
-    public Integer getLikes() {
-        return null;
-    }
+  @Override
+  public Integer getLikes() {
+    return null;
+  }
 
-    @Override
-    public boolean isServerPack() { return false; }
+  @Override
+  public boolean isServerPack() {
+    return false;
+  }
 
-    @Override
-    public Modpack getModpack(String build) throws BuildInaccessibleException {
-        throw new BuildInaccessibleException(getDisplayName(), build);
-    }
+  @Override
+  public Modpack getModpack(String build) throws BuildInaccessibleException {
+    throw new BuildInaccessibleException(getDisplayName(), build);
+  }
 
-    @Override
-    public boolean isComplete() {
-        return false;
-    }
+  @Override
+  public boolean isComplete() {
+    return false;
+  }
 
-    @Override
-    public boolean isOfficial() { return false; }
+  @Override
+  public boolean isOfficial() {
+    return false;
+  }
 
-    @Override
-    public boolean isLocal() {
-        return false;
-    }
+  @Override
+  public boolean isLocal() {
+    return false;
+  }
 
-    @Override
-    public boolean hasSolder() {
-        return false;
-    }
+  @Override
+  public boolean hasSolder() {
+    return false;
+  }
 }

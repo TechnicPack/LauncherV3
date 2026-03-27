@@ -18,6 +18,10 @@
 
 package net.technicpack.launcher.ui.components.discover;
 
+import java.awt.Cursor;
+import java.awt.Rectangle;
+import java.util.LinkedList;
+import java.util.List;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.utilslib.DesktopUtils;
@@ -31,191 +35,182 @@ import org.xhtmlrenderer.render.Box;
 import org.xhtmlrenderer.swing.BasicPanel;
 import org.xhtmlrenderer.swing.LinkListener;
 
-import java.awt.Cursor;
-import java.awt.Rectangle;
-import java.util.LinkedList;
-import java.util.List;
-
 public class DiscoverLinkListener extends LinkListener {
 
-    private IPlatformApi platform;
-    private ModpackSelector modpackSelector;
-    private List<Box> mousedLinks = new LinkedList<>();
-    private Box _previouslyHovered;
+  private IPlatformApi platform;
+  private ModpackSelector modpackSelector;
+  private List<Box> mousedLinks = new LinkedList<>();
+  private Box _previouslyHovered;
 
-    public DiscoverLinkListener(IPlatformApi platform, ModpackSelector modpackSelector ) {
-        this.platform = platform;
-        this.modpackSelector = modpackSelector;
+  public DiscoverLinkListener(IPlatformApi platform, ModpackSelector modpackSelector) {
+    this.platform = platform;
+    this.modpackSelector = modpackSelector;
+  }
+
+  @Override
+  public void linkClicked(BasicPanel panel, String uri) {
+    if (uri.startsWith("platform://")) {
+      if (uri.length() < 12) return;
+      String slug = uri.substring(11);
+
+      String platformUri = this.platform.getPlatformUri(slug);
+
+      modpackSelector.setFilter(platformUri);
+    } else DesktopUtils.browseUrl(uri);
+  }
+
+  @Override
+  public void onMouseOver(
+      org.xhtmlrenderer.swing.BasicPanel panel, org.xhtmlrenderer.render.Box box) {
+    if (isLink(panel, box)) {
+      mousedLinks.add(box);
+      panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 
-    @Override
-    public void linkClicked(BasicPanel panel, String uri) {
-        if (uri.startsWith("platform://")) {
-            if (uri.length() < 12)
-                return;
-            String slug = uri.substring(11);
+    LayoutContext c = panel.getLayoutContext();
 
-            String platformUri = this.platform.getPlatformUri(slug);
-
-            modpackSelector.setFilter(platformUri);
-        } else
-            DesktopUtils.browseUrl(uri);
+    if (c == null) {
+      return;
     }
 
-    @Override
-    public void onMouseOver(org.xhtmlrenderer.swing.BasicPanel panel, org.xhtmlrenderer.render.Box box) {
-        if (isLink(panel, box)) {
-            mousedLinks.add(box);
-            panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        }
+    boolean needRepaint = false;
 
-        LayoutContext c = panel.getLayoutContext();
+    Element currentlyHovered = getHoveredElement(c.getCss(), box);
 
-        if (c == null) {
-            return;
-        }
-
-        boolean needRepaint = false;
-
-        Element currentlyHovered = getHoveredElement(c.getCss(), box);
-
-        if (currentlyHovered == panel.hovered_element) {
-            return;
-        }
-
-        panel.hovered_element = currentlyHovered;
-        Box hoverBox = findBoxForElement(currentlyHovered, panel.getRootLayer());
-
-        boolean targetedRepaint = true;
-        Rectangle repaintRegion = null;
-
-        // If we moved out of the old block then unstyle it
-        if (_previouslyHovered != null) {
-            needRepaint = true;
-            _previouslyHovered.restyle(c);
-
-            PaintingInfo paintInfo = _previouslyHovered.getPaintingInfo();
-
-            if (paintInfo == null) {
-                targetedRepaint = false;
-            } else {
-                repaintRegion = new Rectangle(paintInfo.getAggregateBounds());
-            }
-
-            _previouslyHovered = null;
-        }
-
-        if (currentlyHovered != null) {
-            needRepaint = true;
-            Box target = hoverBox.getRestyleTarget();
-            target.restyle(c);
-
-            if (targetedRepaint) {
-                PaintingInfo paintInfo = target.getPaintingInfo();
-
-                if (paintInfo == null) {
-                    targetedRepaint = false;
-                } else {
-                    if (repaintRegion == null) {
-                        repaintRegion = new Rectangle(paintInfo.getAggregateBounds());
-                    } else {
-                        repaintRegion.add(paintInfo.getAggregateBounds());
-                    }
-                }
-            }
-
-            _previouslyHovered = target;
-        }
-
-        if (needRepaint) {
-            if (targetedRepaint) {
-                panel.repaint(repaintRegion);
-            } else {
-                panel.repaint();
-            }
-        }
+    if (currentlyHovered == panel.hovered_element) {
+      return;
     }
 
-    // look up the Element that corresponds to the Box we are hovering over
-    private Element getHoveredElement(StyleReference style, Box ib) {
-        if (ib == null) {
-            return null;
-        }
+    panel.hovered_element = currentlyHovered;
+    Box hoverBox = findBoxForElement(currentlyHovered, panel.getRootLayer());
 
-        Element element = ib.getElement();
+    boolean targetedRepaint = true;
+    Rectangle repaintRegion = null;
 
-        while (element != null && !style.isHoverStyled(element)) {
-            Node node = element.getParentNode();
-            if (node.getNodeType() == Node.ELEMENT_NODE) {
-                element = (Element) node;
-            } else {
-                element = null;
-            }
-        }
+    // If we moved out of the old block then unstyle it
+    if (_previouslyHovered != null) {
+      needRepaint = true;
+      _previouslyHovered.restyle(c);
 
-        return element;
+      PaintingInfo paintInfo = _previouslyHovered.getPaintingInfo();
+
+      if (paintInfo == null) {
+        targetedRepaint = false;
+      } else {
+        repaintRegion = new Rectangle(paintInfo.getAggregateBounds());
+      }
+
+      _previouslyHovered = null;
     }
 
-    @Override
-    public void onMouseOut(org.xhtmlrenderer.swing.BasicPanel panel, org.xhtmlrenderer.render.Box box) {
-        if (mousedLinks.contains(box)) {
-            mousedLinks.remove(box);
+    if (currentlyHovered != null) {
+      needRepaint = true;
+      Box target = hoverBox.getRestyleTarget();
+      target.restyle(c);
 
-            if (mousedLinks.size() == 0) {
-                panel.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-            }
+      if (targetedRepaint) {
+        PaintingInfo paintInfo = target.getPaintingInfo();
+
+        if (paintInfo == null) {
+          targetedRepaint = false;
+        } else {
+          if (repaintRegion == null) {
+            repaintRegion = new Rectangle(paintInfo.getAggregateBounds());
+          } else {
+            repaintRegion.add(paintInfo.getAggregateBounds());
+          }
         }
+      }
+
+      _previouslyHovered = target;
     }
 
-    protected boolean isLink(BasicPanel panel, Box box) {
-        if (box == null || box.getElement() == null) {
-            return false;
-        }
+    if (needRepaint) {
+      if (targetedRepaint) {
+        panel.repaint(repaintRegion);
+      } else {
+        panel.repaint();
+      }
+    }
+  }
 
-        return findLink(panel, box.getElement());
+  // look up the Element that corresponds to the Box we are hovering over
+  private Element getHoveredElement(StyleReference style, Box ib) {
+    if (ib == null) {
+      return null;
     }
 
-    private Box findBoxForElement(Element e, Layer layer) {
-        Box find = findBoxForElement(e, layer.getMaster());
+    Element element = ib.getElement();
 
-        if (find != null)
-            return find;
-
-        for (Layer l : layer.getChildren()) {
-            find = findBoxForElement(e, l);
-
-            if (find != null)
-                return find;
-        }
-
-        return null;
+    while (element != null && !style.isHoverStyled(element)) {
+      Node node = element.getParentNode();
+      if (node.getNodeType() == Node.ELEMENT_NODE) {
+        element = (Element) node;
+      } else {
+        element = null;
+      }
     }
 
-    private Box findBoxForElement(Element e, Box box) {
-        if (box.getElement() == e)
-            return box;
+    return element;
+  }
 
-        for(Box b : box.getChildren()) {
-            Box find = findBoxForElement(e, b);
+  @Override
+  public void onMouseOut(
+      org.xhtmlrenderer.swing.BasicPanel panel, org.xhtmlrenderer.render.Box box) {
+    if (mousedLinks.contains(box)) {
+      mousedLinks.remove(box);
 
-            if (find != null)
-                return find;
-        }
+      if (mousedLinks.size() == 0) {
+        panel.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+      }
+    }
+  }
 
-        return null;
+  protected boolean isLink(BasicPanel panel, Box box) {
+    if (box == null || box.getElement() == null) {
+      return false;
     }
 
-    private boolean findLink(BasicPanel panel, Element e) {
-        String uri;
+    return findLink(panel, box.getElement());
+  }
 
-        for (Node node = e; node.getNodeType() == Node.ELEMENT_NODE; node = node.getParentNode()) {
-            uri = panel.getSharedContext().getNamespaceHandler().getLinkUri((Element) node);
+  private Box findBoxForElement(Element e, Layer layer) {
+    Box find = findBoxForElement(e, layer.getMaster());
 
-            if (uri != null) {
-                return true;
-            }
-        }
+    if (find != null) return find;
 
-        return false;
+    for (Layer l : layer.getChildren()) {
+      find = findBoxForElement(e, l);
+
+      if (find != null) return find;
     }
+
+    return null;
+  }
+
+  private Box findBoxForElement(Element e, Box box) {
+    if (box.getElement() == e) return box;
+
+    for (Box b : box.getChildren()) {
+      Box find = findBoxForElement(e, b);
+
+      if (find != null) return find;
+    }
+
+    return null;
+  }
+
+  private boolean findLink(BasicPanel panel, Element e) {
+    String uri;
+
+    for (Node node = e; node.getNodeType() == Node.ELEMENT_NODE; node = node.getParentNode()) {
+      uri = panel.getSharedContext().getNamespaceHandler().getLinkUri((Element) node);
+
+      if (uri != null) {
+        return true;
+      }
+    }
+
+    return false;
+  }
 }

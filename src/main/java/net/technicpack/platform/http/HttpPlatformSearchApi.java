@@ -19,30 +19,34 @@
 
 package net.technicpack.platform.http;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import net.technicpack.platform.IPlatformSearchApi;
 import net.technicpack.platform.io.SearchResultsData;
 import net.technicpack.rest.RestObject;
 import net.technicpack.rest.RestfulAPIException;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
 public class HttpPlatformSearchApi implements IPlatformSearchApi {
-    private String rootUrl;
-    private String launcherBuild;
+  private String rootUrl;
+  private String launcherBuild;
 
-    public HttpPlatformSearchApi(String rootUrl, String launcherBuild) {
-        this.rootUrl = rootUrl;
-        this.launcherBuild = launcherBuild;
-    }
+  public HttpPlatformSearchApi(String rootUrl, String launcherBuild) {
+    this.rootUrl = rootUrl;
+    this.launcherBuild = launcherBuild;
+  }
 
-    @Override
-    public SearchResultsData getSearchResults(String searchTerm) throws RestfulAPIException {
-        try {
-            String url = rootUrl + "search?build=" + launcherBuild +"&q=" + URLEncoder.encode(searchTerm.trim(), "UTF-8");
-            return RestObject.getRestObject(SearchResultsData.class, url);
-        } catch (UnsupportedEncodingException e) {
-            return new SearchResultsData();
-        }
+  @Override
+  public SearchResultsData getSearchResults(String searchTerm) throws RestfulAPIException {
+    try {
+      String url =
+          rootUrl
+              + "search?build="
+              + launcherBuild
+              + "&q="
+              + URLEncoder.encode(searchTerm.trim(), "UTF-8");
+      return RestObject.getRestObject(SearchResultsData.class, url);
+    } catch (UnsupportedEncodingException e) {
+      return new SearchResultsData();
     }
+  }
 }

@@ -19,42 +19,41 @@
 
 package net.technicpack.platform.packsources;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import net.technicpack.launchercore.modpacks.sources.IPackSource;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.PlatformPackInfoRepository;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.solder.ISolderApi;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 public class SinglePlatformSource extends PlatformPackInfoRepository implements IPackSource {
-    private String slug;
+  private String slug;
 
-    public SinglePlatformSource(IPlatformApi platformApi, ISolderApi solderApi, String slug) {
-        super(platformApi, solderApi);
-        this.slug = slug;
+  public SinglePlatformSource(IPlatformApi platformApi, ISolderApi solderApi, String slug) {
+    super(platformApi, solderApi);
+    this.slug = slug;
+  }
+
+  @Override
+  public String getSourceName() {
+    return "Platform pack with slug '" + this.slug + "'";
+  }
+
+  @Override
+  public Collection<PackInfo> getPublicPacks() {
+    ArrayList<PackInfo> packs = new ArrayList<>(1);
+    PackInfo info = getPlatformPackInfo(slug);
+
+    if (info != null) {
+      packs.add(info);
     }
 
-    @Override
-    public String getSourceName() {
-        return "Platform pack with slug '" + this.slug + "'";
-    }
+    return packs;
+  }
 
-    @Override
-    public Collection<PackInfo> getPublicPacks() {
-        ArrayList<PackInfo> packs = new ArrayList<>(1);
-        PackInfo info = getPlatformPackInfo(slug);
-
-        if (info != null) {
-            packs.add(info);
-        }
-
-        return packs;
-    }
-
-    @Override
-    public int getPriority(PackInfo packInfo) {
-        return 0;
-    }
+  @Override
+  public int getPriority(PackInfo packInfo) {
+    return 0;
+  }
 }

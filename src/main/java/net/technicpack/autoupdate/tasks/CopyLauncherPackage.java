@@ -19,11 +19,6 @@
 
 package net.technicpack.autoupdate.tasks;
 
-import net.technicpack.autoupdate.Relauncher;
-import net.technicpack.launchercore.install.InstallTasksQueue;
-import net.technicpack.launchercore.install.tasks.IInstallTask;
-import net.technicpack.utilslib.Utils;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -31,57 +26,64 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.logging.Level;
+import net.technicpack.autoupdate.Relauncher;
+import net.technicpack.launchercore.install.InstallTasksQueue;
+import net.technicpack.launchercore.install.tasks.IInstallTask;
+import net.technicpack.utilslib.Utils;
 
 public class CopyLauncherPackage implements IInstallTask<Void> {
-    private String description;
-    private File targetFile;
-    private Relauncher relauncher;
+  private String description;
+  private File targetFile;
+  private Relauncher relauncher;
 
-    public CopyLauncherPackage(String description, File targetFile, Relauncher relauncher) {
-        this.description = description;
-        this.targetFile = targetFile;
-        this.relauncher = relauncher;
+  public CopyLauncherPackage(String description, File targetFile, Relauncher relauncher) {
+    this.description = description;
+    this.targetFile = targetFile;
+    this.relauncher = relauncher;
+  }
+
+  @Override
+  public String getTaskDescription() {
+    return description;
+  }
+
+  @Override
+  public float getTaskProgress() {
+    return 0;
+  }
+
+  @Override
+  public void runTask(InstallTasksQueue<Void> queue) throws IOException {
+    Path currentPath = Paths.get(relauncher.getRunningPath());
+    Path targetPath = Paths.get(targetFile.getAbsolutePath());
+
+    Utils.getLogger()
+        .log(
+            Level.INFO,
+            String.format("Copying running package from %s to %s", currentPath, targetPath));
+
+    if (currentPath.equals(targetPath)) {
+      throw new IOException("Source and destination paths are the same!");
     }
 
-    @Override
-    public String getTaskDescription() {
-        return description;
+    try {
+      Files.deleteIfExists(targetPath);
+    } catch (IOException e) {
+      // TODO: wrap the IOException
+      Utils.getLogger().log(Level.SEVERE, "Failed to delete the existing target package", e);
+      throw e;
     }
 
-    @Override
-    public float getTaskProgress() {
-        return 0;
+    try {
+      Files.createDirectories(targetPath.getParent());
+      Files.copy(currentPath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+    } catch (IOException e) {
+      Utils.getLogger().log(Level.SEVERE, "Error copying package", e);
+      throw e;
     }
 
-    @Override
-    public void runTask(InstallTasksQueue<Void> queue) throws IOException {
-        Path currentPath = Paths.get(relauncher.getRunningPath());
-        Path targetPath = Paths.get(targetFile.getAbsolutePath());
-
-        Utils.getLogger().log(Level.INFO, String.format("Copying running package from %s to %s", currentPath, targetPath));
-
-        if (currentPath.equals(targetPath)) {
-            throw new IOException("Source and destination paths are the same!");
-        }
-
-        try {
-            Files.deleteIfExists(targetPath);
-        } catch (IOException e) {
-            // TODO: wrap the IOException
-            Utils.getLogger().log(Level.SEVERE, "Failed to delete the existing target package", e);
-            throw e;
-        }
-
-        try {
-            Files.createDirectories(targetPath.getParent());
-            Files.copy(currentPath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            Utils.getLogger().log(Level.SEVERE, "Error copying package", e);
-            throw e;
-        }
-
-        if (!targetFile.setExecutable(true, true)) {
-            Utils.getLogger().log(Level.WARNING, "Failed to set executable flag on package");
-        }
+    if (!targetFile.setExecutable(true, true)) {
+      Utils.getLogger().log(Level.WARNING, "Failed to set executable flag on package");
     }
+  }
 }

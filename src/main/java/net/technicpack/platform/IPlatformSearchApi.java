@@ -23,5 +23,5 @@ import net.technicpack.platform.io.SearchResultsData;
 import net.technicpack.rest.RestfulAPIException;
 
 public interface IPlatformSearchApi {
-    SearchResultsData getSearchResults(String searchTerm) throws RestfulAPIException;
+  SearchResultsData getSearchResults(String searchTerm) throws RestfulAPIException;
 }

@@ -20,5 +20,5 @@
 package net.technicpack.launchercore.image;
 
 public interface IImageJobListener<T> {
-    void jobComplete(ImageJob<T> job);
+  void jobComplete(ImageJob<T> job);
 }

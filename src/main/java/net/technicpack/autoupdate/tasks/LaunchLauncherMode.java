@@ -19,39 +19,39 @@
 
 package net.technicpack.autoupdate.tasks;
 
+import java.util.List;
 import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.launchercore.install.tasks.IInstallTask;
 
-import java.util.List;
-
 public class LaunchLauncherMode implements IInstallTask<Void> {
 
-    private String description;
-    private Relauncher relauncher;
-    private String launchTarget;
-    private boolean isLegacy;
+  private String description;
+  private Relauncher relauncher;
+  private String launchTarget;
+  private boolean isLegacy;
 
-    public LaunchLauncherMode(String description, Relauncher relauncher, String launchTarget, boolean isLegacy) {
-        this.description = description;
-        this.relauncher = relauncher;
-        this.launchTarget = launchTarget;
-        this.isLegacy = isLegacy;
-    }
+  public LaunchLauncherMode(
+      String description, Relauncher relauncher, String launchTarget, boolean isLegacy) {
+    this.description = description;
+    this.relauncher = relauncher;
+    this.launchTarget = launchTarget;
+    this.isLegacy = isLegacy;
+  }
 
-    @Override
-    public String getTaskDescription() {
-        return description;
-    }
+  @Override
+  public String getTaskDescription() {
+    return description;
+  }
 
-    @Override
-    public float getTaskProgress() {
-        return 0;
-    }
+  @Override
+  public float getTaskProgress() {
+    return 0;
+  }
 
-    @Override
-    public void runTask(InstallTasksQueue<Void> queue) {
-        List<String> args = relauncher.buildLauncherArgs(isLegacy);
-        relauncher.launch(launchTarget, args);
-    }
+  @Override
+  public void runTask(InstallTasksQueue<Void> queue) {
+    List<String> args = relauncher.buildLauncherArgs(isLegacy);
+    relauncher.launch(launchTarget, args);
+  }
 }

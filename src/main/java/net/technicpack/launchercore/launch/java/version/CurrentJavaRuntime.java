@@ -19,86 +19,93 @@
 
 package net.technicpack.launchercore.launch.java.version;
 
+import java.io.File;
+import java.util.Objects;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.utilslib.OperatingSystem;
 
-import java.io.File;
-import java.util.Objects;
-
-/**
- * An IJavaRuntime for the version of java that is currently running this code.
- */
+/** An IJavaRuntime for the version of java that is currently running this code. */
 public final class CurrentJavaRuntime implements IJavaRuntime {
-    private final String version;
-    private final String vendor;
-    private final boolean is64Bit;
-    private final String osArch;
-    private final File executableFile;
+  private final String version;
+  private final String vendor;
+  private final boolean is64Bit;
+  private final String osArch;
+  private final File executableFile;
 
-    public CurrentJavaRuntime() {
-        this.version = System.getProperty("java.version");
-        this.vendor = System.getProperty("java.vendor");
-        this.osArch = System.getProperty("os.arch");
-        this.is64Bit = this.osArch.contains("64");
-        this.executableFile = new File(OperatingSystem.getJavaDir()).getAbsoluteFile();
+  public CurrentJavaRuntime() {
+    this.version = System.getProperty("java.version");
+    this.vendor = System.getProperty("java.vendor");
+    this.osArch = System.getProperty("os.arch");
+    this.is64Bit = this.osArch.contains("64");
+    this.executableFile = new File(OperatingSystem.getJavaDir()).getAbsoluteFile();
+  }
 
-    }
+  @Override
+  public File getExecutableFile() {
+    return executableFile;
+  }
 
-    @Override
-    public File getExecutableFile() {
-        return executableFile;
-    }
+  @Override
+  public String getVersion() {
+    return version;
+  }
 
-    @Override
-    public String getVersion() {
-        return version;
-    }
+  @Override
+  public String getVendor() {
+    return vendor;
+  }
 
-    @Override
-    public String getVendor() {
-        return vendor;
-    }
+  @Override
+  public String getOsArch() {
+    return osArch;
+  }
 
-    @Override
-    public String getOsArch() {
-        return osArch;
-    }
+  @Override
+  public String getBitness() {
+    return is64Bit ? "64" : "32";
+  }
 
-    @Override
-    public String getBitness() {
-        return is64Bit ? "64" : "32";
-    }
+  @Override
+  public boolean is64Bit() {
+    return is64Bit;
+  }
 
-    @Override
-    public boolean is64Bit() {
-        return is64Bit;
-    }
+  @Override
+  public boolean isValid() {
+    return true;
+  }
 
-    @Override
-    public boolean isValid() {
-        return true;
-    }
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || getClass() != o.getClass()) return false;
+    CurrentJavaRuntime that = (CurrentJavaRuntime) o;
+    return is64Bit == that.is64Bit
+        && Objects.equals(version, that.version)
+        && Objects.equals(vendor, that.vendor)
+        && Objects.equals(osArch, that.osArch);
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        CurrentJavaRuntime that = (CurrentJavaRuntime) o;
-        return is64Bit == that.is64Bit && Objects.equals(version, that.version) && Objects.equals(vendor, that.vendor) && Objects.equals(osArch, that.osArch);
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hash(version, vendor, is64Bit, osArch);
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(version, vendor, is64Bit, osArch);
-    }
-
-    @Override
-    public String toString() {
-        return "CurrentJavaRuntime{" +
-                "version='" + version + '\'' +
-                ", vendor='" + vendor + '\'' +
-                ", is64Bit=" + is64Bit +
-                ", osArch='" + osArch + '\'' +
-                ", executableFile=" + executableFile +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "CurrentJavaRuntime{"
+        + "version='"
+        + version
+        + '\''
+        + ", vendor='"
+        + vendor
+        + '\''
+        + ", is64Bit="
+        + is64Bit
+        + ", osArch='"
+        + osArch
+        + '\''
+        + ", executableFile="
+        + executableFile
+        + '}';
+  }
 }

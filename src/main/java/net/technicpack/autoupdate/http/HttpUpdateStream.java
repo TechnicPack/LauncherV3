@@ -25,14 +25,14 @@ import net.technicpack.rest.RestObject;
 import net.technicpack.rest.RestfulAPIException;
 
 public class HttpUpdateStream implements IUpdateStream {
-    private String baseUrl;
+  private String baseUrl;
 
-    public HttpUpdateStream(String baseUrl) {
-        this.baseUrl = baseUrl;
-    }
+  public HttpUpdateStream(String baseUrl) {
+    this.baseUrl = baseUrl;
+  }
 
-    @Override
-    public StreamVersion getStreamVersion(String stream) throws RestfulAPIException {
-        return RestObject.getRestObject(StreamVersion.class, baseUrl + "version/" + stream);
-    }
+  @Override
+  public StreamVersion getStreamVersion(String stream) throws RestfulAPIException {
+    return RestObject.getRestObject(StreamVersion.class, baseUrl + "version/" + stream);
+  }
 }

@@ -27,34 +27,34 @@ import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
 public class BuildLogFormatter extends Formatter {
-    private final SimpleDateFormat date;
-    private final String launcherBuild;
+  private final SimpleDateFormat date;
+  private final String launcherBuild;
 
-    public BuildLogFormatter(String launcherBuild) {
-        date = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        this.launcherBuild = launcherBuild;
+  public BuildLogFormatter(String launcherBuild) {
+    date = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    this.launcherBuild = launcherBuild;
+  }
+
+  @Override
+  public String format(LogRecord record) {
+    StringBuilder builder = new StringBuilder();
+
+    builder.append("[B#").append(launcherBuild).append("] ");
+    builder.append(date.format(record.getMillis()));
+    builder.append(" [");
+    builder.append(record.getLevel().getName().toUpperCase(Locale.ROOT));
+    builder.append("] ");
+    builder.append(formatMessage(record));
+    if (builder.charAt(builder.length() - 1) != '\n') {
+      builder.append('\n');
     }
 
-    @Override
-    public String format(LogRecord record) {
-        StringBuilder builder = new StringBuilder();
-
-        builder.append("[B#").append(launcherBuild).append("] ");
-        builder.append(date.format(record.getMillis()));
-        builder.append(" [");
-        builder.append(record.getLevel().getName().toUpperCase(Locale.ROOT));
-        builder.append("] ");
-        builder.append(formatMessage(record));
-        if (builder.charAt(builder.length() - 1) != '\n') {
-            builder.append('\n');
-        }
-
-        if (record.getThrown() != null) {
-            StringWriter writer = new StringWriter();
-            record.getThrown().printStackTrace(new PrintWriter(writer));
-            builder.append(writer.getBuffer());
-        }
-
-        return builder.toString();
+    if (record.getThrown() != null) {
+      StringWriter writer = new StringWriter();
+      record.getThrown().printStackTrace(new PrintWriter(writer));
+      builder.append(writer.getBuffer());
     }
+
+    return builder.toString();
+  }
 }

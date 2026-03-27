@@ -23,13 +23,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
-import net.technicpack.launcher.io.LauncherFileSystem;
-import net.technicpack.platform.IPlatformApi;
-import net.technicpack.platform.io.NewsData;
-import net.technicpack.platform.io.PlatformPackInfo;
-import net.technicpack.rest.RestfulAPIException;
-import net.technicpack.utilslib.Utils;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -38,168 +31,168 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+import net.technicpack.launcher.io.LauncherFileSystem;
+import net.technicpack.platform.IPlatformApi;
+import net.technicpack.platform.io.NewsData;
+import net.technicpack.platform.io.PlatformPackInfo;
+import net.technicpack.rest.RestfulAPIException;
+import net.technicpack.utilslib.Utils;
 
 public class ModpackCachePlatformApi implements IPlatformApi {
 
-    private IPlatformApi innerApi;
-    private Cache<String, PlatformPackInfo> cache;
-    private Cache<String, Boolean> deadPacks;
-    private Cache<String, PlatformPackInfo> foreverCache;
-    private LauncherFileSystem fileSystem;
+  private IPlatformApi innerApi;
+  private Cache<String, PlatformPackInfo> cache;
+  private Cache<String, Boolean> deadPacks;
+  private Cache<String, PlatformPackInfo> foreverCache;
+  private LauncherFileSystem fileSystem;
 
-    public ModpackCachePlatformApi(IPlatformApi innerApi, int cacheInSeconds, LauncherFileSystem fileSystem) {
-        this.innerApi = innerApi;
-        this.fileSystem = fileSystem;
-        cache = CacheBuilder.newBuilder()
-                .concurrencyLevel(4)
-                .maximumSize(300)
-                .expireAfterWrite(cacheInSeconds, TimeUnit.SECONDS)
-                .build();
+  public ModpackCachePlatformApi(
+      IPlatformApi innerApi, int cacheInSeconds, LauncherFileSystem fileSystem) {
+    this.innerApi = innerApi;
+    this.fileSystem = fileSystem;
+    cache =
+        CacheBuilder.newBuilder()
+            .concurrencyLevel(4)
+            .maximumSize(300)
+            .expireAfterWrite(cacheInSeconds, TimeUnit.SECONDS)
+            .build();
 
-        foreverCache = CacheBuilder.newBuilder()
-                .concurrencyLevel(4)
-                .maximumSize(300)
-                .build();
+    foreverCache = CacheBuilder.newBuilder().concurrencyLevel(4).maximumSize(300).build();
 
-        deadPacks = CacheBuilder.newBuilder()
-                .concurrencyLevel(4)
-                .maximumSize(300)
-                .expireAfterWrite(cacheInSeconds / 10, TimeUnit.SECONDS)
-                .build();
+    deadPacks =
+        CacheBuilder.newBuilder()
+            .concurrencyLevel(4)
+            .maximumSize(300)
+            .expireAfterWrite(cacheInSeconds / 10, TimeUnit.SECONDS)
+            .build();
+  }
+
+  @Override
+  public PlatformPackInfo getPlatformPackInfoForBulk(String packSlug) throws RestfulAPIException {
+
+    PlatformPackInfo info = foreverCache.getIfPresent(packSlug);
+
+    if (info == null) {
+      info = loadForeverCache(packSlug);
     }
 
-    @Override
-    public PlatformPackInfo getPlatformPackInfoForBulk(String packSlug) throws RestfulAPIException {
+    if (info == null && isDead(packSlug)) return null;
 
-        PlatformPackInfo info = foreverCache.getIfPresent(packSlug);
-
-        if (info == null) {
-            info = loadForeverCache(packSlug);
-        }
-
-        if (info == null && isDead(packSlug))
-            return null;
-
-        if (info == null) {
-            info = pullAndCache(packSlug);
-        }
-
-        return info;
+    if (info == null) {
+      info = pullAndCache(packSlug);
     }
 
-    @Override
-    public PlatformPackInfo getPlatformPackInfo(String packSlug) {
-        PlatformPackInfo info = cache.getIfPresent(packSlug);
+    return info;
+  }
 
-        if (info == null && isDead(packSlug))
-            return getDeadPackInfo(packSlug);
+  @Override
+  public PlatformPackInfo getPlatformPackInfo(String packSlug) {
+    PlatformPackInfo info = cache.getIfPresent(packSlug);
 
-        try {
-            if (info == null) {
-                info = pullAndCache(packSlug);
-            }
-        } catch (RestfulAPIException e) {
-            e.printStackTrace();
+    if (info == null && isDead(packSlug)) return getDeadPackInfo(packSlug);
 
-            deadPacks.put(packSlug, true);
-            return getDeadPackInfo(packSlug);
-        }
+    try {
+      if (info == null) {
+        info = pullAndCache(packSlug);
+      }
+    } catch (RestfulAPIException e) {
+      e.printStackTrace();
 
-        return info;
+      deadPacks.put(packSlug, true);
+      return getDeadPackInfo(packSlug);
     }
 
-    protected PlatformPackInfo getDeadPackInfo(String packSlug) {
-        try {
-            PlatformPackInfo deadInfo = getPlatformPackInfoForBulk(packSlug);
+    return info;
+  }
 
-            if (deadInfo != null)
-                deadInfo.setLocal();
-            return deadInfo;
-        } catch (RestfulAPIException e) {
-            return null;
-        }
+  protected PlatformPackInfo getDeadPackInfo(String packSlug) {
+    try {
+      PlatformPackInfo deadInfo = getPlatformPackInfoForBulk(packSlug);
+
+      if (deadInfo != null) deadInfo.setLocal();
+      return deadInfo;
+    } catch (RestfulAPIException e) {
+      return null;
+    }
+  }
+
+  private boolean isDead(String packSlug) {
+    Boolean isDead = deadPacks.getIfPresent(packSlug);
+
+    if (isDead != null && isDead) return true;
+
+    return false;
+  }
+
+  private PlatformPackInfo pullAndCache(String packSlug) throws RestfulAPIException {
+    PlatformPackInfo info = null;
+    try {
+      info = innerApi.getPlatformPackInfoForBulk(packSlug);
+
+      if (info != null) {
+        cache.put(packSlug, info);
+        foreverCache.put(packSlug, info);
+        saveForeverCache(info);
+      }
+    } finally {
+      deadPacks.put(packSlug, info == null);
     }
 
-    private boolean isDead(String packSlug) {
-        Boolean isDead = deadPacks.getIfPresent(packSlug);
+    return info;
+  }
 
-        if (isDead != null && isDead)
-            return true;
+  private PlatformPackInfo loadForeverCache(String packSlug) {
+    Path cacheFile = fileSystem.getPackAssetsDirectory().resolve(packSlug).resolve("cache.json");
+    if (!Files.exists(cacheFile)) return null;
 
-        return false;
+    try (Reader reader = Files.newBufferedReader(cacheFile, StandardCharsets.UTF_8)) {
+      PlatformPackInfo info = Utils.getGson().fromJson(reader, PlatformPackInfo.class);
+
+      if (info != null) {
+        foreverCache.put(packSlug, info);
+      }
+
+      return info;
+    } catch (JsonParseException | IOException e) {
+      Utils.getLogger()
+          .log(Level.SEVERE, String.format("Failed to load pack cache %s", cacheFile), e);
+      return null;
     }
+  }
 
-    private PlatformPackInfo pullAndCache(String packSlug) throws RestfulAPIException {
-        PlatformPackInfo info = null;
-        try {
-            info = innerApi.getPlatformPackInfoForBulk(packSlug);
+  private void saveForeverCache(PlatformPackInfo info) {
+    Path cacheFile =
+        fileSystem.getPackAssetsDirectory().resolve(info.getName()).resolve("cache.json");
 
-            if (info != null) {
-                cache.put(packSlug, info);
-                foreverCache.put(packSlug, info);
-                saveForeverCache(info);
-            }
-        } finally {
-            deadPacks.put(packSlug, info == null);
-        }
+    try {
+      Files.createDirectories(cacheFile.getParent());
 
-        return info;
+      try (Writer writer = Files.newBufferedWriter(cacheFile, StandardCharsets.UTF_8)) {
+        Utils.getGson().toJson(info, writer);
+      }
+    } catch (JsonIOException | IOException e) {
+      Utils.getLogger()
+          .log(Level.SEVERE, String.format("Failed to save pack cache %s", cacheFile), e);
     }
+  }
 
-    private PlatformPackInfo loadForeverCache(String packSlug) {
-        Path cacheFile = fileSystem.getPackAssetsDirectory()
-                                   .resolve(packSlug)
-                                   .resolve("cache.json");
-        if (!Files.exists(cacheFile))
-            return null;
+  @Override
+  public String getPlatformUri(String packSlug) {
+    return innerApi.getPlatformUri(packSlug);
+  }
 
-        try (Reader reader = Files.newBufferedReader(cacheFile, StandardCharsets.UTF_8)) {
-            PlatformPackInfo info = Utils.getGson().fromJson(reader, PlatformPackInfo.class);
+  @Override
+  public void incrementPackRuns(String packSlug) {
+    innerApi.incrementPackRuns(packSlug);
+  }
 
-            if (info != null) {
-                foreverCache.put(packSlug, info);
-            }
+  @Override
+  public void incrementPackInstalls(String packSlug) {
+    innerApi.incrementPackInstalls(packSlug);
+  }
 
-            return info;
-        } catch (JsonParseException | IOException e) {
-            Utils.getLogger().log(Level.SEVERE, String.format("Failed to load pack cache %s", cacheFile), e);
-            return null;
-        }
-    }
-
-    private void saveForeverCache(PlatformPackInfo info) {
-        Path cacheFile = fileSystem.getPackAssetsDirectory()
-                                   .resolve(info.getName())
-                                   .resolve("cache.json");
-
-        try {
-            Files.createDirectories(cacheFile.getParent());
-
-            try (Writer writer = Files.newBufferedWriter(cacheFile, StandardCharsets.UTF_8)) {
-                Utils.getGson().toJson(info, writer);
-            }
-        } catch (JsonIOException | IOException e) {
-            Utils.getLogger().log(Level.SEVERE, String.format("Failed to save pack cache %s", cacheFile), e);
-        }
-    }
-
-    @Override
-    public String getPlatformUri(String packSlug) {
-        return innerApi.getPlatformUri(packSlug);
-    }
-
-    @Override
-    public void incrementPackRuns(String packSlug) {
-        innerApi.incrementPackRuns(packSlug);
-    }
-
-    @Override
-    public void incrementPackInstalls(String packSlug) {
-        innerApi.incrementPackInstalls(packSlug);
-    }
-
-    @Override
-    public NewsData getNews() throws RestfulAPIException {
-        return innerApi.getNews();
-    }
+  @Override
+  public NewsData getNews() throws RestfulAPIException {
+    return innerApi.getNews();
+  }
 }

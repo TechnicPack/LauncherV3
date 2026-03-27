@@ -19,49 +19,46 @@
 
 package net.technicpack.ui.controls;
 
-import javax.swing.JTextField;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.FocusEvent;
+import javax.swing.JTextField;
 
 public class WatermarkTextField extends JTextField {
-    private final String watermarkText;
-    private final Color watermarkColor;
+  private final String watermarkText;
+  private final Color watermarkColor;
 
-    public WatermarkTextField(String watermarkText, Color watermarkColor) {
-        this.watermarkColor = watermarkColor;
-        this.watermarkText = watermarkText;
+  public WatermarkTextField(String watermarkText, Color watermarkColor) {
+    this.watermarkColor = watermarkColor;
+    this.watermarkText = watermarkText;
+  }
+
+  @Override
+  protected void processFocusEvent(FocusEvent e) {
+    super.processFocusEvent(e);
+    repaint();
+  }
+
+  @Override
+  public void paintComponent(Graphics g) {
+    super.paintComponent(g);
+
+    if (getText().isEmpty() && !isFocusOwner()) {
+      g.setColor(watermarkColor);
+
+      double height = g.getFontMetrics().getStringBounds(watermarkText, g).getHeight();
+
+      Graphics2D g2d = (Graphics2D) g;
+
+      g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+      g2d.setRenderingHint(
+          RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+      g2d.setRenderingHint(
+          RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+      g.drawString(
+          watermarkText, 6, g.getFontMetrics().getAscent() + (int) ((getHeight() - height) / 2));
     }
-
-    @Override
-    protected void processFocusEvent(FocusEvent e) {
-        super.processFocusEvent(e);
-        repaint();
-    }
-
-    @Override
-    public void paintComponent(Graphics g) {
-        super.paintComponent(g);
-
-        if (getText().isEmpty() && !isFocusOwner()) {
-            g.setColor(watermarkColor);
-
-            double height = g.getFontMetrics().getStringBounds(watermarkText, g).getHeight();
-
-            Graphics2D g2d = (Graphics2D) g;
-
-            g2d.setRenderingHint(
-                    RenderingHints.KEY_ANTIALIASING,
-                    RenderingHints.VALUE_ANTIALIAS_ON);
-            g2d.setRenderingHint(
-                    RenderingHints.KEY_TEXT_ANTIALIASING,
-                    RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-            g2d.setRenderingHint(
-                    RenderingHints.KEY_FRACTIONALMETRICS,
-                    RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-            g.drawString(watermarkText, 6,g.getFontMetrics ().getAscent() + (int)((getHeight() - height)/2));
-        }
-    }
+  }
 }

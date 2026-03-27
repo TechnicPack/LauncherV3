@@ -19,59 +19,61 @@
 
 package net.technicpack.ui.controls;
 
-import net.technicpack.ui.controls.borders.DropShadowBorder;
-
-import javax.swing.JDialog;
-import javax.swing.JPanel;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Window;
+import javax.swing.JDialog;
+import javax.swing.JPanel;
+import net.technicpack.ui.controls.borders.DropShadowBorder;
 
 public class LauncherDialog extends JDialog {
-    private int dragGripX;
-    private int dragGripY;
+  private int dragGripX;
+  private int dragGripY;
 
-    public LauncherDialog(Frame owner) {
-        super(owner, null, true);
+  public LauncherDialog(Frame owner) {
+    super(owner, null, true);
 
-        setUndecorated(true);
+    setUndecorated(true);
 
-        try {
-            // Try to set a transparent background, but it isn't always supported
-            this.setBackground(new Color(0, 0, 0, 0));
-            getRootPane().setBorder(new DropShadowBorder(Color.black, 4));
-        } catch (UnsupportedOperationException e) {
-            this.setBackground(new Color(0, 0, 0));
-        } catch (IllegalArgumentException e) {
-            //OS doesn't support translucent windows- dumb dumb dumb
-            //Eat it and just don't do the drop shadow
-        }
-
-        ((JPanel)getContentPane()).setOpaque(true);
+    try {
+      // Try to set a transparent background, but it isn't always supported
+      this.setBackground(new Color(0, 0, 0, 0));
+      getRootPane().setBorder(new DropShadowBorder(Color.black, 4));
+    } catch (UnsupportedOperationException e) {
+      this.setBackground(new Color(0, 0, 0));
+    } catch (IllegalArgumentException e) {
+      // OS doesn't support translucent windows- dumb dumb dumb
+      // Eat it and just don't do the drop shadow
     }
 
-    @Override
-    public void setSize(int width, int height) {
-        super.setSize(width, height);
-        centerOnParent();
-    }
+    ((JPanel) getContentPane()).setOpaque(true);
+  }
 
-    @Override
-    public void setSize(Dimension d) {
-        super.setSize(d);
-        centerOnParent();
-    }
+  @Override
+  public void setSize(int width, int height) {
+    super.setSize(width, height);
+    centerOnParent();
+  }
 
-    private void centerOnParent() {
-        Window frame = getOwner();
+  @Override
+  public void setSize(Dimension d) {
+    super.setSize(d);
+    centerOnParent();
+  }
 
-        if (frame == null)
-            return;
+  private void centerOnParent() {
+    Window frame = getOwner();
 
-        int parentCenterX = frame.getX() + (frame.getWidth()/2);
-        int parentCenterY = frame.getY() + (frame.getHeight()/2);
+    if (frame == null) return;
 
-        this.setBounds(parentCenterX - (getWidth()/2), parentCenterY - (getHeight()/2), getWidth(), getHeight());
-    }
+    int parentCenterX = frame.getX() + (frame.getWidth() / 2);
+    int parentCenterY = frame.getY() + (frame.getHeight() / 2);
+
+    this.setBounds(
+        parentCenterX - (getWidth() / 2),
+        parentCenterY - (getHeight() / 2),
+        getWidth(),
+        getHeight());
+  }
 }

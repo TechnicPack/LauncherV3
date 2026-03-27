@@ -22,39 +22,39 @@ package net.technicpack.launchercore.exception;
 import java.io.IOException;
 
 public class DownloadException extends IOException {
-    private static final long serialVersionUID = 2L;
+  private static final long serialVersionUID = 2L;
 
-    private final Throwable cause;
-    private final String message;
+  private final Throwable cause;
+  private final String message;
 
-    public DownloadException(String message, Throwable cause) {
-        this.cause = cause;
-        if (cause != null) {
-            this.message = message + ":\n" + cause.getMessage();
-        } else {
-            this.message = message;
-        }
+  public DownloadException(String message, Throwable cause) {
+    this.cause = cause;
+    if (cause != null) {
+      this.message = message + ":\n" + cause.getMessage();
+    } else {
+      this.message = message;
     }
+  }
 
-    public DownloadException(Throwable cause) {
-        this(null, cause);
-    }
+  public DownloadException(Throwable cause) {
+    this(null, cause);
+  }
 
-    public DownloadException(String message) {
-        this(message, null);
-    }
+  public DownloadException(String message) {
+    this(message, null);
+  }
 
-    public DownloadException() {
-        this(null, null);
-    }
+  public DownloadException() {
+    this(null, null);
+  }
 
-    @Override
-    public synchronized Throwable getCause() {
-        return this.cause;
-    }
+  @Override
+  public synchronized Throwable getCause() {
+    return this.cause;
+  }
 
-    @Override
-    public String getMessage() {
-        return message;
-    }
+  @Override
+  public String getMessage() {
+    return message;
+  }
 }

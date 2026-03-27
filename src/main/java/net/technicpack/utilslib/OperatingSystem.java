@@ -24,78 +24,79 @@ import java.nio.file.FileSystems;
 import java.util.Locale;
 
 public enum OperatingSystem {
-    LINUX("linux", new String[]{"linux", "unix"}),
-    WINDOWS("windows", new String[]{"win"}),
-    OSX("osx", new String[]{"mac"}),
-    UNKNOWN("unknown", new String[0]);
+  LINUX("linux", new String[] {"linux", "unix"}),
+  WINDOWS("windows", new String[] {"win"}),
+  OSX("osx", new String[] {"mac"}),
+  UNKNOWN("unknown", new String[0]);
 
-    private static OperatingSystem operatingSystem;
-    private final String name;
-    private final String[] aliases;
+  private static OperatingSystem operatingSystem;
+  private final String name;
+  private final String[] aliases;
 
-    private OperatingSystem(String name, String[] aliases) {
-        this.name = name;
-        this.aliases = aliases;
+  private OperatingSystem(String name, String[] aliases) {
+    this.name = name;
+    this.aliases = aliases;
+  }
+
+  public static String getJavaDir() {
+    String separator = FileSystems.getDefault().getSeparator();
+    String path = System.getProperty("java.home") + separator + "bin" + separator;
+
+    if (getOperatingSystem() == WINDOWS) {
+      return path + "javaw.exe";
     }
 
-    public static String getJavaDir() {
-        String separator = FileSystems.getDefault().getSeparator();
-        String path = System.getProperty("java.home") + separator + "bin" + separator;
+    return path + "java";
+  }
 
-        if (getOperatingSystem() == WINDOWS) {
-            return path + "javaw.exe";
+  public static OperatingSystem getOperatingSystem() {
+    if (OperatingSystem.operatingSystem != null) {
+      return OperatingSystem.operatingSystem;
+    }
+
+    // Always specify english when tolowercase/touppercasing values for comparison against
+    // well-known values
+    // Prevents an issue with turkish users
+    String osName = System.getProperty("os.name").toLowerCase(Locale.ROOT);
+
+    for (OperatingSystem operatingSystem : values()) {
+      for (String alias : operatingSystem.getAliases()) {
+        if (osName.contains(alias)) {
+          OperatingSystem.operatingSystem = operatingSystem;
+          return operatingSystem;
         }
-
-        return path + "java";
+      }
     }
 
-    public static OperatingSystem getOperatingSystem() {
-        if (OperatingSystem.operatingSystem != null) {
-            return OperatingSystem.operatingSystem;
+    return UNKNOWN;
+  }
+
+  public File getTechnicDirectory() {
+    String userHome = System.getProperty("user.home", ".");
+
+    switch (this) {
+      case LINUX:
+        return new File(userHome, ".technic/");
+      case WINDOWS:
+        String applicationData = System.getenv("APPDATA");
+        if (applicationData != null) {
+          return new File(applicationData, ".technic/");
+        } else {
+          return new File(userHome, ".technic/");
         }
-
-        //Always specify english when tolowercase/touppercasing values for comparison against well-known values
-        //Prevents an issue with turkish users
-        String osName = System.getProperty("os.name").toLowerCase(Locale.ROOT);
-
-        for (OperatingSystem operatingSystem : values()) {
-            for (String alias : operatingSystem.getAliases()) {
-                if (osName.contains(alias)) {
-                    OperatingSystem.operatingSystem = operatingSystem;
-                    return operatingSystem;
-                }
-            }
-        }
-
-        return UNKNOWN;
+      case OSX:
+        return new File(userHome, "Library/Application Support/technic");
+      case UNKNOWN:
+      default:
+        return new File(userHome, "technic/");
     }
+  }
 
-    public File getTechnicDirectory() {
-        String userHome = System.getProperty("user.home", ".");
+  public String[] getAliases() {
+    return aliases;
+  }
 
-        switch (this) {
-            case LINUX:
-                return new File(userHome, ".technic/");
-            case WINDOWS:
-                String applicationData = System.getenv("APPDATA");
-                if (applicationData != null) {
-                    return new File(applicationData, ".technic/");
-                } else {
-                    return new File(userHome, ".technic/");
-                }
-            case OSX:
-                return new File(userHome, "Library/Application Support/technic");
-            case UNKNOWN:
-            default:
-                return new File(userHome, "technic/");
-        }
-    }
-
-    public String[] getAliases() {
-        return aliases;
-    }
-
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 }

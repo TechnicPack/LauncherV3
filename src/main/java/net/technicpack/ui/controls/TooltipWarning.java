@@ -19,141 +19,131 @@
 
 package net.technicpack.ui.controls;
 
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JToolTip;
 import javax.swing.plaf.metal.MetalToolTipUI;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 
 public class TooltipWarning extends JLabel {
 
-    private JToolTip toolTip;
+  private JToolTip toolTip;
 
-    public TooltipWarning(Icon icon, JToolTip toolTip) {
-        super(icon);
-        this.toolTip = toolTip;
+  public TooltipWarning(Icon icon, JToolTip toolTip) {
+    super(icon);
+    this.toolTip = toolTip;
+  }
+
+  @Override
+  public JToolTip createToolTip() {
+    WarningTooltip tooltip = new WarningTooltip();
+    tooltip.setBackground(this.toolTip.getBackground());
+    tooltip.setForeground(this.toolTip.getForeground());
+    tooltip.setTipText(this.toolTip.getTipText());
+    tooltip.setFont(this.toolTip.getFont());
+    tooltip.setBorder(this.toolTip.getBorder());
+    return tooltip;
+  }
+
+  private class WarningTooltip extends JToolTip {
+
+    public WarningTooltip() {
+      setUI(new WarningTooltipUI());
+    }
+  }
+
+  private static class WarningTooltipUI extends MetalToolTipUI {
+
+    @Override
+    public void paint(Graphics g, JComponent c) {
+      Graphics2D g2d = (Graphics2D) g;
+      JToolTip tooltip = ((JToolTip) c);
+
+      g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+      g2d.setRenderingHint(
+          RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+      g2d.setRenderingHint(
+          RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+
+      g2d.setColor(tooltip.getBackground());
+      g2d.setFont(tooltip.getFont());
+      g2d.setColor(tooltip.getForeground());
+
+      if (((JToolTip) c).getTipText() != null) drawTextUgly(((JToolTip) c).getTipText(), g2d);
     }
 
     @Override
-    public JToolTip createToolTip() {
-        WarningTooltip tooltip = new WarningTooltip();
-        tooltip.setBackground(this.toolTip.getBackground());
-        tooltip.setForeground(this.toolTip.getForeground());
-        tooltip.setTipText(this.toolTip.getTipText());
-        tooltip.setFont(this.toolTip.getFont());
-        tooltip.setBorder(this.toolTip.getBorder());
-        return tooltip;
+    public Dimension getPreferredSize(JComponent c) {
+      // Ugly code to wrap text
+      JToolTip tooltip = (JToolTip) c;
+      String textToDraw = tooltip.getTipText();
+
+      if (textToDraw == null) return getMinimumSize(c);
+
+      String[] arr = textToDraw.split(" ");
+      int nIndex = 0;
+      int startX = 4;
+      int startY = 3;
+      int lineSize = tooltip.getFontMetrics(tooltip.getFont()).getHeight();
+
+      while (nIndex < arr.length) {
+        int nextStartY = startY + lineSize;
+
+        int nextEndY = nextStartY + lineSize;
+
+        StringBuilder line = new StringBuilder(arr[nIndex++]);
+        int lineWidth = tooltip.getFontMetrics(tooltip.getFont()).stringWidth(line.toString());
+
+        while ((nIndex < arr.length) && (lineWidth < 243)) {
+          line.append(' ').append(arr[nIndex]);
+          nIndex++;
+
+          if (nIndex == arr.length) break;
+
+          lineWidth =
+              tooltip
+                  .getFontMetrics(tooltip.getFont())
+                  .stringWidth(String.format("%s %s", line, arr[nIndex]));
+        }
+        startY = nextStartY;
+      }
+
+      return new Dimension(248, startY + 4);
     }
 
-    private class WarningTooltip extends JToolTip {
+    private void drawTextUgly(String text, Graphics2D g2) {
+      // Ugly code to wrap text
+      String textToDraw = text;
+      String[] arr = textToDraw.split(" ");
+      int nIndex = 0;
+      int startX = 4;
+      int startY = 3;
+      int lineSize = g2.getFontMetrics().getHeight();
 
-        public WarningTooltip() {
-            setUI(new WarningTooltipUI());
+      while (nIndex < arr.length) {
+        int nextStartY = startY + lineSize;
+
+        int nextEndY = nextStartY + lineSize;
+
+        StringBuilder line = new StringBuilder(arr[nIndex++]);
+        int lineWidth = g2.getFontMetrics().stringWidth(line.toString());
+
+        while ((nIndex < arr.length) && (lineWidth < 243)) {
+          line.append(' ').append(arr[nIndex]);
+          nIndex++;
+
+          if (nIndex == arr.length) break;
+
+          lineWidth = g2.getFontMetrics().stringWidth(String.format("%s %s", line, arr[nIndex]));
         }
+
+        g2.drawString(line.toString(), startX, startY + g2.getFontMetrics().getAscent());
+        startY = nextStartY;
+      }
     }
-
-    private static class WarningTooltipUI extends MetalToolTipUI {
-
-        @Override
-        public void paint(Graphics g, JComponent c) {
-            Graphics2D g2d = (Graphics2D)g;
-            JToolTip tooltip = ((JToolTip)c);
-
-            g2d.setRenderingHint(
-                    RenderingHints.KEY_ANTIALIASING,
-                    RenderingHints.VALUE_ANTIALIAS_ON);
-            g2d.setRenderingHint(
-                    RenderingHints.KEY_TEXT_ANTIALIASING,
-                    RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-            g2d.setRenderingHint(
-                    RenderingHints.KEY_FRACTIONALMETRICS,
-                    RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-
-            g2d.setColor(tooltip.getBackground());
-            g2d.setFont(tooltip.getFont());
-            g2d.setColor(tooltip.getForeground());
-
-            if (((JToolTip)c).getTipText() != null)
-                drawTextUgly(((JToolTip)c).getTipText(), g2d);
-        }
-
-        @Override
-        public Dimension getPreferredSize(JComponent c) {
-            // Ugly code to wrap text
-            JToolTip tooltip = (JToolTip)c;
-            String textToDraw = tooltip.getTipText();
-
-            if (textToDraw == null)
-                return getMinimumSize(c);
-
-            String[] arr = textToDraw.split(" ");
-            int nIndex = 0;
-            int startX = 4;
-            int startY = 3;
-            int lineSize = tooltip.getFontMetrics(tooltip.getFont()).getHeight();
-
-            while ( nIndex < arr.length )
-            {
-                int nextStartY = startY + lineSize;
-
-                int nextEndY = nextStartY + lineSize;
-
-                StringBuilder line = new StringBuilder(arr[nIndex++]);
-                int lineWidth = tooltip.getFontMetrics(tooltip.getFont()).stringWidth(line.toString());
-
-                while ( ( nIndex < arr.length ) && (lineWidth < 243) )
-                {
-                    line.append(' ').append(arr[nIndex]);
-                    nIndex++;
-
-                    if (nIndex == arr.length)
-                        break;
-
-                    lineWidth = tooltip.getFontMetrics(tooltip.getFont()).stringWidth(String.format("%s %s", line, arr[nIndex]));
-                }
-                startY = nextStartY;
-            }
-
-            return new Dimension(248, startY+4);
-        }
-
-        private void drawTextUgly(String text, Graphics2D g2)
-        {
-            // Ugly code to wrap text
-            String textToDraw = text;
-            String[] arr = textToDraw.split(" ");
-            int nIndex = 0;
-            int startX = 4;
-            int startY = 3;
-            int lineSize = g2.getFontMetrics().getHeight();
-
-            while ( nIndex < arr.length )
-            {
-                int nextStartY = startY + lineSize;
-
-                int nextEndY = nextStartY + lineSize;
-
-                StringBuilder line = new StringBuilder(arr[nIndex++]);
-                int lineWidth = g2.getFontMetrics().stringWidth(line.toString());
-
-                while ( ( nIndex < arr.length ) && (lineWidth < 243) )
-                {
-                    line.append(' ').append(arr[nIndex]);
-                    nIndex++;
-
-                    if (nIndex == arr.length)
-                        break;
-
-                    lineWidth = g2.getFontMetrics().stringWidth(String.format("%s %s", line, arr[nIndex]));
-                }
-
-                g2.drawString(line.toString(), startX, startY + g2.getFontMetrics().getAscent());
-                startY = nextStartY;
-            }
-        }
-    }
+  }
 }

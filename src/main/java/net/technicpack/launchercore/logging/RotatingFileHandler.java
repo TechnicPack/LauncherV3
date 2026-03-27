@@ -19,6 +19,9 @@
 
 package net.technicpack.launchercore.logging;
 
+import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.CREATE;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -31,108 +34,106 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
 
-import static java.nio.file.StandardOpenOption.APPEND;
-import static java.nio.file.StandardOpenOption.CREATE;
-
 public class RotatingFileHandler extends StreamHandler {
-    private final String filenameFormat;
-    private final BlockingQueue<LogRecord> logQueue = new LinkedBlockingQueue<>();
-    private final Thread loggingThread;
-    private final AtomicBoolean running = new AtomicBoolean(true);
-    private Path logsDirectory;
-    private LocalDate currentDate;
+  private final String filenameFormat;
+  private final BlockingQueue<LogRecord> logQueue = new LinkedBlockingQueue<>();
+  private final Thread loggingThread;
+  private final AtomicBoolean running = new AtomicBoolean(true);
+  private Path logsDirectory;
+  private LocalDate currentDate;
 
-    public RotatingFileHandler(Path logsDirectory, String filenameFormat) {
-        this.filenameFormat = filenameFormat;
-        setLogsDirectory(logsDirectory);
+  public RotatingFileHandler(Path logsDirectory, String filenameFormat) {
+    this.filenameFormat = filenameFormat;
+    setLogsDirectory(logsDirectory);
 
-        // Start the logging thread
-        loggingThread = new Thread(this::processQueue, "AsyncLoggerThread");
-        loggingThread.setDaemon(true);
-        loggingThread.start();
+    // Start the logging thread
+    loggingThread = new Thread(this::processQueue, "AsyncLoggerThread");
+    loggingThread.setDaemon(true);
+    loggingThread.start();
+  }
+
+  private synchronized void setLogsDirectory(Path logsDirectory) {
+    if (logsDirectory == null) {
+      throw new NullPointerException("logsDirectory cannot be null");
     }
 
-    private synchronized void setLogsDirectory(Path logsDirectory) {
-        if (logsDirectory == null) {
-            throw new NullPointerException("logsDirectory cannot be null");
+    this.logsDirectory = logsDirectory;
+
+    currentDate = LocalDate.now();
+    updateOutputFile();
+  }
+
+  private synchronized void updateOutputFile() {
+    updateOutputFile(buildFilename());
+  }
+
+  private synchronized void updateOutputFile(String currentFilename) {
+    try {
+      OutputStream out =
+          Files.newOutputStream(this.logsDirectory.resolve(currentFilename), CREATE, APPEND);
+      setOutputStream(out);
+    } catch (IOException ex) {
+      // We can't really log exceptions if the logger doesn't work
+      // TODO: implement ErrorManager that doesn't write to System.err
+    }
+  }
+
+  private String buildFilename() {
+    return String.format(filenameFormat, currentDate.toString());
+  }
+
+  @Override
+  public void publish(LogRecord record) {
+    if (!running.get() || !isLoggable(record)) return;
+    logQueue.offer(record); // Add to queue
+  }
+
+  private void processQueue() {
+    while (running.get() || !logQueue.isEmpty()) {
+      try {
+        LogRecord record = logQueue.take();
+        synchronized (this) {
+          // Rotate the file if the date has changed
+          final LocalDate today = LocalDate.now();
+
+          if (!today.equals(currentDate)) {
+            final String oldPath = buildFilename();
+
+            currentDate = today;
+            updateOutputFile(buildFilename());
+
+            super.publish(new LogRecord(Level.INFO, String.format("Continued from %s", oldPath)));
+          }
+
+          // Write the actual log record
+          super.publish(record);
+          flush();
         }
-
-        this.logsDirectory = logsDirectory;
-
-        currentDate = LocalDate.now();
-        updateOutputFile();
-    }
-
-    private synchronized void updateOutputFile() {
-        updateOutputFile(buildFilename());
-    }
-
-    private synchronized void updateOutputFile(String currentFilename) {
-        try {
-            OutputStream out = Files.newOutputStream(this.logsDirectory.resolve(currentFilename), CREATE, APPEND);
-            setOutputStream(out);
-        } catch (IOException ex) {
-            // We can't really log exceptions if the logger doesn't work
-            // TODO: implement ErrorManager that doesn't write to System.err
+      } catch (InterruptedException ex) {
+        if (running.get()) {
+          Thread.currentThread().interrupt();
+          break;
         }
+      }
+    }
+  }
+
+  public void shutdownHandler() {
+    if (!running.compareAndSet(true, false)) {
+      return;
     }
 
-    private String buildFilename() {
-        return String.format(filenameFormat, currentDate.toString());
+    loggingThread.interrupt();
+    try {
+      loggingThread.join();
+    } catch (InterruptedException ignored) {
+      Thread.currentThread().interrupt();
     }
+    super.close();
+  }
 
-    @Override
-    public void publish(LogRecord record) {
-        if (!running.get() || !isLoggable(record)) return;
-        logQueue.offer(record); // Add to queue
-    }
-
-    private void processQueue() {
-        while (running.get() || !logQueue.isEmpty()) {
-            try {
-                LogRecord record = logQueue.take();
-                synchronized (this) {
-                    // Rotate the file if the date has changed
-                    final LocalDate today = LocalDate.now();
-
-                    if (!today.equals(currentDate)) {
-                        final String oldPath = buildFilename();
-
-                        currentDate = today;
-                        updateOutputFile(buildFilename());
-
-                        super.publish(new LogRecord(Level.INFO, String.format("Continued from %s", oldPath)));
-                    }
-
-                    // Write the actual log record
-                    super.publish(record);
-                    flush();
-                }
-            } catch (InterruptedException ex) {
-                if (running.get()) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
-            }
-        }
-    }
-
-    public void shutdownHandler() {
-        if (!running.compareAndSet(true, false)) {
-            return;
-        }
-
-        loggingThread.interrupt();
-        try {
-            loggingThread.join();
-        } catch (InterruptedException ignored) {
-            Thread.currentThread().interrupt();
-        }
-        super.close();
-    }
-
-    @Override
-    public void close() {
-        shutdownHandler();
-    }
+  @Override
+  public void close() {
+    shutdownHandler();
+  }
 }

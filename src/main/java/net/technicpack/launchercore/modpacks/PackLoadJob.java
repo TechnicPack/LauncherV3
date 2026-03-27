@@ -19,6 +19,11 @@
 
 package net.technicpack.launchercore.modpacks;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import javax.swing.SwingUtilities;
 import net.technicpack.launcher.io.InstalledPackStore;
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
@@ -26,165 +31,168 @@ import net.technicpack.launchercore.modpacks.sources.IModpackTagBuilder;
 import net.technicpack.launchercore.modpacks.sources.IPackSource;
 import net.technicpack.rest.io.PackInfo;
 
-import javax.swing.SwingUtilities;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 public class PackLoadJob implements Runnable {
-    private LauncherFileSystem fileSystem;
-    private IModpackTagBuilder tagBuilder;
-    private IAuthoritativePackSource authoritativeSource;
-    private InstalledPackStore packStore;
-    private Collection<IPackSource> packSources;
-    private IModpackContainer container;
-    private boolean doLoadRepository;
-    private Map<String, ModpackModel> processedModpacks = new HashMap<>();
+  private LauncherFileSystem fileSystem;
+  private IModpackTagBuilder tagBuilder;
+  private IAuthoritativePackSource authoritativeSource;
+  private InstalledPackStore packStore;
+  private Collection<IPackSource> packSources;
+  private IModpackContainer container;
+  private boolean doLoadRepository;
+  private Map<String, ModpackModel> processedModpacks = new HashMap<>();
 
-    private boolean isCancelled = false;
+  private boolean isCancelled = false;
 
-    public PackLoadJob(LauncherFileSystem fileSystem, InstalledPackStore packStore, IAuthoritativePackSource authoritativeSource, Collection<IPackSource> packSources, IModpackContainer container, IModpackTagBuilder tagBuilder, boolean doLoadRepository) {
-        this.packStore = packStore;
-        this.authoritativeSource = authoritativeSource;
-        this.packSources = packSources;
-        this.container = container;
-        this.tagBuilder = tagBuilder;
-        this.fileSystem = fileSystem;
-        this.doLoadRepository = doLoadRepository;
-        container.clear();
+  public PackLoadJob(
+      LauncherFileSystem fileSystem,
+      InstalledPackStore packStore,
+      IAuthoritativePackSource authoritativeSource,
+      Collection<IPackSource> packSources,
+      IModpackContainer container,
+      IModpackTagBuilder tagBuilder,
+      boolean doLoadRepository) {
+    this.packStore = packStore;
+    this.authoritativeSource = authoritativeSource;
+    this.packSources = packSources;
+    this.container = container;
+    this.tagBuilder = tagBuilder;
+    this.fileSystem = fileSystem;
+    this.doLoadRepository = doLoadRepository;
+    container.clear();
+  }
+
+  // Stop adding & updating packs from this job.  Used for instance in the search bar: if the user
+  // types out 3 letters
+  // we want to search for what they typed, but if they keep typing we want to cancel the created
+  // job and make a new one
+
+  // This method forces the cancel to occur on the dispatch thread, since addPack always takes place
+  // on the dispatch thread,
+  // so we don't have to worry about an addPack being halfway through completion if this object is
+  // saying it's cancelled
+  public void cancel() {
+    if (SwingUtilities.isEventDispatchThread()) {
+      isCancelled = true;
+    } else {
+      SwingUtilities.invokeLater(this::cancel);
+    }
+  }
+
+  public boolean isCancelled() {
+    return isCancelled;
+  }
+
+  @Override
+  public void run() {
+
+    int threadCount = 0;
+    if (doLoadRepository) threadCount++;
+    if (packSources != null) threadCount += packSources.size();
+    Collection<Thread> threads = new ArrayList<>(threadCount);
+
+    if (doLoadRepository) {
+      for (final String packName : packStore.getPackNames()) {
+        InstalledPack pack = packStore.getInstalledPacks().get(packName);
+        addPackThreadSafe(pack, null, -1);
+      }
     }
 
-    //Stop adding & updating packs from this job.  Used for instance in the search bar: if the user types out 3 letters
-    //we want to search for what they typed, but if they keep typing we want to cancel the created job and make a new one
-
-    //This method forces the cancel to occur on the dispatch thread, since addPack always takes place on the dispatch thread,
-    //so we don't have to worry about an addPack being halfway through completion if this object is saying it's cancelled
-    public void cancel() {
-        if (SwingUtilities.isEventDispatchThread()) {
-            isCancelled = true;
-        } else {
-            SwingUtilities.invokeLater(this::cancel);
-        }
-    }
-
-    public boolean isCancelled() {
-        return isCancelled;
-    }
-
-    @Override
-    public void run() {
-
-        int threadCount = 0;
-        if (doLoadRepository)
-            threadCount++;
-        if (packSources != null)
-            threadCount += packSources.size();
-        Collection<Thread> threads = new ArrayList<>(threadCount);
-
-        if (doLoadRepository) {
-            for (final String packName : packStore.getPackNames()) {
-                InstalledPack pack = packStore.getInstalledPacks().get(packName);
-                addPackThreadSafe(pack, null, -1);
-            }
-        }
-
-        if (packSources != null) {
-            for (final IPackSource packSource : packSources) {
-                Thread packSourceThread = new Thread(packSource.getSourceName() + " Loading Thread") {
-                    @Override
-                    public void run() {
-                        for (PackInfo info : packSource.getPublicPacks()) {
-                            addPackThreadSafe(null, info, packSource.getPriority(info));
-                        }
-                    }
-                };
-
-                threads.add(packSourceThread);
-                packSourceThread.start();
-            }
-        }
-
-        for (Thread thread : threads) {
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-            }
-        }
-
-        refreshCompleteThreadSafe();
-    }
-
-    protected void refreshCompleteThreadSafe() {
-        SwingUtilities.invokeLater(() -> container.refreshComplete());
-    }
-
-
-    protected void addPackThreadSafe(final InstalledPack pack, final PackInfo packInfo, final int priority) {
-        SwingUtilities.invokeLater(() -> addPack(pack, packInfo, priority));
-    }
-
-    protected void addPack(final InstalledPack pack, final PackInfo packInfo, final int priority) {
-        if (pack == null && packInfo == null || isCancelled)
-            return;
-
-        String name = (pack != null) ? pack.getName() : packInfo.getName();
-
-        ModpackModel modpack;
-        boolean newModpackModel = true;
-        if (processedModpacks.containsKey(name)) {
-            modpack = processedModpacks.get(name);
-            newModpackModel = false;
-            if (modpack.getInstalledPack() == null && pack != null) {
-                modpack.setInstalledPack(pack, packStore);
-            }
-
-            if (packInfo != null) {
-                modpack.setPackInfo(packInfo);
-                modpack.updatePriority(priority);
-            }
-        } else {
-            modpack = new ModpackModel(pack, packInfo, packStore, fileSystem);
-            modpack.updatePriority(priority);
-
-            if (packInfo == null)
-                modpack.setIsPlatform(false);
-
-            processedModpacks.put(name, modpack);
-        }
-
-        if (modpack.getInstalledPack() == null && !doLoadRepository && packStore.getInstalledPacks().containsKey(modpack.getName())) {
-            modpack.setInstalledPack(packStore.getInstalledPacks().get(modpack.getName()), packStore);
-        }
-
-        Runnable fillDataMethod = null;
-        if (modpack.getPackInfo() == null) {
-            fillDataMethod = () -> {
-                PackInfo completeInfo = authoritativeSource.getPackInfo(pack);
-                if (completeInfo != null) {
-                    addPackThreadSafe(null, completeInfo, priority);
+    if (packSources != null) {
+      for (final IPackSource packSource : packSources) {
+        Thread packSourceThread =
+            new Thread(packSource.getSourceName() + " Loading Thread") {
+              @Override
+              public void run() {
+                for (PackInfo info : packSource.getPublicPacks()) {
+                  addPackThreadSafe(null, info, packSource.getPriority(info));
                 }
+              }
             };
-        } else if (!modpack.getPackInfo().isComplete()) {
-            fillDataMethod = () -> {
-                PackInfo completeInfo = authoritativeSource.getCompletePackInfo(packInfo);
-                if (completeInfo != null) {
-                    addPackThreadSafe(null, completeInfo, priority);
-                }
-            };
-        }
 
-        if (fillDataMethod != null) {
-            Thread thread = new Thread(fillDataMethod);
-            thread.start();
-        }
-
-        if (modpack != null && tagBuilder != null)
-            modpack.updateTags(tagBuilder);
-
-        if (newModpackModel)
-            container.addModpackToContainer(modpack);
-        else
-            container.replaceModpackInContainer(modpack);
+        threads.add(packSourceThread);
+        packSourceThread.start();
+      }
     }
+
+    for (Thread thread : threads) {
+      try {
+        thread.join();
+      } catch (InterruptedException e) {
+      }
+    }
+
+    refreshCompleteThreadSafe();
+  }
+
+  protected void refreshCompleteThreadSafe() {
+    SwingUtilities.invokeLater(() -> container.refreshComplete());
+  }
+
+  protected void addPackThreadSafe(
+      final InstalledPack pack, final PackInfo packInfo, final int priority) {
+    SwingUtilities.invokeLater(() -> addPack(pack, packInfo, priority));
+  }
+
+  protected void addPack(final InstalledPack pack, final PackInfo packInfo, final int priority) {
+    if (pack == null && packInfo == null || isCancelled) return;
+
+    String name = (pack != null) ? pack.getName() : packInfo.getName();
+
+    ModpackModel modpack;
+    boolean newModpackModel = true;
+    if (processedModpacks.containsKey(name)) {
+      modpack = processedModpacks.get(name);
+      newModpackModel = false;
+      if (modpack.getInstalledPack() == null && pack != null) {
+        modpack.setInstalledPack(pack, packStore);
+      }
+
+      if (packInfo != null) {
+        modpack.setPackInfo(packInfo);
+        modpack.updatePriority(priority);
+      }
+    } else {
+      modpack = new ModpackModel(pack, packInfo, packStore, fileSystem);
+      modpack.updatePriority(priority);
+
+      if (packInfo == null) modpack.setIsPlatform(false);
+
+      processedModpacks.put(name, modpack);
+    }
+
+    if (modpack.getInstalledPack() == null
+        && !doLoadRepository
+        && packStore.getInstalledPacks().containsKey(modpack.getName())) {
+      modpack.setInstalledPack(packStore.getInstalledPacks().get(modpack.getName()), packStore);
+    }
+
+    Runnable fillDataMethod = null;
+    if (modpack.getPackInfo() == null) {
+      fillDataMethod =
+          () -> {
+            PackInfo completeInfo = authoritativeSource.getPackInfo(pack);
+            if (completeInfo != null) {
+              addPackThreadSafe(null, completeInfo, priority);
+            }
+          };
+    } else if (!modpack.getPackInfo().isComplete()) {
+      fillDataMethod =
+          () -> {
+            PackInfo completeInfo = authoritativeSource.getCompletePackInfo(packInfo);
+            if (completeInfo != null) {
+              addPackThreadSafe(null, completeInfo, priority);
+            }
+          };
+    }
+
+    if (fillDataMethod != null) {
+      Thread thread = new Thread(fillDataMethod);
+      thread.start();
+    }
+
+    if (modpack != null && tagBuilder != null) modpack.updateTags(tagBuilder);
+
+    if (newModpackModel) container.addModpackToContainer(modpack);
+    else container.replaceModpackInContainer(modpack);
+  }
 }
