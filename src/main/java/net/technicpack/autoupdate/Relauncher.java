@@ -24,12 +24,15 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 import javax.swing.JOptionPane;
 import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.io.LauncherFileSystem;
@@ -45,6 +48,8 @@ import net.technicpack.utilslib.Utils;
 
 public class Relauncher {
   private static final String LAUNCHER_ASSET_PROGRESS_TEMPLATE = "%s";
+  private static final int WINDOWS_PACKAGE_REPLACE_ATTEMPTS = 20;
+  private static final long WINDOWS_PACKAGE_RETRY_DELAY_MILLIS = 250L;
 
   private final String stream;
   private final int currentBuild;
@@ -279,18 +284,114 @@ public class Relauncher {
     }
 
     try {
-      Files.deleteIfExists(targetPath);
-      Files.createDirectories(targetPath.getParent());
-      Files.copy(currentPath, targetPath);
+      replaceLauncherPackage(currentPath, targetPath);
     } catch (IOException e) {
-      Utils.getLogger().log(java.util.logging.Level.SEVERE, "Error copying package", e);
+      Utils.getLogger().log(Level.SEVERE, "Error copying package", e);
       throw e;
     }
+  }
+
+  static void replaceLauncherPackage(Path currentPath, Path targetPath) throws IOException {
+    replaceLauncherPackage(
+        currentPath,
+        targetPath,
+        OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS,
+        Relauncher::replaceLauncherPackageOnce,
+        Thread::sleep);
+  }
+
+  static void replaceLauncherPackage(
+      Path currentPath,
+      Path targetPath,
+      boolean retryTargetLocks,
+      ReplaceOperation replaceOperation,
+      PauseOperation pauseOperation)
+      throws IOException {
+    int attempts = retryTargetLocks ? WINDOWS_PACKAGE_REPLACE_ATTEMPTS : 1;
+
+    for (int attempt = 1; attempt <= attempts; attempt++) {
+      try {
+        replaceOperation.execute(currentPath, targetPath);
+        return;
+      } catch (FileSystemException e) {
+        if (!shouldRetryLauncherPackageReplace(
+            e, targetPath, retryTargetLocks, attempt, attempts)) {
+          throw e;
+        }
+
+        Utils.getLogger()
+            .log(
+                Level.WARNING,
+                String.format(
+                    "Failed to replace launcher package at %s on attempt %d/%d; retrying",
+                    targetPath, attempt, attempts),
+                e);
+
+        waitForLauncherPackageRetry(pauseOperation, targetPath, attempt, attempts, e);
+      }
+    }
+  }
+
+  private static void replaceLauncherPackageOnce(Path currentPath, Path targetPath)
+      throws IOException {
+    Path parent = targetPath.getParent();
+    if (parent != null) {
+      Files.createDirectories(parent);
+    }
+
+    Files.copy(currentPath, targetPath, StandardCopyOption.REPLACE_EXISTING);
 
     File targetFile = targetPath.toFile();
     if (!targetFile.setExecutable(true, true)) {
       Utils.getLogger().warning("Failed to set executable flag on package");
     }
+  }
+
+  private static boolean shouldRetryLauncherPackageReplace(
+      FileSystemException exception,
+      Path targetPath,
+      boolean retryTargetLocks,
+      int attempt,
+      int attempts) {
+    if (!retryTargetLocks || attempt >= attempts) {
+      return false;
+    }
+
+    String targetPathString = targetPath.toString();
+    return targetPathString.equals(exception.getFile())
+        || targetPathString.equals(exception.getOtherFile());
+  }
+
+  private static void waitForLauncherPackageRetry(
+      PauseOperation pauseOperation,
+      Path targetPath,
+      int attempt,
+      int attempts,
+      FileSystemException cause)
+      throws IOException {
+    try {
+      pauseOperation.pause(WINDOWS_PACKAGE_RETRY_DELAY_MILLIS);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      IOException interrupted =
+          new IOException(
+              String.format(
+                  "Interrupted while waiting to replace launcher package at %s after attempt %d/%d",
+                  targetPath, attempt, attempts),
+              e);
+      interrupted.addSuppressed(cause);
+      throw interrupted;
+    }
+  }
+
+  @FunctionalInterface
+  interface ReplaceOperation {
+    void execute(Path currentPath, Path targetPath) throws IOException;
+  }
+
+  @FunctionalInterface
+  interface PauseOperation {
+    void pause(long millis) throws InterruptedException;
   }
 
   public void launch(String launchPath, List<String> args) {
