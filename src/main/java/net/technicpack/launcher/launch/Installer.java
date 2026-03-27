@@ -255,10 +255,7 @@ public class Installer {
           boolean usingMojangJava =
               mojangJavaWanted && version.getMojangRuntimeInformation() != null;
 
-          Memory memoryObj =
-              Memory.getClosestAvailableMemory(
-                  Memory.getMemoryFromId(settings.getMemory()),
-                  javaVersions.getSelectedVersion().is64Bit());
+          Memory memoryObj = getLaunchMemory(settings, javaVersions.getSelectedVersion().is64Bit());
           long memory = memoryObj.getMemoryMB();
           String versionNumber = javaVersions.getSelectedVersion().getVersion();
           RunData data = pack.getRunData();
@@ -436,5 +433,24 @@ public class Installer {
   static boolean isCreateProcessAccessDenied(IOException exception) {
     String message = exception.getMessage();
     return message != null && message.contains("CreateProcess error=5,");
+  }
+
+  static Memory getLaunchMemory(TechnicSettings settings, boolean is64Bit) {
+    return getLaunchMemory(settings, Memory.getAvailableMemory(is64Bit));
+  }
+
+  static Memory getLaunchMemory(TechnicSettings settings, long availableMemory) {
+    Memory requestedMemory = Memory.getMemoryFromId(settings.getMemory());
+    Memory launchMemory = Memory.getClosestAvailableMemory(requestedMemory, availableMemory);
+
+    if (launchMemory.getMemoryMB() != requestedMemory.getMemoryMB()) {
+      Utils.getLogger()
+          .warning(
+              String.format(
+                  "Clamping launch memory from %s to %s because only %d MB is available.",
+                  requestedMemory, launchMemory, availableMemory));
+    }
+
+    return launchMemory;
   }
 }

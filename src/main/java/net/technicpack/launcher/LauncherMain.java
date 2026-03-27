@@ -35,6 +35,7 @@ import net.technicpack.launcher.launch.Installer;
 import net.technicpack.launcher.settings.SettingsFactory;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
+import net.technicpack.launcher.settings.migration.DefaultMemorySentinelMigration;
 import net.technicpack.launcher.settings.migration.IMigrator;
 import net.technicpack.launcher.settings.migration.InitialV3Migrator;
 import net.technicpack.launcher.settings.migration.ResetJvmArgsIfDefaultString;
@@ -629,6 +630,7 @@ public class LauncherMain {
         ArrayList<IMigrator> migrators = new ArrayList<>(1);
         migrators.add(new InitialV3Migrator(platform));
         migrators.add(new ResetJvmArgsIfDefaultString());
+        migrators.add(new DefaultMemorySentinelMigration());
         SettingsFactory.migrateSettings(settings, packStore, fileSystem, userStore, migrators);
 
         PackLoader packList = new PackLoader(fileSystem, packStore, packInfoRepository);

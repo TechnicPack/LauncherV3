@@ -8,6 +8,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
+import net.technicpack.utilslib.Memory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -24,6 +25,20 @@ class TechnicSettingsTest {
     settings.save();
 
     assertTrue(Files.exists(settingsPath));
+  }
+
+  @Test
+  void defaultsToDefaultMemorySentinel() {
+    TechnicSettings settings = new TechnicSettings();
+
+    assertEquals(Memory.DEFAULT_SETTINGS_ID, settings.getMemory());
+  }
+
+  @Test
+  void defaultMemorySentinelResolvesToFourGigabytes() {
+    TechnicSettings settings = new TechnicSettings();
+
+    assertEquals(4096, Memory.getMemoryFromId(settings.getMemory()).getMemoryMB());
   }
 
   @Test

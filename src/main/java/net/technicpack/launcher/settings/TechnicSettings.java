@@ -31,6 +31,7 @@ import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.util.LaunchAction;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.launch.WindowType;
+import net.technicpack.utilslib.Memory;
 import net.technicpack.utilslib.Utils;
 import org.jetbrains.annotations.NotNull;
 
@@ -46,7 +47,7 @@ public class TechnicSettings implements ILaunchOptions {
 
   private transient File settingsFile;
   private transient File technicRoot;
-  private int memory;
+  private int memory = Memory.DEFAULT_SETTINGS_ID;
   private LaunchAction launchAction = LaunchAction.HIDE;
   private String buildStream = STABLE;
   private boolean showConsole = true;
@@ -64,7 +65,7 @@ public class TechnicSettings implements ILaunchOptions {
   @SerializedName("javaBitness")
   private boolean prefer64Bit = true;
 
-  private String launcherSettingsVersion = "2";
+  private String launcherSettingsVersion = "3";
 
   private WindowType windowType = WindowType.DEFAULT;
   private int windowWidth = 0;
