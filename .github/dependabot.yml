@@ -1,13 +1,10 @@
 version: 2
 updates:
-  - package-ecosystem: "maven"
+  - package-ecosystem: "gradle"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
     ignore:
-      - dependency-name: "org.apache.maven.plugins:maven-shade-plugin"
-        versions:
-          - "3.3.0" # Broken, see https://issues.apache.org/jira/browse/MSHADE-417
       - dependency-name: "org.xhtmlrenderer:flying-saucer-core"
         versions:
           - ">=9.5.0" # requires Java 11
@@ -22,7 +19,17 @@ updates:
         patterns:
           - "com.google.http-client:*"
 
+  - package-ecosystem: "gradle"
+    directory: "/buildSrc"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
