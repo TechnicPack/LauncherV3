@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       actions: read
-      contents: read
+      contents: write
     env:
       GRADLE_WORKFLOW_FILE: gradle.yml
       REMOTE_HOST: ${{ secrets.LAUNCHER_REMOTE_HOST }}
@@ -96,6 +96,20 @@ jobs:
 
           echo "run_id=${run_id}" >> "${GITHUB_OUTPUT}"
           echo "Selected run id: ${run_id}"
+
+      - name: Resolve Commit SHA
+        id: commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ steps.resolve.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          commit_sha="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" --jq '.head_sha')"
+          if [[ -z "${commit_sha}" || "${commit_sha}" == "null" ]]; then
+            echo "::error::Failed to resolve commit SHA for run ${RUN_ID}."
+            exit 1
+          fi
+          echo "commit_sha=${commit_sha}" >> "${GITHUB_OUTPUT}"
 
       - name: Download Build Artifacts
         id: artifact
@@ -262,3 +276,74 @@ jobs:
             echo "- Source run id: \`${RUN_ID}\`"
             echo "- Source artifact: \`${ARTIFACT_NAME}\`"
           } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CHANNEL: ${{ inputs.channel }}
+          BUILD_NUMBER: ${{ steps.artifact.outputs.build_number }}
+          COMMIT_SHA: ${{ steps.commit.outputs.commit_sha }}
+          JAR_PATH: ${{ steps.artifact.outputs.jar_path }}
+          EXE_PATH: ${{ steps.artifact.outputs.exe_path }}
+          OSX_PATH: ${{ steps.artifact.outputs.osx_path }}
+        run: |
+          set -euo pipefail
+
+          tag="v4.0-${BUILD_NUMBER}"
+          title="4.0-${BUILD_NUMBER} (${CHANNEL})"
+
+          # Find previous release of the same channel, falling back to any release
+          if [[ "${CHANNEL}" == "beta" ]]; then
+            same_channel_filter='[.[] | select(.isPrerelease) | select(.tagName != $tag)] | .[0].tagName'
+          else
+            same_channel_filter='[.[] | select(.isPrerelease | not) | select(.tagName != $tag)] | .[0].tagName'
+          fi
+          any_release_filter='[.[] | select(.tagName != $tag)] | .[0].tagName'
+
+          releases_json="$(gh release list --repo "${GITHUB_REPOSITORY}" --exclude-drafts -L 100 --json tagName,isPrerelease 2>/dev/null || true)"
+
+          prev_tag=""
+          if [[ -n "${releases_json}" ]]; then
+            prev_tag="$(jq -r --arg tag "${tag}" "${same_channel_filter}" <<<"${releases_json}" 2>/dev/null || true)"
+
+            # Fall back to any previous release if none found for this channel
+            if [[ -z "${prev_tag}" || "${prev_tag}" == "null" ]]; then
+              prev_tag="$(jq -r --arg tag "${tag}" "${any_release_filter}" <<<"${releases_json}" 2>/dev/null || true)"
+            fi
+          fi
+
+          # Generate changelog from commits between previous release and current commit
+          notes_file="$(mktemp)"
+          trap 'rm -f "${notes_file}"' EXIT
+          if [[ -n "${prev_tag}" && "${prev_tag}" != "null" ]]; then
+            changelog="$(gh api "repos/${GITHUB_REPOSITORY}/compare/${prev_tag}...${COMMIT_SHA}" \
+              --jq '.commits | map("- " + (.commit.message | split("\n") | .[0])) | join("\n")' 2>/dev/null || true)"
+
+            if [[ -n "${changelog}" ]]; then
+              printf '## Changes since %s\n\n%s\n' "${prev_tag}" "${changelog}" > "${notes_file}"
+            else
+              printf 'Promoted build %s to **%s** channel.\n' "${BUILD_NUMBER}" "${CHANNEL}" > "${notes_file}"
+            fi
+          else
+            printf 'Promoted build %s to **%s** channel.\n' "${BUILD_NUMBER}" "${CHANNEL}" > "${notes_file}"
+          fi
+
+          # Delete existing release for this tag if present (e.g. beta → stable re-promotion)
+          # Keep the tag (no --cleanup-tag) so it survives if gh release create fails
+          if gh release view "${tag}" --repo "${GITHUB_REPOSITORY}" &>/dev/null; then
+            gh release delete "${tag}" --repo "${GITHUB_REPOSITORY}" --yes
+          fi
+
+          prerelease_flag=""
+          if [[ "${CHANNEL}" == "beta" ]]; then
+            prerelease_flag="--prerelease"
+          fi
+
+          gh release create "${tag}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --target "${COMMIT_SHA}" \
+            --title "${title}" \
+            --notes-file "${notes_file}" \
+            ${prerelease_flag} \
+            "${JAR_PATH}" "${EXE_PATH}" "${OSX_PATH}"
+
