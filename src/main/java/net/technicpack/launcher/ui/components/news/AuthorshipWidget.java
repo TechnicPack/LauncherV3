@@ -74,8 +74,8 @@ public class AuthorshipWidget extends JPanel implements IImageJobListener<Author
   }
 
   private String getDateText(Date date) {
-    LocalDate posted = new LocalDate(date.getTime());
-    LocalDate now = new LocalDate();
+    DateTime posted = new DateTime(date.getTime());
+    DateTime now = new DateTime();
 
     Years yearsSince = Years.yearsBetween(posted, now);
     Months monthsSince = Months.monthsBetween(posted, now);
