@@ -89,9 +89,14 @@ public class MojangUtils {
   }
 
   public static boolean isLegacyVersion(String version) {
-    final String[] versionParts = version.split("[.-]", 3);
+    try {
+      final String[] versionParts = version.split("[.-]", 3);
+      if (versionParts.length < 2) return false;
 
-    return Integer.parseInt(versionParts[0]) == 1 && Integer.parseInt(versionParts[1]) < 6;
+      return Integer.parseInt(versionParts[0]) == 1 && Integer.parseInt(versionParts[1]) < 6;
+    } catch (NumberFormatException e) {
+      return false;
+    }
   }
 
   public static boolean hasModernMinecraftForge(IMinecraftVersionInfo version) {
