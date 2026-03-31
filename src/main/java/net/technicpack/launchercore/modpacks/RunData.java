@@ -3,6 +3,7 @@ package net.technicpack.launchercore.modpacks;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.logging.Level;
+import net.technicpack.launchercore.JavaVersionComparator;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.utilslib.Memory;
@@ -50,21 +51,10 @@ public class RunData {
     return getMemorySetting(getMemory());
   }
 
+  private static final JavaVersionComparator JAVA_VERSION_COMPARATOR = new JavaVersionComparator();
+
   public static boolean isJavaVersionAtLeast(String testString, String compareString) {
-    String[] compareVersion = compareString.split("[._]");
-    String[] testVersion = testString.split("[._]");
-
-    int compareLength = Math.min(compareVersion.length, testVersion.length);
-    for (int i = 0; i < compareLength; i++) {
-      int refVal = Integer.parseInt(compareVersion[i]);
-      int testVal = Integer.parseInt(testVersion[i]);
-
-      if (refVal == testVal) continue;
-      return testVal > refVal;
-    }
-
-    if (compareVersion.length == testVersion.length) return true;
-    return compareVersion.length < testVersion.length;
+    return JAVA_VERSION_COMPARATOR.compare(testString, compareString) >= 0;
   }
 
   public boolean isJavaValid(String testString) {
