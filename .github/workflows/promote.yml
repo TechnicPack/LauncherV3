@@ -317,7 +317,7 @@ jobs:
           trap 'rm -f "${notes_file}"' EXIT
           if [[ -n "${prev_tag}" && "${prev_tag}" != "null" ]]; then
             changelog="$(gh api "repos/${GITHUB_REPOSITORY}/compare/${prev_tag}...${COMMIT_SHA}" \
-              --jq '.commits | map("- " + (.commit.message | split("\n") | .[0])) | join("\n")' 2>/dev/null || true)"
+              --jq --arg repo "${GITHUB_REPOSITORY}" '.commits | map("- " + (.commit.message | split("\n") | .[0]) + " (" + (.sha[:7]) + ")") | join("\n")' 2>/dev/null || true)"
 
             if [[ -n "${changelog}" ]]; then
               printf '## Changes since %s\n\n%s\n' "${prev_tag}" "${changelog}" > "${notes_file}"
