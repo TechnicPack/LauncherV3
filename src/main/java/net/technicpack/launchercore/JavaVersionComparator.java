@@ -10,9 +10,9 @@ import java.util.regex.Pattern;
  */
 public class JavaVersionComparator implements Comparator<String> {
 
-  // Legacy: 1.<major>.0_<update> (optionally with -ea, -open, +12, etc)
+  // Legacy: 1.<major>[.0[_<update>]] (optionally with -ea, -open, +12, etc)
   private static final Pattern LEGACY_PATTERN =
-      Pattern.compile("^1\\.(\\d+)\\.0_(\\d+)(?:[-+].*)?$");
+      Pattern.compile("^1\\.(\\d+)(?:\\.0(?:_(\\d+))?)?(?:[-+].*)?$");
 
   // Modern: <major>(.<minor>(.<security>(.<patch>)?)?)? (optionally with -ea, -open, +12, etc)
   private static final Pattern NEW_PATTERN =
@@ -42,8 +42,8 @@ public class JavaVersionComparator implements Comparator<String> {
     Matcher legacy = LEGACY_PATTERN.matcher(version);
     if (legacy.matches()) {
       int major = Integer.parseInt(legacy.group(1));
-      int update = Integer.parseInt(legacy.group(2));
-      // Normalize: legacy 1.8.0_221 -> [8,0,221]
+      int update = legacy.group(2) != null ? Integer.parseInt(legacy.group(2)) : 0;
+      // Normalize: legacy 1.8.0_221 -> [8,0,221], 1.8 -> [8,0,0]
       return new int[] {major, 0, update};
     }
 
