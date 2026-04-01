@@ -371,7 +371,11 @@ jobs:
             | jq -r '[.[] | select(.isDraft | not) | select(.isPrerelease) | .tagName] | .[0] // empty')"
 
           if [[ -n "${current_beta}" ]]; then
-            current_beta_build="$(echo "${current_beta}" | sed -E 's/^v4\.0-([0-9]+)-beta$/\1/')"
+            current_beta_build="$(echo "${current_beta}" | sed -E 's/^v4\.0-([0-9]+)(-beta)?$/\1/')"
+            if [[ ! "${current_beta_build}" =~ ^[0-9]+$ ]]; then
+              echo "::warning::Could not parse build number from beta tag: ${current_beta}"
+              current_beta_build=0
+            fi
           else
             current_beta_build=0
           fi
