@@ -289,7 +289,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          tag="v4.0-${BUILD_NUMBER}"
+          tag="v4.0-${BUILD_NUMBER}-${CHANNEL}"
           title="4.0-${BUILD_NUMBER} (${CHANNEL})"
 
           # Find previous release of the same channel, falling back to any release
@@ -333,7 +333,7 @@ jobs:
             printf 'Promoted build %s to **%s** channel.\n' "${BUILD_NUMBER}" "${CHANNEL}" > "${notes_file}"
           fi
 
-          # Delete existing release for this tag if present (e.g. beta → stable re-promotion)
+          # Delete existing release for this tag if present (e.g. same build+channel rerun)
           # Keep the tag (no --cleanup-tag) so it survives if gh release create fails
           if gh release view "${tag}" --repo "${GITHUB_REPOSITORY}" &>/dev/null; then
             gh release delete "${tag}" --repo "${GITHUB_REPOSITORY}" --yes
@@ -341,7 +341,7 @@ jobs:
 
           prerelease_flag=""
           if [[ "${CHANNEL}" == "beta" ]]; then
-            prerelease_flag="--prerelease"
+            prerelease_flag="--prerelease --latest=false"
           fi
 
           gh release create "${tag}" \
@@ -351,4 +351,88 @@ jobs:
             --notes-file "${notes_file}" \
             ${prerelease_flag} \
             "${JAR_PATH}" "${EXE_PATH}" "${OSX_PATH}"
+
+      - name: Bump Beta to Match Stable
+        if: inputs.channel == 'stable'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_NUMBER: ${{ steps.artifact.outputs.build_number }}
+          COMMIT_SHA: ${{ steps.commit.outputs.commit_sha }}
+          JAR_PATH: ${{ steps.artifact.outputs.jar_path }}
+          EXE_PATH: ${{ steps.artifact.outputs.exe_path }}
+          OSX_PATH: ${{ steps.artifact.outputs.osx_path }}
+          PLATFORM_API_KEY: ${{ secrets.PLATFORM_API_KEY }}
+          DISCORD_WEBHOOK_TOKEN: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Find current beta build number from the latest beta release tag
+          current_beta="$(gh release list --repo "${GITHUB_REPOSITORY}" -L 100 --json tagName,isPrerelease,isDraft \
+            | jq -r '[.[] | select(.isDraft | not) | select(.isPrerelease) | .tagName] | .[0] // empty')"
+
+          if [[ -n "${current_beta}" ]]; then
+            current_beta_build="$(echo "${current_beta}" | sed -E 's/^v4\.0-([0-9]+)-beta$/\1/')"
+          else
+            current_beta_build=0
+          fi
+
+          echo "Current beta build: ${current_beta_build}, stable being promoted: ${BUILD_NUMBER}"
+
+          if [[ "${current_beta_build}" -ge "${BUILD_NUMBER}" ]]; then
+            echo "Beta is already at ${current_beta_build}, no bump needed"
+            exit 0
+          fi
+
+          echo "Bumping beta from ${current_beta_build} to ${BUILD_NUMBER}"
+
+          # Update beta symlink on remote server (artifacts already uploaded by stable promotion)
+          ssh "${REMOTE_USER}@${REMOTE_HOST}" "cd '${REMOTE_BASE_DIR}' && ln -sfn '${BUILD_NUMBER}' 'beta'"
+
+          # Refresh beta launcher APIs
+          launcher_update_base="${LAUNCHER_UPDATE_BASE_URL%/}"
+          launcher_version_base="${LAUNCHER_VERSION_UPDATE_BASE_URL%/}"
+          curl -s -S "${launcher_update_base}/beta4/${BUILD_NUMBER}?k=${PLATFORM_API_KEY}"
+          curl -s -S "${launcher_version_base}/beta4/update?k=${PLATFORM_API_KEY}"
+
+          # Notify Discord
+          curl -s -S \
+            "https://discord.com/api/webhooks/${DISCORD_WEBHOOK_ID}/${DISCORD_WEBHOOK_TOKEN}?wait=true" \
+            --data-urlencode "content=New launcher beta build: ${BUILD_NUMBER} (auto-bumped to match stable)"
+
+          # Create beta GitHub release with changelog since previous beta
+          beta_tag="v4.0-${BUILD_NUMBER}-beta"
+          prev_beta_tag="${current_beta}"
+
+          notes_file="$(mktemp)"
+          trap 'rm -f "${notes_file}"' EXIT
+          if [[ -n "${prev_beta_tag}" ]]; then
+            echo "Generating beta changelog: ${prev_beta_tag}...${COMMIT_SHA}"
+            if changelog="$(gh api "repos/${GITHUB_REPOSITORY}/compare/${prev_beta_tag}...${COMMIT_SHA}" \
+              --jq '.commits | map("- " + (.commit.message | split("\n") | .[0]) + " (" + (.sha[:7]) + ")") | join("\n")')"; then
+              if [[ -n "${changelog}" ]]; then
+                printf '## Changes since %s\n\n%s\n' "${prev_beta_tag}" "${changelog}" > "${notes_file}"
+              else
+                printf 'Promoted build %s to **beta** channel (auto-bumped to match stable).\n' "${BUILD_NUMBER}" > "${notes_file}"
+              fi
+            else
+              echo "::warning::Compare API failed for beta changelog: ${prev_beta_tag}...${COMMIT_SHA}"
+              printf 'Promoted build %s to **beta** channel (auto-bumped to match stable).\n' "${BUILD_NUMBER}" > "${notes_file}"
+            fi
+          else
+            printf 'Promoted build %s to **beta** channel (auto-bumped to match stable).\n' "${BUILD_NUMBER}" > "${notes_file}"
+          fi
+
+          if gh release view "${beta_tag}" --repo "${GITHUB_REPOSITORY}" &>/dev/null; then
+            gh release delete "${beta_tag}" --repo "${GITHUB_REPOSITORY}" --yes
+          fi
+
+          gh release create "${beta_tag}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --target "${COMMIT_SHA}" \
+            --title "4.0-${BUILD_NUMBER} (beta)" \
+            --notes-file "${notes_file}" \
+            --prerelease --latest=false \
+            "${JAR_PATH}" "${EXE_PATH}" "${OSX_PATH}"
+
+          echo "Beta bumped to ${BUILD_NUMBER}"
 
