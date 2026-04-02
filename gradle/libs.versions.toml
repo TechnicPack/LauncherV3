@@ -19,7 +19,7 @@ maven-artifact = "3.9.14"
 google-oauth-client = "1.39.0"
 google-http-client = "2.1.0"
 slf4j = "2.0.17"
-sentry = "8.36.0"
+sentry = "8.37.1"
 sentry-gradle-plugin = "6.2.0"
 annotations = "26.1.0"
 
