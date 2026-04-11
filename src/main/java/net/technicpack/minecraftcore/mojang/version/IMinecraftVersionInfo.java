@@ -23,6 +23,7 @@ import java.util.List;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.mojang.version.io.*;
+import net.technicpack.minecraftcore.mojang.version.io.argument.Argument;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 
 public interface IMinecraftVersionInfo {
@@ -75,6 +76,30 @@ public interface IMinecraftVersionInfo {
   VersionJavaInfo getMojangRuntimeInformation();
 
   void removeLibrary(String libraryName);
+
+  /**
+   * Override the Mojang JRE information (javaVersion field). Used by the version patch system to
+   * set the required Java runtime.
+   */
+  void setMojangRuntimeInformation(VersionJavaInfo info);
+
+  /**
+   * Add JVM arguments to this version. Used by the version patch system to inject additional JVM
+   * flags.
+   */
+  void addJvmArguments(List<Argument> args);
+
+  /**
+   * Add game arguments to this version. Used by the version patch system to inject additional game
+   * args (e.g., tweakers).
+   */
+  void addGameArguments(List<Argument> args);
+
+  /**
+   * Replace ALL libraries with the given list. Used by the version patch system when the
+   * net.minecraft patch defines the complete library set.
+   */
+  void replaceAllLibraries(List<Library> replacementLibraries);
 
   IJavaRuntime getJavaRuntime();
 

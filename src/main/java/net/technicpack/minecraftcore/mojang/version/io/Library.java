@@ -19,6 +19,9 @@
 
 package net.technicpack.minecraftcore.mojang.version.io;
 
+import com.google.gson.annotations.SerializedName;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,9 +51,12 @@ public class Library {
   private String name;
   private List<Rule> rules;
   private Downloads downloads;
-  private Map<OperatingSystem, String> natives;
+  private Map<String, String> natives;
   private ExtractRules extract;
   private String url;
+
+  @SerializedName("MMC-hint")
+  private String mmcHint;
 
   // Gradle specifier/Maven coordinates
   // groupId:artifactId:version[:classifier][@extension]
@@ -109,6 +115,29 @@ public class Library {
     this.url = url;
   }
 
+  public boolean isLocal() {
+    return "local".equals(mmcHint);
+  }
+
+  /**
+   * Resolve the local library path within a base directory. Checks flat layout (filename only)
+   * first, then Maven layout (group/artifact/version/filename). Returns null if not found.
+   */
+  public Path resolveLocalPath(Path baseDir) {
+    Path libDir = baseDir.resolve("libraries");
+
+    // Flat layout: libraries/lwjgl3ify-2.1.16-forgePatches.jar
+    Path flat = libDir.resolve(getArtifactFilename(null));
+    if (Files.isRegularFile(flat)) return flat;
+
+    // Maven layout:
+    // libraries/com/github/GTNewHorizons/lwjgl3ify/2.1.16/lwjgl3ify-2.1.16-forgePatches.jar
+    Path maven = libDir.resolve(getArtifactPath(null));
+    if (Files.isRegularFile(maven)) return maven;
+
+    return null;
+  }
+
   public String getName() {
     return name;
   }
@@ -124,7 +153,7 @@ public class Library {
     return rules;
   }
 
-  public Map<OperatingSystem, String> getNatives() {
+  public Map<String, String> getNatives() {
     return natives;
   }
 
@@ -198,7 +227,7 @@ public class Library {
       return null;
     }
 
-    return natives.get(OperatingSystem.getOperatingSystem());
+    return natives.get(OperatingSystem.getOperatingSystem().getName());
   }
 
   public boolean shouldAppearOnClasspath() {

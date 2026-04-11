@@ -55,6 +55,19 @@ public class InstallVersionLibTask extends ListenerTask<IMinecraftVersionInfo> {
 
     queue.refreshProgress();
 
+    // Local libraries (MMC-hint: local) live in the modpack's libraries/ directory
+    if (library.isLocal()) {
+      Path localPath = library.resolveLocalPath(pack.getInstalledDirectory().toPath());
+      if (localPath != null) {
+        return;
+      }
+      throw new IOException(
+          "Local library "
+              + library.getName()
+              + " not found in "
+              + pack.getInstalledDirectory().toPath().resolve("libraries"));
+    }
+
     File extractDirectory =
         library.shouldExtractToNativesDirectory()
             ? new File(this.pack.getBinDir(), "natives")

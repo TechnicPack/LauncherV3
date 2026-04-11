@@ -19,6 +19,7 @@
 
 package net.technicpack.minecraftcore.mojang.version.chain;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,6 +33,7 @@ import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 public class ChainedMinecraftVersionInfo implements IMinecraftVersionInfo {
 
   private List<IMinecraftVersionInfo> chain;
+  private VersionJavaInfo overrideJavaInfo;
 
   public ChainedMinecraftVersionInfo(IMinecraftVersionInfo rootVersion) {
     chain = new LinkedList<>();
@@ -212,6 +214,8 @@ public class ChainedMinecraftVersionInfo implements IMinecraftVersionInfo {
 
   @Override
   public VersionJavaInfo getMojangRuntimeInformation() {
+    if (overrideJavaInfo != null) return overrideJavaInfo;
+
     for (IMinecraftVersionInfo version : chain) {
       if (version.getMojangRuntimeInformation() != null)
         return version.getMojangRuntimeInformation();
@@ -224,6 +228,40 @@ public class ChainedMinecraftVersionInfo implements IMinecraftVersionInfo {
   public void removeLibrary(String libraryName) {
     for (IMinecraftVersionInfo version : chain) {
       version.removeLibrary(libraryName);
+    }
+  }
+
+  @Override
+  public void setMojangRuntimeInformation(VersionJavaInfo info) {
+    this.overrideJavaInfo = info;
+  }
+
+  @Override
+  public void addJvmArguments(List<Argument> args) {
+    chain.get(0).addJvmArguments(args);
+  }
+
+  @Override
+  public void addGameArguments(List<Argument> args) {
+    chain.get(0).addGameArguments(args);
+  }
+
+  @Override
+  public void replaceAllLibraries(List<Library> replacementLibraries) {
+    // Clear libraries from ALL versions in the chain
+    for (IMinecraftVersionInfo version : chain) {
+      List<String> toRemove = new ArrayList<>();
+      for (Library lib : version.getLibraries()) {
+        toRemove.add(lib.getName());
+      }
+      for (String name : toRemove) {
+        version.removeLibrary(name);
+      }
+    }
+
+    // Add replacement libraries to the root version
+    for (Library lib : replacementLibraries) {
+      chain.get(0).addLibrary(lib);
     }
   }
 

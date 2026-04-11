@@ -1,6 +1,7 @@
 package net.technicpack.launcher.launch;
 
 import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -10,12 +11,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -53,6 +56,7 @@ import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.FmlLibsManager;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.install.ModpackZipFilter;
+import net.technicpack.minecraftcore.install.PrismInstanceRemapper;
 import net.technicpack.minecraftcore.install.tasks.CleanupModpackCacheTask;
 import net.technicpack.minecraftcore.install.tasks.InstallMinecraftIfNecessaryTask;
 import net.technicpack.minecraftcore.install.tasks.RenameJnilibToDylibTask;
@@ -72,6 +76,8 @@ import net.technicpack.minecraftcore.mojang.version.io.ExtractRules;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
 import net.technicpack.minecraftcore.mojang.version.io.Rule;
 import net.technicpack.minecraftcore.mojang.version.io.VersionJavaInfo;
+import net.technicpack.minecraftcore.mojang.version.io.VersionPatch;
+import net.technicpack.minecraftcore.mojang.version.io.argument.Argument;
 import net.technicpack.rest.io.Mod;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.ui.lang.ResourceLoader;
@@ -112,6 +118,11 @@ class ImmutableInstallerPlanner {
   private final boolean jarRegenerationRequired;
   private final String minecraftVersion;
   private final BooleanSupplier cancellationCheck;
+
+  // Set during mod extraction if a Prism instance zip is detected
+  private PrismInstanceRemapper detectedPrismRemapper;
+  // Minimum Java version detected from patches (from compatibleJavaMajors)
+  private int patchMinJavaMajor;
 
   ImmutableInstallerPlanner(
       ResourceLoader resources,
@@ -202,11 +213,25 @@ class ImmutableInstallerPlanner {
         1.0f,
         (context, reporter) -> context.setResolvedVersion(resolveVersion()));
     builder.addNode(
+        "apply-patches",
+        EXAMINE_VERSION_PHASE,
+        "Applying version patches",
+        1.0f,
+        Collections.singletonList("resolve-version"),
+        (context, reporter) -> applyVersionPatches(context));
+    builder.addNode(
+        "write-prism-rundata",
+        EXAMINE_VERSION_PHASE,
+        "Writing Prism runtime data",
+        1.0f,
+        Collections.singletonList("apply-patches"),
+        (context, reporter) -> writePrismRunData());
+    builder.addNode(
         "prepare-version",
         EXAMINE_VERSION_PHASE,
         "Processing version.",
         1.0f,
-        Collections.singletonList("resolve-version"),
+        Collections.singletonList("write-prism-rundata"),
         (context, reporter) -> prepareResolvedVersion(context));
     return builder.build();
   }
@@ -325,6 +350,17 @@ class ImmutableInstallerPlanner {
     deleteMods(pack.getModsDir());
     deleteMods(pack.getCoremodsDir());
     deleteMods(new File(pack.getInstalledDirectory(), "Flan"));
+
+    // Clean old version patches so stale ones don't persist across updates
+    File patchesDir = new File(pack.getInstalledDirectory(), "patches");
+    if (patchesDir.isDirectory()) {
+      File[] patchFiles = patchesDir.listFiles();
+      if (patchFiles != null) {
+        for (File patchFile : patchFiles) {
+          removeFile(patchFile);
+        }
+      }
+    }
   }
 
   private void installModpackContents(NodeProgressReporter reporter)
@@ -363,11 +399,29 @@ class ImmutableInstallerPlanner {
       throwIfCancelled();
       PreparedModpackArchive archive = archives.get(archiveIndex);
       NodeProgressReporter itemReporter = createItemReporter(reporter, stepIndex, totalSteps);
+
+      // Detect Prism instance zips and remap paths during extraction
+      PrismInstanceRemapper prismRemapper = PrismInstanceRemapper.detect(archive.cacheFile);
+      if (prismRemapper != null) {
+        Utils.getLogger().info("Detected Prism instance zip: " + archive.cacheFile.getName());
+      }
+
       executeLeafTask(
           new UnzipFileTask<IMinecraftVersionInfo>(
-              archive.cacheFile, modpackInstallDirectory, zipFilter),
+              archive.cacheFile, modpackInstallDirectory, zipFilter, prismRemapper),
           null,
           itemReporter);
+
+      // Store detected Prism remapper for later runData generation
+      if (prismRemapper != null) {
+        if (this.detectedPrismRemapper != null) {
+          Utils.getLogger()
+              .warning(
+                  "Multiple Prism instance zips detected — using the latest: "
+                      + archive.cacheFile.getName());
+        }
+        this.detectedPrismRemapper = prismRemapper;
+      }
       stepIndex++;
       reporter.updateNodeProgress(percentage(stepIndex, totalSteps));
     }
@@ -409,6 +463,185 @@ class ImmutableInstallerPlanner {
 
     version.setJavaRuntime(selectedJavaRuntime);
     return version;
+  }
+
+  private void writePrismRunData() throws IOException {
+    if (detectedPrismRemapper == null) return;
+
+    File runDataFile = new File(pack.getBinDir(), "runData");
+
+    // Don't overwrite if already written by the Solder API step
+    if (runDataFile.exists()) return;
+
+    long memory = detectedPrismRemapper.getMaxMemAllocMb();
+    if (memory <= 0 && patchMinJavaMajor <= 0) return;
+
+    pack.getBinDir().mkdirs();
+
+    JsonObject runData = new JsonObject();
+    if (patchMinJavaMajor > 0) {
+      runData.addProperty("java", String.valueOf(patchMinJavaMajor));
+    }
+    if (memory > 0) {
+      runData.addProperty("memory", String.valueOf(memory));
+    }
+
+    try (Writer writer = Files.newBufferedWriter(runDataFile.toPath(), StandardCharsets.UTF_8)) {
+      new Gson().toJson(runData, writer);
+    }
+
+    Utils.getLogger()
+        .info("Wrote Prism-derived runData: java=" + patchMinJavaMajor + " memory=" + memory);
+  }
+
+  private void applyVersionPatches(InstallExecutionContext context) throws IOException {
+    IMinecraftVersionInfo version = context.getResolvedVersion();
+    File patchesDir = new File(pack.getInstalledDirectory(), "patches");
+
+    if (!patchesDir.isDirectory()) return;
+
+    File[] patchFiles = patchesDir.listFiles((dir, name) -> name.endsWith(".json"));
+    if (patchFiles == null || patchFiles.length == 0) return;
+
+    // Parse all patches
+    List<VersionPatch> patches = new ArrayList<>();
+    for (File file : patchFiles) {
+      try (Reader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
+        VersionPatch patch = MojangUtils.getGson().fromJson(reader, VersionPatch.class);
+        if (patch != null && patch.getFormatVersion() == 1) {
+          patches.add(patch);
+          Utils.getLogger().info("Loaded version patch: " + file.getName());
+        }
+      } catch (JsonParseException e) {
+        Utils.getLogger()
+            .warning("Failed to parse version patch " + file.getName() + ": " + e.getMessage());
+      }
+    }
+
+    if (patches.isEmpty()) return;
+
+    // Sort by order (ascending)
+    patches.sort(Comparator.comparingInt(VersionPatch::getOrder));
+
+    // Apply each patch in order
+    for (VersionPatch patch : patches) {
+      applyPatch(version, patch);
+    }
+  }
+
+  private void applyPatch(IMinecraftVersionInfo version, VersionPatch patch) {
+    // Special case: uid "net.minecraft" replaces ALL libraries.
+    // This mirrors Prism where the net.minecraft component defines THE complete
+    // set of base libraries. Subsequent patches add their own libs on top.
+    if ("net.minecraft".equals(patch.getUid()) && patch.getLibraries() != null) {
+      version.replaceAllLibraries(patch.getLibraries());
+    } else if (patch.getLibraries() != null) {
+      // Normal case: add libraries using Prism's merge logic.
+      // If a library with the same group:artifact already exists, replace it
+      // only if the new version is higher. Otherwise just add.
+      for (Library lib : patch.getLibraries()) {
+        mergeLibrary(version, lib);
+      }
+    }
+
+    // Add JVM arguments
+    if (patch.getJvmArgs() != null && !patch.getJvmArgs().isEmpty()) {
+      List<Argument> args = new ArrayList<>();
+      for (String arg : patch.getJvmArgs()) {
+        args.add(Argument.literal(arg));
+      }
+      version.addJvmArguments(args);
+    }
+
+    // Add tweakers as --tweakClass game arguments
+    if (patch.getTweakers() != null && !patch.getTweakers().isEmpty()) {
+      List<Argument> tweakArgs = new ArrayList<>();
+      for (String tweaker : patch.getTweakers()) {
+        tweakArgs.add(Argument.literal("--tweakClass"));
+        tweakArgs.add(Argument.literal(tweaker));
+      }
+      version.addGameArguments(tweakArgs);
+    }
+
+    // Override mainClass (last patch by order wins)
+    if (patch.getMainClass() != null) {
+      version.setMainClass(patch.getMainClass());
+    }
+
+    // Override javaVersion (last patch by order wins)
+    if (patch.getJavaVersion() != null) {
+      version.setMojangRuntimeInformation(patch.getJavaVersion());
+    } else if (patch.getCompatibleJavaMajors() != null
+        && !patch.getCompatibleJavaMajors().isEmpty()) {
+      // Derive javaVersion from compatibleJavaMajors (Prism format)
+      VersionJavaInfo derived =
+          deriveJavaVersionFromCompatibleMajors(patch.getCompatibleJavaMajors());
+      if (derived != null) {
+        version.setMojangRuntimeInformation(derived);
+      }
+      // Track minimum Java version for runData (take the highest minimum across all patches)
+      int minMajor =
+          patch.getCompatibleJavaMajors().stream().mapToInt(Integer::intValue).min().orElse(0);
+      if (minMajor > patchMinJavaMajor) {
+        patchMinJavaMajor = minMajor;
+      }
+    }
+  }
+
+  private static VersionJavaInfo deriveJavaVersionFromCompatibleMajors(List<Integer> majors) {
+    // Find the highest compatible major version and map to a Mojang runtime component
+    int highest = majors.stream().mapToInt(Integer::intValue).max().orElse(0);
+
+    // Map to known Mojang runtime components (highest available that matches)
+    String component;
+    int majorVersion;
+    if (highest >= 25) {
+      component = "java-runtime-epsilon";
+      majorVersion = 25;
+    } else if (highest >= 21) {
+      component = "java-runtime-delta";
+      majorVersion = 21;
+    } else if (highest >= 17) {
+      component = "java-runtime-gamma";
+      majorVersion = 17;
+    } else if (highest >= 16) {
+      component = "java-runtime-alpha";
+      majorVersion = 16;
+    } else {
+      component = "jre-legacy";
+      majorVersion = 8;
+    }
+
+    return new VersionJavaInfo(component, majorVersion);
+  }
+
+  /**
+   * Merge a library into the version using Prism's logic: find existing by group:artifact, replace
+   * if new version is higher, otherwise add.
+   */
+  private static void mergeLibrary(IMinecraftVersionInfo version, Library newLib) {
+    String newGroup = newLib.getGradleGroup();
+    String newArtifact = newLib.getGradleArtifact();
+
+    for (Library existing : version.getLibraries()) {
+      if (newGroup.equals(existing.getGradleGroup())
+          && newArtifact.equals(existing.getGradleArtifact())) {
+        // Found matching group:artifact — compare versions
+        ComparableVersion newVersion = new ComparableVersion(newLib.getGradleVersion());
+        ComparableVersion existingVersion = new ComparableVersion(existing.getGradleVersion());
+
+        if (newVersion.compareTo(existingVersion) > 0) {
+          // New version is higher — remove old, add new
+          version.removeLibrary(existing.getName());
+          version.addLibrary(newLib);
+        }
+        // If new version is not higher, keep existing (do nothing)
+        return;
+      }
+    }
+
+    // No existing library with this group:artifact — just add
+    version.addLibrary(newLib);
   }
 
   private void prepareResolvedVersion(InstallExecutionContext context) throws IOException {
@@ -511,7 +744,12 @@ class ImmutableInstallerPlanner {
     }
 
     for (Library library : version.getLibrariesForCurrentOS(settings, selectedJavaRuntime)) {
-      if (library.isMinecraftForge() && !hasModernMinecraftForge) {
+      // Remove the Forge library if not using modern Forge AND modpack.jar exists
+      // (since modpack.jar provides Forge classes on the classpath).
+      // If modpack.jar doesn't exist, keep the Forge library so patches can provide it.
+      if (library.isMinecraftForge()
+          && !hasModernMinecraftForge
+          && new File(pack.getBinDir(), "modpack.jar").exists()) {
         version.removeLibrary(library.getName());
         continue;
       }
@@ -522,6 +760,7 @@ class ImmutableInstallerPlanner {
       }
 
       if (library.isLog4j()
+          && !library.getGradleVersion().equals("2.0-beta9-fixed")
           && (new ComparableVersion(library.getGradleVersion()))
                   .compareTo(new ComparableVersion("2.16.0"))
               < 0) {
@@ -595,6 +834,19 @@ class ImmutableInstallerPlanner {
   private void installVersionLibrary(
       InstallExecutionContext context, Library library, NodeProgressReporter reporter)
       throws IOException, InterruptedException {
+    // Local libraries (MMC-hint: local) live in the modpack's libraries/ directory
+    if (library.isLocal()) {
+      Path localPath = library.resolveLocalPath(pack.getInstalledDirectory().toPath());
+      if (localPath != null) {
+        return;
+      }
+      throw new IOException(
+          "Local library "
+              + library.getName()
+              + " not found in "
+              + pack.getInstalledDirectory().toPath().resolve("libraries"));
+    }
+
     File extractDirectory =
         library.shouldExtractToNativesDirectory() ? new File(pack.getBinDir(), "natives") : null;
 
@@ -1188,13 +1440,13 @@ class ImmutableInstallerPlanner {
   private static final class InstallLibraryKey {
     private final String normalizedName;
     private final List<Rule> rules;
-    private final Map<OperatingSystem, String> natives;
+    private final Map<String, String> natives;
     private final ExtractRules extract;
 
     private InstallLibraryKey(
         String normalizedName,
         List<Rule> rules,
-        Map<OperatingSystem, String> natives,
+        Map<String, String> natives,
         ExtractRules extract) {
       this.normalizedName = normalizedName;
       this.rules = rules;

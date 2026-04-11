@@ -9,6 +9,11 @@ public class VersionJavaInfo {
     // Empty constructor for GSON
   }
 
+  public VersionJavaInfo(String component, int majorVersion) {
+    this.component = component;
+    this.majorVersion = majorVersion;
+  }
+
   public String getComponent() {
     return component;
   }

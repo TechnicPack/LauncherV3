@@ -94,6 +94,16 @@ public class ZipUtils {
   public static void unzipFile(
       File zip, File output, IZipFileFilter fileFilter, DownloadListener listener)
       throws IOException, InterruptedException {
+    unzipFile(zip, output, fileFilter, listener, null);
+  }
+
+  public static void unzipFile(
+      File zip,
+      File output,
+      IZipFileFilter fileFilter,
+      DownloadListener listener,
+      IZipPathRemapper pathRemapper)
+      throws IOException, InterruptedException {
     if (!zip.exists()) {
       Utils.getLogger().log(Level.SEVERE, "File to unzip does not exist: " + zip.getAbsolutePath());
       return;
@@ -123,8 +133,20 @@ public class ZipUtils {
       for (ZipArchiveEntry entry : entries) {
         if (Thread.currentThread().isInterrupted()) throw new InterruptedException();
 
-        if (fileFilter == null || fileFilter.shouldExtract(entry.getName())) {
-          File outputFile = new File(output, entry.getName());
+        String extractPath = entry.getName();
+
+        // Apply path remapper if present
+        if (pathRemapper != null) {
+          extractPath = pathRemapper.remap(extractPath);
+          if (extractPath == null) {
+            // Remapper says skip this entry
+            entriesDone++;
+            continue;
+          }
+        }
+
+        if (fileFilter == null || fileFilter.shouldExtract(extractPath)) {
+          File outputFile = new File(output, extractPath);
 
           // Zip Slip check
           if (!outputFile.toPath().normalize().startsWith(output.toPath())) {

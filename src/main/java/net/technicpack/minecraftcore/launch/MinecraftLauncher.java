@@ -444,10 +444,19 @@ public class MinecraftLauncher {
         continue;
       }
 
-      Path file =
-          fileSystem
-              .getCacheDirectory()
-              .resolve(library.getArtifactPath().replace("${arch}", bitness));
+      Path file;
+      if (library.isLocal()) {
+        // Local libraries (MMC-hint: local) resolve from {modpack}/libraries/
+        file = library.resolveLocalPath(pack.getInstalledDirectory().toPath());
+        if (file == null) {
+          throw new InstallException("Local library " + library.getName() + " not found.");
+        }
+      } else {
+        file =
+            fileSystem
+                .getCacheDirectory()
+                .resolve(library.getArtifactPath().replace("${arch}", bitness));
+      }
       if (!Files.isRegularFile(file)) {
         throw new InstallException("Library " + library.getName() + " not found.");
       }

@@ -24,20 +24,21 @@ import java.util.stream.Collectors;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
+import net.technicpack.minecraftcore.mojang.version.io.argument.Argument;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 
 @SuppressWarnings("java:S2065")
 public class MinecraftVersionInfo implements IMinecraftVersionInfo {
   private final String id;
   private final ReleaseType type;
-  private final LaunchArguments arguments;
+  private LaunchArguments arguments;
   private final List<Library> libraries;
   private final List<Rule> rules;
   private final String assets;
   private final AssetIndex assetIndex;
   private final GameDownloads downloads;
   private final String inheritsFrom;
-  private final VersionJavaInfo javaVersion;
+  private VersionJavaInfo javaVersion;
   private String mainClass;
 
   private transient boolean areAssetsVirtual;
@@ -176,6 +177,27 @@ public class MinecraftVersionInfo implements IMinecraftVersionInfo {
   @Override
   public void removeLibrary(String libraryName) {
     libraries.removeIf(library -> library.getName().equals(libraryName));
+  }
+
+  @Override
+  public void setMojangRuntimeInformation(VersionJavaInfo info) {
+    this.javaVersion = info;
+  }
+
+  @Override
+  public void addJvmArguments(List<Argument> args) {
+    this.arguments = this.arguments.withAdditionalJvmArgs(args);
+  }
+
+  @Override
+  public void addGameArguments(List<Argument> args) {
+    this.arguments = this.arguments.withAdditionalGameArgs(args);
+  }
+
+  @Override
+  public void replaceAllLibraries(List<Library> replacementLibraries) {
+    libraries.clear();
+    libraries.addAll(replacementLibraries);
   }
 
   @Override
