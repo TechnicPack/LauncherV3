@@ -104,6 +104,21 @@ public class ZipUtils {
       DownloadListener listener,
       IZipPathRemapper pathRemapper)
       throws IOException, InterruptedException {
+    unzipFile(zip, output, fileFilter, listener, pathRemapper, null);
+  }
+
+  /**
+   * @param extractedPaths if non-null, collects the relative paths of all extracted files (not
+   *     directories)
+   */
+  public static void unzipFile(
+      File zip,
+      File output,
+      IZipFileFilter fileFilter,
+      DownloadListener listener,
+      IZipPathRemapper pathRemapper,
+      java.util.Set<String> extractedPaths)
+      throws IOException, InterruptedException {
     if (!zip.exists()) {
       Utils.getLogger().log(Level.SEVERE, "File to unzip does not exist: " + zip.getAbsolutePath());
       return;
@@ -176,6 +191,9 @@ public class ZipUtils {
 
           if (!entry.isDirectory()) {
             unzipEntry(zipFile, entry, outputFile);
+            if (extractedPaths != null) {
+              extractedPaths.add(extractPath);
+            }
           }
         }
 

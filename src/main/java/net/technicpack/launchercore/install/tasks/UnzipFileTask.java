@@ -21,6 +21,7 @@ package net.technicpack.launchercore.install.tasks;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 import java.util.zip.ZipException;
 import net.technicpack.launchercore.install.InstallTasksQueue;
 import net.technicpack.utilslib.IZipFileFilter;
@@ -32,17 +33,28 @@ public class UnzipFileTask<T> extends ListenerTask<T> {
   private File destination;
   private IZipFileFilter filter;
   private IZipPathRemapper pathRemapper;
+  private Set<String> extractedPaths;
 
   public UnzipFileTask(File zipFile, File destination, IZipFileFilter filter) {
-    this(zipFile, destination, filter, null);
+    this(zipFile, destination, filter, null, null);
   }
 
   public UnzipFileTask(
       File zipFile, File destination, IZipFileFilter filter, IZipPathRemapper pathRemapper) {
+    this(zipFile, destination, filter, pathRemapper, null);
+  }
+
+  public UnzipFileTask(
+      File zipFile,
+      File destination,
+      IZipFileFilter filter,
+      IZipPathRemapper pathRemapper,
+      Set<String> extractedPaths) {
     this.zipFile = zipFile;
     this.destination = destination;
     this.filter = filter;
     this.pathRemapper = pathRemapper;
+    this.extractedPaths = extractedPaths;
   }
 
   @Override
@@ -64,7 +76,7 @@ public class UnzipFileTask<T> extends ListenerTask<T> {
     }
 
     try {
-      ZipUtils.unzipFile(zipFile, destination, filter, this, pathRemapper);
+      ZipUtils.unzipFile(zipFile, destination, filter, this, pathRemapper, extractedPaths);
     } catch (ZipException e) {
       e.printStackTrace();
       throw new ZipException("Error extracting file " + zipFile.getName() + ".");

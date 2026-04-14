@@ -55,6 +55,7 @@ import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.FmlLibsManager;
 import net.technicpack.minecraftcore.MojangUtils;
+import net.technicpack.minecraftcore.install.ExtractedFilesManifest;
 import net.technicpack.minecraftcore.install.ModpackZipFilter;
 import net.technicpack.minecraftcore.install.PrismInstanceRemapper;
 import net.technicpack.minecraftcore.install.tasks.CleanupModpackCacheTask;
@@ -123,6 +124,8 @@ class ImmutableInstallerPlanner {
   private PrismInstanceRemapper detectedPrismRemapper;
   // Minimum Java version detected from patches (from compatibleJavaMajors)
   private int patchMinJavaMajor;
+  // Collects all file paths extracted from mod zips (for orphan cleanup)
+  private final Set<String> allExtractedPaths = new LinkedHashSet<>();
 
   ImmutableInstallerPlanner(
       ResourceLoader resources,
@@ -171,11 +174,18 @@ class ImmutableInstallerPlanner {
           Collections.singletonList("cleanup-modpack"),
           (context, reporter) -> installModpackContents(reporter));
       builder.addNode(
+          "cleanup-orphaned-files",
+          INSTALL_MODS_PHASE,
+          "Cleaning orphaned files",
+          1.0f,
+          Collections.singletonList("install-modpack-contents"),
+          (context, reporter) -> cleanupOrphanedFiles());
+      builder.addNode(
           "cleanup-modpack-cache",
           INSTALL_MODS_PHASE,
           "Cleaning Modpack Cache",
           1.0f,
-          Collections.singletonList("install-modpack-contents"),
+          Collections.singletonList("cleanup-orphaned-files"),
           new LegacyTaskPlanAction<InstallExecutionContext, IMinecraftVersionInfo>(
               new CleanupModpackCacheTask(pack, modpackData),
               InstallExecutionContext::getResolvedVersion));
@@ -361,6 +371,42 @@ class ImmutableInstallerPlanner {
         }
       }
     }
+
+    // First-run migration: if no extracted files manifest exists, back up config/ to config-backup
+    // so orphaned files from old modpack versions don't persist under the new manifest tracking.
+    if (!ExtractedFilesManifest.exists(binDir)) {
+      File configDir = new File(pack.getInstalledDirectory(), "config");
+      if (configDir.isDirectory()) {
+        File configBackup = new File(pack.getInstalledDirectory(), "config-backup");
+        if (configBackup.exists()) {
+          deleteDirectoryRecursively(configBackup);
+        }
+        if (configDir.renameTo(configBackup)) {
+          Utils.getLogger()
+              .warning(
+                  "No extracted files manifest found - moved config/ to config-backup"
+                      + " for first-run migration");
+        } else {
+          Utils.getLogger()
+              .warning("Failed to move config/ to config-backup during first-run migration");
+        }
+      }
+    }
+  }
+
+  private void deleteDirectoryRecursively(File dir) {
+    if (dir == null || !dir.exists()) return;
+    File[] children = dir.listFiles();
+    if (children != null) {
+      for (File child : children) {
+        if (child.isDirectory()) {
+          deleteDirectoryRecursively(child);
+        } else if (!child.delete()) {
+          Utils.getLogger().warning("Failed to delete: " + child.getAbsolutePath());
+        }
+      }
+    }
+    dir.delete();
   }
 
   private void installModpackContents(NodeProgressReporter reporter)
@@ -408,7 +454,11 @@ class ImmutableInstallerPlanner {
 
       executeLeafTask(
           new UnzipFileTask<IMinecraftVersionInfo>(
-              archive.cacheFile, modpackInstallDirectory, zipFilter, prismRemapper),
+              archive.cacheFile,
+              modpackInstallDirectory,
+              zipFilter,
+              prismRemapper,
+              allExtractedPaths),
           null,
           itemReporter);
 
@@ -417,7 +467,7 @@ class ImmutableInstallerPlanner {
         if (this.detectedPrismRemapper != null) {
           Utils.getLogger()
               .warning(
-                  "Multiple Prism instance zips detected — using the latest: "
+                  "Multiple Prism instance zips detected - using the latest: "
                       + archive.cacheFile.getName());
         }
         this.detectedPrismRemapper = prismRemapper;
@@ -425,6 +475,30 @@ class ImmutableInstallerPlanner {
       stepIndex++;
       reporter.updateNodeProgress(percentage(stepIndex, totalSteps));
     }
+  }
+
+  private void cleanupOrphanedFiles() throws IOException {
+    File modpackDir = pack.getInstalledDirectory();
+    File binDir = pack.getBinDir();
+
+    // Load old manifest (from previous install)
+    ExtractedFilesManifest oldManifest = ExtractedFilesManifest.load(binDir);
+
+    // Build new manifest from the files we just extracted
+    ExtractedFilesManifest newManifest =
+        ExtractedFilesManifest.buildFromExtractedFiles(modpackDir, allExtractedPaths);
+
+    // Find and delete orphans (in old but not in new)
+    Set<String> orphans = ExtractedFilesManifest.findOrphans(oldManifest, newManifest);
+    if (!orphans.isEmpty()) {
+      int deleted = ExtractedFilesManifest.deleteOrphans(orphans, modpackDir);
+      Utils.getLogger()
+          .info(
+              "Cleaned up " + deleted + " orphaned files out of " + orphans.size() + " candidates");
+    }
+
+    // Save new manifest
+    newManifest.save(binDir);
   }
 
   private List<PreparedModpackArchive> prepareModpackArchives()
@@ -626,12 +700,12 @@ class ImmutableInstallerPlanner {
     for (Library existing : version.getLibraries()) {
       if (newGroup.equals(existing.getGradleGroup())
           && newArtifact.equals(existing.getGradleArtifact())) {
-        // Found matching group:artifact — compare versions
+        // Found matching group:artifact - compare versions
         ComparableVersion newVersion = new ComparableVersion(newLib.getGradleVersion());
         ComparableVersion existingVersion = new ComparableVersion(existing.getGradleVersion());
 
         if (newVersion.compareTo(existingVersion) > 0) {
-          // New version is higher — remove old, add new
+          // New version is higher - remove old, add new
           version.removeLibrary(existing.getName());
           version.addLibrary(newLib);
         }
@@ -640,7 +714,7 @@ class ImmutableInstallerPlanner {
       }
     }
 
-    // No existing library with this group:artifact — just add
+    // No existing library with this group:artifact - just add
     version.addLibrary(newLib);
   }
 
