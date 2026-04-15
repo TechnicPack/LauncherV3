@@ -18,6 +18,7 @@ import net.technicpack.minecraftcore.mojang.version.ExtractRulesFileFilter;
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
 import net.technicpack.utilslib.IZipFileFilter;
+import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 
 public class InstallVersionLibTask extends ListenerTask<IMinecraftVersionInfo> {
@@ -68,15 +69,15 @@ public class InstallVersionLibTask extends ListenerTask<IMinecraftVersionInfo> {
               + pack.getInstalledDirectory().toPath().resolve("libraries"));
     }
 
-    File extractDirectory =
-        library.shouldExtractToNativesDirectory()
-            ? new File(this.pack.getBinDir(), "natives")
-            : null;
-
     IMinecraftVersionInfo version = queue.getMetadata();
+    String nativeClassifier =
+        library.resolveNativeClassifier(
+            OperatingSystem.getOperatingSystem().getName(), version.getJavaRuntime().getOsArch());
+    File extractDirectory =
+        nativeClassifier != null ? new File(this.pack.getBinDir(), "natives") : null;
     final String bitness = version.getJavaRuntime().getBitness();
 
-    String path = library.getInstallArtifactPathForCurrentOs().replace("${arch}", bitness);
+    String path = library.getArtifactPath(nativeClassifier).replace("${arch}", bitness);
 
     Path cache = fileSystem.getCacheDirectory().resolve(path);
 
@@ -86,7 +87,7 @@ public class InstallVersionLibTask extends ListenerTask<IMinecraftVersionInfo> {
 
     IFileVerifier verifier;
 
-    String sha1 = library.getInstallArtifactSha1ForCurrentOs();
+    String sha1 = library.getArtifactSha1(nativeClassifier);
     if (sha1 != null && !sha1.isEmpty()) verifier = new SHA1FileVerifier(sha1);
     else verifier = new ValidZipFileVerifier();
 
@@ -98,7 +99,7 @@ public class InstallVersionLibTask extends ListenerTask<IMinecraftVersionInfo> {
 
     // TODO: this causes verification to happen twice, for natives
     if (!Files.isRegularFile(cache) || !verifier.isFileValid(cache)) {
-      url = library.getInstallDownloadUrlForCurrentOs(bitness);
+      url = library.getDownloadUrl(path).replace("${arch}", bitness);
       if (sha1 == null || sha1.isEmpty()) {
         String md5 = Utils.getETag(url);
         if (md5 != null && !md5.isEmpty()) {

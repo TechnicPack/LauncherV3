@@ -2,7 +2,12 @@ package net.technicpack.minecraftcore.mojang.version.io;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
@@ -51,5 +56,34 @@ class MinecraftVersionInfoTest {
     assertEquals(
         List.of("-Xms2G", "-XX:+UseStringDeduplication"),
         version.getDefaultUserJavaArguments().resolve(null, null, null));
+  }
+
+  @Test
+  void deserializesTrimmedOfficialMinecraft1201Fixture() throws IOException {
+    MinecraftVersionInfo version;
+    try (Reader reader =
+        new InputStreamReader(
+            MinecraftVersionInfoTest.class.getResourceAsStream("minecraft-1.20.1-lwjgl.json"),
+            StandardCharsets.UTF_8)) {
+      version = MojangUtils.getGson().fromJson(reader, MinecraftVersionInfo.class);
+    }
+
+    assertEquals("1.20.1", version.getId());
+    assertEquals("net.minecraft.client.main.Main", version.getMainClass());
+    assertEquals(10, version.getLibraries().size());
+    assertTrue(
+        version.getLibraries().stream()
+            .anyMatch(
+                library ->
+                    library
+                        .getName()
+                        .equals("org.lwjgl:lwjgl:3.3.1:natives-macos-arm64")));
+    assertTrue(
+        version.getLibraries().stream()
+            .anyMatch(
+                library ->
+                    library
+                        .getName()
+                        .equals("org.lwjgl:lwjgl:3.3.1:natives-windows-arm64")));
   }
 }

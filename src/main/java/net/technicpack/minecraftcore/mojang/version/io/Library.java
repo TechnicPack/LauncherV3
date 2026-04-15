@@ -29,6 +29,7 @@ import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
+import net.technicpack.utilslib.JavaUtils;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 
@@ -223,11 +224,24 @@ public class Library {
   }
 
   public String resolveNativeClassifierForCurrentOs() {
+    return resolveNativeClassifier(OperatingSystem.getOperatingSystem().getName(), JavaUtils.OS_ARCH);
+  }
+
+  public String resolveNativeClassifier(String operatingSystemName, String osArch) {
     if (!hasNatives()) {
       return null;
     }
 
-    return natives.get(OperatingSystem.getOperatingSystem().getName());
+    String normalizedArchitecture = JavaUtils.normalizeNativeArchitecture(osArch);
+    if (normalizedArchitecture != null) {
+      String architectureSpecificClassifier =
+          natives.get(operatingSystemName + "-" + normalizedArchitecture);
+      if (architectureSpecificClassifier != null) {
+        return architectureSpecificClassifier;
+      }
+    }
+
+    return natives.get(operatingSystemName);
   }
 
   public boolean shouldAppearOnClasspath() {

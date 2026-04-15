@@ -87,6 +87,94 @@ class LibraryTest {
     assertTrue(plainLibrary.shouldAppearOnClasspath());
   }
 
+  @Test
+  void resolveNativeClassifierPrefersArm64SpecificKeyOverGenericOsFallback() {
+    Library library =
+        MojangUtils.getGson()
+            .fromJson(
+                "{"
+                    + "\"name\":\"org.lwjgl:lwjgl:3.2.2\","
+                    + "\"downloads\":{"
+                    + "\"artifact\":{\"sha1\":\"plain\",\"size\":1,\"url\":\"https://example/plain.jar\"},"
+                    + "\"classifiers\":{"
+                    + "\"natives-linux\":{\"sha1\":\"generic\",\"size\":1,\"url\":\"https://example/generic.jar\"},"
+                    + "\"natives-linux-arm64\":{\"sha1\":\"arm64\",\"size\":1,\"url\":\"https://example/arm64.jar\"}"
+                    + "}"
+                    + "},"
+                    + "\"natives\":{\"linux\":\"natives-linux\",\"linux-arm64\":\"natives-linux-arm64\"}"
+                    + "}",
+                Library.class);
+
+    String classifier = library.resolveNativeClassifier("linux", "aarch64");
+
+    assertEquals("natives-linux-arm64", classifier);
+    assertEquals(
+        "org/lwjgl/lwjgl/3.2.2/lwjgl-3.2.2-natives-linux-arm64.jar",
+        library.getArtifactPath(classifier));
+    assertEquals("arm64", library.getArtifactSha1(classifier));
+  }
+
+  @Test
+  void resolveNativeClassifierFallsBackToGenericOsKeyWhenArm64KeyIsMissing() {
+    Library library =
+        MojangUtils.getGson()
+            .fromJson(
+                "{"
+                    + "\"name\":\"org.lwjgl:lwjgl:3.2.2\","
+                    + "\"downloads\":{"
+                    + "\"artifact\":{\"sha1\":\"plain\",\"size\":1,\"url\":\"https://example/plain.jar\"},"
+                    + "\"classifiers\":{"
+                    + "\"natives-linux\":{\"sha1\":\"generic\",\"size\":1,\"url\":\"https://example/generic.jar\"}"
+                    + "}"
+                    + "},"
+                    + "\"natives\":{\"linux\":\"natives-linux\"}"
+                    + "}",
+                Library.class);
+
+    assertEquals("natives-linux", library.resolveNativeClassifier("linux", "aarch64"));
+  }
+
+  @Test
+  void resolveNativeClassifierSupportsArm32Aliases() {
+    Library library =
+        MojangUtils.getGson()
+            .fromJson(
+                "{"
+                    + "\"name\":\"org.lwjgl:lwjgl:3.2.2\","
+                    + "\"downloads\":{"
+                    + "\"artifact\":{\"sha1\":\"plain\",\"size\":1,\"url\":\"https://example/plain.jar\"},"
+                    + "\"classifiers\":{"
+                    + "\"natives-linux-arm32\":{\"sha1\":\"arm32\",\"size\":1,\"url\":\"https://example/arm32.jar\"}"
+                    + "}"
+                    + "},"
+                    + "\"natives\":{\"linux-arm32\":\"natives-linux-arm32\"}"
+                    + "}",
+                Library.class);
+
+    assertEquals("natives-linux-arm32", library.resolveNativeClassifier("linux", "armv7l"));
+    assertEquals("natives-linux-arm32", library.resolveNativeClassifier("linux", "arm32"));
+  }
+
+  @Test
+  void resolveNativeClassifierUsesGenericKeyForUnknownArchitecture() {
+    Library library =
+        MojangUtils.getGson()
+            .fromJson(
+                "{"
+                    + "\"name\":\"org.lwjgl:lwjgl:3.2.2\","
+                    + "\"downloads\":{"
+                    + "\"artifact\":{\"sha1\":\"plain\",\"size\":1,\"url\":\"https://example/plain.jar\"},"
+                    + "\"classifiers\":{"
+                    + "\"natives-linux\":{\"sha1\":\"generic\",\"size\":1,\"url\":\"https://example/generic.jar\"}"
+                    + "}"
+                    + "},"
+                    + "\"natives\":{\"linux\":\"natives-linux\"}"
+                    + "}",
+                Library.class);
+
+    assertEquals("natives-linux", library.resolveNativeClassifier("linux", "amd64"));
+  }
+
   private static String currentOsKey() {
     return OperatingSystem.getOperatingSystem().getName();
   }

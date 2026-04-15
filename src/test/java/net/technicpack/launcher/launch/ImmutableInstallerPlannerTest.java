@@ -3,6 +3,7 @@ package net.technicpack.launcher.launch;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
@@ -341,6 +342,97 @@ class ImmutableInstallerPlannerTest {
     assertEquals(2, context.getLibrariesToInstall().size());
   }
 
+  @Test
+  void installVersionLibraryPrefersArm64NativeCacheForArm64Runtime() throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher-arm64"));
+    InstalledPack installedPack =
+        new InstalledPack(
+            "arm64-pack",
+            InstalledPack.RECOMMENDED,
+            tempDir.resolve("pack-arm64").toString());
+    ModpackModel pack = new ModpackModel(installedPack, null, null, fileSystem);
+    pack.initDirectories();
+
+    String currentOs = OperatingSystem.getOperatingSystem().getName();
+    String arm64Key = currentOs + "-arm64";
+    String genericClassifier = "natives-generic";
+    String arm64Classifier = "natives-arm64";
+
+    Path genericZip = tempDir.resolve("generic-native.zip");
+    Path arm64Zip = tempDir.resolve("arm64-native.zip");
+    writeZip(genericZip, "marker.txt", "generic");
+    writeZip(arm64Zip, "marker.txt", "arm64");
+    byte[] genericBytes = Files.readAllBytes(genericZip);
+    byte[] arm64Bytes = Files.readAllBytes(arm64Zip);
+
+    Library library =
+        MojangUtils.getGson()
+            .fromJson(
+                "{"
+                    + "\"name\":\"org.lwjgl:lwjgl:3.2.2\","
+                    + "\"downloads\":{"
+                    + "\"classifiers\":{"
+                    + "\""
+                    + genericClassifier
+                    + "\":{\"sha1\":\""
+                    + sha1(genericBytes)
+                    + "\",\"size\":"
+                    + genericBytes.length
+                    + ",\"url\":\"https://example/generic.jar\"},"
+                    + "\""
+                    + arm64Classifier
+                    + "\":{\"sha1\":\""
+                    + sha1(arm64Bytes)
+                    + "\",\"size\":"
+                    + arm64Bytes.length
+                    + ",\"url\":\"https://example/arm64.jar\"}"
+                    + "}"
+                    + "},"
+                    + "\"natives\":{\""
+                    + currentOs
+                    + "\":\""
+                    + genericClassifier
+                    + "\",\""
+                    + arm64Key
+                    + "\":\""
+                    + arm64Classifier
+                    + "\"}"
+                    + "}",
+                Library.class);
+
+    Path genericCache = fileSystem.getCacheDirectory().resolve(library.getArtifactPath(genericClassifier));
+    Path arm64Cache = fileSystem.getCacheDirectory().resolve(library.getArtifactPath(arm64Classifier));
+    Files.createDirectories(genericCache.getParent());
+    Files.createDirectories(arm64Cache.getParent());
+    Files.write(genericCache, genericBytes);
+    Files.write(arm64Cache, arm64Bytes);
+
+    ImmutableInstallerPlanner planner =
+        new ImmutableInstallerPlanner(
+            new TestResourceLoader(),
+            pack,
+            GSON.fromJson("{\"minecraft\":\"1.16.5\",\"mods\":[]}", Modpack.class),
+            fileSystem,
+            null,
+            new TechnicSettings(),
+            new FakeJavaRuntime("aarch64"),
+            false,
+            false,
+            false,
+            () -> false);
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+    TestMinecraftVersionInfo version = new TestMinecraftVersionInfo(null);
+    version.setJavaRuntime(new FakeJavaRuntime("aarch64"));
+    context.setResolvedVersion(version);
+
+    invokeInstallVersionLibrary(planner, context, library, new RecordingReporter(new ArrayList<>()));
+
+    Path extractedMarker = pack.getBinDir().toPath().resolve("natives/marker.txt");
+    assertTrue(Files.exists(extractedMarker));
+    assertEquals("arm64", Files.readString(extractedMarker, StandardCharsets.UTF_8));
+  }
+
   private static void writeZip(Path zipPath, String entryName, String contents) throws IOException {
     Files.createDirectories(zipPath.getParent());
     try (ZipOutputStream output = new ZipOutputStream(Files.newOutputStream(zipPath))) {
@@ -431,6 +523,33 @@ class ImmutableInstallerPlannerTest {
     method.setAccessible(true);
     try {
       method.invoke(planner, context, reporter);
+    } catch (InvocationTargetException exception) {
+      Throwable cause = exception.getCause();
+      if (cause instanceof Exception) {
+        throw (Exception) cause;
+      }
+      if (cause instanceof Error) {
+        throw (Error) cause;
+      }
+      throw exception;
+    }
+  }
+
+  private static void invokeInstallVersionLibrary(
+      ImmutableInstallerPlanner planner,
+      ImmutableInstallerPlanner.InstallExecutionContext context,
+      Library library,
+      NodeProgressReporter reporter)
+      throws Exception {
+    Method method =
+        ImmutableInstallerPlanner.class.getDeclaredMethod(
+            "installVersionLibrary",
+            ImmutableInstallerPlanner.InstallExecutionContext.class,
+            Library.class,
+            NodeProgressReporter.class);
+    method.setAccessible(true);
+    try {
+      method.invoke(planner, context, library, reporter);
     } catch (InvocationTargetException exception) {
       Throwable cause = exception.getCause();
       if (cause instanceof Exception) {
@@ -605,6 +724,16 @@ class ImmutableInstallerPlannerTest {
   }
 
   private static final class FakeJavaRuntime implements IJavaRuntime {
+    private final String osArch;
+
+    private FakeJavaRuntime() {
+      this("amd64");
+    }
+
+    private FakeJavaRuntime(String osArch) {
+      this.osArch = osArch;
+    }
+
     @Override
     public File getExecutableFile() {
       return new File("java");
@@ -622,17 +751,17 @@ class ImmutableInstallerPlannerTest {
 
     @Override
     public String getOsArch() {
-      return "amd64";
+      return osArch;
     }
 
     @Override
     public String getBitness() {
-      return "64";
+      return osArch.contains("64") ? "64" : "32";
     }
 
     @Override
     public boolean is64Bit() {
-      return true;
+      return getBitness().equals("64");
     }
 
     @Override

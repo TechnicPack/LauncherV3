@@ -19,6 +19,7 @@
 
 package net.technicpack.utilslib;
 
+import java.util.Locale;
 import net.technicpack.launchercore.JavaVersionComparator;
 
 public class JavaUtils {
@@ -32,7 +33,26 @@ public class JavaUtils {
   }
 
   public static boolean isArm64() {
-    return OS_ARCH.equals("aarch64");
+    return "arm64".equals(normalizeNativeArchitecture(OS_ARCH));
+  }
+
+  public static String normalizeNativeArchitecture(String osArch) {
+    if (osArch == null || osArch.isEmpty()) {
+      return null;
+    }
+
+    String normalized = osArch.toLowerCase(Locale.ROOT);
+    if ("aarch64".equals(normalized) || "arm64".equals(normalized)) {
+      return "arm64";
+    }
+    if ("arm".equals(normalized)
+        || "arm32".equals(normalized)
+        || normalized.startsWith("armv6")
+        || normalized.startsWith("armv7")) {
+      return "arm32";
+    }
+
+    return null;
   }
 
   /**
