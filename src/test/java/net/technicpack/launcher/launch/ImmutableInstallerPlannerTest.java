@@ -45,6 +45,7 @@ import net.technicpack.minecraftcore.mojang.version.io.MinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.io.ReleaseType;
 import net.technicpack.minecraftcore.mojang.version.io.Rule;
 import net.technicpack.minecraftcore.mojang.version.io.VersionJavaInfo;
+import net.technicpack.minecraftcore.mojang.version.io.argument.Argument;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.ui.lang.ResourceLoader;
@@ -579,6 +580,18 @@ class ImmutableInstallerPlannerTest {
 
     @Override
     public void removeLibrary(String libraryName) {}
+
+    @Override
+    public void replaceAllLibraries(List<Library> replacementLibraries) {}
+
+    @Override
+    public void setMojangRuntimeInformation(VersionJavaInfo info) {}
+
+    @Override
+    public void addJvmArguments(List<Argument> args) {}
+
+    @Override
+    public void addGameArguments(List<Argument> args) {}
 
     @Override
     public IJavaRuntime getJavaRuntime() {
