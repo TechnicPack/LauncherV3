@@ -9,6 +9,8 @@ is added at the top.
 
 ## [Unreleased]
 
+## [v4.0-1075-stable] - 2026-04-17
+
 ### Added
 - Support for importing Prism Launcher instance zips (`mmc-pack.json`, per-component patches under `patches/`).
 - Support for Prism-style version patches (uid, order, +jvmArgs, +tweakers, MMC-hint, compatibleJavaMajors).
