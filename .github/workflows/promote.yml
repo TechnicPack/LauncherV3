@@ -3,13 +3,6 @@ name: Promote Launcher Build
 on:
   workflow_dispatch:
     inputs:
-      channel:
-        description: Promotion channel
-        required: true
-        type: choice
-        options:
-          - beta
-          - stable
       build_number:
         description: Build number to promote (for example 1052). Leave blank to use the latest successful build.
         required: false
@@ -205,26 +198,13 @@ jobs:
           ssh-keyscan -H "${REMOTE_HOST}" >> ~/.ssh/known_hosts
 
       - name: Upload Promoted Artifacts
-        id: upload
         env:
-          CHANNEL: ${{ inputs.channel }}
           BUILD_NUMBER: ${{ steps.artifact.outputs.build_number }}
           JAR_PATH: ${{ steps.artifact.outputs.jar_path }}
           EXE_PATH: ${{ steps.artifact.outputs.exe_path }}
           OSX_PATH: ${{ steps.artifact.outputs.osx_path }}
         run: |
           set -euo pipefail
-
-          if [[ "${CHANNEL}" == "beta" ]]; then
-            stream="beta4"
-            pointer="beta"
-          elif [[ "${CHANNEL}" == "stable" ]]; then
-            stream="stable4"
-            pointer="stable"
-          else
-            echo "::error::Unsupported channel: ${CHANNEL}"
-            exit 1
-          fi
 
           remote_dir="${REMOTE_BASE_DIR}/${BUILD_NUMBER}"
 
@@ -234,36 +214,31 @@ jobs:
           scp "${JAR_PATH}" "${REMOTE_USER}@${REMOTE_HOST}:${remote_dir}/TechnicLauncher.jar"
           scp "${OSX_PATH}" "${REMOTE_USER}@${REMOTE_HOST}:${remote_dir}/TechnicLauncher.app.zip"
 
-          ssh "${REMOTE_USER}@${REMOTE_HOST}" "cd '${REMOTE_BASE_DIR}' && ln -sfn '${BUILD_NUMBER}' '${pointer}'"
-
-          echo "stream=${stream}" >> "${GITHUB_OUTPUT}"
+          ssh "${REMOTE_USER}@${REMOTE_HOST}" "cd '${REMOTE_BASE_DIR}' && ln -sfn '${BUILD_NUMBER}' 'stable'"
 
       - name: Refresh Launcher APIs
         env:
           BUILD_NUMBER: ${{ steps.artifact.outputs.build_number }}
-          STREAM: ${{ steps.upload.outputs.stream }}
           PLATFORM_API_KEY: ${{ secrets.PLATFORM_API_KEY }}
         run: |
           set -euo pipefail
           launcher_update_base="${LAUNCHER_UPDATE_BASE_URL%/}"
           launcher_version_base="${LAUNCHER_VERSION_UPDATE_BASE_URL%/}"
-          curl -s -S "${launcher_update_base}/${STREAM}/${BUILD_NUMBER}?k=${PLATFORM_API_KEY}"
-          curl -s -S "${launcher_version_base}/${STREAM}/update?k=${PLATFORM_API_KEY}"
+          curl -s -S "${launcher_update_base}/stable4/${BUILD_NUMBER}?k=${PLATFORM_API_KEY}"
+          curl -s -S "${launcher_version_base}/stable4/update?k=${PLATFORM_API_KEY}"
 
       - name: Notify Discord
         env:
-          CHANNEL: ${{ inputs.channel }}
           BUILD_NUMBER: ${{ steps.artifact.outputs.build_number }}
           DISCORD_WEBHOOK_TOKEN: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
         run: |
           set -euo pipefail
           curl -s -S \
             "https://discord.com/api/webhooks/${DISCORD_WEBHOOK_ID}/${DISCORD_WEBHOOK_TOKEN}?wait=true" \
-            --data-urlencode "content=New launcher ${CHANNEL} build: ${BUILD_NUMBER}"
+            --data-urlencode "content=New launcher stable build: ${BUILD_NUMBER}"
 
       - name: Promotion Summary
         env:
-          CHANNEL: ${{ inputs.channel }}
           RUN_ID: ${{ steps.resolve.outputs.run_id }}
           BUILD_NUMBER: ${{ steps.artifact.outputs.build_number }}
           ARTIFACT_NAME: ${{ steps.artifact.outputs.artifact_name }}
@@ -271,7 +246,6 @@ jobs:
           {
             echo "## Promotion Complete"
             echo ""
-            echo "- Channel: \`${CHANNEL}\`"
             echo "- Build number: \`${BUILD_NUMBER}\`"
             echo "- Source run id: \`${RUN_ID}\`"
             echo "- Source artifact: \`${ARTIFACT_NAME}\`"
@@ -280,7 +254,6 @@ jobs:
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-          CHANNEL: ${{ inputs.channel }}
           BUILD_NUMBER: ${{ steps.artifact.outputs.build_number }}
           COMMIT_SHA: ${{ steps.commit.outputs.commit_sha }}
           JAR_PATH: ${{ steps.artifact.outputs.jar_path }}
@@ -289,29 +262,16 @@ jobs:
         run: |
           set -euo pipefail
 
-          tag="v4.0-${BUILD_NUMBER}-${CHANNEL}"
-          title="4.0-${BUILD_NUMBER} (${CHANNEL})"
+          tag="v4.0-${BUILD_NUMBER}-stable"
+          title="4.0-${BUILD_NUMBER} (stable)"
 
-          # Find previous release of the same channel, falling back to any release
-          if [[ "${CHANNEL}" == "beta" ]]; then
-            same_channel_filter='[.[] | select(.isDraft | not) | select(.isPrerelease) | select(.tagName != $tag)] | .[0].tagName'
-          else
-            same_channel_filter='[.[] | select(.isDraft | not) | select(.isPrerelease | not) | select(.tagName != $tag)] | .[0].tagName'
-          fi
-          any_release_filter='[.[] | select(.isDraft | not) | select(.tagName != $tag)] | .[0].tagName'
+          prev_filter='[.[] | select(.isDraft | not) | select(.isPrerelease | not) | select(.tagName != $tag)] | .[0].tagName'
 
           releases_json="$(gh release list --repo "${GITHUB_REPOSITORY}" -L 100 --json tagName,isPrerelease,isDraft || echo '[]')"
 
-          prev_tag="$(jq -r --arg tag "${tag}" "${same_channel_filter}" <<<"${releases_json}")"
-          echo "Same-channel previous tag: ${prev_tag:-<empty>}"
+          prev_tag="$(jq -r --arg tag "${tag}" "${prev_filter}" <<<"${releases_json}")"
+          echo "Previous tag: ${prev_tag:-<empty>}"
 
-          # Fall back to any previous release if none found for this channel
-          if [[ -z "${prev_tag}" || "${prev_tag}" == "null" ]]; then
-            prev_tag="$(jq -r --arg tag "${tag}" "${any_release_filter}" <<<"${releases_json}")"
-            echo "Any-channel fallback tag: ${prev_tag:-<empty>}"
-          fi
-
-          # Generate changelog from commits between previous release and current commit
           notes_file="$(mktemp)"
           trap 'rm -f "${notes_file}"' EXIT
           if [[ -n "${prev_tag}" && "${prev_tag}" != "null" ]]; then
@@ -322,26 +282,19 @@ jobs:
                 printf '## Changes since %s\n\n%s\n' "${prev_tag}" "${changelog}" > "${notes_file}"
               else
                 echo "::warning::Compare returned no commits for ${prev_tag}...${COMMIT_SHA}"
-                printf 'Promoted build %s to **%s** channel.\n' "${BUILD_NUMBER}" "${CHANNEL}" > "${notes_file}"
+                printf 'Promoted build %s to **stable** channel.\n' "${BUILD_NUMBER}" > "${notes_file}"
               fi
             else
               echo "::warning::Compare API failed for ${prev_tag}...${COMMIT_SHA}"
-              printf 'Promoted build %s to **%s** channel.\n' "${BUILD_NUMBER}" "${CHANNEL}" > "${notes_file}"
+              printf 'Promoted build %s to **stable** channel.\n' "${BUILD_NUMBER}" > "${notes_file}"
             fi
           else
             echo "::warning::No previous release found, skipping changelog"
-            printf 'Promoted build %s to **%s** channel.\n' "${BUILD_NUMBER}" "${CHANNEL}" > "${notes_file}"
+            printf 'Promoted build %s to **stable** channel.\n' "${BUILD_NUMBER}" > "${notes_file}"
           fi
 
-          # Delete existing release for this tag if present (e.g. same build+channel rerun)
-          # Keep the tag (no --cleanup-tag) so it survives if gh release create fails
           if gh release view "${tag}" --repo "${GITHUB_REPOSITORY}" &>/dev/null; then
             gh release delete "${tag}" --repo "${GITHUB_REPOSITORY}" --yes
-          fi
-
-          prerelease_flag=""
-          if [[ "${CHANNEL}" == "beta" ]]; then
-            prerelease_flag="--prerelease --latest=false"
           fi
 
           gh release create "${tag}" \
@@ -349,94 +302,4 @@ jobs:
             --target "${COMMIT_SHA}" \
             --title "${title}" \
             --notes-file "${notes_file}" \
-            ${prerelease_flag} \
             "${JAR_PATH}" "${EXE_PATH}" "${OSX_PATH}"
-
-      - name: Bump Beta to Match Stable
-        if: inputs.channel == 'stable'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          BUILD_NUMBER: ${{ steps.artifact.outputs.build_number }}
-          COMMIT_SHA: ${{ steps.commit.outputs.commit_sha }}
-          JAR_PATH: ${{ steps.artifact.outputs.jar_path }}
-          EXE_PATH: ${{ steps.artifact.outputs.exe_path }}
-          OSX_PATH: ${{ steps.artifact.outputs.osx_path }}
-          PLATFORM_API_KEY: ${{ secrets.PLATFORM_API_KEY }}
-          DISCORD_WEBHOOK_TOKEN: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
-        run: |
-          set -euo pipefail
-
-          # Find current beta build number from the latest beta release tag
-          current_beta="$(gh release list --repo "${GITHUB_REPOSITORY}" -L 100 --json tagName,isPrerelease,isDraft \
-            | jq -r '[.[] | select(.isDraft | not) | select(.isPrerelease) | .tagName] | .[0] // empty')"
-
-          if [[ -n "${current_beta}" ]]; then
-            current_beta_build="$(echo "${current_beta}" | sed -E 's/^v4\.0-([0-9]+)(-beta)?$/\1/')"
-            if [[ ! "${current_beta_build}" =~ ^[0-9]+$ ]]; then
-              echo "::warning::Could not parse build number from beta tag: ${current_beta}"
-              current_beta_build=0
-            fi
-          else
-            current_beta_build=0
-          fi
-
-          echo "Current beta build: ${current_beta_build}, stable being promoted: ${BUILD_NUMBER}"
-
-          if [[ "${current_beta_build}" -ge "${BUILD_NUMBER}" ]]; then
-            echo "Beta is already at ${current_beta_build}, no bump needed"
-            exit 0
-          fi
-
-          echo "Bumping beta from ${current_beta_build} to ${BUILD_NUMBER}"
-
-          # Update beta symlink on remote server (artifacts already uploaded by stable promotion)
-          ssh "${REMOTE_USER}@${REMOTE_HOST}" "cd '${REMOTE_BASE_DIR}' && ln -sfn '${BUILD_NUMBER}' 'beta'"
-
-          # Refresh beta launcher APIs
-          launcher_update_base="${LAUNCHER_UPDATE_BASE_URL%/}"
-          launcher_version_base="${LAUNCHER_VERSION_UPDATE_BASE_URL%/}"
-          curl -s -S "${launcher_update_base}/beta4/${BUILD_NUMBER}?k=${PLATFORM_API_KEY}"
-          curl -s -S "${launcher_version_base}/beta4/update?k=${PLATFORM_API_KEY}"
-
-          # Notify Discord
-          curl -s -S \
-            "https://discord.com/api/webhooks/${DISCORD_WEBHOOK_ID}/${DISCORD_WEBHOOK_TOKEN}?wait=true" \
-            --data-urlencode "content=New launcher beta build: ${BUILD_NUMBER} (auto-bumped to match stable)"
-
-          # Create beta GitHub release with changelog since previous beta
-          beta_tag="v4.0-${BUILD_NUMBER}-beta"
-          prev_beta_tag="${current_beta}"
-
-          notes_file="$(mktemp)"
-          trap 'rm -f "${notes_file}"' EXIT
-          if [[ -n "${prev_beta_tag}" ]]; then
-            echo "Generating beta changelog: ${prev_beta_tag}...${COMMIT_SHA}"
-            if changelog="$(gh api "repos/${GITHUB_REPOSITORY}/compare/${prev_beta_tag}...${COMMIT_SHA}" \
-              --jq '.commits | map("- " + (.commit.message | split("\n") | .[0]) + " (" + (.sha[:7]) + ")") | join("\n")')"; then
-              if [[ -n "${changelog}" ]]; then
-                printf '## Changes since %s\n\n%s\n' "${prev_beta_tag}" "${changelog}" > "${notes_file}"
-              else
-                printf 'Promoted build %s to **beta** channel (auto-bumped to match stable).\n' "${BUILD_NUMBER}" > "${notes_file}"
-              fi
-            else
-              echo "::warning::Compare API failed for beta changelog: ${prev_beta_tag}...${COMMIT_SHA}"
-              printf 'Promoted build %s to **beta** channel (auto-bumped to match stable).\n' "${BUILD_NUMBER}" > "${notes_file}"
-            fi
-          else
-            printf 'Promoted build %s to **beta** channel (auto-bumped to match stable).\n' "${BUILD_NUMBER}" > "${notes_file}"
-          fi
-
-          if gh release view "${beta_tag}" --repo "${GITHUB_REPOSITORY}" &>/dev/null; then
-            gh release delete "${beta_tag}" --repo "${GITHUB_REPOSITORY}" --yes
-          fi
-
-          gh release create "${beta_tag}" \
-            --repo "${GITHUB_REPOSITORY}" \
-            --target "${COMMIT_SHA}" \
-            --title "4.0-${BUILD_NUMBER} (beta)" \
-            --notes-file "${notes_file}" \
-            --prerelease --latest=false \
-            "${JAR_PATH}" "${EXE_PATH}" "${OSX_PATH}"
-
-          echo "Beta bumped to ${BUILD_NUMBER}"
-

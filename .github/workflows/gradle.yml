@@ -47,10 +47,9 @@ jobs:
           {
             echo "## Promotion Shortcuts"
             echo ""
-            echo "CLI commands for this exact build:"
+            echo "CLI command for this exact build:"
             echo ""
-            echo "\`gh workflow run promote.yml -f channel=beta -f run_id=${RUN_ID}\`"
-            echo "\`gh workflow run promote.yml -f channel=stable -f run_id=${RUN_ID}\`"
+            echo "\`gh workflow run promote.yml -f run_id=${RUN_ID}\`"
             echo ""
             echo "Web UI:"
             echo "${promote_url}"

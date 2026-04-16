@@ -214,7 +214,6 @@ public class LauncherMain {
     Sentry.configureScope(
         scope -> {
           scope.setTag("buildNumber", buildNumber.getBuildNumber());
-          scope.setTag("updateStream", settings.getBuildStream());
         });
 
     TechnicConstants.setBuildNumber(buildNumber);
@@ -245,7 +244,7 @@ public class LauncherMain {
     Relauncher launcher =
         new Relauncher(
             new HttpUpdateStream("https://api.technicpack.net/launcher/"),
-            settings.getBuildStream() + "4",
+            "stable4",
             build,
             fileSystem,
             resources,

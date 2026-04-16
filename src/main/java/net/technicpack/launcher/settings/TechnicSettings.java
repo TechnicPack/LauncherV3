@@ -36,9 +36,6 @@ import net.technicpack.utilslib.Utils;
 import org.jetbrains.annotations.NotNull;
 
 public class TechnicSettings implements ILaunchOptions {
-  public static final String STABLE = "stable";
-  public static final String BETA = "beta";
-
   // These are the default JVM args in the vanilla launcher
   public static final String DEFAULT_JAVA_ARGS =
       "-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M";
@@ -49,7 +46,6 @@ public class TechnicSettings implements ILaunchOptions {
   private transient File technicRoot;
   private int memory = Memory.DEFAULT_SETTINGS_ID;
   private LaunchAction launchAction = LaunchAction.HIDE;
-  private String buildStream = STABLE;
   private boolean showConsole = true;
   private String languageCode = "default";
   private String clientId = UUID.randomUUID().toString();
@@ -130,15 +126,6 @@ public class TechnicSettings implements ILaunchOptions {
 
   public void setLaunchAction(LaunchAction launchAction) {
     this.launchAction = launchAction;
-    save();
-  }
-
-  public String getBuildStream() {
-    return buildStream;
-  }
-
-  public void setBuildStream(String buildStream) {
-    this.buildStream = buildStream;
     save();
   }
 

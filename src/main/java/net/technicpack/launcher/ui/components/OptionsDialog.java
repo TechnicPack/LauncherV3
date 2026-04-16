@@ -45,7 +45,6 @@ import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.InstallerFrame;
 import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.launcher.ui.listitems.OnLaunchItem;
-import net.technicpack.launcher.ui.listitems.StreamItem;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.launch.java.source.FileJavaSource;
@@ -80,7 +79,6 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
   private final TechnicSettings settings;
   private boolean clientIdRevealed;
 
-  private boolean hasShownStreamInfo = false;
   private ResourceLoader resources;
   private final JavaVersionRepository javaVersions;
   private final FileJavaSource fileJavaSource;
@@ -143,7 +141,6 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
   JComboBox<JavaVersionItem> versionSelect;
   JComboBox<Memory> memSelect;
   JTextArea javaArgs;
-  JComboBox<StreamItem> streamSelect;
   JComboBox<OnLaunchItem> launchSelect;
   JComboBox<LanguageItem> langSelect;
   JTextField installField;
@@ -372,21 +369,6 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     settings.save();
   }
 
-  protected void changeStream() {
-    settings.setBuildStream(((StreamItem) streamSelect.getSelectedItem()).getStream());
-    settings.save();
-
-    if (!hasShownStreamInfo) {
-      JOptionPane.showMessageDialog(
-          this,
-          resources.getString("launcheroptions.streamchange.text"),
-          resources.getString("launcheroptions.streamchange.title"),
-          JOptionPane.INFORMATION_MESSAGE);
-
-      hasShownStreamInfo = true;
-    }
-  }
-
   protected void changeLaunchAction() {
     settings.setLaunchAction(((OnLaunchItem) launchSelect.getSelectedItem()).getLaunchAction());
     settings.save();
@@ -520,16 +502,6 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     versionSelect.addActionListener(e -> changeJavaVersion());
 
     rebuildMemoryList();
-
-    for (ActionListener listener : streamSelect.getActionListeners()) {
-      streamSelect.removeActionListener(listener);
-    }
-    streamSelect.removeAllItems();
-    streamSelect.addItem(
-        new StreamItem(resources.getString("launcheroptions.build.stable"), "stable"));
-    streamSelect.addItem(new StreamItem(resources.getString("launcheroptions.build.beta"), "beta"));
-    streamSelect.setSelectedIndex((settings.getBuildStream().equals("beta")) ? 1 : 0);
-    streamSelect.addActionListener(e -> changeStream());
 
     for (ActionListener listener : launchSelect.getActionListeners())
       launchSelect.removeActionListener(listener);
@@ -802,11 +774,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     about.setLayout(new BorderLayout());
 
     JLabel buildCtrl =
-        new JLabel(
-            resources.getString(
-                "launcher.build.text",
-                buildNumber.getBuildNumber(),
-                resources.getString("launcher.build." + settings.getBuildStream())));
+        new JLabel(resources.getString("launcher.build.text", buildNumber.getBuildNumber()));
     buildCtrl.setForeground(UIConstants.COLOR_WHITE_TEXT);
     buildCtrl.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
     buildCtrl.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 0));
@@ -845,61 +813,6 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
     panel.setLayout(new GridBagLayout());
 
-    JLabel streamLabel = new JLabel(resources.getString("launcheroptions.general.build"));
-    streamLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-    streamLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
-    panel.add(
-        streamLabel,
-        new GridBagConstraints(
-            0,
-            0,
-            1,
-            1,
-            0,
-            0,
-            GridBagConstraints.EAST,
-            GridBagConstraints.NONE,
-            new Insets(0, 40, 0, 0),
-            0,
-            0));
-
-    // Setup stream select box
-    streamSelect = new JComboBox<>();
-    streamSelect.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-    streamSelect.setEditable(false);
-    streamSelect.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 10));
-    streamSelect.setForeground(UIConstants.COLOR_BUTTON_BLUE);
-    streamSelect.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
-    streamSelect.setUI(
-        new SimpleButtonComboUI(
-            new RoundedBorderFormatter(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 0)),
-            resources,
-            UIConstants.COLOR_SCROLL_TRACK,
-            UIConstants.COLOR_SCROLL_THUMB));
-    streamSelect.setFocusable(false);
-
-    Object child = streamSelect.getAccessibleContext().getAccessibleChild(0);
-    BasicComboPopup popup = (BasicComboPopup) child;
-    JList list = popup.getList();
-    list.setSelectionForeground(UIConstants.COLOR_BUTTON_BLUE);
-    list.setSelectionBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
-    list.setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
-
-    panel.add(
-        streamSelect,
-        new GridBagConstraints(
-            1,
-            0,
-            2,
-            1,
-            1,
-            0,
-            GridBagConstraints.CENTER,
-            GridBagConstraints.BOTH,
-            new Insets(8, 16, 8, 16),
-            0,
-            16));
-
     // Setup language box
     JLabel langLabel = new JLabel(resources.getString("launcheroptions.general.lang"));
     langLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
@@ -908,7 +821,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         langLabel,
         new GridBagConstraints(
             0,
-            1,
+            0,
             1,
             1,
             0,
@@ -933,9 +846,9 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             UIConstants.COLOR_SCROLL_THUMB));
     langSelect.setFocusable(false);
 
-    child = langSelect.getAccessibleContext().getAccessibleChild(0);
-    popup = (BasicComboPopup) child;
-    list = popup.getList();
+    Object child = langSelect.getAccessibleContext().getAccessibleChild(0);
+    BasicComboPopup popup = (BasicComboPopup) child;
+    JList list = popup.getList();
     list.setSelectionForeground(UIConstants.COLOR_BUTTON_BLUE);
     list.setSelectionBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
     list.setBackground(UIConstants.COLOR_CENTRAL_BACK_OPAQUE);
@@ -944,7 +857,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         langSelect,
         new GridBagConstraints(
             1,
-            1,
+            0,
             2,
             1,
             1,
@@ -963,7 +876,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         launchLabel,
         new GridBagConstraints(
             0,
-            2,
+            1,
             1,
             1,
             0,
@@ -999,7 +912,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         launchSelect,
         new GridBagConstraints(
             1,
-            2,
+            1,
             2,
             1,
             1,
@@ -1018,7 +931,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         installLabel,
         new GridBagConstraints(
             0,
-            3,
+            2,
             1,
             1,
             0,
@@ -1041,7 +954,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         installField,
         new GridBagConstraints(
             1,
-            3,
+            2,
             2,
             1,
             1,
@@ -1063,7 +976,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         reinstallButton,
         new GridBagConstraints(
             3,
-            3,
+            2,
             1,
             1,
             0,
@@ -1082,7 +995,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         clientIdField,
         new GridBagConstraints(
             0,
-            4,
+            3,
             1,
             1,
             0,
@@ -1106,7 +1019,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         clientId,
         new GridBagConstraints(
             1,
-            4,
+            3,
             2,
             1,
             1,
@@ -1127,7 +1040,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         copyButton,
         new GridBagConstraints(
             3,
-            4,
+            3,
             1,
             1,
             0,
@@ -1142,7 +1055,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         Box.createRigidArea(new Dimension(60, 0)),
         new GridBagConstraints(
             4,
-            3,
+            2,
             1,
             1,
             0,
@@ -1161,7 +1074,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         showConsoleField,
         new GridBagConstraints(
             0,
-            5,
+            4,
             1,
             1,
             0,
@@ -1185,7 +1098,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         showConsole,
         new GridBagConstraints(
             1,
-            5,
+            4,
             1,
             1,
             0,
@@ -1205,7 +1118,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         launchToModpacksField,
         new GridBagConstraints(
             0,
-            6,
+            5,
             1,
             1,
             0,
@@ -1229,7 +1142,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         launchToModpacks,
         new GridBagConstraints(
             1,
-            6,
+            5,
             1,
             1,
             0,
@@ -1244,7 +1157,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         Box.createGlue(),
         new GridBagConstraints(
             0,
-            7,
+            6,
             5,
             1,
             1,

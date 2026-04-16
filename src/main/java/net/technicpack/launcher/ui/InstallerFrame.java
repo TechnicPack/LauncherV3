@@ -243,7 +243,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
               Relauncher relauncher =
                   new Relauncher(
                       null,
-                      settings.getBuildStream(),
+                      "stable4",
                       0,
                       new LauncherFileSystem(settings.getTechnicRootPath()),
                       resources,
@@ -259,7 +259,7 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
     final Relauncher relauncher =
         new Relauncher(
             null,
-            settings.getBuildStream(),
+            "stable4",
             0,
             new LauncherFileSystem(settings.getTechnicRootPath()),
             resources,
