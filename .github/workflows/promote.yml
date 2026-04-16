@@ -12,6 +12,10 @@ on:
         required: false
         type: string
 
+concurrency:
+  group: promote-launcher
+  cancel-in-progress: false
+
 jobs:
   promote:
     runs-on: ubuntu-latest
