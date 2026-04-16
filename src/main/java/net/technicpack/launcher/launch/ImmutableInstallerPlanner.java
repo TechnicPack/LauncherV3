@@ -12,8 +12,10 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -602,8 +604,19 @@ class ImmutableInstallerPlanner {
       runData.addProperty("memory", String.valueOf(memory));
     }
 
-    try (Writer writer = Files.newBufferedWriter(runDataFile.toPath(), StandardCharsets.UTF_8)) {
+    Path runDataPath = runDataFile.toPath();
+    Path tmp = runDataPath.resolveSibling(runDataPath.getFileName() + ".tmp");
+    try (Writer writer = Files.newBufferedWriter(tmp, StandardCharsets.UTF_8)) {
       MojangUtils.getGson().toJson(runData, writer);
+    }
+    try {
+      Files.move(
+          tmp, runDataPath,
+          StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+    } catch (AtomicMoveNotSupportedException e) {
+      Utils.getLogger()
+          .warning("Filesystem does not support atomic move; falling back to non-atomic replace");
+      Files.move(tmp, runDataPath, StandardCopyOption.REPLACE_EXISTING);
     }
 
     Utils.getLogger()

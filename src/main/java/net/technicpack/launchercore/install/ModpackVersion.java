@@ -26,7 +26,10 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.logging.Level;
 import net.technicpack.utilslib.Utils;
 
@@ -73,8 +76,22 @@ public class ModpackVersion {
   }
 
   public void save(File versionFile) {
-    try (Writer writer = Files.newBufferedWriter(versionFile.toPath(), StandardCharsets.UTF_8)) {
-      Utils.getGson().toJson(this, writer);
+    Path versionPath = versionFile.toPath();
+    Path tmp = versionPath.resolveSibling(versionPath.getFileName() + ".tmp");
+    try {
+      try (Writer writer = Files.newBufferedWriter(tmp, StandardCharsets.UTF_8)) {
+        Utils.getGson().toJson(this, writer);
+      }
+      try {
+        Files.move(
+            tmp, versionPath,
+            StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+      } catch (AtomicMoveNotSupportedException e) {
+        Utils.getLogger()
+            .warning(
+                "Filesystem does not support atomic move; falling back to non-atomic replace");
+        Files.move(tmp, versionPath, StandardCopyOption.REPLACE_EXISTING);
+      }
     } catch (JsonIOException | IOException e) {
       Utils.getLogger()
           .log(Level.WARNING, String.format("Unable to save installed %s", versionFile), e);
