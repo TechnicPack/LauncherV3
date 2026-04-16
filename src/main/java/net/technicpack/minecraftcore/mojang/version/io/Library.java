@@ -248,23 +248,6 @@ public class Library {
     return !hasNatives();
   }
 
-  public String getInstallArtifactPathForCurrentOs() {
-    return getArtifactPath(resolveNativeClassifierForCurrentOs());
-  }
-
-  public String getInstallArtifactSha1ForCurrentOs() {
-    return getArtifactSha1(resolveNativeClassifierForCurrentOs());
-  }
-
-  public boolean shouldExtractToNativesDirectory() {
-    return resolveNativeClassifierForCurrentOs() != null;
-  }
-
-  public String getInstallDownloadUrlForCurrentOs(String bitness) throws DownloadException {
-    String path = getInstallArtifactPathForCurrentOs().replace("${arch}", bitness);
-    return getDownloadUrl(path).replace("${arch}", bitness);
-  }
-
   public String getArtifactPath() {
     return getArtifactPath(null);
   }

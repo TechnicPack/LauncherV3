@@ -34,12 +34,12 @@ class LibraryTest {
                     + "}",
                 Library.class);
 
-    assertEquals(nativeClassifier, library.resolveNativeClassifierForCurrentOs());
+    String classifier = library.resolveNativeClassifierForCurrentOs();
+    assertEquals(nativeClassifier, classifier);
     assertEquals(
         "org/lwjgl/lwjgl/3.2.2/lwjgl-3.2.2-" + nativeClassifier + ".jar",
-        library.getInstallArtifactPathForCurrentOs());
-    assertEquals("native", library.getInstallArtifactSha1ForCurrentOs());
-    assertTrue(library.shouldExtractToNativesDirectory());
+        library.getArtifactPath(classifier));
+    assertEquals("native", library.getArtifactSha1(classifier));
   }
 
   @Test
@@ -61,12 +61,12 @@ class LibraryTest {
                     + "}",
                 Library.class);
 
-    assertNull(library.resolveNativeClassifierForCurrentOs());
+    String classifier = library.resolveNativeClassifierForCurrentOs();
+    assertNull(classifier);
     assertEquals(
         "com/mojang/text2speech/1.11.3/text2speech-1.11.3.jar",
-        library.getInstallArtifactPathForCurrentOs());
-    assertEquals("plain", library.getInstallArtifactSha1ForCurrentOs());
-    assertFalse(library.shouldExtractToNativesDirectory());
+        library.getArtifactPath(classifier));
+    assertEquals("plain", library.getArtifactSha1(classifier));
   }
 
   @Test
