@@ -14,3 +14,4 @@ target/
 .gradle/
 build/
 node_modules/
+code-review-*.md
