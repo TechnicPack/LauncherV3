@@ -19,3 +19,9 @@ is added at the top.
 ### Changed
 - **First-run config migration:** existing `config/` directories are now moved to a timestamped `config-backup-YYYY-MM-DD-HHmmss/` folder (with a `README.txt` explaining the move) before being reset. Previously the migration overwrote prior backups.
 - Atomic writes for persisted launcher state. A crash mid-save no longer truncates the settings file, saved user sessions, the Java-installs list, the runtime-constraints file (`bin/runData`), the installed-version marker (`bin/version`), or the orphan-cleanup manifest (`bin/extractedFiles.json`). Previously such a crash could silently reset settings, log the user out, drop their Java installs, trigger spurious reinstalls, or delete files that weren't actually orphaned.
+
+<!-- historical-releases-footer -->
+
+---
+
+For the full list of historical stable releases (pre-dating this file), see [HISTORY.md](HISTORY.md) or the [Releases page](https://github.com/TechnicPack/LauncherV3/releases).
