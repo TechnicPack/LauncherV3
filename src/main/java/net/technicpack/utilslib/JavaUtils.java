@@ -48,7 +48,8 @@ public class JavaUtils {
     if ("arm".equals(normalized)
         || "arm32".equals(normalized)
         || normalized.startsWith("armv6")
-        || normalized.startsWith("armv7")) {
+        || normalized.startsWith("armv7")
+        || "armv8l".equals(normalized)) {
       return "arm32";
     }
 
