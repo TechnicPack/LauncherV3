@@ -1,54 +1,52 @@
 package net.technicpack.minecraftcore.install;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonIOException;
-import com.google.gson.reflect.TypeToken;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
-import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 import net.technicpack.utilslib.Utils;
 
 /**
  * Tracks files extracted from modpack zips so orphaned files (removed in a modpack update) can be
  * cleaned up.
  *
- * <p>Stored as bin/extractedFiles.json with path → SHA-256 hash entries.
+ * <p>Stored as bin/extractedFiles.json with a JSON array of relative paths. For backward
+ * compatibility, the loader also accepts the legacy JSON object shape ({@code {"path": "hash"}}),
+ * discarding the hash values.
  */
 public class ExtractedFilesManifest {
 
   private static final String MANIFEST_FILENAME = "extractedFiles.json";
   private static final Gson GSON = new Gson();
-  private static final Type MAP_TYPE = new TypeToken<LinkedHashMap<String, String>>() {}.getType();
 
-  private final Map<String, String> files;
+  private final Set<String> files;
 
   public ExtractedFilesManifest() {
-    this.files = new LinkedHashMap<>();
+    this.files = new LinkedHashSet<>();
   }
 
-  private ExtractedFilesManifest(Map<String, String> files) {
-    this.files = new LinkedHashMap<>(files);
+  private ExtractedFilesManifest(Set<String> files) {
+    this.files = new LinkedHashSet<>(files);
   }
 
-  public Map<String, String> getFiles() {
+  public Set<String> getFiles() {
     return files;
   }
 
-  public void put(String relativePath, String sha256) {
-    files.put(relativePath, sha256);
+  public void add(String relativePath) {
+    files.add(relativePath);
   }
 
   /** Returns true if the manifest file exists in binDir. */
@@ -64,23 +62,54 @@ public class ExtractedFilesManifest {
     }
 
     try (Reader reader = Files.newBufferedReader(manifestFile.toPath(), StandardCharsets.UTF_8)) {
-      Map<String, String> map = GSON.fromJson(reader, MAP_TYPE);
-      if (map != null) {
-        return new ExtractedFilesManifest(map);
+      JsonElement root = GSON.fromJson(reader, JsonElement.class);
+      if (root == null || root.isJsonNull()) {
+        return new ExtractedFilesManifest();
       }
-    } catch (IOException | JsonIOException e) {
+
+      Set<String> paths = new LinkedHashSet<>();
+      if (root.isJsonArray()) {
+        for (JsonElement element : root.getAsJsonArray()) {
+          if (element != null && !element.isJsonNull()) {
+            paths.add(element.getAsString());
+          }
+        }
+      } else if (root.isJsonObject()) {
+        // Legacy format: {"path": "hash", ...}. Hash values are discarded.
+        for (String key : root.getAsJsonObject().keySet()) {
+          paths.add(key);
+        }
+      }
+      return new ExtractedFilesManifest(paths);
+    } catch (IOException | JsonParseException e) {
       Utils.getLogger()
           .log(Level.WARNING, "Failed to load extracted files manifest, starting fresh", e);
     }
     return new ExtractedFilesManifest();
   }
 
-  /** Save the manifest to bin/extractedFiles.json. */
+  /**
+   * Save the manifest to bin/extractedFiles.json atomically.
+   *
+   * <p>Writes to a sibling {@code .tmp} file first, then atomically renames it over the target. If
+   * the JVM dies mid-write, the original manifest is left intact and the {@code .tmp} is orphaned
+   * (will be overwritten on next save). This prevents the orphan-cleanup logic from reading a
+   * truncated manifest and concluding that all previously-extracted files are orphaned.
+   */
   public void save(File binDir) throws IOException {
     binDir.mkdirs();
-    File manifestFile = new File(binDir, MANIFEST_FILENAME);
-    try (Writer writer = Files.newBufferedWriter(manifestFile.toPath(), StandardCharsets.UTF_8)) {
-      GSON.toJson(files, MAP_TYPE, writer);
+    Path manifestPath = new File(binDir, MANIFEST_FILENAME).toPath();
+    Path tempPath = new File(binDir, MANIFEST_FILENAME + ".tmp").toPath();
+    try (Writer writer = Files.newBufferedWriter(tempPath, StandardCharsets.UTF_8)) {
+      GSON.toJson(new ArrayList<>(files), writer);
+    }
+    try {
+      Files.move(
+          tempPath, manifestPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+    } catch (AtomicMoveNotSupportedException e) {
+      Utils.getLogger()
+          .warning("Filesystem does not support atomic move; falling back to non-atomic replace");
+      Files.move(tempPath, manifestPath, StandardCopyOption.REPLACE_EXISTING);
     }
   }
 
@@ -90,9 +119,9 @@ public class ExtractedFilesManifest {
    */
   public static Set<String> findOrphans(
       ExtractedFilesManifest oldManifest, ExtractedFilesManifest newManifest) {
-    return oldManifest.files.keySet().stream()
-        .filter(path -> !newManifest.files.containsKey(path))
-        .collect(Collectors.toSet());
+    Set<String> orphans = new LinkedHashSet<>(oldManifest.files);
+    orphans.removeAll(newManifest.files);
+    return orphans;
   }
 
   /** Delete orphaned files from the modpack directory. */
@@ -112,48 +141,19 @@ public class ExtractedFilesManifest {
   }
 
   /**
-   * Build a manifest from a set of extracted file paths. Only hashes the specified files. Paths in
-   * the set should be relative to baseDir.
+   * Build a manifest from a set of extracted file paths. Paths in the set should be relative to
+   * baseDir; entries that don't exist as regular files are skipped.
    */
   public static ExtractedFilesManifest buildFromExtractedFiles(
       File baseDir, Set<String> extractedPaths) {
     ExtractedFilesManifest manifest = new ExtractedFilesManifest();
-    Path basePath = baseDir.toPath();
 
     for (String relativePath : extractedPaths) {
-      Path filePath = basePath.resolve(relativePath);
-      if (Files.isRegularFile(filePath)) {
-        try {
-          String hash = sha256(filePath);
-          manifest.put(relativePath, hash);
-        } catch (IOException e) {
-          Utils.getLogger().log(Level.WARNING, "Failed to hash file: " + filePath, e);
-        }
+      if (Files.isRegularFile(baseDir.toPath().resolve(relativePath))) {
+        manifest.add(relativePath);
       }
     }
 
     return manifest;
-  }
-
-  /** Compute SHA-256 hash of a file. */
-  public static String sha256(Path file) throws IOException {
-    try {
-      MessageDigest digest = MessageDigest.getInstance("SHA-256");
-      try (InputStream is = Files.newInputStream(file)) {
-        byte[] buffer = new byte[8192];
-        int read;
-        while ((read = is.read(buffer)) != -1) {
-          digest.update(buffer, 0, read);
-        }
-      }
-      byte[] hashBytes = digest.digest();
-      StringBuilder sb = new StringBuilder(hashBytes.length * 2);
-      for (byte b : hashBytes) {
-        sb.append(String.format("%02x", b));
-      }
-      return sb.toString();
-    } catch (NoSuchAlgorithmException e) {
-      throw new IOException("SHA-256 not available", e);
-    }
   }
 }
