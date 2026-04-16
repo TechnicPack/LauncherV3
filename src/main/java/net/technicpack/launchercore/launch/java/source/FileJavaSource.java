@@ -23,7 +23,10 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -76,8 +79,22 @@ public class FileJavaSource implements IVersionSource {
   }
 
   public void save() {
-    try (Writer writer = Files.newBufferedWriter(loadedFile.toPath())) {
-      Utils.getGson().toJson(this, writer);
+    Path loadedPath = loadedFile.toPath();
+    Path tmp = loadedPath.resolveSibling(loadedPath.getFileName() + ".tmp");
+    try {
+      try (Writer writer = Files.newBufferedWriter(tmp, StandardCharsets.UTF_8)) {
+        Utils.getGson().toJson(this, writer);
+      }
+      try {
+        Files.move(
+            tmp, loadedPath,
+            StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+      } catch (AtomicMoveNotSupportedException e) {
+        Utils.getLogger()
+            .warning(
+                "Filesystem does not support atomic move; falling back to non-atomic replace");
+        Files.move(tmp, loadedPath, StandardCopyOption.REPLACE_EXISTING);
+      }
     } catch (JsonIOException | IOException e) {
       Utils.getLogger().log(Level.SEVERE, "Failed to save Java versions file", e);
     }

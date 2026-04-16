@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
@@ -76,5 +78,41 @@ class TechnicSettingsTest {
 
     assertFalse(settings.isUsingDefaultJavaArgs());
     assertEquals("-Xmx2G", settings.getJavaArgs());
+  }
+
+  @Test
+  void saveLeavesNoTempSibling() {
+    Path settingsPath = tempDir.resolve("settings.json");
+
+    TechnicSettings settings = new TechnicSettings();
+    settings.setFilePath(settingsPath.toFile());
+    settings.save();
+    settings.save();
+
+    assertTrue(Files.exists(settingsPath));
+    assertFalse(
+        Files.exists(tempDir.resolve("settings.json.tmp")),
+        "save() must atomically rename its temp file, not leave it behind");
+  }
+
+  @Test
+  void saveOverwritesExistingFileContentCompletely() throws IOException {
+    Path settingsPath = tempDir.resolve("settings.json");
+
+    TechnicSettings first = new TechnicSettings();
+    first.setFilePath(settingsPath.toFile());
+    first.setJavaArgs("-Xmx1G");
+    first.save();
+
+    TechnicSettings second = new TechnicSettings();
+    second.setFilePath(settingsPath.toFile());
+    second.setJavaArgs("-Xmx4G");
+    second.save();
+
+    String json = new String(Files.readAllBytes(settingsPath), StandardCharsets.UTF_8);
+    assertTrue(json.contains("-Xmx4G"), "Second save should replace the first");
+    assertFalse(
+        json.contains("-Xmx1G"),
+        "Atomic rename should fully overwrite, not append or leave stale content");
   }
 }

@@ -24,8 +24,10 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -86,8 +88,21 @@ public class UserStore {
   }
 
   public void save() {
-    try (Writer writer = Files.newBufferedWriter(storePath, StandardCharsets.UTF_8)) {
-      MojangUtils.getGson().toJson(this, writer);
+    Path tmp = storePath.resolveSibling(storePath.getFileName() + ".tmp");
+    try {
+      try (Writer writer = Files.newBufferedWriter(tmp, StandardCharsets.UTF_8)) {
+        MojangUtils.getGson().toJson(this, writer);
+      }
+      try {
+        Files.move(
+            tmp, storePath,
+            StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+      } catch (AtomicMoveNotSupportedException e) {
+        Utils.getLogger()
+            .warning(
+                "Filesystem does not support atomic move; falling back to non-atomic replace");
+        Files.move(tmp, storePath, StandardCopyOption.REPLACE_EXISTING);
+      }
     } catch (JsonIOException | IOException e) {
       Utils.getLogger()
           .log(Level.SEVERE, String.format("Failed to save users to %s", storePath), e);
