@@ -22,15 +22,12 @@ import com.google.gson.JsonIOException;
 import com.google.gson.annotations.SerializedName;
 import java.io.File;
 import java.io.IOException;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 import java.util.logging.Level;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
+import net.technicpack.launchercore.util.AtomicJsonWriter;
 import net.technicpack.launchercore.util.LaunchAction;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.launch.WindowType;
@@ -298,23 +295,8 @@ public class TechnicSettings implements ILaunchOptions {
       return;
     }
 
-    Path tmp = settingsPath.resolveSibling(settingsPath.getFileName() + ".tmp");
     try {
-      try (Writer writer = Files.newBufferedWriter(tmp, StandardCharsets.UTF_8)) {
-        Utils.getGson().toJson(this, writer);
-      }
-      try {
-        Files.move(
-            tmp,
-            settingsPath,
-            StandardCopyOption.ATOMIC_MOVE,
-            StandardCopyOption.REPLACE_EXISTING);
-      } catch (AtomicMoveNotSupportedException e) {
-        Utils.getLogger()
-            .warning(
-                "Filesystem does not support atomic move; falling back to non-atomic replace");
-        Files.move(tmp, settingsPath, StandardCopyOption.REPLACE_EXISTING);
-      }
+      AtomicJsonWriter.write(settingsPath, this, Utils.getGson());
     } catch (IOException | JsonIOException e) {
       Utils.getLogger()
           .log(Level.SEVERE, String.format("Failed to save settings %s", settingsFile), e);

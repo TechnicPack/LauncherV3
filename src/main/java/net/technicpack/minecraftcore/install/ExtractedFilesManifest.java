@@ -6,16 +6,14 @@ import com.google.gson.JsonParseException;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.logging.Level;
+import net.technicpack.launchercore.util.AtomicJsonWriter;
 import net.technicpack.utilslib.Utils;
 
 /**
@@ -99,18 +97,7 @@ public class ExtractedFilesManifest {
   public void save(File binDir) throws IOException {
     binDir.mkdirs();
     Path manifestPath = new File(binDir, MANIFEST_FILENAME).toPath();
-    Path tempPath = new File(binDir, MANIFEST_FILENAME + ".tmp").toPath();
-    try (Writer writer = Files.newBufferedWriter(tempPath, StandardCharsets.UTF_8)) {
-      GSON.toJson(new ArrayList<>(files), writer);
-    }
-    try {
-      Files.move(
-          tempPath, manifestPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-    } catch (AtomicMoveNotSupportedException e) {
-      Utils.getLogger()
-          .warning("Filesystem does not support atomic move; falling back to non-atomic replace");
-      Files.move(tempPath, manifestPath, StandardCopyOption.REPLACE_EXISTING);
-    }
+    AtomicJsonWriter.write(manifestPath, new ArrayList<>(files), GSON);
   }
 
   /**

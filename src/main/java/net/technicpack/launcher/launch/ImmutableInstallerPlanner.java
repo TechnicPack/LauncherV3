@@ -59,6 +59,7 @@ import net.technicpack.launchercore.install.verifiers.ValidJsonFileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.launchercore.modpacks.ModpackModel;
+import net.technicpack.launchercore.util.AtomicJsonWriter;
 import net.technicpack.minecraftcore.FmlLibsManager;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.install.ExtractedFilesManifest;
@@ -604,20 +605,7 @@ class ImmutableInstallerPlanner {
       runData.addProperty("memory", String.valueOf(memory));
     }
 
-    Path runDataPath = runDataFile.toPath();
-    Path tmp = runDataPath.resolveSibling(runDataPath.getFileName() + ".tmp");
-    try (Writer writer = Files.newBufferedWriter(tmp, StandardCharsets.UTF_8)) {
-      MojangUtils.getGson().toJson(runData, writer);
-    }
-    try {
-      Files.move(
-          tmp, runDataPath,
-          StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-    } catch (AtomicMoveNotSupportedException e) {
-      Utils.getLogger()
-          .warning("Filesystem does not support atomic move; falling back to non-atomic replace");
-      Files.move(tmp, runDataPath, StandardCopyOption.REPLACE_EXISTING);
-    }
+    AtomicJsonWriter.write(runDataFile.toPath(), runData, MojangUtils.getGson());
 
     Utils.getLogger()
         .info("Wrote Prism-derived runData: java=" + patchEffectiveMinJavaMajor + " memory=" + memory);

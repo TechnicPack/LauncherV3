@@ -22,17 +22,16 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import net.technicpack.launchercore.modpacks.InstalledPack;
+import net.technicpack.launchercore.util.AtomicJsonWriter;
 import net.technicpack.utilslib.Utils;
 
 public class InstalledPackStore {
@@ -138,27 +137,9 @@ public class InstalledPackStore {
 
   public void save() {
     synchronized (storeLock) {
-      // First we write to a temp file, then we move that file to the intended path.
-      // This way, we won't end up with an empty file if we fail to write to it.
-
-      Path tmp = storePath.resolveSibling(storePath.getFileName() + ".tmp");
-
       try {
-        // Separate try-with-resources so the writer is closed and flushed before we move the file
-        try (Writer writer = Files.newBufferedWriter(tmp, StandardCharsets.UTF_8)) {
-          Utils.getGson().toJson(this, writer);
-        }
-
-        Files.move(
-            tmp, storePath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+        AtomicJsonWriter.write(storePath, this, Utils.getGson());
       } catch (IOException | JsonIOException e) {
-        // Clean up the temp file
-        try {
-          Files.deleteIfExists(tmp);
-        } catch (IOException ignored) {
-          // We can safely continue, even if the temporary file wasn't deleted
-        }
-
         Utils.getLogger()
             .log(Level.SEVERE, String.format("Failed to save installedPacks to %s", storePath), e);
       }
