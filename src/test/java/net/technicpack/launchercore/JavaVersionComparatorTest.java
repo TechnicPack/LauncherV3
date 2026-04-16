@@ -234,4 +234,31 @@ class JavaVersionComparatorTest {
   void invalidVersionThrows() {
     assertThrows(IllegalArgumentException.class, () -> comparator.compare("invalid", "17"));
   }
+
+  // --- getMajor ---
+
+  @Test
+  void getMajorParsesLegacyFullForm() {
+    assertEquals(8, comparator.getMajor("1.8.0_221"));
+  }
+
+  @Test
+  void getMajorParsesLegacyShortForm() {
+    assertEquals(8, comparator.getMajor("1.8"));
+  }
+
+  @Test
+  void getMajorParsesModernShort() {
+    assertEquals(21, comparator.getMajor("21"));
+  }
+
+  @Test
+  void getMajorParsesModernFullWithBuild() {
+    assertEquals(21, comparator.getMajor("21.0.4+7"));
+  }
+
+  @Test
+  void getMajorThrowsOnInvalid() {
+    assertThrows(IllegalArgumentException.class, () -> comparator.getMajor("8u51"));
+  }
 }

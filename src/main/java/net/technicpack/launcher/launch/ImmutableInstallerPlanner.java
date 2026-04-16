@@ -1,7 +1,6 @@
 package net.technicpack.launcher.launch;
 
 import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -15,9 +14,12 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -28,10 +30,12 @@ import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launcher.settings.TechnicSettings;
+import net.technicpack.launchercore.JavaVersionComparator;
 import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.exception.CacheDeleteException;
 import net.technicpack.launchercore.exception.DownloadException;
@@ -122,8 +126,11 @@ class ImmutableInstallerPlanner {
 
   // Set during mod extraction if a Prism instance zip is detected
   private PrismInstanceRemapper detectedPrismRemapper;
-  // Minimum Java version detected from patches (from compatibleJavaMajors)
-  private int patchMinJavaMajor;
+  // Effective minimum Java major across all version patches: the maximum of every patch's
+  // minimum compatibleJavaMajors value, so the most-restrictive minimum wins. Written to
+  // bin/runData (Technic's runtime-constraints file) when values were derived from a Prism
+  // instance zip rather than the Solder API; 0 means "unset" (no patches contributed).
+  private int patchEffectiveMinJavaMajor;
   // Collects all file paths extracted from mod zips (for orphan cleanup)
   private final Set<String> allExtractedPaths = new LinkedHashSet<>();
 
@@ -372,41 +379,67 @@ class ImmutableInstallerPlanner {
       }
     }
 
-    // First-run migration: if no extracted files manifest exists, back up config/ to config-backup
-    // so orphaned files from old modpack versions don't persist under the new manifest tracking.
+    // First-run migration: if no extracted files manifest exists, back up config/ to a
+    // timestamped folder so orphaned files from old modpack versions don't persist under
+    // the new manifest tracking. Existing backups are never overwritten.
     if (!ExtractedFilesManifest.exists(binDir)) {
       File configDir = new File(pack.getInstalledDirectory(), "config");
-      if (configDir.isDirectory()) {
-        File configBackup = new File(pack.getInstalledDirectory(), "config-backup");
-        if (configBackup.exists()) {
-          deleteDirectoryRecursively(configBackup);
-        }
-        if (configDir.renameTo(configBackup)) {
+      String[] configEntries = configDir.list();
+      if (configDir.isDirectory() && configEntries != null && configEntries.length > 0) {
+        File backupDir = nextAvailableBackupDir(pack.getInstalledDirectory());
+        if (configDir.renameTo(backupDir)) {
+          writeBackupReadme(backupDir);
           Utils.getLogger()
               .warning(
-                  "No extracted files manifest found - moved config/ to config-backup"
+                  "No extracted files manifest found - moved config/ to "
+                      + backupDir.getName()
                       + " for first-run migration");
         } else {
           Utils.getLogger()
-              .warning("Failed to move config/ to config-backup during first-run migration");
+              .warning(
+                  "Failed to move config/ to "
+                      + backupDir.getName()
+                      + " during first-run migration");
         }
       }
     }
   }
 
-  private void deleteDirectoryRecursively(File dir) {
-    if (dir == null || !dir.exists()) return;
-    File[] children = dir.listFiles();
-    if (children != null) {
-      for (File child : children) {
-        if (child.isDirectory()) {
-          deleteDirectoryRecursively(child);
-        } else if (!child.delete()) {
-          Utils.getLogger().warning("Failed to delete: " + child.getAbsolutePath());
-        }
-      }
+  private static File nextAvailableBackupDir(File modpackDir) {
+    String base =
+        "config-backup-"
+            + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HHmmss"));
+    File candidate = new File(modpackDir, base);
+    int suffix = 1;
+    while (candidate.exists()) {
+      candidate = new File(modpackDir, base + "-" + suffix);
+      suffix++;
     }
-    dir.delete();
+    return candidate;
+  }
+
+  private static void writeBackupReadme(File backupDir) {
+    String text =
+        "This folder contains config files from your previous modpack install.\n"
+            + "\n"
+            + "What happened:\n"
+            + "Technic Launcher upgraded its file tracking on "
+            + LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+            + ".\n"
+            + "To enable orphan-file cleanup on future modpack updates, your existing\n"
+            + "config/ folder was moved here.\n"
+            + "\n"
+            + "To restore individual files, copy them back from this folder into the\n"
+            + "modpack's config/ folder.\n"
+            + "\n"
+            + "You can safely delete this folder once you've copied over anything you\n"
+            + "want to keep.\n";
+    try {
+      Files.write(
+          backupDir.toPath().resolve("README.txt"), text.getBytes(StandardCharsets.UTF_8));
+    } catch (IOException e) {
+      Utils.getLogger().warning("Failed to write README.txt to backup folder: " + e.getMessage());
+    }
   }
 
   private void installModpackContents(NodeProgressReporter reporter)
@@ -495,6 +528,15 @@ class ImmutableInstallerPlanner {
       Utils.getLogger()
           .info(
               "Cleaned up " + deleted + " orphaned files out of " + orphans.size() + " candidates");
+      int failed = orphans.size() - deleted;
+      if (failed > 0) {
+        Utils.getLogger()
+            .warning(
+                failed
+                    + " of "
+                    + orphans.size()
+                    + " orphan deletion(s) failed; check earlier warnings for the affected paths");
+      }
     }
 
     // Save new manifest
@@ -548,24 +590,24 @@ class ImmutableInstallerPlanner {
     if (runDataFile.exists()) return;
 
     long memory = detectedPrismRemapper.getMaxMemAllocMb();
-    if (memory <= 0 && patchMinJavaMajor <= 0) return;
+    if (memory <= 0 && patchEffectiveMinJavaMajor <= 0) return;
 
     pack.getBinDir().mkdirs();
 
     JsonObject runData = new JsonObject();
-    if (patchMinJavaMajor > 0) {
-      runData.addProperty("java", String.valueOf(patchMinJavaMajor));
+    if (patchEffectiveMinJavaMajor > 0) {
+      runData.addProperty("java", String.valueOf(patchEffectiveMinJavaMajor));
     }
     if (memory > 0) {
       runData.addProperty("memory", String.valueOf(memory));
     }
 
     try (Writer writer = Files.newBufferedWriter(runDataFile.toPath(), StandardCharsets.UTF_8)) {
-      new Gson().toJson(runData, writer);
+      MojangUtils.getGson().toJson(runData, writer);
     }
 
     Utils.getLogger()
-        .info("Wrote Prism-derived runData: java=" + patchMinJavaMajor + " memory=" + memory);
+        .info("Wrote Prism-derived runData: java=" + patchEffectiveMinJavaMajor + " memory=" + memory);
   }
 
   private void applyVersionPatches(InstallExecutionContext context) throws IOException {
@@ -576,6 +618,11 @@ class ImmutableInstallerPlanner {
 
     File[] patchFiles = patchesDir.listFiles((dir, name) -> name.endsWith(".json"));
     if (patchFiles == null || patchFiles.length == 0) return;
+
+    // Sort by filename so the parse order is deterministic. Since patches.sort below is stable
+    // (TimSort), patches with the same `order` will then apply in alphabetical filename order,
+    // matching Prism's tiebreaker rule.
+    Arrays.sort(patchFiles, Comparator.comparing(File::getName));
 
     // Parse all patches
     List<VersionPatch> patches = new ArrayList<>();
@@ -656,17 +703,86 @@ class ImmutableInstallerPlanner {
       // Track minimum Java version for runData (take the highest minimum across all patches)
       int minMajor =
           patch.getCompatibleJavaMajors().stream().mapToInt(Integer::intValue).min().orElse(0);
-      if (minMajor > patchMinJavaMajor) {
-        patchMinJavaMajor = minMajor;
+      if (minMajor > patchEffectiveMinJavaMajor) {
+        patchEffectiveMinJavaMajor = minMajor;
       }
     }
   }
 
-  private static VersionJavaInfo deriveJavaVersionFromCompatibleMajors(List<Integer> majors) {
-    // Find the highest compatible major version and map to a Mojang runtime component
+  private VersionJavaInfo deriveJavaVersionFromCompatibleMajors(List<Integer> majors) {
     int highest = majors.stream().mapToInt(Integer::intValue).max().orElse(0);
 
-    // Map to known Mojang runtime components (highest available that matches)
+    // Primary: query Mojang's live JRE manifest for the best available component.
+    VersionJavaInfo dynamic = deriveJavaVersionFromAvailableComponents(highest);
+    if (dynamic != null) return dynamic;
+
+    // Fallback: hardcoded mapping for offline / manifest-failure cases.
+    return deriveJavaVersionFromCompatibleMajorsHardcoded(highest);
+  }
+
+  /**
+   * Picks the best Mojang JRE component for the requested major version by querying the live JRE
+   * manifest. Returns the component whose major is the highest one that is ≤ {@code requestedMajor}.
+   * Returns null on any failure so the caller can fall back to a hardcoded mapping.
+   *
+   * <p>Major versions are parsed from {@link
+   * net.technicpack.minecraftcore.mojang.java.JavaRuntimeInfo#getName()} via {@link
+   * JavaVersionComparator#getMajor(String)}; components whose version string isn't recognized are
+   * skipped rather than failing the whole lookup.
+   */
+  private VersionJavaInfo deriveJavaVersionFromAvailableComponents(int requestedMajor) {
+    try {
+      JavaRuntimesIndex index =
+          MojangUtils.getJavaRuntimesIndex(fileSystem.getRuntimesDirectory().resolve("_index.json"));
+      if (index == null) return null;
+      Map<String, List<JavaRuntime>> available = index.getRuntimesForCurrentOS();
+      if (available == null || available.isEmpty()) return null;
+
+      JavaVersionComparator comparator = new JavaVersionComparator();
+      String bestComponent = null;
+      int bestMajor = -1;
+      for (Map.Entry<String, List<JavaRuntime>> entry : available.entrySet()) {
+        List<JavaRuntime> runtimes = entry.getValue();
+        if (runtimes == null || runtimes.isEmpty()) continue;
+        String versionName = runtimes.get(0).getVersion().getName();
+        int major;
+        try {
+          major = comparator.getMajor(versionName);
+        } catch (IllegalArgumentException ex) {
+          Utils.getLogger()
+              .log(
+                  Level.FINE,
+                  "Skipping JRE component "
+                      + entry.getKey()
+                      + " with unrecognized version "
+                      + versionName,
+                  ex);
+          continue;
+        }
+        if (major > requestedMajor || major <= bestMajor) continue;
+        bestMajor = major;
+        bestComponent = entry.getKey();
+      }
+      if (bestComponent != null) return new VersionJavaInfo(bestComponent, bestMajor);
+    } catch (RuntimeException ex) {
+      Utils.getLogger()
+          .log(
+              Level.WARNING,
+              "JRE manifest lookup failed; falling back to hardcoded component mapping",
+              ex);
+    }
+    return null;
+  }
+
+  /**
+   * Hardcoded fallback used only when the live JRE manifest can't be fetched/parsed. Updated as
+   * Mojang ships new components: alpha=16, gamma=17, delta=21, epsilon=25; jre-legacy=8 covers
+   * everything below 16. To add a new component (e.g. java-runtime-zeta for Java 29+), insert a new
+   * branch above {@code highest >= 25}. Note that {@link #deriveJavaVersionFromAvailableComponents}
+   * already handles new components automatically when the network is available — this list only
+   * matters offline.
+   */
+  private static VersionJavaInfo deriveJavaVersionFromCompatibleMajorsHardcoded(int highest) {
     String component;
     int majorVersion;
     if (highest >= 25) {
@@ -690,17 +806,21 @@ class ImmutableInstallerPlanner {
   }
 
   /**
-   * Merge a library into the version using Prism's logic: find existing by group:artifact, replace
-   * if new version is higher, otherwise add.
+   * Merge a library into the version using Prism's logic: find existing by
+   * group:artifact:classifier, replace if new version is higher, otherwise add. Classifier is part
+   * of the match key because variants like {@code natives-windows} and {@code natives-linux} are
+   * distinct artifacts on disk and must not displace each other.
    */
   private static void mergeLibrary(IMinecraftVersionInfo version, Library newLib) {
     String newGroup = newLib.getGradleGroup();
     String newArtifact = newLib.getGradleArtifact();
+    String newClassifier = newLib.getGradleClassifier();
 
     for (Library existing : version.getLibraries()) {
       if (newGroup.equals(existing.getGradleGroup())
-          && newArtifact.equals(existing.getGradleArtifact())) {
-        // Found matching group:artifact - compare versions
+          && newArtifact.equals(existing.getGradleArtifact())
+          && Objects.equals(newClassifier, existing.getGradleClassifier())) {
+        // Found matching group:artifact:classifier - compare versions
         ComparableVersion newVersion = new ComparableVersion(newLib.getGradleVersion());
         ComparableVersion existingVersion = new ComparableVersion(existing.getGradleVersion());
 
@@ -714,7 +834,7 @@ class ImmutableInstallerPlanner {
       }
     }
 
-    // No existing library with this group:artifact - just add
+    // No existing library with this group:artifact:classifier - just add
     version.addLibrary(newLib);
   }
 

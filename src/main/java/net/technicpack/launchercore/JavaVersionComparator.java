@@ -18,6 +18,16 @@ public class JavaVersionComparator implements Comparator<String> {
   private static final Pattern NEW_PATTERN =
       Pattern.compile("^(\\d+)(?:\\.(\\d+))?(?:\\.(\\d+))?(?:\\.(\\d+))?(?:[-+].*)?$");
 
+  /**
+   * Returns the major Java version parsed from a version string.
+   * E.g. "1.8.0_221" → 8, "21.0.4" → 21, "17-ea" → 17, "1.8" → 8.
+   *
+   * @throws IllegalArgumentException if the string isn't a recognized Java version format.
+   */
+  public int getMajor(String version) {
+    return parseVersion(version)[0];
+  }
+
   @Override
   public int compare(String v1, String v2) {
     int[] arr1 = parseVersion(v1);

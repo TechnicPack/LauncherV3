@@ -21,8 +21,10 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import net.technicpack.launcher.io.LauncherFileSystem;
@@ -433,6 +435,291 @@ class ImmutableInstallerPlannerTest {
     assertEquals("arm64", Files.readString(extractedMarker, StandardCharsets.UTF_8));
   }
 
+  @Test
+  void mergeLibraryWithDifferentClassifierDoesNotReplace() throws Exception {
+    TestMinecraftVersionInfo version = new TestMinecraftVersionInfo(null);
+    version.addLibrary(new Library("org.lwjgl:lwjgl:3.3.1:natives-windows"));
+
+    invokeMergeLibrary(version, new Library("org.lwjgl:lwjgl:3.3.1:natives-linux"));
+
+    List<String> names =
+        version.getLibraries().stream().map(Library::getName).collect(Collectors.toList());
+    assertEquals(
+        Arrays.asList(
+            "org.lwjgl:lwjgl:3.3.1:natives-windows", "org.lwjgl:lwjgl:3.3.1:natives-linux"),
+        names);
+  }
+
+  @Test
+  void mergeLibraryWithSameClassifierAndHigherVersionReplaces() throws Exception {
+    TestMinecraftVersionInfo version = new TestMinecraftVersionInfo(null);
+    version.addLibrary(new Library("org.lwjgl:lwjgl:3.3.1:natives-windows"));
+
+    invokeMergeLibrary(version, new Library("org.lwjgl:lwjgl:3.3.2:natives-windows"));
+
+    List<String> names =
+        version.getLibraries().stream().map(Library::getName).collect(Collectors.toList());
+    assertEquals(Collections.singletonList("org.lwjgl:lwjgl:3.3.2:natives-windows"), names);
+  }
+
+  @Test
+  void mergeLibraryWithNoClassifierAgainstClassifiedExistingCoexists() throws Exception {
+    TestMinecraftVersionInfo version = new TestMinecraftVersionInfo(null);
+    version.addLibrary(new Library("org.lwjgl:lwjgl:3.3.1:natives-linux"));
+
+    invokeMergeLibrary(version, new Library("org.lwjgl:lwjgl:3.3.2"));
+
+    List<String> names =
+        version.getLibraries().stream().map(Library::getName).collect(Collectors.toList());
+    assertEquals(
+        Arrays.asList("org.lwjgl:lwjgl:3.3.1:natives-linux", "org.lwjgl:lwjgl:3.3.2"), names);
+  }
+
+  @Test
+  void versionDiscoveryRemovesLegacyForgeWhenModpackJarPresent() throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher-forge-with-jar"));
+    InstalledPack installedPack =
+        new InstalledPack(
+            "forge-with-jar",
+            InstalledPack.RECOMMENDED,
+            tempDir.resolve("pack-forge-with-jar").toString());
+    ModpackModel pack = new ModpackModel(installedPack, null, null, fileSystem);
+    pack.initDirectories();
+
+    Path modpackJar = pack.getBinDir().toPath().resolve("modpack.jar");
+    Files.createDirectories(modpackJar.getParent());
+    Files.write(modpackJar, new byte[] {0x50, 0x4b, 0x03, 0x04});
+
+    Modpack modpackData = GSON.fromJson("{\"minecraft\":\"1.7.10\",\"mods\":[]}", Modpack.class);
+    IMinecraftVersionInfo version =
+        MojangUtils.getGson()
+            .fromJson(
+                "{"
+                    + "\"id\":\"forge-with-jar-1.7.10\","
+                    + "\"type\":\"release\","
+                    + "\"mainClass\":\"example.Main\","
+                    + "\"inheritsFrom\":\"1.7.10\","
+                    + "\"minecraftArguments\":\"--demo\","
+                    + "\"libraries\":["
+                    + "{\"name\":\"net.minecraftforge:forge:1.7.10-10.13.4.1614\"}"
+                    + "]"
+                    + "}",
+                MinecraftVersionInfo.class);
+
+    ImmutableInstallerPlanner planner =
+        new ImmutableInstallerPlanner(
+            new TestResourceLoader(),
+            pack,
+            modpackData,
+            fileSystem,
+            key -> version,
+            new TechnicSettings(),
+            new FakeJavaRuntime(),
+            false,
+            false,
+            false,
+            () -> false);
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+
+    new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
+        .execute(planner.buildVersionDiscoveryPlan(), context);
+
+    assertTrue(
+        context.getLibrariesToInstall().stream().noneMatch(Library::isMinecraftForge),
+        "Forge library must be removed when modpack.jar provides Forge classes on the classpath");
+  }
+
+  @Test
+  void versionDiscoveryKeepsLegacyForgeWhenModpackJarAbsent() throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher-forge-no-jar"));
+    InstalledPack installedPack =
+        new InstalledPack(
+            "forge-no-jar",
+            InstalledPack.RECOMMENDED,
+            tempDir.resolve("pack-forge-no-jar").toString());
+    ModpackModel pack = new ModpackModel(installedPack, null, null, fileSystem);
+    pack.initDirectories();
+
+    assertFalse(
+        new File(pack.getBinDir(), "modpack.jar").exists(),
+        "precondition: modpack.jar must not exist for this test");
+
+    Modpack modpackData = GSON.fromJson("{\"minecraft\":\"1.7.10\",\"mods\":[]}", Modpack.class);
+    IMinecraftVersionInfo version =
+        MojangUtils.getGson()
+            .fromJson(
+                "{"
+                    + "\"id\":\"forge-no-jar-1.7.10\","
+                    + "\"type\":\"release\","
+                    + "\"mainClass\":\"example.Main\","
+                    + "\"inheritsFrom\":\"1.7.10\","
+                    + "\"minecraftArguments\":\"--demo\","
+                    + "\"libraries\":["
+                    + "{\"name\":\"net.minecraftforge:forge:1.7.10-10.13.4.1614\"}"
+                    + "]"
+                    + "}",
+                MinecraftVersionInfo.class);
+
+    ImmutableInstallerPlanner planner =
+        new ImmutableInstallerPlanner(
+            new TestResourceLoader(),
+            pack,
+            modpackData,
+            fileSystem,
+            key -> version,
+            new TechnicSettings(),
+            new FakeJavaRuntime(),
+            false,
+            false,
+            false,
+            () -> false);
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+
+    new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
+        .execute(planner.buildVersionDiscoveryPlan(), context);
+
+    assertEquals(
+        1,
+        context.getLibrariesToInstall().stream().filter(Library::isMinecraftForge).count(),
+        "Forge library must be retained when modpack.jar is absent so a Prism patch can supply"
+            + " Forge classes via the chain");
+  }
+
+  @Test
+  void deriveJavaVersionPicksHighestComponentNotExceedingRequestedFromManifest() throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher-derive-1"));
+    ImmutableInstallerPlanner planner = makeMinimalPlanner(fileSystem);
+
+    JavaRuntimesIndex index =
+        MojangUtils.getGson()
+            .fromJson(
+                "{\""
+                    + currentRuntimeIndexKey()
+                    + "\":{"
+                    + "\"java-runtime-delta\":[{\"version\":{\"name\":\"21.0.4\",\"released\":\"2024\"}}],"
+                    + "\"java-runtime-epsilon\":[{\"version\":{\"name\":\"25.0.0\",\"released\":\"2024\"}}]"
+                    + "}}",
+                JavaRuntimesIndex.class);
+    JavaRuntimesIndex previous = setJavaRuntimesIndex(index);
+    try {
+      VersionJavaInfo result = invokeDeriveJavaVersion(planner, Collections.singletonList(22));
+      assertEquals("java-runtime-delta", result.getComponent());
+      assertEquals(21, result.getMajorVersion());
+    } finally {
+      setJavaRuntimesIndex(previous);
+    }
+  }
+
+  @Test
+  void deriveJavaVersionPicksExactMatchFromManifest() throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher-derive-2"));
+    ImmutableInstallerPlanner planner = makeMinimalPlanner(fileSystem);
+
+    JavaRuntimesIndex index =
+        MojangUtils.getGson()
+            .fromJson(
+                "{\""
+                    + currentRuntimeIndexKey()
+                    + "\":{"
+                    + "\"java-runtime-epsilon\":[{\"version\":{\"name\":\"25.0.0\",\"released\":\"2024\"}}]"
+                    + "}}",
+                JavaRuntimesIndex.class);
+    JavaRuntimesIndex previous = setJavaRuntimesIndex(index);
+    try {
+      VersionJavaInfo result = invokeDeriveJavaVersion(planner, Collections.singletonList(25));
+      assertEquals("java-runtime-epsilon", result.getComponent());
+      assertEquals(25, result.getMajorVersion());
+    } finally {
+      setJavaRuntimesIndex(previous);
+    }
+  }
+
+  @Test
+  void deriveJavaVersionSkipsComponentsWithUnrecognizedVersionStrings() throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher-derive-3"));
+    ImmutableInstallerPlanner planner = makeMinimalPlanner(fileSystem);
+
+    JavaRuntimesIndex index =
+        MojangUtils.getGson()
+            .fromJson(
+                "{\""
+                    + currentRuntimeIndexKey()
+                    + "\":{"
+                    + "\"java-runtime-delta\":[{\"version\":{\"name\":\"21.0.4\",\"released\":\"2024\"}}],"
+                    + "\"java-runtime-bogus\":[{\"version\":{\"name\":\"weird-format\",\"released\":\"2024\"}}]"
+                    + "}}",
+                JavaRuntimesIndex.class);
+    JavaRuntimesIndex previous = setJavaRuntimesIndex(index);
+    try {
+      VersionJavaInfo result = invokeDeriveJavaVersion(planner, Collections.singletonList(25));
+      assertEquals("java-runtime-delta", result.getComponent());
+      assertEquals(21, result.getMajorVersion());
+    } finally {
+      setJavaRuntimesIndex(previous);
+    }
+  }
+
+  private ImmutableInstallerPlanner makeMinimalPlanner(LauncherFileSystem fileSystem) {
+    return new ImmutableInstallerPlanner(
+        new TestResourceLoader(),
+        new ModpackModel(
+            new InstalledPack("Test Pack", "1.0", InstalledPack.MODPACKS_DIR + "Test Pack"),
+            null,
+            null,
+            fileSystem),
+        GSON.fromJson("{\"minecraft\":\"1.20.1\",\"mods\":[]}", Modpack.class),
+        fileSystem,
+        null,
+        new TechnicSettings(),
+        null,
+        false,
+        true,
+        false,
+        () -> false);
+  }
+
+  private static VersionJavaInfo invokeDeriveJavaVersion(
+      ImmutableInstallerPlanner planner, List<Integer> majors) throws Exception {
+    Method method =
+        ImmutableInstallerPlanner.class.getDeclaredMethod(
+            "deriveJavaVersionFromCompatibleMajors", List.class);
+    method.setAccessible(true);
+    try {
+      return (VersionJavaInfo) method.invoke(planner, majors);
+    } catch (InvocationTargetException exception) {
+      Throwable cause = exception.getCause();
+      if (cause instanceof Exception) {
+        throw (Exception) cause;
+      }
+      if (cause instanceof Error) {
+        throw (Error) cause;
+      }
+      throw exception;
+    }
+  }
+
+  private static void invokeMergeLibrary(IMinecraftVersionInfo version, Library newLib)
+      throws Exception {
+    Method method =
+        ImmutableInstallerPlanner.class.getDeclaredMethod(
+            "mergeLibrary", IMinecraftVersionInfo.class, Library.class);
+    method.setAccessible(true);
+    try {
+      method.invoke(null, version, newLib);
+    } catch (InvocationTargetException exception) {
+      Throwable cause = exception.getCause();
+      if (cause instanceof Exception) {
+        throw (Exception) cause;
+      }
+      if (cause instanceof Error) {
+        throw (Error) cause;
+      }
+      throw exception;
+    }
+  }
+
   private static void writeZip(Path zipPath, String entryName, String contents) throws IOException {
     Files.createDirectories(zipPath.getParent());
     try (ZipOutputStream output = new ZipOutputStream(Files.newOutputStream(zipPath))) {
@@ -596,6 +883,7 @@ class ImmutableInstallerPlannerTest {
 
   private static final class TestMinecraftVersionInfo implements IMinecraftVersionInfo {
     private final VersionJavaInfo runtimeInfo;
+    private final List<Library> libraries = new ArrayList<>();
     private IJavaRuntime runtime;
 
     private TestMinecraftVersionInfo(VersionJavaInfo runtimeInfo) {
@@ -629,7 +917,7 @@ class ImmutableInstallerPlannerTest {
 
     @Override
     public List<Library> getLibraries() {
-      return Collections.emptyList();
+      return libraries;
     }
 
     @Override
@@ -687,10 +975,14 @@ class ImmutableInstallerPlannerTest {
     public void setAssetsMapToResources(boolean mapToResources) {}
 
     @Override
-    public void addLibrary(Library library) {}
+    public void addLibrary(Library library) {
+      libraries.add(library);
+    }
 
     @Override
-    public void prependLibrary(Library library) {}
+    public void prependLibrary(Library library) {
+      libraries.add(0, library);
+    }
 
     @Override
     public VersionJavaInfo getMojangRuntimeInformation() {
@@ -698,10 +990,15 @@ class ImmutableInstallerPlannerTest {
     }
 
     @Override
-    public void removeLibrary(String libraryName) {}
+    public void removeLibrary(String libraryName) {
+      libraries.removeIf(library -> library.getName().equals(libraryName));
+    }
 
     @Override
-    public void replaceAllLibraries(List<Library> replacementLibraries) {}
+    public void replaceAllLibraries(List<Library> replacementLibraries) {
+      libraries.clear();
+      libraries.addAll(replacementLibraries);
+    }
 
     @Override
     public void setMojangRuntimeInformation(VersionJavaInfo info) {}
