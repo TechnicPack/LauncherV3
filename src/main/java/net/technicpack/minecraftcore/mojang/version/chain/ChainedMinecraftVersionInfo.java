@@ -22,6 +22,7 @@ package net.technicpack.minecraftcore.mojang.version.chain;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
@@ -29,6 +30,7 @@ import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.io.*;
 import net.technicpack.minecraftcore.mojang.version.io.argument.Argument;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
+import net.technicpack.utilslib.Utils;
 
 public class ChainedMinecraftVersionInfo implements IMinecraftVersionInfo {
 
@@ -248,16 +250,49 @@ public class ChainedMinecraftVersionInfo implements IMinecraftVersionInfo {
 
   @Override
   public void replaceAllLibraries(List<Library> replacementLibraries) {
-    // Clear libraries from ALL versions in the chain
+    // Snapshot what we're about to remove, per chain layer, so the operation is auditable in logs.
+    // Required because a Prism patch that supplies an incomplete library list will silently wipe
+    // libraries contributed by intermediate chain layers (e.g. a Forge inheritance layer).
+    StringBuilder summary = new StringBuilder();
+    summary
+        .append("ChainedMinecraftVersionInfo.replaceAllLibraries: clearing ")
+        .append(chain.size())
+        .append(" chain layer(s) and adding ")
+        .append(replacementLibraries.size())
+        .append(" replacement librar")
+        .append(replacementLibraries.size() == 1 ? "y" : "ies")
+        .append('.');
+
     for (IMinecraftVersionInfo version : chain) {
-      List<String> toRemove = new ArrayList<>();
+      List<String> removedNames = new ArrayList<>();
       for (Library lib : version.getLibraries()) {
-        toRemove.add(lib.getName());
+        removedNames.add(lib.getName());
       }
-      for (String name : toRemove) {
+      if (!removedNames.isEmpty()) {
+        summary
+            .append("\n  cleared from layer '")
+            .append(version.getId())
+            .append("' (")
+            .append(removedNames.size())
+            .append("): ")
+            .append(String.join(", ", removedNames));
+      }
+      for (String name : removedNames) {
         version.removeLibrary(name);
       }
     }
+
+    if (!replacementLibraries.isEmpty()) {
+      List<String> addedNames =
+          replacementLibraries.stream().map(Library::getName).collect(Collectors.toList());
+      summary
+          .append("\n  added to layer '")
+          .append(chain.get(0).getId())
+          .append("': ")
+          .append(String.join(", ", addedNames));
+    }
+
+    Utils.getLogger().log(Level.INFO, summary.toString());
 
     // Add replacement libraries to the root version
     for (Library lib : replacementLibraries) {
