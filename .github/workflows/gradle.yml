@@ -5,7 +5,9 @@ on:
     branches: [ "master" ]
     paths-ignore:
       - '.gitignore'
+      - 'CHANGELOG.md'
       - 'COPYING.txt'
+      - 'HISTORY.md'
       - 'LICENSE*'
       - 'README.md'
       - 'renovate.json5'

@@ -28,6 +28,9 @@ jobs:
       LAUNCHER_VERSION_UPDATE_BASE_URL: ${{ secrets.LAUNCHER_VERSION_UPDATE_BASE_URL }}
 
     steps:
+      - name: Checkout master
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
       - name: Resolve Build Run
         id: resolve
         env:
@@ -251,6 +254,35 @@ jobs:
             echo "- Source artifact: \`${ARTIFACT_NAME}\`"
           } >> "${GITHUB_STEP_SUMMARY}"
 
+      - name: Extract Release Notes
+        id: notes
+        run: |
+          set -euo pipefail
+          notes_file="$(mktemp)"
+
+          section="$(python3 <<'PY'
+          import re, sys
+          with open('CHANGELOG.md') as f:
+              content = f.read()
+          m = re.search(
+              r'^## \[Unreleased\][^\n]*\n(.*?)(?=^## \[|^<!-- historical-releases-footer -->|\Z)',
+              content, re.MULTILINE | re.DOTALL,
+          )
+          if m:
+              sys.stdout.write(m.group(1).strip())
+          PY
+          )"
+
+          if [[ -n "${section}" ]] && grep -qE '^- ' <<<"${section}"; then
+            printf '%s\n' "${section}" > "${notes_file}"
+            echo "notes_source=changelog" >> "${GITHUB_OUTPUT}"
+            echo "::notice::Using release notes from CHANGELOG.md [Unreleased]"
+          else
+            echo "notes_source=fallback" >> "${GITHUB_OUTPUT}"
+            echo "::notice::CHANGELOG.md [Unreleased] is empty or absent — falling back to commit compare"
+          fi
+          echo "notes_file=${notes_file}" >> "${GITHUB_OUTPUT}"
+
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -259,38 +291,47 @@ jobs:
           JAR_PATH: ${{ steps.artifact.outputs.jar_path }}
           EXE_PATH: ${{ steps.artifact.outputs.exe_path }}
           OSX_PATH: ${{ steps.artifact.outputs.osx_path }}
+          NOTES_SOURCE: ${{ steps.notes.outputs.notes_source }}
+          NOTES_FILE: ${{ steps.notes.outputs.notes_file }}
         run: |
           set -euo pipefail
 
           tag="v4.0-${BUILD_NUMBER}-stable"
           title="4.0-${BUILD_NUMBER} (stable)"
 
-          prev_filter='[.[] | select(.isDraft | not) | select(.isPrerelease | not) | select(.tagName != $tag)] | .[0].tagName'
+          if [[ "${NOTES_SOURCE}" == "changelog" ]]; then
+            echo "Using release notes from CHANGELOG.md [Unreleased]"
+            notes_file="${NOTES_FILE}"
+          else
+            echo "Generating release notes from commit compare"
 
-          releases_json="$(gh release list --repo "${GITHUB_REPOSITORY}" -L 100 --json tagName,isPrerelease,isDraft || echo '[]')"
+            prev_filter='[.[] | select(.isDraft | not) | select(.isPrerelease | not) | select(.tagName != $tag)] | .[0].tagName'
 
-          prev_tag="$(jq -r --arg tag "${tag}" "${prev_filter}" <<<"${releases_json}")"
-          echo "Previous tag: ${prev_tag:-<empty>}"
+            releases_json="$(gh release list --repo "${GITHUB_REPOSITORY}" -L 100 --json tagName,isPrerelease,isDraft || echo '[]')"
 
-          notes_file="$(mktemp)"
-          trap 'rm -f "${notes_file}"' EXIT
-          if [[ -n "${prev_tag}" && "${prev_tag}" != "null" ]]; then
-            echo "Generating changelog: ${prev_tag}...${COMMIT_SHA}"
-            if changelog="$(gh api "repos/${GITHUB_REPOSITORY}/compare/${prev_tag}...${COMMIT_SHA}" \
-              --jq '.commits | map("- " + (.commit.message | split("\n") | .[0]) + " (" + (.sha[:7]) + ")") | join("\n")')"; then
-              if [[ -n "${changelog}" ]]; then
-                printf '## Changes since %s\n\n%s\n' "${prev_tag}" "${changelog}" > "${notes_file}"
+            prev_tag="$(jq -r --arg tag "${tag}" "${prev_filter}" <<<"${releases_json}")"
+            echo "Previous tag: ${prev_tag:-<empty>}"
+
+            notes_file="$(mktemp)"
+            trap 'rm -f "${notes_file}"' EXIT
+            if [[ -n "${prev_tag}" && "${prev_tag}" != "null" ]]; then
+              echo "Generating changelog: ${prev_tag}...${COMMIT_SHA}"
+              if changelog="$(gh api "repos/${GITHUB_REPOSITORY}/compare/${prev_tag}...${COMMIT_SHA}" \
+                --jq '.commits | map("- " + (.commit.message | split("\n") | .[0]) + " (" + (.sha[:7]) + ")") | join("\n")')"; then
+                if [[ -n "${changelog}" ]]; then
+                  printf '## Changes since %s\n\n%s\n' "${prev_tag}" "${changelog}" > "${notes_file}"
+                else
+                  echo "::warning::Compare returned no commits for ${prev_tag}...${COMMIT_SHA}"
+                  printf 'Promoted build %s to **stable** channel.\n' "${BUILD_NUMBER}" > "${notes_file}"
+                fi
               else
-                echo "::warning::Compare returned no commits for ${prev_tag}...${COMMIT_SHA}"
+                echo "::warning::Compare API failed for ${prev_tag}...${COMMIT_SHA}"
                 printf 'Promoted build %s to **stable** channel.\n' "${BUILD_NUMBER}" > "${notes_file}"
               fi
             else
-              echo "::warning::Compare API failed for ${prev_tag}...${COMMIT_SHA}"
+              echo "::warning::No previous release found, skipping changelog"
               printf 'Promoted build %s to **stable** channel.\n' "${BUILD_NUMBER}" > "${notes_file}"
             fi
-          else
-            echo "::warning::No previous release found, skipping changelog"
-            printf 'Promoted build %s to **stable** channel.\n' "${BUILD_NUMBER}" > "${notes_file}"
           fi
 
           if gh release view "${tag}" --repo "${GITHUB_REPOSITORY}" &>/dev/null; then
@@ -303,3 +344,34 @@ jobs:
             --title "${title}" \
             --notes-file "${notes_file}" \
             "${JAR_PATH}" "${EXE_PATH}" "${OSX_PATH}"
+
+      - name: Roll Over CHANGELOG
+        if: steps.notes.outputs.notes_source == 'changelog'
+        env:
+          BUILD_NUMBER: ${{ steps.artifact.outputs.build_number }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          export DATE_STR="$(date -u +'%Y-%m-%d')"
+
+          python3 <<'PY'
+          import os, re, sys
+          build = os.environ['BUILD_NUMBER']
+          date = os.environ['DATE_STR']
+          new_heading = f'## [v4.0-{build}-stable] - {date}'
+          with open('CHANGELOG.md') as f:
+              content = f.read()
+          pattern = re.compile(r'^(## \[Unreleased\][^\n]*\n)', re.MULTILINE)
+          if not pattern.search(content):
+              sys.exit('[Unreleased] heading not found in CHANGELOG.md')
+          new_content = pattern.sub(lambda m: m.group(1) + '\n' + new_heading + '\n', content, count=1)
+          with open('CHANGELOG.md', 'w') as f:
+              f.write(new_content)
+          PY
+
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add CHANGELOG.md
+          git commit -m "docs(changelog): release v4.0-${BUILD_NUMBER}-stable [skip ci]"
+          git push origin HEAD:master
