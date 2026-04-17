@@ -9,6 +9,9 @@ is added at the top.
 
 ## [Unreleased]
 
+### Fixed
+- Orphan-file cleanup no longer reports already-removed files as deletion failures after modpack updates. Most orphans on a normal update are mod-version bumps whose old jars were already wiped by the pre-extraction cleanup step; those are now counted as "already removed" instead of "failed".
+
 ## [v4.0-1075-stable] - 2026-04-17
 
 ### Added
