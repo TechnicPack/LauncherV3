@@ -527,17 +527,23 @@ class ImmutableInstallerPlanner {
     // Find and delete orphans (in old but not in new)
     Set<String> orphans = ExtractedFilesManifest.findOrphans(oldManifest, newManifest);
     if (!orphans.isEmpty()) {
-      int deleted = ExtractedFilesManifest.deleteOrphans(orphans, modpackDir);
+      ExtractedFilesManifest.OrphanCleanupResult result =
+          ExtractedFilesManifest.deleteOrphans(orphans, modpackDir);
       Utils.getLogger()
           .info(
-              "Cleaned up " + deleted + " orphaned files out of " + orphans.size() + " candidates");
-      int failed = orphans.size() - deleted;
-      if (failed > 0) {
+              "Orphan cleanup: "
+                  + result.deleted
+                  + " deleted, "
+                  + result.skipped
+                  + " already removed, "
+                  + result.failed
+                  + " failed (out of "
+                  + orphans.size()
+                  + " candidates)");
+      if (result.failed > 0) {
         Utils.getLogger()
             .warning(
-                failed
-                    + " of "
-                    + orphans.size()
+                result.failed
                     + " orphan deletion(s) failed; check earlier warnings for the affected paths");
       }
     }

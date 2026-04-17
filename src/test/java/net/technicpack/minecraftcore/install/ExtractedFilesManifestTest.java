@@ -158,9 +158,12 @@ class ExtractedFilesManifestTest {
     Files.write(fileB, "beta".getBytes(StandardCharsets.UTF_8));
 
     Set<String> orphans = new LinkedHashSet<>(Arrays.asList("a.txt", "sub/b.txt"));
-    int deleted = ExtractedFilesManifest.deleteOrphans(orphans, modpackDir.toFile());
+    ExtractedFilesManifest.OrphanCleanupResult result =
+        ExtractedFilesManifest.deleteOrphans(orphans, modpackDir.toFile());
 
-    assertEquals(2, deleted);
+    assertEquals(2, result.deleted);
+    assertEquals(0, result.skipped);
+    assertEquals(0, result.failed);
     assertFalse(Files.exists(fileA));
     assertFalse(Files.exists(fileB));
   }
@@ -174,11 +177,31 @@ class ExtractedFilesManifestTest {
 
     Set<String> orphans =
         new LinkedHashSet<>(Arrays.asList("a-directory", "missing.txt", "real.txt"));
-    int deleted = ExtractedFilesManifest.deleteOrphans(orphans, modpackDir.toFile());
+    ExtractedFilesManifest.OrphanCleanupResult result =
+        ExtractedFilesManifest.deleteOrphans(orphans, modpackDir.toFile());
 
-    assertEquals(1, deleted);
+    assertEquals(1, result.deleted);
+    assertEquals(2, result.skipped);
+    assertEquals(0, result.failed);
     assertFalse(Files.exists(realFile));
     assertTrue(Files.exists(modpackDir.resolve("a-directory")));
+  }
+
+  @Test
+  void deleteOrphansCountsAlreadyRemovedFilesAsSkippedNotFailed() {
+    // Scenario: modpack update wiped mods/ before orphan cleanup ran, so every orphan
+    // path in the manifest is already gone. This must not be reported as a failure.
+    Path modpackDir = tempDir.resolve("modpack");
+    Set<String> orphans =
+        new LinkedHashSet<>(
+            Arrays.asList("mods/old-a.jar", "mods/old-b.jar", "mods/old-c.jar"));
+
+    ExtractedFilesManifest.OrphanCleanupResult result =
+        ExtractedFilesManifest.deleteOrphans(orphans, modpackDir.toFile());
+
+    assertEquals(0, result.deleted);
+    assertEquals(3, result.skipped);
+    assertEquals(0, result.failed);
   }
 
   // -------------------------------------------------------------------------

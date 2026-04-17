@@ -111,20 +111,45 @@ public class ExtractedFilesManifest {
     return orphans;
   }
 
+  /**
+   * Result of an orphan-deletion pass, separating real delete failures from no-op cases.
+   *
+   * <p>The orphan list is computed against the previous manifest, but modpack updates wipe {@code
+   * mods/}, {@code coremods/}, and {@code Flan/} before orphan cleanup runs, so most mod-file
+   * orphans are already gone by then. Counting those as failures produces alarming logs; {@link
+   * #skipped} captures them instead.
+   */
+  public static final class OrphanCleanupResult {
+    public final int deleted;
+    public final int skipped;
+    public final int failed;
+
+    OrphanCleanupResult(int deleted, int skipped, int failed) {
+      this.deleted = deleted;
+      this.skipped = skipped;
+      this.failed = failed;
+    }
+  }
+
   /** Delete orphaned files from the modpack directory. */
-  public static int deleteOrphans(Set<String> orphans, File modpackDir) {
+  public static OrphanCleanupResult deleteOrphans(Set<String> orphans, File modpackDir) {
     int deleted = 0;
+    int skipped = 0;
+    int failed = 0;
     for (String orphan : orphans) {
       File file = new File(modpackDir, orphan);
-      if (file.exists() && file.isFile()) {
-        if (file.delete()) {
-          deleted++;
-        } else {
-          Utils.getLogger().warning("Failed to delete orphaned file: " + file.getAbsolutePath());
-        }
+      if (!file.exists() || !file.isFile()) {
+        skipped++;
+        continue;
+      }
+      if (file.delete()) {
+        deleted++;
+      } else {
+        failed++;
+        Utils.getLogger().warning("Failed to delete orphaned file: " + file.getAbsolutePath());
       }
     }
-    return deleted;
+    return new OrphanCleanupResult(deleted, skipped, failed);
   }
 
   /**
