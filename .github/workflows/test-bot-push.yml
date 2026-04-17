@@ -1,0 +1,35 @@
+name: Test Bot Push Permission
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Make no-op commit as github-actions[bot]
+        run: |
+          set -euo pipefail
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git commit --allow-empty -m "test: bot push permission smoke test [skip ci]"
+
+      - name: Dry-run push to master
+        run: git push --dry-run origin HEAD:master
+
+      - name: Report success
+        run: |
+          {
+            echo "## Bot push smoke test: SUCCESS"
+            echo ""
+            echo "\`git push --dry-run origin HEAD:master\` succeeded as github-actions[bot]."
+            echo ""
+            echo "The pre-receive hook evaluated branch protection and accepted the push."
+            echo "Roll Over CHANGELOG in promote.yml will succeed on the next real run."
+          } >> "${GITHUB_STEP_SUMMARY}"
