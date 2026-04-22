@@ -9,6 +9,8 @@ is added at the top.
 
 ## [Unreleased]
 
+## [v4.0-1080] - 2026-04-22
+
 ### Fixed
 - Auto-updates from older launcher builds no longer abort with an "Illegal char `<:>`" error before finishing. Older versions passed the update-target path in a URL-like form that the newer mover rejected; the mover now accepts both shapes, so users who hadn't updated in a while can now finish the update without re-downloading the launcher manually.
 - Launcher auto-updates on Windows are more reliable when antivirus or Windows briefly holds the launcher executable open. The updater now renames the existing binary aside (`launcher.exe.old`) before writing the new one — Windows permits renaming a running executable even when a direct overwrite would fail with "The process cannot access the file because it is being used by another process". Any `.old` files left behind are cleaned up on the next launcher startup.
