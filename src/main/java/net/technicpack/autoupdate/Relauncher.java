@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import javax.swing.JOptionPane;
+import io.sentry.Sentry;
 import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launcher.settings.StartupParameters;
@@ -48,8 +49,8 @@ import net.technicpack.utilslib.Utils;
 
 public class Relauncher {
   private static final String LAUNCHER_ASSET_PROGRESS_TEMPLATE = "%s";
-  private static final int WINDOWS_PACKAGE_REPLACE_ATTEMPTS = 20;
-  private static final long WINDOWS_PACKAGE_RETRY_DELAY_MILLIS = 250L;
+  private static final int WINDOWS_PACKAGE_REPLACE_ATTEMPTS = 40;
+  private static final long WINDOWS_PACKAGE_RETRY_DELAY_MILLIS = 500L;
 
   private final String stream;
   private final int currentBuild;
@@ -330,6 +331,7 @@ public class Relauncher {
       } catch (FileSystemException e) {
         if (!shouldRetryLauncherPackageReplace(
             e, targetPath, retryTargetLocks, attempt, attempts)) {
+          tagFinalMoverFailure(e, attempt, attempts);
           throw e;
         }
 
@@ -346,6 +348,27 @@ public class Relauncher {
     }
   }
 
+  /**
+   * Attach diagnostic tags to the Sentry scope so the captured mover failure tells us
+   * which step actually blocked and how many attempts we burned through. Intentionally
+   * static-scope — this is the last thing we do before rethrowing, and the tags stay on
+   * the scope only long enough to be picked up by the automatic capture.
+   */
+  private static void tagFinalMoverFailure(
+      FileSystemException e, int finalAttempt, int totalAttempts) {
+    // MoveFile-style failures expose both source and target via getOtherFile();
+    // CopyFile-style failures only populate getFile(). This is the cheapest reliable
+    // way to tell which NIO call actually refused the operation.
+    String failedStep = e.getOtherFile() != null ? "rename" : "copy";
+    boolean retryExhausted = finalAttempt >= totalAttempts;
+    Sentry.configureScope(
+        scope -> {
+          scope.setTag("moverFailedStep", failedStep);
+          scope.setTag("moverRetryAttempts", String.valueOf(finalAttempt));
+          scope.setTag("moverRetryExhausted", String.valueOf(retryExhausted));
+        });
+  }
+
   private static void replaceLauncherPackageOnce(Path currentPath, Path targetPath)
       throws IOException {
     Path parent = targetPath.getParent();
@@ -353,37 +376,15 @@ public class Relauncher {
       Files.createDirectories(parent);
     }
 
-    boolean isWindows = OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS;
-    if (isWindows && Files.exists(targetPath)) {
-      // Windows holds an exclusive sharing lock on executing binaries, so a direct
-      // Files.copy(REPLACE_EXISTING) hits ERROR_SHARING_VIOLATION. Renaming a running
-      // binary is always legal (the rename operates on the MFT entry, not the file body),
-      // so stash it aside and copy into the now-free path. If the copy fails we rename
-      // the stash back to preserve the pre-call state.
-      Path stashed = oldPath(targetPath);
-      try {
-        Files.deleteIfExists(stashed);
-      } catch (IOException ignored) {
-        // Stale .old still locked; the subsequent move will surface a clear error.
-      }
-      Files.move(targetPath, stashed);
-      try {
-        Files.copy(currentPath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-      } catch (IOException copyFailed) {
-        try {
-          Files.move(stashed, targetPath);
-        } catch (IOException rollbackFailed) {
-          copyFailed.addSuppressed(rollbackFailed);
-        }
-        throw copyFailed;
-      }
-      // Best-effort cleanup; cleanupStaleOldLauncherPackages will retry on next startup.
-      try {
-        Files.deleteIfExists(stashed);
-      } catch (IOException ignored) {
-        // intentionally silent
-      }
-    } else {
+    boolean renameStrategyApplies =
+        OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS
+            && Files.exists(targetPath);
+
+    if (!renameStrategyApplies || !tryRenameStrategy(currentPath, targetPath)) {
+      // Either non-Windows, target didn't exist, or rename was refused. Fall back to a
+      // direct copy — CopyFile uses different share flags than MoveFile (it needs
+      // FILE_SHARE_WRITE but not FILE_SHARE_DELETE), so it can succeed when AV holds the
+      // target without granting FILE_SHARE_DELETE.
       Files.copy(currentPath, targetPath, StandardCopyOption.REPLACE_EXISTING);
     }
 
@@ -391,6 +392,57 @@ public class Relauncher {
     if (!targetFile.setExecutable(true, true)) {
       Utils.getLogger().warning("Failed to set executable flag on package");
     }
+  }
+
+  /**
+   * Windows self-update strategy: rename the locked target aside, then copy the new build
+   * into the freed path. Windows lets us rename a running executable via the image
+   * loader's FILE_SHARE_DELETE share flag, but AV / OneDrive / Explorer handles don't
+   * always grant FILE_SHARE_DELETE — in that case we return false so the caller can fall
+   * back to a direct copy (which only needs FILE_SHARE_WRITE).
+   *
+   * @return true if the new build is now at targetPath; false if the rename was refused.
+   * @throws IOException if a later step (copy, rollback) fails in a way we cannot recover.
+   */
+  private static boolean tryRenameStrategy(Path currentPath, Path targetPath) throws IOException {
+    Path stashed = oldPath(targetPath);
+    try {
+      Files.deleteIfExists(stashed);
+    } catch (IOException ignored) {
+      // Stale .old still locked; the subsequent move will surface a clear error we can fall back on.
+    }
+
+    try {
+      Files.move(targetPath, stashed);
+    } catch (FileSystemException renameRefused) {
+      Utils.getLogger()
+          .log(
+              Level.FINE,
+              "Rename strategy refused (likely AV without FILE_SHARE_DELETE); "
+                  + "falling back to direct copy for "
+                  + targetPath,
+              renameRefused);
+      return false;
+    }
+
+    try {
+      Files.copy(currentPath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+    } catch (IOException copyFailed) {
+      try {
+        Files.move(stashed, targetPath);
+      } catch (IOException rollbackFailed) {
+        copyFailed.addSuppressed(rollbackFailed);
+      }
+      throw copyFailed;
+    }
+
+    // Best-effort cleanup; cleanupStaleOldLauncherPackages will retry on next startup.
+    try {
+      Files.deleteIfExists(stashed);
+    } catch (IOException ignored) {
+      // intentionally silent
+    }
+    return true;
   }
 
   private static Path oldPath(Path target) {

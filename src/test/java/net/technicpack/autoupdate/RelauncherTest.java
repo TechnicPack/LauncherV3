@@ -16,7 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 class RelauncherTest {
-  private static final int EXPECTED_WINDOWS_PACKAGE_REPLACE_ATTEMPTS = 20;
+  private static final int EXPECTED_WINDOWS_PACKAGE_REPLACE_ATTEMPTS = 40;
+  private static final long EXPECTED_WINDOWS_PACKAGE_RETRY_DELAY_MILLIS = 500L;
 
   @Test
   void replaceLauncherPackageRetriesWhenWindowsTemporarilyLocksTarget() throws Exception {
@@ -37,7 +38,9 @@ class RelauncherTest {
         pauses::add);
 
     assertEquals(3, attempts.get());
-    assertEquals(List.of(250L, 250L), pauses);
+    assertEquals(
+        List.of(EXPECTED_WINDOWS_PACKAGE_RETRY_DELAY_MILLIS, EXPECTED_WINDOWS_PACKAGE_RETRY_DELAY_MILLIS),
+        pauses);
   }
 
   @Test
@@ -155,7 +158,9 @@ class RelauncherTest {
         pauses::add);
 
     assertEquals(3, attempts.get());
-    assertEquals(List.of(250L, 250L), pauses);
+    assertEquals(
+        List.of(EXPECTED_WINDOWS_PACKAGE_RETRY_DELAY_MILLIS, EXPECTED_WINDOWS_PACKAGE_RETRY_DELAY_MILLIS),
+        pauses);
   }
 
   @Test
