@@ -134,11 +134,25 @@ public class Relauncher {
     return parameters.isSkipUpdate();
   }
 
+  static Path parseMoveTarget(String moveTarget) {
+    if (moveTarget == null) {
+      throw new IllegalArgumentException("moveTarget must not be null");
+    }
+    // Pre-2e50788c launchers wrote URL-form paths ("/C:/Users/...") via URI.getPath() into
+    // -movetarget. Strip the leading slash so Paths.get accepts the drive-qualified form.
+    if (moveTarget.length() >= 4
+        && moveTarget.charAt(0) == '/'
+        && moveTarget.charAt(2) == ':') {
+      moveTarget = moveTarget.substring(1);
+    }
+    return Paths.get(moveTarget);
+  }
+
   public ExecutionPlan<UpdatePlanner.UpdateContext> buildMoverPlan() {
     UpdatePlanner planner = new UpdatePlanner(fileSystem);
     return planner.planMover(
         new UpdatePlanner.MoverPlanRequest(
-            Paths.get(parameters.getMoveTarget()),
+            parseMoveTarget(parameters.getMoveTarget()),
             parameters.isLegacyMover(),
             resources.getString("updater.mover"),
             resources.getString("updater.finallaunch")));
