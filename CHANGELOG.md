@@ -9,6 +9,11 @@ is added at the top.
 
 ## [Unreleased]
 
+## [v4.0-1079-stable] - 2026-04-22
+
+### Changed
+- Crash and error reports are now sent to Technic's self-hosted Sentry instance (`sentry.technicpack.net`) instead of Sentry's SaaS. No change to what's reported or when.
+
 ## [v4.0-1076-stable] - 2026-04-17
 
 ### Fixed
