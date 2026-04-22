@@ -92,8 +92,9 @@ sentry {
     includeSourceContext.set(sentryAuthToken != null)
 
     if (sentryAuthToken != null) {
-        org.set("technic-pack")
+        org.set("technic")
         projectName.set("launcher")
+        url.set("https://sentry.technicpack.net/")
         authToken.set(sentryAuthToken)
     }
 }

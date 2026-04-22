@@ -145,7 +145,7 @@ public class LauncherMain {
     Sentry.init(
         options -> {
           options.setDsn(
-              "https://4741ed8316eaefd3fa537240d8800c62@o4508140473417728.ingest.us.sentry.io/4509542931431424");
+              "https://c9b34c6f367b5b4061a1bfdb8bde3ef7@sentry.technicpack.net/3");
           options.setTag(
               "launcherPath",
               LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().getPath());
