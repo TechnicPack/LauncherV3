@@ -300,8 +300,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          tag="v4.0-${BUILD_NUMBER}-stable"
-          title="4.0-${BUILD_NUMBER} (stable)"
+          tag="v4.0-${BUILD_NUMBER}"
+          title="4.0-${BUILD_NUMBER}"
 
           if [[ "${NOTES_SOURCE}" == "changelog" ]]; then
             echo "Using release notes from CHANGELOG.md [Unreleased]"
@@ -326,15 +326,15 @@ jobs:
                   printf '## Changes since %s\n\n%s\n' "${prev_tag}" "${changelog}" > "${notes_file}"
                 else
                   echo "::warning::Compare returned no commits for ${prev_tag}...${COMMIT_SHA}"
-                  printf 'Promoted build %s to **stable** channel.\n' "${BUILD_NUMBER}" > "${notes_file}"
+                  printf 'Promoted build %s.\n' "${BUILD_NUMBER}" > "${notes_file}"
                 fi
               else
                 echo "::warning::Compare API failed for ${prev_tag}...${COMMIT_SHA}"
-                printf 'Promoted build %s to **stable** channel.\n' "${BUILD_NUMBER}" > "${notes_file}"
+                printf 'Promoted build %s.\n' "${BUILD_NUMBER}" > "${notes_file}"
               fi
             else
               echo "::warning::No previous release found, skipping changelog"
-              printf 'Promoted build %s to **stable** channel.\n' "${BUILD_NUMBER}" > "${notes_file}"
+              printf 'Promoted build %s.\n' "${BUILD_NUMBER}" > "${notes_file}"
             fi
           fi
 
@@ -363,7 +363,7 @@ jobs:
           import os, re, sys
           build = os.environ['BUILD_NUMBER']
           date = os.environ['DATE_STR']
-          new_heading = f'## [v4.0-{build}-stable] - {date}'
+          new_heading = f'## [v4.0-{build}] - {date}'
           with open('CHANGELOG.md') as f:
               content = f.read()
           pattern = re.compile(r'^(## \[Unreleased\][^\n]*\n)', re.MULTILINE)
@@ -377,5 +377,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
           git add CHANGELOG.md
-          git commit -m "docs(changelog): release v4.0-${BUILD_NUMBER}-stable [skip ci]"
+          git commit -m "docs(changelog): release v4.0-${BUILD_NUMBER} [skip ci]"
           git push origin HEAD:master

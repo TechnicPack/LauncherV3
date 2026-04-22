@@ -4,7 +4,7 @@ All user-visible changes to this launcher are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 When a build is promoted, the `[Unreleased]` section is renamed to
-`[v4.0-<build>-<channel>] - YYYY-MM-DD` and a new empty `[Unreleased]` section
+`[v4.0-<build>] - YYYY-MM-DD` and a new empty `[Unreleased]` section
 is added at the top.
 
 ## [Unreleased]
