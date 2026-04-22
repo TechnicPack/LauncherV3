@@ -3,14 +3,17 @@ package net.technicpack.autoupdate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.FileSystemException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class RelauncherTest {
   private static final int EXPECTED_WINDOWS_PACKAGE_REPLACE_ATTEMPTS = 20;
@@ -128,5 +131,66 @@ class RelauncherTest {
     assertEquals(
         Paths.get("Z:/games/.technic/launcher.exe"),
         Relauncher.parseMoveTarget("/Z:/games/.technic/launcher.exe"));
+  }
+
+  @Test
+  void replaceLauncherPackageRetriesWhenStashedOldPathIsLocked() throws Exception {
+    // The mover now renames target -> target.old before copying. If a prior run left a
+    // locked target.old, the retry loop must still fire (AV commonly releases within seconds).
+    Path currentPath = Path.of("temp.exe");
+    Path targetPath = Path.of("TechnicLauncher.exe");
+    Path stashedPath = Path.of("TechnicLauncher.exe.old");
+    AtomicInteger attempts = new AtomicInteger();
+    List<Long> pauses = new ArrayList<>();
+
+    Relauncher.replaceLauncherPackage(
+        currentPath,
+        targetPath,
+        true,
+        (source, target) -> {
+          if (attempts.incrementAndGet() < 3) {
+            throw new AccessDeniedException(stashedPath.toString());
+          }
+        },
+        pauses::add);
+
+    assertEquals(3, attempts.get());
+    assertEquals(List.of(250L, 250L), pauses);
+  }
+
+  @Test
+  void replaceLauncherPackageReplacesTargetContentsOnNonWindowsHost(@TempDir Path tmp)
+      throws IOException {
+    // Cross-platform smoke test for the direct-copy (non-Windows) branch of
+    // replaceLauncherPackageOnce. Runs the full public entry point.
+    Path source = tmp.resolve("temp");
+    Path target = tmp.resolve("launcher");
+    Files.writeString(source, "NEW");
+    Files.writeString(target, "OLD");
+
+    Relauncher.replaceLauncherPackage(source, target);
+
+    assertEquals("NEW", Files.readString(target));
+  }
+
+  @Test
+  void cleanupStaleOldLauncherPackagesDeletesKnownSiblings(@TempDir Path tmp) throws IOException {
+    for (String name : List.of("launcher.exe.old", "temp.jar.old", "unrelated.old")) {
+      Files.writeString(tmp.resolve(name), "stale");
+    }
+
+    Relauncher.cleanupStaleOldLauncherPackages(new FakeFileSystem(tmp));
+
+    // Targeted names gone; unrelated .old files are preserved (scoped cleanup).
+    org.junit.jupiter.api.Assertions.assertFalse(Files.exists(tmp.resolve("launcher.exe.old")));
+    org.junit.jupiter.api.Assertions.assertFalse(Files.exists(tmp.resolve("temp.jar.old")));
+    org.junit.jupiter.api.Assertions.assertTrue(Files.exists(tmp.resolve("unrelated.old")));
+  }
+
+  private static final class FakeFileSystem
+      extends net.technicpack.launcher.io.LauncherFileSystem {
+    FakeFileSystem(Path root) {
+      super(root);
+    }
   }
 }

@@ -353,11 +353,64 @@ public class Relauncher {
       Files.createDirectories(parent);
     }
 
-    Files.copy(currentPath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+    boolean isWindows = OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS;
+    if (isWindows && Files.exists(targetPath)) {
+      // Windows holds an exclusive sharing lock on executing binaries, so a direct
+      // Files.copy(REPLACE_EXISTING) hits ERROR_SHARING_VIOLATION. Renaming a running
+      // binary is always legal (the rename operates on the MFT entry, not the file body),
+      // so stash it aside and copy into the now-free path. If the copy fails we rename
+      // the stash back to preserve the pre-call state.
+      Path stashed = oldPath(targetPath);
+      try {
+        Files.deleteIfExists(stashed);
+      } catch (IOException ignored) {
+        // Stale .old still locked; the subsequent move will surface a clear error.
+      }
+      Files.move(targetPath, stashed);
+      try {
+        Files.copy(currentPath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+      } catch (IOException copyFailed) {
+        try {
+          Files.move(stashed, targetPath);
+        } catch (IOException rollbackFailed) {
+          copyFailed.addSuppressed(rollbackFailed);
+        }
+        throw copyFailed;
+      }
+      // Best-effort cleanup; cleanupStaleOldLauncherPackages will retry on next startup.
+      try {
+        Files.deleteIfExists(stashed);
+      } catch (IOException ignored) {
+        // intentionally silent
+      }
+    } else {
+      Files.copy(currentPath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+    }
 
     File targetFile = targetPath.toFile();
     if (!targetFile.setExecutable(true, true)) {
       Utils.getLogger().warning("Failed to set executable flag on package");
+    }
+  }
+
+  private static Path oldPath(Path target) {
+    Path fileName = target.getFileName();
+    return fileName == null
+        ? target.resolveSibling(".old")
+        : target.resolveSibling(fileName + ".old");
+  }
+
+  public static void cleanupStaleOldLauncherPackages(LauncherFileSystem fileSystem) {
+    Path root = fileSystem.getRootDirectory();
+    String[] candidates = {
+      "launcher.exe.old", "temp.exe.old", "launcher.jar.old", "temp.jar.old"
+    };
+    for (String name : candidates) {
+      try {
+        Files.deleteIfExists(root.resolve(name));
+      } catch (IOException e) {
+        Utils.getLogger().log(Level.FINE, "Could not clean stale launcher package " + name, e);
+      }
     }
   }
 
@@ -372,8 +425,11 @@ public class Relauncher {
     }
 
     String targetPathString = targetPath.toString();
+    String stashedPathString = oldPath(targetPath).toString();
     return targetPathString.equals(exception.getFile())
-        || targetPathString.equals(exception.getOtherFile());
+        || targetPathString.equals(exception.getOtherFile())
+        || stashedPathString.equals(exception.getFile())
+        || stashedPathString.equals(exception.getOtherFile());
   }
 
   private static void waitForLauncherPackageRetry(

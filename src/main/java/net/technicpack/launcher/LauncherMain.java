@@ -220,6 +220,7 @@ public class LauncherMain {
 
     setupLogging(fileSystem, resources);
     sanitizeLegacyStandardInstallSettings(settings, fileSystem);
+    Relauncher.cleanupStaleOldLauncherPackages(fileSystem);
 
     final boolean displayConsole = settings.getShowConsole();
     if (displayConsole) {
