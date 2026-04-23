@@ -32,6 +32,7 @@ import net.technicpack.launchercore.exception.SessionException;
 import net.technicpack.minecraftcore.microsoft.auth.model.*;
 import net.technicpack.utilslib.DesktopUtils;
 import net.technicpack.utilslib.Utils;
+import org.apache.commons.io.FileUtils;
 
 public class MicrosoftAuthenticator {
   private static final HttpTransport HTTP_TRANSPORT = new Apache5HttpTransport();
@@ -88,22 +89,29 @@ public class MicrosoftAuthenticator {
             });
 
     // Work around the Access Denied exception that sometimes happens due to Windows ACL permission
-    // issues
+    // issues. FileDataStoreFactory probes ownership of the datastore folder on init, and fails
+    // hard if it can't read it. If the folder is in a corrupt ACL state (stale owner, permissions
+    // rewritten by a cleaner, profile SID changed), we try to reset it before handing off to
+    // FileDataStoreFactory.
     Path dataStorePath = Paths.get(dataStore.getAbsolutePath());
     if (Files.exists(dataStorePath)) {
       try {
-        // FileDataStoreFactory internally does this when it tries to lock down the permissions of
-        // the file.
         FileOwnerAttributeView fileAttributeView =
             Files.getFileAttributeView(dataStorePath, FileOwnerAttributeView.class);
         fileAttributeView.getOwner();
       } catch (AccessDeniedException e) {
-        // Attempt to delete the file if we get an AccessDeniedException
-        try {
-          Files.delete(dataStorePath);
-        } catch (IOException e2) {
-          Sentry.captureException(e2);
-          throw new RuntimeException(e2);
+        // Folder ACLs deny reading ownership. Reset state so FileDataStoreFactory can create
+        // fresh permissions.
+        if (!resetCorruptedDataStore(dataStorePath)) {
+          Sentry.captureException(e);
+          throw new RuntimeException(
+              "Credential store folder "
+                  + dataStorePath
+                  + " is in a corrupt permission state and could not be reset automatically. "
+                  + "Close the launcher, open File Explorer, delete the folder manually "
+                  + "(you may need to take ownership via Properties > Security > Advanced), "
+                  + "and try again.",
+              e);
         }
       } catch (IOException e) {
         Sentry.captureException(e);
@@ -117,6 +125,43 @@ public class MicrosoftAuthenticator {
       e.printStackTrace();
       throw new RuntimeException("Failed to setup credential store.", e);
     }
+  }
+
+  /**
+   * Try progressively harder strategies to clear a credential-store folder that is in a corrupt
+   * permission state. Returns true if the folder is now absent (so FileDataStoreFactory can create
+   * a fresh one) or false if every strategy failed.
+   */
+  static boolean resetCorruptedDataStore(Path dataStorePath) {
+    // Strategy 1: recursive delete. Handles both empty and non-empty folders, and succeeds when
+    // the folder contents are accessible but the folder itself has stale ownership.
+    try {
+      FileUtils.deleteDirectory(dataStorePath.toFile());
+      return true;
+    } catch (IOException e) {
+      Utils.getLogger()
+          .log(Level.WARNING, "Recursive delete of " + dataStorePath + " failed", e);
+    }
+
+    // Strategy 2: rename the folder aside. Windows file rename uses different NTFS permission
+    // bits than delete in some configurations, so rename can succeed where delete does not.
+    // FileDataStoreFactory will then create a fresh empty folder at the original path.
+    Path renamed =
+        dataStorePath.resolveSibling(
+            dataStorePath.getFileName() + ".corrupted." + System.currentTimeMillis());
+    try {
+      Files.move(dataStorePath, renamed);
+      Utils.getLogger()
+          .log(
+              Level.WARNING,
+              "Renamed corrupted credential store to " + renamed + "; creating fresh folder");
+      return true;
+    } catch (IOException e) {
+      Utils.getLogger()
+          .log(Level.WARNING, "Rename of " + dataStorePath + " to " + renamed + " failed", e);
+    }
+
+    return false;
   }
 
   public MicrosoftUser loginNewUser() throws MicrosoftAuthException {
