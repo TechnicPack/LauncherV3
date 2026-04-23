@@ -11,7 +11,9 @@ import com.google.api.client.http.json.JsonHttpContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.api.client.util.store.MemoryDataStoreFactory;
 import io.sentry.Sentry;
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +48,14 @@ public class MicrosoftAuthenticator {
       "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
   private static final String AUTHORIZATION_SERVER_URL =
       "https://login.live.com/oauth20_authorize.srf?prompt=select_account&cobrandid=8058f65d-ce06-4c30-9559-473c9275a65d";
-  private final FileDataStoreFactory dataStoreFactory;
+  private final DataStoreFactory dataStoreFactory;
+  /**
+   * Non-null when the on-disk credential store at this path could not be initialised (usually
+   * Windows ACL corruption), and we fell back to an in-memory store. Callers should surface a
+   * warning to the user telling them how to clean up the folder manually; in-memory mode means
+   * the user has to sign in every launch until the path is resolvable again.
+   */
+  private final String corruptedCredentialStorePath;
 
   // XBOX
   private static final String XBOX_AUTH_URL = "https://user.auth.xboxlive.com/user/authenticate";
@@ -91,40 +100,69 @@ public class MicrosoftAuthenticator {
     // Work around the Access Denied exception that sometimes happens due to Windows ACL permission
     // issues. FileDataStoreFactory probes ownership of the datastore folder on init, and fails
     // hard if it can't read it. If the folder is in a corrupt ACL state (stale owner, permissions
-    // rewritten by a cleaner, profile SID changed), we try to reset it before handing off to
-    // FileDataStoreFactory.
+    // rewritten by a cleaner, profile SID changed after a reinstall), try to reset it. If every
+    // recovery strategy fails, fall back to an in-memory credential store so the launcher can
+    // still run: the user has to sign in each launch until they fix the folder by hand, but the
+    // launcher does not crash. The caller is expected to check getCorruptedCredentialStorePath()
+    // and surface a warning dialog explaining how to clean up.
     Path dataStorePath = Paths.get(dataStore.getAbsolutePath());
+    DataStoreFactory factory = null;
+    String corruptedPath = null;
+
     if (Files.exists(dataStorePath)) {
       try {
         FileOwnerAttributeView fileAttributeView =
             Files.getFileAttributeView(dataStorePath, FileOwnerAttributeView.class);
         fileAttributeView.getOwner();
       } catch (AccessDeniedException e) {
-        // Folder ACLs deny reading ownership. Reset state so FileDataStoreFactory can create
-        // fresh permissions.
         if (!resetCorruptedDataStore(dataStorePath)) {
           Sentry.captureException(e);
-          throw new RuntimeException(
-              "Credential store folder "
-                  + dataStorePath
-                  + " is in a corrupt permission state and could not be reset automatically. "
-                  + "Close the launcher, open File Explorer, delete the folder manually "
-                  + "(you may need to take ownership via Properties > Security > Advanced), "
-                  + "and try again.",
-              e);
+          Utils.getLogger()
+              .log(
+                  Level.WARNING,
+                  "Credential store at "
+                      + dataStorePath
+                      + " is in a corrupt permission state and could not be reset. "
+                      + "Falling back to an in-memory credential store.",
+                  e);
+          factory = MemoryDataStoreFactory.getDefaultInstance();
+          corruptedPath = dataStorePath.toString();
         }
       } catch (IOException e) {
         Sentry.captureException(e);
-        // Ignore any other IO exceptions
+        // Ignore other IO exceptions; FileDataStoreFactory will either succeed or fall back below.
       }
     }
 
-    try {
-      dataStoreFactory = new FileDataStoreFactory(dataStore);
-    } catch (IOException e) {
-      e.printStackTrace();
-      throw new RuntimeException("Failed to setup credential store.", e);
+    if (factory == null) {
+      try {
+        factory = new FileDataStoreFactory(dataStore);
+      } catch (IOException e) {
+        Sentry.captureException(e);
+        Utils.getLogger()
+            .log(
+                Level.WARNING,
+                "Failed to create file-backed credential store at "
+                    + dataStorePath
+                    + ". Falling back to an in-memory credential store.",
+                e);
+        factory = MemoryDataStoreFactory.getDefaultInstance();
+        corruptedPath = dataStorePath.toString();
+      }
     }
+
+    this.dataStoreFactory = factory;
+    this.corruptedCredentialStorePath = corruptedPath;
+  }
+
+  /**
+   * Returns the on-disk path that the credential store could not use, or null if the credential
+   * store is healthy (on-disk, persistent). When non-null, the launcher is running with an
+   * in-memory credential store: the user has to sign in every launch until this folder is cleaned
+   * up manually. Callers should surface a warning dialog with cleanup guidance.
+   */
+  public String getCorruptedCredentialStorePath() {
+    return corruptedCredentialStorePath;
   }
 
   /**
@@ -252,16 +290,19 @@ public class MicrosoftAuthenticator {
       return new AuthorizationCodeInstalledApp(flow, receiver, DesktopUtils::browseUrl)
           .authorize(id);
     } catch (StreamCorruptedException e) {
-      // Data store is corrupt, so we're going to purge it and try again
+      // Data store is corrupt, so we're going to purge it and try again. Only relevant when the
+      // data store is file-backed (in-memory doesn't persist anything that could get corrupted).
       Utils.getLogger().log(Level.SEVERE, "Data store is corrupt, purging", e);
 
-      File dataDir = dataStoreFactory.getDataDirectory();
-      if (dataDir != null && dataDir.exists()) {
-        File[] files = dataDir.listFiles();
-        if (files != null) {
-          for (File file : files) {
-            if (!file.delete()) {
-              Utils.getLogger().log(Level.SEVERE, "Failed to delete " + file.getAbsolutePath());
+      if (dataStoreFactory instanceof FileDataStoreFactory) {
+        File dataDir = ((FileDataStoreFactory) dataStoreFactory).getDataDirectory();
+        if (dataDir != null && dataDir.exists()) {
+          File[] files = dataDir.listFiles();
+          if (files != null) {
+            for (File file : files) {
+              if (!file.delete()) {
+                Utils.getLogger().log(Level.SEVERE, "Failed to delete " + file.getAbsolutePath());
+              }
             }
           }
         }

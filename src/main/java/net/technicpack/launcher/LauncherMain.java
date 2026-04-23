@@ -702,6 +702,16 @@ public class LauncherMain {
     UserStore userStore = UserStore.load(fileSystem.getRootDirectory().resolve("users.json"));
     MicrosoftAuthenticator microsoftAuthenticator =
         new MicrosoftAuthenticator(fileSystem.getRootDirectory().resolve("oauth").toFile());
+    String corruptedCredentialStorePath = microsoftAuthenticator.getCorruptedCredentialStorePath();
+    if (corruptedCredentialStorePath != null) {
+      // In-memory fallback is active: show a warning so the user knows they have to re-sign-in
+      // every launch until they clean up the corrupted folder.
+      JOptionPane.showMessageDialog(
+          null,
+          resources.getString("auth.error.corruptstore", corruptedCredentialStorePath),
+          resources.getString("auth.error.corruptstore.title"),
+          JOptionPane.WARNING_MESSAGE);
+    }
     UserModel userModel = new UserModel(userStore, microsoftAuthenticator);
 
     IModpackResourceType iconType = new IconResourceType();
