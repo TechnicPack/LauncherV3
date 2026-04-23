@@ -149,6 +149,13 @@ public class LauncherMain {
           options.setTag(
               "launcherPath",
               LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+          // Mirror os.name / os.version / os.arch into searchable tags. The SDK's auto-
+          // captured `os` context wasn't surfacing reliably for diagnostic queries, so tag
+          // them explicitly. Java 8 on Windows 11 reports os.name as "Windows 10" (compat
+          // shim) — correlate with runtime.name/version if the distinction matters.
+          options.setTag("os.name", System.getProperty("os.name"));
+          options.setTag("os.version", System.getProperty("os.version"));
+          options.setTag("os.arch", System.getProperty("os.arch"));
         });
 
     // Initialize the AWT desktop properties on Linux before any invocations are done
