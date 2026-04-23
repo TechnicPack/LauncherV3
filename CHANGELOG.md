@@ -9,6 +9,8 @@ is added at the top.
 
 ## [Unreleased]
 
+## [v4.0-1081] - 2026-04-23
+
 ### Fixed
 - Launcher auto-updates on Windows now fall back to a direct file copy when the "rename first" update strategy is refused by strict antivirus configurations (some antivirus products block the rename step itself with "The process cannot access the file because it is being used by another process"). The direct copy uses different Windows file-sharing flags and can succeed where the rename could not. The auto-update retry window was also extended from 5 seconds to 20 seconds to give antivirus scans on the freshly-downloaded launcher executable more time to finish before giving up.
 
