@@ -9,6 +9,8 @@ is added at the top.
 
 ## [Unreleased]
 
+## [v4.0-1084] - 2026-04-23
+
 ### Fixed
 - When the Microsoft account sign-in folder (`%APPDATA%\.technic\oauth`) is in a damaged permission state that the launcher cannot reset automatically, the launcher now keeps running with a temporary in-memory credential store instead of crashing. A warning dialog explains which folder is affected and how to fix it manually (delete via File Explorer, with a take-ownership step if permissions are also broken). You will need to sign in to Microsoft every launch until you clean up the folder, but the rest of the launcher works as normal in the meantime.
 
