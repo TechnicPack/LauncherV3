@@ -26,6 +26,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.FileSystemException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -453,6 +454,18 @@ public class Relauncher {
   }
 
   public static void cleanupStaleOldLauncherPackages(LauncherFileSystem fileSystem) {
+    Path runningBinary = null;
+    try {
+      runningBinary = Paths.get(getRunningPath(LauncherMain.class));
+    } catch (InvalidPathException e) {
+      Utils.getLogger().log(Level.FINE, "Could not resolve running binary path for cleanup", e);
+    }
+    cleanupStaleOldLauncherPackages(fileSystem, runningBinary);
+  }
+
+  static void cleanupStaleOldLauncherPackages(LauncherFileSystem fileSystem, Path runningBinary) {
+    // Sweep the .technic root for updater-flow stashes (temp.exe.old) and for installer-
+    // placed launchers that live under .technic.
     Path root = fileSystem.getRootDirectory();
     String[] candidates = {
       "launcher.exe.old", "temp.exe.old", "launcher.jar.old", "temp.jar.old"
@@ -462,6 +475,19 @@ public class Relauncher {
         Files.deleteIfExists(root.resolve(name));
       } catch (IOException e) {
         Utils.getLogger().log(Level.FINE, "Could not clean stale launcher package " + name, e);
+      }
+    }
+
+    // The launcher binary is portable and most users keep it outside .technic (Desktop,
+    // Downloads, external drives). The mover stashes the previous build next to wherever
+    // the binary lives, so also sweep the running binary's sibling .old.
+    if (runningBinary != null) {
+      Path stashed = oldPath(runningBinary);
+      try {
+        Files.deleteIfExists(stashed);
+      } catch (IOException e) {
+        Utils.getLogger()
+            .log(Level.FINE, "Could not clean stale launcher package " + stashed, e);
       }
     }
   }

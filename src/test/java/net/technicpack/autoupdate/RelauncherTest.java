@@ -1,7 +1,9 @@
 package net.technicpack.autoupdate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
@@ -184,12 +186,39 @@ class RelauncherTest {
       Files.writeString(tmp.resolve(name), "stale");
     }
 
-    Relauncher.cleanupStaleOldLauncherPackages(new FakeFileSystem(tmp));
+    Relauncher.cleanupStaleOldLauncherPackages(new FakeFileSystem(tmp), null);
 
     // Targeted names gone; unrelated .old files are preserved (scoped cleanup).
-    org.junit.jupiter.api.Assertions.assertFalse(Files.exists(tmp.resolve("launcher.exe.old")));
-    org.junit.jupiter.api.Assertions.assertFalse(Files.exists(tmp.resolve("temp.jar.old")));
-    org.junit.jupiter.api.Assertions.assertTrue(Files.exists(tmp.resolve("unrelated.old")));
+    assertFalse(Files.exists(tmp.resolve("launcher.exe.old")));
+    assertFalse(Files.exists(tmp.resolve("temp.jar.old")));
+    assertTrue(Files.exists(tmp.resolve("unrelated.old")));
+  }
+
+  @Test
+  void cleanupStaleOldLauncherPackagesSweepsSiblingOfRunningBinary(@TempDir Path tmp)
+      throws IOException {
+    // Simulate the common case: launcher lives on Desktop, not under .technic.
+    Path desktop = Files.createDirectories(tmp.resolve("desktop"));
+    Path runningBinary = desktop.resolve("TechnicLauncher.exe");
+    Files.writeString(runningBinary, "current build");
+    Path stashedNextToBinary = desktop.resolve("TechnicLauncher.exe.old");
+    Files.writeString(stashedNextToBinary, "previous build");
+
+    // Unrelated file that should survive the cleanup.
+    Path unrelated = desktop.resolve("notes.old");
+    Files.writeString(unrelated, "users other file");
+
+    // Canonical root has its own stash that should also be swept.
+    Path root = Files.createDirectories(tmp.resolve("technic"));
+    Path rootStash = root.resolve("launcher.exe.old");
+    Files.writeString(rootStash, "old launcher");
+
+    Relauncher.cleanupStaleOldLauncherPackages(new FakeFileSystem(root), runningBinary);
+
+    assertFalse(Files.exists(stashedNextToBinary), "sibling .old of running binary not deleted");
+    assertFalse(Files.exists(rootStash), "canonical .technic stash not deleted");
+    assertTrue(Files.exists(runningBinary), "running binary must not be deleted");
+    assertTrue(Files.exists(unrelated), "unrelated .old must not be deleted");
   }
 
   private static final class FakeFileSystem

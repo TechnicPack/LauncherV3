@@ -9,6 +9,9 @@ is added at the top.
 
 ## [Unreleased]
 
+### Fixed
+- Launcher auto-updates now clean up the `launcher.exe.old` backup file that is left on disk when antivirus briefly blocks its removal, even for launchers installed outside `%APPDATA%\.technic\` (Desktop, Downloads, portable drives — the common case). Previously this cleanup only scanned `%APPDATA%\.technic\`, so most users could see a leftover `.old` file next to their launcher until they deleted it manually.
+
 ## [v4.0-1081] - 2026-04-23
 
 ### Fixed
