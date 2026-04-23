@@ -9,6 +9,8 @@ is added at the top.
 
 ## [Unreleased]
 
+## [v4.0-1083] - 2026-04-23
+
 ### Fixed
 - Launcher auto-updates now clean up the `launcher.exe.old` backup file that is left on disk when antivirus briefly blocks its removal, even for launchers installed outside `%APPDATA%\.technic\` (Desktop, Downloads, portable drives — the common case). Previously this cleanup only scanned `%APPDATA%\.technic\`, so most users could see a leftover `.old` file next to their launcher until they deleted it manually.
 - When an auto-update is blocked by antivirus, Windows Defender, or Windows' "Controlled Folder Access" (which protects Documents, Pictures, Videos, Music, and Favorites by default), the launcher now shows a specific error dialog that names the blocked file path and walks through how to fix it (whitelist the launcher, move it out of a protected folder, or re-download from technicpack.net). Previously these blocks showed the generic "unknown I/O error occurred" message with no actionable information.
