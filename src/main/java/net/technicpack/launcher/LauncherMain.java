@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -274,6 +275,14 @@ public class LauncherMain {
       Utils.getLogger().log(Level.SEVERE, "Failed to download launcher resources", e);
       Sentry.captureException(e);
       showStartupError(resources, resources.getString("updater.error.download", e.getMessage()));
+      System.exit(1);
+    } catch (AccessDeniedException e) {
+      // Windows Controlled Folder Access, strict AV, or folder permissions blocked the
+      // update write. The generic IOException handler would show the opaque "unknown I/O
+      // error" message; route here instead for actionable guidance about the specific path.
+      Utils.getLogger().log(Level.SEVERE, "Access denied while updating launcher", e);
+      Sentry.captureException(e);
+      showStartupError(resources, resources.getString("updater.error.accessdenied", e.getFile()));
       System.exit(1);
     } catch (IOException e) {
       // An unknown IO error occurred, show an error message and exit
