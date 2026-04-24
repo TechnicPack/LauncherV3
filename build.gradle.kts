@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.zstd.jni)
     implementation(libs.xz)
     implementation(libs.commons.codec)
+    implementation(libs.qrcodegen)
     implementation(libs.guava)
     implementation(libs.maven.artifact)
     implementation(libs.google.oauth.client)

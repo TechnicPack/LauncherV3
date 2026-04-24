@@ -25,8 +25,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileOwnerAttributeView;
+import com.google.api.client.util.Key;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.BooleanSupplier;
 import java.util.logging.Level;
 import net.technicpack.launchercore.exception.AuthenticationException;
 import net.technicpack.launchercore.exception.MicrosoftAuthException;
@@ -48,6 +52,10 @@ public class MicrosoftAuthenticator {
       "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
   private static final String AUTHORIZATION_SERVER_URL =
       "https://login.live.com/oauth20_authorize.srf?prompt=select_account&cobrandid=8058f65d-ce06-4c30-9559-473c9275a65d";
+  private static final String DEVICE_CODE_URL =
+      "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode";
+  private static final String DEVICE_CODE_GRANT_TYPE =
+      "urn:ietf:params:oauth:grant-type:device_code";
   private final DataStoreFactory dataStoreFactory;
   /**
    * Non-null when the on-disk credential store at this path could not be initialised (usually
@@ -204,9 +212,57 @@ public class MicrosoftAuthenticator {
 
   public MicrosoftUser loginNewUser() throws MicrosoftAuthException {
     final String tempCredentialId = UUID.randomUUID().toString();
-
     Credential credential = getOAuthCredential(tempCredentialId);
+    return completeMinecraftLogin(credential);
+  }
 
+  /**
+   * Device-code equivalent of {@link #loginNewUser()}: acquires a Microsoft OAuth token without
+   * the LocalServerReceiver / localhost-callback path. Useful when the user cannot or will not
+   * get the browser redirect back to the launcher (restrictive firewalls, corporate proxies,
+   * cancelled Windows Defender prompts, browser sign-in on a different device).
+   *
+   * @param listener receives the device-code challenge (user code + verification URL) as soon as
+   *     Microsoft hands it back, so the caller's UI can render it and the user can act on it.
+   * @param cancelled polled between polling iterations; if it ever returns true, the method
+   *     aborts with a MicrosoftAuthException.
+   */
+  public MicrosoftUser loginNewUserViaDeviceCode(
+      DeviceCodeListener listener, BooleanSupplier cancelled) throws MicrosoftAuthException {
+    final String tempCredentialId = UUID.randomUUID().toString();
+
+    DeviceCodeResponse challenge;
+    try {
+      challenge = requestDeviceCode();
+    } catch (IOException e) {
+      throw new MicrosoftAuthException(OAUTH, "Failed to start device code sign-in", e);
+    }
+
+    listener.onChallengeReady(
+        new DeviceCodeChallenge(
+            challenge.userCode,
+            challenge.verificationUri,
+            challenge.verificationUriComplete,
+            challenge.expiresIn));
+
+    Credential credential;
+    try {
+      credential =
+          pollDeviceCodeToken(
+              challenge.deviceCode,
+              Math.max(1, challenge.interval),
+              challenge.expiresIn,
+              tempCredentialId,
+              cancelled);
+    } catch (IOException e) {
+      throw new MicrosoftAuthException(OAUTH, "Device code polling failed", e);
+    }
+
+    return completeMinecraftLogin(credential);
+  }
+
+  /** Shared post-credential pipeline: Xbox auth, Minecraft entitlement check, profile, store. */
+  private MicrosoftUser completeMinecraftLogin(Credential credential) throws MicrosoftAuthException {
     XboxResponse xboxResponse = authenticateXbox(credential);
     XboxResponse xstsResponse = authenticateXSTS(xboxResponse.token);
     XboxMinecraftResponse xboxMinecraftResponse = authenticateMinecraftXbox(xstsResponse);
@@ -221,6 +277,189 @@ public class MicrosoftAuthenticator {
     updateCredentialStore(profile.id, credential);
 
     return new MicrosoftUser(xboxMinecraftResponse, profile);
+  }
+
+  private DeviceCodeResponse requestDeviceCode() throws IOException {
+    Map<String, String> params = new HashMap<>();
+    params.put("client_id", TECHNIC_CLIENT_ID);
+    params.put("scope", String.join(" ", SCOPES));
+
+    HttpRequest request =
+        REQUEST_FACTORY.buildPostRequest(
+            new GenericUrl(DEVICE_CODE_URL), new UrlEncodedContent(params));
+
+    HttpResponse response = request.execute();
+    try {
+      return response.parseAs(DeviceCodeResponse.class);
+    } finally {
+      try {
+        response.disconnect();
+      } catch (IOException ignored) {
+        // disconnect-time IO noise is not worth propagating
+      }
+    }
+  }
+
+  private Credential pollDeviceCodeToken(
+      String deviceCode,
+      int intervalSeconds,
+      long expiresInSeconds,
+      String tempCredentialId,
+      BooleanSupplier cancelled)
+      throws IOException, MicrosoftAuthException {
+    final long deadlineMillis = System.currentTimeMillis() + (expiresInSeconds * 1000L);
+    int currentInterval = intervalSeconds;
+
+    while (true) {
+      if (cancelled.getAsBoolean()) {
+        throw new MicrosoftAuthException(OAUTH, "Device code sign-in was cancelled.");
+      }
+      if (System.currentTimeMillis() > deadlineMillis) {
+        throw new MicrosoftAuthException(
+            OAUTH, "Device code expired before sign-in was completed.");
+      }
+
+      try {
+        Thread.sleep(currentInterval * 1000L);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        throw new MicrosoftAuthException(OAUTH, "Device code polling was interrupted.", e);
+      }
+
+      if (cancelled.getAsBoolean()) {
+        throw new MicrosoftAuthException(OAUTH, "Device code sign-in was cancelled.");
+      }
+
+      Map<String, String> params = new HashMap<>();
+      params.put("grant_type", DEVICE_CODE_GRANT_TYPE);
+      params.put("client_id", TECHNIC_CLIENT_ID);
+      params.put("device_code", deviceCode);
+
+      HttpRequest request =
+          REQUEST_FACTORY.buildPostRequest(
+              new GenericUrl(TOKEN_SERVER_URL), new UrlEncodedContent(params));
+      // 400 with error=authorization_pending is the expected steady state. Don't throw on it.
+      request.setThrowExceptionOnExecuteError(false);
+
+      HttpResponse response = request.execute();
+      DevicePollResponse parsed;
+      try {
+        parsed = response.parseAs(DevicePollResponse.class);
+      } finally {
+        try {
+          response.disconnect();
+        } catch (IOException ignored) {
+          // ignore
+        }
+      }
+
+      if (parsed.accessToken != null && !parsed.accessToken.isEmpty()) {
+        TokenResponse tokenResponse = new TokenResponse();
+        tokenResponse.setAccessToken(parsed.accessToken);
+        tokenResponse.setRefreshToken(parsed.refreshToken);
+        tokenResponse.setExpiresInSeconds(parsed.expiresIn);
+        tokenResponse.setTokenType(parsed.tokenType);
+        tokenResponse.setScope(parsed.scope);
+        try {
+          return buildFlow().createAndStoreCredential(tokenResponse, tempCredentialId);
+        } catch (IOException e) {
+          throw new MicrosoftAuthException(OAUTH, "Failed to store device code credential", e);
+        }
+      }
+
+      String error = parsed.error == null ? "" : parsed.error;
+      switch (error) {
+        case "authorization_pending":
+          // User has not yet completed sign-in. Keep polling at current interval.
+          break;
+        case "slow_down":
+          // Microsoft asked us to back off. Add 5s to the interval permanently per RFC 8628.
+          currentInterval += 5;
+          break;
+        case "authorization_declined":
+          throw new MicrosoftAuthException(OAUTH, "User declined the sign-in request.");
+        case "expired_token":
+          throw new MicrosoftAuthException(
+              OAUTH, "Device code expired before sign-in was completed.");
+        case "bad_verification_code":
+          throw new MicrosoftAuthException(
+              OAUTH, "Device code rejected: " + parsed.errorDescription);
+        default:
+          throw new MicrosoftAuthException(
+              OAUTH,
+              "Device code polling failed: "
+                  + error
+                  + (parsed.errorDescription == null ? "" : " " + parsed.errorDescription));
+      }
+    }
+  }
+
+  /** Public view of the device-code challenge passed to the UI via {@link DeviceCodeListener}. */
+  public static final class DeviceCodeChallenge {
+    public final String userCode;
+    public final String verificationUri;
+    /** May be null on endpoints that do not return a pre-filled URL (e.g. the consumer tenant). */
+    public final String verificationUriComplete;
+
+    public final long expiresInSeconds;
+
+    DeviceCodeChallenge(
+        String userCode,
+        String verificationUri,
+        String verificationUriComplete,
+        long expiresInSeconds) {
+      this.userCode = userCode;
+      this.verificationUri = verificationUri;
+      this.verificationUriComplete = verificationUriComplete;
+      this.expiresInSeconds = expiresInSeconds;
+    }
+  }
+
+  /** Called once by {@link #loginNewUserViaDeviceCode} as soon as the challenge is available. */
+  public interface DeviceCodeListener {
+    void onChallengeReady(DeviceCodeChallenge challenge);
+  }
+
+  /** JSON wire shape of the /devicecode response. */
+  public static class DeviceCodeResponse {
+    @Key("device_code")
+    String deviceCode;
+
+    @Key("user_code")
+    String userCode;
+
+    @Key("verification_uri")
+    String verificationUri;
+
+    @Key("verification_uri_complete")
+    String verificationUriComplete;
+
+    @Key("expires_in")
+    long expiresIn;
+
+    @Key int interval;
+  }
+
+  /** JSON wire shape of /token polling responses, covering both success and pending-error cases. */
+  public static class DevicePollResponse {
+    @Key("access_token")
+    String accessToken;
+
+    @Key("refresh_token")
+    String refreshToken;
+
+    @Key("expires_in")
+    Long expiresIn;
+
+    @Key("token_type")
+    String tokenType;
+
+    @Key String scope;
+
+    @Key String error;
+
+    @Key("error_description")
+    String errorDescription;
   }
 
   public void refreshSession(MicrosoftUser user) throws AuthenticationException {

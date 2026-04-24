@@ -22,6 +22,7 @@ slf4j = "2.0.17"
 sentry = "8.36.0"
 sentry-gradle-plugin = "6.2.0"
 annotations = "26.1.0"
+qrcodegen = "1.8.0"
 
 [libraries]
 joda-time = { module = "joda-time:joda-time", version.ref = "joda-time" }
@@ -48,6 +49,7 @@ slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 slf4j-nop = { module = "org.slf4j:slf4j-nop", version.ref = "slf4j" }
 sentry = { module = "io.sentry:sentry", version.ref = "sentry" }
 annotations = { module = "org.jetbrains:annotations", version.ref = "annotations" }
+qrcodegen = { module = "io.nayuki:qrcodegen", version.ref = "qrcodegen" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
 

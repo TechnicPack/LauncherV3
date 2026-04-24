@@ -637,12 +637,73 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
   private void newMicrosoftLogin() {
     setAccountSelectVisibility(false);
     setAddAccountVisibility(false);
-    // TODO: Setup info message
-    cancelMsa.setVisible(true);
 
-    if (msaLoginSwingWorker == null || msaLoginSwingWorker.isDone()) {
-      msaLoginSwingWorker = new MsaLoginSwingWorker(this);
-      msaLoginSwingWorker.execute();
+    // Hide the login window while the dialog is up so the user focuses on sign-in.
+    setVisible(false);
+
+    MicrosoftLoginDialog dialog =
+        new MicrosoftLoginDialog(null, userModel.getMicrosoftAuthenticator(), resources);
+    MicrosoftUser user;
+    try {
+      user = dialog.awaitResult();
+    } finally {
+      setVisible(true);
+      toFront();
+    }
+
+    if (user != null) {
+      userModel.addUser(user);
+      userModel.setCurrentUser(user);
+      setCurrentUser(user);
+    } else {
+      MicrosoftAuthException terminal = dialog.getTerminalException();
+      if (terminal != null) {
+        handleTerminalMicrosoftAuthException(terminal);
+      }
+    }
+
+    setAccountSelectVisibility(!userModel.getUsers().isEmpty());
+    setAddAccountVisibility(true);
+  }
+
+  private void handleTerminalMicrosoftAuthException(MicrosoftAuthException e) {
+    Utils.getLogger().log(Level.SEVERE, e.getMessage(), e);
+    switch (e.getType()) {
+      case UNDERAGE:
+        showMessageDialog(
+            this,
+            "Your Xbox account is underage and will need to be added to a Family to play this game.",
+            "Underage Error",
+            ERROR_MESSAGE);
+        break;
+      case NO_XBOX_ACCOUNT:
+        showMessageDialog(
+            this,
+            "You don't have an Xbox account associated with this Microsoft account.\n"
+                + "Please login at minecraft.net and set up an Xbox account, then try to login here again.",
+            "No Xbox Account",
+            ERROR_MESSAGE);
+        DesktopUtils.browseUrl("https://www.minecraft.net/login");
+        break;
+      case NO_PROFILE:
+        showMessageDialog(
+            this,
+            "You don't have a Minecraft profile set up yet.\nPlease open the Minecraft Launcher "
+                + "or go to minecraft.net and set up a Minecraft profile before attempting to "
+                + "use Technic Launcher.",
+            "No Minecraft Profile",
+            ERROR_MESSAGE);
+        DesktopUtils.browseUrl("https://www.minecraft.net/msaprofile/mygames/editprofile");
+        break;
+      case NO_MINECRAFT:
+        showMessageDialog(
+            this,
+            "This account has not purchased Minecraft Java Edition.",
+            "No Minecraft",
+            ERROR_MESSAGE);
+        break;
+      default:
+        showMessageDialog(this, e.getMessage(), "Add Microsoft Account Failed", ERROR_MESSAGE);
     }
   }
 }
