@@ -1193,21 +1193,25 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
   }
 
   private void updateDimensionsEnabled() {
-    if (windowSelect.getSelectedIndex() == 2) {
-      widthInput.setEnabled(true);
-      heightInput.setEnabled(true);
-      widthInput.setForeground(UIConstants.COLOR_BUTTON_BLUE);
-      heightInput.setForeground(UIConstants.COLOR_BUTTON_BLUE);
-      widthInput.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 8));
-      heightInput.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 8));
-    } else {
-      widthInput.setEnabled(false);
-      heightInput.setEnabled(false);
-      widthInput.setForeground(UIConstants.COLOR_GREY_TEXT);
-      heightInput.setForeground(UIConstants.COLOR_GREY_TEXT);
-      widthInput.setBorder(new RoundBorder(UIConstants.COLOR_GREY_TEXT, 1, 8));
-      heightInput.setBorder(new RoundBorder(UIConstants.COLOR_GREY_TEXT, 1, 8));
-    }
+    boolean custom = windowSelect.getSelectedIndex() == 2;
+    widthInput.setEnabled(custom);
+    heightInput.setEnabled(custom);
+    Color fg = custom ? UIConstants.COLOR_BUTTON_BLUE : UIConstants.COLOR_DIM_TEXT;
+    Color borderColor = custom ? UIConstants.COLOR_BUTTON_BLUE : UIConstants.COLOR_GREY_TEXT;
+    widthInput.setForeground(fg);
+    heightInput.setForeground(fg);
+    widthInput.setBorder(new RoundBorder(borderColor, 1, 8));
+    heightInput.setBorder(new RoundBorder(borderColor, 1, 8));
+  }
+
+  private JTextField buildDimensionsField() {
+    JTextField field = new JTextField(3);
+    field.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+    field.setForeground(UIConstants.COLOR_BUTTON_BLUE);
+    field.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
+    field.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 8));
+    field.setCaretColor(UIConstants.COLOR_BUTTON_BLUE);
+    return field;
   }
 
   private void setupVideoOptionsPanel(JPanel panel) {
@@ -1290,12 +1294,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             0,
             0));
 
-    widthInput = new JTextField(3);
-    widthInput.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-    widthInput.setForeground(UIConstants.COLOR_BLUE);
-    widthInput.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
-    widthInput.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 8));
-    widthInput.setCaretColor(UIConstants.COLOR_BLUE);
+    widthInput = buildDimensionsField();
     widthInput.setText("800");
     panel.add(
         widthInput,
@@ -1330,12 +1329,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             0,
             0));
 
-    heightInput = new JTextField(3);
-    heightInput.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
-    heightInput.setForeground(UIConstants.COLOR_BLUE);
-    heightInput.setBackground(UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
-    heightInput.setBorder(new RoundBorder(UIConstants.COLOR_BUTTON_BLUE, 1, 8));
-    heightInput.setCaretColor(UIConstants.COLOR_BLUE);
+    heightInput = buildDimensionsField();
     heightInput.setText("600");
     panel.add(
         heightInput,
