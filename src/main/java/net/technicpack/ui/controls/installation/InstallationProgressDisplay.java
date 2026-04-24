@@ -3,8 +3,9 @@ package net.technicpack.ui.controls.installation;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
-import java.awt.Graphics;
 import java.awt.GridLayout;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -104,8 +105,15 @@ public class InstallationProgressDisplay extends JPanel
   public void configureForSplash(int preferredWidth) {
     setComponentHeight(overallProgressBar, preferredWidth, 24);
     currentItemRow.setBorder(BorderFactory.createEmptyBorder(3, 0, 0, 0));
-    setComponentHeight(currentItemRow, preferredWidth, 14);
-    currentItemRow.setVisible(false);
+    // Row = 3 (top border) + 15 (label content) = 18, enough to fit descenders on the 11pt
+    // label font (getFont().getSize() = 11, measured height ~15).
+    setComponentHeight(currentItemRow, preferredWidth, 18);
+    // Keep the row visible from the start so pack() reserves its 18px. If the row were hidden
+    // during pack and later revealed during the update (e.g., when asset download starts), the
+    // splash frame would stay its packed size and the BorderLayout would compensate by
+    // shrinking CENTER — which clips the splash image top/bottom. Showing it now means the
+    // mini progress bar sits empty (0%, blank label) until something drives it.
+    currentItemRow.setVisible(true);
     currentItemCaptionLabel.setVisible(false);
     currentItemCaptionLabel.setPreferredSize(new Dimension(0, 0));
     currentItemCenter.removeAll();
@@ -113,8 +121,8 @@ public class InstallationProgressDisplay extends JPanel
     currentItemProgressBar.setMinimumSize(new Dimension(84, 8));
     currentItemProgressBar.setPreferredSize(new Dimension(84, 8));
     currentItemProgressBar.setMaximumSize(new Dimension(84, 8));
-    currentItemNameLabel.setMinimumSize(new Dimension(0, 12));
-    currentItemNameLabel.setPreferredSize(new Dimension(0, 12));
+    currentItemNameLabel.setMinimumSize(new Dimension(0, 15));
+    currentItemNameLabel.setPreferredSize(new Dimension(0, 15));
     currentItemCenter.add(currentItemProgressBar, BorderLayout.WEST);
     currentItemCenter.add(currentItemNameLabel, BorderLayout.CENTER);
     revalidate();
@@ -214,15 +222,24 @@ public class InstallationProgressDisplay extends JPanel
     private String fullText;
 
     private EllipsizedLabel(String text) {
-      super(text);
-      this.fullText = text;
+      super(text == null ? "" : text);
+      this.fullText = text == null ? "" : text;
+      // Update the ellipsized text whenever the label is resized — this is what replaces the
+      // previous paintComponent-time setText dance that caused a PropertyChange feedback loop.
+      addComponentListener(
+          new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+              updateDisplayText();
+            }
+          });
     }
 
     @Override
     public void setText(String text) {
       fullText = text == null ? "" : text;
       setToolTipText(fullText.isEmpty() ? null : fullText);
-      super.setText(fullText);
+      updateDisplayText();
     }
 
     @Override
@@ -230,18 +247,28 @@ public class InstallationProgressDisplay extends JPanel
       return fullText;
     }
 
-    @Override
-    protected void paintComponent(Graphics graphics) {
-      String displayText = fitText(fullText, getFontMetrics(getFont()), getWidth());
-      super.setText(displayText);
-      super.paintComponent(graphics);
-      super.setText(fullText);
+    private void updateDisplayText() {
+      int width = getWidth();
+      if (width <= 0 || getFont() == null) {
+        super.setText(fullText);
+        return;
+      }
+      super.setText(fitText(fullText, getFontMetrics(getFont()), width));
     }
 
     @Override
     public Dimension getPreferredSize() {
+      // Base the preferred size on the full untruncated text, capped at MAX_PREFERRED_WIDTH.
+      // Not on the currently-displayed (possibly truncated) text, because that would cause
+      // layout to collapse the label once the ellipsized version fits, then re-expand, etc.
+      FontMetrics metrics = getFontMetrics(getFont());
       Dimension preferredSize = super.getPreferredSize();
-      preferredSize.width = Math.min(preferredSize.width, MAX_PREFERRED_WIDTH);
+      if (metrics != null && fullText != null) {
+        int fullWidth = metrics.stringWidth(fullText);
+        preferredSize.width = Math.min(MAX_PREFERRED_WIDTH, fullWidth);
+      } else {
+        preferredSize.width = Math.min(preferredSize.width, MAX_PREFERRED_WIDTH);
+      }
       return preferredSize;
     }
 

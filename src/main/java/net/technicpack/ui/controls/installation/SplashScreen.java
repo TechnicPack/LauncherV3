@@ -47,17 +47,15 @@ public class SplashScreen extends JFrame {
     g.drawImage(img, 0, 0, image.getIconWidth(), image.getIconHeight(), null);
     g.dispose();
 
-    // Draw the image
-    JButton background = new JButton(new ImageIcon(alphaImage));
-    background.setRolloverEnabled(true);
-    background.setRolloverIcon(background.getIcon());
-    background.setSelectedIcon(background.getIcon());
-    background.setDisabledIcon(background.getIcon());
-    background.setPressedIcon(background.getIcon());
-    background.setFocusable(false);
-    background.setContentAreaFilled(false);
-    background.setBorderPainted(false);
-    background.setOpaque(false);
+    // Draw the image. JLabel rather than JButton because JButton fires full-component
+    // repaints on mouse enter/exit (rollover) and press/release, which on a translucent
+    // JFrame show as a visible flicker as the buffer gets redrawn. JLabel installs no
+    // mouse listeners and stays visually stable under any cursor interaction.
+    // Explicit sizing ensures pack() gets exactly the icon dimensions.
+    JLabel background = new JLabel(new ImageIcon(alphaImage));
+    Dimension iconSize = new Dimension(image.getIconWidth(), image.getIconHeight());
+    background.setMinimumSize(iconSize);
+    background.setPreferredSize(iconSize);
     container.add(background, BorderLayout.CENTER);
 
     if (barHeight > 0) {
@@ -96,9 +94,29 @@ public class SplashScreen extends JFrame {
   }
 
   static JPanel createProgressFooter(InstallationProgressDisplay progressDisplay) {
-    JPanel footer = new JPanel(new BorderLayout());
-    footer.setOpaque(true);
-    footer.setBackground(Color.BLACK);
+    // Semi-transparent dark backdrop: reads as a soft ribbon that gives white progress text a
+    // reliable contrast surface without the hard black-slab look of a fully-opaque footer. The
+    // RGB matches the launcher palette's central-back colour (25, 30, 34) but it's hard-coded
+    // here so this UI-controls module doesn't take a reverse dependency on the launcher layer.
+    JPanel footer =
+        new JPanel(new BorderLayout()) {
+          @Override
+          protected void paintComponent(Graphics g) {
+            Graphics2D g2d = (Graphics2D) g.create();
+            try {
+              // AlphaComposite.SRC (not SRC_OVER) overwrites destination pixels instead of
+              // blending with them, which is required on a translucent JFrame. SRC_OVER
+              // compounds with stale buffer alpha across repaints and causes visible flicker.
+              g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC, 0.75f));
+              g2d.setColor(new Color(25, 30, 34));
+              g2d.fillRect(0, 0, getWidth(), getHeight());
+            } finally {
+              g2d.dispose();
+            }
+            super.paintComponent(g);
+          }
+        };
+    footer.setOpaque(false);
     footer.setBorder(
         new EmptyBorder(
             4, PROGRESS_HORIZONTAL_PADDING, PROGRESS_BOTTOM_PADDING, PROGRESS_HORIZONTAL_PADDING));

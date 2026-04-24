@@ -14,6 +14,7 @@ is added at the top.
 
 ### Fixed
 - Disabled controls across the launcher now visibly render as disabled instead of looking identical to enabled ones. Styled buttons fade to reduced opacity, and the custom Width/Height fields in Options > Video now use a muted gray palette when the Default/Fullscreen window size is selected (the saved values stay legible, but the field clearly reads as non-interactive). Previously these controls ignored disabled state when drawing themselves, so any button temporarily locked (e.g., while an action was loading) or dimensions fields locked behind a non-Custom window mode gave no visual feedback about their state.
+- The self-updater's progress bar no longer sits in a hard black box on top of the splash art. The bar now renders over a soft semi-transparent dark ribbon that blends with the icon above and keeps the white progress text legible over any desktop behind the translucent splash frame. Adjacent polish: the splash icon no longer flickers on cursor movement or clicks, the current-item label's descenders (g, p, y, j) are no longer clipped, and the splash frame is sized up-front to avoid clipping the icon when the asset-download phase reveals its secondary progress row.
 
 ## [v4.0-1084] - 2026-04-23
 
