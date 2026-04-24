@@ -107,9 +107,13 @@ public class MicrosoftLoginDialog extends JDialog {
   private JTextField deviceCodeField;
   private RoundedButton copyCodeButton;
   private RoundedButton openBrowserButton;
+  private RoundedButton getNewCodeButton;
   private JProgressBar expiryBar;
   private JLabel statusLabel;
   private RoundedButton cancelButton;
+
+  /** True while the current device code has expired and the user hasn't requested a new one. */
+  private volatile boolean deviceCodeExpired = false;
 
   /** Unix-millis deadline by which the device code expires, set when the challenge arrives. */
   private volatile long expiryDeadlineMillis;
@@ -246,8 +250,12 @@ public class MicrosoftLoginDialog extends JDialog {
     openBrowserButton = styledButton(resources.getString("msa.dialog.open"), 13);
     openBrowserButton.setEnabled(false);
     openBrowserButton.addActionListener(e -> openVerificationUrl());
+    getNewCodeButton = styledButton(resources.getString("msa.dialog.getnewcode"), 13);
+    getNewCodeButton.setVisible(false);
+    getNewCodeButton.addActionListener(e -> requestNewDeviceCode());
     codeButtons.add(copyCodeButton);
     codeButtons.add(openBrowserButton);
+    codeButtons.add(getNewCodeButton);
     content.add(codeButtons, gbc);
 
     gbc.gridy++;
@@ -340,6 +348,8 @@ public class MicrosoftLoginDialog extends JDialog {
           deviceCodeField.setText(c.userCode);
           copyCodeButton.setEnabled(true);
           openBrowserButton.setEnabled(true);
+          deviceCodeExpired = false;
+          getNewCodeButton.setVisible(false);
           if (qrImage != null) {
             qrLabel.setIcon(new ImageIcon(qrImage));
           }
@@ -413,6 +423,10 @@ public class MicrosoftLoginDialog extends JDialog {
       if (expiryTimer != null) {
         expiryTimer.stop();
       }
+      deviceCodeExpired = true;
+      copyCodeButton.setEnabled(false);
+      openBrowserButton.setEnabled(false);
+      getNewCodeButton.setVisible(true);
       return;
     }
     int remainingSeconds = (int) Math.ceil(remainingMillis / 1000.0);
@@ -441,6 +455,21 @@ public class MicrosoftLoginDialog extends JDialog {
       return;
     }
     DesktopUtils.browseUrl(challenge.verificationUri);
+  }
+
+  private void requestNewDeviceCode() {
+    SwingWorker<MicrosoftUser, Void> old = deviceCodeFlow.get();
+    if (old != null) {
+      old.cancel(true);
+    }
+    deviceCodeField.setText(resources.getString("msa.dialog.fetching"));
+    qrLabel.setIcon(null);
+    expiryBar.setVisible(false);
+    copyCodeButton.setEnabled(false);
+    openBrowserButton.setEnabled(false);
+    getNewCodeButton.setVisible(false);
+    statusLabel.setText(" ");
+    startDeviceCodeFlow();
   }
 
   // --- Localhost flow -----------------------------------------------------------------------
@@ -484,12 +513,18 @@ public class MicrosoftLoginDialog extends JDialog {
         SwingUtilities.invokeLater(this::dispose);
       }
     } catch (Exception e) {
+      if (flow.isCancelled()) {
+        // Worker was cancelled via SwingWorker.cancel(true). Happens when the user clicks
+        // "Get a new code" (device-code flow) or in paths where cancelOtherFlows runs without
+        // cancelled.get() being set yet. Not an error; nothing to log or surface.
+        return;
+      }
       Throwable cause = e.getCause() != null ? e.getCause() : e;
       Utils.getLogger().log(Level.WARNING, label + " sign-in flow failed", cause);
       // Don't tear the dialog down on a single-flow failure; let the other flow keep running.
       // Keep the message in English for now (matches msa.update error strings elsewhere).
       if (cause instanceof MicrosoftAuthException) {
-        SwingUtilities.invokeLater(() -> handleAuthException((MicrosoftAuthException) cause, label));
+        SwingUtilities.invokeLater(() -> handleAuthException((MicrosoftAuthException) cause, label, flow));
       } else {
         SwingUtilities.invokeLater(
             () -> statusLabel.setText(label + " sign-in failed: " + cause.getMessage()));
@@ -501,7 +536,14 @@ public class MicrosoftLoginDialog extends JDialog {
     }
   }
 
-  private void handleAuthException(MicrosoftAuthException e, String label) {
+  private void handleAuthException(
+      MicrosoftAuthException e, String label, SwingWorker<MicrosoftUser, Void> flow) {
+    // A previous device-code worker (cancelled by "Get a new code") can finish late and
+    // route its interruption/expiry here after a fresh worker has already taken over.
+    // Ignore those stale reports so they don't overwrite the new worker's UI state.
+    if ("device code".equals(label) && deviceCodeFlow.get() != flow) {
+      return;
+    }
     // The terminal error classes (NO_MINECRAFT, UNDERAGE, etc.) should tear down the dialog;
     // transient ones (OAUTH polling failure, REQUEST) let the user try the other flow.
     switch (e.getType()) {
@@ -516,6 +558,13 @@ public class MicrosoftLoginDialog extends JDialog {
         dispose();
         break;
       default:
+        // If the UI timer already surfaced the localized "expired" message for this flow,
+        // don't overwrite it with the worker's English exception text.
+        if ("device code".equals(label)
+            && deviceCodeExpired
+            && e.getType() == MicrosoftAuthException.ExceptionType.OAUTH) {
+          return;
+        }
         // Transient: keep dialog open so the user can try the other flow or cancel.
         statusLabel.setText(label + ": " + e.getMessage());
     }
