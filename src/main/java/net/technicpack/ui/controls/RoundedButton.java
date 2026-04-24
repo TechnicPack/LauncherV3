@@ -109,15 +109,27 @@ public class RoundedButton extends JButton implements MouseListener {
     g2d.setRenderingHint(
         RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
+    boolean enabled = isEnabled();
+    Composite originalComposite = g2d.getComposite();
+    if (!enabled) {
+      // Render the entire button at reduced opacity. On a dark dialog background this
+      // blends bright colors (e.g. COLOR_BUTTON_BLUE) substantially toward the surface,
+      // giving an unambiguous "not interactive" look without needing per-caller palette
+      // plumbing. Also bypasses hover/click branches so stale hover state can't leak.
+      g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.35f));
+    }
+
     if (shouldShowBackground()) {
-      if (isClicked) g2d.setColor(getClickBackground());
+      if (!enabled) g2d.setColor(getBackground());
+      else if (isClicked) g2d.setColor(getClickBackground());
       else if (isHovered) g2d.setColor(getHoverBackground());
       else g2d.setColor(getBackground());
 
       g2d.fillRoundRect(1, 1, getWidth() - 3, getHeight() - 2, getHeight(), getHeight());
     }
 
-    if (isClicked) g2d.setColor(getClickForeground());
+    if (!enabled) g2d.setColor(getForeground());
+    else if (isClicked) g2d.setColor(getClickForeground());
     else if (isHovered) g2d.setColor(getHoverForeground());
     else g2d.setColor(getForeground());
 
@@ -150,6 +162,8 @@ public class RoundedButton extends JButton implements MouseListener {
       currentIcon.paintIcon(
           this, g2d, (getWidth() - width) / 2, (getHeight() - currentIcon.getIconHeight()) / 2);
     }
+
+    g2d.setComposite(originalComposite);
   }
 
   @Override
@@ -157,6 +171,7 @@ public class RoundedButton extends JButton implements MouseListener {
 
   @Override
   public void mousePressed(MouseEvent e) {
+    if (!isEnabled()) return;
     isClicked = true;
   }
 
@@ -167,6 +182,7 @@ public class RoundedButton extends JButton implements MouseListener {
 
   @Override
   public void mouseEntered(MouseEvent e) {
+    if (!isEnabled()) return;
     isHovered = true;
   }
 
@@ -174,4 +190,5 @@ public class RoundedButton extends JButton implements MouseListener {
   public void mouseExited(MouseEvent e) {
     isHovered = false;
   }
+
 }
