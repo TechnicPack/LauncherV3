@@ -39,6 +39,7 @@ import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import net.technicpack.autoupdate.IBuildNumber;
+import net.technicpack.launcher.BuildYear;
 import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
@@ -766,7 +767,10 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     aboutText +=
         "<p>"
             + resources.getString(
-                "launcheroptions.about.copyright", buildNumber.getBuildNumber(), linkText)
+                "launcheroptions.about.copyright",
+                buildNumber.getBuildNumber(),
+                linkText,
+                BuildYear.read(resources))
             + "</p>";
     aboutText += "<p>" + resources.getString("launcheroptions.about.romainguy") + "</p>";
     aboutText += "<p>" + resources.getString("launcheroptions.about.summary") + "</p>";

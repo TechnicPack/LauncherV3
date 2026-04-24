@@ -35,6 +35,7 @@ class LauncherPackagingPlugin : Plugin<Project> {
             pluginManager.apply("edu.sc.seis.launch4j")
 
             val buildNumber = providers.environmentVariable("BUILD_NUMBER").orElse("0").get()
+            val buildYear = java.time.Year.now().toString()
 
             extensions.configure<JavaApplication> {
                 mainClass.set("net.technicpack.launcher.LauncherMain")
@@ -52,7 +53,7 @@ class LauncherPackagingPlugin : Plugin<Project> {
 
                 from(layout.projectDirectory.dir("src/main/resources")) {
                     include("**/*")
-                    exclude("app/**", "exe/**", "version")
+                    exclude("app/**", "exe/**", "version", "buildyear")
                     into("net/technicpack/launcher/resources")
                 }
 
@@ -62,10 +63,10 @@ class LauncherPackagingPlugin : Plugin<Project> {
                 }
 
                 from(layout.projectDirectory.dir("src/main/resources")) {
-                    include("version")
+                    include("version", "buildyear")
                     into("net/technicpack/launcher/resources")
                     filteringCharset = StandardCharsets.UTF_8.name()
-                    expand(mapOf("buildNumber" to buildNumber))
+                    expand(mapOf("buildNumber" to buildNumber, "buildYear" to buildYear))
                 }
             }
 
