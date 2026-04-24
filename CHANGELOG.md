@@ -10,7 +10,10 @@ is added at the top.
 ## [Unreleased]
 
 ### Added
-- Adding a Microsoft account now opens a dialog with two sign-in options at once: the existing browser-based sign-in, and a short device code with a QR code you can scan with your phone (or any other device with a camera) to finish signing in there. Either option signs you in; whichever finishes first wins. The device code path avoids the localhost callback entirely and works in environments where the browser-based sign-in has historically hung or been blocked (antivirus intercepting localhost, Windows Firewall prompts dismissed, corporate proxies, some OneDrive configurations).
+- Adding a Microsoft account now opens a dialog with two sign-in options at once: the existing browser-based sign-in, and a short device code with a QR code you can scan with your phone (or any other device with a camera) to finish signing in there. Either option signs you in; whichever finishes first wins. The device code path avoids the localhost callback entirely and works in environments where the browser-based sign-in has historically hung or been blocked (antivirus intercepting localhost, Windows Firewall prompts dismissed, corporate proxies, some OneDrive configurations). The dialog shows a countdown for the device code's 15-minute window; if it expires before you finish, a "Get a new code" button fetches a fresh code without having to close and reopen the dialog.
+
+### Fixed
+- Disabled buttons across the launcher now visibly render as disabled (reduced opacity) instead of looking identical to enabled buttons. Previously the launcher's styled buttons ignored disabled state when drawing themselves, so any button that had been temporarily locked (e.g., while an action was loading) gave no visual feedback that clicks would do nothing.
 
 ## [v4.0-1084] - 2026-04-23
 
