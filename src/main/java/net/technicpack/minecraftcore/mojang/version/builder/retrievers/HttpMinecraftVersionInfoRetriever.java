@@ -25,6 +25,7 @@ import net.technicpack.launchercore.install.verifiers.ValidJsonFileVerifier;
 import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.builder.MinecraftVersionInfoRetriever;
+import net.technicpack.utilslib.Urls;
 import net.technicpack.utilslib.Utils;
 
 public class HttpMinecraftVersionInfoRetriever implements MinecraftVersionInfoRetriever {
@@ -39,7 +40,8 @@ public class HttpMinecraftVersionInfoRetriever implements MinecraftVersionInfoRe
 
   @Override
   public void retrieveVersion(File target, String key) throws InterruptedException, IOException {
-    String url = baseUrl + key + "/" + key + ".json";
+    String encodedKey = Urls.pathSegment(key);
+    String url = baseUrl + encodedKey + "/" + encodedKey + ".json";
     Utils.downloadFile(
         url,
         target.getName(),

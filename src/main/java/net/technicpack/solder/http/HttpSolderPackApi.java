@@ -25,6 +25,7 @@ import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.solder.ISolderPackApi;
 import net.technicpack.solder.io.SolderPackInfo;
+import net.technicpack.utilslib.Urls;
 
 public class HttpSolderPackApi implements ISolderPackApi {
 
@@ -69,7 +70,10 @@ public class HttpSolderPackApi implements ISolderPackApi {
 
   @Override
   public SolderPackInfo getPackInfo() throws RestfulAPIException {
-    String packUrl = String.format("%s/modpack/%s?cid=%s", baseUrl, modpackSlug, clientId);
+    String packUrl =
+        String.format(
+            "%s/modpack/%s?cid=%s",
+            baseUrl, Urls.pathSegment(modpackSlug), Urls.formParameter(clientId));
     SolderPackInfo info = RestObject.getRestObject(SolderPackInfo.class, packUrl);
     info.setSolder(this);
     return info;
@@ -77,7 +81,13 @@ public class HttpSolderPackApi implements ISolderPackApi {
 
   @Override
   public Modpack getPackBuild(String build) throws BuildInaccessibleException {
-    String url = String.format("%s/modpack/%s/%s?cid=%s", baseUrl, modpackSlug, build, clientId);
+    String url =
+        String.format(
+            "%s/modpack/%s/%s?cid=%s",
+            baseUrl,
+            Urls.pathSegment(modpackSlug),
+            Urls.pathSegment(build),
+            Urls.formParameter(clientId));
 
     try {
       return RestObject.getRestObject(Modpack.class, url);

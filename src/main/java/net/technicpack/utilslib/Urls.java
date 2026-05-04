@@ -2,14 +2,46 @@ package net.technicpack.utilslib;
 
 import io.sentry.Sentry;
 import io.sentry.SentryLevel;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 public final class Urls {
   private Urls() {
     throw new IllegalStateException("Utility class");
+  }
+
+  /**
+   * Percent-encode a string for inclusion in a URI path segment. Java's URLEncoder produces
+   * application/x-www-form-urlencoded output (space encoded as {@code +}), which is the wrong
+   * encoding for a path segment (where {@code +} is the literal plus character per RFC 3986).
+   * Re-mapping {@code +} to {@code %20} after URLEncoder converts form-encoding to path-encoding
+   * unambiguously: any literal {@code +} in the input was already encoded as {@code %2B} by
+   * URLEncoder, so the only {@code +} characters left in the output came from spaces.
+   */
+  public static String pathSegment(String input) {
+    try {
+      return URLEncoder.encode(input, StandardCharsets.UTF_8.name()).replace("+", "%20");
+    } catch (UnsupportedEncodingException impossible) {
+      throw new AssertionError("UTF-8 must be supported", impossible);
+    }
+  }
+
+  /**
+   * Percent-encode a string for inclusion as an {@code application/x-www-form-urlencoded} query
+   * parameter value (so a space becomes {@code +}). Matches Java's {@link URLEncoder} semantics but
+   * hides the {@link UnsupportedEncodingException} that's unreachable for UTF-8.
+   */
+  public static String formParameter(String input) {
+    try {
+      return URLEncoder.encode(input, StandardCharsets.UTF_8.name());
+    } catch (UnsupportedEncodingException impossible) {
+      throw new AssertionError("UTF-8 must be supported", impossible);
+    }
   }
 
   /**

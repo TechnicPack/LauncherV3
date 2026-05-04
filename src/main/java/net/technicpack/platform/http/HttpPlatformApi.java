@@ -24,6 +24,7 @@ import net.technicpack.platform.io.NewsData;
 import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.rest.RestObject;
 import net.technicpack.rest.RestfulAPIException;
+import net.technicpack.utilslib.Urls;
 import net.technicpack.utilslib.Utils;
 
 public class HttpPlatformApi implements IPlatformApi {
@@ -36,7 +37,7 @@ public class HttpPlatformApi implements IPlatformApi {
   }
 
   public String getPlatformUri(String packSlug) {
-    return platformUrl + "modpack/" + packSlug + "?build=" + launcherBuild;
+    return platformUrl + "modpack/" + Urls.pathSegment(packSlug) + "?build=" + launcherBuild;
   }
 
   @Override
@@ -52,13 +53,19 @@ public class HttpPlatformApi implements IPlatformApi {
 
   @Override
   public void incrementPackRuns(String packSlug) {
-    String url = platformUrl + "modpack/" + packSlug + "/stat/run?build=" + launcherBuild;
+    String url =
+        platformUrl + "modpack/" + Urls.pathSegment(packSlug) + "/stat/run?build=" + launcherBuild;
     Utils.pingHttpURL(url);
   }
 
   @Override
   public void incrementPackInstalls(String packSlug) {
-    String url = platformUrl + "modpack/" + packSlug + "/stat/install?build=" + launcherBuild;
+    String url =
+        platformUrl
+            + "modpack/"
+            + Urls.pathSegment(packSlug)
+            + "/stat/install?build="
+            + launcherBuild;
     Utils.pingHttpURL(url);
   }
 

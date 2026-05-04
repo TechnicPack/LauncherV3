@@ -23,6 +23,7 @@ import net.technicpack.autoupdate.IUpdateStream;
 import net.technicpack.autoupdate.io.StreamVersion;
 import net.technicpack.rest.RestObject;
 import net.technicpack.rest.RestfulAPIException;
+import net.technicpack.utilslib.Urls;
 
 public class HttpUpdateStream implements IUpdateStream {
   private String baseUrl;
@@ -33,6 +34,7 @@ public class HttpUpdateStream implements IUpdateStream {
 
   @Override
   public StreamVersion getStreamVersion(String stream) throws RestfulAPIException {
-    return RestObject.getRestObject(StreamVersion.class, baseUrl + "version/" + stream);
+    return RestObject.getRestObject(
+        StreamVersion.class, baseUrl + "version/" + Urls.pathSegment(stream));
   }
 }
