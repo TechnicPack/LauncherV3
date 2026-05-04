@@ -258,7 +258,87 @@ class JavaVersionComparatorTest {
   }
 
   @Test
-  void getMajorThrowsOnInvalid() {
-    assertThrows(IllegalArgumentException.class, () -> comparator.getMajor("8u51"));
+  void getMajorThrowsOnGarbage() {
+    // "8u51" used to be the canonical invalid input here, but Mojang's jre-legacy publishes
+    // exactly that shape ("8u202") so it's now a recognized format. Use input with no valid
+    // numeric prefix instead.
+    assertThrows(IllegalArgumentException.class, () -> comparator.getMajor("not-a-version"));
+  }
+
+  // --- Mojang manifest formats (java-runtime-* and jre-legacy) ---
+
+  @Test
+  void getMajorParsesLegacyUForm() {
+    assertEquals(8, comparator.getMajor("8u202"));
+  }
+
+  @Test
+  void getMajorParsesLegacyUFormWithSuffix() {
+    assertEquals(8, comparator.getMajor("8u51-cacert462b08"));
+  }
+
+  @Test
+  void getMajorParsesFiveComponent() {
+    assertEquals(16, comparator.getMajor("16.0.1.9.1"));
+  }
+
+  @Test
+  void getMajorParsesFiveComponentWithBuild() {
+    assertEquals(16, comparator.getMajor("16.0.1.9.1_3"));
+  }
+
+  @Test
+  void getMajorParsesBetaFiveComponent() {
+    assertEquals(17, comparator.getMajor("17.0.1.12.1"));
+  }
+
+  @Test
+  void getMajorParsesGammaFourComponent() {
+    assertEquals(17, comparator.getMajor("17.0.8.1"));
+  }
+
+  @Test
+  void fiveComponentBuildHigherThanBare() {
+    // "16.0.1.9.1_3" is build revision 3 of "16.0.1.9.1", so it orders higher.
+    assertTrue(comparator.compare("16.0.1.9.1_3", "16.0.1.9.1") > 0);
+  }
+
+  @Test
+  void fiveComponentHigherThanThreeComponentSameMajor() {
+    assertTrue(comparator.compare("16.0.1.9.1", "16.0.1") > 0);
+  }
+
+  @Test
+  void fiveComponentLexicographic() {
+    // Lex compare: 17.0.1.12.1 vs 17.0.8.1 differ first at index 2 (1 < 8), so the first is lower.
+    assertTrue(comparator.compare("17.0.1.12.1", "17.0.8.1") < 0);
+  }
+
+  @Test
+  void legacyUEqualsLegacyDotted() {
+    // "8u202" and "1.8.0_202" both normalize to [8,0,202].
+    assertEquals(0, comparator.compare("8u202", "1.8.0_202"));
+  }
+
+  @Test
+  void legacyULowerThanHigherUpdate() {
+    assertTrue(comparator.compare("8u202", "1.8.0_221") < 0);
+  }
+
+  @Test
+  void legacyUSuffixIgnored() {
+    // Trailing "-cacert462b08" is metadata, parallel to "-ea" on the dotted form.
+    assertEquals(0, comparator.compare("8u51-cacert462b08", "8u51"));
+  }
+
+  @Test
+  void fiveComponentLowerMajorThanModern() {
+    assertTrue(comparator.compare("16.0.1.9.1", "17") < 0);
+  }
+
+  @Test
+  void threeComponentOrderingStillWorks() {
+    // Sanity check: pre-existing forms still compare correctly after parser change.
+    assertTrue(comparator.compare("21.0.7", "17.0.15") > 0);
   }
 }

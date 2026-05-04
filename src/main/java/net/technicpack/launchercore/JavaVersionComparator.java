@@ -6,7 +6,9 @@ import java.util.regex.Pattern;
 
 /**
  * A comparator for Java version strings, supporting both legacy and modern formats. It can compare
- * versions like "1.8.0_221", "11.0.10", "17", "21.0.1+12", "22-ea+1", etc.
+ * versions like "1.8.0_221", "11.0.10", "17", "21.0.1+12", "22-ea+1", "8u202", "16.0.1.9.1",
+ * "16.0.1.9.1_3", etc. The 8uNNN form is normalized to [major, 0, update] so it sorts identically
+ * to "1.8.0_NNN"; modern dotted forms are kept variable-length and compared lexicographically.
  */
 public class JavaVersionComparator implements Comparator<String> {
 
@@ -14,9 +16,14 @@ public class JavaVersionComparator implements Comparator<String> {
   private static final Pattern LEGACY_PATTERN =
       Pattern.compile("^1\\.(\\d+)(?:\\.0(?:_(\\d+))?)?(?:[-+].*)?$");
 
-  // Modern: <major>(.<minor>(.<security>(.<patch>)?)?)? (optionally with -ea, -open, +12, etc)
+  // Legacy <major>u<update> form (e.g. "8u202", "8u51-cacert462b08") used by Mojang's jre-legacy.
+  private static final Pattern LEGACY_U_PATTERN =
+      Pattern.compile("^(\\d+)u(\\d+)(?:[-+].*)?$");
+
+  // Modern: <major>(.<n>)* with optional _<build> suffix (Microsoft's java-runtime-alpha
+  // publishes "16.0.1.9.1" and "16.0.1.9.1_3"). Trailing -ea/-open/+12/etc still ignored.
   private static final Pattern NEW_PATTERN =
-      Pattern.compile("^(\\d+)(?:\\.(\\d+))?(?:\\.(\\d+))?(?:\\.(\\d+))?(?:[-+].*)?$");
+      Pattern.compile("^(\\d+(?:\\.\\d+)*)(?:_(\\d+))?(?:[-+].*)?$");
 
   /**
    * Returns the major Java version parsed from a version string.
@@ -57,12 +64,24 @@ public class JavaVersionComparator implements Comparator<String> {
       return new int[] {major, 0, update};
     }
 
+    Matcher legacyU = LEGACY_U_PATTERN.matcher(version);
+    if (legacyU.matches()) {
+      int major = Integer.parseInt(legacyU.group(1));
+      int update = Integer.parseInt(legacyU.group(2));
+      // Normalize: 8u202 -> [8,0,202], parallel to 1.8.0_202
+      return new int[] {major, 0, update};
+    }
+
     Matcher modern = NEW_PATTERN.matcher(version);
     if (modern.matches()) {
-      int[] parts = new int[4];
-      for (int i = 1; i <= 4; i++) {
-        String group = modern.group(i);
-        parts[i - 1] = (group != null) ? Integer.parseInt(group) : 0;
+      String[] dotParts = modern.group(1).split("\\.");
+      String build = modern.group(2);
+      int[] parts = new int[dotParts.length + (build != null ? 1 : 0)];
+      for (int i = 0; i < dotParts.length; i++) {
+        parts[i] = Integer.parseInt(dotParts[i]);
+      }
+      if (build != null) {
+        parts[dotParts.length] = Integer.parseInt(build);
       }
       return parts;
     }
