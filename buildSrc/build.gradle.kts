@@ -8,7 +8,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.gradleup.shadow:shadow-gradle-plugin:9.4.0")
+    implementation("com.gradleup.shadow:shadow-gradle-plugin:9.4.1")
     implementation("edu.sc.seis.launch4j:launch4j:4.0.0")
 
     testImplementation("org.junit.jupiter:junit-jupiter:6.0.3")

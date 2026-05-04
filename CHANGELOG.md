@@ -15,6 +15,7 @@ is added at the top.
 ### Changed
 - Bumped bundled third-party libraries to current upstream releases: Gson 2.13.2 to 2.14.0, Guava 33.5.0 to 33.6.0, Apache Commons IO 2.21.0 to 2.22.0, Apache Commons Codec 1.21.0 to 1.22.0, Joda-Time 2.14.1 to 2.14.2 (latest tzdata), Maven Artifact 3.9.14 to 3.9.15, zstd-jni 1.5.7-7 to 1.5.7-8. Bug-fix and timezone-data refreshes only; no behaviour changes for end users.
 - Bumped the Sentry crash-reporting SDK from 8.36.0 to 8.40.0 and its companion Gradle plugin from 6.2.0 to 6.6.0. Bundled bug fixes only; the launcher's reporting behaviour and self-hosted Sentry endpoint are unchanged.
+- Bumped the Gradle build tool from 9.4.1 to 9.5.0 and the Shadow plugin from 9.4.0 to 9.4.1. Build-time only; no impact on the produced launcher binary.
 
 ### Fixed
 - Mojang JRE component selection now recognizes the version strings Mojang actually publishes for `java-runtime-alpha` (`16.0.1.9.1`, `16.0.1.9.1_3`) and `jre-legacy` (`8u202`, `8u51-cacert462b08`). Previously these were skipped as "unrecognized version" and the launcher fell back to a hardcoded component map. The hardcoded fallback already covered the cases Mojang ships today, but any future runtime that uses the same dotted-with-build form would have been silently dropped from the live manifest. The parser now handles arbitrary-length dotted versions and the classic `<major>u<update>` shape.
