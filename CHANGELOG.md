@@ -9,6 +9,8 @@ is added at the top.
 
 ## [Unreleased]
 
+## [v4.0-1090] - 2026-05-04
+
 ### Fixed
 - Modpacks hosted on third-party Solder instances whose **build identifiers contain spaces** (commonly seen on community-run Pixelmon Solders, where build names like `Pixelmon 9.3.14` or `1.16.5 - Oficial` are typical) now install reliably. The launcher was concatenating these build names directly into URL paths without percent-encoding the space, which depended on the upstream Solder's HTTP router being lenient enough to match the malformed path. Routers that strictly conform to RFC 3986 would refuse the request. The launcher now percent-encodes path segments at every API call site, so spaces (and other reserved characters) round-trip correctly regardless of router strictness.
 
