@@ -11,6 +11,7 @@ import com.google.api.client.http.json.JsonHttpContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.util.Key;
 import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.client.util.store.MemoryDataStoreFactory;
@@ -25,7 +26,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileOwnerAttributeView;
-import com.google.api.client.util.Key;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,11 +57,12 @@ public class MicrosoftAuthenticator {
   private static final String DEVICE_CODE_GRANT_TYPE =
       "urn:ietf:params:oauth:grant-type:device_code";
   private final DataStoreFactory dataStoreFactory;
+
   /**
    * Non-null when the on-disk credential store at this path could not be initialised (usually
    * Windows ACL corruption), and we fell back to an in-memory store. Callers should surface a
-   * warning to the user telling them how to clean up the folder manually; in-memory mode means
-   * the user has to sign in every launch until the path is resolvable again.
+   * warning to the user telling them how to clean up the folder manually; in-memory mode means the
+   * user has to sign in every launch until the path is resolvable again.
    */
   private final String corruptedCredentialStorePath;
 
@@ -185,8 +186,7 @@ public class MicrosoftAuthenticator {
       FileUtils.deleteDirectory(dataStorePath.toFile());
       return true;
     } catch (IOException e) {
-      Utils.getLogger()
-          .log(Level.WARNING, "Recursive delete of " + dataStorePath + " failed", e);
+      Utils.getLogger().log(Level.WARNING, "Recursive delete of " + dataStorePath + " failed", e);
     }
 
     // Strategy 2: rename the folder aside. Windows file rename uses different NTFS permission
@@ -217,15 +217,15 @@ public class MicrosoftAuthenticator {
   }
 
   /**
-   * Device-code equivalent of {@link #loginNewUser()}: acquires a Microsoft OAuth token without
-   * the LocalServerReceiver / localhost-callback path. Useful when the user cannot or will not
-   * get the browser redirect back to the launcher (restrictive firewalls, corporate proxies,
-   * cancelled Windows Defender prompts, browser sign-in on a different device).
+   * Device-code equivalent of {@link #loginNewUser()}: acquires a Microsoft OAuth token without the
+   * LocalServerReceiver / localhost-callback path. Useful when the user cannot or will not get the
+   * browser redirect back to the launcher (restrictive firewalls, corporate proxies, cancelled
+   * Windows Defender prompts, browser sign-in on a different device).
    *
    * @param listener receives the device-code challenge (user code + verification URL) as soon as
    *     Microsoft hands it back, so the caller's UI can render it and the user can act on it.
-   * @param cancelled polled between polling iterations; if it ever returns true, the method
-   *     aborts with a MicrosoftAuthException.
+   * @param cancelled polled between polling iterations; if it ever returns true, the method aborts
+   *     with a MicrosoftAuthException.
    */
   public MicrosoftUser loginNewUserViaDeviceCode(
       DeviceCodeListener listener, BooleanSupplier cancelled) throws MicrosoftAuthException {
@@ -262,7 +262,8 @@ public class MicrosoftAuthenticator {
   }
 
   /** Shared post-credential pipeline: Xbox auth, Minecraft entitlement check, profile, store. */
-  private MicrosoftUser completeMinecraftLogin(Credential credential) throws MicrosoftAuthException {
+  private MicrosoftUser completeMinecraftLogin(Credential credential)
+      throws MicrosoftAuthException {
     XboxResponse xboxResponse = authenticateXbox(credential);
     XboxResponse xstsResponse = authenticateXSTS(xboxResponse.token);
     XboxMinecraftResponse xboxMinecraftResponse = authenticateMinecraftXbox(xstsResponse);
@@ -398,6 +399,7 @@ public class MicrosoftAuthenticator {
   public static final class DeviceCodeChallenge {
     public final String userCode;
     public final String verificationUri;
+
     /** May be null on endpoints that do not return a pre-filled URL (e.g. the consumer tenant). */
     public final String verificationUriComplete;
 

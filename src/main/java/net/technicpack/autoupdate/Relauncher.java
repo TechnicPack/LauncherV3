@@ -19,6 +19,7 @@
 
 package net.technicpack.autoupdate;
 
+import io.sentry.Sentry;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +36,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import javax.swing.JOptionPane;
-import io.sentry.Sentry;
 import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launcher.settings.StartupParameters;
@@ -142,9 +142,7 @@ public class Relauncher {
     }
     // Pre-2e50788c launchers wrote URL-form paths ("/C:/Users/...") via URI.getPath() into
     // -movetarget. Strip the leading slash so Paths.get accepts the drive-qualified form.
-    if (moveTarget.length() >= 4
-        && moveTarget.charAt(0) == '/'
-        && moveTarget.charAt(2) == ':') {
+    if (moveTarget.length() >= 4 && moveTarget.charAt(0) == '/' && moveTarget.charAt(2) == ':') {
       moveTarget = moveTarget.substring(1);
     }
     return Paths.get(moveTarget);
@@ -350,10 +348,10 @@ public class Relauncher {
   }
 
   /**
-   * Attach diagnostic tags to the Sentry scope so the captured mover failure tells us
-   * which step actually blocked and how many attempts we burned through. Intentionally
-   * static-scope — this is the last thing we do before rethrowing, and the tags stay on
-   * the scope only long enough to be picked up by the automatic capture.
+   * Attach diagnostic tags to the Sentry scope so the captured mover failure tells us which step
+   * actually blocked and how many attempts we burned through. Intentionally static-scope — this is
+   * the last thing we do before rethrowing, and the tags stay on the scope only long enough to be
+   * picked up by the automatic capture.
    */
   private static void tagFinalMoverFailure(
       FileSystemException e, int finalAttempt, int totalAttempts) {
@@ -378,8 +376,7 @@ public class Relauncher {
     }
 
     boolean renameStrategyApplies =
-        OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS
-            && Files.exists(targetPath);
+        OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS && Files.exists(targetPath);
 
     if (!renameStrategyApplies || !tryRenameStrategy(currentPath, targetPath)) {
       // Either non-Windows, target didn't exist, or rename was refused. Fall back to a
@@ -396,11 +393,11 @@ public class Relauncher {
   }
 
   /**
-   * Windows self-update strategy: rename the locked target aside, then copy the new build
-   * into the freed path. Windows lets us rename a running executable via the image
-   * loader's FILE_SHARE_DELETE share flag, but AV / OneDrive / Explorer handles don't
-   * always grant FILE_SHARE_DELETE — in that case we return false so the caller can fall
-   * back to a direct copy (which only needs FILE_SHARE_WRITE).
+   * Windows self-update strategy: rename the locked target aside, then copy the new build into the
+   * freed path. Windows lets us rename a running executable via the image loader's
+   * FILE_SHARE_DELETE share flag, but AV / OneDrive / Explorer handles don't always grant
+   * FILE_SHARE_DELETE — in that case we return false so the caller can fall back to a direct copy
+   * (which only needs FILE_SHARE_WRITE).
    *
    * @return true if the new build is now at targetPath; false if the rename was refused.
    * @throws IOException if a later step (copy, rollback) fails in a way we cannot recover.
@@ -410,7 +407,8 @@ public class Relauncher {
     try {
       Files.deleteIfExists(stashed);
     } catch (IOException ignored) {
-      // Stale .old still locked; the subsequent move will surface a clear error we can fall back on.
+      // Stale .old still locked; the subsequent move will surface a clear error we can fall back
+      // on.
     }
 
     try {
@@ -467,9 +465,7 @@ public class Relauncher {
     // Sweep the .technic root for updater-flow stashes (temp.exe.old) and for installer-
     // placed launchers that live under .technic.
     Path root = fileSystem.getRootDirectory();
-    String[] candidates = {
-      "launcher.exe.old", "temp.exe.old", "launcher.jar.old", "temp.jar.old"
-    };
+    String[] candidates = {"launcher.exe.old", "temp.exe.old", "launcher.jar.old", "temp.jar.old"};
     for (String name : candidates) {
       try {
         Files.deleteIfExists(root.resolve(name));
@@ -486,8 +482,7 @@ public class Relauncher {
       try {
         Files.deleteIfExists(stashed);
       } catch (IOException e) {
-        Utils.getLogger()
-            .log(Level.FINE, "Could not clean stale launcher package " + stashed, e);
+        Utils.getLogger().log(Level.FINE, "Could not clean stale launcher package " + stashed, e);
       }
     }
   }

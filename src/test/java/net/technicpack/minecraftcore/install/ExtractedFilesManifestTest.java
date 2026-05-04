@@ -39,8 +39,7 @@ class ExtractedFilesManifestTest {
     ExtractedFilesManifest manifest = ExtractedFilesManifest.load(tempDir.toFile());
 
     assertEquals(
-        new LinkedHashSet<>(Arrays.asList("a.txt", "sub/b.txt", "sub/c.txt")),
-        manifest.getFiles());
+        new LinkedHashSet<>(Arrays.asList("a.txt", "sub/b.txt", "sub/c.txt")), manifest.getFiles());
   }
 
   @Test
@@ -51,15 +50,13 @@ class ExtractedFilesManifestTest {
 
     ExtractedFilesManifest manifest = ExtractedFilesManifest.load(tempDir.toFile());
 
-    assertEquals(
-        new LinkedHashSet<>(Arrays.asList("a.txt", "sub/b.txt")), manifest.getFiles());
+    assertEquals(new LinkedHashSet<>(Arrays.asList("a.txt", "sub/b.txt")), manifest.getFiles());
   }
 
   @Test
   void loadFromMalformedJsonReturnsEmpty() throws Exception {
     Files.write(
-        tempDir.resolve("extractedFiles.json"),
-        "{not valid json".getBytes(StandardCharsets.UTF_8));
+        tempDir.resolve("extractedFiles.json"), "{not valid json".getBytes(StandardCharsets.UTF_8));
 
     ExtractedFilesManifest manifest = ExtractedFilesManifest.load(tempDir.toFile());
 
@@ -193,8 +190,7 @@ class ExtractedFilesManifestTest {
     // path in the manifest is already gone. This must not be reported as a failure.
     Path modpackDir = tempDir.resolve("modpack");
     Set<String> orphans =
-        new LinkedHashSet<>(
-            Arrays.asList("mods/old-a.jar", "mods/old-b.jar", "mods/old-c.jar"));
+        new LinkedHashSet<>(Arrays.asList("mods/old-a.jar", "mods/old-b.jar", "mods/old-c.jar"));
 
     ExtractedFilesManifest.OrphanCleanupResult result =
         ExtractedFilesManifest.deleteOrphans(orphans, modpackDir.toFile());

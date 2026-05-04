@@ -41,7 +41,9 @@ class RelauncherTest {
 
     assertEquals(3, attempts.get());
     assertEquals(
-        List.of(EXPECTED_WINDOWS_PACKAGE_RETRY_DELAY_MILLIS, EXPECTED_WINDOWS_PACKAGE_RETRY_DELAY_MILLIS),
+        List.of(
+            EXPECTED_WINDOWS_PACKAGE_RETRY_DELAY_MILLIS,
+            EXPECTED_WINDOWS_PACKAGE_RETRY_DELAY_MILLIS),
         pauses);
   }
 
@@ -125,7 +127,8 @@ class RelauncherTest {
 
   @Test
   void parseMoveTargetDoesNotStripUnixAbsolutePath() {
-    // Regression: only the "/X:" shape should be stripped. Real unix absolute paths must pass through.
+    // Regression: only the "/X:" shape should be stripped. Real unix absolute paths must pass
+    // through.
     String unixPath = "/home/example/.technic/launcher.jar";
     assertEquals(Paths.get(unixPath), Relauncher.parseMoveTarget(unixPath));
   }
@@ -161,7 +164,9 @@ class RelauncherTest {
 
     assertEquals(3, attempts.get());
     assertEquals(
-        List.of(EXPECTED_WINDOWS_PACKAGE_RETRY_DELAY_MILLIS, EXPECTED_WINDOWS_PACKAGE_RETRY_DELAY_MILLIS),
+        List.of(
+            EXPECTED_WINDOWS_PACKAGE_RETRY_DELAY_MILLIS,
+            EXPECTED_WINDOWS_PACKAGE_RETRY_DELAY_MILLIS),
         pauses);
   }
 
@@ -221,8 +226,7 @@ class RelauncherTest {
     assertTrue(Files.exists(unrelated), "unrelated .old must not be deleted");
   }
 
-  private static final class FakeFileSystem
-      extends net.technicpack.launcher.io.LauncherFileSystem {
+  private static final class FakeFileSystem extends net.technicpack.launcher.io.LauncherFileSystem {
     FakeFileSystem(Path root) {
       super(root);
     }

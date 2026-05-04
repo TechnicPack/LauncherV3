@@ -69,12 +69,12 @@ import net.technicpack.utilslib.Utils;
 
 /**
  * Modal "Add a Microsoft account" dialog that offers both sign-in flows simultaneously: the
- * browser-redirect localhost callback, and Microsoft's device code flow. The first flow to
- * complete successfully wins; the other is cancelled.
+ * browser-redirect localhost callback, and Microsoft's device code flow. The first flow to complete
+ * successfully wins; the other is cancelled.
  *
- * <p>Both flows run on separate {@link SwingWorker} threads. The dialog pre-fetches a device
- * code as soon as it opens (so the user sees it immediately) and starts polling in the
- * background. The browser-based flow runs only when the user clicks the top button.
+ * <p>Both flows run on separate {@link SwingWorker} threads. The dialog pre-fetches a device code
+ * as soon as it opens (so the user sees it immediately) and starts polling in the background. The
+ * browser-based flow runs only when the user clicks the top button.
  */
 public class MicrosoftLoginDialog extends JDialog {
 
@@ -85,15 +85,15 @@ public class MicrosoftLoginDialog extends JDialog {
   private final AtomicReference<MicrosoftUser> result = new AtomicReference<>();
 
   /**
-   * Terminal auth exception that closed the dialog, if any. The caller can read this after
-   * {@link #awaitResult()} returns null to decide whether to show a follow-up error dialog
-   * (UNDERAGE, NO_MINECRAFT, etc.) or just quietly restore the UI (plain cancellation).
+   * Terminal auth exception that closed the dialog, if any. The caller can read this after {@link
+   * #awaitResult()} returns null to decide whether to show a follow-up error dialog (UNDERAGE,
+   * NO_MINECRAFT, etc.) or just quietly restore the UI (plain cancellation).
    */
   private final AtomicReference<MicrosoftAuthException> terminalException = new AtomicReference<>();
 
   /**
-   * Set to true by either flow completing (success or failure) or by the user cancelling. All
-   * flows must check this between steps and abort if set.
+   * Set to true by either flow completing (success or failure) or by the user cancelling. All flows
+   * must check this between steps and abort if set.
    */
   private final AtomicBoolean cancelled = new AtomicBoolean(false);
 
@@ -166,8 +166,8 @@ public class MicrosoftLoginDialog extends JDialog {
   }
 
   /**
-   * Returns the terminal auth exception that closed the dialog, or null if the dialog was closed
-   * by plain cancellation (or the result was a success).
+   * Returns the terminal auth exception that closed the dialog, or null if the dialog was closed by
+   * plain cancellation (or the result was a success).
    */
   public MicrosoftAuthException getTerminalException() {
     return terminalException.get();
@@ -365,9 +365,9 @@ public class MicrosoftLoginDialog extends JDialog {
 
   /**
    * Render {@code text} as a QR code into a roughly {@code targetPixels}x{@code targetPixels}
-   * image, with a white background and black modules plus a 4-module quiet zone (per the QR
-   * spec). Returns null if encoding fails (e.g. the text is longer than any QR version can
-   * hold), in which case the caller silently skips the QR display.
+   * image, with a white background and black modules plus a 4-module quiet zone (per the QR spec).
+   * Returns null if encoding fails (e.g. the text is longer than any QR version can hold), in which
+   * case the caller silently skips the QR display.
    */
   static BufferedImage renderQrCode(String text, int targetPixels) {
     if (text == null || text.isEmpty()) {
@@ -524,7 +524,8 @@ public class MicrosoftLoginDialog extends JDialog {
       // Don't tear the dialog down on a single-flow failure; let the other flow keep running.
       // Keep the message in English for now (matches msa.update error strings elsewhere).
       if (cause instanceof MicrosoftAuthException) {
-        SwingUtilities.invokeLater(() -> handleAuthException((MicrosoftAuthException) cause, label, flow));
+        SwingUtilities.invokeLater(
+            () -> handleAuthException((MicrosoftAuthException) cause, label, flow));
       } else {
         SwingUtilities.invokeLater(
             () -> statusLabel.setText(label + " sign-in failed: " + cause.getMessage()));

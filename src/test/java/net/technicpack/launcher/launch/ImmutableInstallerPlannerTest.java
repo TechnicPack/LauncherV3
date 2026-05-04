@@ -349,9 +349,7 @@ class ImmutableInstallerPlannerTest {
     LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher-arm64"));
     InstalledPack installedPack =
         new InstalledPack(
-            "arm64-pack",
-            InstalledPack.RECOMMENDED,
-            tempDir.resolve("pack-arm64").toString());
+            "arm64-pack", InstalledPack.RECOMMENDED, tempDir.resolve("pack-arm64").toString());
     ModpackModel pack = new ModpackModel(installedPack, null, null, fileSystem);
     pack.initDirectories();
 
@@ -402,8 +400,10 @@ class ImmutableInstallerPlannerTest {
                     + "}",
                 Library.class);
 
-    Path genericCache = fileSystem.getCacheDirectory().resolve(library.getArtifactPath(genericClassifier));
-    Path arm64Cache = fileSystem.getCacheDirectory().resolve(library.getArtifactPath(arm64Classifier));
+    Path genericCache =
+        fileSystem.getCacheDirectory().resolve(library.getArtifactPath(genericClassifier));
+    Path arm64Cache =
+        fileSystem.getCacheDirectory().resolve(library.getArtifactPath(arm64Classifier));
     Files.createDirectories(genericCache.getParent());
     Files.createDirectories(arm64Cache.getParent());
     Files.write(genericCache, genericBytes);
@@ -428,7 +428,8 @@ class ImmutableInstallerPlannerTest {
     version.setJavaRuntime(new FakeJavaRuntime("aarch64"));
     context.setResolvedVersion(version);
 
-    invokeInstallVersionLibrary(planner, context, library, new RecordingReporter(new ArrayList<>()));
+    invokeInstallVersionLibrary(
+        planner, context, library, new RecordingReporter(new ArrayList<>()));
 
     Path extractedMarker = pack.getBinDir().toPath().resolve("natives/marker.txt");
     assertTrue(Files.exists(extractedMarker));
@@ -477,7 +478,8 @@ class ImmutableInstallerPlannerTest {
 
   @Test
   void versionDiscoveryRemovesLegacyForgeWhenModpackJarPresent() throws Exception {
-    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher-forge-with-jar"));
+    LauncherFileSystem fileSystem =
+        new LauncherFileSystem(tempDir.resolve("launcher-forge-with-jar"));
     InstalledPack installedPack =
         new InstalledPack(
             "forge-with-jar",
@@ -532,7 +534,8 @@ class ImmutableInstallerPlannerTest {
 
   @Test
   void versionDiscoveryKeepsLegacyForgeWhenModpackJarAbsent() throws Exception {
-    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher-forge-no-jar"));
+    LauncherFileSystem fileSystem =
+        new LauncherFileSystem(tempDir.resolve("launcher-forge-no-jar"));
     InstalledPack installedPack =
         new InstalledPack(
             "forge-no-jar",

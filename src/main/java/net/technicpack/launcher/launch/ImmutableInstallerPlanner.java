@@ -10,18 +10,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -438,8 +435,7 @@ class ImmutableInstallerPlanner {
             + "You can safely delete this folder once you've copied over anything you\n"
             + "want to keep.\n";
     try {
-      Files.write(
-          backupDir.toPath().resolve("README.txt"), text.getBytes(StandardCharsets.UTF_8));
+      Files.write(backupDir.toPath().resolve("README.txt"), text.getBytes(StandardCharsets.UTF_8));
     } catch (IOException e) {
       Utils.getLogger().warning("Failed to write README.txt to backup folder: " + e.getMessage());
     }
@@ -614,7 +610,11 @@ class ImmutableInstallerPlanner {
     AtomicJsonWriter.write(runDataFile.toPath(), runData, MojangUtils.getGson());
 
     Utils.getLogger()
-        .info("Wrote Prism-derived runData: java=" + patchEffectiveMinJavaMajor + " memory=" + memory);
+        .info(
+            "Wrote Prism-derived runData: java="
+                + patchEffectiveMinJavaMajor
+                + " memory="
+                + memory);
   }
 
   private void applyVersionPatches(InstallExecutionContext context) throws IOException {
@@ -729,8 +729,9 @@ class ImmutableInstallerPlanner {
 
   /**
    * Picks the best Mojang JRE component for the requested major version by querying the live JRE
-   * manifest. Returns the component whose major is the highest one that is ≤ {@code requestedMajor}.
-   * Returns null on any failure so the caller can fall back to a hardcoded mapping.
+   * manifest. Returns the component whose major is the highest one that is ≤ {@code
+   * requestedMajor}. Returns null on any failure so the caller can fall back to a hardcoded
+   * mapping.
    *
    * <p>Major versions are parsed from {@link
    * net.technicpack.minecraftcore.mojang.java.JavaRuntimeInfo#getName()} via {@link
@@ -740,7 +741,8 @@ class ImmutableInstallerPlanner {
   private VersionJavaInfo deriveJavaVersionFromAvailableComponents(int requestedMajor) {
     try {
       JavaRuntimesIndex index =
-          MojangUtils.getJavaRuntimesIndex(fileSystem.getRuntimesDirectory().resolve("_index.json"));
+          MojangUtils.getJavaRuntimesIndex(
+              fileSystem.getRuntimesDirectory().resolve("_index.json"));
       if (index == null) return null;
       Map<String, List<JavaRuntime>> available = index.getRuntimesForCurrentOS();
       if (available == null || available.isEmpty()) return null;

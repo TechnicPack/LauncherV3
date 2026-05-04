@@ -25,15 +25,15 @@ import net.technicpack.utilslib.Utils;
  *   <li>Atomically rename it over the target.
  * </ol>
  *
- * <p>A JVM crash or OS crash during step 1 or 2 leaves the original target untouched; the
- * orphaned {@code .tmp} is overwritten on the next save. A crash after step 3 has completed has
- * already persisted the new contents. This closes the usual "settings file ends up empty after a
- * power cut" failure mode that plain {@link Files#newBufferedWriter} leaves open.
+ * <p>A JVM crash or OS crash during step 1 or 2 leaves the original target untouched; the orphaned
+ * {@code .tmp} is overwritten on the next save. A crash after step 3 has completed has already
+ * persisted the new contents. This closes the usual "settings file ends up empty after a power cut"
+ * failure mode that plain {@link Files#newBufferedWriter} leaves open.
  *
  * <p>Falls back to a non-atomic replace on filesystems that don't support {@code ATOMIC_MOVE}
- * (FAT32, some network mounts). On {@link IOException} or {@link JsonIOException} during the
- * write, the {@code .tmp} is removed before the exception propagates so callers aren't left
- * cleaning up partial state.
+ * (FAT32, some network mounts). On {@link IOException} or {@link JsonIOException} during the write,
+ * the {@code .tmp} is removed before the exception propagates so callers aren't left cleaning up
+ * partial state.
  *
  * <p>Parent-directory creation is the caller's responsibility.
  */
@@ -60,10 +60,7 @@ public final class AtomicJsonWriter {
       }
       try {
         Files.move(
-            tmp,
-            target,
-            StandardCopyOption.ATOMIC_MOVE,
-            StandardCopyOption.REPLACE_EXISTING);
+            tmp, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
       } catch (AtomicMoveNotSupportedException e) {
         Utils.getLogger()
             .warning("Filesystem does not support atomic move; falling back to non-atomic replace");

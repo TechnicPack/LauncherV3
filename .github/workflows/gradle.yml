@@ -36,7 +36,7 @@ jobs:
       - name: Build with Gradle
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-        run: ./gradlew clean test package --no-daemon
+        run: ./gradlew clean test spotlessCheck package --no-daemon
 
       - name: Add promotion shortcuts
         env:

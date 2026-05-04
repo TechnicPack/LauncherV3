@@ -224,7 +224,8 @@ public class Library {
   }
 
   public String resolveNativeClassifierForCurrentOs() {
-    return resolveNativeClassifier(OperatingSystem.getOperatingSystem().getName(), JavaUtils.OS_ARCH);
+    return resolveNativeClassifier(
+        OperatingSystem.getOperatingSystem().getName(), JavaUtils.OS_ARCH);
   }
 
   public String resolveNativeClassifier(String operatingSystemName, String osArch) {

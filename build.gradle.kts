@@ -20,7 +20,7 @@ repositories {
 spotless {
     java {
         target("src/*/java/**/*.java")
-        googleJavaFormat()
+        googleJavaFormat("1.28.0")
     }
 
     kotlin {

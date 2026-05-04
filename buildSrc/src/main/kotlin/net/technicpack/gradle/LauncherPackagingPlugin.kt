@@ -35,7 +35,10 @@ class LauncherPackagingPlugin : Plugin<Project> {
             pluginManager.apply("edu.sc.seis.launch4j")
 
             val buildNumber = providers.environmentVariable("BUILD_NUMBER").orElse("0").get()
-            val buildYear = java.time.Year.now().toString()
+            val buildYear =
+                java.time.Year
+                    .now()
+                    .toString()
 
             extensions.configure<JavaApplication> {
                 mainClass.set("net.technicpack.launcher.LauncherMain")

@@ -190,5 +190,4 @@ public class RoundedButton extends JButton implements MouseListener {
   public void mouseExited(MouseEvent e) {
     isHovered = false;
   }
-
 }

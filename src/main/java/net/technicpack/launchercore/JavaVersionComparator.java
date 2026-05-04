@@ -17,8 +17,7 @@ public class JavaVersionComparator implements Comparator<String> {
       Pattern.compile("^1\\.(\\d+)(?:\\.0(?:_(\\d+))?)?(?:[-+].*)?$");
 
   // Legacy <major>u<update> form (e.g. "8u202", "8u51-cacert462b08") used by Mojang's jre-legacy.
-  private static final Pattern LEGACY_U_PATTERN =
-      Pattern.compile("^(\\d+)u(\\d+)(?:[-+].*)?$");
+  private static final Pattern LEGACY_U_PATTERN = Pattern.compile("^(\\d+)u(\\d+)(?:[-+].*)?$");
 
   // Modern: <major>(.<n>)* with optional _<build> suffix (Microsoft's java-runtime-alpha
   // publishes "16.0.1.9.1" and "16.0.1.9.1_3"). Trailing -ea/-open/+12/etc still ignored.
@@ -26,8 +25,8 @@ public class JavaVersionComparator implements Comparator<String> {
       Pattern.compile("^(\\d+(?:\\.\\d+)*)(?:_(\\d+))?(?:[-+].*)?$");
 
   /**
-   * Returns the major Java version parsed from a version string.
-   * E.g. "1.8.0_221" → 8, "21.0.4" → 21, "17-ea" → 17, "1.8" → 8.
+   * Returns the major Java version parsed from a version string. E.g. "1.8.0_221" → 8, "21.0.4" →
+   * 21, "17-ea" → 17, "1.8" → 8.
    *
    * @throws IllegalArgumentException if the string isn't a recognized Java version format.
    */

@@ -61,7 +61,8 @@ class AtomicJsonWriterTest {
 
     String content = new String(Files.readAllBytes(target), StandardCharsets.UTF_8);
     assertTrue(content.contains("second-a-distinct-string"));
-    assertFalse(content.contains("first-a-distinct-string"),
+    assertFalse(
+        content.contains("first-a-distinct-string"),
         "atomic rename should fully replace, not append or interleave");
   }
 
@@ -85,9 +86,7 @@ class AtomicJsonWriterTest {
                 })
             .create();
 
-    assertThrows(
-        JsonIOException.class,
-        () -> AtomicJsonWriter.write(target, "boom", failingGson));
+    assertThrows(JsonIOException.class, () -> AtomicJsonWriter.write(target, "boom", failingGson));
 
     assertFalse(Files.exists(target), "target should not exist when write failed");
     assertFalse(
