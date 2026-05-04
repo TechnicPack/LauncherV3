@@ -21,9 +21,9 @@ package net.technicpack.solder.cache;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.TimeUnit;
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.solder.ISolderApi;
@@ -84,7 +84,7 @@ public class CachedSolderApi implements ISolderApi {
         CacheBuilder.newBuilder()
             .concurrencyLevel(4)
             .maximumSize(50)
-            .expireAfterWrite(cacheInSeconds, TimeUnit.SECONDS)
+            .expireAfterWrite(Duration.ofSeconds(cacheInSeconds))
             .build();
   }
 

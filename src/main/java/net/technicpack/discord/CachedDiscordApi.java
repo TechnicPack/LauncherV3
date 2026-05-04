@@ -2,7 +2,7 @@ package net.technicpack.discord;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 import net.technicpack.discord.io.Server;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 
@@ -18,14 +18,14 @@ public class CachedDiscordApi implements IDiscordApi {
         CacheBuilder.newBuilder()
             .concurrencyLevel(4)
             .maximumSize(300)
-            .expireAfterWrite(cacheLength, TimeUnit.SECONDS)
+            .expireAfterWrite(Duration.ofSeconds(cacheLength))
             .build();
 
     deadCache =
         CacheBuilder.newBuilder()
             .concurrencyLevel(4)
             .maximumSize(300)
-            .expireAfterWrite(deadCacheLength, TimeUnit.SECONDS)
+            .expireAfterWrite(Duration.ofSeconds(deadCacheLength))
             .build();
   }
 

@@ -29,7 +29,7 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 import java.util.logging.Level;
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.platform.IPlatformApi;
@@ -54,7 +54,7 @@ public class ModpackCachePlatformApi implements IPlatformApi {
         CacheBuilder.newBuilder()
             .concurrencyLevel(4)
             .maximumSize(300)
-            .expireAfterWrite(cacheInSeconds, TimeUnit.SECONDS)
+            .expireAfterWrite(Duration.ofSeconds(cacheInSeconds))
             .build();
 
     foreverCache = CacheBuilder.newBuilder().concurrencyLevel(4).maximumSize(300).build();
@@ -63,7 +63,7 @@ public class ModpackCachePlatformApi implements IPlatformApi {
         CacheBuilder.newBuilder()
             .concurrencyLevel(4)
             .maximumSize(300)
-            .expireAfterWrite(cacheInSeconds / 10, TimeUnit.SECONDS)
+            .expireAfterWrite(Duration.ofSeconds(cacheInSeconds / 10))
             .build();
   }
 

@@ -29,7 +29,7 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 import java.util.logging.Level;
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
@@ -67,14 +67,14 @@ public class CachedSolderPackApi implements ISolderPackApi {
         CacheBuilder.newBuilder()
             .concurrencyLevel(4)
             .maximumSize(300)
-            .expireAfterWrite(cacheInSeconds, TimeUnit.SECONDS)
+            .expireAfterWrite(Duration.ofSeconds(cacheInSeconds))
             .build();
 
     deadBuildCache =
         CacheBuilder.newBuilder()
             .concurrencyLevel(4)
             .maximumSize(300)
-            .expireAfterWrite(cacheInSeconds / 10, TimeUnit.SECONDS)
+            .expireAfterWrite(Duration.ofSeconds(cacheInSeconds / 10))
             .build();
   }
 
