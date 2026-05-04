@@ -98,7 +98,7 @@ public class Utils {
         String newUrl = conn.getHeaderField("Location");
         URL redirectUrl;
         try {
-          redirectUrl = new URL(newUrl);
+          redirectUrl = Urls.parseAndDiagnose(newUrl, "Utils.pingHttpURL.redirect");
         } catch (MalformedURLException e) {
           throw new DownloadException("Invalid Redirect URL: " + url, e);
         }
@@ -191,7 +191,7 @@ public class Utils {
     URL urlObject;
 
     try {
-      urlObject = new URL(url);
+      urlObject = Urls.parseAndDiagnose(url, "Utils.getFullUrl");
     } catch (MalformedURLException e) {
       throw new DownloadException("Invalid URL: " + url, e);
     }

@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.logging.Level;
@@ -36,6 +35,7 @@ import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.ui.lang.ResourceLoader;
+import net.technicpack.utilslib.Urls;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
@@ -183,7 +183,9 @@ public class DiscoverInfoPanel extends JPanel {
 
   protected Document getDiscoverDocumentFromLiveSite(String url, Path localCache) {
     try {
-      HttpURLConnection conn = Utils.openHttpConnection(new URL(url));
+      HttpURLConnection conn =
+          Utils.openHttpConnection(
+              Urls.parseAndDiagnose(url, "DiscoverInfoPanel.getDiscoverDocumentFromLiveSite"));
       byte[] data;
       try (InputStream stream = conn.getInputStream()) {
         data = IOUtils.toByteArray(stream);

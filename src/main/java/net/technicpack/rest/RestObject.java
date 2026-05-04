@@ -29,6 +29,7 @@ import java.io.Reader;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import net.technicpack.launchercore.TechnicConstants;
+import net.technicpack.utilslib.Urls;
 
 public abstract class RestObject {
   private static final Gson gson = new Gson();
@@ -39,7 +40,7 @@ public abstract class RestObject {
   public static <T extends RestObject> T getRestObject(Class<T> restObject, String url)
       throws RestfulAPIException {
     try {
-      URLConnection conn = new URL(url).openConnection();
+      URLConnection conn = Urls.parseAndDiagnose(url, "RestObject.getRestObject").openConnection();
       conn.setRequestProperty("User-Agent", TechnicConstants.getUserAgent());
       conn.setConnectTimeout(15000);
       conn.setReadTimeout(15000);

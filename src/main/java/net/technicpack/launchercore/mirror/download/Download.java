@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import net.technicpack.launchercore.exception.DownloadException;
 import net.technicpack.launchercore.exception.PermissionDeniedException;
 import net.technicpack.launchercore.util.DownloadListener;
+import net.technicpack.utilslib.Urls;
 import net.technicpack.utilslib.Utils;
 
 public class Download implements Runnable {
@@ -79,7 +80,7 @@ public class Download implements Runnable {
         if (redirUrlText != null && !redirUrlText.isEmpty()) {
           URL redirectUrl;
           try {
-            redirectUrl = new URL(redirUrlText);
+            redirectUrl = Urls.parseAndDiagnose(redirUrlText, "Download.run.redirect");
           } catch (MalformedURLException e) {
             throw new DownloadException("Invalid Redirect URL: " + url, e);
           }
