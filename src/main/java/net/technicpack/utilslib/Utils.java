@@ -23,6 +23,7 @@ import com.google.gson.GsonBuilder;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
@@ -98,8 +99,8 @@ public class Utils {
         String newUrl = conn.getHeaderField("Location");
         URL redirectUrl;
         try {
-          redirectUrl = Urls.parseAndDiagnose(newUrl, "Utils.pingHttpURL.redirect");
-        } catch (MalformedURLException e) {
+          redirectUrl = Urls.parseDownloadUri(newUrl).toURL();
+        } catch (URISyntaxException | MalformedURLException e) {
           throw new DownloadException("Invalid Redirect URL: " + url, e);
         }
 
@@ -188,15 +189,11 @@ public class Utils {
   }
 
   public static URL getFullUrl(String url) throws DownloadException {
-    URL urlObject;
-
     try {
-      urlObject = Urls.parseAndDiagnose(url, "Utils.getFullUrl");
-    } catch (MalformedURLException e) {
+      return Urls.parseDownloadUri(url).toURL();
+    } catch (URISyntaxException | MalformedURLException e) {
       throw new DownloadException("Invalid URL: " + url, e);
     }
-
-    return urlObject;
   }
 
   public static String getETag(String address) {

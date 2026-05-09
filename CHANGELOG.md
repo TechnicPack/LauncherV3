@@ -11,6 +11,7 @@ is added at the top.
 
 ### Fixed
 - Modpacks hosted on third-party Solders that don't set a recommended or latest build no longer require manual intervention to install. When the modpack has exactly one build available, the launcher now falls back to that build automatically; when there are multiple builds and the Solder hasn't picked a default, the launcher shows a clear "open the modpack settings and pick a specific build" error from the install dialog. Previously these modpacks failed at install time with no automatic resolution path (and in build 1090 specifically, the failure was a silent install-thread crash before the graceful error path was restored in 1097).
+- Mod resources with characters in their filenames or paths that are technically illegal in URLs per RFC 3986 (most commonly square brackets in Pixelmon-style filenames like `[solder]ThePixelmonOST.zip.zip`, but also spaces and other reserved characters) now download via a strict-URI parser that percent-encodes the path before fetching. Previously these URLs only worked because of leniency in Java's deprecated URL parser; the launcher now handles them via the strict path while still accepting the upstream URL as published. URLs that are already strictly valid pass through unchanged, and URLs that arrive partially or fully percent-encoded are preserved without double-encoding.
 
 ## [v4.0-1097] - 2026-05-09
 

@@ -80,8 +80,8 @@ public class Download implements Runnable {
         if (redirUrlText != null && !redirUrlText.isEmpty()) {
           URL redirectUrl;
           try {
-            redirectUrl = Urls.parseAndDiagnose(redirUrlText, "Download.run.redirect");
-          } catch (MalformedURLException e) {
+            redirectUrl = Urls.parseDownloadUri(redirUrlText).toURL();
+          } catch (URISyntaxException | MalformedURLException e) {
             throw new DownloadException("Invalid Redirect URL: " + url, e);
           }
 
