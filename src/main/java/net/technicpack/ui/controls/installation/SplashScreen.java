@@ -89,7 +89,7 @@ public class SplashScreen extends JFrame {
     return progressDisplay.getOverallProgressBar();
   }
 
-  static int computeProgressDisplayWidth(int imageWidth) {
+  private static int computeProgressDisplayWidth(int imageWidth) {
     return Math.max(160, imageWidth - (PROGRESS_HORIZONTAL_PADDING * 2));
   }
 

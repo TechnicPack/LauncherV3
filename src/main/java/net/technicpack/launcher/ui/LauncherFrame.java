@@ -116,14 +116,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
   DiscoverInfoPanel discoverInfoPanel;
   private JButton logoutButton;
 
-  static int footerUserSectionGap() {
-    return FOOTER_USER_SECTION_GAP;
-  }
-
-  static String footerSeparatorText() {
-    return FOOTER_SEPARATOR_TEXT;
-  }
-
   public LauncherFrame(
       final ResourceLoader resources,
       final ImageRepository<IUserType> skinRepository,
@@ -576,14 +568,14 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     userWidget.setAlignmentY(Component.CENTER_ALIGNMENT);
     userWidget.setMaximumSize(userWidget.getPreferredSize());
     footerUserSection.add(userWidget);
-    footerUserSection.add(Box.createHorizontalStrut(footerUserSectionGap()));
+    footerUserSection.add(Box.createHorizontalStrut(FOOTER_USER_SECTION_GAP));
 
-    JLabel dashText = new JLabel(footerSeparatorText());
+    JLabel dashText = new JLabel(FOOTER_SEPARATOR_TEXT);
     dashText.setForeground(UIConstants.COLOR_WHITE_TEXT);
     dashText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
     dashText.setAlignmentY(Component.CENTER_ALIGNMENT);
     footerUserSection.add(dashText);
-    footerUserSection.add(Box.createHorizontalStrut(footerUserSectionGap()));
+    footerUserSection.add(Box.createHorizontalStrut(FOOTER_USER_SECTION_GAP));
 
     logoutButton = new JButton(resources.getString("launcher.user.logout"));
     logoutButton.setBorder(BorderFactory.createEmptyBorder());

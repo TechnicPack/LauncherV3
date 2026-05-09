@@ -109,7 +109,7 @@ public class ProgressBar extends JLabel implements DownloadListener {
     g2d.setClip(clip);
   }
 
-  static int computeTextEdgeInset(int barHeight) {
+  private static int computeTextEdgeInset(int barHeight) {
     if (barHeight <= 0) {
       return TEXT_EDGE_PADDING;
     }

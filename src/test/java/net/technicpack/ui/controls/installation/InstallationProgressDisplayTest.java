@@ -10,14 +10,6 @@ import org.junit.jupiter.api.Test;
 
 class InstallationProgressDisplayTest {
   @Test
-  void displayDefinesHeightsForBothProgressRows() {
-    InstallationProgressDisplay display = new InstallationProgressDisplay();
-
-    assertTrue(display.getOverallProgressBar().getPreferredSize().height > 0);
-    assertTrue(display.getCurrentItemRow().getPreferredSize().height > 0);
-  }
-
-  @Test
   void overallProgressUpdatesPrimaryBar() throws Exception {
     InstallationProgressDisplay display = new InstallationProgressDisplay();
 

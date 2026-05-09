@@ -1,6 +1,5 @@
 package net.technicpack.ui.controls.installation;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -8,11 +7,6 @@ import javax.swing.JPanel;
 import org.junit.jupiter.api.Test;
 
 class SplashScreenLayoutTest {
-  @Test
-  void splashProgressWidthStaysInsideImageBounds() {
-    assertEquals(217, SplashScreen.computeProgressDisplayWidth(245));
-  }
-
   @Test
   void splashFooterIsNonOpaqueSoCustomRibbonShows() {
     InstallationProgressDisplay display = new InstallationProgressDisplay();

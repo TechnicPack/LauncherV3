@@ -314,8 +314,12 @@ public class ModpackSelector extends TintablePanel
   }
 
   private List<ModpackWidget> sortPacks() {
+    return sortPacks(allModpacks.values());
+  }
+
+  static List<ModpackWidget> sortPacks(Collection<ModpackWidget> widgets) {
     List<ModpackWidget> sortedPacks = new LinkedList<>();
-    for (ModpackWidget widget : allModpacks.values()) {
+    for (ModpackWidget widget : widgets) {
       if (widget != null && widget.getModpack() != null) {
         sortedPacks.add(widget);
       }
