@@ -9,6 +9,9 @@ is added at the top.
 
 ## [Unreleased]
 
+### Fixed
+- Modpacks hosted on third-party Solders that don't set a recommended or latest build no longer require manual intervention to install. When the modpack has exactly one build available, the launcher now falls back to that build automatically; when there are multiple builds and the Solder hasn't picked a default, the launcher shows a clear "open the modpack settings and pick a specific build" error from the install dialog. Previously these modpacks failed at install time with no automatic resolution path (and in build 1090 specifically, the failure was a silent install-thread crash before the graceful error path was restored in 1097).
+
 ## [v4.0-1097] - 2026-05-09
 
 ### Fixed

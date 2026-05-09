@@ -20,6 +20,7 @@ package net.technicpack.launcher.ui;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.*;
 import net.technicpack.autoupdate.IBuildNumber;
@@ -41,6 +42,7 @@ import net.technicpack.launcher.ui.controls.UserWidget;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.auth.UserModel;
+import net.technicpack.launchercore.exception.InstallException;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.install.ModpackVersion;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
@@ -268,7 +270,17 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     // If we're forcing an install, then derive the installation build from the pack build
     // otherwise, just use the installed version
-    String installBuild = getInstallBuild(forceInstall, pack, installedVersion);
+    String installBuild;
+    try {
+      installBuild = getInstallBuild(forceInstall, pack, installedVersion);
+    } catch (InstallException e) {
+      JOptionPane.showMessageDialog(
+          this,
+          e.getMessage(),
+          resources.getString("launcher.installerror.title"),
+          JOptionPane.ERROR_MESSAGE);
+      return;
+    }
 
     installProgressSlot.showProgress();
     installProgress.stateChanged("Initializing...", 0);
@@ -303,17 +315,78 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
   }
 
   private static String getInstallBuild(
-      boolean forceInstall, ModpackModel pack, ModpackVersion installedVersion) {
-    String installBuild = null;
-    if (forceInstall && !pack.isLocalOnly()) {
-      installBuild = pack.getBuild();
+      boolean forceInstall, ModpackModel pack, ModpackVersion installedVersion)
+      throws InstallException {
+    PackInfo info = pack.getPackInfo();
+    String recommended = info != null ? info.getRecommended() : null;
+    String latest = info != null ? info.getLatest() : null;
+    List<String> builds = info != null ? info.getBuilds() : null;
+    String installed = installedVersion != null ? installedVersion.getVersion() : null;
+    return resolveInstallBuild(
+        forceInstall,
+        pack.isLocalOnly(),
+        pack.getBuild(),
+        recommended,
+        latest,
+        builds,
+        installed,
+        pack.getDisplayName());
+  }
 
-      if (installBuild.equalsIgnoreCase(InstalledPack.RECOMMENDED))
-        installBuild = pack.getPackInfo().getRecommended();
-      else if (installBuild.equalsIgnoreCase(InstalledPack.LATEST))
-        installBuild = pack.getPackInfo().getLatest();
-    } else if (installedVersion != null) installBuild = installedVersion.getVersion();
-    return installBuild;
+  static String resolveInstallBuild(
+      boolean forceInstall,
+      boolean isLocalOnly,
+      String selectedBuildOrSentinel,
+      String recommendedBuild,
+      String latestBuild,
+      List<String> availableBuilds,
+      String installedBuild,
+      String packDisplayName)
+      throws InstallException {
+    if (forceInstall && !isLocalOnly) {
+      if (InstalledPack.RECOMMENDED.equalsIgnoreCase(selectedBuildOrSentinel)) {
+        return resolveRecommendedOrLatest(
+            recommendedBuild, availableBuilds, packDisplayName, "recommended");
+      }
+      if (InstalledPack.LATEST.equalsIgnoreCase(selectedBuildOrSentinel)) {
+        return resolveRecommendedOrLatest(latestBuild, availableBuilds, packDisplayName, "latest");
+      }
+      if (selectedBuildOrSentinel == null || selectedBuildOrSentinel.trim().isEmpty()) {
+        throw new InstallException(
+            "Cannot determine which build to install for modpack '" + packDisplayName + "'.");
+      }
+      return selectedBuildOrSentinel;
+    }
+    if (installedBuild != null) {
+      return installedBuild;
+    }
+    throw new InstallException(
+        "Cannot determine which build to install for modpack '" + packDisplayName + "'.");
+  }
+
+  private static String resolveRecommendedOrLatest(
+      String preferredBuild, List<String> availableBuilds, String packDisplayName, String label)
+      throws InstallException {
+    if (preferredBuild != null) {
+      return preferredBuild;
+    }
+    if (availableBuilds != null && availableBuilds.size() == 1) {
+      return availableBuilds.get(0);
+    }
+    if (availableBuilds == null || availableBuilds.isEmpty()) {
+      throw new InstallException(
+          "Modpack '"
+              + packDisplayName
+              + "' has no "
+              + label
+              + " build configured and no other builds available.");
+    }
+    throw new InstallException(
+        "Modpack '"
+            + packDisplayName
+            + "' has no "
+            + label
+            + " build configured. Open the modpack settings and pick a specific build.");
   }
 
   /**
