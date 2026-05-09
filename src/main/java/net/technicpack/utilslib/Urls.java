@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 public final class Urls {
   private Urls() {
@@ -24,6 +25,7 @@ public final class Urls {
    * URLEncoder, so the only {@code +} characters left in the output came from spaces.
    */
   public static String pathSegment(String input) {
+    Objects.requireNonNull(input, "Urls.pathSegment: input must not be null");
     try {
       return URLEncoder.encode(input, StandardCharsets.UTF_8.name()).replace("+", "%20");
     } catch (UnsupportedEncodingException impossible) {
@@ -37,6 +39,7 @@ public final class Urls {
    * hides the {@link UnsupportedEncodingException} that's unreachable for UTF-8.
    */
   public static String formParameter(String input) {
+    Objects.requireNonNull(input, "Urls.formParameter: input must not be null");
     try {
       return URLEncoder.encode(input, StandardCharsets.UTF_8.name());
     } catch (UnsupportedEncodingException impossible) {

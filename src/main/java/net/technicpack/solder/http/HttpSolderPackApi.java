@@ -36,6 +36,10 @@ public class HttpSolderPackApi implements ISolderPackApi {
 
   protected HttpSolderPackApi(String baseUrl, String modpackSlug, String clientId, String mirrorUrl)
       throws RestfulAPIException {
+    if (modpackSlug == null) {
+      throw new RestfulAPIException("The Solder modpack slug is null");
+    }
+
     if (baseUrl == null) {
       throw new RestfulAPIException(
           String.format("The Solder base URL for the modpack \"%s\" is null", modpackSlug));
@@ -44,6 +48,11 @@ public class HttpSolderPackApi implements ISolderPackApi {
     if (mirrorUrl == null) {
       throw new RestfulAPIException(
           String.format("The Solder mirror URL for the modpack \"%s\" is null", modpackSlug));
+    }
+
+    if (clientId == null) {
+      throw new RestfulAPIException(
+          String.format("The Solder client ID for the modpack \"%s\" is null", modpackSlug));
     }
 
     // Remove the right trailing slash from the base URL so we can format the URLs in a much cleaner
@@ -81,6 +90,10 @@ public class HttpSolderPackApi implements ISolderPackApi {
 
   @Override
   public Modpack getPackBuild(String build) throws BuildInaccessibleException {
+    if (build == null) {
+      throw new BuildInaccessibleException(
+          modpackSlug, "<null>", new IllegalArgumentException("build name must not be null"));
+    }
     String url =
         String.format(
             "%s/modpack/%s/%s?cid=%s",
