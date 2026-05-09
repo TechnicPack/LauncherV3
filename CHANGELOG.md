@@ -9,6 +9,8 @@ is added at the top.
 
 ## [Unreleased]
 
+## [v4.0-1097] - 2026-05-09
+
 ### Fixed
 - A class of installs that began crashing in build 1090 with a `NullPointerException` deep inside `URLEncoder.encode` now fails gracefully with a "build can't be loaded" error from the install dialog. The crash occurred when the launcher tried to install a modpack with no selected build (most often after a modpack maintainer removed the launcher's previously-cached build name from their Solder, leaving the launcher with a stale reference). The null build name reached the URL-encoding helpers introduced in 1090 and threw `NullPointerException` before the request was even made, terminating the install thread silently. The launcher now refuses null inputs at the URL-construction helpers and surfaces a recognizable "build inaccessible" error from the Solder modpack API surface, so the install dialog reports a meaningful failure instead of stalling. The upstream cause of the null build name itself is being addressed separately.
 
