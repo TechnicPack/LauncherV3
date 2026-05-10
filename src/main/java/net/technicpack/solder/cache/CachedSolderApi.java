@@ -22,6 +22,7 @@ package net.technicpack.solder.cache;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import net.technicpack.launcher.io.LauncherFileSystem;
@@ -29,15 +30,13 @@ import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.solder.ISolderApi;
 import net.technicpack.solder.ISolderPackApi;
 import net.technicpack.solder.io.SolderPackInfo;
-import org.joda.time.DateTime;
-import org.joda.time.Seconds;
 
 public class CachedSolderApi implements ISolderApi {
 
   private LauncherFileSystem fileSystem;
   private ISolderApi innerApi;
   private Collection<SolderPackInfo> cachedPublicPacks = null;
-  private DateTime lastSolderPull = new DateTime(0);
+  private Instant lastSolderPull = Instant.EPOCH;
   private int cacheInSeconds;
 
   private static class CacheTuple {
@@ -116,19 +115,18 @@ public class CachedSolderApi implements ISolderApi {
   @Override
   public Collection<SolderPackInfo> internalGetPublicSolderPacks(
       String solderRoot, ISolderApi packFactory) throws RestfulAPIException {
-    if (Seconds.secondsBetween(lastSolderPull, DateTime.now())
-        .isLessThan(Seconds.seconds(cacheInSeconds))) {
+    Instant now = Instant.now();
+    if (lastSolderPull.plusSeconds(cacheInSeconds).isAfter(now)) {
       if (cachedPublicPacks != null) return cachedPublicPacks;
     }
 
-    if (Seconds.secondsBetween(lastSolderPull, DateTime.now())
-        .isLessThan(Seconds.seconds(cacheInSeconds / 10))) return new ArrayList<>(0);
+    if (lastSolderPull.plusSeconds(cacheInSeconds / 10).isAfter(now)) return new ArrayList<>(0);
 
     try {
       cachedPublicPacks = innerApi.internalGetPublicSolderPacks(solderRoot, this);
       return cachedPublicPacks;
     } finally {
-      lastSolderPull = DateTime.now();
+      lastSolderPull = Instant.now();
     }
   }
 

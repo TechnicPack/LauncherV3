@@ -52,7 +52,6 @@ tasks.named<JavaCompile>("compileJava") {
 }
 
 dependencies {
-    implementation(libs.joda.time)
     implementation(libs.jcommander)
     implementation(libs.gson)
     implementation(libs.commons.io)

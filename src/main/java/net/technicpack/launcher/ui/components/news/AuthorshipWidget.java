@@ -19,6 +19,9 @@
 package net.technicpack.launcher.ui.components.news;
 
 import java.awt.Font;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import javax.swing.*;
 import net.technicpack.launcher.ui.UIConstants;
@@ -27,7 +30,6 @@ import net.technicpack.launchercore.image.ImageJob;
 import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.ImageUtils;
-import org.joda.time.*;
 
 public class AuthorshipWidget extends JPanel implements IImageJobListener<AuthorshipInfo> {
   private JLabel avatarView;
@@ -74,29 +76,25 @@ public class AuthorshipWidget extends JPanel implements IImageJobListener<Author
   }
 
   private String getDateText(Date date) {
-    DateTime posted = new DateTime(date.getTime());
-    DateTime now = new DateTime();
+    ZonedDateTime posted = date.toInstant().atZone(ZoneId.systemDefault());
+    ZonedDateTime now = ZonedDateTime.now();
 
-    Years yearsSince = Years.yearsBetween(posted, now);
-    Months monthsSince = Months.monthsBetween(posted, now);
-    Days daysSince = Days.daysBetween(posted, now);
-    Hours hoursSince = Hours.hoursBetween(posted, now);
-    Minutes minutesSince = Minutes.minutesBetween(posted, now);
+    long yearsSince = ChronoUnit.YEARS.between(posted, now);
+    long monthsSince = ChronoUnit.MONTHS.between(posted, now);
+    long daysSince = ChronoUnit.DAYS.between(posted, now);
+    long hoursSince = ChronoUnit.HOURS.between(posted, now);
+    long minutesSince = ChronoUnit.MINUTES.between(posted, now);
 
-    if (yearsSince.getYears() > 1)
-      return resources.getString("time.years", Integer.toString(yearsSince.getYears()));
-    else if (yearsSince.getYears() == 1) return resources.getString("time.year");
-    else if (monthsSince.getMonths() > 1)
-      return resources.getString("time.months", Integer.toString(monthsSince.getMonths()));
-    else if (monthsSince.getMonths() == 1) return resources.getString("time.month");
-    else if (daysSince.getDays() > 1)
-      return resources.getString("time.days", Integer.toString(daysSince.getDays()));
-    else if (daysSince.getDays() == 1) return resources.getString("time.day");
-    else if (hoursSince.getHours() > 1)
-      return resources.getString("time.hours", Integer.toString(hoursSince.getHours()));
-    else if (hoursSince.getHours() == 1) return resources.getString("time.hour");
-    else if (minutesSince.getMinutes() > 1)
-      return resources.getString("time.minutes", Integer.toString(minutesSince.getMinutes()));
+    if (yearsSince > 1) return resources.getString("time.years", Long.toString(yearsSince));
+    else if (yearsSince == 1) return resources.getString("time.year");
+    else if (monthsSince > 1) return resources.getString("time.months", Long.toString(monthsSince));
+    else if (monthsSince == 1) return resources.getString("time.month");
+    else if (daysSince > 1) return resources.getString("time.days", Long.toString(daysSince));
+    else if (daysSince == 1) return resources.getString("time.day");
+    else if (hoursSince > 1) return resources.getString("time.hours", Long.toString(hoursSince));
+    else if (hoursSince == 1) return resources.getString("time.hour");
+    else if (minutesSince > 1)
+      return resources.getString("time.minutes", Long.toString(minutesSince));
     else return resources.getString("time.minute");
   }
 

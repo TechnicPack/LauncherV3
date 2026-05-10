@@ -2,7 +2,6 @@
 launch4j = "4.0.0"
 junit-jupiter = "6.0.3"
 junit-platform = "6.0.3"
-joda-time = "2.14.2"
 jcommander = "1.82"
 gson = "2.14.0"
 commons-io = "2.22.0"
@@ -25,7 +24,6 @@ annotations = "26.1.0"
 qrcodegen = "1.8.0"
 
 [libraries]
-joda-time = { module = "joda-time:joda-time", version.ref = "joda-time" }
 jcommander = { module = "com.beust:jcommander", version.ref = "jcommander" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 commons-io = { module = "commons-io:commons-io", version.ref = "commons-io" }

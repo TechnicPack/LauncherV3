@@ -40,6 +40,8 @@ import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -117,7 +119,6 @@ import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.JavaUtils;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
-import org.joda.time.DateTime;
 
 public class LauncherMain {
 
@@ -643,14 +644,13 @@ public class LauncherMain {
                 return;
               }
 
-              final DateTime aWeekAgo = DateTime.now().minusWeeks(1);
+              final Instant aWeekAgo = Instant.now().minus(7, ChronoUnit.DAYS);
               try (Stream<Path> walk = Files.walk(logsDir, 1)) {
                 walk.filter(p -> Files.isRegularFile(p) && p.toString().endsWith(".log"))
                     .forEach(
                         p -> {
                           try {
-                            DateTime dateTime =
-                                new DateTime(Files.getLastModifiedTime(p).toMillis());
+                            Instant dateTime = Files.getLastModifiedTime(p).toInstant();
 
                             if (dateTime.isBefore(aWeekAgo)) {
                               Files.deleteIfExists(p);

@@ -30,6 +30,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.logging.Level;
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
@@ -38,8 +39,6 @@ import net.technicpack.rest.io.Modpack;
 import net.technicpack.solder.ISolderPackApi;
 import net.technicpack.solder.io.SolderPackInfo;
 import net.technicpack.utilslib.Utils;
-import org.joda.time.DateTime;
-import org.joda.time.Seconds;
 
 public class CachedSolderPackApi implements ISolderPackApi {
 
@@ -48,7 +47,7 @@ public class CachedSolderPackApi implements ISolderPackApi {
   private final String packSlug;
 
   private SolderPackInfo rootInfoCache = null;
-  private DateTime lastInfoAccess = new DateTime(0);
+  private Instant lastInfoAccess = Instant.EPOCH;
 
   private final Cache<String, Modpack> buildCache;
   private final Cache<String, Boolean> deadBuildCache;
@@ -96,8 +95,7 @@ public class CachedSolderPackApi implements ISolderPackApi {
 
   @Override
   public SolderPackInfo getPackInfo() throws RestfulAPIException {
-    if (Seconds.secondsBetween(lastInfoAccess, DateTime.now())
-            .isLessThan(Seconds.seconds(cacheInSeconds))
+    if (lastInfoAccess.plusSeconds(cacheInSeconds).isAfter(Instant.now())
         && rootInfoCache != null) {
       return rootInfoCache;
     }
@@ -117,7 +115,7 @@ public class CachedSolderPackApi implements ISolderPackApi {
       saveForeverCache();
       return rootInfoCache;
     } finally {
-      lastInfoAccess = DateTime.now();
+      lastInfoAccess = Instant.now();
     }
   }
 
