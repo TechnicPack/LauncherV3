@@ -25,8 +25,12 @@ public class NameFilterPackSource implements IPackSource {
     LinkedList<PackInfo> info = new LinkedList<>();
 
     for (ModpackModel modpack : baseModpacks.getModpacks()) {
-      if (modpack.getDisplayName().toUpperCase().contains(filterTerms)) {
-        info.add(modpack.getPackInfo());
+      PackInfo packInfo = modpack.getPackInfo();
+      String displayName = modpack.getDisplayName();
+      if (packInfo != null
+          && displayName != null
+          && displayName.toUpperCase().contains(filterTerms)) {
+        info.add(packInfo);
       }
     }
 
