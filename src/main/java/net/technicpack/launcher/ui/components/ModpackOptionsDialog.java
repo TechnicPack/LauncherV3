@@ -599,10 +599,10 @@ public class ModpackOptionsDialog extends LauncherDialog {
 
     String build = modpack.getBuild();
 
-    if (build.equals(InstalledPack.RECOMMENDED)) {
+    if (build == null || InstalledPack.RECOMMENDED.equals(build)) {
       recommended.setSelected(true);
       selectRecommended();
-    } else if (build.equals(InstalledPack.LATEST)) {
+    } else if (InstalledPack.LATEST.equals(build)) {
       latest.setSelected(true);
       selectLatest();
     } else {
