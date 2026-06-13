@@ -16,7 +16,21 @@
   // duplicate vuln PRs so the two bots don't race. Renovate = version
   // updates only.
   "vulnerabilityAlerts": { "enabled": false },
+  // Lock file maintenance refreshes the whole lockfile to the newest
+  // resolvable versions and bypasses minimumReleaseAge, so disable it to keep
+  // the 7-day cooldown airtight (Dependabot covers vulnerable transitives).
+  "lockFileMaintenance": { "enabled": false },
   "packageRules": [
+    {
+      // Do NOT pin devDependencies. Renovate's pin step ignores release age,
+      // which sidesteps the 7-day cooldown. These are npm dev tooling only, so
+      // keep semver ranges and let the normal (cooled) update flow govern.
+      // This overrides config:best-practices' :pinDevDependencies; a bare
+      // :preserveSemverRanges would not, since a packageRule beats a top-level
+      // rangeStrategy.
+      "matchDepTypes": ["devDependencies"],
+      "rangeStrategy": "bump"
+    },
     {
       // Flying Saucer requires Java 11 in 9.5.0, and Java 17 in 9.6.0 (https://github.com/flyingsaucerproject/flyingsaucer?tab=readme-ov-file#getting-flying-saucer),
       // so these changes are pending that, since we're still targeting Java 8.
