@@ -24,6 +24,7 @@ jobs:
       contents: write
     env:
       GRADLE_WORKFLOW_FILE: gradle.yml
+      LAUNCHER_MAJOR: "4.0"
       REMOTE_HOST: ${{ secrets.LAUNCHER_REMOTE_HOST }}
       REMOTE_USER: ${{ secrets.LAUNCHER_REMOTE_USER }}
       REMOTE_BASE_DIR: ${{ secrets.LAUNCHER_REMOTE_BASE_DIR }}
@@ -34,6 +35,33 @@ jobs:
     steps:
       - name: Checkout master
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Validate Secrets
+        env:
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          PLATFORM_API_KEY: ${{ secrets.PLATFORM_API_KEY }}
+          DISCORD_WEBHOOK_TOKEN: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
+        run: |
+          set -euo pipefail
+          missing=0
+          for var_name in \
+            DEPLOY_SSH_PRIVATE_KEY \
+            PLATFORM_API_KEY \
+            DISCORD_WEBHOOK_TOKEN \
+            REMOTE_HOST \
+            REMOTE_USER \
+            REMOTE_BASE_DIR \
+            DISCORD_WEBHOOK_ID \
+            LAUNCHER_UPDATE_BASE_URL \
+            LAUNCHER_VERSION_UPDATE_BASE_URL; do
+            if [[ -z "${!var_name}" ]]; then
+              echo "::error::Missing required secret: ${var_name}"
+              missing=1
+            fi
+          done
+          if [[ "${missing}" -ne 0 ]]; then
+            exit 1
+          fi
 
       - name: Resolve Build Run
         id: resolve
@@ -145,16 +173,17 @@ jobs:
           mkdir -p launcher-artifacts
           unzip -q launcher-artifacts.zip -d launcher-artifacts
 
-          jar_path="$(find launcher-artifacts -type f -name 'launcher-4.0-*.jar' | head -n1)"
-          exe_path="$(find launcher-artifacts -type f -name 'launcher-4.0-*.exe' | head -n1)"
-          osx_path="$(find launcher-artifacts -type f -name 'launcher-4.0-*-osx.app.zip' | head -n1)"
+          jar_path="$(find launcher-artifacts -type f -name "launcher-${LAUNCHER_MAJOR}-*.jar" | head -n1)"
+          exe_path="$(find launcher-artifacts -type f -name "launcher-${LAUNCHER_MAJOR}-*.exe" | head -n1)"
+          osx_path="$(find launcher-artifacts -type f -name "launcher-${LAUNCHER_MAJOR}-*-osx.app.zip" | head -n1)"
 
           if [[ -z "${jar_path}" || -z "${exe_path}" || -z "${osx_path}" ]]; then
             echo "::error::Expected jar/exe/osx artifacts were not found in downloaded artifact ${artifact_name}."
             exit 1
           fi
 
-          build_number="$(basename "${jar_path}" | sed -E 's/^launcher-4\.0-([0-9]+)\.jar$/\1/')"
+          build_number="$(basename "${jar_path}" .jar)"
+          build_number="${build_number##*-}"
           if [[ -z "${build_number}" || ! "${build_number}" =~ ^[0-9]+$ ]]; then
             echo "::error::Failed to parse build number from $(basename "${jar_path}")."
             exit 1
@@ -172,39 +201,12 @@ jobs:
           BUILD_NUMBER: ${{ steps.artifact.outputs.build_number }}
         run: |
           set -euo pipefail
-          tag="v4.0-${BUILD_NUMBER}"
+          tag="v${LAUNCHER_MAJOR}-${BUILD_NUMBER}"
           if gh release view "${tag}" --repo "${GITHUB_REPOSITORY}" &>/dev/null; then
             echo "::error::Release ${tag} already exists. Immutable releases cannot be overwritten — promote a new build number instead."
             exit 1
           fi
           echo "No existing release for ${tag}; safe to promote."
-
-      - name: Validate Secrets
-        env:
-          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
-          PLATFORM_API_KEY: ${{ secrets.PLATFORM_API_KEY }}
-          DISCORD_WEBHOOK_TOKEN: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
-        run: |
-          set -euo pipefail
-          missing=0
-          for var_name in \
-            DEPLOY_SSH_PRIVATE_KEY \
-            PLATFORM_API_KEY \
-            DISCORD_WEBHOOK_TOKEN \
-            REMOTE_HOST \
-            REMOTE_USER \
-            REMOTE_BASE_DIR \
-            DISCORD_WEBHOOK_ID \
-            LAUNCHER_UPDATE_BASE_URL \
-            LAUNCHER_VERSION_UPDATE_BASE_URL; do
-            if [[ -z "${!var_name}" ]]; then
-              echo "::error::Missing required secret: ${var_name}"
-              missing=1
-            fi
-          done
-          if [[ "${missing}" -ne 0 ]]; then
-            exit 1
-          fi
 
       - name: Configure SSH
         env:
@@ -215,7 +217,24 @@ jobs:
           chmod 700 ~/.ssh
           printf '%s\n' "${DEPLOY_SSH_PRIVATE_KEY}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "${REMOTE_HOST}" >> ~/.ssh/known_hosts
+
+          # Trust the deploy host via DNSSEC-signed SSHFP records instead of
+          # blind TOFU. GitHub's systemd-resolved stub does not surface the
+          # DNSSEC AD bit, so point the runner at validating resolvers and
+          # trust their AD bit (options trust-ad) — ssh needs that to accept
+          # SSHFP as authenticated.
+          sudo rm -f /etc/resolv.conf
+          printf 'nameserver 1.1.1.1\nnameserver 8.8.8.8\noptions edns0 trust-ad\n' \
+            | sudo tee /etc/resolv.conf >/dev/null
+
+          # Verify host keys from signed SSHFP only; fail closed (no prompt,
+          # no TOFU) if validation does not apply.
+          printf 'Host *\n    VerifyHostKeyDNS yes\n    StrictHostKeyChecking yes\n    BatchMode yes\n' >> ~/.ssh/config
+          chmod 600 ~/.ssh/config
+
+          # Pre-flight: confirm the host key is accepted via SSHFP before any
+          # artifacts are shipped.
+          ssh "${REMOTE_USER}@${REMOTE_HOST}" true
 
       - name: Upload Promoted Artifacts
         env:
@@ -244,8 +263,8 @@ jobs:
           set -euo pipefail
           launcher_update_base="${LAUNCHER_UPDATE_BASE_URL%/}"
           launcher_version_base="${LAUNCHER_VERSION_UPDATE_BASE_URL%/}"
-          curl -s -S "${launcher_update_base}/stable4/${BUILD_NUMBER}?k=${PLATFORM_API_KEY}"
-          curl -s -S "${launcher_version_base}/stable4/update?k=${PLATFORM_API_KEY}"
+          curl -fsS "${launcher_update_base}/stable4/${BUILD_NUMBER}?k=${PLATFORM_API_KEY}"
+          curl -fsS "${launcher_version_base}/stable4/update?k=${PLATFORM_API_KEY}"
 
       - name: Notify Discord
         env:
@@ -253,9 +272,10 @@ jobs:
           DISCORD_WEBHOOK_TOKEN: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
         run: |
           set -euo pipefail
-          curl -s -S \
+          curl -fsS \
             "https://discord.com/api/webhooks/${DISCORD_WEBHOOK_ID}/${DISCORD_WEBHOOK_TOKEN}?wait=true" \
-            --data-urlencode "content=New launcher stable build: ${BUILD_NUMBER}"
+            --data-urlencode "content=New launcher stable build: ${BUILD_NUMBER}" \
+            || echo "::warning::Discord notification failed (non-fatal)"
 
       - name: Promotion Summary
         env:
@@ -313,8 +333,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          tag="v4.0-${BUILD_NUMBER}"
-          title="4.0-${BUILD_NUMBER}"
+          tag="v${LAUNCHER_MAJOR}-${BUILD_NUMBER}"
+          title="${LAUNCHER_MAJOR}-${BUILD_NUMBER}"
 
           if [[ "${NOTES_SOURCE}" == "changelog" ]]; then
             echo "Using release notes from CHANGELOG.md [Unreleased]"
@@ -372,7 +392,8 @@ jobs:
           import os, re, sys
           build = os.environ['BUILD_NUMBER']
           date = os.environ['DATE_STR']
-          new_heading = f'## [v4.0-{build}] - {date}'
+          major = os.environ['LAUNCHER_MAJOR']
+          new_heading = f'## [v{major}-{build}] - {date}'
           with open('CHANGELOG.md') as f:
               content = f.read()
           pattern = re.compile(r'^(## \[Unreleased\][^\n]*\n)', re.MULTILINE)
@@ -386,5 +407,19 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
           git add CHANGELOG.md
-          git commit -m "docs(changelog): release v4.0-${BUILD_NUMBER} [skip ci]"
-          git push origin HEAD:master
+          git commit -m "docs(changelog): release v${LAUNCHER_MAJOR}-${BUILD_NUMBER} [skip ci]"
+
+          # master may have advanced during the promotion; rebase the changelog
+          # commit onto the latest tip and retry the push.
+          for attempt in 1 2 3 4 5; do
+            if git push origin HEAD:master; then
+              echo "Changelog push succeeded (attempt ${attempt})."
+              break
+            fi
+            if [[ "${attempt}" -eq 5 ]]; then
+              echo "::error::Failed to push changelog rollover after ${attempt} attempts."
+              exit 1
+            fi
+            echo "::warning::Push rejected (attempt ${attempt}); rebasing onto latest master."
+            git pull --rebase origin master
+          done
