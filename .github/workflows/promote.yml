@@ -72,51 +72,24 @@ jobs:
         run: |
           set -euo pipefail
 
-          auth_header="Authorization: Bearer ${GH_TOKEN}"
-          api_header="Accept: application/vnd.github+json"
-
           if [[ -n "${INPUT_RUN_ID}" ]]; then
             run_id="${INPUT_RUN_ID}"
           elif [[ -n "${INPUT_BUILD_NUMBER}" ]]; then
             artifact_name="launcher-${INPUT_BUILD_NUMBER}"
-            run_id=""
+            run_id="$(gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=${artifact_name}&per_page=100" \
+              --jq '[.artifacts[] | select(.expired == false)] | .[0].workflow_run.id // empty')"
 
-            for page in $(seq 1 20); do
-              artifacts_json="$(curl -fsSL \
-                -H "${auth_header}" \
-                -H "${api_header}" \
-                "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100&page=${page}")"
-
-              run_id="$(jq -r \
-                --arg artifact_name "${artifact_name}" \
-                '.artifacts[]
-                | select(.expired == false)
-                | select(.name == $artifact_name)
-                | .workflow_run.id' <<<"${artifacts_json}" | head -n1)"
-
-              if [[ -n "${run_id}" && "${run_id}" != "null" ]]; then
-                break
-              fi
-
-              artifact_count="$(jq -r '.artifacts | length' <<<"${artifacts_json}")"
-              if [[ "${artifact_count}" -lt 100 ]]; then
-                break
-              fi
-            done
-
-            if [[ -z "${run_id}" || "${run_id}" == "null" ]]; then
+            if [[ -z "${run_id}" ]]; then
               echo "::error::No non-expired artifact named ${artifact_name} was found."
               exit 1
             fi
           else
-            runs_json="$(curl -fsSL \
-              -H "${auth_header}" \
-              -H "${api_header}" \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/${GRADLE_WORKFLOW_FILE}/runs?branch=master&event=push&per_page=20")"
+            run_id="$(gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/workflows/${GRADLE_WORKFLOW_FILE}/runs?branch=master&event=push&status=success&per_page=1" \
+              --jq '.workflow_runs[0].id // empty')"
 
-            run_id="$(jq -r '[.workflow_runs[] | select(.conclusion == "success")] | .[0].id' <<<"${runs_json}")"
-
-            if [[ -z "${run_id}" || "${run_id}" == "null" ]]; then
+            if [[ -z "${run_id}" ]]; then
               echo "::error::No successful runs were found for ${GRADLE_WORKFLOW_FILE} on master."
               exit 1
             fi
@@ -147,31 +120,17 @@ jobs:
         run: |
           set -euo pipefail
 
-          auth_header="Authorization: Bearer ${GH_TOKEN}"
-          api_header="Accept: application/vnd.github+json"
+          artifact_name="$(gh api \
+            "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}/artifacts?per_page=100" \
+            --jq 'first(.artifacts[] | select(.name | startswith("launcher-")) | .name) // empty')"
 
-          artifacts_json="$(curl -fsSL \
-            -H "${auth_header}" \
-            -H "${api_header}" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}/artifacts?per_page=100")"
-
-          artifact_id="$(jq -r '.artifacts[] | select(.name | startswith("launcher-")) | .id' <<<"${artifacts_json}" | head -n1)"
-          artifact_name="$(jq -r '.artifacts[] | select(.name | startswith("launcher-")) | .name' <<<"${artifacts_json}" | head -n1)"
-
-          if [[ -z "${artifact_id}" || "${artifact_id}" == "null" ]]; then
+          if [[ -z "${artifact_name}" ]]; then
             echo "::error::No launcher artifact was found on run ${RUN_ID}."
             exit 1
           fi
 
-          curl -fsSL \
-            -H "${auth_header}" \
-            -H "${api_header}" \
-            -L "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}/zip" \
-            -o launcher-artifacts.zip
-
           rm -rf launcher-artifacts
-          mkdir -p launcher-artifacts
-          unzip -q launcher-artifacts.zip -d launcher-artifacts
+          gh run download "${RUN_ID}" --name "${artifact_name}" --dir launcher-artifacts
 
           jar_path="$(find launcher-artifacts -type f -name "launcher-${LAUNCHER_MAJOR}-*.jar" | head -n1)"
           exe_path="$(find launcher-artifacts -type f -name "launcher-${LAUNCHER_MAJOR}-*.exe" | head -n1)"
