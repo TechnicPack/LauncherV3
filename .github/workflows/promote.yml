@@ -166,6 +166,19 @@ jobs:
           echo "build_number=${build_number}" >> "${GITHUB_OUTPUT}"
           echo "artifact_name=${artifact_name}" >> "${GITHUB_OUTPUT}"
 
+      - name: Guard Against Re-Promotion
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_NUMBER: ${{ steps.artifact.outputs.build_number }}
+        run: |
+          set -euo pipefail
+          tag="v4.0-${BUILD_NUMBER}"
+          if gh release view "${tag}" --repo "${GITHUB_REPOSITORY}" &>/dev/null; then
+            echo "::error::Release ${tag} already exists. Immutable releases cannot be overwritten — promote a new build number instead."
+            exit 1
+          fi
+          echo "No existing release for ${tag}; safe to promote."
+
       - name: Validate Secrets
         env:
           DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
@@ -336,10 +349,6 @@ jobs:
               echo "::warning::No previous release found, skipping changelog"
               printf 'Promoted build %s.\n' "${BUILD_NUMBER}" > "${notes_file}"
             fi
-          fi
-
-          if gh release view "${tag}" --repo "${GITHUB_REPOSITORY}" &>/dev/null; then
-            gh release delete "${tag}" --repo "${GITHUB_REPOSITORY}" --yes
           fi
 
           gh release create "${tag}" \
