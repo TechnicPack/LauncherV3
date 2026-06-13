@@ -11,6 +11,9 @@ on:
       - 'LICENSE*'
       - 'README.md'
       - 'renovate.json5'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
 
 jobs:
   build:
