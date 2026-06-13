@@ -10,6 +10,12 @@
   "minimumReleaseAge": "7 days",
   "internalChecksFilter": "strict",
   "rangeStrategy": "bump",
+  // Dependabot owns security remediation (it works off the full dependency
+  // graph and catches Gradle transitive CVEs that Renovate cannot bump:
+  // no lockfile, no transitive-override mechanism). Disable Renovate's
+  // duplicate vuln PRs so the two bots don't race. Renovate = version
+  // updates only.
+  "vulnerabilityAlerts": { "enabled": false },
   "packageRules": [
     {
       // Flying Saucer requires Java 11 in 9.5.0, and Java 17 in 9.6.0 (https://github.com/flyingsaucerproject/flyingsaucer?tab=readme-ov-file#getting-flying-saucer),
