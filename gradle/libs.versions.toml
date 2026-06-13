@@ -1,7 +1,7 @@
 [versions]
 launch4j = "4.0.0"
-junit-jupiter = "6.0.3"
-junit-platform = "6.0.3"
+junit-jupiter = "6.1.0"
+junit-platform = "6.1.0"
 jcommander = "1.82"
 gson = "2.14.0"
 commons-io = "2.22.0"
