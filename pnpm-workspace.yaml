@@ -1,0 +1,6 @@
+# Refuse to install any package version (direct OR transitive) published less
+# than 7 days ago. This is the install-layer counterpart to Renovate's
+# minimumReleaseAge ("7 days") in renovate.json5: Renovate gates PR creation
+# for direct deps it manages, while this gates actual resolution of every
+# dependency — including transitives Renovate can't see. 10080 = 7 * 24 * 60.
+minimumReleaseAge: 10080
