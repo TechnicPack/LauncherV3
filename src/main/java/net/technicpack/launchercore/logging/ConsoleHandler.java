@@ -135,6 +135,15 @@ public class ConsoleHandler extends Handler {
   private void writeBatchToUI(List<LogRecord> batch) {
     final Document document = consoleFrame.getDocument();
 
+    // Coalesce consecutive records that share the same attribute set into one
+    // insertString. Each insert fires a document event and a view relayout, and
+    // profiling showed text layout/measurement dominates the EDT cost -- so
+    // fewer, larger inserts mean fewer relayout passes. The attribute sets from
+    // getAttributes() are shared singletons, so an identity check finds the run
+    // boundaries.
+    final StringBuilder runText = new StringBuilder();
+    AttributeSet runAttributes = null;
+
     for (LogRecord record : batch) {
       String msg;
       try {
@@ -147,13 +156,13 @@ public class ConsoleHandler extends Handler {
       final AttributeSet attributes = getAttributes(record, msg);
       final String writeText = msg.replace("\n\n", "\n");
 
-      try {
-        int offset = document.getLength();
-        document.insertString(offset, writeText, attributes);
-      } catch (BadLocationException e) {
-        Sentry.captureException(e);
+      if (runText.length() > 0 && attributes != runAttributes) {
+        flushRun(document, runText, runAttributes);
       }
+      runAttributes = attributes;
+      runText.append(writeText);
     }
+    flushRun(document, runText, runAttributes);
 
     trimDocument(document);
 
@@ -162,6 +171,19 @@ public class ConsoleHandler extends Handler {
     // never calls modelToView() -- that path is what crashed in
     // LAUNCHER-63 / LAUNCHER-3N.
     consoleFrame.autoScrollToBottom();
+  }
+
+  /** Insert the accumulated run as a single styled span, then reset it. */
+  private void flushRun(Document document, StringBuilder runText, AttributeSet attributes) {
+    if (runText.length() == 0) {
+      return;
+    }
+    try {
+      document.insertString(document.getLength(), runText.toString(), attributes);
+    } catch (BadLocationException e) {
+      Sentry.captureException(e);
+    }
+    runText.setLength(0);
   }
 
   @Override
