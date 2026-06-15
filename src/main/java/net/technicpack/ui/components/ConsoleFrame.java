@@ -24,6 +24,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import javax.swing.*;
 import javax.swing.text.*;
+import javax.swing.undo.UndoableEdit;
 
 /**
  * Console dialog for showing console messages.
@@ -132,7 +133,10 @@ public class ConsoleFrame extends JFrame implements MouseListener {
 
   /** Build the interface. */
   private void buildUI() {
-    this.textPane = new JTextPane();
+    // Back the console with a no-undo document: it is a read-only log, so the
+    // undo records the default GapContent builds on every trim are pure waste
+    // (RemoveUndo walks the removed range collecting positions). See NoUndoContent.
+    this.textPane = new JTextPane(new DefaultStyledDocument(new NoUndoContent(), new StyleContext()));
     textPane.addMouseListener(this);
     textPane.setFont(getMonospaceFont());
     textPane.setEditable(false);
@@ -239,4 +243,24 @@ public class ConsoleFrame extends JFrame implements MouseListener {
     }
   }
 
+  /**
+   * GapContent that skips undo bookkeeping on remove. The console is read-only,
+   * so nothing is ever undone, yet the default content builds a RemoveUndo on
+   * every trim -- walking the removed range to collect Position marks, which is
+   * throughput-proportional waste. AbstractDocument.remove() treats a null edit
+   * as "content does not support undo", so this is a supported opt-out.
+   */
+  private static final class NoUndoContent extends GapContent {
+    private static final long serialVersionUID = 1L;
+    private static final Object[] EMPTY = new Object[0];
+
+    @Override
+    public UndoableEdit remove(int where, int nitems) throws BadLocationException {
+      if (where + nitems >= length()) {
+        throw new BadLocationException("Invalid remove", length() + 1);
+      }
+      replace(where, nitems, EMPTY, 0); // delete the text; the gap shift updates marks
+      return null; // skip RemoveUndo's position walk
+    }
+  }
 }
