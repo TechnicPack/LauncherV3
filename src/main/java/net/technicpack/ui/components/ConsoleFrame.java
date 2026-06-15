@@ -50,6 +50,7 @@ public class ConsoleFrame extends JFrame implements MouseListener {
   private JTextPane textPane;
   private Document document;
   private JScrollPane scrollPane;
+  private boolean autoScroll = true;
 
   /** Construct the frame. */
   public ConsoleFrame(Image frameIcon) {
@@ -107,6 +108,26 @@ public class ConsoleFrame extends JFrame implements MouseListener {
 
   public JScrollPane getScrollPane() {
     return scrollPane;
+  }
+
+  /**
+   * Scroll to the newest line, but only while auto-scroll is enabled (toggled
+   * from the right-click menu). Call after appending content.
+   *
+   * <p>Pins via {@link JScrollBar#setValue(int)} on the scrollbar model; it never
+   * calls {@code JTextComponent.modelToView()}, the path that threw {@code
+   * BadLocationException} on Java 8 and {@code IllegalArgumentException} from the
+   * line-break iterator on Java 25 (LAUNCHER-63 / LAUNCHER-3N).
+   */
+  public void autoScrollToBottom() {
+    if (!autoScroll) {
+      return;
+    }
+    SwingUtilities.invokeLater(
+        () -> {
+          JScrollBar vertical = scrollPane.getVerticalScrollBar();
+          vertical.setValue(vertical.getMaximum());
+        });
   }
 
   /** Build the interface. */
@@ -203,6 +224,19 @@ public class ConsoleFrame extends JFrame implements MouseListener {
       clear = new JMenuItem("Clear");
       add(clear);
       clear.addActionListener(e -> textPane.setText(null));
+
+      addSeparator();
+
+      JCheckBoxMenuItem autoScrollItem = new JCheckBoxMenuItem("Auto-scroll", autoScroll);
+      add(autoScrollItem);
+      autoScrollItem.addActionListener(
+          e -> {
+            autoScroll = autoScrollItem.isSelected();
+            if (autoScroll) {
+              autoScrollToBottom(); // snap straight to the bottom when re-enabled
+            }
+          });
     }
   }
+
 }

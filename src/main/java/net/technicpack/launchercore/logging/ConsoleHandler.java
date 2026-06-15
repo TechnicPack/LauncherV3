@@ -20,7 +20,6 @@
 package net.technicpack.launchercore.logging;
 
 import io.sentry.Sentry;
-import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -28,9 +27,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -136,12 +132,6 @@ public class ConsoleHandler extends Handler {
     }
   }
 
-  private boolean isScrollAtBottom(JScrollPane scrollPane) {
-    JScrollBar vertical = scrollPane.getVerticalScrollBar();
-    int bottom = vertical.getMaximum() - vertical.getVisibleAmount();
-    return vertical.getValue() >= (bottom - 30); // Allow slight margin
-  }
-
   private void writeBatchToUI(List<LogRecord> batch) {
     final Document document = consoleFrame.getDocument();
 
@@ -167,26 +157,11 @@ public class ConsoleHandler extends Handler {
 
     trimDocument(document);
 
-    final JScrollPane scrollPane = consoleFrame.getScrollPane();
-    final boolean shouldScroll = true;
-
-    // Only scroll to bottom if we were already at the bottom
-    if (shouldScroll) {
-      // Defer scrolling to allow the scroll pane and text pane to catch up.
-      // This is necessary because otherwise the scrolling will start "lagging" behind.
-      SwingUtilities.invokeLater(
-          () -> {
-            try {
-              JTextPane textPane = consoleFrame.getTextPane();
-              Rectangle rect = textPane.modelToView(document.getLength());
-              if (rect != null) {
-                textPane.scrollRectToVisible(rect);
-              }
-            } catch (BadLocationException e) {
-              Sentry.captureException(e);
-            }
-          });
-    }
+    // Follow the newest line if auto-scroll is enabled (toggled from the
+    // console's right-click menu). ConsoleFrame owns the scrollbar work and
+    // never calls modelToView() -- that path is what crashed in
+    // LAUNCHER-63 / LAUNCHER-3N.
+    consoleFrame.autoScrollToBottom();
   }
 
   @Override
