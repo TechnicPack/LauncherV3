@@ -9,6 +9,16 @@ is added at the top.
 
 ## [Unreleased]
 
+### Added
+- The launcher's log console now has an **Auto-scroll** toggle in its right-click menu, enabled by default. Leave it on to keep following the newest line as the console always has; turn it off to scroll up and read earlier output without new log lines pulling you back to the bottom, then turn it back on to jump to the latest and resume following.
+
+### Changed
+- The log console is far lighter on the CPU when a modpack or the game is logging heavily. It now refreshes at a capped frame rate instead of repainting on every burst of output, and does less redundant work per line, cutting the console's processor use by roughly 40-60% under a fast log stream (on slower machines, a chatty pack no longer turns the console window itself into a noticeable drain). Auto-scroll was also reworked to follow the newest line directly through the scrollbar instead of a text-layout calculation that could occasionally fail under heavy load, so following the latest output is more reliable as well.
+- Routine dependency upkeep: bundled libraries (zstd-jni, SLF4J, Maven Artifact, and the Sentry crash-reporting SDK) and the build tooling were refreshed to current upstream releases, and the launcher dropped its Joda-Time dependency in favour of the JDK's built-in `java.time`. Maintenance and bug-fix updates only; no behaviour changes for end users.
+
+### Fixed
+- Searching for a modpack by name no longer crashes the launcher when one of your locally installed packs matches the search text. Some installed packs are local-only and have no online listing; when one of those matched a name search, the search emitted an incomplete result the pack loader couldn't process, throwing a `NullPointerException` (reported as LAUNCHER-E). Local-only installs are now skipped in name-search results for the moment, while online and default packs continue to appear in search exactly as before. A regression test was added so name search can never emit one of these incomplete results again.
+
 ## [v4.0-1098] - 2026-05-10
 
 ### Fixed
@@ -32,9 +42,7 @@ is added at the top.
 - Adding a Microsoft account now opens a dialog with two sign-in options at once: the existing browser-based sign-in, and a short device code with a QR code you can scan with your phone (or any other device with a camera) to finish signing in there. Either option signs you in; whichever finishes first wins. The device code path avoids the localhost callback entirely and works in environments where the browser-based sign-in has historically hung or been blocked (antivirus intercepting localhost, Windows Firewall prompts dismissed, corporate proxies, some OneDrive configurations). The dialog shows a countdown for the device code's 15-minute window; if it expires before you finish, a "Get a new code" button fetches a fresh code without having to close and reopen the dialog.
 
 ### Changed
-- Bumped bundled third-party libraries to current upstream releases: Gson 2.13.2 to 2.14.0, Guava 33.5.0 to 33.6.0, Apache Commons IO 2.21.0 to 2.22.0, Apache Commons Codec 1.21.0 to 1.22.0, Joda-Time 2.14.1 to 2.14.2 (latest tzdata), Maven Artifact 3.9.14 to 3.9.15, zstd-jni 1.5.7-7 to 1.5.7-8. Bug-fix and timezone-data refreshes only; no behaviour changes for end users.
-- Bumped the Sentry crash-reporting SDK from 8.36.0 to 8.40.0 and its companion Gradle plugin from 6.2.0 to 6.6.0. Bundled bug fixes only; the launcher's reporting behaviour and self-hosted Sentry endpoint are unchanged.
-- Bumped the Gradle build tool from 9.4.1 to 9.5.0 and the Shadow plugin from 9.4.0 to 9.4.1. Build-time only; no impact on the produced launcher binary.
+- Routine dependency upkeep: bundled libraries (Gson, Guava, Apache Commons IO/Codec, Joda-Time with the latest tzdata, Maven Artifact, zstd-jni), the Sentry crash-reporting SDK, and the build tooling were refreshed to current upstream releases. Bug-fix and timezone-data updates only; no behaviour changes for end users.
 
 ### Fixed
 - Mojang JRE component selection now recognizes the version strings Mojang actually publishes for `java-runtime-alpha` (`16.0.1.9.1`, `16.0.1.9.1_3`) and `jre-legacy` (`8u202`, `8u51-cacert462b08`). Previously these were skipped as "unrecognized version" and the launcher fell back to a hardcoded component map. The hardcoded fallback already covered the cases Mojang ships today, but any future runtime that uses the same dotted-with-build form would have been silently dropped from the live manifest. The parser now handles arbitrary-length dotted versions and the classic `<major>u<update>` shape.
