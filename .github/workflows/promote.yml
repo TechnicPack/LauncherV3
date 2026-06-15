@@ -35,6 +35,10 @@ jobs:
     steps:
       - name: Checkout master
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          # Full history so the Sentry release can associate the commit range
+          # (previous release head .. current head) for commit-trailer auto-resolve.
+          fetch-depth: 0
 
       - name: Validate Secrets
         env:
@@ -336,6 +340,22 @@ jobs:
             --title "${title}" \
             --notes-file "${notes_file}" \
             "${JAR_PATH}" "${EXE_PATH}" "${OSX_PATH}"
+
+      - name: Register Sentry Release
+        uses: getsentry/action-release@ff07929a6537bac57790c3451cf4d364aca38528 # v3.7.0
+        continue-on-error: true # release tracking must never block shipping a build to users
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_URL: https://sentry.technicpack.net/
+          SENTRY_ORG: technic
+          SENTRY_PROJECT: launcher
+        with:
+          # Dotted semver so Sentry orders builds numerically; must match the string the
+          # launcher sets at runtime in LauncherMain.resolveSentryRelease().
+          version: launcher@${{ env.LAUNCHER_MAJOR }}.${{ steps.artifact.outputs.build_number }}
+          set_commits: auto # falls back to the local git tree when no repo integration exists
+          finalize: true
+          ignore_missing: true # the first release has no prior baseline -- don't fail on it
 
       - name: Roll Over CHANGELOG
         if: steps.notes.outputs.notes_source == 'changelog'

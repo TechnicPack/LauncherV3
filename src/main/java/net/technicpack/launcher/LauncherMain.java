@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -119,6 +120,7 @@ import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.JavaUtils;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
+import org.apache.commons.io.IOUtils;
 
 public class LauncherMain {
 
@@ -142,11 +144,50 @@ public class LauncherMain {
   private static IBuildNumber buildNumber;
   private static RotatingFileHandler currentFileHandler;
 
+  /**
+   * Resolve the Sentry release for this run: {@code launcher@4.0.<build>}, or {@code null} for
+   * dev/source builds. Reads the build-baked {@code version} resource straight off the classpath
+   * (the same file {@link VersionFileBuildNumber} reads later) because the release has to be set at
+   * {@link Sentry#init} time, before the {@link ResourceLoader} that normally serves it exists.
+   *
+   * <p>The dot form ({@code 4.0.<build>}) is deliberate: Sentry only treats {@code package@version}
+   * as semver when the version is dotted, and semver ordering is what lets an event from an older
+   * build be recognized as older instead of reopening a resolved issue. It intentionally differs
+   * from the git tag ({@code v4.0-<build>}); it only has to match the release promote.yml creates.
+   */
+  private static String resolveSentryRelease() {
+    try (InputStream versionStream =
+        LauncherMain.class.getResourceAsStream("/net/technicpack/launcher/resources/version")) {
+      if (versionStream == null) {
+        return null;
+      }
+      String build = IOUtils.toString(versionStream, StandardCharsets.UTF_8).trim();
+      // Dev/IDE runs leave the literal ${buildNumber} placeholder; an unset BUILD_NUMBER bakes
+      // "0". Only a real, numbered build gets a release.
+      if (!build.matches("\\d+") || "0".equals(build)) {
+        return null;
+      }
+      return "launcher@4.0." + build;
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
   public static void main(String[] argv) {
     // Initialize Sentry
     Sentry.init(
         options -> {
           options.setDsn("https://c9b34c6f367b5b4061a1bfdb8bde3ef7@sentry.technicpack.net/3");
+
+          // Tag events with the semver release so Sentry can order builds: this is what
+          // makes commit-trailer auto-resolve and regression detection work, and what stops
+          // an event from a straggler on an older build reopening a resolved issue. Null on
+          // dev/source builds, which correctly leaves the release unset.
+          String release = resolveSentryRelease();
+          if (release != null) {
+            options.setRelease(release);
+          }
+
           options.setTag(
               "launcherPath",
               LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().getPath());
