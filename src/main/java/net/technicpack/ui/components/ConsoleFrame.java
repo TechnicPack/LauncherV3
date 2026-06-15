@@ -112,13 +112,13 @@ public class ConsoleFrame extends JFrame implements MouseListener {
   }
 
   /**
-   * Scroll to the newest line, but only while auto-scroll is enabled (toggled
-   * from the right-click menu). Call after appending content.
+   * Scroll to the newest line, but only while auto-scroll is enabled (toggled from the right-click
+   * menu). Call after appending content.
    *
-   * <p>Pins via {@link JScrollBar#setValue(int)} on the scrollbar model; it never
-   * calls {@code JTextComponent.modelToView()}, the path that threw {@code
-   * BadLocationException} on Java 8 and {@code IllegalArgumentException} from the
-   * line-break iterator on Java 25 (LAUNCHER-63 / LAUNCHER-3N).
+   * <p>Pins via {@link JScrollBar#setValue(int)} on the scrollbar model; it never calls {@code
+   * JTextComponent.modelToView()}, the path that threw {@code BadLocationException} on Java 8 and
+   * {@code IllegalArgumentException} from the line-break iterator on Java 25 (LAUNCHER-63 /
+   * LAUNCHER-3N).
    */
   public void autoScrollToBottom() {
     if (!autoScroll) {
@@ -136,7 +136,8 @@ public class ConsoleFrame extends JFrame implements MouseListener {
     // Back the console with a no-undo document: it is a read-only log, so the
     // undo records the default GapContent builds on every trim are pure waste
     // (RemoveUndo walks the removed range collecting positions). See NoUndoContent.
-    this.textPane = new JTextPane(new DefaultStyledDocument(new NoUndoContent(), new StyleContext()));
+    this.textPane =
+        new JTextPane(new DefaultStyledDocument(new NoUndoContent(), new StyleContext()));
     textPane.addMouseListener(this);
     textPane.setFont(getMonospaceFont());
     textPane.setEditable(false);
@@ -244,11 +245,10 @@ public class ConsoleFrame extends JFrame implements MouseListener {
   }
 
   /**
-   * GapContent that skips undo bookkeeping on remove. The console is read-only,
-   * so nothing is ever undone, yet the default content builds a RemoveUndo on
-   * every trim -- walking the removed range to collect Position marks, which is
-   * throughput-proportional waste. AbstractDocument.remove() treats a null edit
-   * as "content does not support undo", so this is a supported opt-out.
+   * GapContent that skips undo bookkeeping on remove. The console is read-only, so nothing is ever
+   * undone, yet the default content builds a RemoveUndo on every trim -- walking the removed range
+   * to collect Position marks, which is throughput-proportional waste. AbstractDocument.remove()
+   * treats a null edit as "content does not support undo", so this is a supported opt-out.
    */
   private static final class NoUndoContent extends GapContent {
     private static final long serialVersionUID = 1L;
