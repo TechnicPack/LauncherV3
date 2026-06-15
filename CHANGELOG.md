@@ -9,6 +9,8 @@ is added at the top.
 
 ## [Unreleased]
 
+## [v4.0-1120] - 2026-06-15
+
 ### Added
 - The launcher's log console now has an **Auto-scroll** toggle in its right-click menu, enabled by default. Leave it on to keep following the newest line as the console always has; turn it off to scroll up and read earlier output without new log lines pulling you back to the bottom, then turn it back on to jump to the latest and resume following.
 
