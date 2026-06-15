@@ -44,6 +44,12 @@ public class ConsoleHandler extends Handler {
   private static final int MAX_DOC_CHARS = 300_000;
   private static final int MAX_LINES = 2500;
 
+  // Cap the console refresh rate (~60 fps). Under heavy logging the worker lets
+  // records pile up for up to this long, then flushes one larger batch -- so the
+  // EDT amortizes the per-batch scroll/trim/relayout/paint instead of paying it
+  // per arrival. Nobody reads faster than this, and added latency is <= one frame.
+  private static final long MIN_FLUSH_INTERVAL_MS = 16;
+
   public ConsoleHandler(ConsoleFrame consoleFrame) {
     this.consoleFrame = consoleFrame;
     Utils.getLogger().info("Console Mode Activated");
@@ -79,12 +85,22 @@ public class ConsoleHandler extends Handler {
 
   private void processLogs() {
     try {
+      long lastFlush = 0;
       while (running) {
         LogRecord first = logQueue.take(); // Blocks until one is available
 
+        // Frame-rate cap: if the last flush was under a frame ago, wait out the
+        // rest of the frame so more records accumulate and the EDT does one
+        // larger update this frame instead of several small ones.
+        long sinceFlush = System.currentTimeMillis() - lastFlush;
+        if (sinceFlush < MIN_FLUSH_INTERVAL_MS) {
+          Thread.sleep(MIN_FLUSH_INTERVAL_MS - sinceFlush);
+        }
+
         List<LogRecord> batch = new ArrayList<>();
         batch.add(first);
-        logQueue.drainTo(batch); // Grab rest of the available ones
+        logQueue.drainTo(batch); // Grab the rest, including anything that piled up
+        lastFlush = System.currentTimeMillis();
 
         SwingUtilities.invokeLater(() -> writeBatchToUI(batch));
       }
