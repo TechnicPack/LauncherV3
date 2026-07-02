@@ -19,7 +19,7 @@ google-oauth-client = "1.39.0"
 google-http-client = "2.1.0"
 slf4j = "2.0.18"
 sentry = "8.43.1"
-sentry-gradle-plugin = "6.10.0"
+sentry-gradle-plugin = "6.13.0"
 annotations = "26.1.0"
 qrcodegen = "1.8.0"
 
