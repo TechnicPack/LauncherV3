@@ -9,6 +9,10 @@ is added at the top.
 
 ## [Unreleased]
 
+### Fixed
+- The **Discover** tab no longer drops to the built-in offline page for players still running Java 8. The images on that page were the only launcher requests that did not identify themselves as the launcher; they went out labelled as generic Java traffic instead, and our site recently began turning that traffic away when it came from older Java versions. A single refused image was enough to stop the page laying itself out, so those players saw the offline copy instead of the live one. Discover page images now identify themselves the same way every other launcher request already does, which also means the tab no longer depends on how our site chooses to treat unlabelled Java traffic in future. Players on newer Java versions were never affected.
+- The **Discover** tab now falls back to the last copy it successfully downloaded when the page cannot be fetched. A reversed check meant the saved copy was only ever consulted when it did not exist, so an unreachable site always skipped straight past it to the generic built-in page rather than showing the most recent version you had actually seen.
+
 ## [v4.0-1133] - 2026-07-06
 
 ### Changed
