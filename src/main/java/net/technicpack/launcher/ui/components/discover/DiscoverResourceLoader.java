@@ -4,12 +4,15 @@ import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import javax.imageio.ImageIO;
 import net.technicpack.utilslib.ImageUtils;
+import net.technicpack.utilslib.Urls;
+import net.technicpack.utilslib.Utils;
 import org.xhtmlrenderer.extend.FSImage;
 import org.xhtmlrenderer.resource.ImageResource;
 import org.xhtmlrenderer.swing.AWTFSImage;
@@ -66,6 +69,15 @@ public class DiscoverResourceLoader extends ImageResourceLoader {
       return loadEmbeddedBase64ImageResource(uri);
     }
 
+    // Flying Saucer's StreamResource opens its own connections and never sets a User-Agent, so
+    // remote images went out with the bare JVM default ("Java/1.8.0_451" and friends). Edge rules
+    // commonly block that, which broke the discover page for anyone still on Java 8. Route
+    // HTTP(S) through openHttpConnection so these requests carry the launcher's own User-Agent.
+    if (isHttpUri(uri)) {
+      return loadHttpImageResourceFromUri(uri);
+    }
+
+    // jar: and file: URIs (the bundled fallback page) never leave the machine.
     ImageResource ir = null;
 
     try (StreamResource sr = new StreamResource(uri)) {
@@ -84,6 +96,39 @@ public class DiscoverResourceLoader extends ImageResourceLoader {
     }
 
     return ir;
+  }
+
+  private static boolean isHttpUri(final String uri) {
+    return uri.startsWith("http:") || uri.startsWith("https:");
+  }
+
+  /**
+   * Loads a remote image through the launcher's HTTP stack, so the request carries our User-Agent
+   * instead of the JVM default.
+   *
+   * <p>Returns null when the image can't be fetched or decoded. That is deliberate: the null
+   * propagates into a layout exception, which DiscoverInfoPanel.onLayoutException turns into the
+   * offline fallback discover page.
+   */
+  private static ImageResource loadHttpImageResourceFromUri(final String uri) {
+    try {
+      HttpURLConnection conn =
+          Utils.openHttpConnection(
+              Urls.parseAndDiagnose(uri, "DiscoverResourceLoader.loadHttpImageResourceFromUri"));
+      try (InputStream is = conn.getInputStream()) {
+        BufferedImage img = ImageIO.read(is);
+        if (img == null) {
+          throw new IOException("ImageIO.read() returned null");
+        }
+        return createImageResource(uri, img);
+      }
+    } catch (FileNotFoundException e) {
+      XRLog.exception("Can't read image file; image at URI '" + uri + "' not found");
+    } catch (IOException e) {
+      XRLog.exception("Can't read image file; unexpected problem for URI '" + uri + "'", e);
+    }
+
+    return null;
   }
 
   public static ImageResource loadEmbeddedBase64ImageResource(final String uri) {

@@ -73,7 +73,6 @@ public class Utils {
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
     conn.setDoInput(true);
     conn.setDoOutput(false);
-    System.setProperty("http.agent", TechnicConstants.getUserAgent());
     conn.setRequestProperty("User-Agent", TechnicConstants.getUserAgent());
     conn.setUseCaches(false);
     return conn;
@@ -204,7 +203,6 @@ public class Utils {
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
       conn.setDoInput(true);
       conn.setDoOutput(false);
-      System.setProperty("http.agent", TechnicConstants.getUserAgent());
       conn.setRequestProperty("User-Agent", TechnicConstants.getUserAgent());
       HttpURLConnection.setFollowRedirects(true);
       conn.setUseCaches(false);
