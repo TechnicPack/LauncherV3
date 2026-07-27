@@ -173,7 +173,7 @@ public class DiscoverInfoPanel extends JPanel {
     Document doc = getDiscoverDocumentFromLiveSite(url, localCache);
     if (doc != null) return doc;
 
-    if (!Files.exists(localCache)) {
+    if (Files.exists(localCache)) {
       doc = getDiscoverDocumentFromLocalCache(localCache);
       if (doc != null) return doc;
     }
