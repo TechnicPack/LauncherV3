@@ -99,7 +99,7 @@ public class DiscoverResourceLoader extends ImageResourceLoader {
   }
 
   private static boolean isHttpUri(final String uri) {
-    return uri.startsWith("http:") || uri.startsWith("https:");
+    return uri.regionMatches(true, 0, "http:", 0, 5) || uri.regionMatches(true, 0, "https:", 0, 6);
   }
 
   /**
@@ -111,8 +111,9 @@ public class DiscoverResourceLoader extends ImageResourceLoader {
    * offline fallback discover page.
    */
   private static ImageResource loadHttpImageResourceFromUri(final String uri) {
+    HttpURLConnection conn = null;
     try {
-      HttpURLConnection conn =
+      conn =
           Utils.openHttpConnection(
               Urls.parseAndDiagnose(uri, "DiscoverResourceLoader.loadHttpImageResourceFromUri"));
       try (InputStream is = conn.getInputStream()) {
@@ -126,6 +127,10 @@ public class DiscoverResourceLoader extends ImageResourceLoader {
       XRLog.exception("Can't read image file; image at URI '" + uri + "' not found");
     } catch (IOException e) {
       XRLog.exception("Can't read image file; unexpected problem for URI '" + uri + "'", e);
+    } finally {
+      if (conn != null) {
+        conn.disconnect();
+      }
     }
 
     return null;
