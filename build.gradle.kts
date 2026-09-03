@@ -2,7 +2,7 @@ import org.gradle.jvm.toolchain.JavaLanguageVersion
 import java.nio.charset.StandardCharsets
 
 plugins {
-    id("com.diffplug.spotless") version "8.7.0"
+    id("com.diffplug.spotless") version "8.10.1"
     id("net.technicpack.launcher-packaging")
     alias(libs.plugins.sentry.jvm)
 }
