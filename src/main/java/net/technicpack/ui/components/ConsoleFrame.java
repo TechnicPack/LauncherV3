@@ -136,8 +136,7 @@ public class ConsoleFrame extends JFrame implements MouseListener {
     // Back the console with a no-undo document: it is a read-only log, so the
     // undo records the default GapContent builds on every trim are pure waste
     // (RemoveUndo walks the removed range collecting positions). See NoUndoContent.
-    this.textPane =
-        new JTextPane(new DefaultStyledDocument(new NoUndoContent(), new StyleContext()));
+    this.textPane = createConsoleTextPane();
     textPane.addMouseListener(this);
     textPane.setFont(getMonospaceFont());
     textPane.setEditable(false);
@@ -155,6 +154,12 @@ public class ConsoleFrame extends JFrame implements MouseListener {
     scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
     add(scrollPane, BorderLayout.CENTER);
+  }
+
+  static JTextPane createConsoleTextPane() {
+    JTextPane textPane = new WrappingTextPane();
+    textPane.setDocument(new DefaultStyledDocument(new NoUndoContent(), new StyleContext()));
+    return textPane;
   }
 
   /**
@@ -241,6 +246,58 @@ public class ConsoleFrame extends JFrame implements MouseListener {
               autoScrollToBottom(); // snap straight to the bottom when re-enabled
             }
           });
+    }
+  }
+
+  /**
+   * Styled text pane that wraps every line to the viewport, including tokens with no whitespace.
+   * Launch classpaths can exceed the XRender protocol's coordinate range when laid out as one
+   * horizontal run, which causes distant glyphs to be painted over the visible text on Linux.
+   */
+  private static final class WrappingTextPane extends JTextPane {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    protected EditorKit createDefaultEditorKit() {
+      return new WrappingStyledEditorKit();
+    }
+
+    @Override
+    public boolean getScrollableTracksViewportWidth() {
+      return true;
+    }
+  }
+
+  private static final class WrappingStyledEditorKit extends StyledEditorKit {
+    private static final long serialVersionUID = 1L;
+    private static final ViewFactory VIEW_FACTORY = new WrappingViewFactory();
+
+    @Override
+    public ViewFactory getViewFactory() {
+      return VIEW_FACTORY;
+    }
+  }
+
+  private static final class WrappingViewFactory implements ViewFactory {
+    private final ViewFactory defaultViewFactory = new StyledEditorKit().getViewFactory();
+
+    @Override
+    public View create(Element element) {
+      if (AbstractDocument.ContentElementName.equals(element.getName())) {
+        return new WrappingLabelView(element);
+      }
+      return defaultViewFactory.create(element);
+    }
+  }
+
+  private static final class WrappingLabelView extends LabelView {
+    private WrappingLabelView(Element element) {
+      super(element);
+    }
+
+    @Override
+    public float getMinimumSpan(int axis) {
+      return axis == View.X_AXIS ? 0 : super.getMinimumSpan(axis);
     }
   }
 
