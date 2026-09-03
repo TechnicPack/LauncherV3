@@ -22,7 +22,6 @@ package net.technicpack.launchercore.install;
 import java.io.File;
 import java.io.IOException;
 import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.utilslib.Utils;
 
@@ -49,15 +48,5 @@ public class ModpackInstaller {
       platformApi.incrementPackInstalls(modpack.getName());
       Utils.sendTracking("installModpack", modpack.getName(), modpack.getBuild(), clientId);
     }
-  }
-
-  public IMinecraftVersionInfo installPack(
-      InstallTasksQueue<IMinecraftVersionInfo> tasksQueue, ModpackModel modpack, String build)
-      throws IOException, InterruptedException {
-    preparePack(modpack);
-    ModpackVersion installedVersion = modpack.getInstalledVersion();
-    tasksQueue.runAllTasks();
-    completeInstall(modpack, build, installedVersion);
-    return tasksQueue.getMetadata();
   }
 }
