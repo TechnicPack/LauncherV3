@@ -18,6 +18,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import net.technicpack.launchercore.install.plan.NodeProgressReporter;
@@ -26,6 +29,7 @@ import net.technicpack.launchercore.progress.CurrentItemMode;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
 import net.technicpack.minecraftcore.mojang.version.io.MavenCoordinate;
 import net.technicpack.utilslib.CryptoUtils;
+import net.technicpack.utilslib.Utils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -275,6 +279,93 @@ class ModernInstallerArtifactResolverTest {
       Files.write(installer, new byte[] {3});
       resolver.materialize(plan(request, false), REPORTER);
       assertEquals(Collections.emptyList(), server.requests);
+    }
+  }
+
+  @Test
+  void missingMirrorFallsThroughOnceWithoutWarningBeforeVerifiedDownload() throws Exception {
+    byte[] bytes = "verified fallback".getBytes(StandardCharsets.UTF_8);
+    try (RepositoryServer server = new RepositoryServer()) {
+      server.serve("/available.jar", bytes);
+      ModernInstallerArtifactResolver.ArtifactRequest request =
+          request(
+              sha1(bytes),
+              Arrays.asList(server.url("/missing.jar"), server.url("/available.jar")),
+              false,
+              false);
+      List<LogRecord> warnings = Collections.synchronizedList(new ArrayList<>());
+      Handler handler =
+          new Handler() {
+            @Override
+            public void publish(LogRecord record) {
+              if (record.getLevel().intValue() >= Level.WARNING.intValue()
+                  && record.getMessage() != null
+                  && record.getMessage().contains(server.url(""))) {
+                warnings.add(record);
+              }
+            }
+
+            @Override
+            public void flush() {}
+
+            @Override
+            public void close() {}
+          };
+      Utils.getLogger().addHandler(handler);
+      try {
+        resolver(archive("unrelated", new byte[] {1})).materialize(plan(request, false), REPORTER);
+      } finally {
+        Utils.getLogger().removeHandler(handler);
+      }
+
+      assertArrayEquals(
+          bytes, Files.readAllBytes(root.resolve("libraries").resolve(request.getPath())));
+      assertEquals(Arrays.asList("/missing.jar", "/available.jar"), server.requests);
+      assertTrue(warnings.isEmpty(), "A recoverable mirror miss must not emit a download warning");
+    }
+  }
+
+  @Test
+  void exhaustedMissingMirrorsStillFailWithAttemptedSources() throws Exception {
+    try (RepositoryServer server = new RepositoryServer()) {
+      ModernInstallerArtifactResolver.ArtifactRequest request =
+          request(
+              HASH,
+              Arrays.asList(server.url("/first.jar"), server.url("/second.jar")),
+              false,
+              false);
+      IOException failure =
+          assertThrows(
+              IOException.class,
+              () ->
+                  resolver(archive("unrelated", new byte[] {1}))
+                      .materialize(plan(request, false), REPORTER));
+
+      assertEquals(Arrays.asList("/first.jar", "/second.jar"), server.requests);
+      assertTrue(failure.getMessage().contains(request.getCoordinate().toString()));
+      assertTrue(failure.getMessage().contains(server.url("/first.jar")));
+      assertTrue(failure.getMessage().contains(server.url("/second.jar")));
+      assertTrue(
+          Arrays.stream(failure.getSuppressed())
+              .anyMatch(cause -> cause.getMessage().contains("HTTP 404")));
+      assertFalse(Files.exists(root.resolve("libraries").resolve(request.getPath())));
+    }
+  }
+
+  @Test
+  void transientServerFailureStillRetriesAndVerifiesDownload() throws Exception {
+    byte[] bytes = "verified after transient failure".getBytes(StandardCharsets.UTF_8);
+    try (RepositoryServer server = new RepositoryServer()) {
+      server.serve("/retry.jar", bytes);
+      server.failOnce("/retry.jar", 503);
+      ModernInstallerArtifactResolver.ArtifactRequest request =
+          request(sha1(bytes), Collections.singletonList(server.url("/retry.jar")), false, false);
+
+      resolver(archive("unrelated", new byte[] {1})).materialize(plan(request, false), REPORTER);
+
+      assertEquals(Arrays.asList("/retry.jar", "/retry.jar"), server.requests);
+      assertArrayEquals(
+          bytes, Files.readAllBytes(root.resolve("libraries").resolve(request.getPath())));
     }
   }
 
@@ -627,6 +718,7 @@ class ModernInstallerArtifactResolverTest {
   private static final class RepositoryServer implements AutoCloseable {
     private final HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
     private final Map<String, byte[]> responses = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<String, Integer> failures = new java.util.concurrent.ConcurrentHashMap<>();
     private final List<String> requests = Collections.synchronizedList(new ArrayList<>());
     private volatile String etag;
 
@@ -637,10 +729,13 @@ class ModernInstallerArtifactResolverTest {
             String path = exchange.getRequestURI().getPath();
             requests.add(path);
             byte[] response = responses.get(path);
+            Integer failure = failures.remove(path);
+            if (failure != null) response = null;
             try {
               if (etag != null) exchange.getResponseHeaders().add("ETag", "\"" + etag + "\"");
               exchange.sendResponseHeaders(
-                  response == null ? 404 : 200, response == null ? -1 : response.length);
+                  failure != null ? failure : response == null ? 404 : 200,
+                  response == null ? -1 : response.length);
               if (response != null) exchange.getResponseBody().write(response);
             } finally {
               exchange.close();
@@ -651,6 +746,10 @@ class ModernInstallerArtifactResolverTest {
 
     private void serve(String path, byte[] bytes) {
       responses.put(path, bytes);
+    }
+
+    private void failOnce(String path, int status) {
+      failures.put(path, status);
     }
 
     private String url(String path) {

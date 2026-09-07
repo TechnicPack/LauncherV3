@@ -95,7 +95,10 @@ public class Download implements Runnable {
         throw new DownloadException(
             "The download is being rate limited (HTTP 429). Try again later.");
       } else if (response == 404) {
-        throw new DownloadException("The specified URL does not exist (HTTP 404).");
+        exception = new DownloadException("The specified URL does not exist (HTTP 404).");
+        result = Result.NOT_FOUND;
+        conn.disconnect();
+        return;
       } else if (responseFamily != 2) {
         throw new DownloadException("The server issued a " + response + " response code.");
       }
@@ -310,6 +313,7 @@ public class Download implements Runnable {
     SUCCESS,
     FAILURE,
     PERMISSION_DENIED,
-    LOCK_FAILED
+    LOCK_FAILED,
+    NOT_FOUND
   }
 }

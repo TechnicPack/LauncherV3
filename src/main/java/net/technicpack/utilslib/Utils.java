@@ -248,6 +248,11 @@ public class Utils {
           throw new InterruptedException();
         }
 
+        // A missing mirror entry is not retryable. Leave fallback/error reporting to the caller.
+        if (download.getResult() == Download.Result.NOT_FOUND) {
+          break;
+        }
+
         getLogger()
             .log(
                 Level.WARNING,
