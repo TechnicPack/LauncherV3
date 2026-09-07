@@ -101,6 +101,13 @@ public final class ModernInstallerEngine {
       checkCancelled(request);
       Path bootstrap = ProcessorProcessRunner.createBootstrapJar(work.path);
       ProcessorProcessRunner runner = new ProcessorProcessRunner();
+      ProcessorCache processorCache =
+          new ProcessorCache(
+              request.root,
+              request.installer,
+              request.vanillaJar,
+              request.runtime,
+              request.cancelled);
       for (int index = 0; index < invocations.size(); index++) {
         checkCancelled(request);
         Invocation invocation = invocations.get(index);
@@ -110,8 +117,26 @@ public final class ModernInstallerEngine {
             null);
         if (!prepareOutputs(request, invocation.outputs)) {
           List<Path> classpath = verifiedClasspath(request, resolver, invocation.processor);
-          checkCancelled(request);
-          runAndCheckOutputs(request, runner, work.path, bootstrap, invocation, classpath);
+          ProcessorCache.Entry cached =
+              invocation.outputs.isEmpty()
+                  ? processorCache.prepare(
+                      request.profile,
+                      invocation.processor,
+                      index,
+                      data,
+                      invocation.arguments,
+                      classpath)
+                  : null;
+          if (cached == null || !cached.isValid()) {
+            if (cached != null) cached.invalidate();
+            checkCancelled(request);
+            runAndCheckOutputs(request, runner, work.path, bootstrap, invocation, classpath);
+            if (cached != null) {
+              checkCancelled(request);
+              cached.record();
+            }
+            processorCache.afterExecution();
+          }
         }
         checkCancelled(request);
         reporter.updateNodeProgress(10 + (index + 1) * 90.0f / invocations.size());
@@ -177,7 +202,7 @@ public final class ModernInstallerEngine {
         MavenCoordinate.resolve(request.root.resolve("libraries"), artifact.getPath()));
   }
 
-  /** Empty output maps deliberately never authorize a skip. */
+  /** Only nonempty, authoritative output maps authorize a skip through this path. */
   private static boolean prepareOutputs(Request request, Map<Path, String> outputs)
       throws IOException, InterruptedException {
     boolean allValid = !outputs.isEmpty();

@@ -16,9 +16,15 @@ game Java runtime; ForgeWrapper is not used. Processors are ordinary local progr
 - Modern launch uses a verified, unmodified vanilla copy at `bin/native-launch/<version-id>.jar`.
   This launcher-managed directory is cleaned on full reinstall. Legacy launches retain their existing
   pack-local JAR behavior; modern launch does not create an unused signature-stripped `bin/minecraft.jar`.
-- Processors without declared outputs run on every installation. Cached libraries and tool sidecars
-  do not guarantee a completely offline recipe: upstream tasks such as `DOWNLOAD_MOJMAPS` fetch Mojang
-  metadata even when their previous output exists.
+- Processors without declared output hashes can reuse successful runs when their file arguments are
+  conservatively trackable: whole Maven coordinates and supported whole-token references. SHA-256
+  receipts under `cache/processor-state/` bind the installer recipe, selected Java runtime, vanilla
+  client, processor classpath, and referenced files. A baseline is recorded only after a successful
+  run produces or rewrites a referenced artifact; existing files alone never authorize reuse.
+  Changed or missing files invalidate reuse without making argument paths deletion targets.
+  Untrackable arguments and processors that produce no observed artifact continue to run.
+- Cached libraries alone do not guarantee an offline recipe. Cold or uncacheable runs of upstream
+  tasks such as `DOWNLOAD_MOJMAPS` still fetch Mojang metadata.
 
 ### Installer verification
 

@@ -48,6 +48,7 @@ import org.junit.jupiter.api.io.TempDir;
 class ModernInstallerEngineTest {
   private static final String TOOL = "test.engine:processor:1";
   private static final String GENERATED = "test.engine:generated:1";
+  private static final String CACHED_SOURCE = "test.engine:cache-source:1";
   private static final String GOOD = "complete processor output";
   private static final String GOOD_HASH = DigestUtils.sha1Hex(GOOD);
   private static final NodeProgressReporter REPORTER =
@@ -103,7 +104,7 @@ class ModernInstallerEngineTest {
   }
 
   @Test
-  void outputlessProcessorsRunEveryTimeAndMayGenerateUndeclaredCoordinates() throws Exception {
+  void outputlessProcessorsWithUntrackedPathsRunEveryTime() throws Exception {
     Map<String, ModernInstallerProfile.DataValue> data =
         Collections.singletonMap(
             "PATCHED", new ModernInstallerProfile.DataValue("[" + GENERATED + "]", null));
@@ -124,6 +125,173 @@ class ModernInstallerEngineTest {
     assertEquals(GOOD, text(maven(root.resolve("libraries"), GENERATED)));
     assertEquals(Arrays.asList("write", "require", "write", "require"), invocations());
     assertWorkCleaned();
+  }
+
+  @Test
+  void successfulOutputlessRunIsReusedUntilInputOrGeneratedBytesChange() throws Exception {
+    Path source = write(maven(root.resolve("libraries"), CACHED_SOURCE), GOOD);
+    Path output = write(maven(root.resolve("libraries"), GENERATED), GOOD);
+    Files.setLastModifiedTime(output, java.nio.file.attribute.FileTime.fromMillis(1000));
+    ModernInstallerEngine.Request request = cachedRequest("cache-copy", () -> false);
+
+    execute(request);
+    assertEquals(1, cachedInvocations().size(), "Existing bytes alone must not authorize reuse");
+    execute(request);
+    assertEquals(1, cachedInvocations().size());
+
+    write(output, "corrupted");
+    execute(request);
+    assertEquals(GOOD, text(output));
+    assertEquals(2, cachedInvocations().size());
+
+    write(source, "updated input");
+    execute(request);
+    assertEquals("updated input", text(output));
+    assertEquals(3, cachedInvocations().size());
+
+    Files.delete(output);
+    execute(request);
+    assertEquals("updated input", text(output));
+    assertEquals(4, cachedInvocations().size());
+    execute(request);
+    assertEquals(4, cachedInvocations().size());
+    assertWorkCleaned();
+  }
+
+  @Test
+  void failedOutputlessRunCannotKeepAnEarlierSuccessfulReceipt() throws Exception {
+    Path source = write(maven(root.resolve("libraries"), CACHED_SOURCE), GOOD);
+    Path output = maven(root.resolve("libraries"), GENERATED);
+    ModernInstallerEngine.Request request = cachedRequest("cache-copy", () -> false);
+    execute(request);
+    execute(request);
+    assertEquals(1, cachedInvocations().size());
+
+    write(source, "fail");
+    assertThrows(IOException.class, () -> execute(request));
+    assertEquals(2, cachedInvocations().size());
+    write(source, GOOD);
+    write(output, GOOD);
+    Files.setLastModifiedTime(output, java.nio.file.attribute.FileTime.fromMillis(1000));
+
+    execute(request);
+    assertEquals(3, cachedInvocations().size(), "Failure must invalidate the previous receipt");
+    execute(request);
+    assertEquals(3, cachedInvocations().size());
+    assertEquals(GOOD, text(output));
+    assertWorkCleaned();
+  }
+
+  @Test
+  void concurrentEnginesReuseOutputlessResultsOnlyAfterTheWriterCompletes() throws Exception {
+    write(maven(root.resolve("libraries"), CACHED_SOURCE), GOOD);
+    Path output = maven(root.resolve("libraries"), GENERATED);
+    AtomicBoolean cancelled = new AtomicBoolean();
+    ModernInstallerEngine.Request request = cachedRequest("cache-wait", cancelled::get);
+    ExecutorService executor = Executors.newFixedThreadPool(2);
+    CountDownLatch secondStarted = new CountDownLatch(1);
+    try {
+      Future<Throwable> first = executor.submit(() -> executeFailure(request));
+      awaitFile(output.resolveSibling("started"));
+      Future<Throwable> second =
+          executor.submit(
+              () -> {
+                secondStarted.countDown();
+                return executeFailure(request);
+              });
+      assertTrue(secondStarted.await(5, TimeUnit.SECONDS));
+      write(output.resolveSibling("release"), "release");
+      assertNull(first.get(15, TimeUnit.SECONDS));
+      assertNull(second.get(15, TimeUnit.SECONDS));
+      assertEquals(1, cachedInvocations().size());
+      assertEquals(GOOD, text(output));
+      assertWorkCleaned();
+    } finally {
+      cancelled.set(true);
+      executor.shutdownNow();
+      assertTrue(executor.awaitTermination(15, TimeUnit.SECONDS));
+    }
+  }
+
+  @Test
+  void executedProcessorsInvalidateSharedFingerprintsEvenWhenFileMetadataIsPreserved()
+      throws Exception {
+    write(maven(root.resolve("libraries"), CACHED_SOURCE), GOOD);
+    Path vanilla = write(root.resolve("cache/minecraft_1.20.1.jar"), GOOD);
+    Path replacement = write(root.resolve("next-vanilla.bin"), GOOD);
+    Map<String, ModernInstallerProfile.DataValue> data = new LinkedHashMap<>();
+    data.put("SOURCE", new ModernInstallerProfile.DataValue("[" + CACHED_SOURCE + "]", null));
+    data.put("GENERATED", new ModernInstallerProfile.DataValue("[" + GENERATED + "]", null));
+    ModernInstallerProfile.Processor first =
+        new ModernInstallerProfile.Processor(
+            TOOL,
+            Collections.singletonList(TOOL),
+            Arrays.asList("cache-copy", "{SOURCE}", "[test.engine:first-stage:1]"),
+            Collections.singletonList("client"),
+            Collections.emptyMap());
+    ModernInstallerProfile.Processor middle =
+        processor(
+            "preserve-time-copy",
+            Collections.emptyMap(),
+            "{ROOT}/next-vanilla.bin",
+            "{MINECRAFT_JAR}");
+    ModernInstallerProfile.Processor last =
+        new ModernInstallerProfile.Processor(
+            TOOL,
+            Collections.singletonList(TOOL),
+            Arrays.asList("cache-copy", "{MINECRAFT_JAR}", "{GENERATED}"),
+            Collections.singletonList("client"),
+            Collections.emptyMap());
+    ModernInstallerEngine.Request request =
+        request(
+            root,
+            Arrays.asList(first, middle, last),
+            data,
+            Collections.emptyList(),
+            Collections.emptyMap(),
+            () -> false);
+    execute(request);
+    assertEquals(1, cachedInvocations().size());
+    java.nio.file.attribute.FileTime originalTime = Files.getLastModifiedTime(vanilla);
+
+    String changed = "X" + GOOD.substring(1);
+    write(replacement, changed);
+    execute(request);
+
+    assertEquals(originalTime, Files.getLastModifiedTime(vanilla));
+    assertEquals(changed, text(maven(root.resolve("libraries"), GENERATED)));
+    assertEquals(2, cachedInvocations().size());
+    execute(request);
+    assertEquals(2, cachedInvocations().size());
+    assertWorkCleaned();
+  }
+
+  private ModernInstallerEngine.Request cachedRequest(String mode, BooleanSupplier cancelled)
+      throws Exception {
+    write(root.resolve("cache/minecraft_1.20.1.jar"), "verified vanilla input");
+    Map<String, ModernInstallerProfile.DataValue> data = new LinkedHashMap<>();
+    data.put("SOURCE", new ModernInstallerProfile.DataValue("[" + CACHED_SOURCE + "]", null));
+    data.put("GENERATED", new ModernInstallerProfile.DataValue("[" + GENERATED + "]", null));
+    ModernInstallerProfile.Processor processor =
+        new ModernInstallerProfile.Processor(
+            TOOL,
+            Collections.singletonList(TOOL),
+            Arrays.asList(mode, "{SOURCE}", "{GENERATED}"),
+            Collections.singletonList("client"),
+            Collections.emptyMap());
+    return request(
+        root,
+        Collections.singletonList(processor),
+        data,
+        Collections.emptyList(),
+        Collections.emptyMap(),
+        cancelled);
+  }
+
+  private List<String> cachedInvocations() throws IOException {
+    return Files.readAllLines(
+        maven(root.resolve("libraries"), GENERATED).resolveSibling("cache-invocations.log"),
+        StandardCharsets.UTF_8);
   }
 
   @Test
@@ -677,6 +845,26 @@ class ModernInstallerEngineTest {
   public static final class ChildProcessor {
     public static void main(String[] args) throws Exception {
       String mode = args[0];
+      if (mode.startsWith("cache-")) {
+        Path source = Paths.get(args[1]);
+        Path output = Paths.get(args[2]);
+        Files.createDirectories(output.getParent());
+        Files.write(
+            output.resolveSibling("cache-invocations.log"),
+            (mode + "\n").getBytes(StandardCharsets.UTF_8),
+            StandardOpenOption.CREATE,
+            StandardOpenOption.APPEND);
+        byte[] bytes = Files.readAllBytes(source);
+        Files.write(output, bytes);
+        if (mode.equals("cache-wait")) {
+          Files.write(output.resolveSibling("started"), new byte[] {1});
+          while (!Files.exists(output.resolveSibling("release"))) Thread.sleep(20);
+        }
+        if (new String(bytes, StandardCharsets.UTF_8).equals("fail")) {
+          throw new IOException("Processor failed after writing its output");
+        }
+        return;
+      }
       Path log = Paths.get(args[1]);
       Files.write(
           log,
@@ -687,6 +875,13 @@ class ModernInstallerEngineTest {
       if (mode.equals("require")) {
         String actual = new String(Files.readAllBytes(Paths.get(args[2])), StandardCharsets.UTF_8);
         if (!actual.equals(args[3])) throw new IOException("Generated input has wrong content");
+        return;
+      }
+      if (mode.equals("preserve-time-copy")) {
+        Path output = Paths.get(args[3]);
+        java.nio.file.attribute.FileTime time = Files.getLastModifiedTime(output);
+        Files.write(output, Files.readAllBytes(Paths.get(args[2])));
+        Files.setLastModifiedTime(output, time);
         return;
       }
       if (mode.equals("copy")) {

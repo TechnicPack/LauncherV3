@@ -64,6 +64,15 @@ public final class ProcessorProcessRunner {
     }
   }
 
+  static Path executablePath(IJavaRuntime runtime) {
+    Path executable = runtime.getExecutableFile().toPath().toAbsolutePath().normalize();
+    if (OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS
+        && executable.getFileName().toString().equalsIgnoreCase("javaw.exe")) {
+      executable = executable.resolveSibling("java.exe");
+    }
+    return executable;
+  }
+
   public void run(
       IJavaRuntime runtime,
       Path root,
@@ -108,11 +117,7 @@ public final class ProcessorProcessRunner {
       throw new IOException("Processor " + coordinate + " has no manifest Main-Class");
     }
 
-    Path executable = runtime.getExecutableFile().toPath().toAbsolutePath().normalize();
-    if (OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS
-        && executable.getFileName().toString().equalsIgnoreCase("javaw.exe")) {
-      executable = executable.resolveSibling("java.exe");
-    }
+    Path executable = executablePath(runtime);
     if (!Files.isRegularFile(executable)) {
       throw new IOException("Selected processor Java executable is missing: " + executable);
     }
