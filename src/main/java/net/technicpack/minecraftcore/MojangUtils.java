@@ -54,6 +54,8 @@ public class MojangUtils {
   private static final HttpTransport HTTP_TRANSPORT = new Apache5HttpTransport();
   private static final JsonFactory JSON_FACTORY = new GsonFactory();
   private static final HttpRequestFactory REQUEST_FACTORY;
+  private static final Pattern WINDOWS_DEVICE_NAME =
+      Pattern.compile("(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\\..*)?", Pattern.CASE_INSENSITIVE);
 
   public static final String assets = "https://resources.download.minecraft.net/";
 
@@ -131,33 +133,31 @@ public class MojangUtils {
     return m.lookingAt();
   }
 
-  public static String getMinecraftVersion(IMinecraftVersionInfo version) {
-    final String id = version.getId();
-
-    // Simplification in case it doesn't have Forge at all
-    if (!id.contains("-")) return id;
-
-    // Neoforge doesn't have the mc version in the id but it's always the parent
-    if (hasNeoForge(version)) {
-      return version.getParentVersion();
+  /** Returns the prepared vanilla client copy whose filename matches native loader metadata. */
+  public static Path getModernLaunchJar(Path binDirectory, String versionId) {
+    if (binDirectory == null
+        || versionId == null
+        || versionId.isEmpty()
+        || versionId.equals(".")
+        || versionId.equals("..")
+        || versionId.endsWith(".")
+        || versionId.endsWith(" ")) {
+      throw new IllegalArgumentException("Invalid native launch version ID: " + versionId);
     }
-
-    // For Forge, this will be "mc-forge"
-    final String[] idParts = id.split("-");
-    return idParts[0];
-  }
-
-  public static boolean requiresForgeWrapper(IMinecraftVersionInfo version) {
-    if (hasNeoForge(version)) {
-      return true;
+    for (int i = 0; i < versionId.length(); i++) {
+      char character = versionId.charAt(i);
+      if (Character.isISOControl(character) || "/\\:;<>\"|?*".indexOf(character) >= 0) {
+        throw new IllegalArgumentException("Invalid native launch version ID: " + versionId);
+      }
     }
-    if (!hasModernMinecraftForge(version)) {
-      return false;
+    if (WINDOWS_DEVICE_NAME.matcher(versionId).matches()) {
+      throw new IllegalArgumentException("Invalid native launch version ID: " + versionId);
     }
-
-    final String mcVersion = getMinecraftVersion(version);
-
-    return !mcVersion.equals("1.12.2");
+    return binDirectory
+        .toAbsolutePath()
+        .normalize()
+        .resolve("native-launch")
+        .resolve(versionId + ".jar");
   }
 
   public static JavaRuntimesIndex getJavaRuntimesIndex(Path cachedIndexPath) {

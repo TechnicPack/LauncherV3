@@ -22,6 +22,7 @@ package net.technicpack.minecraftcore.mojang.version.chain;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
@@ -71,7 +72,9 @@ public class ChainedMinecraftVersionInfo implements IMinecraftVersionInfo {
   public ArgumentList getJavaArguments() {
     ArgumentList.Builder allArguments = new ArgumentList.Builder();
 
-    for (IMinecraftVersionInfo version : chain) {
+    ListIterator<IMinecraftVersionInfo> versions = chain.listIterator(chain.size());
+    while (versions.hasPrevious()) {
+      IMinecraftVersionInfo version = versions.previous();
       if (version.getJavaArguments() != null) {
         for (Argument arg : version.getJavaArguments().getArguments()) {
           allArguments.addArgument(arg);

@@ -38,6 +38,7 @@ import net.technicpack.launchercore.install.verifiers.IFileVerifier;
 import net.technicpack.launchercore.install.verifiers.SHA1FileVerifier;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.util.DownloadListener;
+import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.io.GameDownloads;
 import net.technicpack.utilslib.Utils;
@@ -91,6 +92,11 @@ public class InstallMinecraftIfNecessaryTask extends ListenerTask<IMinecraftVers
       Utils.downloadFile(
           url, originalJar.getFileName().toString(), output, originalJar.toFile(), verifier, this);
       regenerate = true;
+    }
+
+    // Modern loaders consume a verified native-launch alias, not the legacy rewritten JAR.
+    if (MojangUtils.hasModernMinecraftForge(version) || MojangUtils.hasNeoForge(version)) {
+      return;
     }
 
     File targetJar = new File(this.pack.getBinDir(), "minecraft.jar");

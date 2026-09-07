@@ -41,8 +41,6 @@ public class Library {
     "https://mirror.technicpack.net/Technic/lib/",
     "https://maven.creeperhost.net/",
   };
-  private static final Pattern GRADLE_PATTERN =
-      Pattern.compile("^([^:@]+):([^:@]+):([^:@]+)(?::([^:@]+))?(?:@([^:@]+))?$");
   private static final Pattern FORGE_MAVEN_ROOT =
       Pattern.compile(
           "^https://(?:files\\.minecraftforge\\.net/maven|maven\\.minecraftforge\\.net)/(.+)$");
@@ -59,16 +57,11 @@ public class Library {
   @SerializedName("MMC-hint")
   private String mmcHint;
 
-  // Gradle specifier/Maven coordinates
-  // groupId:artifactId:version[:classifier][@extension]
-  private transient String gradleGroupId;
-  private transient String gradleArtifactId;
-  private transient String gradleVersion;
-  private transient String gradleClassifier;
-  private transient String gradleExtension;
+  private transient MavenCoordinate coordinate;
 
   public String getNormalizedName() {
-    return name.contains("@") ? name : name + "@jar";
+    ensureNameIsParsed();
+    return coordinate.toString();
   }
 
   @Override
@@ -81,10 +74,10 @@ public class Library {
     this.ensureNameIsParsed();
     library.ensureNameIsParsed();
 
-    return Objects.equals(gradleGroupId, library.gradleGroupId)
-        && Objects.equals(gradleArtifactId, library.gradleArtifactId)
-        && Objects.equals(gradleClassifier, library.gradleClassifier)
-        && Objects.equals(gradleExtension, library.gradleExtension)
+    return coordinate.getGroup().equals(library.coordinate.getGroup())
+        && coordinate.getArtifact().equals(library.coordinate.getArtifact())
+        && Objects.equals(coordinate.getClassifier(), library.coordinate.getClassifier())
+        && coordinate.getExtension().equals(library.coordinate.getExtension())
         && Objects.equals(rules, library.rules)
         && Objects.equals(natives, library.natives);
   }
@@ -93,7 +86,12 @@ public class Library {
   public int hashCode() {
     ensureNameIsParsed();
     return Objects.hash(
-        gradleGroupId, gradleArtifactId, gradleClassifier, gradleExtension, rules, natives);
+        coordinate.getGroup(),
+        coordinate.getArtifact(),
+        coordinate.getClassifier(),
+        coordinate.getExtension(),
+        rules,
+        natives);
   }
 
   public Library() {}
@@ -125,15 +123,17 @@ public class Library {
    * first, then Maven layout (group/artifact/version/filename). Returns null if not found.
    */
   public Path resolveLocalPath(Path baseDir) {
-    Path libDir = baseDir.resolve("libraries");
+    Path libDir = MavenCoordinate.resolve(baseDir, "libraries");
+    String artifactPath = getArtifactPath(null);
 
     // Flat layout: libraries/lwjgl3ify-2.1.16-forgePatches.jar
-    Path flat = libDir.resolve(getArtifactFilename(null));
+    Path flat =
+        MavenCoordinate.resolve(libDir, artifactPath.substring(artifactPath.lastIndexOf('/') + 1));
     if (Files.isRegularFile(flat)) return flat;
 
     // Maven layout:
     // libraries/com/github/GTNewHorizons/lwjgl3ify/2.1.16/lwjgl3ify-2.1.16-forgePatches.jar
-    Path maven = libDir.resolve(getArtifactPath(null));
+    Path maven = MavenCoordinate.resolve(libDir, artifactPath);
     if (Files.isRegularFile(maven)) return maven;
 
     return null;
@@ -144,10 +144,9 @@ public class Library {
   }
 
   public void setName(String name) {
+    MavenCoordinate parsed = MavenCoordinate.parse(name);
     this.name = name;
-
-    // Trigger name reparse to update the gradle info
-    parseName();
+    this.coordinate = parsed;
   }
 
   public List<Rule> getRules() {
@@ -163,53 +162,33 @@ public class Library {
   }
 
   private void ensureNameIsParsed() {
-    // Don't reparse if it's already been parsed
-    if (gradleGroupId != null) return;
-
-    parseName();
-  }
-
-  private void parseName() {
-    Matcher m = GRADLE_PATTERN.matcher(name);
-
-    if (!m.matches()) {
-      throw new IllegalStateException("Cannot parse invalid gradle specifier: " + name);
-    }
-
-    gradleGroupId = m.group(1);
-    gradleArtifactId = m.group(2);
-    gradleVersion = m.group(3);
-    gradleClassifier = m.group(4);
-    String extension = m.group(5);
-    if (extension != null && !extension.isEmpty()) {
-      gradleExtension = extension;
-    } else {
-      gradleExtension = "jar";
+    if (coordinate == null) {
+      coordinate = MavenCoordinate.parse(name);
     }
   }
 
   public String getGradleGroup() {
     ensureNameIsParsed();
 
-    return gradleGroupId;
+    return coordinate.getGroup();
   }
 
   public String getGradleArtifact() {
     ensureNameIsParsed();
 
-    return gradleArtifactId;
+    return coordinate.getArtifact();
   }
 
   public String getGradleVersion() {
     ensureNameIsParsed();
 
-    return gradleVersion;
+    return coordinate.getVersion();
   }
 
   public String getGradleClassifier() {
     ensureNameIsParsed();
 
-    return gradleClassifier;
+    return coordinate.getClassifier();
   }
 
   public boolean isForCurrentOS(ILaunchOptions options, IJavaRuntime runtime) {
@@ -254,58 +233,44 @@ public class Library {
   }
 
   public String getArtifactPath(String nativeClassifier) {
-    if (this.name == null) {
-      throw new IllegalStateException("Cannot get artifact path of empty/blank artifact");
-    }
-
-    // Make sure the gradle specifier is parsed
     ensureNameIsParsed();
-
-    String filename = getArtifactFilename(nativeClassifier);
-
-    return gradleGroupId.replace('.', '/')
-        + '/'
-        + gradleArtifactId
-        + '/'
-        + gradleVersion
-        + '/'
-        + filename;
+    Artifact artifact = getArtifact(nativeClassifier);
+    if (artifact != null && artifact.getPath() != null) {
+      MavenCoordinate.validateRelativePath(artifact.getPath());
+      return artifact.getPath();
+    }
+    return nativeClassifier == null
+        ? coordinate.getPath()
+        : coordinate.withClassifier(nativeClassifier).getPath();
   }
 
   public String getArtifactFilename(String nativeClassifier) {
-    if (this.name == null) {
-      throw new IllegalStateException("Cannot get artifact filename of empty/blank artifact");
-    }
-
-    // Make sure the gradle specifier is parsed
-    ensureNameIsParsed();
-
-    String filename = gradleArtifactId + '-' + gradleVersion;
-
-    // The native classifier overrides the regular classifier
-    if (nativeClassifier != null) filename += '-' + nativeClassifier;
-    else if (gradleClassifier != null && !gradleClassifier.isEmpty())
-      filename += '-' + gradleClassifier;
-
-    filename += '.' + gradleExtension;
-
-    return filename;
+    String path = getArtifactPath(nativeClassifier);
+    return path.substring(path.lastIndexOf('/') + 1);
   }
 
   public String getArtifactSha1(String nativeClassifier) {
-    if (downloads == null) return null;
-
-    Artifact artifact;
-
-    if (nativeClassifier != null) artifact = downloads.getClassifier(nativeClassifier);
-    else artifact = downloads.getArtifact();
-
-    if (artifact != null) return artifact.getSha1();
-
-    return null;
+    Artifact artifact = getArtifact(nativeClassifier);
+    return artifact == null ? null : artifact.getSha1();
   }
 
-  public String getDownloadUrl(String path) throws DownloadException {
+  public Artifact getArtifact(String classifier) {
+    if (downloads == null) return null;
+    return classifier == null ? downloads.getArtifact() : downloads.getClassifier(classifier);
+  }
+
+  public String getDownloadUrl(String path, String classifier) throws DownloadException {
+    for (String candidate : getDownloadCandidates(path, classifier)) {
+      if (Utils.pingHttpURL(candidate)) {
+        return candidate;
+      }
+    }
+    throw new DownloadException("Failed to download library " + path + ": no mirror found");
+  }
+
+  /** Candidate URLs in repository preference order, with duplicates removed. */
+  public Set<String> getDownloadCandidates(String path, String classifier) {
+    MavenCoordinate.validateRelativePath(path);
     Set<String> possibleUrls = new LinkedHashSet<>(8);
 
     // Check the old-style URL (Forge 1.6, I think?)
@@ -314,28 +279,17 @@ public class Library {
       possibleUrls.add(this.url + path);
     }
 
-    // Check if an artifact URL is specified (downloads -> artifact -> url), only if it doesn't have
-    // natives
-    // This is a fully specified URL
-    if (!hasNatives()) {
-      String artifactUrl = null;
-
-      if (downloads != null) {
-        Artifact artifact = downloads.getArtifact();
-
-        if (artifact != null) artifactUrl = artifact.getUrl();
+    // Selected artifact URLs are fully specified, including native variants.
+    Artifact artifact = getArtifact(classifier);
+    String artifactUrl = artifact == null ? null : artifact.getUrl();
+    if (artifactUrl != null && !artifactUrl.isEmpty()) {
+      // Check if this URL is in Minecraft Forge's Maven repo and add ours as a primary mirror.
+      Matcher m = FORGE_MAVEN_ROOT.matcher(artifactUrl);
+      if (m.matches()) {
+        possibleUrls.add(TechnicConstants.TECHNIC_LIB_REPO + m.group(1));
+        possibleUrls.add(MCFORGE_MAVEN_MIRROR + m.group(1));
       }
-
-      if (artifactUrl != null && !artifactUrl.isEmpty()) {
-        // Check if this URL is in Minecraft Forge's Maven repo and add ours as a primary mirror
-        Matcher m = FORGE_MAVEN_ROOT.matcher(artifactUrl);
-        if (m.matches()) {
-          possibleUrls.add(TechnicConstants.TECHNIC_LIB_REPO + m.group(1));
-          possibleUrls.add(MCFORGE_MAVEN_MIRROR + m.group(1));
-        }
-
-        possibleUrls.add(artifactUrl);
-      }
+      possibleUrls.add(artifactUrl);
     }
 
     // Check if any fallback mirrors we know of have this library
@@ -344,13 +298,7 @@ public class Library {
       possibleUrls.add(string + path);
     }
 
-    for (String possibleUrl : possibleUrls) {
-      if (Utils.pingHttpURL(possibleUrl)) {
-        return possibleUrl;
-      }
-    }
-
-    throw new DownloadException("Failed to download library " + path + ": no mirror found");
+    return possibleUrls;
   }
 
   public boolean isMinecraftForge() {

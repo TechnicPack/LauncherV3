@@ -27,6 +27,7 @@ public class LauncherFileSystem {
   private final Path rootDirectory;
   private final Path assetsDirectory;
   private final Path cacheDirectory;
+  private final Path librariesDirectory;
   private final Path logsDirectory;
   private final Path modpacksDirectory;
   private final Path runtimesDirectory;
@@ -38,6 +39,7 @@ public class LauncherFileSystem {
 
     assetsDirectory = rootDirectory.resolve("assets");
     cacheDirectory = rootDirectory.resolve("cache");
+    librariesDirectory = rootDirectory.resolve("libraries");
     logsDirectory = rootDirectory.resolve("logs");
     modpacksDirectory = rootDirectory.resolve("modpacks");
     runtimesDirectory = rootDirectory.resolve("runtimes");
@@ -52,6 +54,7 @@ public class LauncherFileSystem {
     createDirectory(rootDirectory);
     createDirectory(assetsDirectory);
     createDirectory(cacheDirectory);
+    createDirectory(librariesDirectory);
     createDirectory(logsDirectory);
     createDirectory(modpacksDirectory);
     createDirectory(runtimesDirectory);
@@ -108,11 +111,16 @@ public class LauncherFileSystem {
   /**
    * The directory where cached files are stored.
    *
-   * <p>This includes FML libraries, Minecraft client jars, Minecraft libraries, and the discover
+   * <p>This includes FML libraries, Minecraft client jars, legacy Maven files, and the discover
    * page.
    */
   public Path getCacheDirectory() {
     return ensureDirectory(cacheDirectory);
+  }
+
+  /** The shared Maven repository, separate from mixed legacy cache contents. */
+  public Path getLibrariesDirectory() {
+    return ensureDirectory(librariesDirectory);
   }
 
   /** The directory where assets are stored */

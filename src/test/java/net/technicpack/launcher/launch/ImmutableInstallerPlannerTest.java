@@ -1,11 +1,15 @@
 package net.technicpack.launcher.launch;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import java.io.File;
@@ -395,7 +399,7 @@ class ImmutableInstallerPlannerTest {
                     + "\",\""
                     + arm64Key
                     + "\":\""
-                    + arm64Classifier
+                    + "natives-arm${arch}"
                     + "\"}"
                     + "}",
                 Library.class);
@@ -434,6 +438,73 @@ class ImmutableInstallerPlannerTest {
     Path extractedMarker = pack.getBinDir().toPath().resolve("natives/marker.txt");
     assertTrue(Files.exists(extractedMarker));
     assertEquals("arm64", Files.readString(extractedMarker, StandardCharsets.UTF_8));
+    Path installed =
+        fileSystem.getLibrariesDirectory().resolve(library.getArtifactPath(arm64Classifier));
+    assertEquals(sha1(arm64Bytes), sha1(Files.readAllBytes(installed)));
+    assertEquals(sha1(arm64Bytes), sha1(Files.readAllBytes(arm64Cache)));
+    assertEquals(sha1(genericBytes), sha1(Files.readAllBytes(genericCache)));
+    Files.write(installed, genericBytes);
+    assertEquals(sha1(arm64Bytes), sha1(Files.readAllBytes(arm64Cache)));
+    invokeInstallVersionLibrary(
+        planner, context, library, new RecordingReporter(new ArrayList<>()));
+    assertEquals(sha1(arm64Bytes), sha1(Files.readAllBytes(installed)));
+  }
+
+  @Test
+  void hashlessLibraryPrefersEmbeddedArchiveAndRetainsMixedCache() throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher-hashless"));
+    ModpackModel pack =
+        new ModpackModel(
+            new InstalledPack(
+                "hashless", InstalledPack.RECOMMENDED, tempDir.resolve("pack-hashless").toString()),
+            null,
+            null,
+            fileSystem);
+    pack.initDirectories();
+    Library library = new Library("example:tool:1");
+    Path legacy = fileSystem.getCacheDirectory().resolve(library.getArtifactPath());
+    writeZip(legacy, "marker.txt", "legacy");
+    Path sentinel = fileSystem.getCacheDirectory().resolve("minecraft_unrelated.jar");
+    Files.write(sentinel, new byte[] {1, 2, 3});
+    Path embedded = tempDir.resolve("embedded.jar");
+    writeZip(embedded, "marker.txt", "embedded");
+    try (ZipOutputStream output =
+        new ZipOutputStream(
+            Files.newOutputStream(pack.getBinDir().toPath().resolve("modpack.jar")))) {
+      output.putNextEntry(new ZipEntry("maven/" + library.getArtifactPath()));
+      Files.copy(embedded, output);
+      output.closeEntry();
+    }
+    Path target = fileSystem.getLibrariesDirectory().resolve(library.getArtifactPath());
+    Files.createDirectories(target.getParent());
+    Files.write(target, new byte[] {0});
+    ImmutableInstallerPlanner planner =
+        new ImmutableInstallerPlanner(
+            new TestResourceLoader(),
+            pack,
+            GSON.fromJson("{\"minecraft\":\"1.16.5\",\"mods\":[]}", Modpack.class),
+            fileSystem,
+            null,
+            new TechnicSettings(),
+            new FakeJavaRuntime(),
+            false,
+            false,
+            false,
+            () -> false);
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+    TestMinecraftVersionInfo version = new TestMinecraftVersionInfo(null);
+    version.setJavaRuntime(new FakeJavaRuntime());
+    context.setResolvedVersion(version);
+    invokeInstallVersionLibrary(
+        planner, context, library, new RecordingReporter(new ArrayList<>()));
+    assertEquals(sha1(Files.readAllBytes(embedded)), sha1(Files.readAllBytes(target)));
+    assertTrue(Files.isRegularFile(legacy));
+    assertEquals(3, Files.size(sentinel));
+    Files.copy(legacy, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+    invokeInstallVersionLibrary(
+        planner, context, library, new RecordingReporter(new ArrayList<>()));
+    assertEquals(sha1(Files.readAllBytes(legacy)), sha1(Files.readAllBytes(target)));
   }
 
   @Test
@@ -490,7 +561,7 @@ class ImmutableInstallerPlannerTest {
 
     Path modpackJar = pack.getBinDir().toPath().resolve("modpack.jar");
     Files.createDirectories(modpackJar.getParent());
-    Files.write(modpackJar, new byte[] {0x50, 0x4b, 0x03, 0x04});
+    writeZip(modpackJar, "legacy-payload.txt", "legacy Forge classes");
 
     Modpack modpackData = GSON.fromJson("{\"minecraft\":\"1.7.10\",\"mods\":[]}", Modpack.class);
     IMinecraftVersionInfo version =
@@ -591,6 +662,272 @@ class ImmutableInstallerPlannerTest {
   }
 
   @Test
+  void modernDiscoveryUsesPreparedProfileEntryAndPreservesPackPatches() throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher"));
+    ModpackModel pack = createDiscoveryPack(fileSystem);
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+    FakeJavaRuntime runtime = new FakeJavaRuntime();
+    Modpack modpackData =
+        GSON.fromJson(
+            "{\"minecraft\":\"1.20.1\",\"mods\":[{\"name\":\"loader\",\"version\":\"1\","
+                + "\"url\":\"https://example.invalid/loader.zip\",\"md5\":\"\"}]}",
+            Modpack.class);
+    ImmutableInstallerPlanner planner =
+        new ImmutableInstallerPlanner(
+            new TestResourceLoader(),
+            pack,
+            modpackData,
+            fileSystem,
+            Installer.createVersionBuilder(pack.getBinDir(), null, context),
+            new TechnicSettings(),
+            runtime,
+            true,
+            false,
+            false,
+            () -> false);
+
+    String forge = "net.minecraftforge:forge:1.20.1-47.1.0";
+    String forgeClient = forge + ":client";
+    String patchedLibrary = "example:pack-library:1";
+    String selected =
+        versionJson(
+            "1.20.1-forge-47.1.0",
+            "1.20.1",
+            declaredLibrary(forge) + "," + declaredLibrary(forgeClient));
+    JsonObject profile = modernProfile("1.20.1");
+    profile.addProperty("version", "display-id-is-not-the-launch-id");
+    profile.add(
+        "libraries",
+        GSON.fromJson(
+            "[" + declaredLibrary("example:processor:1") + "]", com.google.gson.JsonArray.class));
+    profile.add(
+        "processors",
+        GSON.fromJson(
+            "[{\"jar\":\"example:processor:1\",\"classpath\":[],\"args\":[]}]",
+            com.google.gson.JsonArray.class));
+    Path installer = tempDir.resolve("installer.jar");
+    writeModernInstaller(installer, profile, selected);
+    String stale = versionJson("stale-cached-version", "1.20.1", "");
+    String patch =
+        "{\"formatVersion\":1,\"uid\":\"example.pack\",\"order\":10,"
+            + "\"mainClass\":\"example.PatchedMain\",\"+jvmArgs\":[\"-Dpack=patched\"],"
+            + "\"libraries\":["
+            + declaredLibrary(patchedLibrary)
+            + "]}";
+    try (ZipOutputStream output =
+        new ZipOutputStream(
+            Files.newOutputStream(pack.getCacheDir().toPath().resolve("loader-1.zip")))) {
+      writeZipEntry(output, "bin/modpack.jar", Files.readAllBytes(installer));
+      writeZipEntry(output, "bin/version.json", stale.getBytes(StandardCharsets.UTF_8));
+      writeZipEntry(output, "patches/pack.json", patch.getBytes(StandardCharsets.UTF_8));
+    }
+
+    PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext> executor =
+        new PlanExecutor<>(null);
+    executor.execute(planner.buildPreparationPlan(), context);
+    assertEquals(stale, Files.readString(pack.getBinDir().toPath().resolve("version.json")));
+    writeVanillaVersion(pack, "1.20.1", "1.20.1");
+    executor.execute(planner.buildVersionDiscoveryPlan(), context);
+
+    IMinecraftVersionInfo version = context.getResolvedVersion();
+    assertEquals("1.20.1-forge-47.1.0", version.getId());
+    assertEquals("1.20.1", version.getParentVersion());
+    assertEquals("example.PatchedMain", version.getMainClass());
+    assertSame(runtime, version.getJavaRuntime());
+    assertTrue(
+        version
+            .getJavaArguments()
+            .resolve(new TechnicSettings(), runtime, null)
+            .containsAll(Arrays.asList("-Dloader=original", "-Dpack=patched")));
+    assertEquals(
+        Arrays.asList(forge, forgeClient, patchedLibrary),
+        version.getLibraries().stream().map(Library::getName).collect(Collectors.toList()));
+    assertEquals(
+        Arrays.asList(forge, forgeClient, patchedLibrary),
+        context.getLibrariesToInstall().stream()
+            .map(Library::getName)
+            .collect(Collectors.toList()));
+    assertEquals("", version.getLibraries().get(0).getArtifact(null).getUrl());
+    assertArrayEquals(
+        selected.getBytes(StandardCharsets.UTF_8),
+        Files.readAllBytes(pack.getBinDir().toPath().resolve("version.json")));
+
+    String replacementForge = "net.minecraftforge:forge:1.20.1-47.1.1";
+    String replacement =
+        versionJson(
+            "1.20.1-forge-47.1.1",
+            "1.20.1",
+            declaredLibrary(replacementForge)
+                + ","
+                + declaredLibrary(replacementForge + ":client"));
+    writeModernInstaller(pack.getBinDir().toPath().resolve("modpack.jar"), profile, replacement);
+    ImmutableInstallerPlanner.InstallExecutionContext partialContext =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+    ImmutableInstallerPlanner partial =
+        createDiscoveryPlanner(fileSystem, pack, partialContext, "1.20.1");
+    executor.execute(partial.buildVersionDiscoveryPlan(), partialContext);
+    assertEquals("1.20.1-forge-47.1.1", partialContext.getResolvedVersion().getId());
+    assertEquals("example.PatchedMain", partialContext.getResolvedVersion().getMainClass());
+    assertEquals(
+        Arrays.asList(replacementForge, replacementForge + ":client", patchedLibrary),
+        partialContext.getResolvedVersion().getLibraries().stream()
+            .map(Library::getName)
+            .collect(Collectors.toList()));
+    assertArrayEquals(
+        replacement.getBytes(StandardCharsets.UTF_8),
+        Files.readAllBytes(pack.getBinDir().toPath().resolve("version.json")));
+  }
+
+  @Test
+  void modernDiscoveryRejectsMissingSelectedEntryDespiteCachedVersion() throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher"));
+    ModpackModel pack = createDiscoveryPack(fileSystem);
+    String stale = versionJson("stale-version", "1.20.1", "");
+    Path versionJson = pack.getBinDir().toPath().resolve("version.json");
+    Files.writeString(versionJson, stale);
+    writeModernInstaller(
+        pack.getBinDir().toPath().resolve("modpack.jar"), modernProfile("1.20.1"), null);
+    writeVanillaVersion(pack, "1.20.1", "1.20.1");
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+    ImmutableInstallerPlanner planner = createDiscoveryPlanner(fileSystem, pack, context, "1.20.1");
+
+    assertThrows(
+        IOException.class,
+        () ->
+            new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
+                .execute(planner.buildVersionDiscoveryPlan(), context));
+    assertNull(context.getResolvedVersion());
+    assertEquals(stale, Files.readString(versionJson));
+  }
+
+  @Test
+  void malformedModernProfileCannotFallBackToCachedOrDefaultVersion() throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher"));
+    ModpackModel pack = createDiscoveryPack(fileSystem);
+    String stale = versionJson("stale-version", "1.20.1", "");
+    Path versionJson = pack.getBinDir().toPath().resolve("version.json");
+    Files.writeString(versionJson, stale);
+    JsonObject profile = modernProfile("1.20.1");
+    profile.addProperty("spec", true);
+    writeModernInstaller(
+        pack.getBinDir().toPath().resolve("modpack.jar"),
+        profile,
+        versionJson("embedded-loader", "1.20.1", ""));
+    writeVanillaVersion(pack, "1.20.1", "1.20.1");
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+    ImmutableInstallerPlanner planner = createDiscoveryPlanner(fileSystem, pack, context, "1.20.1");
+
+    assertThrows(
+        IOException.class,
+        () ->
+            new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
+                .execute(planner.buildVersionDiscoveryPlan(), context));
+    assertNull(context.getResolvedVersion());
+    assertEquals(stale, Files.readString(versionJson));
+  }
+
+  @Test
+  void modernDiscoveryRejectsPackMinecraftMismatch() throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher"));
+    ModpackModel pack = createDiscoveryPack(fileSystem);
+    writeModernInstaller(
+        pack.getBinDir().toPath().resolve("modpack.jar"),
+        modernProfile("1.20.1"),
+        versionJson("embedded-loader", "1.20.1", ""));
+    writeVanillaVersion(pack, "1.20.1", "1.20.1");
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+    ImmutableInstallerPlanner planner = createDiscoveryPlanner(fileSystem, pack, context, "1.20.2");
+
+    assertThrows(
+        IOException.class,
+        () ->
+            new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
+                .execute(planner.buildVersionDiscoveryPlan(), context));
+  }
+
+  @Test
+  void modernDiscoveryRejectsRawParentMismatchBeforeReplacingCachedVersion() throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher"));
+    ModpackModel pack = createDiscoveryPack(fileSystem);
+    String stale = versionJson("stale-version", "1.20.1", "");
+    Path versionJson = pack.getBinDir().toPath().resolve("version.json");
+    Files.writeString(versionJson, stale);
+    writeModernInstaller(
+        pack.getBinDir().toPath().resolve("modpack.jar"),
+        modernProfile("1.20.1"),
+        versionJson("embedded-loader", "1.20.2", ""));
+    writeVanillaVersion(pack, "1.20.2", "1.20.2");
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+    ImmutableInstallerPlanner planner = createDiscoveryPlanner(fileSystem, pack, context, "1.20.1");
+
+    assertThrows(
+        IOException.class,
+        () ->
+            new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
+                .execute(planner.buildVersionDiscoveryPlan(), context));
+    assertNull(context.getResolvedVersion());
+    assertEquals(stale, Files.readString(versionJson));
+  }
+
+  @Test
+  void modernDiscoveryRejectsResolvedVanillaParentMismatch() throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher"));
+    ModpackModel pack = createDiscoveryPack(fileSystem);
+    writeModernInstaller(
+        pack.getBinDir().toPath().resolve("modpack.jar"),
+        modernProfile("1.20.1"),
+        versionJson("embedded-loader", "1.20.1", ""));
+    writeVanillaVersion(pack, "1.20.1", "1.20.2");
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+    ImmutableInstallerPlanner planner = createDiscoveryPlanner(fileSystem, pack, context, "1.20.1");
+
+    assertThrows(
+        IOException.class,
+        () ->
+            new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
+                .execute(planner.buildVersionDiscoveryPlan(), context));
+  }
+
+  @Test
+  void modernForgeRequiresInstallerProfile() throws Exception {
+    assertModernVersionRequiresProfile("1.20.1-forge-47.1.0");
+  }
+
+  @Test
+  void neoForgeRequiresInstallerProfile() throws Exception {
+    assertModernVersionRequiresProfile("neoforge-21.1.0");
+  }
+
+  @Test
+  void payloadDiscoveryStillUsesDefaultZipVersionInsteadOfStaleCache() throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher"));
+    ModpackModel pack = createDiscoveryPack(fileSystem);
+    Files.writeString(
+        pack.getBinDir().toPath().resolve("version.json"),
+        versionJson("stale-version", "1.20.1", ""));
+    writeZip(
+        pack.getBinDir().toPath().resolve("modpack.jar"),
+        "version.json",
+        versionJson("payload-version", "1.20.1", ""));
+    writeVanillaVersion(pack, "1.20.1", "1.20.1");
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+    ImmutableInstallerPlanner planner = createDiscoveryPlanner(fileSystem, pack, context, "1.20.1");
+
+    new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
+        .execute(planner.buildVersionDiscoveryPlan(), context);
+
+    assertEquals("payload-version", context.getResolvedVersion().getId());
+    assertEquals("example.Loader", context.getResolvedVersion().getMainClass());
+  }
+
+  @Test
   void deriveJavaVersionPicksHighestComponentNotExceedingRequestedFromManifest() throws Exception {
     LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher-derive-1"));
     ImmutableInstallerPlanner planner = makeMinimalPlanner(fileSystem);
@@ -662,6 +999,416 @@ class ImmutableInstallerPlannerTest {
     } finally {
       setJavaRuntimesIndex(previous);
     }
+  }
+
+  @Test
+  void zeroClientInstallerAcquiresExactEmbeddedGameLibrary() throws Exception {
+    assertEmbeddedArtifactInstalled(false);
+  }
+
+  @Test
+  void processorOnlyArtifactSetIsAcquiredWithoutGameLibraries() throws Exception {
+    assertEmbeddedArtifactInstalled(true);
+  }
+
+  private void assertEmbeddedArtifactInstalled(boolean processorOnly) throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher-embedded"));
+    ModpackModel pack = createDiscoveryPack(fileSystem);
+    String coordinate =
+        processorOnly ? "example:processor:1" : "net.minecraftforge:forge:1.12.2-14.23.5.2851";
+    Library library = new Library(coordinate);
+    Path jar = tempDir.resolve("embedded-library.jar");
+    writeZip(jar, "marker.txt", "embedded verified bytes");
+    byte[] bytes = Files.readAllBytes(jar);
+    JsonObject declaration = GSON.fromJson(declaredLibrary(coordinate), JsonObject.class);
+    JsonObject metadata = declaration.getAsJsonObject("downloads").getAsJsonObject("artifact");
+    metadata.addProperty("sha1", sha1(bytes));
+    metadata.addProperty("size", bytes.length);
+    JsonObject profile = modernProfile("1.12.2");
+    profile.addProperty("spec", 0);
+    profile.add("data", new com.google.gson.JsonArray());
+    if (processorOnly) {
+      profile.add(
+          "libraries", GSON.fromJson("[" + declaration + "]", com.google.gson.JsonArray.class));
+      profile.add(
+          "processors",
+          GSON.fromJson(
+              "[{\"jar\":\"" + coordinate + "\",\"classpath\":[],\"args\":[]}]",
+              com.google.gson.JsonArray.class));
+    }
+    try (ZipOutputStream output =
+        new ZipOutputStream(
+            Files.newOutputStream(pack.getBinDir().toPath().resolve("modpack.jar")))) {
+      writeZipEntry(
+          output, "install_profile.json", profile.toString().getBytes(StandardCharsets.UTF_8));
+      writeZipEntry(
+          output,
+          "metadata/loader.json",
+          versionJson("embedded-loader", "1.12.2", processorOnly ? "" : declaration.toString())
+              .getBytes(StandardCharsets.UTF_8));
+      writeZipEntry(output, "maven/" + library.getArtifactPath(), bytes);
+    }
+    writeVanillaVersion(pack, "1.12.2", "1.12.2");
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+    ImmutableInstallerPlanner planner = createDiscoveryPlanner(fileSystem, pack, context, "1.12.2");
+    new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
+        .execute(planner.buildVersionDiscoveryPlan(), context);
+    executeNode(planner.buildInstallPlan(context), "install-version-libraries", context);
+    assertEquals(
+        sha1(bytes),
+        sha1(
+            Files.readAllBytes(
+                fileSystem.getLibrariesDirectory().resolve(library.getArtifactPath()))));
+    assertEquals(processorOnly ? 0 : 1, context.getResolvedVersion().getLibraries().size());
+    assertTrue(context.getDeferredArtifacts().isEmpty());
+  }
+
+  @Test
+  void processorsUseRuntimeInstalledAfterTheirPlanWasBuilt() throws Exception {
+    org.junit.jupiter.api.Assumptions.assumeTrue(
+        OperatingSystem.getOperatingSystem() == OperatingSystem.LINUX);
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher-runtime"));
+    ModpackModel pack = createDiscoveryPack(fileSystem);
+    String coordinate = "example:runtime-probe:1:${arch}";
+    Path jar = tempDir.resolve("probe.jar");
+    java.util.jar.Manifest manifest = new java.util.jar.Manifest();
+    manifest.getMainAttributes().putValue("Manifest-Version", "1.0");
+    manifest.getMainAttributes().putValue("Main-Class", RuntimeProbe.class.getName());
+    String className = RuntimeProbe.class.getName().replace('.', '/') + ".class";
+    try (java.util.jar.JarOutputStream output =
+            new java.util.jar.JarOutputStream(Files.newOutputStream(jar), manifest);
+        java.io.InputStream input = RuntimeProbe.class.getResourceAsStream("/" + className)) {
+      writeZipEntry(output, className, input.readAllBytes());
+    }
+    byte[] bytes = Files.readAllBytes(jar);
+    JsonObject declaration = GSON.fromJson(declaredLibrary(coordinate), JsonObject.class);
+    JsonObject artifact = declaration.getAsJsonObject("downloads").getAsJsonObject("artifact");
+    artifact.addProperty("sha1", sha1(bytes));
+    artifact.addProperty("size", bytes.length);
+    artifact.addProperty(
+        "path", new Library(coordinate.replace("${arch}", "64")).getArtifactPath());
+    JsonObject profile = modernProfile("1.20.1");
+    profile.add(
+        "libraries", GSON.fromJson("[" + declaration + "]", com.google.gson.JsonArray.class));
+    profile.add(
+        "processors",
+        GSON.fromJson(
+            "[{\"jar\":\""
+                + coordinate
+                + "\",\"classpath\":[],\"args\":[\"{ROOT}/runtime-observed.txt\"]}]",
+            com.google.gson.JsonArray.class));
+    JsonObject embedded =
+        GSON.fromJson(versionJson("embedded-loader", "1.20.1", ""), JsonObject.class);
+    embedded.add(
+        "javaVersion",
+        GSON.fromJson("{\"component\":\"test-runtime\",\"majorVersion\":25}", JsonObject.class));
+    try (ZipOutputStream output =
+        new ZipOutputStream(
+            Files.newOutputStream(pack.getBinDir().toPath().resolve("modpack.jar")))) {
+      writeZipEntry(
+          output, "install_profile.json", profile.toString().getBytes(StandardCharsets.UTF_8));
+      writeZipEntry(
+          output, "metadata/loader.json", embedded.toString().getBytes(StandardCharsets.UTF_8));
+      writeZipEntry(
+          output,
+          "maven/" + new Library(coordinate.replace("${arch}", "64")).getArtifactPath(),
+          bytes);
+    }
+    byte[] assets = "{\"objects\":{}}".getBytes(StandardCharsets.UTF_8);
+    Path assetIndex = fileSystem.getAssetsDirectory().resolve("indexes/runtime-test.json");
+    Files.createDirectories(assetIndex.getParent());
+    Files.write(assetIndex, assets);
+    JsonObject vanilla = GSON.fromJson(vanillaVersionJson("1.20.1"), JsonObject.class);
+    vanilla.add(
+        "downloads",
+        GSON.fromJson(
+            "{\"client\":{\"sha1\":\""
+                + sha1(bytes)
+                + "\",\"url\":\"https://unused.invalid/client.jar\"}}",
+            JsonObject.class));
+    vanilla.add(
+        "assetIndex",
+        GSON.fromJson(
+            "{\"id\":\"runtime-test\",\"sha1\":\""
+                + sha1(assets)
+                + "\",\"url\":\"https://unused.invalid/assets.json\"}",
+            JsonObject.class));
+    Files.writeString(pack.getBinDir().toPath().resolve("1.20.1.json"), vanilla.toString());
+    Files.write(fileSystem.getCacheDirectory().resolve("minecraft_1.20.1.jar"), bytes);
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+    ImmutableInstallerPlanner planner =
+        new ImmutableInstallerPlanner(
+            new TestResourceLoader(),
+            pack,
+            GSON.fromJson("{\"minecraft\":\"1.20.1\",\"mods\":[]}", Modpack.class),
+            fileSystem,
+            Installer.createVersionBuilder(pack.getBinDir(), null, context),
+            new TechnicSettings(),
+            new FakeJavaRuntime("x86"),
+            false,
+            true,
+            false,
+            () -> false);
+    new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
+        .execute(planner.buildVersionDiscoveryPlan(), context);
+    ExecutionPlan<ImmutableInstallerPlanner.InstallExecutionContext> plan =
+        planner.buildInstallPlan(context);
+    String executable = new File(System.getProperty("java.home"), "bin/java").getAbsolutePath();
+    byte[] script =
+        ("#!/bin/sh\nexec '" + executable.replace("'", "'\\''") + "' \"$@\"\n")
+            .getBytes(StandardCharsets.UTF_8);
+    HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+    String url = "http://127.0.0.1:" + server.getAddress().getPort();
+    byte[] manifestBytes =
+        ("{\"files\":{\"bin\":{\"type\":\"directory\"},\"bin/java\":{"
+                + "\"type\":\"file\",\"executable\":true,\"downloads\":{\"raw\":{\"sha1\":\""
+                + sha1(script)
+                + "\",\"size\":"
+                + script.length
+                + ",\"url\":\""
+                + url
+                + "/java\"}}}}}")
+            .getBytes(StandardCharsets.UTF_8);
+    server.createContext("/java", exchange -> respond(exchange, 200, script));
+    server.createContext("/runtime.json", exchange -> respond(exchange, 200, manifestBytes));
+    server.start();
+    JavaRuntimesIndex previous = setJavaRuntimesIndex(server, manifestBytes);
+    try {
+      new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
+          .execute(plan, context);
+      assertEquals(
+          fileSystem.getRuntimesDirectory().resolve("test-runtime").toString(),
+          Files.readString(fileSystem.getRootDirectory().resolve("runtime-observed.txt")));
+      Path selectedTool =
+          fileSystem
+              .getLibrariesDirectory()
+              .resolve(new Library(coordinate.replace("${arch}", "64")).getArtifactPath());
+      assertEquals(sha1(bytes), sha1(Files.readAllBytes(selectedTool)));
+      assertFalse(
+          Files.exists(
+              fileSystem
+                  .getLibrariesDirectory()
+                  .resolve(new Library(coordinate.replace("${arch}", "32")).getArtifactPath())));
+    } finally {
+      setJavaRuntimesIndex(previous);
+      server.stop(0);
+    }
+  }
+
+  public static final class RuntimeProbe {
+    public static void main(String[] args) throws IOException {
+      Files.write(
+          java.nio.file.Paths.get(args[0]),
+          System.getenv("JAVA_HOME").getBytes(StandardCharsets.UTF_8));
+    }
+  }
+
+  private static void executeNode(
+      ExecutionPlan<ImmutableInstallerPlanner.InstallExecutionContext> plan,
+      String id,
+      ImmutableInstallerPlanner.InstallExecutionContext context)
+      throws Exception {
+    net.technicpack.launchercore.install.plan.PlanNode<?> node =
+        plan.getNodes().stream()
+            .filter(candidate -> candidate.getId().equals(id))
+            .findFirst()
+            .orElseThrow(AssertionError::new);
+    Method actionGetter = node.getClass().getDeclaredMethod("getAction");
+    actionGetter.setAccessible(true);
+    @SuppressWarnings("unchecked")
+    net.technicpack.launchercore.install.plan.PlanNodeAction<
+            ImmutableInstallerPlanner.InstallExecutionContext>
+        action =
+            (net.technicpack.launchercore.install.plan.PlanNodeAction<
+                    ImmutableInstallerPlanner.InstallExecutionContext>)
+                actionGetter.invoke(node);
+    action.execute(context, new RecordingReporter(new ArrayList<>()));
+  }
+
+  @Test
+  void preparesCanonicalNativeAliasAndCleansOnlyManagedBinState() throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher-alias"));
+    ModpackModel pack = createDiscoveryPack(fileSystem);
+    Path canonical = fileSystem.getCacheDirectory().resolve("minecraft_26.2.jar");
+    try (ZipOutputStream output = new ZipOutputStream(Files.newOutputStream(canonical))) {
+      writeZipEntry(
+          output, "META-INF/MOJANG_C.SF", "signature fixture".getBytes(StandardCharsets.UTF_8));
+      writeZipEntry(
+          output, "client.txt", "canonical vanilla bytes".getBytes(StandardCharsets.UTF_8));
+    }
+    byte[] bytes = Files.readAllBytes(canonical);
+    Path stale = pack.getBinDir().toPath().resolve("native-launch/stale.jar");
+    Files.createDirectories(stale.getParent());
+    Files.writeString(stale, "old generated alias");
+    Path unrelated = pack.getBinDir().toPath().resolve("user-file.txt");
+    Files.writeString(unrelated, "retain");
+    JsonObject metadata =
+        GSON.fromJson(versionJson("neoforge-26.2.0.75", "26.2", ""), JsonObject.class);
+    metadata.add(
+        "downloads",
+        GSON.fromJson(
+            "{\"client\":{\"sha1\":\""
+                + sha1(bytes)
+                + "\",\"size\":"
+                + bytes.length
+                + ",\"url\":\"https://unused.invalid/client.jar\"}}",
+            JsonObject.class));
+    IMinecraftVersionInfo version =
+        MojangUtils.getGson().fromJson(metadata, MinecraftVersionInfo.class);
+    version.setJavaRuntime(new FakeJavaRuntime());
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+    context.setResolvedVersion(version);
+    ImmutableInstallerPlanner planner =
+        new ImmutableInstallerPlanner(
+            new TestResourceLoader(),
+            pack,
+            GSON.fromJson("{\"minecraft\":\"26.2\",\"mods\":[]}", Modpack.class),
+            fileSystem,
+            null,
+            new TechnicSettings(),
+            new FakeJavaRuntime(),
+            true,
+            false,
+            false,
+            () -> false);
+    executeNode(planner.buildPreparationPlan(), "cleanup-modpack", context);
+    assertFalse(Files.exists(stale));
+    assertEquals("retain", Files.readString(unrelated));
+    assertEquals(sha1(bytes), sha1(Files.readAllBytes(canonical)));
+    ExecutionPlan<ImmutableInstallerPlanner.InstallExecutionContext> install =
+        planner.buildInstallPlan(context);
+    executeNode(install, "install-minecraft", context);
+    Files.writeString(
+        pack.getBinDir().toPath().resolve("minecraft.jar"), "stale legacy launch bytes");
+    executeNode(install, "prepare-modern-launch-jar", context);
+    Path alias = MojangUtils.getModernLaunchJar(pack.getBinDir().toPath(), version.getId());
+    assertEquals(sha1(bytes), sha1(Files.readAllBytes(alias)));
+    assertFalse(
+        sha1(bytes)
+            .equals(sha1(Files.readAllBytes(pack.getBinDir().toPath().resolve("minecraft.jar")))));
+    Files.writeString(alias, "damaged alias");
+    executeNode(install, "prepare-modern-launch-jar", context);
+    assertEquals(sha1(bytes), sha1(Files.readAllBytes(alias)));
+    assertEquals(sha1(bytes), sha1(Files.readAllBytes(canonical)));
+  }
+
+  private ModpackModel createDiscoveryPack(LauncherFileSystem fileSystem) throws IOException {
+    ModpackModel pack =
+        new ModpackModel(
+            new InstalledPack(
+                "discovery", InstalledPack.RECOMMENDED, tempDir.resolve("pack").toString()),
+            null,
+            null,
+            fileSystem);
+    pack.initDirectories();
+    return pack;
+  }
+
+  private static ImmutableInstallerPlanner createDiscoveryPlanner(
+      LauncherFileSystem fileSystem,
+      ModpackModel pack,
+      ImmutableInstallerPlanner.InstallExecutionContext context,
+      String minecraftVersion) {
+    return new ImmutableInstallerPlanner(
+        new TestResourceLoader(),
+        pack,
+        GSON.fromJson("{\"minecraft\":\"" + minecraftVersion + "\",\"mods\":[]}", Modpack.class),
+        fileSystem,
+        Installer.createVersionBuilder(pack.getBinDir(), null, context),
+        new TechnicSettings(),
+        new FakeJavaRuntime(),
+        false,
+        false,
+        false,
+        () -> false);
+  }
+
+  private void assertModernVersionRequiresProfile(String versionId) throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher"));
+    ModpackModel pack = createDiscoveryPack(fileSystem);
+    Files.writeString(
+        pack.getBinDir().toPath().resolve("version.json"), versionJson(versionId, "1.20.1", ""));
+    writeVanillaVersion(pack, "1.20.1", "1.20.1");
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+    ImmutableInstallerPlanner planner = createDiscoveryPlanner(fileSystem, pack, context, "1.20.1");
+
+    assertThrows(
+        IOException.class,
+        () ->
+            new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
+                .execute(planner.buildVersionDiscoveryPlan(), context));
+  }
+
+  private static JsonObject modernProfile(String minecraftVersion) {
+    return GSON.fromJson(
+        "{\"spec\":1,\"profile\":\"custom-loader\",\"version\":\"embedded-loader\","
+            + "\"minecraft\":\""
+            + minecraftVersion
+            + "\",\"json\":\"/metadata/loader.json\","
+            + "\"libraries\":[],\"data\":{},\"processors\":[]}",
+        JsonObject.class);
+  }
+
+  private static String versionJson(String id, String parent, String libraries) {
+    return "{\"id\":\""
+        + id
+        + "\",\"inheritsFrom\":\""
+        + parent
+        + "\","
+        + "\"type\":\"release\",\"mainClass\":\"example.Loader\","
+        + "\"arguments\":{\"jvm\":[\"-Dloader=original\"],\"game\":[\"--demo\"]},"
+        + "\"libraries\":["
+        + libraries
+        + "]}";
+  }
+
+  private static String vanillaVersionJson(String id) {
+    return "{\"id\":\""
+        + id
+        + "\",\"type\":\"release\","
+        + "\"mainClass\":\"net.minecraft.client.main.Main\",\"arguments\":{},"
+        + "\"libraries\":[],\"downloads\":{}}";
+  }
+
+  private static void writeVanillaVersion(ModpackModel pack, String key, String id)
+      throws IOException {
+    Files.writeString(pack.getBinDir().toPath().resolve(key + ".json"), vanillaVersionJson(id));
+  }
+
+  private static String declaredLibrary(String coordinate) {
+    return "{\"name\":\""
+        + coordinate
+        + "\",\"downloads\":{\"artifact\":{"
+        + "\"path\":\""
+        + new Library(coordinate).getArtifactPath()
+        + "\","
+        + "\"sha1\":\"1111111111111111111111111111111111111111\",\"size\":1,\"url\":\"\"}}}";
+  }
+
+  private static void writeModernInstaller(Path installer, JsonObject profile, String versionJson)
+      throws IOException {
+    try (ZipOutputStream output = new ZipOutputStream(Files.newOutputStream(installer))) {
+      writeZipEntry(
+          output, "install_profile.json", GSON.toJson(profile).getBytes(StandardCharsets.UTF_8));
+      writeZipEntry(
+          output,
+          "version.json",
+          versionJson("wrong-default-entry", "1.20.1", "").getBytes(StandardCharsets.UTF_8));
+      if (versionJson != null) {
+        writeZipEntry(output, "metadata/loader.json", versionJson.getBytes(StandardCharsets.UTF_8));
+      }
+    }
+  }
+
+  private static void writeZipEntry(ZipOutputStream output, String name, byte[] contents)
+      throws IOException {
+    output.putNextEntry(new ZipEntry(name));
+    output.write(contents);
+    output.closeEntry();
   }
 
   private ImmutableInstallerPlanner makeMinimalPlanner(LauncherFileSystem fileSystem) {

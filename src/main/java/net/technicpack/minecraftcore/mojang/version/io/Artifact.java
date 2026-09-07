@@ -7,6 +7,7 @@ public class Artifact {
   private String url;
   private String sha1;
   private long size;
+  private String path;
 
   private Artifact() {}
 
@@ -23,12 +24,13 @@ public class Artifact {
     Artifact artifact = (Artifact) o;
     return size == artifact.size
         && Objects.equals(url, artifact.url)
-        && Objects.equals(sha1, artifact.sha1);
+        && Objects.equals(sha1, artifact.sha1)
+        && Objects.equals(path, artifact.path);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(url, sha1, size);
+    return Objects.hash(url, sha1, size, path);
   }
 
   public String getUrl() {
@@ -41,6 +43,10 @@ public class Artifact {
 
   public long getSize() {
     return size;
+  }
+
+  public String getPath() {
+    return path;
   }
 
   public void setUrl(String url) {

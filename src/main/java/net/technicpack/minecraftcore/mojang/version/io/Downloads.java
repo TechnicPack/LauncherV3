@@ -33,7 +33,7 @@ public class Downloads {
   }
 
   public Artifact getClassifier(String key) {
-    return classifiers.get(key);
+    return classifiers == null ? null : classifiers.get(key);
   }
 
   public void setArtifact(Artifact artifact) {

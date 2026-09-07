@@ -47,6 +47,7 @@ import net.technicpack.launchercore.modpacks.RunData;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
 import net.technicpack.minecraftcore.mojang.version.io.Library;
+import net.technicpack.minecraftcore.mojang.version.io.MavenCoordinate;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.utilslib.OperatingSystem;
@@ -160,15 +161,10 @@ public class MinecraftLauncher {
     // build jvm args
     String launchJavaVersion = javaRuntime.getVersion();
 
-    // Ignore JVM args for Forge 1.13+, ForgeWrapper handles those
-    // FIXME: HACK: This likely breaks some things as it will also skip vanilla JVM args
-    if (!MojangUtils.hasModernMinecraftForge(version) && !MojangUtils.hasNeoForge(version)) {
-      ArgumentList jvmArgs = version.getJavaArguments();
-
-      if (jvmArgs != null) {
-        for (String arg : jvmArgs.resolve(options.getOptions(), javaRuntime, paramDereferencer)) {
-          commands.add(arg);
-        }
+    ArgumentList jvmArgs = version.getJavaArguments();
+    if (jvmArgs != null) {
+      for (String arg : jvmArgs.resolve(launchOpts, javaRuntime, paramDereferencer)) {
+        commands.add(arg);
       }
     }
 
@@ -192,22 +188,6 @@ public class MinecraftLauncher {
     // This is required because we strip META-INF from the minecraft.jar
     commands.addUnique("-Dfml.ignoreInvalidMinecraftCertificates=true");
     commands.addUnique("-Dfml.ignorePatchDiscrepancies=true");
-
-    // This is for ForgeWrapper >= 1.4.2
-    if (MojangUtils.requiresForgeWrapper(version)) {
-      commands.addUnique(
-          "-Dforgewrapper.librariesDir=" + fileSystem.getCacheDirectory().toString());
-
-      // The Forge installer jar is really the modpack.jar
-      File modpackJar = new File(pack.getBinDir(), "modpack.jar");
-      commands.addUnique("-Dforgewrapper.installer=" + modpackJar.getAbsolutePath());
-
-      // We feed ForgeWrapper the unmodified Minecraft jar here
-      String mcVersion = MojangUtils.getMinecraftVersion(version);
-      Path minecraftJar =
-          fileSystem.getCacheDirectory().resolve(String.format("minecraft_%s.jar", mcVersion));
-      commands.addUnique("-Dforgewrapper.minecraft=" + minecraftJar);
-    }
 
     commands.addUnique(
         "-Dminecraft.applet.TargetDirectory=" + pack.getInstalledDirectory().getAbsolutePath());
@@ -396,6 +376,10 @@ public class MinecraftLauncher {
     params.put("game_directory", gameDirectory.getAbsolutePath());
     params.put("natives_directory", nativesDir);
     params.put("classpath", cpString);
+    params.put(
+        "library_directory",
+        fileSystem.getLibrariesDirectory().toAbsolutePath().normalize().toString());
+    params.put("classpath_separator", File.pathSeparator);
 
     params.put("resolution_width", Integer.toString(launchOpts.getCustomWidth()));
     params.put("resolution_height", Integer.toString(launchOpts.getCustomHeight()));
@@ -453,9 +437,9 @@ public class MinecraftLauncher {
         }
       } else {
         file =
-            fileSystem
-                .getCacheDirectory()
-                .resolve(library.getArtifactPath().replace("${arch}", bitness));
+            MavenCoordinate.resolve(
+                fileSystem.getLibrariesDirectory(),
+                library.getArtifactPath().replace("${arch}", bitness));
       }
       if (!Files.isRegularFile(file)) {
         throw new InstallException("Library " + library.getName() + " not found.");
@@ -479,10 +463,7 @@ public class MinecraftLauncher {
     // Add the minecraft jar to the classpath
     Path minecraft;
     if (hasModernMinecraftForge || hasNeoForge) {
-      minecraft =
-          fileSystem
-              .getCacheDirectory()
-              .resolve(String.format("minecraft_%s.jar", version.getParentVersion()));
+      minecraft = MojangUtils.getModernLaunchJar(pack.getBinDir().toPath(), version.getId());
     } else {
       minecraft = pack.getBinDir().toPath().resolve("minecraft.jar");
     }

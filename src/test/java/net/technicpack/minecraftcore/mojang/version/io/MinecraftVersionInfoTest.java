@@ -10,10 +10,48 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import net.technicpack.minecraftcore.MojangUtils;
+import net.technicpack.minecraftcore.mojang.version.chain.ChainedMinecraftVersionInfo;
+import net.technicpack.minecraftcore.mojang.version.io.argument.Argument;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import org.junit.jupiter.api.Test;
 
 class MinecraftVersionInfoTest {
+  @Test
+  void versionJvmInheritanceIsParentFirstButGameAndUserArgumentsRemainChildFirst() {
+    ChainedMinecraftVersionInfo version = new ChainedMinecraftVersionInfo(argumentLayer("child"));
+    version.addVersionToChain(argumentLayer("parent"));
+    version.addVersionToChain(argumentLayer("vanilla"));
+    version.addJvmArguments(List.of(Argument.literal("-Dpriority=prism")));
+
+    assertEquals(
+        List.of("-Dpriority=vanilla", "-Dpriority=parent", "-Dpriority=child", "-Dpriority=prism"),
+        version.getJavaArguments().resolve(null, null, null));
+    assertEquals(
+        List.of("--layer", "child", "--layer", "parent", "--layer", "vanilla"),
+        version.getMinecraftArguments().resolve(null, null, null));
+    assertEquals(
+        List.of("-Duser=child", "-Duser=parent", "-Duser=vanilla"),
+        version.getDefaultUserJavaArguments().resolve(null, null, null));
+  }
+
+  private static MinecraftVersionInfo argumentLayer(String name) {
+    return MojangUtils.getGson()
+        .fromJson(
+            "{\"id\":\""
+                + name
+                + "\",\"type\":\"release\",\"arguments\":{"
+                + "\"jvm\":[\"-Dpriority="
+                + name
+                + "\"],"
+                + "\"game\":[\"--layer\",\""
+                + name
+                + "\"],"
+                + "\"default-user-jvm\":[\"-Duser="
+                + name
+                + "\"]}}",
+            MinecraftVersionInfo.class);
+  }
+
   @Test
   void deserializesDefaultUserJvmArgumentsFromArgumentsBlock() {
     MinecraftVersionInfo version =

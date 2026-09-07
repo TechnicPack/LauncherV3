@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.logging.Level;
@@ -33,6 +34,35 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 
 public class ZipUtils {
+  /** Extracts one normalized archive member to an explicit, caller-checked destination. */
+  public static void extractEntryTo(Path archive, String member, Path target)
+      throws IOException, InterruptedException {
+    if (member == null || member.isEmpty()) throw new IOException("Empty ZIP member");
+    String normalized = member.startsWith("/") ? member.substring(1) : member;
+    if (normalized.isEmpty() || normalized.indexOf('\\') >= 0 || normalized.indexOf(':') >= 0) {
+      throw new IOException("Unsafe ZIP member: " + member);
+    }
+    for (String segment : normalized.split("/", -1)) {
+      if (segment.isEmpty() || segment.equals(".") || segment.equals("..")) {
+        throw new IOException("Unsafe ZIP member: " + member);
+      }
+      for (int i = 0; i < segment.length(); i++) {
+        if (Character.isISOControl(segment.charAt(i))) {
+          throw new IOException("Unsafe ZIP member: " + member);
+        }
+      }
+    }
+    if (Thread.currentThread().isInterrupted()) throw new InterruptedException();
+    try (ZipFile zip = ZipFile.builder().setPath(archive).get()) {
+      ZipArchiveEntry entry = zip.getEntry(normalized);
+      if (entry == null || entry.isDirectory()) {
+        throw new IOException("Missing regular ZIP member " + normalized + " in " + archive);
+      }
+      Files.createDirectories(target.toAbsolutePath().getParent());
+      unzipEntry(zip, entry, target.toFile());
+    }
+  }
+
   public static boolean extractFile(File zip, File output, String fileName)
       throws InterruptedException {
     if (!zip.exists() || fileName == null) {
@@ -84,6 +114,7 @@ public class ZipUtils {
             new BufferedOutputStream(Files.newOutputStream(outputFile.toPath()))) {
       int length;
       while ((length = inputStream.read(buffer, 0, buffer.length)) != -1) {
+        if (Thread.currentThread().isInterrupted()) throw new InterruptedException();
         outputStream.write(buffer, 0, length);
       }
     } catch (ClosedByInterruptException e) {

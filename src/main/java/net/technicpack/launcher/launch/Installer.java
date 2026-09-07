@@ -210,7 +210,9 @@ public class Installer {
 
       try {
         ExecutionProgressListener progressListener = ExecutionProgressListeners.adapt(listener);
-        MinecraftVersionInfoBuilder versionBuilder = createVersionBuilder(listener);
+        ImmutableInstallerPlanner.InstallExecutionContext context =
+            new ImmutableInstallerPlanner.InstallExecutionContext();
+        MinecraftVersionInfoBuilder versionBuilder = createVersionBuilder(listener, context);
         JavaVersionRepository javaVersions = launcher.getJavaVersions();
 
         final boolean mojangJavaWanted = settings.shouldUseMojangJava();
@@ -235,8 +237,6 @@ public class Installer {
                 mojangJavaWanted,
                 jarRegenerationRequired,
                 () -> isCancelledByUser);
-        ImmutableInstallerPlanner.InstallExecutionContext context =
-            new ImmutableInstallerPlanner.InstallExecutionContext();
         PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext> executor =
             new PlanExecutor<>(progressListener);
 
@@ -405,29 +405,41 @@ public class Installer {
       executor.execute(plan, context);
     }
 
-    private MinecraftVersionInfoBuilder createVersionBuilder(DownloadListener listener) {
-      ZipMinecraftVersionInfoRetriever zipVersionRetriever =
-          new ZipMinecraftVersionInfoRetriever(new File(pack.getBinDir(), "modpack.jar"));
-      HttpMinecraftVersionInfoRetriever fallbackVersionRetriever =
-          new HttpMinecraftVersionInfoRetriever(TechnicConstants.VERSIONS_BASE_URL, listener);
-
-      java.util.ArrayList<MinecraftVersionInfoRetriever> fallbackRetrievers =
-          new java.util.ArrayList<>(1);
-      fallbackRetrievers.add(fallbackVersionRetriever);
-
-      File versionJson = new File(pack.getBinDir(), "version.json");
-
-      // This always gets the version.json from the modpack.jar (it ignores "key"), cached as
-      // bin/version.json
-      FileMinecraftVersionInfoBuilder zipVersionBuilder =
-          new FileMinecraftVersionInfoBuilder(versionJson, zipVersionRetriever, fallbackRetrievers);
-      // This gets the "key" from bin/$key.json if it exists, otherwise it downloads it from our
-      // repo into that location
-      FileMinecraftVersionInfoBuilder webVersionBuilder =
-          new FileMinecraftVersionInfoBuilder(pack.getBinDir(), null, fallbackRetrievers);
-
-      return new ChainedMinecraftVersionInfoBuilder(zipVersionBuilder, webVersionBuilder);
+    private MinecraftVersionInfoBuilder createVersionBuilder(
+        DownloadListener listener, ImmutableInstallerPlanner.InstallExecutionContext context) {
+      return Installer.createVersionBuilder(pack.getBinDir(), listener, context);
     }
+  }
+
+  static MinecraftVersionInfoBuilder createVersionBuilder(
+      File binDirectory,
+      DownloadListener listener,
+      ImmutableInstallerPlanner.InstallExecutionContext context) {
+    ZipMinecraftVersionInfoRetriever zipVersionRetriever =
+        new ZipMinecraftVersionInfoRetriever(new File(binDirectory, "modpack.jar"));
+    HttpMinecraftVersionInfoRetriever fallbackVersionRetriever =
+        new HttpMinecraftVersionInfoRetriever(TechnicConstants.VERSIONS_BASE_URL, listener);
+
+    java.util.ArrayList<MinecraftVersionInfoRetriever> fallbackRetrievers =
+        new java.util.ArrayList<>(1);
+    fallbackRetrievers.add(fallbackVersionRetriever);
+
+    File versionJson = new File(binDirectory, "version.json");
+    FileMinecraftVersionInfoBuilder modernVersionBuilder =
+        new FileMinecraftVersionInfoBuilder(versionJson, null, null);
+    FileMinecraftVersionInfoBuilder zipVersionBuilder =
+        new FileMinecraftVersionInfoBuilder(versionJson, zipVersionRetriever, fallbackRetrievers);
+
+    // Select only when discovery runs, after pack preparation has read the installer profile.
+    MinecraftVersionInfoBuilder primaryVersionBuilder =
+        key ->
+            (context.getModernInstallerProfile() != null ? modernVersionBuilder : zipVersionBuilder)
+                .buildVersionFromKey(key);
+    // Parent metadata still comes from bin/$key.json or the existing version repository.
+    FileMinecraftVersionInfoBuilder webVersionBuilder =
+        new FileMinecraftVersionInfoBuilder(binDirectory, null, fallbackRetrievers);
+
+    return new ChainedMinecraftVersionInfoBuilder(primaryVersionBuilder, webVersionBuilder);
   }
 
   static boolean isCreateProcessAccessDenied(IOException exception) {
