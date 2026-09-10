@@ -35,6 +35,7 @@ import net.technicpack.launchercore.JavaVersionComparator;
 import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.exception.CacheDeleteException;
 import net.technicpack.launchercore.exception.DownloadException;
+import net.technicpack.launchercore.exception.JavaRuntimeException;
 import net.technicpack.launchercore.exception.PackNotAvailableOfflineException;
 import net.technicpack.launchercore.install.plan.ExecutionPlan;
 import net.technicpack.launchercore.install.plan.LegacyTaskPlanAction;
@@ -52,6 +53,7 @@ import net.technicpack.launchercore.install.verifiers.SHA1FileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidJsonFileVerifier;
 import net.technicpack.launchercore.install.verifiers.ValidZipFileVerifier;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
+import net.technicpack.launchercore.launch.java.version.FileBasedJavaRuntime;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.util.AtomicJsonWriter;
 import net.technicpack.minecraftcore.FmlLibsManager;
@@ -1733,7 +1735,8 @@ class ImmutableInstallerPlanner {
     }
   }
 
-  private static @NotNull IJavaRuntime getJavaRuntime(Path runtimeRoot) {
+  private static @NotNull IJavaRuntime getJavaRuntime(Path runtimeRoot)
+      throws JavaRuntimeException, InterruptedException {
     final OperatingSystem os = OperatingSystem.getOperatingSystem();
     final Path runtimeExecutable;
 
@@ -1745,8 +1748,21 @@ class ImmutableInstallerPlanner {
       runtimeExecutable = runtimeRoot.resolve("bin/java");
     }
 
-    return new net.technicpack.launchercore.launch.java.version.FileBasedJavaRuntime(
-        runtimeExecutable);
+    FileBasedJavaRuntime runtime = new FileBasedJavaRuntime(runtimeExecutable);
+    try {
+      runtime.validate();
+    } catch (JavaRuntimeException e) {
+      if (Thread.currentThread().isInterrupted()) {
+        throw new InterruptedException("Interrupted while querying the downloaded Java runtime");
+      }
+      throw new JavaRuntimeException(
+          "The downloaded Java runtime could not be validated.\n\n"
+              + e.getMessage()
+              + "\n\nCheck the Java installation and its permissions, or select a compatible Java "
+              + "version in Launcher Options and disable \"Use Mojang Java runtimes\".",
+          e);
+    }
+    return runtime;
   }
 
   static class InstallExecutionContext {

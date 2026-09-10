@@ -35,6 +35,7 @@ import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.exception.DownloadException;
+import net.technicpack.launchercore.exception.JavaRuntimeException;
 import net.technicpack.launchercore.install.plan.ExecutionPlan;
 import net.technicpack.launchercore.install.plan.NodeProgressReporter;
 import net.technicpack.launchercore.install.plan.PlanExecutor;
@@ -213,6 +214,76 @@ class ImmutableInstallerPlannerTest {
         setJavaRuntimesIndex(previousIndex);
       }
     } finally {
+      server.stop(0);
+    }
+  }
+
+  @Test
+  void installJavaRuntimeRejectsFailedProbeBeforeReplacingSelectedRuntime() throws Exception {
+    Assumptions.assumeTrue(OperatingSystem.getOperatingSystem() == OperatingSystem.LINUX);
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher-bad-java"));
+    ImmutableInstallerPlanner planner =
+        new ImmutableInstallerPlanner(
+            new TestResourceLoader(),
+            new ModpackModel(
+                new InstalledPack("Test Pack", "1.0", InstalledPack.MODPACKS_DIR + "Test Pack"),
+                null,
+                null,
+                fileSystem),
+            GSON.fromJson("{\"minecraft\":\"1.20.1\",\"mods\":[]}", Modpack.class),
+            fileSystem,
+            null,
+            new TechnicSettings(),
+            null,
+            false,
+            true,
+            false,
+            () -> false);
+    byte[] script =
+        "#!/bin/sh\necho 'VM initialization failed' >&2\nexit 1\n".getBytes(StandardCharsets.UTF_8);
+    HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+    String url = "http://127.0.0.1:" + server.getAddress().getPort();
+    byte[] manifestBytes =
+        ("{\"files\":{\"bin\":{\"type\":\"directory\"},\"bin/java\":{"
+                + "\"type\":\"file\",\"executable\":true,\"downloads\":{\"raw\":{\"sha1\":\""
+                + sha1(script)
+                + "\",\"size\":"
+                + script.length
+                + ",\"url\":\""
+                + url
+                + "/java\"}}}}}")
+            .getBytes(StandardCharsets.UTF_8);
+    server.createContext("/java", exchange -> respond(exchange, 200, script));
+    server.createContext("/runtime.json", exchange -> respond(exchange, 200, manifestBytes));
+    server.start();
+    JavaRuntimesIndex previousIndex = setJavaRuntimesIndex(server, manifestBytes);
+    try {
+      VersionJavaInfo runtimeInfo =
+          GSON.fromJson(
+              "{\"component\":\"test-runtime\",\"majorVersion\":17}", VersionJavaInfo.class);
+      TestMinecraftVersionInfo version = new TestMinecraftVersionInfo(runtimeInfo);
+      IJavaRuntime selectedRuntime = new FakeJavaRuntime();
+      version.setJavaRuntime(selectedRuntime);
+      ImmutableInstallerPlanner.InstallExecutionContext context =
+          new ImmutableInstallerPlanner.InstallExecutionContext();
+      context.setResolvedVersion(version);
+      TechnicConstants.setBuildNumber(() -> "0");
+
+      JavaRuntimeException failure =
+          assertThrows(
+              JavaRuntimeException.class,
+              () ->
+                  invokeInstallJavaRuntime(
+                      planner, context, new RecordingReporter(new ArrayList<>())));
+      assertTrue(failure.getMessage().contains("VM initialization failed"));
+      assertTrue(
+          failure
+              .getMessage()
+              .contains(
+                  fileSystem.getRuntimesDirectory().resolve("test-runtime/bin/java").toString()));
+      assertSame(selectedRuntime, version.getJavaRuntime());
+    } finally {
+      setJavaRuntimesIndex(previousIndex);
       server.stop(0);
     }
   }

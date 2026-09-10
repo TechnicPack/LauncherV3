@@ -359,7 +359,7 @@ public class Installer {
         showErrorDialog(
             resources.getString(
                 "launcher.installerror.cache", pack.getDisplayName(), e.getMessage()));
-      } catch (InstallException | BuildInaccessibleException e) {
+      } catch (InstallException | BuildInaccessibleException | JavaRuntimeException e) {
         Utils.getLogger()
             .log(Level.SEVERE, "Exception caught during modpack installation or launch.", e);
         showErrorDialog(e.getMessage());

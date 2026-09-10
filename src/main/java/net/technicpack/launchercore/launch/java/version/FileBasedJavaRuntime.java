@@ -27,6 +27,7 @@ import java.io.StringReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+import net.technicpack.launchercore.exception.JavaRuntimeException;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.utilslib.ProfilingUtils;
 import net.technicpack.utilslib.Utils;
@@ -40,6 +41,7 @@ public final class FileBasedJavaRuntime implements IJavaRuntime {
   private transient String osArch;
   private transient boolean is64Bit;
   private transient File javaPath;
+  private transient String queryError;
 
   private String filePath;
 
@@ -74,12 +76,12 @@ public final class FileBasedJavaRuntime implements IJavaRuntime {
     return version;
   }
 
-  private void ensureQueried() {
+  private synchronized void ensureQueried() {
     if (!queried) {
-      queried = true;
       ProfilingUtils.measureTime(
           String.format("Querying Java runtime \"%s\"", filePath),
           this::getInformationFromJavaRuntime);
+      queried = true;
     }
   }
 
@@ -99,7 +101,13 @@ public final class FileBasedJavaRuntime implements IJavaRuntime {
     String data =
         Utils.getProcessOutput(javaBinaryPath.toString(), "-XshowSettings:properties", "-version");
 
-    if (data == null) return;
+    if (data == null) {
+      queryError =
+          "No output was received while querying Java runtime at "
+              + javaBinaryPath
+              + ". See the launcher log for process startup errors.";
+      return;
+    }
 
     try (BufferedReader reader = new BufferedReader(new StringReader(data))) {
       String line;
@@ -114,11 +122,28 @@ public final class FileBasedJavaRuntime implements IJavaRuntime {
         }
       }
     } catch (IOException e) {
-      // ignore, it should never happen
+      // StringReader does not perform external I/O.
       Sentry.captureException(e);
+      queryError =
+          "Could not read Java runtime properties at " + javaBinaryPath + ": " + e.getMessage();
+      return;
     }
 
-    is64Bit = osArch != null && osArch.contains("64");
+    if (version == null
+        || version.isEmpty()
+        || vendor == null
+        || vendor.isEmpty()
+        || osArch == null
+        || osArch.isEmpty()) {
+      queryError =
+          "Java runtime at "
+              + javaBinaryPath
+              + " did not report all required properties (java.version, java.vendor, os.arch).\n"
+              + data;
+      return;
+    }
+
+    is64Bit = osArch.contains("64");
   }
 
   @Override
@@ -154,7 +179,15 @@ public final class FileBasedJavaRuntime implements IJavaRuntime {
   public boolean isValid() {
     ensureQueried();
 
-    return (version != null && vendor != null && osArch != null);
+    return queryError == null;
+  }
+
+  /** Reject an unusable runtime while preserving the metadata probe's diagnostic output. */
+  public void validate() throws JavaRuntimeException {
+    ensureQueried();
+    if (queryError != null) {
+      throw new JavaRuntimeException(queryError);
+    }
   }
 
   public String getExecutablePath() {
