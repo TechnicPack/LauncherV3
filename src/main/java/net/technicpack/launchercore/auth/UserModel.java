@@ -24,6 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import net.technicpack.launcher.io.UserStore;
 import net.technicpack.launchercore.exception.AuthenticationException;
 import net.technicpack.launchercore.exception.ResponseException;
@@ -59,9 +60,19 @@ public class UserModel {
     this.mAuthListeners.add(listener);
   }
 
+  /** Notify UI listeners on the EDT, preserving the user associated with each transition. */
   protected void triggerAuthListeners() {
-    for (IAuthListener listener : mAuthListeners) {
-      listener.userChanged(this.mCurrentUser);
+    IUserType user = this.mCurrentUser;
+    Runnable notifyListeners =
+        () -> {
+          for (IAuthListener listener : mAuthListeners) {
+            listener.userChanged(user);
+          }
+        };
+    if (SwingUtilities.isEventDispatchThread()) {
+      notifyListeners.run();
+    } else {
+      SwingUtilities.invokeLater(notifyListeners);
     }
   }
 
