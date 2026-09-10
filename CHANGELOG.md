@@ -9,6 +9,8 @@ is added at the top.
 
 ## [Unreleased]
 
+## [v4.0-1136] - 2026-09-10
+
 ### Changed
 - Modern Forge and NeoForge loaders are now installed before Minecraft starts, without ForgeWrapper. The launcher preserves the loader's native JVM arguments, runs installer processors with the selected game Java runtime, and verifies generated files when the installer provides hashes. Ordinary shared-library acquisition copies into a dedicated repository while retaining its sources. Some upstream processor recipes still require network access on repeat installations.
 - A one-time startup migration moves canonical Maven libraries from the old mixed `cache/` into `libraries/`, deleting old copies only after verifying the destination. Identical copies are deduplicated; differing destinations and unrelated cache contents, including legacy FML libraries, are preserved. Partial I/O failures retry at the next startup without preventing the launcher from opening. Older launcher versions may need to redownload moved libraries.
