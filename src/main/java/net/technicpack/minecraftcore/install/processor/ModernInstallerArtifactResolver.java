@@ -325,7 +325,7 @@ public final class ModernInstallerArtifactResolver {
     };
   }
 
-  private static String readSidecar(Path sidecar, Path target) {
+  public static String readSidecar(Path sidecar, Path target) {
     try {
       if (!Files.isRegularFile(sidecar) || Files.size(sidecar) > MAX_SIDECAR_BYTES) return null;
       String text = new String(Files.readAllBytes(sidecar), StandardCharsets.US_ASCII).trim();

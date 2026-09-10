@@ -9,7 +9,15 @@ game Java runtime; ForgeWrapper is not used. Processors are ordinary local progr
 
 - Shared Maven artifacts live under `libraries/` in the configured launcher root. Compatible artifacts
   are copied on demand from the installer's `maven/` entries, the old mixed `cache/`, or `~/.m2/repository`.
-  Original cache and installer files are retained.
+  Ordinary acquisition retains its sources.
+  A one-time startup migration moves canonical Maven files from `cache/` to `libraries/` using
+  SHA-256-verified copy/delete, including matching paired `.sha1` files. Identical destinations are
+  deduplicated without rewriting them; differing destinations and their cached originals both remain.
+  Partial I/O failures keep the upgrade retryable on the next startup without blocking the launcher.
+  FML's `cache/fmllibs`, processor state/work directories, noncanonical paths, and unrelated cache files
+  stay untouched, as do pack-local files, installer archives, and `~/.m2`. Only this migration deletes
+  old shared-cache sources; on-demand fallbacks remain available. Older launchers may redownload
+  moved libraries, and cache files they add after the migration are not bulk-scanned again.
 - Declared artifact and output hashes are verified. Inferred processor tools retain `.sha1` sidecars
   for verified cache reuse. Shared library writes and processor sequences use the cache's
   `modern-installer.lock` across launcher instances.

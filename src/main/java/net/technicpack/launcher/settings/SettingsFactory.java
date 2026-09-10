@@ -67,7 +67,7 @@ public class SettingsFactory {
       String version = settings.getLauncherSettingsVersion();
       boolean bothNull = version == null && migrator.getMigrationVersion() == null;
       if (bothNull || (version != null && version.equals(migrator.getMigrationVersion()))) {
-        migrator.migrate(settings, packStore, fileSystem, users);
+        if (!migrator.migrate(settings, packStore, fileSystem, users)) break;
         settings.setLauncherSettingsVersion(migrator.getMigratedVersion());
       }
     }

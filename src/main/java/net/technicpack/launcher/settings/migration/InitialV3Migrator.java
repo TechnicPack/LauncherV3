@@ -49,7 +49,7 @@ public class InitialV3Migrator implements IMigrator {
   }
 
   @Override
-  public void migrate(
+  public boolean migrate(
       TechnicSettings settings,
       InstalledPackStore packStore,
       LauncherFileSystem fileSystem,
@@ -85,5 +85,6 @@ public class InitialV3Migrator implements IMigrator {
     }
 
     packStore.save();
+    return true;
   }
 }

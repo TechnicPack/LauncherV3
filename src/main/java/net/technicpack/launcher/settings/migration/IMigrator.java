@@ -28,7 +28,8 @@ public interface IMigrator {
 
   String getMigratedVersion();
 
-  void migrate(
+  /** Returns whether migration completed and its new settings version may be persisted. */
+  boolean migrate(
       TechnicSettings settings,
       InstalledPackStore packStore,
       LauncherFileSystem fileSystem,

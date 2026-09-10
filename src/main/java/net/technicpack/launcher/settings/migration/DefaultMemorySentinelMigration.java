@@ -36,7 +36,7 @@ public class DefaultMemorySentinelMigration implements IMigrator {
   }
 
   @Override
-  public void migrate(
+  public boolean migrate(
       TechnicSettings settings,
       InstalledPackStore packStore,
       LauncherFileSystem fileSystem,
@@ -45,5 +45,6 @@ public class DefaultMemorySentinelMigration implements IMigrator {
         < Memory.DEFAULT_MEM.getMemoryMB()) {
       settings.setMemory(Memory.DEFAULT_SETTINGS_ID);
     }
+    return true;
   }
 }

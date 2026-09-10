@@ -10,7 +10,8 @@ is added at the top.
 ## [Unreleased]
 
 ### Changed
-- Modern Forge and NeoForge loaders are now installed before Minecraft starts, without ForgeWrapper. The launcher preserves the loader's native JVM arguments, runs installer processors with the selected game Java runtime, and verifies generated files when the installer provides hashes. Shared libraries are copied into a dedicated repository without deleting existing cache files. Some upstream processor recipes still require network access on repeat installations.
+- Modern Forge and NeoForge loaders are now installed before Minecraft starts, without ForgeWrapper. The launcher preserves the loader's native JVM arguments, runs installer processors with the selected game Java runtime, and verifies generated files when the installer provides hashes. Ordinary shared-library acquisition copies into a dedicated repository while retaining its sources. Some upstream processor recipes still require network access on repeat installations.
+- A one-time startup migration moves canonical Maven libraries from the old mixed `cache/` into `libraries/`, deleting old copies only after verifying the destination. Identical copies are deduplicated; differing destinations and unrelated cache contents, including legacy FML libraries, are preserved. Partial I/O failures retry at the next startup without preventing the launcher from opening. Older launcher versions may need to redownload moved libraries.
 
 ### Fixed
 - Repeated modpack launches can now reuse completed Forge/NeoForge processor work when the installer omits output hashes, including Forge 1.16.1's mappings extraction and remapping. The first successful run records SHA-256 fingerprints; later launches recheck the recipe, runtime, inputs, and generated files before skipping. Changed or missing files trigger execution again. Existing files are never adopted as their own checksum baseline, and processors with untrackable arguments still run.

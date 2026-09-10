@@ -35,7 +35,7 @@ public class ResetJvmArgsIfDefaultString implements IMigrator {
   }
 
   @Override
-  public void migrate(
+  public boolean migrate(
       TechnicSettings settings,
       InstalledPackStore packStore,
       LauncherFileSystem fileSystem,
@@ -46,7 +46,7 @@ public class ResetJvmArgsIfDefaultString implements IMigrator {
 
     // Null check
     if (settings.getJavaArgs() == null) {
-      return;
+      return true;
     }
 
     if (settings
@@ -56,5 +56,6 @@ public class ResetJvmArgsIfDefaultString implements IMigrator {
         || settings.getJavaArgs().equalsIgnoreCase(TechnicSettings.DEFAULT_JAVA_ARGS)) {
       settings.setJavaArgs(null);
     }
+    return true;
   }
 }
