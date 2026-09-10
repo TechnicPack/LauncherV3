@@ -3,6 +3,7 @@ package net.technicpack.launcher.launch;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import io.sentry.Sentry;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -1755,6 +1756,7 @@ class ImmutableInstallerPlanner {
       if (Thread.currentThread().isInterrupted()) {
         throw new InterruptedException("Interrupted while querying the downloaded Java runtime");
       }
+      Sentry.captureException(e);
       throw new JavaRuntimeException(
           "The downloaded Java runtime could not be validated.\n\n"
               + e.getMessage()

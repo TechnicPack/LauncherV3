@@ -19,7 +19,6 @@
 
 package net.technicpack.launchercore.launch.java.version;
 
-import io.sentry.Sentry;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -29,19 +28,20 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import net.technicpack.launchercore.exception.JavaRuntimeException;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
+import net.technicpack.utilslib.ProcessUtils;
 import net.technicpack.utilslib.ProfilingUtils;
-import net.technicpack.utilslib.Utils;
 
 /** An IJavaRuntime based on an externally selected java executable. */
 @SuppressWarnings("java:S2065")
 public final class FileBasedJavaRuntime implements IJavaRuntime {
+  private static final int MAX_DIAGNOSTIC_OUTPUT = 4096;
   private transient boolean queried = false;
   private transient String version;
   private transient String vendor;
   private transient String osArch;
   private transient boolean is64Bit;
   private transient File javaPath;
-  private transient String queryError;
+  private transient JavaRuntimeException queryError;
 
   private String filePath;
 
@@ -98,16 +98,28 @@ public final class FileBasedJavaRuntime implements IJavaRuntime {
       javaBinaryPath = javaBinaryPath.resolveSibling("java.exe");
     }
 
-    String data =
-        Utils.getProcessOutput(javaBinaryPath.toString(), "-XshowSettings:properties", "-version");
-
-    if (data == null) {
+    ProcessUtils.ProcessOutput result;
+    try {
+      result =
+          ProcessUtils.captureOutput(
+              javaBinaryPath.toString(), "-XshowSettings:properties", "-version");
+    } catch (IOException e) {
       queryError =
-          "No output was received while querying Java runtime at "
-              + javaBinaryPath
-              + ". See the launcher log for process startup errors.";
+          new JavaRuntimeException(
+              "Could not query Java runtime at " + javaBinaryPath + ": " + e.getMessage(), e);
+      return;
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      queryError =
+          new JavaRuntimeException(
+              "Interrupted while querying Java runtime at " + javaBinaryPath, e);
       return;
     }
+    if (result.getExitCode() != 0) {
+      queryError = probeFailure(javaBinaryPath, result, "Java runtime probe failed");
+      return;
+    }
+    String data = result.getOutput();
 
     try (BufferedReader reader = new BufferedReader(new StringReader(data))) {
       String line;
@@ -123,9 +135,10 @@ public final class FileBasedJavaRuntime implements IJavaRuntime {
       }
     } catch (IOException e) {
       // StringReader does not perform external I/O.
-      Sentry.captureException(e);
       queryError =
-          "Could not read Java runtime properties at " + javaBinaryPath + ": " + e.getMessage();
+          new JavaRuntimeException(
+              "Could not read Java runtime properties at " + javaBinaryPath + ": " + e.getMessage(),
+              e);
       return;
     }
 
@@ -136,14 +149,32 @@ public final class FileBasedJavaRuntime implements IJavaRuntime {
         || osArch == null
         || osArch.isEmpty()) {
       queryError =
-          "Java runtime at "
-              + javaBinaryPath
-              + " did not report all required properties (java.version, java.vendor, os.arch).\n"
-              + data;
+          probeFailure(
+              javaBinaryPath,
+              result,
+              "Java runtime did not report all required properties (java.version, java.vendor, os.arch)");
       return;
     }
 
     is64Bit = osArch.contains("64");
+  }
+
+  private static JavaRuntimeException probeFailure(
+      Path executable, ProcessUtils.ProcessOutput result, String reason) {
+    String output = result.getOutput();
+    String excerpt =
+        output.length() > MAX_DIAGNOSTIC_OUTPUT
+            ? "[Earlier output truncated]\n"
+                + output.substring(output.length() - MAX_DIAGNOSTIC_OUTPUT)
+            : output;
+    return new JavaRuntimeException(
+        reason
+            + " at "
+            + executable
+            + " (exit code "
+            + result.getExitCode()
+            + ").\n"
+            + (excerpt.isEmpty() ? "[No output]" : excerpt));
   }
 
   @Override
@@ -186,7 +217,7 @@ public final class FileBasedJavaRuntime implements IJavaRuntime {
   public void validate() throws JavaRuntimeException {
     ensureQueried();
     if (queryError != null) {
-      throw new JavaRuntimeException(queryError);
+      throw queryError;
     }
   }
 

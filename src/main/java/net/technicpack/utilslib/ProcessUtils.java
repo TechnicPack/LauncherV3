@@ -1,8 +1,14 @@
 package net.technicpack.utilslib;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 public class ProcessUtils {
   private static final String[] ENV_VARS_TO_REMOVE =
@@ -60,5 +66,55 @@ public class ProcessUtils {
    */
   public static ProcessBuilder createProcessBuilder(String... command) {
     return createProcessBuilder(Arrays.asList(command));
+  }
+
+  /** Capture merged stdout/stderr without discarding the exit code or process startup failure. */
+  public static ProcessOutput captureOutput(String... command)
+      throws IOException, InterruptedException {
+    Process process = createProcessBuilder(command).redirectErrorStream(true).start();
+    FutureTask<String> output =
+        new FutureTask<>(
+            () -> {
+              StringBuilder response = new StringBuilder();
+              try (Reader reader =
+                  new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8)) {
+                char[] buffer = new char[4096];
+                int length;
+                while ((length = reader.read(buffer)) != -1) {
+                  response.append(buffer, 0, length);
+                }
+              }
+              return response.toString();
+            });
+    Thread reader = new Thread(output, "process-output");
+    reader.setDaemon(true);
+    try {
+      reader.start();
+      int exitCode = process.waitFor();
+      return new ProcessOutput(exitCode, output.get());
+    } catch (ExecutionException e) {
+      throw new IOException(
+          "Error reading process output: " + String.join(" ", command), e.getCause());
+    } finally {
+      process.destroy();
+    }
+  }
+
+  public static final class ProcessOutput {
+    private final int exitCode;
+    private final String output;
+
+    private ProcessOutput(int exitCode, String output) {
+      this.exitCode = exitCode;
+      this.output = output;
+    }
+
+    public int getExitCode() {
+      return exitCode;
+    }
+
+    public String getOutput() {
+      return output;
+    }
   }
 }

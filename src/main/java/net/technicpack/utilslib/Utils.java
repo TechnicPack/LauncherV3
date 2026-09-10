@@ -25,7 +25,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.technicpack.launchercore.TechnicConstants;
@@ -137,37 +136,9 @@ public class Utils {
     String out = null;
 
     try {
-      ProcessBuilder pb = ProcessUtils.createProcessBuilder(command);
-      pb.redirectErrorStream(true);
-      Process process = pb.start();
-      final StringBuilder response = new StringBuilder();
-
-      Thread outputThread =
-          new Thread(
-              () -> {
-                char[] buffer = new char[4096];
-                int n;
-                try (Reader reader =
-                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8)) {
-                  while ((n = reader.read(buffer)) != -1) {
-                    response.append(buffer, 0, n);
-                  }
-                } catch (IOException e) {
-                  Utils.getLogger()
-                      .log(
-                          Level.SEVERE,
-                          String.format(
-                              "Error reading process output: %s", String.join(" ", command)),
-                          e);
-                }
-              });
-      outputThread.start();
-
-      process.waitFor();
-      outputThread.join();
-
-      if (response.length() > 0) {
-        out = response.toString().trim();
+      String response = ProcessUtils.captureOutput(command).getOutput();
+      if (!response.isEmpty()) {
+        out = response.trim();
       }
     } catch (IOException e) {
       Utils.getLogger()
