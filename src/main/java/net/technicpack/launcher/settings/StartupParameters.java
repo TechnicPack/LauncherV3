@@ -18,7 +18,11 @@
 
 package net.technicpack.launcher.settings;
 
+import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -62,6 +66,18 @@ public final class StartupParameters {
 
   @Parameter(names = "-discover", description = "An override param for the discover URL")
   private String discover = null;
+
+  @Parameter(
+      names = "-platformApiUrl",
+      description = "Override the Platform metadata and search API root URL",
+      converter = ApiRootUrlConverter.class)
+  private String platformApiUrl = "https://api.technicpack.net/";
+
+  @Parameter(
+      names = "-solderApiUrl",
+      description = "Override the default public-pack Solder API root URL",
+      converter = ApiRootUrlConverter.class)
+  private String solderApiUrl = "https://solder.technicpack.net/api/";
 
   @Parameter(
       names = "-blockReboot",
@@ -120,11 +136,50 @@ public final class StartupParameters {
     return discover;
   }
 
+  public String getPlatformApiUrl() {
+    return platformApiUrl;
+  }
+
+  public String getSolderApiUrl() {
+    return solderApiUrl;
+  }
+
   public String getBuildNumber() {
     return buildNumber;
   }
 
   public boolean isSkipUpdate() {
     return skipUpdate;
+  }
+
+  public static final class ApiRootUrlConverter implements IStringConverter<String> {
+    private final String optionName;
+
+    public ApiRootUrlConverter(String optionName) {
+      this.optionName = optionName;
+    }
+
+    @Override
+    public String convert(String value) {
+      URI uri;
+      try {
+        uri = new URI(value).parseServerAuthority();
+      } catch (URISyntaxException e) {
+        throw new ParameterException(optionName + " must be a valid absolute HTTP(S) API root URL");
+      }
+      if ((!"http".equalsIgnoreCase(uri.getScheme()) && !"https".equalsIgnoreCase(uri.getScheme()))
+          || uri.getHost() == null
+          || uri.getRawUserInfo() != null
+          || uri.getRawQuery() != null
+          || uri.getRawFragment() != null
+          || uri.getPort() > 65535) {
+        throw new ParameterException(
+            optionName
+                + " must be an absolute HTTP(S) API root URL with a host and valid port,"
+                + " without user info, query, or fragment");
+      }
+      String root = uri.toASCIIString();
+      return root.endsWith("/") ? root : root + "/";
+    }
   }
 }

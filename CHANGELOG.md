@@ -9,6 +9,9 @@ is added at the top.
 
 ## [Unreleased]
 
+### Added
+- Optional `-platformApiUrl` and `-solderApiUrl` startup arguments allow local API testing without changing production defaults. A loopback-only Platform fixture script supports discovery against real local Solder builds, with process-local install/run statistics.
+
 ### Fixed
 - Fresh library downloads no longer report a SHA-1 mismatch for their empty staging file before downloading starts. Downloaded content is still verified before publication, and corrupt downloads still fail installation.
 

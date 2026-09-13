@@ -175,6 +175,21 @@ public class LauncherMain {
   }
 
   public static void main(String[] argv) {
+    StartupParameters params = new StartupParameters(argv);
+    try {
+      JCommander jc = JCommander.newBuilder().addObject(params).build();
+      // Allow options to be case-insensitive
+      jc.setCaseSensitiveOptions(false);
+      // Ignore extra unknown options
+      jc.setAcceptUnknownOptions(true);
+      // Parse and validate arguments before initializing services or the GUI.
+      jc.parse(argv);
+    } catch (ParameterException e) {
+      System.err.println("Invalid launcher arguments: " + e.getMessage());
+      System.exit(1);
+      return;
+    }
+
     // Initialize Sentry
     Sentry.init(
         options -> {
@@ -219,19 +234,6 @@ public class LauncherMain {
     }
 
     ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
-
-    StartupParameters params = new StartupParameters(argv);
-    try {
-      JCommander jc = JCommander.newBuilder().addObject(params).build();
-      // Allow options to be case-insensitive
-      jc.setCaseSensitiveOptions(false);
-      // Ignore extra unknown options
-      jc.setAcceptUnknownOptions(true);
-      // Parse the arguments into the params object
-      jc.parse(argv);
-    } catch (ParameterException e) {
-      e.printStackTrace();
-    }
 
     TechnicSettings settings;
 
@@ -789,11 +791,12 @@ public class LauncherMain {
         new HttpSolderApi(new InstalledPackClientIdProvider(packStore, settings));
     ISolderApi solder = new CachedSolderApi(fileSystem, httpSolder, 60 * 60);
     HttpPlatformApi httpPlatform =
-        new HttpPlatformApi("https://api.technicpack.net/", buildNumber.getBuildNumber());
+        new HttpPlatformApi(startupParameters.getPlatformApiUrl(), buildNumber.getBuildNumber());
 
     IPlatformApi platform = new ModpackCachePlatformApi(httpPlatform, 60 * 60, fileSystem);
     IPlatformSearchApi platformSearch =
-        new HttpPlatformSearchApi("https://api.technicpack.net/", buildNumber.getBuildNumber());
+        new HttpPlatformSearchApi(
+            startupParameters.getPlatformApiUrl(), buildNumber.getBuildNumber());
 
     IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(platform, solder);
 
@@ -809,7 +812,7 @@ public class LauncherMain {
         new ModpackSelector(
             resources,
             packList,
-            new SolderPackSource("https://solder.technicpack.net/api/", solder),
+            new SolderPackSource(startupParameters.getSolderApiUrl(), solder),
             solder,
             platform,
             platformSearch,

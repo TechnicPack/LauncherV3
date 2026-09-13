@@ -15,5 +15,6 @@ target/
 build/
 node_modules/
 code-review-*.md
-scripts/
+scripts/*
+!scripts/local-platform-fixture.py
 .mcp.json
