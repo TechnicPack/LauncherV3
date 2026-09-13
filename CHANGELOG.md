@@ -9,6 +9,9 @@ is added at the top.
 
 ## [Unreleased]
 
+### Fixed
+- Fresh library downloads no longer report a SHA-1 mismatch for their empty staging file before downloading starts. Downloaded content is still verified before publication, and corrupt downloads still fail installation.
+
 ## [v4.0-1136] - 2026-09-10
 
 ### Changed

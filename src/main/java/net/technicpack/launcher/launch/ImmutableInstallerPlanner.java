@@ -1209,7 +1209,11 @@ class ImmutableInstallerPlanner {
       }
       Path staged = InstallerArtifactStore.stage(cache);
       try {
-        downloadFile(url, staged.toFile(), verifier, library.getName(), reporter, null, false);
+        throwIfCancelled();
+        // This stage is newly created, not a reusable download-cache entry.
+        new DownloadFilePlanAction<Void>(url, staged.toFile(), verifier, library.getName())
+            .execute(null, reporter);
+        throwIfCancelled();
         if (!InstallerArtifactStore.isValid(staged, verifier)) {
           throw new IOException("Invalid downloaded library " + library.getName());
         }

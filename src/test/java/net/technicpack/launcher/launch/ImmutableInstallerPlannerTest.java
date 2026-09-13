@@ -28,6 +28,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -60,9 +63,12 @@ import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.JavaUtils;
 import net.technicpack.utilslib.OSUtils;
 import net.technicpack.utilslib.OperatingSystem;
+import net.technicpack.utilslib.Utils;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class ImmutableInstallerPlannerTest {
   private static final Gson GSON = new Gson();
@@ -576,6 +582,104 @@ class ImmutableInstallerPlannerTest {
     invokeInstallVersionLibrary(
         planner, context, library, new RecordingReporter(new ArrayList<>()));
     assertEquals(sha1(Files.readAllBytes(legacy)), sha1(Files.readAllBytes(target)));
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void freshLibraryDownloadVerifiesReceivedBytesWithoutCheckingEmptyStage(boolean corrupt)
+      throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher-download"));
+    ModpackModel pack =
+        new ModpackModel(
+            new InstalledPack(
+                "download", InstalledPack.RECOMMENDED, tempDir.resolve("pack-download").toString()),
+            null,
+            null,
+            fileSystem);
+    pack.initDirectories();
+    Path archive = tempDir.resolve("library.jar");
+    writeZip(archive, "marker.txt", "verified library");
+    byte[] expected = Files.readAllBytes(archive);
+    byte[] received = corrupt ? new byte[] {1, 2, 3} : expected;
+    HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+    server.createContext(
+        "/library.jar",
+        exchange -> {
+          if ("HEAD".equals(exchange.getRequestMethod())) {
+            exchange.getResponseHeaders().set("Content-Length", Integer.toString(received.length));
+            exchange.sendResponseHeaders(200, -1);
+            exchange.close();
+            return;
+          }
+          exchange.sendResponseHeaders(200, received.length);
+          try (OutputStream output = exchange.getResponseBody()) {
+            output.write(received);
+          }
+        });
+    server.start();
+    List<LogRecord> warnings = Collections.synchronizedList(new ArrayList<>());
+    Handler handler =
+        new Handler() {
+          @Override
+          public void publish(LogRecord record) {
+            if (record.getLevel().intValue() >= Level.WARNING.intValue()
+                && record.getMessage() != null
+                && record.getMessage().contains(fileSystem.getLibrariesDirectory().toString())) {
+              warnings.add(record);
+            }
+          }
+
+          @Override
+          public void flush() {}
+
+          @Override
+          public void close() {}
+        };
+    Utils.getLogger().addHandler(handler);
+    try {
+      String coordinate = "local.integration:download-probe:1";
+      JsonObject declaration = GSON.fromJson(declaredLibrary(coordinate), JsonObject.class);
+      JsonObject artifact = declaration.getAsJsonObject("downloads").getAsJsonObject("artifact");
+      artifact.addProperty("sha1", sha1(expected));
+      artifact.addProperty("size", expected.length);
+      artifact.addProperty(
+          "url", "http://127.0.0.1:" + server.getAddress().getPort() + "/library.jar");
+      Library library = GSON.fromJson(declaration, Library.class);
+      Path target = fileSystem.getLibrariesDirectory().resolve(library.getArtifactPath());
+      ImmutableInstallerPlanner planner =
+          new ImmutableInstallerPlanner(
+              new TestResourceLoader(),
+              pack,
+              GSON.fromJson("{\"minecraft\":\"1.20.1\",\"mods\":[]}", Modpack.class),
+              fileSystem,
+              null,
+              new TechnicSettings(),
+              new FakeJavaRuntime(),
+              false,
+              false,
+              false,
+              () -> false);
+      ImmutableInstallerPlanner.InstallExecutionContext context =
+          new ImmutableInstallerPlanner.InstallExecutionContext();
+      TestMinecraftVersionInfo version = new TestMinecraftVersionInfo(null);
+      version.setJavaRuntime(new FakeJavaRuntime());
+      context.setResolvedVersion(version);
+      RecordingReporter reporter = new RecordingReporter(new ArrayList<>());
+      if (corrupt) {
+        assertThrows(
+            DownloadException.class,
+            () -> invokeInstallVersionLibrary(planner, context, library, reporter));
+        assertFalse(Files.exists(target), "Corrupt bytes must never be published");
+      } else {
+        invokeInstallVersionLibrary(planner, context, library, reporter);
+        assertArrayEquals(expected, Files.readAllBytes(target));
+        assertTrue(
+            warnings.isEmpty(), "A fresh valid download must not report verification failures");
+      }
+    } finally {
+      Utils.getLogger().removeHandler(handler);
+      server.stop(0);
+    }
   }
 
   @Test
