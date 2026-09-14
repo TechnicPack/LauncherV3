@@ -268,6 +268,13 @@ public class ModpackSelector extends TintablePanel
 
   @Override
   public void clear() {
+    if (selectedWidget != null) {
+      selectedWidget.setIsSelected(false);
+      selectedWidget = null;
+    }
+    if (modpackInfoPanel != null) {
+      modpackInfoPanel.clearSelection();
+    }
     allModpacks.clear();
     rebuildUI();
   }
@@ -389,7 +396,7 @@ public class ModpackSelector extends TintablePanel
           () -> {
             if (widget == selectedWidget) {
               selectWidget(widget);
-            } else {
+            } else if (selectedWidget != null) {
               selectedWidget.scrollRectToVisible(new Rectangle(selectedWidget.getSize()));
             }
           });

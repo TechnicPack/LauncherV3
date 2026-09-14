@@ -39,6 +39,10 @@ public final class ModpackDeleteDialog {
    */
   public static boolean confirmDelete(
       Component parent, ModpackModel modpack, ResourceLoader resources) {
+    if (modpack == null || modpack.getInstalledPack() == null) {
+      return false;
+    }
+
     if (modpack.hasWorldSaves()) {
       Object[] options = {
         resources.getString("modpackoptions.delete.deleteeverything"),

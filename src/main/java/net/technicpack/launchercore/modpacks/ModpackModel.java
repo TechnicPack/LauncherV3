@@ -47,6 +47,8 @@ import org.apache.commons.io.FileUtils;
 public class ModpackModel {
   private InstalledPack installedPack;
   private PackInfo packInfo;
+  // Identity outlives both installed state and replaceable remote metadata.
+  private String name;
   private InstalledPackStore packStore;
   private LauncherFileSystem fileSystem;
   private Collection<String> tags = new ArrayList<>();
@@ -66,6 +68,7 @@ public class ModpackModel {
 
     this.installedPack = installedPack;
     this.packInfo = info;
+    this.name = resolveName(installedPack, info);
     this.packStore = packStore;
     this.fileSystem = fileSystem;
   }
@@ -92,9 +95,11 @@ public class ModpackModel {
   public void setInstalledPack(InstalledPack pack, InstalledPackStore packStore) {
     installedPack = pack;
     this.packStore = packStore;
+    if (name == null) name = resolveName(pack, packInfo);
   }
 
   public void setPackInfo(PackInfo packInfo) {
+    if (name == null) name = resolveName(installedPack, packInfo);
 
     // HACK
     // I need to rework the way platform & solder data interact to produce a complete pack, but
@@ -119,11 +124,15 @@ public class ModpackModel {
   }
 
   public String getName() {
-    if (packInfo != null) {
-      return packInfo.getName();
-    } else if (installedPack != null) {
-      return installedPack.getName();
-    } else return null;
+    return name;
+  }
+
+  static String resolveName(InstalledPack installedPack, PackInfo packInfo) {
+    String installedName = installedPack == null ? null : installedPack.getName();
+    if (installedName != null && !installedName.trim().isEmpty()) return installedName;
+
+    String metadataName = packInfo == null ? null : packInfo.getName();
+    return metadataName == null || metadataName.trim().isEmpty() ? null : metadataName;
   }
 
   public String getDisplayName() {
@@ -532,8 +541,14 @@ public class ModpackModel {
    *
    * @param keepSaves when true, the saves directory is left in place so a future reinstall of the
    *     same pack picks the worlds back up
+   * @throws IllegalStateException if this model has no usable pack identity; no files are deleted
    */
   public void delete(boolean keepSaves) {
+    String packName = getName();
+    if (packName == null || packName.trim().isEmpty()) {
+      throw new IllegalStateException("Cannot delete a modpack without a name");
+    }
+    Path assets = fileSystem.getPackAssetsDirectory().resolve(packName);
     File installedDir = getInstalledDirectory();
 
     if (installedDir != null && installedDir.exists()) {
@@ -548,7 +563,6 @@ public class ModpackModel {
       }
     }
 
-    Path assets = fileSystem.getPackAssetsDirectory().resolve(getName());
     if (Files.isDirectory(assets)) {
       try {
         FileUtils.deleteDirectory(assets.toFile());
@@ -557,7 +571,7 @@ public class ModpackModel {
       }
     }
 
-    packStore.remove(getName());
+    packStore.remove(packName);
     installedPack = null;
     installedDirectory = null;
   }

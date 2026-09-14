@@ -601,8 +601,11 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         .getDeleteButton()
         .addActionListener(
             e -> {
-              if (ModpackDeleteDialog.confirmDelete(
-                  LauncherFrame.this, modpackSelector.getSelectedPack(), resources)) {
+              ModpackModel selectedPack = modpackSelector.getSelectedPack();
+              if (selectedPack == null || selectedPack.getInstalledPack() == null) {
+                return;
+              }
+              if (ModpackDeleteDialog.confirmDelete(LauncherFrame.this, selectedPack, resources)) {
                 modpackSelector.forceRefresh();
               }
             });

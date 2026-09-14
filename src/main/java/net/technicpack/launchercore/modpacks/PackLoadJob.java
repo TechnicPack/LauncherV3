@@ -136,7 +136,8 @@ public class PackLoadJob implements Runnable {
   protected void addPack(final InstalledPack pack, final PackInfo packInfo, final int priority) {
     if (pack == null && packInfo == null || isCancelled) return;
 
-    String name = (pack != null) ? pack.getName() : packInfo.getName();
+    String name = ModpackModel.resolveName(pack, packInfo);
+    if (name == null) return;
 
     ModpackModel modpack;
     boolean newModpackModel = true;

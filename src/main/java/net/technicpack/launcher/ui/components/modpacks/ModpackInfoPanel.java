@@ -70,6 +70,11 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
     initComponents(iconRepo, logoRepo, modpackOptionsListener, discordApi);
   }
 
+  void clearSelection() {
+    modpack = null;
+    deleteButton.setVisible(false);
+  }
+
   public void setModpackIfSame(ModpackModel modpack) {
     if (modpack == this.modpack) setModpack(modpack);
   }
@@ -232,6 +237,7 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
     feedBottom.add(vertFill, constraints);
 
     deleteButton = new RoundedButton(resources.getString("modpackoptions.delete.text"));
+    deleteButton.setVisible(false);
     deleteButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
     deleteButton.setBorder(BorderFactory.createEmptyBorder(5, 17, 10, 17));
     deleteButton.setBackground(UIConstants.COLOR_FOOTER);

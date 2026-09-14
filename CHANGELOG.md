@@ -9,6 +9,10 @@ is added at the top.
 
 ## [Unreleased]
 
+### Fixed
+- Deleting a modpack no longer crashes when no pack is selected, and clearing the pack list hides the delete action until a pack is selected again (LAUNCHER-FP).
+- Modpacks retain their identity across metadata refreshes and deletion, preventing null-name crashes during asset cleanup and image loading. Entries without a usable identity are not loaded, and deletion checks its identity and asset path before touching installed files (LAUNCHER-FQ, LAUNCHER-FS).
+
 ## [v4.0-1137] - 2026-09-14
 
 ### Added
