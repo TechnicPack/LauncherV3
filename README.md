@@ -1,140 +1,71 @@
-LauncherV3
+# Technic Launcher
 
-## Solder Java runtime overrides
+Technic Launcher is a desktop application built specifically for use with the Technic Platform,
+letting players discover, install, update, and play Minecraft modpacks. This repository (`LauncherV3`)
+contains the Java launcher, its Technic Platform and Solder integrations, and platform packaging tools.
 
-A Solder build can select a Mojang Java runtime with the optional `java_runtime` field:
+## Documentation
 
-```json
-{
-  "minecraft": "1.20.1",
-  "java": "1.8",
-  "java_runtime": "java-runtime-delta",
-  "mods": []
-}
-```
+- [Solder Java runtime overrides](docs/solder-java-runtime-overrides.md) — select a Mojang Java
+  runtime for a Solder build, including validation and manual-Java behavior.
+- [Local Solder integration testing](docs/local-solder-integration-testing.md) — connect a local
+  Solder instance through the Platform fixture and test with an isolated launcher profile.
+- [Modern Forge and NeoForge installation](docs/modern-forge-and-neoforge-installation.md) —
+  installer processing, shared libraries, cache migration, offline limitations, and corpus verification.
 
-When **Use Mojang Java runtimes** is enabled, this selects the exact component from Mojang's
-runtime catalog after Minecraft and version-patch metadata have been resolved. The selected
-runtime is used for the game and, when applicable, mod-loader installer processors.
-`java-runtime-delta`, for example, selects Mojang's Java 21 runtime, not a pinned patch release.
+See the [changelog](CHANGELOG.md) for recent changes and [history](HISTORY.md) for older releases.
 
-An absent or `null` field leaves automatic selection unchanged. Disabling **Use Mojang Java
-runtimes** leaves the player's manually selected Java installation in use and ignores the
-override. The existing `java` and `memory` requirements retain their meaning.
+## Development
 
-An explicit override must name an available component for the player's OS and architecture.
-Unavailable components stop installation rather than silently selecting another Java version.
-The existing runtime catalog cache is used when Mojang cannot be reached.
-Solder's `SOLDER_ADVANCED_MODE` flag only controls its UI; the launcher does not check that flag.
+Use the included Gradle wrapper from the repository root. The build uses a **Java 25 toolchain**
+with automatic toolchain provisioning configured; production sources target **Java 8**. The Java
+runtime needed by a Minecraft modpack is selected separately from the build toolchain.
 
-## Local Solder integration testing
+On Windows, use `gradlew.bat` in place of `./gradlew`.
 
-`scripts/local-platform-fixture.py` provides loopback-only Platform discovery for explicitly
-allowed packs on a real local Solder. It reads pack names from Solder, advertises that Solder API,
-and provides local search, Discover, and news responses. Install/run statistics (including the
-launcher's `HEAD` pings) stay in memory in the fixture process. It does not serve build metadata,
-mod archives, Minecraft files, or Java runtimes, and does not proxy production Platform traffic.
-
-Start Solder separately, then create a public pack with published builds and a recommended build.
-For a minimal launch test, use Minecraft 1.20.1 with no mods. Pack metadata and build definitions
-must come from Solder, not the fixture.
-
-From the launcher checkout:
+For local testing, set `BUILD_NUMBER=999` so communication with the Technic Platform API works.
+On Windows, set this environment variable before invoking `gradlew.bat`.
 
 ```sh
-python3 scripts/local-platform-fixture.py \
-  --solder-url http://127.0.0.1:18081/api/ \
-  --pack local-runtime-test
+# Run the launcher (requires a graphical desktop)
+BUILD_NUMBER=999 ./gradlew run
+
+# Build the standalone JAR
+BUILD_NUMBER=999 ./gradlew shadowJar
 ```
 
-The fixture listens on `127.0.0.1:18082`. Repeat `--pack` to allow more packs; use `--port` to
-change the port. Unknown packs return 404 and upstream Solder failures return 502, not fabricated
-metadata. `/health` checks fixture liveness only; `/modpack/local-runtime-test` also checks Solder.
+The example produces `build/libs/launcher-4.0-999.jar`. Without `BUILD_NUMBER`, the build defaults to `0`;
+use `999` for local testing.
+For local Solder testing without using your normal launcher profile, follow the
+[isolated-profile guide](docs/local-solder-integration-testing.md).
 
-Use a **separate portable launcher directory**. On Linux, with an existing standard launcher
-installation supplying the font assets, this creates a fresh profile (the directory must not exist):
+### Common commands
 
-```sh
-BUILD_NUMBER=0 ./gradlew shadowJar
-LOCAL="$HOME/.local/share/technic-local-runtime-test"
-mkdir -p "$HOME/.local/share"
-mkdir "$LOCAL" || exit 1
-mkdir -p "$LOCAL/technic/assets/launcher"
-cp build/libs/launcher-4.0-0.jar "$LOCAL/launcher.jar"
-printf '%s\n' '{"directory":"portable","useMojangJava":true,"launchToModpacks":true}' \
-  > "$LOCAL/technic/settings.json"
-cp "$HOME/.technic/assets/launcher/"*.ttf "$LOCAL/technic/assets/launcher/"
-java -Djava.net.preferIPv4Stack=true -Dawt.useSystemAAFontSettings=lcd -Dswing.aatext=true \
-  -jar "$LOCAL/launcher.jar" -launcheronly \
-  -platformApiUrl http://127.0.0.1:18082/ \
-  -solderApiUrl http://127.0.0.1:18081/api/ \
-  -discover http://127.0.0.1:18082/discover
-```
+| Command | Purpose |
+| --- | --- |
+| `./gradlew test` | Run the JUnit 5 test suite. |
+| `./gradlew spotlessApply` | Format Java and Gradle/Kotlin build files. |
+| `./gradlew spotlessCheck` | Check formatting without changing files. |
+| `./gradlew check` | Run tests, formatting checks, and shadow-JAR service verification. |
+| `./gradlew build` | Compile, assemble, and verify the application. |
+| `./gradlew package` | Build the shadow JAR, Windows executable, and macOS app ZIP. |
 
-`-launcheronly` skips both launcher replacement and asset updates, so provide the font assets
-before starting. Copy only fonts, not `users.json`, `oauth/`, or your normal settings. Sign in
-normally in the isolated profile. Use these flags on every launch; without overrides, the
-production endpoints remain the defaults.
+Signing during `package` is enabled when `CERT_KEYSTORE` is set and also requires `CERT_ALIAS`,
+`CERT_STOREPASS`, and `CERT_KEYPASS`. Setting `SENTRY_AUTH_TOKEN` enables Sentry source bundle
+upload. Keep credentials and generated files out of version control.
 
-`-platformApiUrl` controls Platform metadata, search, news, and install/run statistics.
-`-solderApiUrl` controls the default public-pack list; individual packs still use the Solder URL
-from their Platform metadata. Both accept absolute HTTP(S) roots, normalize a missing trailing
-slash, and reject credentials, query strings, and fragments. These options do not redirect
-Microsoft/Mojang services, arbitrary mod-download URLs, or launcher error reporting. Use only
-local test packs and inspect their download URLs before installing.
+## Project layout
 
-After signing in, search for the allowed pack's name or select its link in **Discover**.
-Pasting a loopback API URL into the search box is not supported. Select builds under
-**Modpack Options**, and verify the game process's Java executable and game log. With Mojang
-runtimes disabled, a compatible manually selected Java should be used instead. Restart the
-launcher between edits to the same Solder build to avoid its in-memory build cache; do not delete
-your normal launcher data. Stop the fixture with Ctrl-C; close the launcher before replacing its
-JAR with a new local build.
+- `src/main/java/net/technicpack/` — launcher UI, installation and update flows, and shared utilities.
+- `src/main/resources/` — bundled images, translations, metadata, and Windows packaging assets.
+- `src/main/app/` — macOS application assets.
+- `src/test/java/` — tests mirroring production packages.
+- `buildSrc/src/main/kotlin/` — custom Gradle build and packaging logic.
+- `scripts/` — development utilities, including the local Platform fixture.
+- `docs/` — detailed guides and existing design documents.
 
-## Modern Forge and NeoForge installation
+## License
 
-Modern loader packs must supply their installer JAR as `bin/modpack.jar`. The launcher reads its
-`install_profile.json` before resolving the version, uses the profile-selected version JSON, and then
-applies pack patches. It runs client processors during installation in separate JVMs using the selected
-game Java runtime; ForgeWrapper is not used. Processors are ordinary local programs, not security-sandboxed code.
-
-- Shared Maven artifacts live under `libraries/` in the configured launcher root. Compatible artifacts
-  are copied on demand from the installer's `maven/` entries, the old mixed `cache/`, or `~/.m2/repository`.
-  Ordinary acquisition retains its sources.
-  A one-time startup migration moves canonical Maven files from `cache/` to `libraries/` using
-  SHA-256-verified copy/delete, including matching paired `.sha1` files. Identical destinations are
-  deduplicated without rewriting them; differing destinations and their cached originals both remain.
-  Partial I/O failures keep the upgrade retryable on the next startup without blocking the launcher.
-  FML's `cache/fmllibs`, processor state/work directories, noncanonical paths, and unrelated cache files
-  stay untouched, as do pack-local files, installer archives, and `~/.m2`. Only this migration deletes
-  old shared-cache sources; on-demand fallbacks remain available. Older launchers may redownload
-  moved libraries, and cache files they add after the migration are not bulk-scanned again.
-- Declared artifact and output hashes are verified. Inferred processor tools retain `.sha1` sidecars
-  for verified cache reuse. Shared library writes and processor sequences use the cache's
-  `modern-installer.lock` across launcher instances.
-- Modern launch uses a verified, unmodified vanilla copy at `bin/native-launch/<version-id>.jar`.
-  This launcher-managed directory is cleaned on full reinstall. Legacy launches retain their existing
-  pack-local JAR behavior; modern launch does not create an unused signature-stripped `bin/minecraft.jar`.
-- Processors without declared output hashes can reuse successful runs when their file arguments are
-  conservatively trackable: whole Maven coordinates and supported whole-token references. SHA-256
-  receipts under `cache/processor-state/` bind the installer recipe, selected Java runtime, vanilla
-  client, processor classpath, and referenced files. A baseline is recorded only after a successful
-  run produces or rewrites a referenced artifact; existing files alone never authorize reuse.
-  Changed or missing files invalidate reuse without making argument paths deletion targets.
-  Untrackable arguments and processors that produce no observed artifact continue to run.
-- Cached libraries alone do not guarantee an offline recipe. Cold or uncacheable runs of upstream
-  tasks such as `DOWNLOAD_MOJMAPS` still fetch Mojang metadata.
-
-### Installer verification
-
-`./gradlew check` runs the deterministic tests and repository checks. The opt-in corpus test also
-parses every installer, builds its artifact plan, and resolves client data, arguments and outputs:
-
-```sh
-FORGE_INSTALLER_MIRROR=/path/to/forge/downloads \
-NEOFORGE_INSTALLER_MIRROR=/path/to/neoforge/downloads \
-./gradlew test --tests ModernInstallerCorpusTest.parsesEveryInstaller
-```
-
-A supplied mirror directory must contain the required historical fixtures; missing fixtures fail
-rather than silently reducing coverage. This corpus check does not execute third-party processors.
+The launcher is licensed under the [GNU General Public License, version 3 or later](LICENSE).
+See [LICENSE.txt](LICENSE.txt) and [COPYING.txt](COPYING.txt) for the Technic Launcher Core license notice
+and bundled license text.
