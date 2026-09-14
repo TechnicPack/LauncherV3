@@ -9,6 +9,8 @@ is added at the top.
 
 ## [Unreleased]
 
+## [v4.0-1137] - 2026-09-14
+
 ### Added
 - Solder builds can override the automatically selected Mojang Java runtime using `java_runtime`. With **Use Mojang Java runtimes** enabled, the exact component takes precedence over Minecraft and version-patch metadata and is used for both the game and installer processors. Missing or null overrides preserve automatic selection; manually selected Java installations are unchanged when the option is disabled. An unavailable runtime reports an installation error instead of silently falling back.
 - Launch attempts using a Solder Java runtime override now log the pack, build, component, actual Java version, and executable path before calling the game launcher, so the selected override is recorded even if launch fails.
