@@ -1239,6 +1239,191 @@ class ImmutableInstallerPlannerTest {
     assertTrue(context.getDeferredArtifacts().isEmpty());
   }
 
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void solderRuntimeOverridesMinecraftAndLaterPatchRuntime(boolean applyPatch) throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher"));
+    ModpackModel pack = createDiscoveryPack(fileSystem);
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+    ImmutableInstallerPlanner planner =
+        createRuntimeDiscoveryPlanner(
+            fileSystem,
+            pack,
+            context,
+            "\"java_runtime\":\"test-runtime\",",
+            true,
+            new FakeJavaRuntime());
+    if (applyPatch) {
+      Path patch = pack.getInstalledDirectory().toPath().resolve("patches/runtime.json");
+      Files.createDirectories(patch.getParent());
+      Files.writeString(
+          patch,
+          "{\"formatVersion\":1,\"uid\":\"example.runtime\",\"order\":100,"
+              + "\"mainClass\":\"example.PatchedMain\",\"compatibleJavaMajors\":[21]}");
+    }
+    JavaRuntimesIndex previous = setJavaRuntimesIndex(runtimeCatalog("test-runtime", "25.0.1+8"));
+    try {
+      new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
+          .execute(planner.buildVersionDiscoveryPlan(), context);
+
+      IMinecraftVersionInfo version = context.getResolvedVersion();
+      assertEquals("test-runtime", version.getMojangRuntimeInformation().getComponent());
+      assertEquals(25, version.getMojangRuntimeInformation().getMajorVersion());
+      if (applyPatch) {
+        assertEquals("example.PatchedMain", version.getMainClass());
+      }
+    } finally {
+      setJavaRuntimesIndex(previous);
+    }
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"", "\"java_runtime\":null,"})
+  void missingOrNullSolderRuntimePreservesMinecraftSelection(String runtimeField) throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher"));
+    ModpackModel pack = createDiscoveryPack(fileSystem);
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+    ImmutableInstallerPlanner planner =
+        createRuntimeDiscoveryPlanner(
+            fileSystem, pack, context, runtimeField, true, new FakeJavaRuntime());
+    JavaRuntimesIndex previous = setJavaRuntimesIndex(runtimeCatalog("test-runtime", "25.0.1+8"));
+    try {
+      new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
+          .execute(planner.buildVersionDiscoveryPlan(), context);
+
+      VersionJavaInfo runtime = context.getResolvedVersion().getMojangRuntimeInformation();
+      assertEquals("java-runtime-gamma", runtime.getComponent());
+      assertEquals(17, runtime.getMajorVersion());
+    } finally {
+      setJavaRuntimesIndex(previous);
+    }
+  }
+
+  @Test
+  void disabledManagedJavaIgnoresUnsupportedSolderRuntimeAndPreservesManualJava() throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher"));
+    ModpackModel pack = createDiscoveryPack(fileSystem);
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+    FakeJavaRuntime manualRuntime = new FakeJavaRuntime();
+    ImmutableInstallerPlanner planner =
+        createRuntimeDiscoveryPlanner(
+            fileSystem,
+            pack,
+            context,
+            "\"java_runtime\":\"unsupported-runtime\",",
+            false,
+            manualRuntime);
+    JavaRuntimesIndex previous = setJavaRuntimesIndex(runtimeCatalog("test-runtime", "25.0.1+8"));
+    try {
+      new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
+          .execute(planner.buildVersionDiscoveryPlan(), context);
+
+      assertSame(manualRuntime, context.getResolvedVersion().getJavaRuntime());
+      assertEquals(
+          "java-runtime-gamma",
+          context.getResolvedVersion().getMojangRuntimeInformation().getComponent());
+      assertFalse(Files.exists(fileSystem.getRuntimesDirectory().resolve("unsupported-runtime")));
+    } finally {
+      setJavaRuntimesIndex(previous);
+    }
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"unsupported-runtime", "empty-runtime"})
+  void unavailableSolderRuntimeFailsInsteadOfSelectingAnotherComponent(String component)
+      throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher"));
+    ModpackModel pack = createDiscoveryPack(fileSystem);
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+    ImmutableInstallerPlanner planner =
+        createRuntimeDiscoveryPlanner(
+            fileSystem,
+            pack,
+            context,
+            "\"java_runtime\":" + GSON.toJson(component) + ",",
+            true,
+            new FakeJavaRuntime());
+    JavaRuntimesIndex previous = setJavaRuntimesIndex(runtimeCatalog("test-runtime", "25.0.1+8"));
+    try {
+      assertThrows(
+          IOException.class,
+          () ->
+              new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
+                  .execute(planner.buildVersionDiscoveryPlan(), context));
+      assertFalse(Files.exists(fileSystem.getRuntimesDirectory().resolve(component)));
+    } finally {
+      setJavaRuntimesIndex(previous);
+    }
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void unsafeSolderRuntimeFailsEvenWhenPresentInCatalog(boolean absolutePath) throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher"));
+    ModpackModel pack = createDiscoveryPack(fileSystem);
+    Path escapedRuntime = tempDir.resolve("escaped-runtime");
+    String component = absolutePath ? escapedRuntime.toString() : "../../escaped-runtime";
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+    ImmutableInstallerPlanner planner =
+        createRuntimeDiscoveryPlanner(
+            fileSystem,
+            pack,
+            context,
+            "\"java_runtime\":" + GSON.toJson(component) + ",",
+            true,
+            new FakeJavaRuntime());
+    JavaRuntimesIndex previous = setJavaRuntimesIndex(runtimeCatalog(component, "25.0.1+8"));
+    try {
+      assertThrows(
+          IOException.class,
+          () ->
+              new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
+                  .execute(planner.buildVersionDiscoveryPlan(), context));
+      assertFalse(Files.exists(escapedRuntime));
+      assertFalse(
+          Files.exists(
+              fileSystem
+                  .getRuntimesDirectory()
+                  .resolve("manifests")
+                  .resolve(component + ".json")
+                  .normalize()));
+    } finally {
+      setJavaRuntimesIndex(previous);
+    }
+  }
+
+  @Test
+  void solderRuntimeWithMalformedCatalogVersionFailsInsteadOfUsingMinecraftJava() throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher"));
+    ModpackModel pack = createDiscoveryPack(fileSystem);
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+    ImmutableInstallerPlanner planner =
+        createRuntimeDiscoveryPlanner(
+            fileSystem,
+            pack,
+            context,
+            "\"java_runtime\":\"test-runtime\",",
+            true,
+            new FakeJavaRuntime());
+    JavaRuntimesIndex previous =
+        setJavaRuntimesIndex(runtimeCatalog("test-runtime", "not-a-version"));
+    try {
+      assertThrows(
+          IOException.class,
+          () ->
+              new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
+                  .execute(planner.buildVersionDiscoveryPlan(), context));
+    } finally {
+      setJavaRuntimesIndex(previous);
+    }
+  }
+
   @Test
   void processorsUseRuntimeInstalledAfterTheirPlanWasBuilt() throws Exception {
     org.junit.jupiter.api.Assumptions.assumeTrue(
@@ -1277,7 +1462,8 @@ class ImmutableInstallerPlannerTest {
         GSON.fromJson(versionJson("embedded-loader", "1.20.1", ""), JsonObject.class);
     embedded.add(
         "javaVersion",
-        GSON.fromJson("{\"component\":\"test-runtime\",\"majorVersion\":25}", JsonObject.class));
+        GSON.fromJson(
+            "{\"component\":\"java-runtime-gamma\",\"majorVersion\":17}", JsonObject.class));
     try (ZipOutputStream output =
         new ZipOutputStream(
             Files.newOutputStream(pack.getBinDir().toPath().resolve("modpack.jar")))) {
@@ -1317,7 +1503,9 @@ class ImmutableInstallerPlannerTest {
         new ImmutableInstallerPlanner(
             new TestResourceLoader(),
             pack,
-            GSON.fromJson("{\"minecraft\":\"1.20.1\",\"mods\":[]}", Modpack.class),
+            GSON.fromJson(
+                "{\"minecraft\":\"1.20.1\",\"java_runtime\":\"test-runtime\",\"mods\":[]}",
+                Modpack.class),
             fileSystem,
             Installer.createVersionBuilder(pack.getBinDir(), null, context),
             new TechnicSettings(),
@@ -1326,10 +1514,6 @@ class ImmutableInstallerPlannerTest {
             true,
             false,
             () -> false);
-    new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
-        .execute(planner.buildVersionDiscoveryPlan(), context);
-    ExecutionPlan<ImmutableInstallerPlanner.InstallExecutionContext> plan =
-        planner.buildInstallPlan(context);
     String executable = new File(System.getProperty("java.home"), "bin/java").getAbsolutePath();
     byte[] script =
         ("#!/bin/sh\nexec '" + executable.replace("'", "'\\''") + "' \"$@\"\n")
@@ -1351,6 +1535,10 @@ class ImmutableInstallerPlannerTest {
     server.start();
     JavaRuntimesIndex previous = setJavaRuntimesIndex(server, manifestBytes);
     try {
+      new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
+          .execute(planner.buildVersionDiscoveryPlan(), context);
+      ExecutionPlan<ImmutableInstallerPlanner.InstallExecutionContext> plan =
+          planner.buildInstallPlan(context);
       new PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext>(null)
           .execute(plan, context);
       assertEquals(
@@ -1480,6 +1668,55 @@ class ImmutableInstallerPlannerTest {
             fileSystem);
     pack.initDirectories();
     return pack;
+  }
+
+  private static ImmutableInstallerPlanner createRuntimeDiscoveryPlanner(
+      LauncherFileSystem fileSystem,
+      ModpackModel pack,
+      ImmutableInstallerPlanner.InstallExecutionContext context,
+      String runtimeField,
+      boolean managedJava,
+      IJavaRuntime selectedRuntime)
+      throws IOException {
+    JsonObject vanilla = GSON.fromJson(vanillaVersionJson("1.20.1"), JsonObject.class);
+    vanilla.add(
+        "javaVersion",
+        GSON.fromJson(
+            "{\"component\":\"java-runtime-gamma\",\"majorVersion\":17}", JsonObject.class));
+    Files.writeString(pack.getBinDir().toPath().resolve("version.json"), vanilla.toString());
+    return new ImmutableInstallerPlanner(
+        new TestResourceLoader(),
+        pack,
+        GSON.fromJson("{\"minecraft\":\"1.20.1\"," + runtimeField + "\"mods\":[]}", Modpack.class),
+        fileSystem,
+        Installer.createVersionBuilder(pack.getBinDir(), null, context),
+        new TechnicSettings(),
+        selectedRuntime,
+        false,
+        managedJava,
+        false,
+        () -> false);
+  }
+
+  private static JavaRuntimesIndex runtimeCatalog(String component, String versionName) {
+    JsonObject runtimes = new JsonObject();
+    runtimes.add(
+        "java-runtime-gamma",
+        GSON.fromJson("[{\"version\":{\"name\":\"17.0.12\"}}]", com.google.gson.JsonArray.class));
+    runtimes.add(
+        "java-runtime-delta",
+        GSON.fromJson("[{\"version\":{\"name\":\"21.0.4\"}}]", com.google.gson.JsonArray.class));
+    runtimes.add("empty-runtime", new com.google.gson.JsonArray());
+    runtimes.add(
+        component,
+        GSON.fromJson(
+            "[{\"version\":{\"name\":" + GSON.toJson(versionName) + "}}]",
+            com.google.gson.JsonArray.class));
+    JsonObject index = new JsonObject();
+    index.add("mac-os", new JsonObject());
+    index.add("mac-os-arm64", new JsonObject());
+    index.add(currentRuntimeIndexKey(), runtimes);
+    return MojangUtils.getGson().fromJson(index, JavaRuntimesIndex.class);
   }
 
   private static ImmutableInstallerPlanner createDiscoveryPlanner(
@@ -1681,6 +1918,7 @@ class ImmutableInstallerPlannerTest {
             + currentRuntimeIndexKey()
             + "\":{"
             + "\"test-runtime\":[{"
+            + "\"version\":{\"name\":\"25.0.1+8\"},"
             + "\"manifest\":{"
             + "\"sha1\":\""
             + sha1(manifestBytes)

@@ -5,13 +5,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.sun.net.httpserver.HttpServer;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
 import net.technicpack.rest.RestfulAPIException;
+import net.technicpack.rest.io.Modpack;
 import net.technicpack.solder.ISolderClientIdProvider;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class HttpSolderPackApiTest {
 
@@ -22,6 +29,50 @@ class HttpSolderPackApiTest {
 
   private static final ISolderClientIdProvider ALWAYS_SEND = slug -> CLIENT_ID;
   private static final ISolderClientIdProvider NEVER_SEND = slug -> null;
+
+  @ParameterizedTest
+  @ValueSource(strings = {"\"java-runtime-delta\"", "null", "absent"})
+  void fetchedBuildPreservesOptionalRuntimeAndExistingRequirements(String runtimeJson)
+      throws Exception {
+    String runtimeField = runtimeJson.equals("absent") ? "" : ",\"java_runtime\":" + runtimeJson;
+    byte[] response =
+        ("{\"minecraft\":\"1.20.1\",\"java\":\"17\",\"memory\":\"4096\",\"mods\":[]"
+                + runtimeField
+                + "}")
+            .getBytes(StandardCharsets.UTF_8);
+    HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+    try {
+      server.createContext(
+          "/api/modpack/" + SLUG + "/1.0.1",
+          exchange -> {
+            try (exchange) {
+              exchange.getResponseHeaders().set("Content-Type", "application/json");
+              exchange.sendResponseHeaders(200, response.length);
+              exchange.getResponseBody().write(response);
+            }
+          });
+      server.start();
+      HttpSolderPackApi api =
+          new HttpSolderPackApi(
+              "http://127.0.0.1:" + server.getAddress().getPort() + "/api/",
+              SLUG,
+              NEVER_SEND,
+              MIRROR_URL);
+
+      Modpack build = api.getPackBuild("1.0.1");
+
+      if (runtimeJson.startsWith("\"")) {
+        assertEquals("java-runtime-delta", build.getJavaRuntime());
+      } else {
+        assertNull(build.getJavaRuntime());
+      }
+      assertEquals("1.20.1", build.getGameVersion());
+      assertEquals("17", build.getJava());
+      assertEquals("4096", build.getMemory());
+    } finally {
+      server.stop(0);
+    }
+  }
 
   @Test
   void constructorThrowsWhenModpackSlugIsNull() {

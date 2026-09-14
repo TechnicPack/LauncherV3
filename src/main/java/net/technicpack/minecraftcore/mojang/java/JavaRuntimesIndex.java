@@ -80,7 +80,10 @@ public class JavaRuntimesIndex {
 
     if (availableRuntimes == null || availableRuntimes.isEmpty()) return null;
 
+    List<JavaRuntime> runtimes = availableRuntimes.get(runtimeName);
+    if (runtimes == null || runtimes.isEmpty()) return null;
+
     // For some reason every runtime is a list with a single entry
-    return availableRuntimes.get(runtimeName).get(0);
+    return runtimes.get(0);
   }
 }

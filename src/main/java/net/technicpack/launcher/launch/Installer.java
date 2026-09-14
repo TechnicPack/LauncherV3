@@ -169,6 +169,29 @@ public class Installer {
     return modpackData;
   }
 
+  private static void logRuntimeOverrideLaunch(
+      ModpackModel pack,
+      String build,
+      Modpack modpackData,
+      boolean usingMojangJava,
+      IMinecraftVersionInfo version) {
+    if (!usingMojangJava || modpackData.getJavaRuntime() == null) return;
+
+    IJavaRuntime runtime = version.getJavaRuntime();
+    Utils.getLogger()
+        .info(
+            "Launching "
+                + pack.getDisplayName()
+                + " ("
+                + build
+                + ") using Solder Java runtime override "
+                + modpackData.getJavaRuntime()
+                + ": Java "
+                + runtime.getVersion()
+                + " at "
+                + runtime.getExecutableFile());
+  }
+
   private class InstallerThread extends Thread {
     private final DownloadListener listener;
     private final ModpackModel pack;
@@ -319,6 +342,7 @@ public class Installer {
                   pack.getDisplayName(),
                   packIconMapper.getImageLocation(pack).getAbsolutePath(),
                   settings);
+          logRuntimeOverrideLaunch(pack, build, modpackData, usingMojangJava, version);
           setGameProcess(launcher.launch(pack, memory, options, launcherUnhider, version));
 
           switch (launchAction) {

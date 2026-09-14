@@ -118,6 +118,7 @@ class ImmutableInstallerPlanner {
   private static final String OBJECTS_FIELD = "objects";
   private static final String SIZE_FIELD = "size";
   private static final String HASH_FIELD = "hash";
+  private static final Pattern JAVA_RUNTIME_COMPONENT = Pattern.compile("[a-z0-9][a-z0-9-]*");
 
   private final ResourceLoader resources;
   private final ModpackModel pack;
@@ -264,7 +265,10 @@ class ImmutableInstallerPlanner {
         "Processing version.",
         1.0f,
         Collections.singletonList("write-prism-rundata"),
-        (context, reporter) -> prepareResolvedVersion(context, false));
+        (context, reporter) -> {
+          applyJavaRuntimeOverride(context);
+          prepareResolvedVersion(context, false);
+        });
     return builder.build();
   }
 
@@ -782,6 +786,41 @@ class ImmutableInstallerPlanner {
     for (VersionPatch patch : patches) {
       applyPatch(version, patch);
     }
+  }
+
+  private void applyJavaRuntimeOverride(InstallExecutionContext context) throws IOException {
+    String component = modpackData.getJavaRuntime();
+    if (!mojangJavaWanted || component == null) return;
+
+    if (!JAVA_RUNTIME_COMPONENT.matcher(component).matches()) {
+      throw new DownloadException("Invalid Solder Java runtime component: " + component);
+    }
+
+    JavaRuntimesIndex index =
+        MojangUtils.getJavaRuntimesIndex(fileSystem.getRuntimesDirectory().resolve("_index.json"));
+    if (index == null) {
+      throw new DownloadException(
+          "Failed to get Mojang JRE information for Solder runtime " + component);
+    }
+    JavaRuntime runtime = index.getRuntimeForCurrentOS(component);
+    if (runtime == null) {
+      throw new DownloadException(
+          "Mojang Java runtime "
+              + component
+              + " requested by this modpack is not available for the current OS and architecture");
+    }
+    if (runtime.getVersion() == null || runtime.getVersion().getName() == null) {
+      throw new DownloadException("Missing Java version in Mojang runtime component " + component);
+    }
+
+    int major;
+    try {
+      major = new JavaVersionComparator().getMajor(runtime.getVersion().getName());
+    } catch (IllegalArgumentException e) {
+      throw new DownloadException(
+          "Invalid Java version in Mojang runtime component " + component, e);
+    }
+    context.getResolvedVersion().setMojangRuntimeInformation(new VersionJavaInfo(component, major));
   }
 
   private void applyPatch(IMinecraftVersionInfo version, VersionPatch patch) {

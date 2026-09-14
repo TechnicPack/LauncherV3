@@ -19,6 +19,7 @@
 
 package net.technicpack.rest.io;
 
+import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.List;
 import net.technicpack.platform.io.PlatformPackInfo;
@@ -28,6 +29,10 @@ import net.technicpack.rest.RestObject;
 public class Modpack extends RestObject {
   private String minecraft;
   private String java;
+
+  @SerializedName("java_runtime")
+  private String javaRuntime;
+
   private String memory;
   private List<Mod> mods;
 
@@ -50,6 +55,10 @@ public class Modpack extends RestObject {
 
   public String getJava() {
     return java;
+  }
+
+  public String getJavaRuntime() {
+    return javaRuntime;
   }
 
   public String getMemory() {
