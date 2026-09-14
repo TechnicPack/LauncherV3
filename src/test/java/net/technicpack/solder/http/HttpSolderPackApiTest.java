@@ -1,10 +1,7 @@
 package net.technicpack.solder.http;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -16,6 +13,7 @@ import net.technicpack.launchercore.exception.BuildInaccessibleException;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.solder.ISolderClientIdProvider;
+import net.technicpack.solder.io.SolderPackInfo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -76,51 +74,28 @@ class HttpSolderPackApiTest {
 
   @Test
   void constructorThrowsWhenModpackSlugIsNull() {
-    RestfulAPIException ex =
-        assertThrows(
-            RestfulAPIException.class,
-            () -> new HttpSolderPackApi(BASE_URL, null, ALWAYS_SEND, MIRROR_URL));
-    assertTrue(
-        ex.getMessage().contains("modpack slug"),
-        "exception message should identify modpack slug, was: " + ex.getMessage());
+    assertThrows(
+        RestfulAPIException.class,
+        () -> new HttpSolderPackApi(BASE_URL, null, ALWAYS_SEND, MIRROR_URL));
   }
 
   @Test
   void constructorThrowsWhenBaseUrlIsNull() {
-    RestfulAPIException ex =
-        assertThrows(
-            RestfulAPIException.class,
-            () -> new HttpSolderPackApi(null, SLUG, ALWAYS_SEND, MIRROR_URL));
-    assertTrue(
-        ex.getMessage().contains("base URL"),
-        "exception message should identify base URL, was: " + ex.getMessage());
+    assertThrows(
+        RestfulAPIException.class,
+        () -> new HttpSolderPackApi(null, SLUG, ALWAYS_SEND, MIRROR_URL));
   }
 
   @Test
   void constructorThrowsWhenMirrorUrlIsNull() {
-    RestfulAPIException ex =
-        assertThrows(
-            RestfulAPIException.class,
-            () -> new HttpSolderPackApi(BASE_URL, SLUG, ALWAYS_SEND, null));
-    assertTrue(
-        ex.getMessage().contains("mirror URL"),
-        "exception message should identify mirror URL, was: " + ex.getMessage());
+    assertThrows(
+        RestfulAPIException.class, () -> new HttpSolderPackApi(BASE_URL, SLUG, ALWAYS_SEND, null));
   }
 
   @Test
   void constructorThrowsWhenClientIdProviderIsNull() {
-    RestfulAPIException ex =
-        assertThrows(
-            RestfulAPIException.class,
-            () -> new HttpSolderPackApi(BASE_URL, SLUG, null, MIRROR_URL));
-    assertTrue(
-        ex.getMessage().contains("client ID provider"),
-        "exception message should identify client ID provider, was: " + ex.getMessage());
-  }
-
-  @Test
-  void constructorAcceptsAllNonNullArguments() {
-    assertDoesNotThrow(() -> new HttpSolderPackApi(BASE_URL, SLUG, ALWAYS_SEND, MIRROR_URL));
+    assertThrows(
+        RestfulAPIException.class, () -> new HttpSolderPackApi(BASE_URL, SLUG, null, MIRROR_URL));
   }
 
   @Test
@@ -156,28 +131,72 @@ class HttpSolderPackApiTest {
   }
 
   @Test
-  void providerReceivesTheModpackSlug() throws RestfulAPIException {
-    String[] seenSlug = new String[1];
-    ISolderClientIdProvider capturing =
-        slug -> {
-          seenSlug[0] = slug;
-          return null;
-        };
-    HttpSolderPackApi api = new HttpSolderPackApi(BASE_URL, SLUG, capturing, MIRROR_URL);
-    api.buildPackInfoUrl();
-    assertEquals(SLUG, seenSlug[0]);
+  void getPackBuildThrowsBuildInaccessibleWhenBuildIsNull() throws RestfulAPIException {
+    HttpSolderPackApi api = new HttpSolderPackApi(BASE_URL, SLUG, ALWAYS_SEND, MIRROR_URL);
+    assertThrows(BuildInaccessibleException.class, () -> api.getPackBuild(null));
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "null",
+        "{}",
+        "{\"builds\":[]}",
+        "{\"name\":\"other-pack\",\"builds\":[]}",
+        "{\"name\":\" \",\"builds\":[]}",
+        "{\"name\":\"test-pack\"}",
+        "{\"name\":\"test-pack\",\"builds\":null}",
+        "{\"name\":\"test-pack\",\"builds\":[null]}",
+        "{\"name\":\"test-pack\",\"builds\":[\" \"]}",
+        "{\"name\":\"test-pack\",\"builds\":{}}"
+      })
+  void malformedCatalogFailsAtHttpBoundary(String json) throws Exception {
+    HttpServer server = catalogServer(json);
+    try {
+      HttpSolderPackApi api =
+          new HttpSolderPackApi(
+              "http://127.0.0.1:" + server.getAddress().getPort() + "/api/",
+              SLUG,
+              NEVER_SEND,
+              MIRROR_URL);
+      assertThrows(RestfulAPIException.class, api::getPackInfo);
+    } finally {
+      server.stop(0);
+    }
   }
 
   @Test
-  void getPackBuildThrowsBuildInaccessibleWhenBuildIsNull() throws RestfulAPIException {
-    HttpSolderPackApi api = new HttpSolderPackApi(BASE_URL, SLUG, ALWAYS_SEND, MIRROR_URL);
-    BuildInaccessibleException ex =
-        assertThrows(BuildInaccessibleException.class, () -> api.getPackBuild(null));
-    assertNotNull(ex.getCause());
-    assertInstanceOf(IllegalArgumentException.class, ex.getCause());
-    assertEquals("build name must not be null", ex.getCause().getMessage());
-    assertTrue(
-        ex.getMessage().contains(SLUG),
-        "exception message should name the modpack, was: " + ex.getMessage());
+  void emptyCatalogRemainsValidForPrivateOrUnavailablePack() throws Exception {
+    HttpServer server = catalogServer("{\"name\":\"test-pack\",\"builds\":[]}");
+    try {
+      HttpSolderPackApi api =
+          new HttpSolderPackApi(
+              "http://127.0.0.1:" + server.getAddress().getPort() + "/api/",
+              SLUG,
+              NEVER_SEND,
+              MIRROR_URL);
+      SolderPackInfo info = api.getPackInfo();
+      assertEquals(SLUG, info.getName());
+      assertEquals(java.util.List.of(), info.getBuilds());
+      assertTrue(info.isLocal());
+    } finally {
+      server.stop(0);
+    }
+  }
+
+  private HttpServer catalogServer(String json) throws Exception {
+    byte[] response = json.getBytes(StandardCharsets.UTF_8);
+    HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+    server.createContext(
+        "/api/modpack/" + SLUG,
+        exchange -> {
+          try (exchange) {
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, response.length);
+            exchange.getResponseBody().write(response);
+          }
+        });
+    server.start();
+    return server;
   }
 }

@@ -86,6 +86,7 @@ public class HttpSolderPackApi implements ISolderPackApi {
   @Override
   public SolderPackInfo getPackInfo() throws RestfulAPIException {
     SolderPackInfo info = RestObject.getRestObject(SolderPackInfo.class, buildPackInfoUrl());
+    info.validate(modpackSlug);
     info.setSolder(this);
     return info;
   }

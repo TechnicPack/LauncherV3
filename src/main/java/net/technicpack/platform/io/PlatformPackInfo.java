@@ -22,7 +22,9 @@ package net.technicpack.platform.io;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import net.technicpack.launchercore.exception.BuildInaccessibleException;
 import net.technicpack.rest.RestObject;
+import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.rest.io.Resource;
@@ -53,6 +55,15 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
   private transient boolean isLocal = false;
 
   public PlatformPackInfo() {}
+
+  public void validate(String expectedName) throws RestfulAPIException {
+    if (hasError()) {
+      throw new RestfulAPIException("Error in Platform response: " + getError());
+    }
+    if (name == null || name.trim().isEmpty() || !name.equals(expectedName)) {
+      throw new RestfulAPIException("Invalid Platform pack identity for " + expectedName);
+    }
+  }
 
   @Override
   public String getName() {
@@ -112,16 +123,11 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
 
   @Override
   public List<String> getBuilds() {
-    if (hasSolder()) {
-      // If this is a Solder modpack, then the Platform modpack version is ignored.
-      // Code can actually reach this if the Solder instance is offline, due to how combined modpack
-      // info works.
+    if (hasSolder() || version == null || version.trim().isEmpty()) {
       return Collections.emptyList();
     }
 
-    List<String> builds = new ArrayList<>();
-    builds.add(version);
-    return builds;
+    return Collections.singletonList(version);
   }
 
   public String getGameVersion() {
@@ -164,7 +170,10 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
   }
 
   @Override
-  public Modpack getModpack(String build) {
+  public Modpack getModpack(String build) throws BuildInaccessibleException {
+    if (hasSolder()) {
+      throw new BuildInaccessibleException(getDisplayName(), build);
+    }
     return new Modpack(this);
   }
 
@@ -177,18 +186,33 @@ public class PlatformPackInfo extends RestObject implements PackInfo {
     return url;
   }
 
-  public void setLocal() {
-    isLocal = true;
+  public PlatformPackInfo asLocal() {
+    PlatformPackInfo copy = new PlatformPackInfo();
+    copy.name = name;
+    copy.displayName = displayName;
+    copy.url = url;
+    copy.platformUrl = platformUrl;
+    copy.icon = icon;
+    copy.logo = logo;
+    copy.background = background;
+    copy.minecraft = minecraft;
+    copy.forge = forge;
+    copy.version = version;
+    copy.solder = solder;
+    copy.description = description;
+    copy.ratings = ratings;
+    copy.runs = runs;
+    copy.installs = installs;
+    copy.isServer = isServer;
+    copy.isOfficial = isOfficial;
+    copy.discordServerId = discordServerId;
+    copy.feed = feed;
+    copy.isLocal = true;
+    return copy;
   }
 
   @Override
   public boolean isLocal() {
-    // If this modpack has a Solder instance set, and code has reached this point, that means that
-    // Solder is
-    // unreachable for some reason, and we should consider its Solder to be offline (and mark the
-    // pack as local)
-    if (hasSolder()) return true;
-
     return isLocal;
   }
 

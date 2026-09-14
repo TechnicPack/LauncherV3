@@ -34,19 +34,16 @@ import java.util.logging.Level;
 import net.technicpack.launcher.io.InstalledPackStore;
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.launchercore.install.ModpackVersion;
-import net.technicpack.launchercore.modpacks.packinfo.CombinedPackInfo;
 import net.technicpack.launchercore.modpacks.sources.IModpackTagBuilder;
 import net.technicpack.platform.io.FeedItem;
-import net.technicpack.platform.io.PlatformPackInfo;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.rest.io.Resource;
-import net.technicpack.solder.io.SolderPackInfo;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 
 public class ModpackModel {
   private InstalledPack installedPack;
-  private PackInfo packInfo;
+  private volatile PackInfo packInfo;
   // Identity outlives both installed state and replaceable remote metadata.
   private String name;
   private InstalledPackStore packStore;
@@ -67,8 +64,8 @@ public class ModpackModel {
     this();
 
     this.installedPack = installedPack;
-    this.packInfo = info;
     this.name = resolveName(installedPack, info);
+    this.packInfo = info != null && name != null && name.equals(info.getName()) ? info : null;
     this.packStore = packStore;
     this.fileSystem = fileSystem;
   }
@@ -98,24 +95,18 @@ public class ModpackModel {
     if (name == null) name = resolveName(pack, packInfo);
   }
 
-  public void setPackInfo(PackInfo packInfo) {
-    if (name == null) name = resolveName(installedPack, packInfo);
-
-    // HACK
-    // I need to rework the way platform & solder data interact to produce a complete pack, but
-    // until I do so, this
-    // awesome hack will combine platform & solder data where necessary
-    if (packInfo instanceof SolderPackInfo && this.packInfo instanceof PlatformPackInfo) {
-      this.packInfo = new CombinedPackInfo(packInfo, this.packInfo);
-    } else if (packInfo instanceof PlatformPackInfo && this.packInfo instanceof SolderPackInfo) {
-      this.packInfo = new CombinedPackInfo(this.packInfo, packInfo);
-    } else if (packInfo instanceof SolderPackInfo && this.packInfo instanceof CombinedPackInfo) {
-      this.packInfo = new CombinedPackInfo(packInfo, this.packInfo);
-    } else if (packInfo instanceof PlatformPackInfo && this.packInfo instanceof CombinedPackInfo) {
-      this.packInfo = new CombinedPackInfo(this.packInfo, packInfo);
-    } else {
-      this.packInfo = packInfo;
+  /**
+   * Replaces metadata atomically; source resolution belongs to the pack repository, not the model.
+   * Discovery fills an empty model but cannot roll back an already resolved snapshot.
+   */
+  public synchronized void setPackInfo(PackInfo packInfo) {
+    if (packInfo != null) {
+      String metadataName = resolveName(null, packInfo);
+      if (metadataName == null || (name != null && !name.equals(metadataName))) return;
+      if (name == null) name = metadataName;
+      if (this.packInfo != null && !packInfo.isComplete()) return;
     }
+    this.packInfo = packInfo;
   }
 
   public String getDiscordId() {

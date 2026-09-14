@@ -102,14 +102,17 @@ public class ModpackCachePlatformApi implements IPlatformApi {
       return getDeadPackInfo(packSlug);
     }
 
-    return info;
+    return info == null ? getDeadPackInfo(packSlug) : info;
   }
 
   protected PlatformPackInfo getDeadPackInfo(String packSlug) {
     try {
       PlatformPackInfo deadInfo = getPlatformPackInfoForBulk(packSlug);
 
-      if (deadInfo != null) deadInfo.setLocal();
+      if (deadInfo != null) {
+        deadInfo = deadInfo.asLocal();
+        foreverCache.put(packSlug, deadInfo);
+      }
       return deadInfo;
     } catch (RestfulAPIException e) {
       return null;
@@ -127,12 +130,14 @@ public class ModpackCachePlatformApi implements IPlatformApi {
   private PlatformPackInfo pullAndCache(String packSlug) throws RestfulAPIException {
     PlatformPackInfo info = null;
     try {
-      info = innerApi.getPlatformPackInfoForBulk(packSlug);
+      PlatformPackInfo response = innerApi.getPlatformPackInfoForBulk(packSlug);
 
-      if (info != null) {
+      if (response != null) {
+        response.validate(packSlug);
+        info = response;
         cache.put(packSlug, info);
         foreverCache.put(packSlug, info);
-        saveForeverCache(info);
+        saveForeverCache(packSlug, info);
       }
     } finally {
       deadPacks.put(packSlug, info == null);
@@ -149,6 +154,8 @@ public class ModpackCachePlatformApi implements IPlatformApi {
       PlatformPackInfo info = Utils.getGson().fromJson(reader, PlatformPackInfo.class);
 
       if (info != null) {
+        info.validate(packSlug);
+        info = info.asLocal();
         foreverCache.put(packSlug, info);
       }
 
@@ -160,9 +167,8 @@ public class ModpackCachePlatformApi implements IPlatformApi {
     }
   }
 
-  private void saveForeverCache(PlatformPackInfo info) {
-    Path cacheFile =
-        fileSystem.getPackAssetsDirectory().resolve(info.getName()).resolve("cache.json");
+  private void saveForeverCache(String packSlug, PlatformPackInfo info) {
+    Path cacheFile = fileSystem.getPackAssetsDirectory().resolve(packSlug).resolve("cache.json");
 
     try {
       Files.createDirectories(cacheFile.getParent());

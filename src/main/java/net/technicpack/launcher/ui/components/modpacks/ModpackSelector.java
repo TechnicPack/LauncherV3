@@ -46,18 +46,16 @@ import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.modpacks.*;
-import net.technicpack.launchercore.modpacks.packinfo.CombinedPackInfo;
 import net.technicpack.launchercore.modpacks.sources.IPackSource;
 import net.technicpack.launchercore.modpacks.sources.NameFilterPackSource;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.IPlatformSearchApi;
-import net.technicpack.platform.io.PlatformPackInfo;
+import net.technicpack.platform.PlatformPackInfoRepository;
 import net.technicpack.platform.packsources.SearchResultPackSource;
 import net.technicpack.platform.packsources.SinglePlatformSource;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.solder.ISolderApi;
-import net.technicpack.solder.ISolderPackApi;
 import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.controls.WatermarkTextField;
 import net.technicpack.ui.controls.borders.RoundBorder;
@@ -73,6 +71,7 @@ public class ModpackSelector extends TintablePanel
   private final transient IPlatformSearchApi platformSearchApi;
   private final transient ISolderApi solderApi;
   private final transient PackLoader packLoader;
+  private final transient PlatformPackInfoRepository packInfoRepository;
   private final transient IPackSource technicSolder;
   private final transient ImageRepository<ModpackModel> iconRepo;
   private final FindMoreWidget findMoreWidget;
@@ -107,6 +106,7 @@ public class ModpackSelector extends TintablePanel
     this.platformApi = platformApi;
     this.solderApi = solderApi;
     this.platformSearchApi = platformSearchApi;
+    this.packInfoRepository = new PlatformPackInfoRepository(platformApi, solderApi);
 
     slugRegex = Pattern.compile("^[a-zA-Z0-9-]+$");
     siteRegex = Pattern.compile("^([a-zA-Z0-9-]+)\\.\\d+$");
@@ -464,27 +464,8 @@ public class ModpackSelector extends TintablePanel
    */
   private void updatePackInfoFromNetwork(ModpackModel modpack, boolean invalidateSolderCache)
       throws RestfulAPIException {
-    PlatformPackInfo updatedInfo = platformApi.getPlatformPackInfo(modpack.getName());
-    PackInfo infoToUse = updatedInfo;
-
-    if (updatedInfo != null && updatedInfo.hasSolder()) {
-      try {
-        ISolderPackApi solderPack =
-            solderApi.getSolderPack(
-                updatedInfo.getSolder(),
-                updatedInfo.getName(),
-                solderApi.getMirrorUrl(updatedInfo.getSolder()));
-        if (invalidateSolderCache) {
-          solderPack.invalidateCache();
-        }
-        infoToUse = new CombinedPackInfo(solderPack.getPackInfo(), updatedInfo);
-      } catch (RestfulAPIException e) {
-      }
-    }
-
-    if (infoToUse != null) {
-      modpack.setPackInfo(infoToUse);
-    }
+    PackInfo info = packInfoRepository.refreshPackInfo(modpack.getName(), invalidateSolderCache);
+    if (info != null) modpack.setPackInfo(info);
   }
 
   /**

@@ -57,6 +57,10 @@ public interface PackInfo {
 
   Modpack getModpack(String build) throws BuildInaccessibleException;
 
+  /**
+   * Whether authoritative resolution has finished, not whether installation is available. A
+   * resolved pack can still be local-only when its build source is unavailable.
+   */
   boolean isComplete();
 
   boolean isLocal();

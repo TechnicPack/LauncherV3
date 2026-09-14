@@ -25,6 +25,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import net.technicpack.launcher.io.LauncherFileSystem;
 import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.solder.ISolderApi;
@@ -35,9 +37,13 @@ public class CachedSolderApi implements ISolderApi {
 
   private LauncherFileSystem fileSystem;
   private ISolderApi innerApi;
-  private Collection<SolderPackInfo> cachedPublicPacks = null;
-  private Instant lastSolderPull = Instant.EPOCH;
+  private final Map<String, PublicPackCache> publicPacks = new HashMap<>();
   private int cacheInSeconds;
+
+  private static class PublicPackCache {
+    private Collection<SolderPackInfo> packs;
+    private Instant lastPull = Instant.EPOCH;
+  }
 
   private static class CacheTuple {
     private String root;
@@ -99,6 +105,7 @@ public class CachedSolderApi implements ISolderApi {
               fileSystem,
               innerApi.getSolderPack(solderRoot, modpackSlug, mirrorUrl),
               cacheInSeconds,
+              solderRoot,
               modpackSlug);
       packs.put(tuple, pack);
     }
@@ -113,20 +120,45 @@ public class CachedSolderApi implements ISolderApi {
   }
 
   @Override
-  public Collection<SolderPackInfo> internalGetPublicSolderPacks(
+  public synchronized Collection<SolderPackInfo> internalGetPublicSolderPacks(
       String solderRoot, ISolderApi packFactory) throws RestfulAPIException {
+    PublicPackCache cache = publicPacks.computeIfAbsent(solderRoot, root -> new PublicPackCache());
     Instant now = Instant.now();
-    if (lastSolderPull.plusSeconds(cacheInSeconds).isAfter(now)) {
-      if (cachedPublicPacks != null) return cachedPublicPacks;
+    if (cache.lastPull.plusSeconds(cacheInSeconds).isAfter(now)) {
+      if (cache.packs != null) return cache.packs;
     }
 
-    if (lastSolderPull.plusSeconds(cacheInSeconds / 10).isAfter(now)) return new ArrayList<>(0);
+    if (cache.lastPull.plusSeconds(cacheInSeconds / 10).isAfter(now)) return new ArrayList<>(0);
 
     try {
-      cachedPublicPacks = innerApi.internalGetPublicSolderPacks(solderRoot, this);
-      return cachedPublicPacks;
+      Collection<SolderPackInfo> fetched = innerApi.internalGetPublicSolderPacks(solderRoot, this);
+      if (fetched == null) {
+        throw new RestfulAPIException("Missing Solder public pack catalog");
+      }
+      ArrayList<SolderPackInfo> validated = new ArrayList<>(fetched.size());
+      for (SolderPackInfo info : fetched) {
+        if (info == null) {
+          throw new RestfulAPIException("Missing Solder public pack metadata");
+        }
+        info.validate(info.getName());
+        validated.add(info);
+      }
+      cache.packs = validated;
+      return cache.packs;
+    } catch (RestfulAPIException e) {
+      if (cache.packs == null) {
+        throw e;
+      }
+      ArrayList<SolderPackInfo> local = new ArrayList<>(cache.packs.size());
+      for (SolderPackInfo info : cache.packs) {
+        SolderPackInfo snapshot = new SolderPackInfo(info);
+        snapshot.setLocal();
+        local.add(snapshot);
+      }
+      cache.packs = local;
+      return cache.packs;
     } finally {
-      lastSolderPull = Instant.now();
+      cache.lastPull = Instant.now();
     }
   }
 

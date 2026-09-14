@@ -32,8 +32,8 @@ import net.technicpack.solder.io.SolderPackInfo;
 import net.technicpack.utilslib.Utils;
 
 public class PlatformPackInfoRepository implements IAuthoritativePackSource {
-  private IPlatformApi platform;
-  private ISolderApi solder;
+  private final IPlatformApi platform;
+  private final ISolderApi solder;
 
   public PlatformPackInfoRepository(IPlatformApi platform, ISolderApi solder) {
     this.platform = platform;
@@ -52,38 +52,40 @@ public class PlatformPackInfoRepository implements IAuthoritativePackSource {
 
   protected PackInfo getPlatformPackInfo(String slug) {
     try {
-      PackInfo info;
-
-      PlatformPackInfo platformInfo = platform.getPlatformPackInfoForBulk(slug);
-
-      info = getInfoFromPlatformInfo(platformInfo);
-
-      return info;
+      return resolve(slug, platform.getPlatformPackInfoForBulk(slug), true, false);
     } catch (RestfulAPIException e) {
       Utils.getLogger().log(Level.WARNING, "Unable to load platform pack " + slug, e);
       return null;
     }
   }
 
-  protected PackInfo getInfoFromPlatformInfo(PlatformPackInfo platformInfo) {
-    if (platformInfo != null && platformInfo.hasSolder()) {
-      try {
-        ISolderPackApi solderPack =
-            solder.getSolderPack(
-                platformInfo.getSolder(),
-                platformInfo.getName(),
-                solder.getMirrorUrl(platformInfo.getSolder()));
-        SolderPackInfo solderInfo = solderPack.getPackInfoForBulk();
+  /** Resolves a fresh snapshot using the same ownership rules as bulk discovery. */
+  public PackInfo refreshPackInfo(String slug, boolean invalidateSolderCache)
+      throws RestfulAPIException {
+    return resolve(slug, platform.getPlatformPackInfo(slug), false, invalidateSolderCache);
+  }
 
-        if (solderInfo == null) return platformInfo;
-        else return new CombinedPackInfo(solderInfo, platformInfo);
-      } catch (RestfulAPIException e) {
-        Utils.getLogger()
-            .log(Level.SEVERE, "Failed to query Solder for modpack " + platformInfo.getName(), e);
-        return platformInfo;
+  private PackInfo resolve(
+      String slug, PlatformPackInfo platformInfo, boolean bulk, boolean invalidateSolderCache)
+      throws RestfulAPIException {
+    if (platformInfo == null) return null;
+    platformInfo.validate(slug);
+    if (!platformInfo.hasSolder()) return platformInfo;
+
+    SolderPackInfo solderInfo = null;
+    try {
+      ISolderPackApi solderPack =
+          solder.getSolderPack(
+              platformInfo.getSolder(), slug, solder.getMirrorUrl(platformInfo.getSolder()));
+      if (invalidateSolderCache) solderPack.invalidateCache();
+      SolderPackInfo candidate = bulk ? solderPack.getPackInfoForBulk() : solderPack.getPackInfo();
+      if (candidate != null) {
+        candidate.validate(slug);
+        solderInfo = candidate;
       }
-    } else {
-      return platformInfo;
+    } catch (RestfulAPIException e) {
+      Utils.getLogger().log(Level.SEVERE, "Failed to query Solder for modpack " + slug, e);
     }
+    return new CombinedPackInfo(platformInfo, solderInfo);
   }
 }

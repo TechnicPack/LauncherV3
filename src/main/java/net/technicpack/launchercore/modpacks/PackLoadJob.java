@@ -177,9 +177,10 @@ public class PackLoadJob implements Runnable {
             }
           };
     } else if (!modpack.getPackInfo().isComplete()) {
+      PackInfo incompleteInfo = modpack.getPackInfo();
       fillDataMethod =
           () -> {
-            PackInfo completeInfo = authoritativeSource.getCompletePackInfo(packInfo);
+            PackInfo completeInfo = authoritativeSource.getCompletePackInfo(incompleteInfo);
             if (completeInfo != null) {
               addPackThreadSafe(null, completeInfo, priority);
             }

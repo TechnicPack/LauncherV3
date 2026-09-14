@@ -21,6 +21,7 @@ package net.technicpack.solder.cache;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.hash.Hashing;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
 import java.io.IOException;
@@ -45,6 +46,7 @@ public class CachedSolderPackApi implements ISolderPackApi {
   private final ISolderPackApi innerApi;
   private final int cacheInSeconds;
   private final String packSlug;
+  private final String solderRoot;
 
   private SolderPackInfo rootInfoCache = null;
   private Instant lastInfoAccess = Instant.EPOCH;
@@ -53,14 +55,38 @@ public class CachedSolderPackApi implements ISolderPackApi {
   private final Cache<String, Boolean> deadBuildCache;
 
   private final Path cachePath;
+  private boolean diskCacheEligible = true;
+
+  private static class CacheEnvelope {
+    private final String solderRoot;
+    private final SolderPackInfo packInfo;
+
+    private CacheEnvelope(String solderRoot, SolderPackInfo packInfo) {
+      this.solderRoot = solderRoot;
+      this.packInfo = packInfo;
+    }
+  }
 
   public CachedSolderPackApi(
-      LauncherFileSystem fileSystem, ISolderPackApi innerApi, int cacheInSeconds, String packSlug) {
+      LauncherFileSystem fileSystem,
+      ISolderPackApi innerApi,
+      int cacheInSeconds,
+      String solderRoot,
+      String packSlug) {
     this.innerApi = innerApi;
     this.cacheInSeconds = cacheInSeconds;
     this.packSlug = packSlug;
+    this.solderRoot = solderRoot;
+    // A slug can move between Solder hosts. Legacy soldercache.json files have no source
+    // provenance and are deliberately ignored; the next successful fetch creates this cache.
     this.cachePath =
-        fileSystem.getPackAssetsDirectory().resolve(packSlug).resolve("soldercache.json");
+        fileSystem
+            .getPackAssetsDirectory()
+            .resolve(packSlug)
+            .resolve(
+                "soldercache-"
+                    + Hashing.sha256().hashString(solderRoot, StandardCharsets.UTF_8)
+                    + ".json");
 
     buildCache =
         CacheBuilder.newBuilder()
@@ -83,7 +109,7 @@ public class CachedSolderPackApi implements ISolderPackApi {
   }
 
   @Override
-  public SolderPackInfo getPackInfoForBulk() throws RestfulAPIException {
+  public synchronized SolderPackInfo getPackInfoForBulk() throws RestfulAPIException {
     if (rootInfoCache != null) return rootInfoCache;
 
     loadForeverCache();
@@ -94,7 +120,7 @@ public class CachedSolderPackApi implements ISolderPackApi {
   }
 
   @Override
-  public SolderPackInfo getPackInfo() throws RestfulAPIException {
+  public synchronized SolderPackInfo getPackInfo() throws RestfulAPIException {
     if (lastInfoAccess.plusSeconds(cacheInSeconds).isAfter(Instant.now())
         && rootInfoCache != null) {
       return rootInfoCache;
@@ -103,46 +129,69 @@ public class CachedSolderPackApi implements ISolderPackApi {
     try {
       return pullAndCache();
     } catch (RestfulAPIException e) {
-      e.printStackTrace();
-
-      return getPackInfoForBulk();
+      lastInfoAccess = Instant.now();
+      if (rootInfoCache == null) {
+        loadForeverCache();
+      } else {
+        rootInfoCache = new SolderPackInfo(rootInfoCache);
+        rootInfoCache.setLocal();
+      }
+      if (rootInfoCache != null) {
+        Utils.getLogger()
+            .log(
+                Level.WARNING,
+                "Failed to refresh Solder metadata for " + packSlug + "; using cached data",
+                e);
+        return rootInfoCache;
+      }
+      throw e;
     }
   }
 
   @Override
-  public void invalidateCache() {
-    // soldercache.json is left on disk: a successful re-fetch overwrites it, and if the re-fetch
-    // fails it remains a sane fallback for getPackInfoForBulk()
+  public synchronized void invalidateCache() {
+    diskCacheEligible = false;
     rootInfoCache = null;
     lastInfoAccess = Instant.EPOCH;
     buildCache.invalidateAll();
     deadBuildCache.invalidateAll();
-  }
-
-  private SolderPackInfo pullAndCache() throws RestfulAPIException {
     try {
-      rootInfoCache = innerApi.getPackInfoForBulk();
-      saveForeverCache();
-      return rootInfoCache;
-    } finally {
-      lastInfoAccess = Instant.now();
+      Files.deleteIfExists(cachePath);
+    } catch (IOException e) {
+      Utils.getLogger().log(Level.WARNING, "Failed to invalidate Solder cache for " + packSlug, e);
     }
   }
 
+  private SolderPackInfo pullAndCache() throws RestfulAPIException {
+    SolderPackInfo info = innerApi.getPackInfo();
+    if (info == null) {
+      throw new RestfulAPIException("Missing Solder pack metadata for " + packSlug);
+    }
+    info.validate(packSlug);
+    rootInfoCache = new SolderPackInfo(info);
+    rootInfoCache.setSolder(this);
+    lastInfoAccess = Instant.now();
+    saveForeverCache();
+    return rootInfoCache;
+  }
+
   private void loadForeverCache() {
-    if (!Files.exists(cachePath)) {
+    if (!diskCacheEligible || !Files.exists(cachePath)) {
       return;
     }
 
     try (Reader reader = Files.newBufferedReader(cachePath, StandardCharsets.UTF_8)) {
-      rootInfoCache = Utils.getGson().fromJson(reader, SolderPackInfo.class);
-
-      if (rootInfoCache == null) {
+      CacheEnvelope envelope = Utils.getGson().fromJson(reader, CacheEnvelope.class);
+      if (envelope == null
+          || !solderRoot.equals(envelope.solderRoot)
+          || envelope.packInfo == null) {
         return;
       }
-
-      rootInfoCache.setLocal();
-      rootInfoCache.setSolder(innerApi);
+      SolderPackInfo info = envelope.packInfo;
+      info.validate(packSlug);
+      info.setLocal();
+      info.setSolder(this);
+      rootInfoCache = info;
     } catch (JsonParseException | IOException e) {
       Utils.getLogger()
           .log(
@@ -157,8 +206,9 @@ public class CachedSolderPackApi implements ISolderPackApi {
       Files.createDirectories(cachePath.getParent());
 
       try (Writer writer = Files.newBufferedWriter(cachePath, StandardCharsets.UTF_8)) {
-        Utils.getGson().toJson(rootInfoCache, writer);
+        Utils.getGson().toJson(new CacheEnvelope(solderRoot, rootInfoCache), writer);
       }
+      diskCacheEligible = true;
     } catch (JsonIOException | IOException e) {
       Utils.getLogger()
           .log(
@@ -169,7 +219,11 @@ public class CachedSolderPackApi implements ISolderPackApi {
   }
 
   @Override
-  public Modpack getPackBuild(String build) throws BuildInaccessibleException {
+  public synchronized Modpack getPackBuild(String build) throws BuildInaccessibleException {
+    if (build == null) {
+      throw new BuildInaccessibleException(
+          packSlug, "<null>", new IllegalArgumentException("build name must not be null"));
+    }
 
     Boolean isDead = deadBuildCache.getIfPresent(build);
 

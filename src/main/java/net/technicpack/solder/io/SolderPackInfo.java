@@ -21,10 +21,12 @@ package net.technicpack.solder.io;
 
 import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
 import net.technicpack.platform.io.FeedItem;
 import net.technicpack.rest.RestObject;
+import net.technicpack.rest.RestfulAPIException;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.rest.io.Resource;
@@ -46,6 +48,37 @@ public class SolderPackInfo extends RestObject implements PackInfo {
 
   private SolderPackInfo() {
     // Empty constructor for GSON
+  }
+
+  public SolderPackInfo(SolderPackInfo other) {
+    name = other.name;
+    displayName = other.displayName;
+    recommended = other.recommended;
+    latest = other.latest;
+    builds = other.builds == null ? null : new ArrayList<>(other.builds);
+    solder = other.solder;
+    isLocal = other.isLocal;
+  }
+
+  public void validate(String expectedName) throws RestfulAPIException {
+    if (hasError()) {
+      throw new RestfulAPIException("Error in Solder response: " + getError());
+    }
+    if (expectedName == null
+        || expectedName.trim().isEmpty()
+        || name == null
+        || name.trim().isEmpty()
+        || !expectedName.equals(name)) {
+      throw new RestfulAPIException("Invalid Solder pack identity for " + expectedName);
+    }
+    if (builds == null) {
+      throw new RestfulAPIException("Missing Solder build catalog for " + expectedName);
+    }
+    for (String build : builds) {
+      if (build == null || build.trim().isEmpty()) {
+        throw new RestfulAPIException("Invalid Solder build catalog for " + expectedName);
+      }
+    }
   }
 
   public ISolderPackApi getSolder() {
@@ -98,7 +131,7 @@ public class SolderPackInfo extends RestObject implements PackInfo {
 
   @Override
   public List<String> getBuilds() {
-    return builds;
+    return builds == null ? Collections.emptyList() : builds;
   }
 
   @Override
@@ -143,7 +176,14 @@ public class SolderPackInfo extends RestObject implements PackInfo {
 
   @Override
   public Modpack getModpack(String build) throws BuildInaccessibleException {
-    return solder.getPackBuild(build);
+    if (solder == null) {
+      throw new BuildInaccessibleException(name, build);
+    }
+    Modpack modpack = solder.getPackBuild(build);
+    if (modpack == null) {
+      throw new BuildInaccessibleException(name, build);
+    }
+    return modpack;
   }
 
   @Override
@@ -153,15 +193,7 @@ public class SolderPackInfo extends RestObject implements PackInfo {
 
   @Override
   public boolean isLocal() {
-    // If this Solder modpack has no builds available, then there's effectively no modpack
-    // available, so we
-    // consider the modpack as local-only/not enough information available for installation or
-    // launch.
-    if (builds.isEmpty()) {
-      return true;
-    }
-
-    return isLocal;
+    return isLocal || getBuilds().isEmpty();
   }
 
   public void setLocal() {

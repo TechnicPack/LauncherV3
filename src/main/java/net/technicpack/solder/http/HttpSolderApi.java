@@ -71,7 +71,15 @@ public class HttpSolderApi implements ISolderApi {
     String allPacksUrl = buildPublicPacksUrl(solderRoot);
 
     FullModpacks technic = RestObject.getRestObject(FullModpacks.class, allPacksUrl);
-    for (SolderPackInfo info : technic.getModpacks().values()) {
+    if (technic.getModpacks() == null) {
+      throw new RestfulAPIException("Missing Solder public pack catalog");
+    }
+    for (Map.Entry<String, SolderPackInfo> entry : technic.getModpacks().entrySet()) {
+      SolderPackInfo info = entry.getValue();
+      if (info == null) {
+        throw new RestfulAPIException("Missing Solder pack metadata for " + entry.getKey());
+      }
+      info.validate(entry.getKey());
       ISolderPackApi solder =
           packFactory.getSolderPack(solderRoot, info.getName(), technic.getMirrorUrl());
       info.setSolder(solder);
