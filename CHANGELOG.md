@@ -10,6 +10,7 @@ is added at the top.
 ## [Unreleased]
 
 ### Fixed
+- Windows host architecture detection now uses native APIs instead of relying on the launcher JVM's architecture and inherited WOW64 environment variables. Mojang runtime selection recognizes ARM64 hosts even under emulation; game-native selection still follows the selected game JVM.
 - OS version-range rules now use the full native Windows version, including the build number, so supported Windows releases select Minecraft's ZGC defaults correctly even under older launcher Java runtimes. Range minima are inclusive and maxima are exclusive, preventing conflicting collectors at a shared boundary; legacy OS-version regexes are unchanged.
 - Deleting a modpack no longer crashes when no pack is selected, and clearing the pack list hides the delete action until a pack is selected again (LAUNCHER-FP).
 - Modpacks retain their identity across metadata refreshes and deletion, preventing null-name crashes during asset cleanup and image loading. Entries without a usable identity are not loaded, and deletion checks its identity and asset path before touching installed files (LAUNCHER-FQ, LAUNCHER-FS).

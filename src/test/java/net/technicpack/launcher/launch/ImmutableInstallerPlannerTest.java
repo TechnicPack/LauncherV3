@@ -1950,7 +1950,7 @@ class ImmutableInstallerPlannerTest {
       case OSX:
         return JavaUtils.isArm64() ? "mac-os-arm64" : "mac-os";
       case WINDOWS:
-        if (JavaUtils.isArm64()) {
+        if (OSUtils.isArm64OS()) {
           return "windows-arm64";
         }
         return OSUtils.is64BitOS() ? "windows-x64" : "windows-x86";

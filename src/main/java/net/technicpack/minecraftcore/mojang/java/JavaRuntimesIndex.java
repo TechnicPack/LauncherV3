@@ -38,7 +38,7 @@ public class JavaRuntimesIndex {
   public Map<String, List<JavaRuntime>> getRuntimesForCurrentOS() {
     switch (OperatingSystem.getOperatingSystem()) {
       case WINDOWS:
-        if (JavaUtils.isArm64()) {
+        if (OSUtils.isArm64OS()) {
           return windowsArm64;
         }
 
