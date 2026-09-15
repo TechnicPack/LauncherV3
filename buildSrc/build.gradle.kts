@@ -17,7 +17,7 @@ dependencies {
         implementation("org.codehaus.plexus:plexus-utils:4.0.3")
     }
 
-    implementation("com.gradleup.shadow:shadow-gradle-plugin:9.4.3")
+    implementation("com.gradleup.shadow:shadow-gradle-plugin:9.6.1")
     implementation("edu.sc.seis.launch4j:launch4j:4.0.0")
 
     testImplementation("org.junit.jupiter:junit-jupiter:6.1.0")
