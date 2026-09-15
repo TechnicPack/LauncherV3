@@ -85,14 +85,15 @@ public class Memory {
     return Math.max(512, maxMemory);
   }
 
-  public static long getAvailableMemory(boolean is64Bit) {
+  /** Total-RAM/Java-bitness ceiling in MiB; not a measurement of current memory availability. */
+  public static long getHeapLimit(boolean is64Bit) {
     long physical = getPhysicalMemory();
     if (!is64Bit && physical > MAX_32_BIT_MEMORY) return MAX_32_BIT_MEMORY;
     return physical;
   }
 
   public static Memory getClosestAvailableMemory(Memory memory, boolean is64Bit) {
-    long available = getAvailableMemory(is64Bit);
+    long available = getHeapLimit(is64Bit);
     return getClosestAvailableMemory(memory, available);
   }
 

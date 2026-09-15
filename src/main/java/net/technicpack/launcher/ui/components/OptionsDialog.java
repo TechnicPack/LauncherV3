@@ -608,7 +608,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
     memSelect.removeAllItems();
     boolean is64Bit = javaVersions.getSelectedVersion().is64Bit();
-    long maxMemory = Memory.getAvailableMemory(is64Bit);
+    long maxMemory = Memory.getHeapLimit(is64Bit);
     for (int i = 0; i < Memory.memoryOptions.length; i++) {
       if (Memory.memoryOptions[i].getMemoryMB() <= maxMemory)
         memSelect.addItem(Memory.memoryOptions[i]);

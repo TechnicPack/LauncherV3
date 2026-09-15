@@ -10,9 +10,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
 import net.technicpack.launchercore.exception.InstallException;
@@ -24,7 +21,6 @@ import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.rest.io.Resource;
 import net.technicpack.utilslib.Memory;
-import net.technicpack.utilslib.Utils;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
@@ -97,41 +93,14 @@ class InstallerTest {
   }
 
   @Test
-  void getLaunchMemoryClampsToAvailableLimitAndLogsWarning() {
+  void getLaunchMemoryClampsToHeapCeilingWithoutChangingSavedSelection() {
     TechnicSettings settings = new TechnicSettings();
-    TestLogHandler handler = new TestLogHandler();
-    Utils.getLogger().addHandler(handler);
+    int savedSelection = settings.getMemory();
 
-    try {
-      Memory launchMemory = Installer.getLaunchMemory(settings, 1024);
+    Memory launchMemory = Installer.getLaunchMemory(settings, 1024);
 
-      assertEquals(1024, launchMemory.getMemoryMB());
-      assertTrue(
-          handler.records.stream()
-              .anyMatch(
-                  record ->
-                      record.getLevel().equals(Level.WARNING)
-                          && record.getMessage().contains("Clamping launch memory")
-                          && record.getMessage().contains("4 GB")
-                          && record.getMessage().contains("1 GB")));
-    } finally {
-      Utils.getLogger().removeHandler(handler);
-    }
-  }
-
-  private static final class TestLogHandler extends Handler {
-    private final List<LogRecord> records = new ArrayList<>();
-
-    @Override
-    public void publish(LogRecord record) {
-      records.add(record);
-    }
-
-    @Override
-    public void flush() {}
-
-    @Override
-    public void close() {}
+    assertEquals(1024, launchMemory.getMemoryMB());
+    assertEquals(savedSelection, settings.getMemory());
   }
 
   private static final class RecordingModpackInstaller extends ModpackInstaller {

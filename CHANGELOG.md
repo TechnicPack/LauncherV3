@@ -9,6 +9,9 @@ is added at the top.
 
 ## [Unreleased]
 
+### Added
+- Launch-time memory warnings on Windows, Linux, and macOS warn when estimated available physical memory is below the selected heap plus 1 GiB of advisory headroom. Estimates account for reclaimable cache where supported. Players can cancel or launch anyway; the warning never lowers the heap or changes saved settings. Unavailable estimates do not block launching.
+
 ### Changed
 - Windows Java discovery reads Unicode registry values directly instead of starting `reg.exe`, preserving vendor searches and both registry views. Discovered executables are still validated by running Java.
 

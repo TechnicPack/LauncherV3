@@ -31,6 +31,7 @@ import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.components.FixRunDataDialog;
+import net.technicpack.launcher.ui.components.MemoryWarningDialog;
 import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.exception.*;
 import net.technicpack.launchercore.install.ModpackInstaller;
@@ -61,6 +62,7 @@ import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.Memory;
+import net.technicpack.utilslib.MemoryPressure;
 import net.technicpack.utilslib.Utils;
 
 public class Installer {
@@ -328,6 +330,16 @@ public class Installer {
             }
           }
 
+          // Sample after installation and requirement dialogs, immediately before launch.
+          // A warning never clamps the heap or writes the user's saved memory selection.
+          if (!MemoryWarningDialog.confirmLaunch(
+              frame, resources, memory, MemoryPressure.getAvailableMemoryMb())) {
+            return;
+          }
+          if (isCancelledByUser || Thread.currentThread().isInterrupted()) {
+            throw new InterruptedException("Launch cancelled");
+          }
+
           LaunchAction launchAction = settings.getLaunchAction();
 
           LauncherUnhider launcherUnhider;
@@ -472,7 +484,7 @@ public class Installer {
   }
 
   static Memory getLaunchMemory(TechnicSettings settings, boolean is64Bit) {
-    return getLaunchMemory(settings, Memory.getAvailableMemory(is64Bit));
+    return getLaunchMemory(settings, Memory.getHeapLimit(is64Bit));
   }
 
   static Memory getLaunchMemory(TechnicSettings settings, long availableMemory) {
@@ -483,7 +495,7 @@ public class Installer {
       Utils.getLogger()
           .warning(
               String.format(
-                  "Clamping launch memory from %s to %s because only %d MB is available.",
+                  "Clamping launch memory from %s to %s because the heap ceiling is %d MB.",
                   requestedMemory, launchMemory, availableMemory));
     }
 
