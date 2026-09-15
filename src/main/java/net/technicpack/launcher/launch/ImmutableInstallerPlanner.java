@@ -1251,6 +1251,7 @@ class ImmutableInstallerPlanner {
         throwIfCancelled();
         // This stage is newly created, not a reusable download-cache entry.
         new DownloadFilePlanAction<Void>(url, staged.toFile(), verifier, library.getName())
+            .withTaskDescriptionAsProgressLabel()
             .execute(null, reporter);
         throwIfCancelled();
         if (!InstallerArtifactStore.isValid(staged, verifier)) {

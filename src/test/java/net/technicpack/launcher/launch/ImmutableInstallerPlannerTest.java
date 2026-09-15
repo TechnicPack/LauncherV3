@@ -663,7 +663,20 @@ class ImmutableInstallerPlannerTest {
       TestMinecraftVersionInfo version = new TestMinecraftVersionInfo(null);
       version.setJavaRuntime(new FakeJavaRuntime());
       context.setResolvedVersion(version);
-      RecordingReporter reporter = new RecordingReporter(new ArrayList<>());
+      List<String> labels = Collections.synchronizedList(new ArrayList<>());
+      NodeProgressReporter reporter =
+          new NodeProgressReporter() {
+            @Override
+            public void updateNodeProgress(float percent) {}
+
+            @Override
+            public void updateCurrentItem(
+                String label,
+                net.technicpack.launchercore.progress.CurrentItemMode mode,
+                Float percent) {
+              labels.add(label);
+            }
+          };
       if (corrupt) {
         assertThrows(
             DownloadException.class,
@@ -675,6 +688,9 @@ class ImmutableInstallerPlannerTest {
         assertTrue(
             warnings.isEmpty(), "A fresh valid download must not report verification failures");
       }
+      assertTrue(
+          labels.stream().allMatch(label -> label != null && label.contains(coordinate)),
+          "Download progress must identify the library, not its temporary staging file: " + labels);
     } finally {
       Utils.getLogger().removeHandler(handler);
       server.stop(0);

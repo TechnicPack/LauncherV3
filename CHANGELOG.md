@@ -9,6 +9,9 @@ is added at the top.
 
 ## [Unreleased]
 
+### Fixed
+- Library download progress displays the library's Maven coordinate instead of its temporary `.installer-*.tmp` staging filename.
+
 ## [v4.0-1138] - 2026-09-15
 
 ### Added
