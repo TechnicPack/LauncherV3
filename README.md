@@ -49,10 +49,29 @@ For local Solder testing without using your normal launcher profile, follow the
 | `./gradlew check` | Run tests, formatting checks, and shadow-JAR service verification. |
 | `./gradlew build` | Compile, assemble, and verify the application. |
 | `./gradlew package` | Build the shadow JAR, Windows executable, and macOS app ZIP. |
+| `./gradlew previewMemoryWarning` | Preview the memory warning without generating memory pressure. |
 
 Signing during `package` is enabled when `CERT_KEYSTORE` is set and also requires `CERT_ALIAS`,
 `CERT_STOREPASS`, and `CERT_KEYPASS`. Setting `SENTRY_AUTH_TOKEN` enables Sentry source bundle
 upload. Keep credentials and generated files out of version control.
+
+### Memory warning preview
+
+```sh
+# Open the real dialog with a simulated 4 GiB heap and 2 GiB available.
+./gradlew previewMemoryWarning
+
+# Supply a different simulated heap and available memory, both in MiB.
+./gradlew previewMemoryWarning --args="8192 4096"
+
+# Healthy and unknown readings should finish without displaying a warning.
+./gradlew previewMemoryWarning --args="4096 8192"
+./gradlew previewMemoryWarning --args="4096 -1"
+```
+
+The preview reports **Cancel** or **Launch anyway** in the terminal. It does not generate memory
+pressure, load or save launcher settings, or start Minecraft. It uses the production warning
+dialog; the preview script itself is development-only and is not included in the launcher JAR.
 
 ### Native architecture checks without a Mac
 

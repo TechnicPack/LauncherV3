@@ -17,4 +17,5 @@ node_modules/
 code-review-*.md
 scripts/*
 !scripts/local-platform-fixture.py
+!scripts/MemoryWarningPreview.java
 .mcp.json

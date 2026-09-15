@@ -19,7 +19,7 @@ repositories {
 
 spotless {
     java {
-        target("src/*/java/**/*.java")
+        target("src/*/java/**/*.java", "scripts/*.java")
         googleJavaFormat("1.28.0")
     }
 
@@ -111,4 +111,17 @@ tasks.test {
 
 tasks.named("check") {
     dependsOn("spotlessCheck")
+}
+
+tasks.register<JavaExec>("previewMemoryWarning") {
+    group = "application"
+    description = "Preview the memory warning with simulated readings; never launch a game or change settings."
+    dependsOn(tasks.named("classes"))
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set(
+        layout.projectDirectory
+            .file("scripts/MemoryWarningPreview.java")
+            .asFile.absolutePath,
+    )
+    maxHeapSize = "256m"
 }
