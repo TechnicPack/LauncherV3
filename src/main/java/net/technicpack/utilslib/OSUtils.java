@@ -4,6 +4,7 @@ import com.sun.jna.Function;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLibrary;
+import com.sun.jna.NativeLong;
 import java.util.logging.Level;
 
 public class OSUtils {
@@ -18,11 +19,53 @@ public class OSUtils {
         : System.getProperty("os.arch").contains("64");
   }
 
-  /** Returns the host architecture on Windows; other platforms retain JVM-based detection. */
+  /** Returns the native host architecture on Windows/macOS, or the JVM architecture elsewhere. */
   public static boolean isArm64OS() {
-    return OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS
-        ? "aarch64".equals(WindowsArchitecture.ARCH)
-        : JavaUtils.isArm64();
+    switch (OperatingSystem.getOperatingSystem()) {
+      case WINDOWS:
+        return "aarch64".equals(WindowsArchitecture.ARCH);
+      case OSX:
+        return MacArchitecture.IS_ARM64;
+      default:
+        return JavaUtils.isArm64();
+    }
+  }
+
+  private static final class MacArchitecture {
+    private static final boolean IS_ARM64 = query();
+
+    private static boolean query() {
+      boolean fallback = JavaUtils.isArm64();
+      try {
+        return queryMacArm64(
+            NativeLibrary.getInstance("System").getFunction("sysctlbyname"), fallback);
+      } catch (LinkageError | RuntimeException e) {
+        Utils.getLogger().log(Level.WARNING, "Could not determine native macOS architecture", e);
+        return fallback;
+      }
+    }
+  }
+
+  static boolean queryMacArm64(Function sysctl, boolean fallback) {
+    // hw.optional.arm64 describes the host even when an x64 JVM runs under Rosetta.
+    // The value is a C int; its buffer length and the new-value length are size_t.
+    try (Memory value = new Memory(4);
+        Memory length = new Memory(Native.SIZE_T_SIZE)) {
+      value.clear();
+      if (Native.SIZE_T_SIZE == 8) length.setLong(0, 4);
+      else length.setInt(0, 4);
+      int status =
+          sysctl.invokeInt(
+              new Object[] {"hw.optional.arm64", value, length, null, new NativeLong(0)});
+      // Some Intel macOS versions do not expose this key. Failed or malformed queries
+      // retain JVM-based detection rather than inventing a host architecture.
+      if (status != 0) return fallback;
+      long bytes =
+          Native.SIZE_T_SIZE == 8 ? length.getLong(0) : Integer.toUnsignedLong(length.getInt(0));
+      if (bytes != 4) return fallback;
+      int arm64 = value.getInt(0);
+      return arm64 == 0 || arm64 == 1 ? arm64 == 1 : fallback;
+    }
   }
 
   private static final class WindowsArchitecture {

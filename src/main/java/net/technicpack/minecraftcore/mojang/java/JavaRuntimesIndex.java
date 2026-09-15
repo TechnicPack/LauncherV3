@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import net.technicpack.utilslib.JavaUtils;
 import net.technicpack.utilslib.OSUtils;
 import net.technicpack.utilslib.OperatingSystem;
 
@@ -48,8 +47,7 @@ public class JavaRuntimesIndex {
 
         return windows32;
       case OSX:
-        // TODO: improve this detection
-        if (JavaUtils.isArm64()) {
+        if (OSUtils.isArm64OS()) {
           // Combine the arm64 and x64 entries, with the arm64 ones taking precedence
           Map<String, List<JavaRuntime>> combinedMac = new HashMap<>(mac);
           macArm64.forEach(

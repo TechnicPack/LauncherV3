@@ -54,6 +54,17 @@ Signing during `package` is enabled when `CERT_KEYSTORE` is set and also require
 `CERT_STOREPASS`, and `CERT_KEYPASS`. Setting `SENTRY_AUTH_TOKEN` enables Sentry source bundle
 upload. Keep credentials and generated files out of version control.
 
+### Native architecture checks without a Mac
+
+```sh
+./gradlew test --tests net.technicpack.utilslib.OSUtilsTest
+```
+
+These tests expose synthetic macOS-style functions through JNA and exercise the native calling
+interface, ARM64/Intel results, and unavailable or malformed query results. They run locally
+without a Mac or C compiler. They do **not** verify Apple's actual `sysctl` implementation or
+Rosetta; that still requires an Apple Silicon Mac, such as a suitable hosted macOS runner.
+
 ## Project layout
 
 - `src/main/java/net/technicpack/` — launcher UI, installation and update flows, and shared utilities.

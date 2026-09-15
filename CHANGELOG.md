@@ -16,6 +16,7 @@ is added at the top.
 - Windows Java discovery reads Unicode registry values directly instead of starting `reg.exe`, preserving vendor searches and both registry views. Discovered executables are still validated by running Java.
 
 ### Fixed
+- macOS host architecture detection queries `hw.optional.arm64`, allowing an x64 launcher under Rosetta to select native Apple Silicon Mojang runtimes. Missing or failed queries retain JVM-based detection, and components without an ARM runtime retain the existing Intel fallback.
 - Windows host architecture detection now uses native APIs instead of relying on the launcher JVM's architecture and inherited WOW64 environment variables. Mojang runtime selection recognizes ARM64 hosts even under emulation; game-native selection still follows the selected game JVM.
 - OS version-range rules now use the full native Windows version, including the build number, so supported Windows releases select Minecraft's ZGC defaults correctly even under older launcher Java runtimes. Range minima are inclusive and maxima are exclusive, preventing conflicting collectors at a shared boundary; legacy OS-version regexes are unchanged.
 - Deleting a modpack no longer crashes when no pack is selected, and clearing the pack list hides the delete action until a pack is selected again (LAUNCHER-FP).

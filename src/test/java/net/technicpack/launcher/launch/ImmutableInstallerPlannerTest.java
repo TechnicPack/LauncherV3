@@ -60,7 +60,6 @@ import net.technicpack.minecraftcore.mojang.version.io.argument.Argument;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.ui.lang.ResourceLoader;
-import net.technicpack.utilslib.JavaUtils;
 import net.technicpack.utilslib.OSUtils;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
@@ -1948,7 +1947,7 @@ class ImmutableInstallerPlannerTest {
       case LINUX:
         return OSUtils.is64BitOS() ? "linux" : "linux-i386";
       case OSX:
-        return JavaUtils.isArm64() ? "mac-os-arm64" : "mac-os";
+        return OSUtils.isArm64OS() ? "mac-os-arm64" : "mac-os";
       case WINDOWS:
         if (OSUtils.isArm64OS()) {
           return "windows-arm64";
