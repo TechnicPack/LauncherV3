@@ -76,6 +76,7 @@ dependencies {
     implementation(libs.slf4j.nop)
     implementation(libs.sentry)
     implementation(libs.annotations)
+    implementation(libs.jna)
 
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)

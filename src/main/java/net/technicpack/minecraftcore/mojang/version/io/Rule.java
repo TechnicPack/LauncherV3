@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.minecraftcore.launch.ILaunchOptions;
 import net.technicpack.minecraftcore.launch.WindowType;
+import net.technicpack.utilslib.OSUtils;
 import net.technicpack.utilslib.OperatingSystem;
 
 public class Rule {
@@ -226,7 +227,7 @@ public class Rule {
       String archProp = runtime.getOsArch().toLowerCase(Locale.ROOT);
       return (name == null || name.equalsIgnoreCase(os))
           && (version == null || version.matcher(osVersion).find())
-          && (versionRange == null || versionRange.matches(osVersion))
+          && (versionRange == null || versionRange.matches(OSUtils.getVersionForRange()))
           && (arch == null || archProp.contains(arch.toLowerCase()));
     }
 
@@ -272,7 +273,8 @@ public class Rule {
       if (min != null && compareDottedVersion(version, min) < 0) {
         return false;
       }
-      if (max != null && compareDottedVersion(version, max) > 0) {
+      // Adjacent metadata ranges share a boundary: min is inclusive, max is exclusive.
+      if (max != null && compareDottedVersion(version, max) >= 0) {
         return false;
       }
 

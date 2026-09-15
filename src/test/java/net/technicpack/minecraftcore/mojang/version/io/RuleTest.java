@@ -6,88 +6,58 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Collections;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
 import net.technicpack.minecraftcore.MojangUtils;
 import net.technicpack.utilslib.OperatingSystem;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class RuleTest {
-  @Test
-  void compareDottedVersionTreatsMissingTrailingPartsAsZero() throws Exception {
-    assertEquals(0, compareDottedVersion("10.0", "10.0.0"));
+  @ParameterizedTest
+  @CsvSource({"10.0.17133, false", "10.0.17134, true", "10.0.17135, true", "10.0, false"})
+  void adjacentRangesSelectExactlyOneCollector(String version, boolean useZgc) throws Exception {
+    // Use a synthetic Linux version to exercise range semantics without querying the Windows host.
+    Rule zgc = rangeRule("\"min\":\"10.0.17134\"");
+    Rule g1 = rangeRule("\"max\":\"10.0.17134\"");
+
+    withOs(
+        "Linux",
+        version,
+        () -> {
+          assertEquals(useZgc, isAllowable(zgc));
+          assertEquals(!useZgc, isAllowable(g1));
+        });
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "10.0, 10.0.0, true",
+    "10.0.9, 10.0.10, false",
+    "10.0.1, 10.0.0.9, true",
+    "10.0.0.9, 10.0.1, false"
+  })
+  void minimumComparesNumericComponentsWithMissingPartsAsZero(
+      String version, String minimum, boolean allowed) throws Exception {
+    Rule rule = rangeRule("\"min\":\"" + minimum + "\"");
+    withOs("Linux", version, () -> assertEquals(allowed, isAllowable(rule)));
   }
 
   @Test
-  void compareDottedVersionComparesPartsNumerically() throws Exception {
-    assertTrue(compareDottedVersion("10.0.9", "10.0.10") < 0);
+  void unavailableVersionMatchesNeitherRange() throws Exception {
+    withOs(
+        "Linux",
+        "",
+        () -> {
+          assertFalse(isAllowable(rangeRule("\"min\":\"10.0.17134\"")));
+          assertFalse(isAllowable(rangeRule("\"max\":\"10.0.17134\"")));
+        });
   }
 
-  @Test
-  void compareDottedVersionHandlesLongerLeftVersionWithNonZeroTail() throws Exception {
-    assertTrue(compareDottedVersion("10.0.1", "10.0.0.9") > 0);
-  }
-
-  @Test
-  void compareDottedVersionHandlesLongerRightVersionWithNonZeroTail() throws Exception {
-    assertTrue(compareDottedVersion("10.0.0.9", "10.0.1") < 0);
-  }
-
-  @Test
-  void compareDottedVersionOrdersLaterBuildNumbersHigher() throws Exception {
-    assertTrue(compareDottedVersion("10.0.22000", "10.0.19045") > 0);
-  }
-
-  @Test
-  void allowRuleAppliesWhenOsVersionMeetsMinimumInclusiveBound() throws Exception {
-    Rule rule =
-        MojangUtils.getGson()
-            .fromJson(
-                "{"
-                    + "\"action\":\"allow\","
-                    + "\"os\":{"
-                    + "\"name\":\"windows\","
-                    + "\"versionRange\":{\"min\":\"10.0.17134\"}"
-                    + "}"
-                    + "}",
-                Rule.class);
-
-    withOs("Windows 10", "10.0.17134", () -> assertTrue(isAllowable(rule)));
-  }
-
-  @Test
-  void allowRuleDoesNotApplyWhenOsVersionIsBelowMinimumBound() throws Exception {
-    Rule rule =
-        MojangUtils.getGson()
-            .fromJson(
-                "{"
-                    + "\"action\":\"allow\","
-                    + "\"os\":{"
-                    + "\"name\":\"windows\","
-                    + "\"versionRange\":{\"min\":\"10.0.17134\"}"
-                    + "}"
-                    + "}",
-                Rule.class);
-
-    withOs("Windows 10", "10.0.17133", () -> assertFalse(isAllowable(rule)));
-  }
-
-  @Test
-  void allowRuleDoesNotApplyWhenOsVersionExceedsMaximumBound() throws Exception {
-    Rule rule =
-        MojangUtils.getGson()
-            .fromJson(
-                "{"
-                    + "\"action\":\"allow\","
-                    + "\"os\":{"
-                    + "\"name\":\"windows\","
-                    + "\"versionRange\":{\"max\":\"10.0.17134\"}"
-                    + "}"
-                    + "}",
-                Rule.class);
-
-    withOs("Windows 10", "10.0.17135", () -> assertFalse(isAllowable(rule)));
+  private static Rule rangeRule(String bounds) {
+    return MojangUtils.getGson()
+        .fromJson("{\"action\":\"allow\",\"os\":{\"versionRange\":{" + bounds + "}}}", Rule.class);
   }
 
   @Test
@@ -179,13 +149,6 @@ class RuleTest {
     return Rule.isAllowable(Collections.singletonList(rule), null, new FakeJavaRuntime());
   }
 
-  private static int compareDottedVersion(String left, String right) throws Exception {
-    Method method =
-        osVersionRangeClass().getDeclaredMethod("compareDottedVersion", String.class, String.class);
-    method.setAccessible(true);
-    return (int) method.invoke(null, left, right);
-  }
-
   private static void withOs(String osName, String osVersion, ThrowingRunnable assertion)
       throws Exception {
     String previousName = System.getProperty("os.name");
@@ -224,10 +187,6 @@ class RuleTest {
     Field field = OperatingSystem.class.getDeclaredField("operatingSystem");
     field.setAccessible(true);
     return field;
-  }
-
-  private static Class<?> osVersionRangeClass() throws Exception {
-    return Class.forName(Rule.class.getName() + "$OsVersionRange");
   }
 
   @FunctionalInterface

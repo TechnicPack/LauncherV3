@@ -22,6 +22,7 @@ sentry = "8.46.0"
 sentry-gradle-plugin = "6.13.0"
 annotations = "26.1.0"
 qrcodegen = "1.8.0"
+jna = "5.19.1"
 
 [libraries]
 jcommander = { module = "com.beust:jcommander", version.ref = "jcommander" }
@@ -48,6 +49,7 @@ slf4j-nop = { module = "org.slf4j:slf4j-nop", version.ref = "slf4j" }
 sentry = { module = "io.sentry:sentry", version.ref = "sentry" }
 annotations = { module = "org.jetbrains:annotations", version.ref = "annotations" }
 qrcodegen = { module = "io.nayuki:qrcodegen", version.ref = "qrcodegen" }
+jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
 

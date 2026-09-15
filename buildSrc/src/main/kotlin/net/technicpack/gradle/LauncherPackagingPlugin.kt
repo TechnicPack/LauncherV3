@@ -80,8 +80,13 @@ class LauncherPackagingPlugin : Plugin<Project> {
                     exclude(dependency("org.ccil.cowan.tagsoup:.*:.*"))
                     // Keep SLF4J provider classes that are loaded via ServiceLoader.
                     exclude(dependency("org.slf4j:slf4j-nop:.*"))
+                    // JNA loads native support classes reflectively.
+                    exclude(dependency("net.java.dev.jna:jna:.*"))
                     exclude(project(":"))
                 }
+
+                // Only Windows version detection uses JNA. Keep all Windows jnidispatch.dll variants.
+                exclude("com/sun/jna/**/libjnidispatch.*")
 
                 exclude(
                     "META-INF/*.txt",
@@ -93,6 +98,7 @@ class LauncherPackagingPlugin : Plugin<Project> {
 
                 manifest {
                     attributes["Main-Class"] = "net.technicpack.launcher.LauncherMain"
+                    attributes["Enable-Native-Access"] = "ALL-UNNAMED"
                 }
             }
 

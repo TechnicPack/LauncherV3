@@ -269,10 +269,10 @@ class MinecraftLauncherTest {
   }
 
   @Test
-  void resolves26_1ShapedWindowsDefaultsUsingVersionRangeRules() throws Exception {
+  void resolves26_1ShapedLinuxDefaultsWithoutEvaluatingWindowsRanges() throws Exception {
     withOs(
-        "Windows 10",
-        "10.0.19045",
+        "Linux",
+        "7.2.4-arch1-2",
         () -> {
           IMinecraftVersionInfo version =
               testVersionWithDefaultUserJvm(
