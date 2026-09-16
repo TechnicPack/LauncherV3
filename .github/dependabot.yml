@@ -6,6 +6,9 @@ updates:
     schedule:
       interval: "weekly"
     ignore:
+      - dependency-name: "org.jcommander:jcommander"
+        versions:
+          - ">=2.0" # requires Java 11
       - dependency-name: "org.xhtmlrenderer:flying-saucer-core"
         versions:
           - ">=9.5.0" # requires Java 11
