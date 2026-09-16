@@ -9,8 +9,11 @@ is added at the top.
 
 ## [Unreleased]
 
+### Changed
+- Routine dependency upkeep: refreshed bundled libraries (Guava, Apache Commons Codec, Google HTTP Client, SLF4J, zstd-jni, and the Sentry crash-reporting SDK) and build tooling. The command-line argument parser was also updated to JCommander's maintained successor while retaining Java 8 compatibility.
+
 ### Fixed
-- When macOS rejects a Java runtime with "Bad CPU type in executable" on Apple Silicon, the launcher explains that Intel Java requires Rosetta and provides its installation command instead of showing generic Java validation advice. Launching stops without changing Java settings, and technical diagnostics remain in the launcher log (LAUNCHER-G2).
+- When macOS cannot start a modpack's Java runtime because of an incompatible CPU architecture, the launcher now shows recovery instructions instead of generic Java validation advice. On Apple Silicon, the message explains that Intel Java requires Rosetta and provides its installation command, plus guidance for selecting a compatible Java runtime if Rosetta cannot be installed. Minecraft is not started, and saved Java settings are left unchanged (LAUNCHER-G2).
 
 ## [v4.0-1139] - 2026-09-15
 
