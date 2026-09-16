@@ -2,7 +2,7 @@ import org.gradle.jvm.toolchain.JavaLanguageVersion
 import java.nio.charset.StandardCharsets
 
 plugins {
-    id("com.diffplug.spotless") version "8.7.0"
+    id("com.diffplug.spotless") version "8.10.2"
     id("net.technicpack.launcher-packaging")
     alias(libs.plugins.sentry.jvm)
 }
@@ -20,7 +20,7 @@ repositories {
 spotless {
     java {
         target("src/*/java/**/*.java", "scripts/*.java")
-        googleJavaFormat("1.28.0")
+        googleJavaFormat("1.36.1")
     }
 
     kotlin {

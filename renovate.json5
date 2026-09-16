@@ -32,6 +32,11 @@
       "rangeStrategy": "bump"
     },
     {
+      // JCommander 2.x requires Java 11; the launcher still supports Java 8.
+      "matchPackageNames": ["org.jcommander:jcommander"],
+      "allowedVersions": "<2.0"
+    },
+    {
       // Flying Saucer requires Java 11 in 9.5.0, and Java 17 in 9.6.0 (https://github.com/flyingsaucerproject/flyingsaucer?tab=readme-ov-file#getting-flying-saucer),
       // so these changes are pending that, since we're still targeting Java 8.
       "matchPackageNames": ["org.xhtmlrenderer:flying-saucer-core"],
