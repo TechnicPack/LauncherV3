@@ -9,6 +9,8 @@ is added at the top.
 
 ## [Unreleased]
 
+## [v4.0-1158] - 2026-09-16
+
 ### Changed
 - Routine dependency upkeep: refreshed bundled libraries (Guava, Apache Commons Codec, Google HTTP Client, SLF4J, zstd-jni, and the Sentry crash-reporting SDK) and build tooling. The command-line argument parser was also updated to JCommander's maintained successor while retaining Java 8 compatibility.
 
