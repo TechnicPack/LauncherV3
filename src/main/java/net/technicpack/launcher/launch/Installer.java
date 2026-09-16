@@ -33,7 +33,12 @@ import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.components.FixRunDataDialog;
 import net.technicpack.launcher.ui.components.MemoryWarningDialog;
 import net.technicpack.launchercore.TechnicConstants;
-import net.technicpack.launchercore.exception.*;
+import net.technicpack.launchercore.exception.BuildInaccessibleException;
+import net.technicpack.launchercore.exception.CacheDeleteException;
+import net.technicpack.launchercore.exception.DownloadException;
+import net.technicpack.launchercore.exception.InstallException;
+import net.technicpack.launchercore.exception.JavaRuntimeException;
+import net.technicpack.launchercore.exception.PackNotAvailableOfflineException;
 import net.technicpack.launchercore.install.ModpackInstaller;
 import net.technicpack.launchercore.install.ModpackVersion;
 import net.technicpack.launchercore.install.plan.ExecutionPlan;
@@ -48,7 +53,6 @@ import net.technicpack.launchercore.progress.ExecutionProgressListener;
 import net.technicpack.launchercore.progress.ExecutionProgressListeners;
 import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.launchercore.util.LaunchAction;
-import net.technicpack.minecraftcore.install.tasks.*;
 import net.technicpack.minecraftcore.launch.LaunchOptions;
 import net.technicpack.minecraftcore.launch.MinecraftLauncher;
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
@@ -63,6 +67,8 @@ import net.technicpack.rest.io.PackInfo;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.Memory;
 import net.technicpack.utilslib.MemoryPressure;
+import net.technicpack.utilslib.OSUtils;
+import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 
 public class Installer {
@@ -395,7 +401,16 @@ public class Installer {
         showErrorDialog(
             resources.getString(
                 "launcher.installerror.cache", pack.getDisplayName(), e.getMessage()));
-      } catch (InstallException | BuildInaccessibleException | JavaRuntimeException e) {
+      } catch (JavaRuntimeException e) {
+        Utils.getLogger()
+            .log(Level.SEVERE, "Exception caught during modpack installation or launch.", e);
+        showErrorDialog(
+            getJavaRuntimeErrorMessage(
+                e,
+                resources,
+                OperatingSystem.getOperatingSystem() == OperatingSystem.OSX
+                    && OSUtils.isArm64OS()));
+      } catch (InstallException | BuildInaccessibleException e) {
         Utils.getLogger()
             .log(Level.SEVERE, "Exception caught during modpack installation or launch.", e);
         showErrorDialog(e.getMessage());
@@ -476,6 +491,24 @@ public class Installer {
         new FileMinecraftVersionInfoBuilder(binDirectory, null, fallbackRetrievers);
 
     return new ChainedMinecraftVersionInfoBuilder(primaryVersionBuilder, webVersionBuilder);
+  }
+
+  static String getJavaRuntimeErrorMessage(
+      JavaRuntimeException exception, ResourceLoader resources, boolean appleSilicon) {
+    if (appleSilicon) {
+      for (Throwable cause = exception.getCause(); cause != null; cause = cause.getCause()) {
+        if (!(cause instanceof IOException)) continue;
+        String message = cause.getMessage();
+        // ProcessBuilder reports errno differently on older and newer launcher JVMs.
+        if (message != null
+            && (message.contains("error=86,")
+                || message.contains("error: 86 (")
+                || message.contains("Bad CPU type in executable"))) {
+          return resources.getString("launcher.installerror.rosetta");
+        }
+      }
+    }
+    return exception.getMessage();
   }
 
   static boolean isCreateProcessAccessDenied(IOException exception) {

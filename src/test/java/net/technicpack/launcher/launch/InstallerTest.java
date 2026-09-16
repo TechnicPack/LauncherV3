@@ -10,9 +10,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
 import net.technicpack.launchercore.exception.InstallException;
+import net.technicpack.launchercore.exception.JavaRuntimeException;
 import net.technicpack.launchercore.install.ModpackInstaller;
 import net.technicpack.launchercore.install.ModpackVersion;
 import net.technicpack.launchercore.modpacks.ModpackModel;
@@ -20,9 +22,13 @@ import net.technicpack.platform.io.FeedItem;
 import net.technicpack.rest.io.Modpack;
 import net.technicpack.rest.io.PackInfo;
 import net.technicpack.rest.io.Resource;
+import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.Memory;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class InstallerTest {
   @Test
@@ -42,6 +48,66 @@ class InstallerTest {
     IOException exception =
         new IOException("CreateProcess error=2, The system cannot find the file specified");
     assertFalse(Installer.isCreateProcessAccessDenied(exception));
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "Cannot run program \"java\": error=86, Bad CPU type in executable",
+        "Exec failed, error: 86 (Bad CPU type in executable)",
+        "error=86, incompatible executable",
+        "Bad CPU type in executable"
+      })
+  void appleSiliconStartupFailureExplainsHowToInstallRosetta(String message) {
+    JavaRuntimeException failure =
+        new JavaRuntimeException(
+            "The downloaded Java runtime could not be validated.",
+            new JavaRuntimeException("Could not query Java", new IOException(message)));
+
+    assertTrue(
+        Installer.getJavaRuntimeErrorMessage(failure, errorResources(), true)
+            .contains("softwareupdate --install-rosetta"));
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {"error=2, No such file", "error=13, Permission denied", "error=860, other"})
+  @NullSource
+  void unrelatedStartupFailuresKeepTheirDiagnostics(String message) {
+    JavaRuntimeException failure =
+        new JavaRuntimeException("Runtime validation failed", new IOException(message));
+
+    assertEquals(
+        failure.getMessage(),
+        Installer.getJavaRuntimeErrorMessage(failure, errorResources(), true));
+  }
+
+  @Test
+  void unsupportedCpuOnOtherHostsDoesNotRecommendRosetta() {
+    JavaRuntimeException failure =
+        new JavaRuntimeException(
+            "Runtime validation failed", new IOException("error=86, Bad CPU type in executable"));
+
+    assertEquals(
+        failure.getMessage(),
+        Installer.getJavaRuntimeErrorMessage(failure, errorResources(), false));
+  }
+
+  @Test
+  void probeOutputWithoutAnIoFailureDoesNotRecommendRosetta() {
+    JavaRuntimeException failure =
+        new JavaRuntimeException("Java runtime probe failed: Bad CPU type in executable");
+
+    assertEquals(
+        failure.getMessage(),
+        Installer.getJavaRuntimeErrorMessage(failure, errorResources(), true));
+  }
+
+  private static ResourceLoader errorResources() {
+    ResourceLoader resources =
+        new ResourceLoader(null, "net", "technicpack", "launcher", "resources");
+    resources.setLocale(Locale.GERMAN);
+    return resources;
   }
 
   @Test

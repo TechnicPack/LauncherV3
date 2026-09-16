@@ -9,6 +9,9 @@ is added at the top.
 
 ## [Unreleased]
 
+### Fixed
+- When macOS rejects a Java runtime with "Bad CPU type in executable" on Apple Silicon, the launcher explains that Intel Java requires Rosetta and provides its installation command instead of showing generic Java validation advice. Launching stops without changing Java settings, and technical diagnostics remain in the launcher log (LAUNCHER-G2).
+
 ## [v4.0-1139] - 2026-09-15
 
 ### Fixed
