@@ -14,7 +14,7 @@ dependencies {
     // clears the Dependabot alerts (GHSA-6fmv-xxpf-w3cw, log4j-core advisories).
     constraints {
         implementation("org.apache.logging.log4j:log4j-core:2.26.1")
-        implementation("org.codehaus.plexus:plexus-utils:4.0.3")
+        implementation("org.codehaus.plexus:plexus-utils:4.1.0")
     }
 
     implementation("com.gradleup.shadow:shadow-gradle-plugin:9.6.1")
