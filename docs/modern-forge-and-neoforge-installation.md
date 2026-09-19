@@ -16,9 +16,20 @@ game Java runtime; ForgeWrapper is not used. Processors are ordinary local progr
   stay untouched, as do pack-local files, installer archives, and `~/.m2`. Only this migration deletes
   old shared-cache sources; on-demand fallbacks remain available. Older launchers may redownload
   moved libraries, and cache files they add after the migration are not bulk-scanned again.
-- Declared artifact and output hashes are verified. Inferred processor tools retain `.sha1` sidecars
-  for verified cache reuse. Shared library writes and processor sequences use the cache's
-  `modern-installer.lock` across launcher instances.
+- Declared artifact and output hashes are verified by default. On Linux/glibc, the launcher probes the
+  selected processor JVM for zlib-ng compression before running recipes with declared output hashes,
+  including automatically installed Mojang runtimes. Positive detection shows a warning offering
+  Cancel (the default) or Continue with reduced verification. Technical details are collapsed by
+  default and can be expanded to show the selected Java path, compression issue, and bypass scope.
+  Unknown detection results retain checks. To switch from a managed runtime to a compatible local Java,
+  disable "Use Mojang Java runtimes" in Launcher Options.
+- The explicit bypass applies only to that installation attempt, never changes saved settings, and
+  disables only generated-output hash comparisons. Downloaded inputs and processor tools remain
+  verified; output containment, regular-file/readability checks, and successful processor completion
+  remain required. Hash-mismatching cached outputs never authorize skipping a processor, even after
+  an earlier bypass.
+- Inferred processor tools retain `.sha1` sidecars for verified cache reuse. Shared library writes and
+  processor sequences use the cache's `modern-installer.lock` across launcher instances.
 - Modern launch uses a verified, unmodified vanilla copy at `bin/native-launch/<version-id>.jar`.
   This launcher-managed directory is cleaned on full reinstall. Legacy launches retain their existing
   pack-local JAR behavior; modern launch does not create an unused signature-stripped `bin/minecraft.jar`.

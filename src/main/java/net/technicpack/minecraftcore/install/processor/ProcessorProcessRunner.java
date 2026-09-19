@@ -75,6 +75,36 @@ public final class ProcessorProcessRunner {
     return executable;
   }
 
+  static ProcessBuilder createProcessBuilder(IJavaRuntime runtime, List<String> command)
+      throws IOException {
+    Path executable = executablePath(runtime);
+    Path executableDirectory = executable.getParent();
+    Path javaHome = executableDirectory == null ? null : executableDirectory.getParent();
+    if (javaHome == null) {
+      throw new IOException("Cannot determine selected Java runtime root from " + executable);
+    }
+    ProcessBuilder builder = ProcessUtils.createProcessBuilder(command);
+    Map<String, String> environment = builder.environment();
+    environment.put("JAVA_HOME", javaHome.toString());
+    String pathKey = "PATH";
+    if (OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS) {
+      for (String key : environment.keySet()) {
+        if (key.equalsIgnoreCase("PATH")) {
+          pathKey = key;
+          break;
+        }
+      }
+    }
+    String inheritedPath = environment.get(pathKey);
+    environment.put(
+        pathKey,
+        executableDirectory
+            + (inheritedPath == null || inheritedPath.isEmpty()
+                ? ""
+                : File.pathSeparator + inheritedPath));
+    return builder;
+  }
+
   /**
    * Probe once per installation, without trusting discovery-time validation or the launcher JVM.
    */
@@ -153,11 +183,6 @@ public final class ProcessorProcessRunner {
       throw runtimeFailure(
           executable, new IOException("Java executable is unavailable or is not a regular file."));
     }
-    Path executableDirectory = executable.getParent();
-    Path javaHome = executableDirectory == null ? null : executableDirectory.getParent();
-    if (javaHome == null) {
-      throw new IOException("Cannot determine selected Java runtime root from " + executable);
-    }
 
     Path descriptor = Files.createTempFile(workDirectory, "processor-", ".descriptor");
     Path completion = null;
@@ -167,7 +192,8 @@ public final class ProcessorProcessRunner {
       Files.delete(completion);
       writeDescriptor(descriptor, mainClass.trim(), entries, arguments);
       ProcessBuilder builder =
-          ProcessUtils.createProcessBuilder(
+          createProcessBuilder(
+              runtime,
               Arrays.asList(
                   executable.toString(),
                   "-cp",
@@ -176,24 +202,6 @@ public final class ProcessorProcessRunner {
                   descriptor.toAbsolutePath().toString(),
                   completion.toAbsolutePath().toString()));
       builder.directory(workingRoot.toFile()).redirectErrorStream(true);
-      Map<String, String> environment = builder.environment();
-      environment.put("JAVA_HOME", javaHome.toString());
-      String pathKey = "PATH";
-      if (OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS) {
-        for (String key : environment.keySet()) {
-          if (key.equalsIgnoreCase("PATH")) {
-            pathKey = key;
-            break;
-          }
-        }
-      }
-      String inheritedPath = environment.get(pathKey);
-      environment.put(
-          pathKey,
-          executableDirectory
-              + (inheritedPath == null || inheritedPath.isEmpty()
-                  ? ""
-                  : File.pathSeparator + inheritedPath));
       checkCancelled(cancelled);
       Process process;
       try {
@@ -317,14 +325,14 @@ public final class ProcessorProcessRunner {
     }
   }
 
-  private static void checkCancelled(BooleanSupplier cancelled) throws InterruptedException {
+  static void checkCancelled(BooleanSupplier cancelled) throws InterruptedException {
     if (Thread.currentThread().isInterrupted() || cancelled.getAsBoolean()) {
       throw new InterruptedException("Processor execution cancelled");
     }
   }
 
   /** All potentially blocking pipe operations live on daemon threads, never on the installer. */
-  private static boolean cleanup(Process process, Thread reader) {
+  static boolean cleanup(Process process, Thread reader) {
     boolean interrupted = false;
     if (process.isAlive()) {
       daemon("processor-destroy", process::destroy);
@@ -367,7 +375,7 @@ public final class ProcessorProcessRunner {
     return interrupted;
   }
 
-  private static void closeAsync(Closeable stream) {
+  static void closeAsync(Closeable stream) {
     daemon(
         "processor-close-stream",
         () -> {

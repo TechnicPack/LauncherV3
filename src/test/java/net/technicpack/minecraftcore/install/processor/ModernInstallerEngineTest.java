@@ -2,10 +2,12 @@ package net.technicpack.minecraftcore.install.processor;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.sun.net.httpserver.HttpServer;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystemException;
 import java.nio.file.Files;
@@ -375,6 +377,123 @@ class ModernInstallerEngineTest {
   }
 
   @Test
+  void explicitBypassAcceptsDifferentGeneratedJarAndNonJarBytes() throws Exception {
+    Map<String, ModernInstallerProfile.DataValue> data =
+        Collections.singletonMap(
+            "JAR", new ModernInstallerProfile.DataValue("/data/generated.jar", null));
+    String different = "readable generated mappings";
+    ModernInstallerEngine.Request request =
+        request(
+            root,
+            Arrays.asList(
+                processor(
+                    "copy",
+                    outputs("[" + GENERATED + "]", GOOD_HASH),
+                    "{JAR}",
+                    "[" + GENERATED + "]"),
+                processor(
+                    "write", outputs("mappings.txt", GOOD_HASH), "{ROOT}/mappings.txt", different)),
+            data,
+            Collections.singletonList(new Library(GENERATED, "", GOOD_HASH, GOOD.length())),
+            Collections.singletonMap("data/generated.jar", toolJar),
+            false,
+            () -> false);
+    execute(request);
+    assertArrayEquals(toolJar, Files.readAllBytes(maven(root.resolve("libraries"), GENERATED)));
+    assertEquals(different, text(root.resolve("mappings.txt")));
+    assertEquals(Arrays.asList("copy", "write"), invocations());
+    assertWorkCleaned();
+  }
+
+  @Test
+  void bypassStillRequiresEveryDeclaredOutput() throws Exception {
+    Map<String, String> declared = outputs("missing.bin", GOOD_HASH);
+    declared.put("present.bin", GOOD_HASH);
+    ModernInstallerEngine.Request request =
+        request(
+            root,
+            Collections.singletonList(
+                processor("write", declared, "{ROOT}/present.bin", "different but readable")),
+            Collections.emptyMap(),
+            Collections.emptyList(),
+            Collections.emptyMap(),
+            false,
+            () -> false);
+    assertThrows(IOException.class, () -> execute(request));
+    assertFalse(Files.exists(root.resolve("missing.bin")));
+    assertEquals("different but readable", text(root.resolve("present.bin")));
+    assertEquals(Collections.singletonList("write"), invocations());
+    assertWorkCleaned();
+  }
+
+  @Test
+  void bypassedOutputsNeverAuthorizeReuseAndLaterStrictRunRejectsThem() throws Exception {
+    ModernInstallerProfile.Processor processor =
+        processor("write", outputs("final.bin", GOOD_HASH), "{ROOT}/final.bin", "different bytes");
+    ModernInstallerEngine.Request bypass =
+        request(
+            root,
+            Collections.singletonList(processor),
+            Collections.emptyMap(),
+            Collections.emptyList(),
+            Collections.emptyMap(),
+            false,
+            () -> false);
+    execute(bypass);
+    execute(bypass);
+    assertEquals(Arrays.asList("write", "write"), invocations());
+    assertEquals("different bytes", text(root.resolve("final.bin")));
+    ModernInstallerEngine.Request strict = request(processor);
+    assertThrows(IOException.class, () -> execute(strict));
+    assertEquals(Arrays.asList("write", "write", "write"), invocations());
+    assertFalse(Files.exists(root.resolve("final.bin")));
+    assertWorkCleaned();
+  }
+
+  @Test
+  void bypassDoesNotAcceptCorruptedDownloadedInputs() throws Exception {
+    byte[] corrupt = "corrupted downloaded input".getBytes(StandardCharsets.UTF_8);
+    AtomicBoolean served = new AtomicBoolean();
+    HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+    server.createContext(
+        "/input.jar",
+        exchange -> {
+          served.set(true);
+          exchange.sendResponseHeaders(200, corrupt.length);
+          try (java.io.OutputStream body = exchange.getResponseBody()) {
+            body.write(corrupt);
+          }
+        });
+    server.start();
+    try {
+      String coordinate = "test.engine:downloaded:1";
+      Library input =
+          new Library(
+              coordinate,
+              "http://127.0.0.1:" + server.getAddress().getPort() + "/input.jar",
+              GOOD_HASH,
+              corrupt.length);
+      ModernInstallerEngine.Request request =
+          request(
+              root,
+              Collections.singletonList(
+                  processor("write", outputs("final.bin", GOOD_HASH), "{ROOT}/final.bin", GOOD)),
+              Collections.emptyMap(),
+              Collections.singletonList(input),
+              Collections.emptyMap(),
+              false,
+              () -> false);
+      assertThrows(IOException.class, () -> execute(request));
+      assertTrue(served.get());
+      assertFalse(Files.exists(maven(root.resolve("libraries"), coordinate)));
+      assertFalse(Files.exists(root.resolve("invocations.log")));
+      assertWorkCleaned();
+    } finally {
+      server.stop(0);
+    }
+  }
+
+  @Test
   void missingAndMismatchedOutputsFailAndRemoveOnlyInvalidDeclaredFiles() throws Exception {
     Map<String, String> outputs = outputs("missing.bin", GOOD_HASH);
     outputs.put("partial.bin", GOOD_HASH);
@@ -391,13 +510,23 @@ class ModernInstallerEngineTest {
     assertWorkCleaned();
   }
 
-  @Test
-  void nonzeroChildRetainsValidOutputsAndDeletesMismatchedPartials() throws Exception {
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
+  void nonzeroChildRetainsValidOutputsAndDeletesMismatchedPartials(boolean verifyOutputHashes)
+      throws Exception {
     Map<String, String> outputs = outputs("partial.bin", GOOD_HASH);
     outputs.put("valid.bin", GOOD_HASH);
     ModernInstallerEngine.Request request =
         request(
-            processor("exit", outputs, "{ROOT}/partial.bin", "partial", "{ROOT}/valid.bin", GOOD));
+            root,
+            Collections.singletonList(
+                processor(
+                    "exit", outputs, "{ROOT}/partial.bin", "partial", "{ROOT}/valid.bin", GOOD)),
+            Collections.emptyMap(),
+            Collections.emptyList(),
+            Collections.emptyMap(),
+            verifyOutputHashes,
+            () -> false);
     IOException failure = assertThrows(IOException.class, () -> execute(request));
     assertTrue(failure.getSuppressed().length > 0);
     assertFalse(Files.exists(root.resolve("partial.bin")));
@@ -596,8 +725,10 @@ class ModernInstallerEngineTest {
     assertFalse(Files.exists(root.resolve("invocations.log")));
   }
 
-  @Test
-  void classpathChangedByAnEarlierProcessorIsRejectedBeforeTheNextChild() throws Exception {
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
+  void classpathChangedByAnEarlierProcessorIsRejectedBeforeTheNextChild(boolean verifyOutputHashes)
+      throws Exception {
     String dependency = "test.engine:dependency:1";
     ModernInstallerProfile.Processor first =
         processor("write", Collections.emptyMap(), "[" + dependency + "]", "corrupted dependency");
@@ -617,6 +748,7 @@ class ModernInstallerEngineTest {
             Collections.singletonList(library),
             Collections.singletonMap(
                 "maven/" + MavenCoordinate.parse(dependency).getPath(), toolJar),
+            verifyOutputHashes,
             () -> false);
     IOException failure = assertThrows(IOException.class, () -> execute(request));
     assertTrue(failure.getMessage().contains(dependency));
@@ -695,6 +827,18 @@ class ModernInstallerEngineTest {
       Map<String, byte[]> embedded,
       BooleanSupplier cancelled)
       throws Exception {
+    return request(launcherRoot, processors, data, gameLibraries, embedded, true, cancelled);
+  }
+
+  private ModernInstallerEngine.Request request(
+      Path launcherRoot,
+      List<ModernInstallerProfile.Processor> processors,
+      Map<String, ModernInstallerProfile.DataValue> data,
+      List<Library> gameLibraries,
+      Map<String, byte[]> embedded,
+      boolean verifyOutputHashes,
+      BooleanSupplier cancelled)
+      throws Exception {
     Library tool = new Library(TOOL, "", DigestUtils.sha1Hex(toolJar), toolJar.length);
     ModernInstallerProfile profile =
         new ModernInstallerProfile(
@@ -724,6 +868,7 @@ class ModernInstallerEngineTest {
         profile,
         ModernInstallerArtifactResolver.plan(profile, gameLibraries, runtime),
         runtime,
+        verifyOutputHashes,
         cancelled);
   }
 

@@ -11,6 +11,7 @@ is added at the top.
 
 ### Fixed
 - Modern mod loader installation now freshly validates locally selected Java before installing libraries, Minecraft, or assets, including when the launcher uses that same Java runtime. Missing or unusable executables report their path and recovery instructions instead of an unknown error, including if Java becomes unavailable after validation. Automatically installed Mojang runtimes retain their existing post-install validation; Java selections are not silently changed (LAUNCHER-GA).
+- On Linux, modern mod loader installation warns when the selected processor Java uses zlib-ng, which can produce different hashes for equivalent generated JAR contents. The warning offers Cancel or Continue with reduced verification for that installation only, with technical details available on demand. Download and tool verification remain enabled, and no Java or verification settings are saved (LAUNCHER-GB).
 
 ## [v4.0-1158] - 2026-09-16
 

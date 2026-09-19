@@ -1,6 +1,7 @@
 package net.technicpack.minecraftcore.install.processor;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -145,9 +146,11 @@ public final class ModernInstallerEngine {
         checkCancelled(request);
         Path target = artifactPath(request, artifact);
         if (artifact.getSha1() == null || !declaredOutputs.contains(target)) continue;
-        if (!isValid(request, target, artifact.getSha1())) {
+        if (!isValidOutput(request, target, artifact.getSha1(), request.verifyOutputHashes)) {
           throw new IOException(
-              "Generated artifact failed final SHA-1 verification: "
+              (request.verifyOutputHashes
+                      ? "Generated artifact failed final SHA-1 verification: "
+                      : "Generated artifact is missing or unreadable: ")
                   + artifact.getCoordinate()
                   + " at "
                   + target);
@@ -293,7 +296,10 @@ public final class ModernInstallerEngine {
       // an interrupted read as corruption, and never let cleanup replace the original failure.
       boolean interrupted = Thread.interrupted();
       try {
-        IOException outputFailure = cleanAndCheckOutputs(request, invocation.outputs);
+        // Opt-out accepts completed outputs only; failed children still lose hash-invalid partials.
+        IOException outputFailure =
+            cleanAndCheckOutputs(
+                request, invocation.outputs, request.verifyOutputHashes || failure != null);
         if (outputFailure != null) {
           if (failure != null) failure.addSuppressed(outputFailure);
           else throw outputFailure;
@@ -304,19 +310,22 @@ public final class ModernInstallerEngine {
     }
   }
 
-  private static IOException cleanAndCheckOutputs(Request request, Map<Path, String> outputs) {
+  private static IOException cleanAndCheckOutputs(
+      Request request, Map<Path, String> outputs, boolean verifyOutputHashes) {
     IOException failure = null;
     for (Map.Entry<Path, String> output : outputs.entrySet()) {
       try {
         Path target = InstallerArtifactStore.checkedPath(request.root, output.getKey());
-        if (isValid(request, target, output.getValue())) continue;
+        if (isValidOutput(request, target, output.getValue(), verifyOutputHashes)) continue;
         IOException invalid =
             new IOException(
-                "Processor output is missing or has an invalid SHA-1: "
-                    + target
-                    + " (expected "
-                    + output.getValue()
-                    + ")");
+                verifyOutputHashes
+                    ? "Processor output is missing or has an invalid SHA-1: "
+                        + target
+                        + " (expected "
+                        + output.getValue()
+                        + ")"
+                    : "Processor output is missing, not a regular file, or unreadable: " + target);
         try {
           Files.deleteIfExists(InstallerArtifactStore.checkedPath(request.root, target));
         } catch (IOException cleanupFailure) {
@@ -330,6 +339,21 @@ public final class ModernInstallerEngine {
       }
     }
     return failure;
+  }
+
+  private static boolean isValidOutput(
+      Request request, Path target, String sha1, boolean verifyOutputHashes) throws IOException {
+    if (verifyOutputHashes) return isValid(request, target, sha1);
+    target = InstallerArtifactStore.checkedPath(request.root, target);
+    if (!Files.isRegularFile(target)) return false;
+    // Outputs may be mappings or other non-JAR data. Require readable bytes, not ZIP structure.
+    try (InputStream input = Files.newInputStream(target)) {
+      byte[] buffer = new byte[8192];
+      while (input.read(buffer) != -1) {}
+      return true;
+    } catch (IOException unreadable) {
+      return false;
+    }
   }
 
   private static boolean isValid(Request request, Path target, String sha1) throws IOException {
@@ -404,6 +428,7 @@ public final class ModernInstallerEngine {
     private final ModernInstallerProfile profile;
     private final ArtifactPlan plan;
     private final IJavaRuntime runtime;
+    private final boolean verifyOutputHashes;
     private final BooleanSupplier cancelled;
 
     public Request(
@@ -413,6 +438,7 @@ public final class ModernInstallerEngine {
         ModernInstallerProfile profile,
         ArtifactPlan plan,
         IJavaRuntime runtime,
+        boolean verifyOutputHashes,
         BooleanSupplier cancelled) {
       this.root = Objects.requireNonNull(root, "root").toAbsolutePath().normalize();
       this.installer = Objects.requireNonNull(installer, "installer").toAbsolutePath().normalize();
@@ -421,6 +447,7 @@ public final class ModernInstallerEngine {
       this.profile = Objects.requireNonNull(profile, "profile");
       this.plan = Objects.requireNonNull(plan, "plan");
       this.runtime = Objects.requireNonNull(runtime, "runtime");
+      this.verifyOutputHashes = verifyOutputHashes;
       this.cancelled = Objects.requireNonNull(cancelled, "cancelled");
     }
   }

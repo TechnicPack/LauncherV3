@@ -85,9 +85,8 @@ class LauncherPackagingPlugin : Plugin<Project> {
                     exclude(project(":"))
                 }
 
-                // Windows OS/registry queries and macOS memory estimates use JNA.
-                // Keep Windows DLLs and Darwin dylibs; Linux reads /proc without JNA.
-                exclude("com/sun/jna/**/libjnidispatch.so", "com/sun/jna/**/libjnidispatch.a")
+                // Keep native JNA libraries for OS queries and the selected-JVM zlib probe.
+                exclude("com/sun/jna/**/libjnidispatch.a")
 
                 exclude(
                     "META-INF/*.txt",

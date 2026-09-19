@@ -130,7 +130,8 @@ class ImmutableInstallerPlannerTest {
             true,
             false,
             false,
-            () -> false);
+            () -> false,
+            runtime -> true);
 
     ExecutionPlan<ImmutableInstallerPlanner.InstallExecutionContext> plan =
         planner.buildPreparationPlan();
@@ -166,7 +167,8 @@ class ImmutableInstallerPlannerTest {
             false,
             true,
             false,
-            () -> false);
+            () -> false,
+            runtime -> true);
 
     byte[] runtimeFileBytes = "runtime".getBytes(StandardCharsets.UTF_8);
     byte[] manifestBytes;
@@ -246,7 +248,8 @@ class ImmutableInstallerPlannerTest {
             false,
             true,
             false,
-            () -> false);
+            () -> false,
+            runtime -> true);
     byte[] script =
         "#!/bin/sh\necho 'VM initialization failed' >&2\nexit 1\n".getBytes(StandardCharsets.UTF_8);
     HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
@@ -341,7 +344,8 @@ class ImmutableInstallerPlannerTest {
             false,
             false,
             false,
-            () -> false);
+            () -> false,
+            runtime -> true);
     ImmutableInstallerPlanner.InstallExecutionContext context =
         new ImmutableInstallerPlanner.InstallExecutionContext();
 
@@ -417,7 +421,8 @@ class ImmutableInstallerPlannerTest {
             false,
             false,
             false,
-            () -> false);
+            () -> false,
+            runtime -> true);
     ImmutableInstallerPlanner.InstallExecutionContext context =
         new ImmutableInstallerPlanner.InstallExecutionContext();
 
@@ -504,7 +509,8 @@ class ImmutableInstallerPlannerTest {
             false,
             false,
             false,
-            () -> false);
+            () -> false,
+            runtime -> true);
     ImmutableInstallerPlanner.InstallExecutionContext context =
         new ImmutableInstallerPlanner.InstallExecutionContext();
     TestMinecraftVersionInfo version = new TestMinecraftVersionInfo(null);
@@ -569,7 +575,8 @@ class ImmutableInstallerPlannerTest {
             false,
             false,
             false,
-            () -> false);
+            () -> false,
+            runtime -> true);
     ImmutableInstallerPlanner.InstallExecutionContext context =
         new ImmutableInstallerPlanner.InstallExecutionContext();
     TestMinecraftVersionInfo version = new TestMinecraftVersionInfo(null);
@@ -660,7 +667,8 @@ class ImmutableInstallerPlannerTest {
               false,
               false,
               false,
-              () -> false);
+              () -> false,
+              runtime -> true);
       ImmutableInstallerPlanner.InstallExecutionContext context =
           new ImmutableInstallerPlanner.InstallExecutionContext();
       TestMinecraftVersionInfo version = new TestMinecraftVersionInfo(null);
@@ -784,7 +792,8 @@ class ImmutableInstallerPlannerTest {
             false,
             false,
             false,
-            () -> false);
+            () -> false,
+            runtime -> true);
     ImmutableInstallerPlanner.InstallExecutionContext context =
         new ImmutableInstallerPlanner.InstallExecutionContext();
 
@@ -840,7 +849,8 @@ class ImmutableInstallerPlannerTest {
             false,
             false,
             false,
-            () -> false);
+            () -> false,
+            runtime -> true);
     ImmutableInstallerPlanner.InstallExecutionContext context =
         new ImmutableInstallerPlanner.InstallExecutionContext();
 
@@ -878,7 +888,8 @@ class ImmutableInstallerPlannerTest {
             true,
             false,
             false,
-            () -> false);
+            () -> false,
+            ignoredRuntime -> true);
 
     String forge = "net.minecraftforge:forge:1.20.1-47.1.0";
     String forgeClient = forge + ":client";
@@ -1516,7 +1527,8 @@ class ImmutableInstallerPlannerTest {
             false,
             false,
             false,
-            () -> false);
+            () -> false,
+            ignoredRuntime -> true);
     PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext> executor =
         new PlanExecutor<>(null);
     executor.execute(planner.buildVersionDiscoveryPlan(), context);
@@ -1563,6 +1575,10 @@ class ImmutableInstallerPlannerTest {
                 + coordinate
                 + "\",\"classpath\":[],\"args\":[\"{ROOT}/runtime-observed.txt\"]}]",
             com.google.gson.JsonArray.class));
+    JsonObject outputs = new JsonObject();
+    outputs.addProperty(
+        "{ROOT}/runtime-observed.txt", "'0000000000000000000000000000000000000000'");
+    profile.getAsJsonArray("processors").get(0).getAsJsonObject().add("outputs", outputs);
     JsonObject embedded =
         GSON.fromJson(versionJson("embedded-loader", "1.20.1", ""), JsonObject.class);
     embedded.add(
@@ -1618,7 +1634,12 @@ class ImmutableInstallerPlannerTest {
             false,
             true,
             false,
-            () -> false);
+            () -> false,
+            runtime ->
+                !runtime
+                    .getExecutableFile()
+                    .toPath()
+                    .equals(fileSystem.getRuntimesDirectory().resolve("test-runtime/bin/java")));
     String executable = new File(System.getProperty("java.home"), "bin/java").getAbsolutePath();
     byte[] script =
         ("#!/bin/sh\nexec '" + executable.replace("'", "'\\''") + "' \"$@\"\n")
@@ -1741,7 +1762,8 @@ class ImmutableInstallerPlannerTest {
             true,
             false,
             false,
-            () -> false);
+            () -> false,
+            runtime -> true);
     executeNode(planner.buildPreparationPlan(), "cleanup-modpack", context);
     assertFalse(Files.exists(stale));
     assertEquals("retain", Files.readString(unrelated));
@@ -1800,7 +1822,8 @@ class ImmutableInstallerPlannerTest {
         false,
         managedJava,
         false,
-        () -> false);
+        () -> false,
+        runtime -> true);
   }
 
   private static JavaRuntimesIndex runtimeCatalog(String component, String versionName) {
@@ -1840,7 +1863,8 @@ class ImmutableInstallerPlannerTest {
         false,
         false,
         false,
-        () -> false);
+        () -> false,
+        runtime -> true);
   }
 
   private void assertModernVersionRequiresProfile(String versionId) throws Exception {
@@ -1944,7 +1968,8 @@ class ImmutableInstallerPlannerTest {
         false,
         true,
         false,
-        () -> false);
+        () -> false,
+        runtime -> true);
   }
 
   private static VersionJavaInfo invokeDeriveJavaVersion(

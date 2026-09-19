@@ -32,6 +32,7 @@ import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.components.FixRunDataDialog;
 import net.technicpack.launcher.ui.components.MemoryWarningDialog;
+import net.technicpack.launcher.ui.components.ProcessorHashWarningDialog;
 import net.technicpack.launchercore.TechnicConstants;
 import net.technicpack.launchercore.exception.BuildInaccessibleException;
 import net.technicpack.launchercore.exception.CacheDeleteException;
@@ -53,6 +54,7 @@ import net.technicpack.launchercore.progress.ExecutionProgressListener;
 import net.technicpack.launchercore.progress.ExecutionProgressListeners;
 import net.technicpack.launchercore.util.DownloadListener;
 import net.technicpack.launchercore.util.LaunchAction;
+import net.technicpack.minecraftcore.install.processor.ProcessorCompressorDetector;
 import net.technicpack.minecraftcore.launch.LaunchOptions;
 import net.technicpack.minecraftcore.launch.MinecraftLauncher;
 import net.technicpack.minecraftcore.mojang.version.IMinecraftVersionInfo;
@@ -267,7 +269,8 @@ public class Installer {
                 doFullInstall,
                 mojangJavaWanted,
                 jarRegenerationRequired,
-                () -> isCancelledByUser);
+                () -> isCancelledByUser,
+                this::shouldVerifyProcessorHashes);
         PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext> executor =
             new PlanExecutor<>(progressListener);
 
@@ -431,6 +434,20 @@ public class Installer {
           SwingUtilities.invokeLater(frame::launchCompleted);
         }
       }
+    }
+
+    private boolean shouldVerifyProcessorHashes(IJavaRuntime runtime) throws InterruptedException {
+      if (!ProcessorCompressorDetector.usesZlibNg(runtime, () -> isCancelledByUser)) return true;
+      ProcessorHashWarningDialog.Result result =
+          ProcessorHashWarningDialog.show(
+              frame, resources, runtime.getExecutableFile().getAbsolutePath());
+      if (result == ProcessorHashWarningDialog.Result.CANCEL) {
+        isCancelledByUser = true;
+        throw new InterruptedException("Processor installation cancelled by user");
+      }
+      Utils.getLogger()
+          .info("User disabled processor output hash checks for this installation only");
+      return false;
     }
 
     private void setGameProcess(GameProcess gameProcess) {

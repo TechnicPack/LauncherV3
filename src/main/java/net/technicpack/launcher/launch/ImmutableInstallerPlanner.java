@@ -133,6 +133,7 @@ class ImmutableInstallerPlanner {
   private final boolean jarRegenerationRequired;
   private final String minecraftVersion;
   private final BooleanSupplier cancellationCheck;
+  private final ProcessorHashCheck processorHashCheck;
 
   // Set during mod extraction if a Prism instance zip is detected
   private PrismInstanceRemapper detectedPrismRemapper;
@@ -155,7 +156,8 @@ class ImmutableInstallerPlanner {
       boolean doFullInstall,
       boolean mojangJavaWanted,
       boolean jarRegenerationRequired,
-      BooleanSupplier cancellationCheck) {
+      BooleanSupplier cancellationCheck,
+      ProcessorHashCheck processorHashCheck) {
     this.resources = resources;
     this.pack = pack;
     this.modpackData = modpackData;
@@ -168,6 +170,12 @@ class ImmutableInstallerPlanner {
     this.jarRegenerationRequired = jarRegenerationRequired;
     this.minecraftVersion = modpackData.getGameVersion();
     this.cancellationCheck = cancellationCheck;
+    this.processorHashCheck = Objects.requireNonNull(processorHashCheck, "processorHashCheck");
+  }
+
+  @FunctionalInterface
+  interface ProcessorHashCheck {
+    boolean shouldVerify(IJavaRuntime runtime) throws InterruptedException;
   }
 
   ExecutionPlan<InstallExecutionContext> buildPreparationPlan() {
@@ -395,20 +403,28 @@ class ImmutableInstallerPlanner {
           "Installing Mod Loader...",
           Math.max(1.0f, context.getModernInstallerProfile().getClientProcessors().size()),
           dependencies,
-          (installContext, reporter) ->
-              new ModernInstallerEngine()
-                  .execute(
-                      new ModernInstallerEngine.Request(
-                          fileSystem.getRootDirectory(),
-                          pack.getBinDir().toPath().resolve("modpack.jar"),
-                          fileSystem
-                              .getCacheDirectory()
-                              .resolve("minecraft_" + minecraftVersion + ".jar"),
-                          installContext.getModernInstallerProfile(),
-                          installContext.getArtifactPlan(),
-                          installContext.getResolvedVersion().getJavaRuntime(),
-                          cancellationCheck),
-                      reporter));
+          (installContext, reporter) -> {
+            IJavaRuntime runtime = installContext.getResolvedVersion().getJavaRuntime();
+            boolean hasOutputHashes =
+                installContext.getModernInstallerProfile().getClientProcessors().stream()
+                    .anyMatch(processor -> !processor.getOutputs().isEmpty());
+            boolean verifyOutputHashes =
+                !hasOutputHashes || processorHashCheck.shouldVerify(runtime);
+            new ModernInstallerEngine()
+                .execute(
+                    new ModernInstallerEngine.Request(
+                        fileSystem.getRootDirectory(),
+                        pack.getBinDir().toPath().resolve("modpack.jar"),
+                        fileSystem
+                            .getCacheDirectory()
+                            .resolve("minecraft_" + minecraftVersion + ".jar"),
+                        installContext.getModernInstallerProfile(),
+                        installContext.getArtifactPlan(),
+                        runtime,
+                        verifyOutputHashes,
+                        cancellationCheck),
+                    reporter);
+          });
     }
 
     if (OperatingSystem.getOperatingSystem() == OperatingSystem.OSX) {
