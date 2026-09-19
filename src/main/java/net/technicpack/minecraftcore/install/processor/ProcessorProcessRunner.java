@@ -26,7 +26,9 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
+import net.technicpack.launchercore.exception.JavaRuntimeException;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
+import net.technicpack.launchercore.launch.java.version.FileBasedJavaRuntime;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.ProcessUtils;
 import net.technicpack.utilslib.Utils;
@@ -71,6 +73,34 @@ public final class ProcessorProcessRunner {
       executable = executable.resolveSibling("java.exe");
     }
     return executable;
+  }
+
+  /**
+   * Probe once per installation, without trusting discovery-time validation or the launcher JVM.
+   */
+  public static void validateRuntime(IJavaRuntime runtime, BooleanSupplier cancelled)
+      throws JavaRuntimeException, InterruptedException {
+    checkCancelled(cancelled);
+    Path executable = executablePath(runtime);
+    try {
+      new FileBasedJavaRuntime(executable).validate();
+    } catch (JavaRuntimeException failure) {
+      checkCancelled(cancelled);
+      throw runtimeFailure(executable, failure);
+    }
+    checkCancelled(cancelled);
+  }
+
+  private static JavaRuntimeException runtimeFailure(Path executable, IOException cause) {
+    return new JavaRuntimeException(
+        "The selected Java installation cannot run installer tools.\n\n"
+            + "Java executable: "
+            + executable
+            + "\n"
+            + cause.getMessage()
+            + "\n\nRepair this Java installation or select a compatible Java version in Launcher "
+            + "Options, then retry.",
+        cause);
   }
 
   public void run(
@@ -119,7 +149,9 @@ public final class ProcessorProcessRunner {
 
     Path executable = executablePath(runtime);
     if (!Files.isRegularFile(executable)) {
-      throw new IOException("Selected processor Java executable is missing: " + executable);
+      checkCancelled(cancelled);
+      throw runtimeFailure(
+          executable, new IOException("Java executable is unavailable or is not a regular file."));
     }
     Path executableDirectory = executable.getParent();
     Path javaHome = executableDirectory == null ? null : executableDirectory.getParent();
@@ -163,7 +195,13 @@ public final class ProcessorProcessRunner {
                   ? ""
                   : File.pathSeparator + inheritedPath));
       checkCancelled(cancelled);
-      Process process = builder.start();
+      Process process;
+      try {
+        process = builder.start();
+      } catch (IOException failureToStart) {
+        checkCancelled(cancelled);
+        throw runtimeFailure(executable, failureToStart);
+      }
       OutputCapture output = new OutputCapture(process.getInputStream(), coordinate);
       InterruptedException interruption = null;
       int exit;

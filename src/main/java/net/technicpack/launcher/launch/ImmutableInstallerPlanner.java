@@ -70,6 +70,7 @@ import net.technicpack.minecraftcore.install.processor.ModernInstallerEngine;
 import net.technicpack.minecraftcore.install.processor.ModernInstallerLock;
 import net.technicpack.minecraftcore.install.processor.ModernInstallerProfile;
 import net.technicpack.minecraftcore.install.processor.ModernInstallerProfileReader;
+import net.technicpack.minecraftcore.install.processor.ProcessorProcessRunner;
 import net.technicpack.minecraftcore.install.tasks.CleanupModpackCacheTask;
 import net.technicpack.minecraftcore.install.tasks.InstallMinecraftIfNecessaryTask;
 import net.technicpack.minecraftcore.install.tasks.RenameJnilibToDylibTask;
@@ -281,6 +282,11 @@ class ImmutableInstallerPlanner {
     boolean runProcessors =
         context.getModernInstallerProfile() != null
             && !context.getModernInstallerProfile().getClientProcessors().isEmpty();
+    boolean validateLocalJava = runProcessors && !installJava;
+    List<String> validationDependencies =
+        validateLocalJava
+            ? Collections.singletonList("validate-processor-java")
+            : Collections.emptyList();
     boolean javaBeforeLibraries = installJava && context.getModernInstallerProfile() != null;
     boolean installLibraries =
         context.getLibraryInstallCount() > 0
@@ -288,8 +294,10 @@ class ImmutableInstallerPlanner {
                 && (runProcessors || !context.getResolvedVersion().getLibraries().isEmpty()));
 
     PlanBuilder<InstallExecutionContext> builder = new PlanBuilder<>();
-    if (javaBeforeLibraries) {
-      builder.addPhase(INSTALL_JAVA_PHASE, "Downloading Java runtime...");
+    if (javaBeforeLibraries || validateLocalJava) {
+      builder.addPhase(
+          INSTALL_JAVA_PHASE,
+          validateLocalJava ? "Checking Java runtime..." : "Downloading Java runtime...");
     }
     builder.addPhase(INSTALL_LIBS_PHASE, resources.getString("install.message.installlibs"));
     builder.addPhase(
@@ -305,6 +313,17 @@ class ImmutableInstallerPlanner {
       builder.addPhase(FIX_NATIVE_PHASE, "Fixing OSX natives");
     }
 
+    if (validateLocalJava) {
+      builder.addNode(
+          "validate-processor-java",
+          INSTALL_JAVA_PHASE,
+          "Checking Java runtime",
+          1.0f,
+          (installContext, reporter) ->
+              ProcessorProcessRunner.validateRuntime(
+                  installContext.getResolvedVersion().getJavaRuntime(), cancellationCheck));
+    }
+
     Map<String, String> fmlLibs = FmlLibsManager.getLibsForVersion(minecraftVersion);
     if (!fmlLibs.isEmpty()) {
       builder.addNode(
@@ -312,6 +331,7 @@ class ImmutableInstallerPlanner {
           INSTALL_LIBS_PHASE,
           "Installing FML libraries",
           Math.max(1.0f, fmlLibs.size()),
+          validationDependencies,
           (installContext, reporter) -> installFmlLibraries(fmlLibs, reporter));
     }
 
@@ -323,7 +343,7 @@ class ImmutableInstallerPlanner {
           Math.max(1.0f, context.getLibraryInstallCount()),
           javaBeforeLibraries
               ? Collections.singletonList("install-java-runtime")
-              : Collections.emptyList(),
+              : validationDependencies,
           (installContext, reporter) -> installVersionLibraries(installContext, reporter));
     }
 
@@ -332,6 +352,7 @@ class ImmutableInstallerPlanner {
         INSTALL_MINECRAFT_PHASE,
         "Installing Minecraft",
         1.0f,
+        validationDependencies,
         new LegacyTaskPlanAction<InstallExecutionContext, IMinecraftVersionInfo>(
             new InstallMinecraftIfNecessaryTask(
                 pack, minecraftVersion, fileSystem.getCacheDirectory(), jarRegenerationRequired),
@@ -352,6 +373,7 @@ class ImmutableInstallerPlanner {
         INSTALL_ASSETS_PHASE,
         "Checking Minecraft Assets",
         1.0f,
+        validationDependencies,
         (installContext, reporter) -> installAssets(installContext, reporter));
 
     if (installJava) {

@@ -43,6 +43,8 @@ import net.technicpack.launchercore.install.plan.ExecutionPlan;
 import net.technicpack.launchercore.install.plan.NodeProgressReporter;
 import net.technicpack.launchercore.install.plan.PlanExecutor;
 import net.technicpack.launchercore.launch.java.IJavaRuntime;
+import net.technicpack.launchercore.launch.java.version.CurrentJavaRuntime;
+import net.technicpack.launchercore.launch.java.version.FileBasedJavaRuntime;
 import net.technicpack.launchercore.modpacks.InstalledPack;
 import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.minecraftcore.MojangUtils;
@@ -66,6 +68,7 @@ import net.technicpack.utilslib.Utils;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -1437,6 +1440,93 @@ class ImmutableInstallerPlannerTest {
     } finally {
       setJavaRuntimesIndex(previous);
     }
+  }
+
+  @Test
+  @ResourceLock("java.home")
+  void missingCurrentRuntimeStopsInstallationBeforeLibraryAcquisition() throws Exception {
+    CurrentJavaRuntime runtime;
+    String javaHome = System.getProperty("java.home");
+    try {
+      System.setProperty("java.home", tempDir.resolve("missing-jre").toString());
+      runtime = new CurrentJavaRuntime();
+    } finally {
+      System.setProperty("java.home", javaHome);
+    }
+    assertUnavailableProcessorRuntimeStopsInstallation(runtime);
+  }
+
+  @Test
+  void previouslyValidatedRuntimeIsProbedAgainBeforeInstallation() throws Exception {
+    Assumptions.assumeTrue(OperatingSystem.getOperatingSystem() == OperatingSystem.LINUX);
+    Path executable =
+        Files.createSymbolicLink(
+            tempDir.resolve("java"), new CurrentJavaRuntime().getExecutableFile().toPath());
+    FileBasedJavaRuntime runtime = new FileBasedJavaRuntime(executable);
+    runtime.validate();
+    Files.delete(executable);
+    assertUnavailableProcessorRuntimeStopsInstallation(runtime);
+  }
+
+  private void assertUnavailableProcessorRuntimeStopsInstallation(IJavaRuntime runtime)
+      throws Exception {
+    LauncherFileSystem fileSystem =
+        new LauncherFileSystem(tempDir.resolve("launcher-missing-java"));
+    ModpackModel pack = createDiscoveryPack(fileSystem);
+    String coordinate = "example:processor:1";
+    String artifactPath = new Library(coordinate).getArtifactPath();
+    Path jar = tempDir.resolve("processor.jar");
+    writeZip(jar, "marker.txt", "verified processor bytes");
+    byte[] bytes = Files.readAllBytes(jar);
+    JsonObject declaration = GSON.fromJson(declaredLibrary(coordinate), JsonObject.class);
+    JsonObject artifact = declaration.getAsJsonObject("downloads").getAsJsonObject("artifact");
+    artifact.addProperty("sha1", sha1(bytes));
+    artifact.addProperty("size", bytes.length);
+    JsonObject profile = modernProfile("1.20.1");
+    profile.add(
+        "libraries", GSON.fromJson("[" + declaration + "]", com.google.gson.JsonArray.class));
+    profile.add(
+        "processors",
+        GSON.fromJson(
+            "[{\"jar\":\"" + coordinate + "\",\"classpath\":[],\"args\":[]}]",
+            com.google.gson.JsonArray.class));
+    try (ZipOutputStream output =
+        new ZipOutputStream(
+            Files.newOutputStream(pack.getBinDir().toPath().resolve("modpack.jar")))) {
+      writeZipEntry(
+          output, "install_profile.json", profile.toString().getBytes(StandardCharsets.UTF_8));
+      writeZipEntry(
+          output,
+          "metadata/loader.json",
+          versionJson("embedded-loader", "1.20.1", "").getBytes(StandardCharsets.UTF_8));
+      writeZipEntry(output, "maven/" + artifactPath, bytes);
+    }
+    writeVanillaVersion(pack, "1.20.1", "1.20.1");
+    ImmutableInstallerPlanner.InstallExecutionContext context =
+        new ImmutableInstallerPlanner.InstallExecutionContext();
+    ImmutableInstallerPlanner planner =
+        new ImmutableInstallerPlanner(
+            new TestResourceLoader(),
+            pack,
+            GSON.fromJson("{\"minecraft\":\"1.20.1\",\"mods\":[]}", Modpack.class),
+            fileSystem,
+            Installer.createVersionBuilder(pack.getBinDir(), null, context),
+            new TechnicSettings(),
+            runtime,
+            false,
+            false,
+            false,
+            () -> false);
+    PlanExecutor<ImmutableInstallerPlanner.InstallExecutionContext> executor =
+        new PlanExecutor<>(null);
+    executor.execute(planner.buildVersionDiscoveryPlan(), context);
+    JavaRuntimeException failure =
+        assertThrows(
+            JavaRuntimeException.class,
+            () -> executor.execute(planner.buildInstallPlan(context), context));
+    assertTrue(
+        failure.getMessage().contains(runtime.getExecutableFile().getParentFile().toString()));
+    assertFalse(Files.exists(fileSystem.getLibrariesDirectory().resolve(artifactPath)));
   }
 
   @Test

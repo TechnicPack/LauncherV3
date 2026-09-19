@@ -29,9 +29,15 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
+import net.technicpack.launchercore.exception.JavaRuntimeException;
 import net.technicpack.launchercore.launch.java.version.CurrentJavaRuntime;
+import net.technicpack.launchercore.launch.java.version.FileBasedJavaRuntime;
+import net.technicpack.utilslib.OperatingSystem;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -212,6 +218,72 @@ class ProcessorProcessRunnerTest {
       executor.shutdownNow();
       assertTrue(executor.awaitTermination(20, TimeUnit.SECONDS));
     }
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void runtimeBecomingUnavailableAfterPreflightIsReportedBeforeRunningProcessor(boolean removed)
+      throws Exception {
+    Assumptions.assumeTrue(OperatingSystem.getOperatingSystem() == OperatingSystem.LINUX);
+    Path executable = root.resolve("bin/java");
+    Files.createDirectories(executable.getParent());
+    Files.writeString(
+        executable,
+        "#!/bin/sh\nexec '" + javaExecutable().toString().replace("'", "'\\''") + "' \"$@\"\n");
+    assertTrue(executable.toFile().setExecutable(true));
+    FileBasedJavaRuntime runtime = new FileBasedJavaRuntime(executable);
+    ProcessorProcessRunner.validateRuntime(runtime, () -> false);
+    if (removed) Files.delete(executable);
+    else assertTrue(executable.toFile().setExecutable(false, false));
+    Path captured = root.resolve("must-not-exist.bin");
+
+    JavaRuntimeException failure =
+        assertThrows(
+            JavaRuntimeException.class,
+            () ->
+                runner.run(
+                    runtime,
+                    root,
+                    work,
+                    bootstrap,
+                    "fixture:unavailable-java:1",
+                    Collections.singletonList(processor),
+                    Arrays.asList("capture", captured.toString()),
+                    () -> false));
+    assertTrue(failure.getMessage().contains(executable.toString()));
+    assertInstanceOf(IOException.class, failure.getCause());
+    assertFalse(Files.exists(captured));
+  }
+
+  @Test
+  @EnabledOnOs(OS.WINDOWS)
+  void existingJavawDoesNotSubstituteForMissingConsoleJava() throws Exception {
+    Path javaw = root.resolve("bin/javaw.exe");
+    Files.createDirectories(javaw.getParent());
+    Files.createFile(javaw);
+    JavaRuntimeException failure =
+        assertThrows(
+            JavaRuntimeException.class,
+            () ->
+                ProcessorProcessRunner.validateRuntime(
+                    new FileBasedJavaRuntime(javaw), () -> false));
+    assertTrue(failure.getMessage().contains(javaw.resolveSibling("java.exe").toString()));
+  }
+
+  @Test
+  void cancellationDuringRuntimeProbeTakesPrecedenceOverProbeFailure() throws Exception {
+    Assumptions.assumeTrue(OperatingSystem.getOperatingSystem() == OperatingSystem.LINUX);
+    Path marker = root.resolve("cancelled");
+    Path executable = root.resolve("java");
+    Files.writeString(
+        executable, "#!/bin/sh\ntouch '" + marker.toString().replace("'", "'\\''") + "'\nexit 1\n");
+    assertTrue(executable.toFile().setExecutable(true));
+
+    assertThrows(
+        InterruptedException.class,
+        () ->
+            ProcessorProcessRunner.validateRuntime(
+                new FileBasedJavaRuntime(executable), () -> Files.exists(marker)));
   }
 
   @Test

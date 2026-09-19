@@ -9,6 +9,9 @@ is added at the top.
 
 ## [Unreleased]
 
+### Fixed
+- Modern mod loader installation now freshly validates locally selected Java before installing libraries, Minecraft, or assets, including when the launcher uses that same Java runtime. Missing or unusable executables report their path and recovery instructions instead of an unknown error, including if Java becomes unavailable after validation. Automatically installed Mojang runtimes retain their existing post-install validation; Java selections are not silently changed (LAUNCHER-GA).
+
 ## [v4.0-1158] - 2026-09-16
 
 ### Changed
