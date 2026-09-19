@@ -9,6 +9,8 @@ is added at the top.
 
 ## [Unreleased]
 
+## [v4.0-1160] - 2026-09-19
+
 ### Changed
 - Java compatibility and low-memory warnings now use the launcher's dark palette, bundled fonts, and rounded buttons, with visible keyboard focus. Native window controls, default cancellation, and expandable technical details are preserved.
 
