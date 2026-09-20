@@ -31,6 +31,15 @@ game Java runtime; ForgeWrapper is not used. Processors are ordinary local progr
 - Inferred processor tools retain `.sha1` sidecars for verified cache reuse. Shared library writes and
   processor sequences use the cache's `modern-installer.lock` across launcher instances.
 - Modern launch uses a verified, unmodified vanilla copy at `bin/native-launch/<version-id>.jar`.
+  `<version-id>` is the resolved Forge or NeoForge version ID, not the vanilla Minecraft version:
+  loader metadata can exclude the vanilla JAR from loader discovery by filename, for example with
+  `-DignoreList=${version_name}.jar`. The shared cache's `minecraft_<mc-version>.jar` does not match
+  that name. The pack-local copy preserves the loader's arguments without renaming the shared cache;
+  its loader-looking filename does not make it a patched processor output. Generated loader artifacts
+  are separate. The copy is checked against Mojang's client SHA-1 and reused when valid, rather than
+  copied on every launch. A physical copy is the launcher's implementation choice; the naming
+  compatibility is the reason for the alias. This policy applies to all modern Forge and NeoForge
+  launches, even if a particular loader version does not require the alias.
   This launcher-managed directory is cleaned on full reinstall. Legacy launches retain their existing
   pack-local JAR behavior; modern launch does not create an unused signature-stripped `bin/minecraft.jar`.
 - Processors without declared output hashes can reuse successful runs when their file arguments are
