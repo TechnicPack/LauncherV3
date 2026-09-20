@@ -1,7 +1,7 @@
 # Release History
 
 Auto-generated log of every stable release, reverse-chronological.
-Sourced from the Technic Jenkins build server (https://jenkins.technicpack.net) and
+Sourced from the Technic Jenkins build server (<https://jenkins.technicpack.net>) and
 GitHub Releases (TechnicPack/LauncherV3). Commits are listed as recorded in git —
 **this is not a curated changelog** (see [CHANGELOG.md](CHANGELOG.md) for that).
 
@@ -2396,4 +2396,3 @@ _Build data purged from CI; changelog unrecoverable._
 ## [v4.0-35-stable] - 2014-09-19
 
 Initial tracked stable release (v4.0-35-stable).
-
