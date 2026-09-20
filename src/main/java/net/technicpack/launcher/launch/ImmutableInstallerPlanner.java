@@ -486,6 +486,7 @@ class ImmutableInstallerPlanner {
         throw new IOException("Missing or invalid canonical vanilla JAR: " + source);
       }
     }
+    removeFile(new File(pack.getBinDir(), "minecraft.jar"));
     reporter.updateNodeProgress(100.0f);
   }
 

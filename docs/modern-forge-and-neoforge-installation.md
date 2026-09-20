@@ -42,6 +42,8 @@ game Java runtime; ForgeWrapper is not used. Processors are ordinary local progr
   launches, even if a particular loader version does not require the alias.
   This launcher-managed directory is cleaned on full reinstall. Legacy launches retain their existing
   pack-local JAR behavior; modern launch does not create an unused signature-stripped `bin/minecraft.jar`.
+  After verifying the native-launch copy, modern launch preparation removes any obsolete
+  `bin/minecraft.jar`, including on existing installations without a full reinstall.
 - Processors without declared output hashes can reuse successful runs when their file arguments are
   conservatively trackable: whole Maven coordinates and supported whole-token references. SHA-256
   receipts under `cache/processor-state/` bind the installer recipe, selected Java runtime, vanilla

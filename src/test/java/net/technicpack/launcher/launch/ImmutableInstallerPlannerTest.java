@@ -1776,9 +1776,12 @@ class ImmutableInstallerPlannerTest {
     executeNode(install, "prepare-modern-launch-jar", context);
     Path alias = MojangUtils.getModernLaunchJar(pack.getBinDir().toPath(), version.getId());
     assertEquals(sha1(bytes), sha1(Files.readAllBytes(alias)));
-    assertFalse(
-        sha1(bytes)
-            .equals(sha1(Files.readAllBytes(pack.getBinDir().toPath().resolve("minecraft.jar")))));
+    assertFalse(Files.exists(pack.getBinDir().toPath().resolve("minecraft.jar")));
+    Files.writeString(
+        pack.getBinDir().toPath().resolve("minecraft.jar"), "stale legacy launch bytes");
+    executeNode(install, "prepare-modern-launch-jar", context);
+    assertFalse(Files.exists(pack.getBinDir().toPath().resolve("minecraft.jar")));
+    assertEquals(sha1(bytes), sha1(Files.readAllBytes(alias)));
     Files.writeString(alias, "damaged alias");
     executeNode(install, "prepare-modern-launch-jar", context);
     assertEquals(sha1(bytes), sha1(Files.readAllBytes(alias)));

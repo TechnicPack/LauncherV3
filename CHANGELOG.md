@@ -9,6 +9,9 @@ is added at the top.
 
 ## [Unreleased]
 
+### Fixed
+- Modern Forge and NeoForge launch preparation now removes obsolete `bin/minecraft.jar` files left by earlier installations after verifying the native-launch copy, without requiring a full reinstall.
+
 ## [v4.0-1160] - 2026-09-19
 
 ### Changed
