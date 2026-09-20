@@ -1,7 +1,11 @@
 # Changelog
 
-All user-visible changes to this launcher are documented here. Format follows
+Notable changes to this launcher are documented here for users and contributors. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+This project uses build-based versioning (`v4.0-<build>`), not Semantic Versioning. Older release tags also include
+the update channel (for example, `v4.0-1075-stable`). Curated coverage starts with that release; earlier releases
+are preserved in the uncurated [release history](HISTORY.md).
 
 When a build is promoted, the `[Unreleased]` section is renamed to `[v4.0-<build>] - YYYY-MM-DD` and a new empty
 `[Unreleased]` section is added at the top.
@@ -141,17 +145,10 @@ When a build is promoted, the `[Unreleased]` section is renamed to `[v4.0-<build
 - Missing library files on a mirror (HTTP 404) no longer trigger repeated download attempts and warning stack traces
   before the installer tries the next source. Transient failures still retry, and installation still fails with the
   attempted sources if no mirror can supply the file.
-- The **Discover** tab no longer drops to the built-in offline page for players still running Java 8. The images on that
-  page were the only launcher requests that did not identify themselves as the launcher; they went out labelled as
-  generic Java traffic instead, and our site recently began turning that traffic away when it came from older Java
-  versions. A single refused image was enough to stop the page laying itself out, so those players saw the offline copy
-  instead of the live one. Discover page images now identify themselves the same way every other launcher request
-  already does, which also means the tab no longer depends on how our site chooses to treat unlabelled Java traffic in
-  future. Players on newer Java versions were never affected.
-- The **Discover** tab now falls back to the last copy it successfully downloaded when the page cannot be fetched. A
-  reversed check meant the saved copy was only ever consulted when it did not exist, so an unreachable site always
-  skipped straight past it to the generic built-in page rather than showing the most recent version you had actually
-  seen.
+- The **Discover** tab loads correctly on Java 8 again. Image requests now identify themselves as launcher traffic,
+  preventing refused images from forcing the tab to show its built-in offline page.
+- The **Discover** tab now shows its last successfully downloaded copy when the page cannot be fetched, instead of
+  skipping straight to the built-in offline page.
 - The launcher console now wraps exceptionally long unbroken text, such as the full classpath for a large modpack,
   instead of allowing a single line to grow tens of thousands of pixels wide. On Linux, lines that exceeded the XRender
   coordinate range could fold distant characters back over the visible text and appear badly garbled; the console now
@@ -210,12 +207,8 @@ When a build is promoted, the `[Unreleased]` section is renamed to `[v4.0-<build
 
 ### Fixed
 
-- Searching for a modpack by name no longer crashes the launcher when one of your locally installed packs matches the
-  search text. Some installed packs are local-only and have no online listing; when one of those matched a name search,
-  the search emitted an incomplete result the pack loader couldn't process, throwing a `NullPointerException` (reported
-  as LAUNCHER-E). Local-only installs are now skipped in name-search results for the moment, while online and default
-  packs continue to appear in search exactly as before. A regression test was added so name search can never emit one of
-  these incomplete results again.
+- Searching for a modpack by name no longer crashes when a locally installed pack has no online listing. Local-only
+  packs are excluded from name-search results; online and default packs remain searchable.
 
 ## [v4.0-1098] - 2026-05-10
 
@@ -406,3 +399,26 @@ When a build is promoted, the `[Unreleased]` section is renamed to `[v4.0-<build
 
 For the full list of historical stable releases (pre-dating this file), see [HISTORY.md](HISTORY.md) or the
 [Releases page](https://github.com/TechnicPack/LauncherV3/releases).
+
+[Unreleased]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1160...HEAD
+[v4.0-1160]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1158...v4.0-1160
+[v4.0-1158]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1139...v4.0-1158
+[v4.0-1139]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1138...v4.0-1139
+[v4.0-1138]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1137...v4.0-1138
+[v4.0-1137]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1136...v4.0-1137
+[v4.0-1136]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1133...v4.0-1136
+[v4.0-1133]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1131...v4.0-1133
+[v4.0-1131]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1130...v4.0-1131
+[v4.0-1130]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1120...v4.0-1130
+[v4.0-1120]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1098...v4.0-1120
+[v4.0-1098]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1097...v4.0-1098
+[v4.0-1097]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1090...v4.0-1097
+[v4.0-1090]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1089...v4.0-1090
+[v4.0-1089]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1084...v4.0-1089
+[v4.0-1084]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1083...v4.0-1084
+[v4.0-1083]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1081...v4.0-1083
+[v4.0-1081]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1080...v4.0-1081
+[v4.0-1080]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1079-stable...v4.0-1080
+[v4.0-1079-stable]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1076-stable...v4.0-1079-stable
+[v4.0-1076-stable]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1075-stable...v4.0-1076-stable
+[v4.0-1075-stable]: https://github.com/TechnicPack/LauncherV3/releases/tag/v4.0-1075-stable

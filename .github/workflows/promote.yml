@@ -171,6 +171,40 @@ jobs:
           fi
           echo "No existing release for ${tag}; safe to promote."
 
+      - name: Extract and Validate Release Notes
+        id: notes
+        run: |
+          set -euo pipefail
+          notes_file="$(mktemp)"
+
+          section="$(python3 <<'PY'
+          import re, sys
+          with open('CHANGELOG.md') as f:
+              content = f.read()
+          m = re.search(
+              r'^## \[Unreleased\][^\n]*\n(.*?)(?=^## \[|^<!-- historical-releases-footer -->|\Z)',
+              content, re.MULTILINE | re.DOTALL,
+          )
+          if m:
+              section = m.group(1).strip()
+              if re.search(r'^- ', section, re.MULTILINE) and not re.search(
+                  r'^\[(?i:Unreleased)\]: (.+/compare/)([^ \n]+)\.\.\.HEAD$', content, re.MULTILINE,
+              ):
+                  sys.exit('[Unreleased] comparison link not found in CHANGELOG.md')
+              sys.stdout.write(section)
+          PY
+          )"
+
+          if [[ -n "${section}" ]] && grep -qE '^- ' <<<"${section}"; then
+            printf '%s\n' "${section}" > "${notes_file}"
+            echo "notes_source=changelog" >> "${GITHUB_OUTPUT}"
+            echo "::notice::Using release notes from CHANGELOG.md [Unreleased]"
+          else
+            echo "notes_source=fallback" >> "${GITHUB_OUTPUT}"
+            echo "::notice::CHANGELOG.md [Unreleased] is empty or absent — falling back to commit compare"
+          fi
+          echo "notes_file=${notes_file}" >> "${GITHUB_OUTPUT}"
+
       - name: Configure SSH
         env:
           DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
@@ -253,35 +287,6 @@ jobs:
             echo "- Source run id: \`${RUN_ID}\`"
             echo "- Source artifact: \`${ARTIFACT_NAME}\`"
           } >> "${GITHUB_STEP_SUMMARY}"
-
-      - name: Extract Release Notes
-        id: notes
-        run: |
-          set -euo pipefail
-          notes_file="$(mktemp)"
-
-          section="$(python3 <<'PY'
-          import re, sys
-          with open('CHANGELOG.md') as f:
-              content = f.read()
-          m = re.search(
-              r'^## \[Unreleased\][^\n]*\n(.*?)(?=^## \[|^<!-- historical-releases-footer -->|\Z)',
-              content, re.MULTILINE | re.DOTALL,
-          )
-          if m:
-              sys.stdout.write(m.group(1).strip())
-          PY
-          )"
-
-          if [[ -n "${section}" ]] && grep -qE '^- ' <<<"${section}"; then
-            printf '%s\n' "${section}" > "${notes_file}"
-            echo "notes_source=changelog" >> "${GITHUB_OUTPUT}"
-            echo "::notice::Using release notes from CHANGELOG.md [Unreleased]"
-          else
-            echo "notes_source=fallback" >> "${GITHUB_OUTPUT}"
-            echo "::notice::CHANGELOG.md [Unreleased] is empty or absent — falling back to commit compare"
-          fi
-          echo "notes_file=${notes_file}" >> "${GITHUB_OUTPUT}"
 
       - name: Create GitHub Release
         env:
@@ -379,6 +384,15 @@ jobs:
           if not pattern.search(content):
               sys.exit('[Unreleased] heading not found in CHANGELOG.md')
           new_content = pattern.sub(lambda m: m.group(1) + '\n' + new_heading + '\n', content, count=1)
+          tag = f'v{major}-{build}'
+          link_pattern = re.compile(r'^\[(?i:Unreleased)\]: (.+/compare/)([^ \n]+)\.\.\.HEAD$', re.MULTILINE)
+          if not link_pattern.search(new_content):
+              sys.exit('[Unreleased] comparison link not found in CHANGELOG.md')
+          new_content = link_pattern.sub(
+              lambda m: f'[Unreleased]: {m.group(1)}{tag}...HEAD\n'
+              f'[{tag}]: {m.group(1)}{m.group(2)}...{tag}',
+              new_content, count=1,
+          )
           with open('CHANGELOG.md', 'w') as f:
               f.write(new_content)
           PY
