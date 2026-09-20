@@ -152,11 +152,13 @@ jobs:
             exit 1
           fi
 
-          echo "jar_path=${jar_path}" >> "${GITHUB_OUTPUT}"
-          echo "exe_path=${exe_path}" >> "${GITHUB_OUTPUT}"
-          echo "osx_path=${osx_path}" >> "${GITHUB_OUTPUT}"
-          echo "build_number=${build_number}" >> "${GITHUB_OUTPUT}"
-          echo "artifact_name=${artifact_name}" >> "${GITHUB_OUTPUT}"
+          {
+            echo "jar_path=${jar_path}"
+            echo "exe_path=${exe_path}"
+            echo "osx_path=${osx_path}"
+            echo "build_number=${build_number}"
+            echo "artifact_name=${artifact_name}"
+          } >> "${GITHUB_OUTPUT}"
 
       - name: Guard Against Re-Promotion
         env:
@@ -243,14 +245,21 @@ jobs:
           set -euo pipefail
 
           remote_dir="${REMOTE_BASE_DIR}/${BUILD_NUMBER}"
+          # Escape apostrophes before enclosing paths in POSIX-shell single quotes.
+          remote_dir_quoted="'${remote_dir//\'/\'\\\'\'}'"
+          remote_base_quoted="'${REMOTE_BASE_DIR//\'/\'\\\'\'}'"
 
-          ssh "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p '${remote_dir}'"
+          # Expand the safely quoted runner-side path, not a remote variable.
+          # shellcheck disable=SC2029
+          ssh "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p ${remote_dir_quoted}"
 
           scp "${EXE_PATH}" "${REMOTE_USER}@${REMOTE_HOST}:${remote_dir}/TechnicLauncher.exe"
           scp "${JAR_PATH}" "${REMOTE_USER}@${REMOTE_HOST}:${remote_dir}/TechnicLauncher.jar"
           scp "${OSX_PATH}" "${REMOTE_USER}@${REMOTE_HOST}:${remote_dir}/TechnicLauncher.app.zip"
 
-          ssh "${REMOTE_USER}@${REMOTE_HOST}" "cd '${REMOTE_BASE_DIR}' && ln -sfn '${BUILD_NUMBER}' 'stable'"
+          # Paths are shell-quoted above; BUILD_NUMBER is validated as numeric.
+          # shellcheck disable=SC2029
+          ssh "${REMOTE_USER}@${REMOTE_HOST}" "cd ${remote_base_quoted} && ln -sfn '${BUILD_NUMBER}' 'stable'"
 
       - name: Refresh Launcher APIs
         env:
@@ -310,6 +319,8 @@ jobs:
           else
             echo "Generating release notes from commit compare"
 
+            # $tag is a jq variable supplied by --arg, not a shell variable.
+            # shellcheck disable=SC2016
             prev_filter='[.[] | select(.isDraft | not) | select(.isPrerelease | not) | select(.tagName != $tag)] | .[0].tagName'
 
             releases_json="$(gh release list --repo "${GITHUB_REPOSITORY}" -L 100 --json tagName,isPrerelease,isDraft || echo '[]')"
@@ -370,7 +381,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          export DATE_STR="$(date -u +'%Y-%m-%d')"
+          DATE_STR="$(date -u +'%Y-%m-%d')"
+          export DATE_STR
 
           python3 <<'PY'
           import os, re, sys
