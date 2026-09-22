@@ -71,6 +71,12 @@ dependencies {
     implementation(libs.google.oauth.client.java6)
     implementation(libs.google.http.client)
     implementation(libs.google.http.client.apache.v5)
+    // Security pin: forces httpclient5 (transitive via google-http-client-apache-v5) to >= 5.6.3
+    // to patch GHSA-hjcp-jmpx-g3qm (CVE-2026-64607); its parent pom also pins httpcore5/httpcore5-h2
+    // to 5.4.3, patching GHSA-hf6x-8p5f-cgmf and GHSA-v3jc-474w-2wm6. Declared directly (not as a
+    // constraint) so Dependabot can open fix PRs for it. Remove once google-http-client-apache-v5
+    // pulls httpclient5 >= 5.6.3 itself.
+    implementation(libs.httpclient5)
     implementation(libs.google.http.client.gson)
     implementation(libs.slf4j.api)
     implementation(libs.slf4j.nop)
