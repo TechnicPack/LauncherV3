@@ -12,6 +12,11 @@ When a build is promoted, the `[Unreleased]` section is renamed to `[v4.0-<build
 
 ## [Unreleased]
 
+### Fixed
+
+- Modpack logos now scale up or down proportionally to fit the artwork area, centered without
+  cropping or stretching nonstandard image dimensions.
+
 ## [v4.0-1164] - 2026-09-25
 
 ### Fixed

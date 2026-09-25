@@ -12,11 +12,13 @@ class ImageUtilsTest {
     "500, 500, 220, 220",
     "740, 370, 370, 185",
     "250, 500, 110, 220",
-    "100, 50, 100, 50",
+    "100, 50, 370, 185",
+    "50, 100, 110, 220",
+    "50, 50, 220, 220",
     "370, 220, 370, 220",
     "1, 1000, 1, 220"
   })
-  void fitsArtworkWithoutDistortionOrUpscaling(
+  void scalesArtworkToFitWithoutDistortion(
       int sourceWidth, int sourceHeight, int expectedWidth, int expectedHeight) {
     BufferedImage source =
         new BufferedImage(sourceWidth, sourceHeight, BufferedImage.TYPE_INT_ARGB);
