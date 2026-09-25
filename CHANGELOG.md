@@ -16,6 +16,8 @@ When a build is promoted, the `[Unreleased]` section is renamed to `[v4.0-<build
 
 ### Fixed
 
+- Discover artwork now keeps its original proportions and follows the page's image sizing instead
+  of being forced into a fixed thumbnail size when loaded.
 - Splash-screen artwork and update progress now share a solid dark background with padded artwork
   and rounded corners where supported, avoiding translucent repaint flicker. The current-item row
   has a wider, vertically centered progress strip, larger filename text, and more spacing.

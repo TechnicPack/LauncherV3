@@ -160,7 +160,7 @@ public class DiscoverResourceLoader extends ImageResourceLoader {
   }
 
   public ImageResource get(final String uri) {
-    return get(uri, 255, 151);
+    return get(uri, -1, -1);
   }
 
   public synchronized ImageResource get(final String uri, final int width, final int height) {
@@ -169,7 +169,8 @@ public class DiscoverResourceLoader extends ImageResourceLoader {
       BufferedImage newImg = ((AWTFSImage) resource.getImage()).getImage();
       return new ImageResource(
           resource.getImageUri(),
-          AWTFSImage.createImage(ImageUtils.scaleImage(newImg, width, height)));
+          AWTFSImage.createImage(
+              width > -1 && height > -1 ? ImageUtils.scaleImage(newImg, width, height) : newImg));
     } else {
       CacheKey key = new CacheKey(uri, width, height);
       ImageResource ir = (ImageResource) _imageCache.get(key);
@@ -207,7 +208,9 @@ public class DiscoverResourceLoader extends ImageResourceLoader {
           FSImage awtfsImage = ir.getImage();
           BufferedImage newImg = ((AWTFSImage) awtfsImage).getImage();
 
-          newImg = ImageUtils.scaleImage(newImg, width, height);
+          if (width > -1 && height > -1) {
+            newImg = ImageUtils.scaleImage(newImg, width, height);
+          }
           ir = new ImageResource(ir.getImageUri(), AWTFSImage.createImage(newImg));
           loaded(ir, width, height);
         }

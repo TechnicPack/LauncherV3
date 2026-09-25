@@ -17,6 +17,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -26,8 +28,37 @@ import javax.imageio.ImageIO;
 import net.technicpack.launchercore.TechnicConstants;
 import org.junit.jupiter.api.Test;
 import org.xhtmlrenderer.resource.ImageResource;
+import org.xhtmlrenderer.swing.AWTFSImage;
 
 class DiscoverResourceLoaderTest {
+  @Test
+  void backgroundRequestsPreserveNaturalDimensionsOnInitialAndCachedLoads() throws Exception {
+    Path file = Files.createTempFile("discover-logo", ".png");
+    try {
+      BufferedImage source = new BufferedImage(220, 220, BufferedImage.TYPE_INT_ARGB);
+      for (int y = 0; y < 220; y++) {
+        for (int x = 0; x < 220; x++) {
+          source.setRGB(x, y, 0xffff0000);
+        }
+      }
+      ImageIO.write(source, "png", file.toFile());
+      DiscoverResourceLoader loader = new DiscoverResourceLoader();
+      for (int attempt = 0; attempt < 2; attempt++) {
+        BufferedImage image =
+            ((AWTFSImage) loader.get(file.toUri().toString()).getImage()).getImage();
+        assertEquals(220, image.getWidth());
+        assertEquals(220, image.getHeight());
+        for (int y = 0; y < 220; y++) {
+          for (int x = 0; x < 220; x++) {
+            assertEquals(0xffff0000, image.getRGB(x, y));
+          }
+        }
+      }
+    } finally {
+      Files.deleteIfExists(file);
+    }
+  }
+
   @Test
   void uppercaseHttpSchemeUsesLauncherUserAgent() throws Exception {
     TechnicConstants.setBuildNumber(() -> "test");
