@@ -182,7 +182,7 @@ public class Relauncher {
     screen
         .getProgressDisplay()
         .getCurrentItemLabel()
-        .setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 11));
+        .setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 12));
     screen
         .getProgressDisplay()
         .getCurrentItemProgressBar()

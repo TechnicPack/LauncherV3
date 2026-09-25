@@ -3,6 +3,7 @@ package net.technicpack.ui.controls.installation;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -104,11 +105,10 @@ public class InstallationProgressDisplay extends JPanel
 
   public void configureForSplash(int preferredWidth) {
     setComponentHeight(overallProgressBar, preferredWidth, 24);
-    currentItemRow.setBorder(BorderFactory.createEmptyBorder(3, 0, 0, 0));
-    // Row = 3 (top border) + 15 (label content) = 18, enough to fit descenders on the 11pt
-    // label font (getFont().getSize() = 11, measured height ~15).
-    setComponentHeight(currentItemRow, preferredWidth, 18);
-    // Keep the row visible from the start so pack() reserves its 18px. If the row were hidden
+    currentItemRow.setBorder(BorderFactory.createEmptyBorder(5, 2, 0, 2));
+    // Reserve 18px for the 12pt filename and 5px of spacing above it.
+    setComponentHeight(currentItemRow, preferredWidth, 23);
+    // Keep the row visible from the start so pack() reserves its height. If the row were hidden
     // during pack and later revealed during the update (e.g., when asset download starts), the
     // splash frame would stay its packed size and the BorderLayout would compensate by
     // shrinking CENTER — which clips the splash image top/bottom. Showing it now means the
@@ -118,12 +118,15 @@ public class InstallationProgressDisplay extends JPanel
     currentItemCaptionLabel.setPreferredSize(new Dimension(0, 0));
     currentItemCenter.removeAll();
     currentItemCenter.setLayout(new BorderLayout(8, 0));
-    currentItemProgressBar.setMinimumSize(new Dimension(84, 8));
-    currentItemProgressBar.setPreferredSize(new Dimension(84, 8));
-    currentItemProgressBar.setMaximumSize(new Dimension(84, 8));
-    currentItemNameLabel.setMinimumSize(new Dimension(0, 15));
-    currentItemNameLabel.setPreferredSize(new Dimension(0, 15));
-    currentItemCenter.add(currentItemProgressBar, BorderLayout.WEST);
+    currentItemProgressBar.setMinimumSize(new Dimension(100, 10));
+    currentItemProgressBar.setPreferredSize(new Dimension(100, 10));
+    currentItemProgressBar.setMaximumSize(new Dimension(100, 10));
+    currentItemNameLabel.setMinimumSize(new Dimension(0, 18));
+    currentItemNameLabel.setPreferredSize(new Dimension(0, 18));
+    JPanel stripContainer = new JPanel(new GridBagLayout());
+    stripContainer.setOpaque(false);
+    stripContainer.add(currentItemProgressBar);
+    currentItemCenter.add(stripContainer, BorderLayout.WEST);
     currentItemCenter.add(currentItemNameLabel, BorderLayout.CENTER);
     revalidate();
   }

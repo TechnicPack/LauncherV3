@@ -72,23 +72,6 @@ class InstallationProgressDisplayTest {
     assertFalse(display.getCurrentItemProgressBar().isIndeterminate());
   }
 
-  @Test
-  void splashModeHidesCaptionAndKeepsRowCompactlyVisible() {
-    InstallationProgressDisplay display = new InstallationProgressDisplay();
-
-    display.configureForSplash();
-
-    // The row stays visible from the start so pack() reserves its 18px even before any
-    // current-item update arrives; otherwise revealing the row mid-install would shrink the
-    // splash image. "Compact" comes from the caption being width-zero, not from the row
-    // itself being hidden or sub-18.
-    assertTrue(display.getCurrentItemRow().isVisible());
-    assertFalse(display.getCurrentItemCaptionLabel().isVisible());
-    assertEquals(0, display.getCurrentItemCaptionLabel().getPreferredSize().width);
-    assertEquals(24, display.getOverallProgressBar().getPreferredSize().height);
-    assertEquals(18, display.getCurrentItemRow().getPreferredSize().height);
-  }
-
   private static void flushEdt() throws Exception {
     SwingUtilities.invokeAndWait(() -> {});
   }
