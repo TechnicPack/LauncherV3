@@ -14,6 +14,8 @@ When a build is promoted, the `[Unreleased]` section is renamed to `[v4.0-<build
 
 ### Fixed
 
+- Modpack logos now preserve their aspect ratio, centered in the artwork area without upscaling,
+  instead of stretching nonstandard image dimensions.
 - Modern Forge and NeoForge launch preparation now removes obsolete `bin/minecraft.jar` files left by earlier
   installations after verifying the native-launch copy, without requiring a full reinstall.
 

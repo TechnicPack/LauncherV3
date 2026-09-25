@@ -31,6 +31,35 @@ public class ImageUtils {
     return scaleImage(img, width, height);
   }
 
+  /** Fits artwork on a centered transparent canvas without upscaling. */
+  public static BufferedImage fitImage(BufferedImage img, int width, int height) {
+    if (img.getWidth() == width && img.getHeight() == height) {
+      return img;
+    }
+
+    double scale =
+        Math.min(1.0, Math.min((double) width / img.getWidth(), (double) height / img.getHeight()));
+    int scaledWidth = Math.max(1, (int) Math.round(img.getWidth() * scale));
+    int scaledHeight = Math.max(1, (int) Math.round(img.getHeight() * scale));
+    BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    Graphics2D g = result.createGraphics();
+    try {
+      g.setRenderingHint(
+          RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+      g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+      g.drawImage(
+          img,
+          (width - scaledWidth) / 2,
+          (height - scaledHeight) / 2,
+          scaledWidth,
+          scaledHeight,
+          null);
+    } finally {
+      g.dispose();
+    }
+    return result;
+  }
+
   public static BufferedImage scaleImage(BufferedImage img, int width, int height) {
     if (img.getWidth() == width && img.getHeight() == height) {
       return img; // No scaling needed

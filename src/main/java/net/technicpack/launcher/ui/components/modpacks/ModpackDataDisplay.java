@@ -103,7 +103,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
 
     ImageJob<ModpackModel> job = logoRepo.startImageJob(modpack);
     job.addJobListener(this);
-    packImage.setIcon(new ImageIcon(ImageUtils.scaleImage(job.getImage(), 370, 220)));
+    packImage.setIcon(new ImageIcon(ImageUtils.fitImage(job.getImage(), 370, 220)));
 
     SwingUtilities.invokeLater(
         () -> {
@@ -404,7 +404,7 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
   @Override
   public void jobComplete(ImageJob<ModpackModel> job) {
     if (job.getJobData() == currentModpack) {
-      packImage.setIcon(new ImageIcon(ImageUtils.scaleImage(job.getImage(), 370, 220)));
+      packImage.setIcon(new ImageIcon(ImageUtils.fitImage(job.getImage(), 370, 220)));
     }
   }
 
