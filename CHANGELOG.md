@@ -12,7 +12,7 @@ When a build is promoted, the `[Unreleased]` section is renamed to `[v4.0-<build
 
 ## [Unreleased]
 
-## [v4.0-1165] - 2026-09-25
+## [v4.0-1166] - 2026-09-25
 
 ### Fixed
 
@@ -21,6 +21,11 @@ When a build is promoted, the `[Unreleased]` section is renamed to `[v4.0-<build
 - Splash-screen artwork and update progress now share a solid dark background with padded artwork
   and rounded corners where supported, avoiding translucent repaint flicker. The current-item row
   has a wider, vertically centered progress strip, larger filename text, and more spacing.
+
+## [v4.0-1165] - 2026-09-25
+
+### Fixed
+
 - Modpack logos now scale up or down proportionally to fit the artwork area, centered without
   cropping or stretching nonstandard image dimensions.
 
@@ -416,7 +421,8 @@ When a build is promoted, the `[Unreleased]` section is renamed to `[v4.0-<build
 For the full list of historical stable releases (pre-dating this file), see [HISTORY.md](HISTORY.md) or the
 [Releases page](https://github.com/TechnicPack/LauncherV3/releases).
 
-[Unreleased]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1165...HEAD
+[Unreleased]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1166...HEAD
+[v4.0-1166]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1165...v4.0-1166
 [v4.0-1165]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1164...v4.0-1165
 [v4.0-1164]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1160...v4.0-1164
 [v4.0-1160]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1158...v4.0-1160
