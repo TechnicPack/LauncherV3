@@ -12,6 +12,8 @@ When a build is promoted, the `[Unreleased]` section is renamed to `[v4.0-<build
 
 ## [Unreleased]
 
+## [v4.0-1164] - 2026-09-25
+
 ### Fixed
 
 - Modpack logos now preserve their aspect ratio, centered in the artwork area without upscaling,
@@ -402,7 +404,8 @@ When a build is promoted, the `[Unreleased]` section is renamed to `[v4.0-<build
 For the full list of historical stable releases (pre-dating this file), see [HISTORY.md](HISTORY.md) or the
 [Releases page](https://github.com/TechnicPack/LauncherV3/releases).
 
-[Unreleased]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1160...HEAD
+[Unreleased]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1164...HEAD
+[v4.0-1164]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1160...v4.0-1164
 [v4.0-1160]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1158...v4.0-1160
 [v4.0-1158]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1139...v4.0-1158
 [v4.0-1139]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1138...v4.0-1139
