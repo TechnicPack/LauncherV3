@@ -94,29 +94,11 @@ public class SplashScreen extends JFrame {
   }
 
   static JPanel createProgressFooter(InstallationProgressDisplay progressDisplay) {
-    // Semi-transparent dark backdrop: reads as a soft ribbon that gives white progress text a
-    // reliable contrast surface without the hard black-slab look of a fully-opaque footer. The
-    // RGB matches the launcher palette's central-back colour (25, 30, 34) but it's hard-coded
-    // here so this UI-controls module doesn't take a reverse dependency on the launcher layer.
-    JPanel footer =
-        new JPanel(new BorderLayout()) {
-          @Override
-          protected void paintComponent(Graphics g) {
-            Graphics2D g2d = (Graphics2D) g.create();
-            try {
-              // AlphaComposite.SRC (not SRC_OVER) overwrites destination pixels instead of
-              // blending with them, which is required on a translucent JFrame. SRC_OVER
-              // compounds with stale buffer alpha across repaints and causes visible flicker.
-              g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC, 0.75f));
-              g2d.setColor(new Color(25, 30, 34));
-              g2d.fillRect(0, 0, getWidth(), getHeight());
-            } finally {
-              g2d.dispose();
-            }
-            super.paintComponent(g);
-          }
-        };
-    footer.setOpaque(false);
+    // Keep progress repaints independent of the translucent window's backing buffer.
+    // Swing clears and double-buffers this opaque surface before painting its children.
+    JPanel footer = new JPanel(new BorderLayout());
+    footer.setBackground(new Color(25, 30, 34));
+    footer.setOpaque(true);
     footer.setBorder(
         new EmptyBorder(
             4, PROGRESS_HORIZONTAL_PADDING, PROGRESS_BOTTOM_PADDING, PROGRESS_HORIZONTAL_PADDING));
