@@ -16,7 +16,8 @@ When a build is promoted, the `[Unreleased]` section is renamed to `[v4.0-<build
 
 ### Fixed
 
-- Splash-screen update progress now paints on a solid dark footer to avoid translucent repaint flicker.
+- Splash-screen artwork and update progress now share a solid dark background with padded artwork
+  and rounded corners where supported, avoiding translucent repaint flicker.
 - Modpack logos now scale up or down proportionally to fit the artwork area, centered without
   cropping or stretching nonstandard image dimensions.
 

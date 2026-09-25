@@ -22,7 +22,6 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import io.sentry.Sentry;
 import io.sentry.protocol.User;
-import java.awt.Color;
 import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
@@ -729,8 +728,6 @@ public class LauncherMain {
     cleanupLogsThread.start();
 
     final SplashScreen splash = new SplashScreen(resources.getImage("launch_splash.png"), 0);
-    Color bg = UIConstants.COLOR_FORM_ELEMENT_INTERNAL;
-    splash.getContentPane().setBackground(new Color(bg.getRed(), bg.getGreen(), bg.getBlue(), 255));
     splash.pack();
     splash.setLocationRelativeTo(null);
     splash.setVisible(true);

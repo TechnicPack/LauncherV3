@@ -160,8 +160,6 @@ public class Relauncher {
 
   public ExecutionPlan<UpdatePlanner.UpdateContext> buildUpdaterPlan() throws IOException {
     screen = new SplashScreen(resources.getImage("launch_splash.png"), 30);
-    Color bg = UIConstants.COLOR_FORM_ELEMENT_INTERNAL;
-    screen.getContentPane().setBackground(new Color(bg.getRed(), bg.getGreen(), bg.getBlue(), 255));
     screen.getProgressDisplay().getOverallProgressBar().setForeground(Color.white);
     screen.getProgressDisplay().getOverallProgressBar().setBackground(UIConstants.COLOR_GREEN);
     screen

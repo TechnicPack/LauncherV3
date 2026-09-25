@@ -20,12 +20,15 @@
 package net.technicpack.ui.controls.installation;
 
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import net.technicpack.utilslib.Utils;
 
 public class SplashScreen extends JFrame {
+  private static final Color SPLASH_BACKGROUND = new Color(25, 30, 34);
   private static final int PROGRESS_HORIZONTAL_PADDING = 14;
   private static final int PROGRESS_BOTTOM_PADDING = 10;
   protected final ImageIcon image;
@@ -39,6 +42,7 @@ public class SplashScreen extends JFrame {
 
     Container container = getContentPane();
     container.setLayout(new BorderLayout());
+    container.setBackground(SPLASH_BACKGROUND);
 
     // Redraw the image to fix the alpha channel
     BufferedImage alphaImage =
@@ -47,13 +51,11 @@ public class SplashScreen extends JFrame {
     g.drawImage(img, 0, 0, image.getIconWidth(), image.getIconHeight(), null);
     g.dispose();
 
-    // Draw the image. JLabel rather than JButton because JButton fires full-component
-    // repaints on mouse enter/exit (rollover) and press/release, which on a translucent
-    // JFrame show as a visible flicker as the buffer gets redrawn. JLabel installs no
-    // mouse listeners and stays visually stable under any cursor interaction.
-    // Explicit sizing ensures pack() gets exactly the icon dimensions.
+    // A passive label avoids mouse-triggered button repaints.
+    // Reserve the image dimensions plus breathing room on each side.
     JLabel background = new JLabel(new ImageIcon(alphaImage));
-    Dimension iconSize = new Dimension(image.getIconWidth(), image.getIconHeight());
+    background.setBorder(new EmptyBorder(14, 14, 14, 14));
+    Dimension iconSize = new Dimension(image.getIconWidth() + 28, image.getIconHeight() + 28);
     background.setMinimumSize(iconSize);
     background.setPreferredSize(iconSize);
     container.add(background, BorderLayout.CENTER);
@@ -64,17 +66,17 @@ public class SplashScreen extends JFrame {
       container.add(createProgressFooter(progressDisplay), BorderLayout.SOUTH);
     }
 
-    // Finalize
-    this.getRootPane().setOpaque(false);
-    try {
-      // Try to set a transparent background, but it isn't always supported
-      this.setBackground(new Color(0, 0, 0, 0));
-    } catch (UnsupportedOperationException e) {
-      this.setBackground(new Color(0, 0, 0));
-    } catch (IllegalArgumentException e) {
-      Utils.getLogger()
-          .warning(
-              "Your desktop environment does not support translucent windows. Technic Launcher will not look as rad for you.");
+    setBackground(SPLASH_BACKGROUND);
+    if (getGraphicsConfiguration()
+        .getDevice()
+        .isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSPARENT)) {
+      addComponentListener(
+          new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent event) {
+              setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 20, 20));
+            }
+          });
     }
   }
 
@@ -94,10 +96,9 @@ public class SplashScreen extends JFrame {
   }
 
   static JPanel createProgressFooter(InstallationProgressDisplay progressDisplay) {
-    // Keep progress repaints independent of the translucent window's backing buffer.
-    // Swing clears and double-buffers this opaque surface before painting its children.
+    // An opaque surface clears the previous progress frame before painting its children.
     JPanel footer = new JPanel(new BorderLayout());
-    footer.setBackground(new Color(25, 30, 34));
+    footer.setBackground(SPLASH_BACKGROUND);
     footer.setOpaque(true);
     footer.setBorder(
         new EmptyBorder(
