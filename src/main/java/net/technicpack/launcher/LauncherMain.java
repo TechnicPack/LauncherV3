@@ -722,6 +722,10 @@ public class LauncherMain {
     UIManager.put("ComboBox.disabledBackground", UIConstants.COLOR_FORM_ELEMENT_INTERNAL);
     UIManager.put("ComboBox.disabledForeground", UIConstants.COLOR_GREY_TEXT);
     System.setProperty("xr.load.xml-reader", "org.ccil.cowan.tagsoup.Parser");
+    // CSS-sized Discover artwork otherwise uses Flying Saucer's nearest-neighbor defaults.
+    System.setProperty("xr.image.scale", "HIGH");
+    System.setProperty(
+        "xr.image.render-quality", "java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC");
 
     // Remove all log files older than a week
     Thread cleanupLogsThread = createCleanupLogsThread(fileSystem);

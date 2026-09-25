@@ -12,6 +12,10 @@ When a build is promoted, the `[Unreleased]` section is renamed to `[v4.0-<build
 
 ## [Unreleased]
 
+### Fixed
+
+- Discover artwork now uses high-quality image scaling to avoid jagged edges while preserving its proportions.
+
 ## [v4.0-1166] - 2026-09-25
 
 ### Fixed
