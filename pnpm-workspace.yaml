@@ -1,14 +1,3 @@
-# Refuse to install any package version (direct OR transitive) published less
-# than 7 days ago. This is the install-layer counterpart to Renovate's
-# minimumReleaseAge ("7 days") in renovate.json5: Renovate gates PR creation
-# for direct deps it manages, while this gates actual resolution of every
-# dependency — including transitives Renovate can't see. 10080 = 7 * 24 * 60.
-
-# Pin fast-uri above the 3.1.x versions affected by the 2026 host-confusion /
-# SSRF advisories (GHSA-4c8g-83qw-93j6, GHSA-v2hh-gcrm-f6hx, GHSA-7p8r-x3mc-p8w7,
-# GHSA-fph4-wmhf-6fwf, GHSA-f65p-4m7j-42xc, GHSA-jqff-g426-hqxp). It is only
-# pulled in transitively by ajv via commitlint, so pnpm.overrides in
-# package.json would not reliably apply.
 overrides:
-  fast-uri: ^3.1.8
+  fast-uri: ^4.2.1
 minimumReleaseAge: 10080
