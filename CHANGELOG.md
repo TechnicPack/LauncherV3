@@ -17,6 +17,13 @@ If master advances during rollover, the workflow fails its push rather than reba
 
 ## [Unreleased]
 
+### Fixed
+
+- Linux startup no longer replaces an existing launch script, preventing development or downloaded JARs from
+  silently retargeting an installed desktop shortcut. Custom scripts and permissions are preserved.
+  To change the target explicitly, remove the `technic-launcher` script from the Technic data directory and
+  start the desired packaged launcher to regenerate it.
+
 ## [v4.0-1168] - 2026-10-09
 
 ### Added
