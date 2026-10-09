@@ -25,6 +25,7 @@ import javax.swing.JButton;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.BasicComboPopup;
 import javax.swing.plaf.basic.ComboPopup;
+import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.ui.controls.list.SimpleScrollPopup;
 import net.technicpack.ui.controls.list.popupformatters.IPopupFormatter;
 
@@ -55,6 +56,8 @@ public class LanguageCellUI extends BasicComboBoxUI {
   protected ComboPopup createPopup() {
     BasicComboPopup comboPopup = new SimpleScrollPopup(comboBox, trackColor, thumbColor);
     popupFormatter.formatPopup(comboPopup);
+    comboPopup.getList().setSelectionBackground(UIConstants.COLOR_SELECTOR_OPTION);
+    comboPopup.getList().setSelectionForeground(UIConstants.COLOR_WHITE_TEXT);
     return comboPopup;
   }
 }

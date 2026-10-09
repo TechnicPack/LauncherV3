@@ -25,7 +25,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
-import net.technicpack.launcher.ui.UIConstants;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.ui.listitems.LanguageItem;
 
@@ -58,8 +57,13 @@ public class LanguageCellRenderer extends JLabel implements ListCellRenderer<Lan
       int index,
       boolean isSelected,
       boolean cellHasFocus) {
-    setForeground(this.defaultForeground);
-    setBackground(this.defaultBackground);
+    if (index < 0) {
+      setForeground(defaultForeground);
+      setBackground(defaultBackground);
+    } else {
+      setForeground(isSelected ? list.getSelectionForeground() : list.getForeground());
+      setBackground(isSelected ? list.getSelectionBackground() : list.getBackground());
+    }
     setFont(
         value
             .getLanguageResources()
@@ -74,13 +78,6 @@ public class LanguageCellRenderer extends JLabel implements ListCellRenderer<Lan
       } else {
         setIcon(null);
       }
-    }
-
-    // Set a lighter background for the currently selected option (on hover)
-    if (selectedValue != null && selectedValue.equals(value)) {
-      setBackground(UIConstants.COLOR_SELECTOR_OPTION);
-    } else {
-      setBackground(defaultBackground);
     }
 
     return this;

@@ -26,6 +26,8 @@ If master advances during rollover, the workflow fails its push rather than reba
 
 ### Fixed
 
+- The launcher options language dropdown now uses the same row background and highlight colours as
+  the other settings dropdowns.
 - Corrected an off-by-one in control borders that left a stray background-colored pixel column along
   dropdowns' right edges.
 - Dialog dropdowns repaint within an opaque interior layer, avoiding flashes of the launcher underneath
