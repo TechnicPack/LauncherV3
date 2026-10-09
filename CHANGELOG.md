@@ -20,6 +20,7 @@ If master advances during rollover, the workflow fails its push rather than reba
 ### Changed
 
 - Updated runtime dependencies, build tooling, and CI actions.
+- Delete Pack buttons use a muted red, with a darker hover state, to distinguish them from non-destructive actions.
 - Dialog shadows retain their appearance while reusing blur buffers during generation and caching the
   rendered shadow until the dialog size changes, reducing repaint work and temporary allocations.
 

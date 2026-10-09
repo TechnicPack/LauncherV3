@@ -23,6 +23,8 @@ public class UIConstants {
   public static final Color COLOR_FEED_ITEM_BACK = new Color(37, 44, 49);
   public static final Color COLOR_LIKES_BACK = new Color(20, 65, 97);
   public static final Color COLOR_BUTTON_BLUE = new Color(43, 128, 195);
+  public static final Color COLOR_BUTTON_RED = new Color(183, 91, 91);
+  public static final Color COLOR_BUTTON_RED_HOVER = new Color(158, 75, 75);
   public static final Color COLOR_FORM_ELEMENT_INTERNAL = new Color(30, 39, 46);
   public static final Color COLOR_GREY_TEXT = new Color(86, 98, 110);
   public static final Color COLOR_FOOTER = new Color(27, 32, 36);

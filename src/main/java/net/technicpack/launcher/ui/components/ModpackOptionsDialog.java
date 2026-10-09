@@ -575,8 +575,8 @@ public class ModpackOptionsDialog extends LauncherDialog {
     deletePack.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
     deletePack.setContentAreaFilled(false);
     if (modpack.getInstalledDirectory() != null) {
-      deletePack.setForeground(UIConstants.COLOR_BUTTON_BLUE);
-      deletePack.setHoverForeground(UIConstants.COLOR_BLUE);
+      deletePack.setForeground(UIConstants.COLOR_BUTTON_RED);
+      deletePack.setHoverForeground(UIConstants.COLOR_BUTTON_RED_HOVER);
     } else {
       deletePack.setForeground(UIConstants.COLOR_GREY_TEXT);
     }

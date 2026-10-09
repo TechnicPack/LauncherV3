@@ -241,8 +241,8 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
     deleteButton.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
     deleteButton.setBorder(BorderFactory.createEmptyBorder(5, 17, 10, 17));
     deleteButton.setBackground(UIConstants.COLOR_FOOTER);
-    deleteButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
-    deleteButton.setHoverForeground(UIConstants.COLOR_BLUE);
+    deleteButton.setForeground(UIConstants.COLOR_BUTTON_RED);
+    deleteButton.setHoverForeground(UIConstants.COLOR_BUTTON_RED_HOVER);
     deleteButton.setAlignmentX(RIGHT_ALIGNMENT);
     deleteButton.setFocusable(false);
     deleteButton.setContentAreaFilled(false);
@@ -250,11 +250,12 @@ public class ModpackInfoPanel extends JPanel implements IImageJobListener<Modpac
     deleteButton.setIconTextGap(8);
     deleteButton.setHoverIcon(
         new ImageIcon(
-            resources.colorImage(resources.getImage("delete_button.png"), UIConstants.COLOR_BLUE)));
+            resources.colorImage(
+                resources.getImage("delete_button.png"), UIConstants.COLOR_BUTTON_RED_HOVER)));
     deleteButton.setIcon(
         new ImageIcon(
             resources.colorImage(
-                resources.getImage("delete_button.png"), UIConstants.COLOR_BUTTON_BLUE)));
+                resources.getImage("delete_button.png"), UIConstants.COLOR_BUTTON_RED)));
     feedBottom.add(
         deleteButton,
         new GridBagConstraints(
