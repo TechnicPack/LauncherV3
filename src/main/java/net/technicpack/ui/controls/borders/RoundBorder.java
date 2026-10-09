@@ -73,7 +73,7 @@ public class RoundBorder extends AbstractBorder {
 
     RoundRectangle2D.Double bubble =
         new RoundRectangle2D.Double(
-            0 + strokePad, 0 + strokePad, width - thickness - 1, bottomLineY, radii, radii);
+            0 + strokePad, 0 + strokePad, width - thickness, bottomLineY, radii, radii);
 
     Polygon pointer = new Polygon();
 

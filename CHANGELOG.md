@@ -26,6 +26,8 @@ If master advances during rollover, the workflow fails its push rather than reba
 
 ### Fixed
 
+- Corrected an off-by-one in control borders that left a stray background-colored pixel column along
+  dropdowns' right edges.
 - Dialog dropdowns repaint within an opaque interior layer, avoiding flashes of the launcher underneath
   while retaining translucent drop shadows and normal lightweight popup behavior.
 - Linux startup no longer replaces an existing launch script, preventing development or downloaded JARs from
