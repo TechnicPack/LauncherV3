@@ -12,6 +12,11 @@ When a build is promoted, the `[Unreleased]` section is renamed to `[v4.0-<build
 
 ## [Unreleased]
 
+### Changed
+
+- Discover image loading now reuses Flying Saucer's cache and scaling while preserving the launcher User-Agent,
+  image proportions, and the offline page when remote images cannot be fetched or decoded.
+
 ### Fixed
 
 - Discover artwork now uses high-quality image scaling to avoid jagged edges while preserving its proportions.

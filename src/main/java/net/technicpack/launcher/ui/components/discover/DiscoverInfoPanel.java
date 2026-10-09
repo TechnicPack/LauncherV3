@@ -40,9 +40,9 @@ import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 import org.xhtmlrenderer.event.DocumentListener;
+import org.xhtmlrenderer.resource.ImageResource;
 import org.xhtmlrenderer.resource.XMLResource;
 import org.xhtmlrenderer.simple.XHTMLPanel;
-import org.xhtmlrenderer.swing.DelegatingUserAgent;
 import org.xhtmlrenderer.swing.FSMouseListener;
 import org.xhtmlrenderer.swing.ImageResourceLoader;
 import org.xhtmlrenderer.swing.SwingReplacedElementFactory;
@@ -71,10 +71,22 @@ public class DiscoverInfoPanel extends JPanel {
     this.panel = new XHTMLPanel();
     panel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
     panel.setDefaultFontFromComponent(true);
+    final Runnable showOfflinePage =
+        new Runnable() {
+          private boolean hasReloaded;
+
+          @Override
+          public void run() {
+            if (!hasReloaded) {
+              hasReloaded = true;
+              SwingUtilities.invokeLater(
+                  () ->
+                      panel.setDocument(getDiscoverDocumentFromResource(), runnableAccessDiscover));
+            }
+          }
+        };
     panel.addDocumentListener(
         new DocumentListener() {
-          private boolean hasReloaded = false;
-
           @Override
           public void documentStarted() {
             // Unused
@@ -88,27 +100,13 @@ public class DiscoverInfoPanel extends JPanel {
           @Override
           public void onLayoutException(Throwable throwable) {
             Utils.getLogger().log(Level.SEVERE, "Discover page layout exception", throwable);
-
-            if (!hasReloaded) {
-              hasReloaded = true;
-
-              SwingUtilities.invokeLater(
-                  () ->
-                      panel.setDocument(getDiscoverDocumentFromResource(), runnableAccessDiscover));
-            }
+            showOfflinePage.run();
           }
 
           @Override
           public void onRenderException(Throwable throwable) {
             Utils.getLogger().log(Level.SEVERE, "Discover page render exception", throwable);
-
-            if (!hasReloaded) {
-              hasReloaded = true;
-
-              SwingUtilities.invokeLater(
-                  () ->
-                      panel.setDocument(getDiscoverDocumentFromResource(), runnableAccessDiscover));
-            }
+            showOfflinePage.run();
           }
         });
 
@@ -117,17 +115,24 @@ public class DiscoverInfoPanel extends JPanel {
     }
     panel.addMouseTrackingListener(new DiscoverLinkListener(platform, modpackSelector));
 
-    final DelegatingUserAgent uac = new DelegatingUserAgent();
-    ImageResourceLoader imageLoader = new DiscoverResourceLoader();
-    imageLoader.setRepaintListener(panel);
-    imageLoader.clear();
-    uac.setImageResourceLoader(imageLoader);
+    final DiscoverUserAgent uac = new DiscoverUserAgent(showOfflinePage);
     panel.getSharedContext().getTextRenderer().setSmoothingThreshold(6.0f);
     panel.getSharedContext().setUserAgentCallback(uac);
+    panel.addDocumentListener(uac);
 
-    SwingReplacedElementFactory factory = new SwingReplacedElementFactory(panel, imageLoader);
-    factory.reset();
-    panel.getSharedContext().setReplacedElementFactory(factory);
+    // ImageResourceLoader's fetch method is static. Use the same user agent/cache for <img>
+    // elements and CSS backgrounds; ImageReplacedElement handles sizing without mutating the
+    // cached original, including preserving aspect ratio when only one dimension is specified.
+    ImageResourceLoader imageLoader =
+        new ImageResourceLoader() {
+          @Override
+          public ImageResource get(String uri, int width, int height) {
+            return uac.getImageResource(uri);
+          }
+        };
+    panel
+        .getSharedContext()
+        .setReplacedElementFactory(new SwingReplacedElementFactory(panel, imageLoader));
     panel
         .getSharedContext()
         .setFontMapping("Raleway", resources.getFont(ResourceLoader.FONT_RALEWAY, 12));
