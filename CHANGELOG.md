@@ -17,6 +17,10 @@ If master advances during rollover, the workflow fails its push rather than reba
 
 ## [Unreleased]
 
+### Changed
+
+- Updated runtime dependencies, build tooling, and CI actions.
+
 ### Fixed
 
 - Linux startup no longer replaces an existing launch script, preventing development or downloaded JARs from
