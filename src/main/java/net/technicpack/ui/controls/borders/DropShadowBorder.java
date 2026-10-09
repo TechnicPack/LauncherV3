@@ -25,10 +25,12 @@ import javax.swing.border.AbstractBorder;
 import net.technicpack.contrib.romainguy.FastBlurFilter;
 
 public class DropShadowBorder extends AbstractBorder {
-  private Color color;
-  private int thickness;
-  private Insets insets;
-  RenderingHints hints;
+  private final Color color;
+  private final int thickness;
+  private final Insets insets;
+  private final RenderingHints hints;
+  // Keep only the current size; working blur buffers are released after rendering.
+  private transient BufferedImage shadow;
 
   public DropShadowBorder(Color color) {
     this(color, 3);
@@ -54,26 +56,21 @@ public class DropShadowBorder extends AbstractBorder {
 
   @Override
   public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+    if (shadow == null || shadow.getWidth() != width || shadow.getHeight() != height) {
+      shadow = createShadow(width, height);
+    }
+    g.drawImage(shadow, x, y, width, height, null);
+  }
+
+  private BufferedImage createShadow(int width, int height) {
     BufferedImage shadow = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 
     Graphics2D g2 = shadow.createGraphics();
     g2.setRenderingHints(hints);
-    Composite oldComposite = g2.getComposite();
-    AlphaComposite composite = AlphaComposite.getInstance(AlphaComposite.CLEAR, 0.0f);
-    g2.setComposite(composite);
-    g2.setColor(new Color(0, 0, 0, 0));
-    g2.fillRect(0, 0, width, height);
-    g2.setComposite(oldComposite);
     g2.setColor(color);
     g2.fillRect(thickness * 4, thickness * 4, width - (thickness * 8), height - (thickness * 8));
     g2.dispose();
 
-    FastBlurFilter blur = new FastBlurFilter(thickness);
-    shadow = blur.filter(shadow, null);
-    shadow = blur.filter(shadow, null);
-    shadow = blur.filter(shadow, null);
-    shadow = blur.filter(shadow, null);
-
-    g.drawImage(shadow, x, y, width, height, null);
+    return new FastBlurFilter(thickness).filter(shadow, shadow, 4);
   }
 }

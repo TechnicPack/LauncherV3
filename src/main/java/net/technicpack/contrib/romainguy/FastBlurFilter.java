@@ -80,6 +80,19 @@ public class FastBlurFilter extends AbstractFilter {
   /** {@inheritDoc} */
   @Override
   public BufferedImage filter(BufferedImage src, BufferedImage dst) {
+    return filter(src, dst, 1);
+  }
+
+  /**
+   * Applies repeated box blurs using one pair of working pixel buffers. Intermediate results stay
+   * in ARGB form rather than being converted through the destination image's color model.
+   *
+   * @param iterations the positive number of complete horizontal/vertical blur passes
+   */
+  public BufferedImage filter(BufferedImage src, BufferedImage dst, int iterations) {
+    if (iterations < 1) {
+      throw new IllegalArgumentException("iterations must be positive");
+    }
     int width = src.getWidth();
     int height = src.getHeight();
 
@@ -91,11 +104,11 @@ public class FastBlurFilter extends AbstractFilter {
     int[] dstPixels = new int[width * height];
 
     getPixels(src, 0, 0, width, height, srcPixels);
-    // horizontal pass
-    blur(srcPixels, dstPixels, width, height, radius);
-    // vertical pass
-    blur(dstPixels, srcPixels, height, width, radius);
-    // the result is now stored in srcPixels due to the 2nd pass
+    for (int i = 0; i < iterations; i++) {
+      // Each horizontal pass transposes the pixels; the vertical pass restores their layout.
+      blur(srcPixels, dstPixels, width, height, radius);
+      blur(dstPixels, srcPixels, height, width, radius);
+    }
     setPixels(dst, 0, 0, width, height, srcPixels);
 
     return dst;
