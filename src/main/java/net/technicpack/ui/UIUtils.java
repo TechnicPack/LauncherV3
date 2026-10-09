@@ -44,7 +44,13 @@ public class UIUtils {
     if (!settingsLanguageCode.equalsIgnoreCase(ResourceLoader.DEFAULT_LOCALE)) {
       Locale wantedLocale = resources.getLocaleFromCode(settingsLanguageCode);
 
-      languages.setSelectedItem(wantedLocale);
+      for (int i = 1; i < languages.getItemCount(); i++) {
+        LanguageItem item = languages.getItemAt(i);
+        if (resources.getLocaleFromCode(item.getLangCode()).equals(wantedLocale)) {
+          languages.setSelectedIndex(i);
+          break;
+        }
+      }
     }
   }
 }
