@@ -18,6 +18,9 @@ When a build is promoted, the `[Unreleased]` section is renamed to `[v4.0-<build
   (normally `~/.technic`). It launches the current launcher JAR with the required networking and font-rendering
   settings, avoiding the configuration-triggered restart. Existing installations receive it on startup;
   portable installations are unchanged.
+- Standard Linux installations now register a per-user application-menu entry and bundled icon, pointing to
+  the launch script and identifying Technic correctly in the taskbar. Installation respects `XDG_DATA_HOME`,
+  covers existing installations on startup, and leaves portable installs and separately named user shortcuts alone.
 
 ### Changed
 

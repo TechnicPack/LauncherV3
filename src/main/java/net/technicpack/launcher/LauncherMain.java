@@ -729,11 +729,20 @@ public class LauncherMain {
 
     if (OperatingSystem.getOperatingSystem() == OperatingSystem.LINUX && !settings.isPortable()) {
       String launcherPath = Relauncher.getRunningPath(LauncherMain.class);
-      if (launcherPath != null) {
+      if (launcherPath != null
+          && launcherPath.endsWith(".jar")
+          && Files.isRegularFile(Paths.get(launcherPath))) {
         try {
           LinuxLaunchScript.install(fileSystem.getRootDirectory(), Paths.get(launcherPath));
+          try (InputStream icon = resources.getResourceAsStream("/icon.png")) {
+            LinuxDesktopEntry.install(
+                LinuxDesktopEntry.dataDirectory(
+                    System.getenv("XDG_DATA_HOME"), Paths.get(System.getProperty("user.home"))),
+                fileSystem.getRootDirectory().resolve("technic-launcher"),
+                icon);
+          }
         } catch (IOException e) {
-          Utils.getLogger().log(Level.WARNING, "Could not install Linux launch script", e);
+          Utils.getLogger().log(Level.WARNING, "Could not install Linux desktop integration", e);
         }
       }
     }
