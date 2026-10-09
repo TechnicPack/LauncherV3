@@ -31,6 +31,7 @@ If master advances during rollover, the workflow fails its push rather than reba
 
 - Discover image loading now reuses Flying Saucer's cache and scaling while preserving the launcher User-Agent,
   image proportions, and the offline page when remote images cannot be fetched or decoded.
+- Updated runtime dependencies and build tooling.
 
 ### Fixed
 
