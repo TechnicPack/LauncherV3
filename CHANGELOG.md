@@ -12,6 +12,13 @@ When a build is promoted, the `[Unreleased]` section is renamed to `[v4.0-<build
 
 ## [Unreleased]
 
+### Added
+
+- Standard Linux installations now create an executable `technic-launcher` script in the Technic data directory
+  (normally `~/.technic`). It launches the current launcher JAR with the required networking and font-rendering
+  settings, avoiding the configuration-triggered restart. Existing installations receive it on startup;
+  portable installations are unchanged.
+
 ### Changed
 
 - Discover image loading now reuses Flying Saucer's cache and scaling while preserving the launcher User-Agent,

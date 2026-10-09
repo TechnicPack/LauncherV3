@@ -727,6 +727,17 @@ public class LauncherMain {
     System.setProperty(
         "xr.image.render-quality", "java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC");
 
+    if (OperatingSystem.getOperatingSystem() == OperatingSystem.LINUX && !settings.isPortable()) {
+      String launcherPath = Relauncher.getRunningPath(LauncherMain.class);
+      if (launcherPath != null) {
+        try {
+          LinuxLaunchScript.install(fileSystem.getRootDirectory(), Paths.get(launcherPath));
+        } catch (IOException e) {
+          Utils.getLogger().log(Level.WARNING, "Could not install Linux launch script", e);
+        }
+      }
+    }
+
     // Remove all log files older than a week
     Thread cleanupLogsThread = createCleanupLogsThread(fileSystem);
     cleanupLogsThread.start();
