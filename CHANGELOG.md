@@ -9,6 +9,11 @@ are preserved in the uncurated [release history](HISTORY.md).
 
 When a build is promoted, the `[Unreleased]` section is renamed to `[v4.0-<build>] - YYYY-MM-DD` and a new empty
 `[Unreleased]` section is added at the top.
+Promotion requires nonempty curated notes from the selected build and an identical changelog in the promotion checkout.
+The preceding release section must match its published GitHub release body. After rebasing across a release,
+check that new notes remain under `[Unreleased]`; misplaced notes now block promotion before artifacts are uploaded.
+Correct the changelog and build again rather than editing release history or relying on generated commit summaries.
+If master advances during rollover, the workflow fails its push rather than rebasing release headings automatically.
 
 ## [Unreleased]
 
@@ -30,6 +35,8 @@ When a build is promoted, the `[Unreleased]` section is renamed to `[v4.0-<build
 ### Fixed
 
 - Discover artwork now uses high-quality image scaling to avoid jagged edges while preserving its proportions.
+- Release promotion now rejects notes accidentally rebased under the previous build's heading, empty release notes,
+  and changelogs that differ from the selected build. GitHub releases no longer fall back to commit summaries.
 
 ## [v4.0-1166] - 2026-09-25
 

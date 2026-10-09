@@ -175,36 +175,19 @@ jobs:
 
       - name: Extract and Validate Release Notes
         id: notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT_SHA: ${{ steps.commit.outputs.commit_sha }}
         run: |
           set -euo pipefail
+          python3 -B -m unittest discover -s scripts -p 'test_release_notes.py'
           notes_file="$(mktemp)"
-
-          section="$(python3 <<'PY'
-          import re, sys
-          with open('CHANGELOG.md') as f:
-              content = f.read()
-          m = re.search(
-              r'^## \[Unreleased\][^\n]*\n(.*?)(?=^## \[|^<!-- historical-releases-footer -->|\Z)',
-              content, re.MULTILINE | re.DOTALL,
-          )
-          if m:
-              section = m.group(1).strip()
-              if re.search(r'^- ', section, re.MULTILINE) and not re.search(
-                  r'^\[(?i:Unreleased)\]: (.+/compare/)([^ \n]+)\.\.\.HEAD$', content, re.MULTILINE,
-              ):
-                  sys.exit('[Unreleased] comparison link not found in CHANGELOG.md')
-              sys.stdout.write(section)
-          PY
-          )"
-
-          if [[ -n "${section}" ]] && grep -qE '^- ' <<<"${section}"; then
-            printf '%s\n' "${section}" > "${notes_file}"
-            echo "notes_source=changelog" >> "${GITHUB_OUTPUT}"
-            echo "::notice::Using release notes from CHANGELOG.md [Unreleased]"
-          else
-            echo "notes_source=fallback" >> "${GITHUB_OUTPUT}"
-            echo "::notice::CHANGELOG.md [Unreleased] is empty or absent — falling back to commit compare"
-          fi
+          previous_release="$(mktemp)"
+          build_changelog="$(mktemp)"
+          gh api "repos/${GITHUB_REPOSITORY}/releases/latest" > "${previous_release}"
+          git show "${COMMIT_SHA}:CHANGELOG.md" > "${build_changelog}"
+          python3 scripts/release-notes.py \
+            "${build_changelog}" CHANGELOG.md "${previous_release}" "${notes_file}"
           echo "notes_file=${notes_file}" >> "${GITHUB_OUTPUT}"
 
       - name: Configure SSH
@@ -305,7 +288,6 @@ jobs:
           JAR_PATH: ${{ steps.artifact.outputs.jar_path }}
           EXE_PATH: ${{ steps.artifact.outputs.exe_path }}
           OSX_PATH: ${{ steps.artifact.outputs.osx_path }}
-          NOTES_SOURCE: ${{ steps.notes.outputs.notes_source }}
           NOTES_FILE: ${{ steps.notes.outputs.notes_file }}
         run: |
           set -euo pipefail
@@ -313,48 +295,13 @@ jobs:
           tag="v${LAUNCHER_MAJOR}-${BUILD_NUMBER}"
           title="${LAUNCHER_MAJOR}-${BUILD_NUMBER}"
 
-          if [[ "${NOTES_SOURCE}" == "changelog" ]]; then
-            echo "Using release notes from CHANGELOG.md [Unreleased]"
-            notes_file="${NOTES_FILE}"
-          else
-            echo "Generating release notes from commit compare"
-
-            # $tag is a jq variable supplied by --arg, not a shell variable.
-            # shellcheck disable=SC2016
-            prev_filter='[.[] | select(.isDraft | not) | select(.isPrerelease | not) | select(.tagName != $tag)] | .[0].tagName'
-
-            releases_json="$(gh release list --repo "${GITHUB_REPOSITORY}" -L 100 --json tagName,isPrerelease,isDraft || echo '[]')"
-
-            prev_tag="$(jq -r --arg tag "${tag}" "${prev_filter}" <<<"${releases_json}")"
-            echo "Previous tag: ${prev_tag:-<empty>}"
-
-            notes_file="$(mktemp)"
-            trap 'rm -f "${notes_file}"' EXIT
-            if [[ -n "${prev_tag}" && "${prev_tag}" != "null" ]]; then
-              echo "Generating changelog: ${prev_tag}...${COMMIT_SHA}"
-              if changelog="$(gh api "repos/${GITHUB_REPOSITORY}/compare/${prev_tag}...${COMMIT_SHA}" \
-                --jq '.commits | map("- " + (.commit.message | split("\n") | .[0]) + " (" + (.sha[:7]) + ")") | join("\n")')"; then
-                if [[ -n "${changelog}" ]]; then
-                  printf '## Changes since %s\n\n%s\n' "${prev_tag}" "${changelog}" > "${notes_file}"
-                else
-                  echo "::warning::Compare returned no commits for ${prev_tag}...${COMMIT_SHA}"
-                  printf 'Promoted build %s.\n' "${BUILD_NUMBER}" > "${notes_file}"
-                fi
-              else
-                echo "::warning::Compare API failed for ${prev_tag}...${COMMIT_SHA}"
-                printf 'Promoted build %s.\n' "${BUILD_NUMBER}" > "${notes_file}"
-              fi
-            else
-              echo "::warning::No previous release found, skipping changelog"
-              printf 'Promoted build %s.\n' "${BUILD_NUMBER}" > "${notes_file}"
-            fi
-          fi
+          # Never substitute commit messages for missing or misplaced curated notes.
 
           gh release create "${tag}" \
             --repo "${GITHUB_REPOSITORY}" \
             --target "${COMMIT_SHA}" \
             --title "${title}" \
-            --notes-file "${notes_file}" \
+            --notes-file "${NOTES_FILE}" \
             "${JAR_PATH}" "${EXE_PATH}" "${OSX_PATH}"
 
       - name: Register Sentry Release
@@ -374,7 +321,6 @@ jobs:
           ignore_missing: true # the first release has no prior baseline -- don't fail on it
 
       - name: Roll Over CHANGELOG
-        if: steps.notes.outputs.notes_source == 'changelog'
         env:
           BUILD_NUMBER: ${{ steps.artifact.outputs.build_number }}
           GH_TOKEN: ${{ github.token }}
@@ -414,17 +360,6 @@ jobs:
           git add CHANGELOG.md
           git commit -m "docs(changelog): release v${LAUNCHER_MAJOR}-${BUILD_NUMBER} [skip ci]"
 
-          # master may have advanced during the promotion; rebase the changelog
-          # commit onto the latest tip and retry the push.
-          for attempt in 1 2 3 4 5; do
-            if git push origin HEAD:master; then
-              echo "Changelog push succeeded (attempt ${attempt})."
-              break
-            fi
-            if [[ "${attempt}" -eq 5 ]]; then
-              echo "::error::Failed to push changelog rollover after ${attempt} attempts."
-              exit 1
-            fi
-            echo "::warning::Push rejected (attempt ${attempt}); rebasing onto latest master."
-            git pull --rebase origin master
-          done
+          # A textual rebase can silently attach Unreleased additions to the newly
+          # inserted release heading. Fail rather than rebase release boundaries.
+          git push origin HEAD:master
