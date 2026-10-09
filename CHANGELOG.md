@@ -17,6 +17,8 @@ If master advances during rollover, the workflow fails its push rather than reba
 
 ## [Unreleased]
 
+## [v4.0-1168] - 2026-10-09
+
 ### Added
 
 - Standard Linux installations now create an executable `technic-launcher` script in the Technic data directory
@@ -448,7 +450,8 @@ If master advances during rollover, the workflow fails its push rather than reba
 For the full list of historical stable releases (pre-dating this file), see [HISTORY.md](HISTORY.md) or the
 [Releases page](https://github.com/TechnicPack/LauncherV3/releases).
 
-[Unreleased]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1166...HEAD
+[Unreleased]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1168...HEAD
+[v4.0-1168]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1166...v4.0-1168
 [v4.0-1166]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1165...v4.0-1166
 [v4.0-1165]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1164...v4.0-1165
 [v4.0-1164]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1160...v4.0-1164
