@@ -37,15 +37,17 @@ public class LauncherDialog extends JDialog {
     setUndecorated(true);
 
     try {
-      // Try to set a transparent background, but it isn't always supported
-      this.setBackground(new Color(0, 0, 0, 0));
+      setBackground(new Color(0, 0, 0, 0));
       getRootPane().setBorder(new DropShadowBorder(Color.black, 4));
-    } catch (UnsupportedOperationException e) {
-      this.setBackground(new Color(0, 0, 0));
-    } catch (IllegalArgumentException e) {
-      // OS doesn't support translucent windows- dumb dumb dumb
-      // Eat it and just don't do the drop shadow
+    } catch (UnsupportedOperationException | IllegalArgumentException e) {
+      setBackground(Color.black);
     }
+
+    // Popups repaint the layered pane, not the content pane. Stop those repaints
+    // here instead of letting Window.paint clear the translucent native surface.
+    // The root pane's shadow border lies outside this opaque interior.
+    getLayeredPane().setBackground(Color.black);
+    getLayeredPane().setOpaque(true);
 
     ((JPanel) getContentPane()).setOpaque(true);
   }

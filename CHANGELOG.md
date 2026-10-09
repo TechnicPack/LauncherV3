@@ -26,6 +26,8 @@ If master advances during rollover, the workflow fails its push rather than reba
 
 ### Fixed
 
+- Dialog dropdowns repaint within an opaque interior layer, avoiding flashes of the launcher underneath
+  while retaining translucent drop shadows and normal lightweight popup behavior.
 - Linux startup no longer replaces an existing launch script, preventing development or downloaded JARs from
   silently retargeting an installed desktop shortcut. Custom scripts and permissions are preserved.
   To change the target explicitly, remove the `technic-launcher` script from the Technic data directory and
