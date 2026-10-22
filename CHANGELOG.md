@@ -17,12 +17,6 @@ If master advances during rollover, the workflow fails its push rather than reba
 
 ## [Unreleased]
 
-### Changed
-
-- Updated Zstandard JNI, Commons Codec, Apache HttpClient, Sentry, Spotless, GitHub Actions and
-  development-tool dependencies while retaining Java 8 runtime compatibility and the seven-day
-  release-age policy.
-
 ### Security
 
 - Launcher HTTPS now uses current bundled Mozilla roots and a release-bundled Mozilla OneCRL

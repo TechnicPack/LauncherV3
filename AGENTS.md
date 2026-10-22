@@ -27,3 +27,5 @@ Recent history follows Conventional Commit style such as `feat(ui): ...` and `fi
 
 ## Configuration & Release Notes
 `BUILD_NUMBER` controls the launcher version suffix. `SENTRY_AUTH_TOKEN` enables source bundle upload, and signing during `package` requires `CERT_KEYSTORE`, `CERT_ALIAS`, `CERT_STOREPASS`, and `CERT_KEYPASS`. Do not commit secrets or generated artifacts.
+
+`CHANGELOG.md` must describe end-user-relevant changes: user-visible features, fixes, security changes, and compatibility impacts. Omit internal refactors, CI/build tooling, dependency maintenance, and automation configuration unless they have a concrete end-user impact; describe that impact rather than the implementation details.
