@@ -8,5 +8,5 @@
 # AJV 8.20.0 declares fast-uri ^3.0.1, but uses URIComponent and the retained
 # parse/serialize/resolve API, not the deprecated aliases removed in v4.
 overrides:
-  fast-uri: ^4.2.1
+  fast-uri: ^4.2.2
 minimumReleaseAge: 10080

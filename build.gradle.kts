@@ -2,7 +2,7 @@ import org.gradle.jvm.toolchain.JavaLanguageVersion
 import java.nio.charset.StandardCharsets
 
 plugins {
-    id("com.diffplug.spotless") version "8.10.3"
+    id("com.diffplug.spotless") version "8.10.4"
     id("net.technicpack.launcher-packaging")
     alias(libs.plugins.sentry.jvm)
 }
@@ -20,6 +20,8 @@ repositories {
 spotless {
     java {
         target("src/*/java/**/*.java", "scripts/*.java")
+        // 1.37.0 removed Style.valueOf; retain 1.36.1 until the upstream compatibility fix ships.
+        // https://github.com/diffplug/spotless/issues/3126
         googleJavaFormat("1.36.1")
     }
 
@@ -73,7 +75,7 @@ dependencies {
     implementation(libs.google.http.client.apache.v5)
     // Security pin: forces httpclient5 (transitive via google-http-client-apache-v5) to >= 5.6.3
     // to patch GHSA-hjcp-jmpx-g3qm (CVE-2026-64607); its parent pom also pins httpcore5/httpcore5-h2
-    // to 5.4.3, patching GHSA-hf6x-8p5f-cgmf and GHSA-v3jc-474w-2wm6. Declared directly (not as a
+    // to >= 5.4.3, patching GHSA-hf6x-8p5f-cgmf and GHSA-v3jc-474w-2wm6. Declared directly (not as a
     // constraint) so Dependabot can open fix PRs for it. Remove once google-http-client-apache-v5
     // pulls httpclient5 >= 5.6.3 itself.
     implementation(libs.httpclient5)

@@ -305,7 +305,7 @@ jobs:
             "${JAR_PATH}" "${EXE_PATH}" "${OSX_PATH}"
 
       - name: Register Sentry Release
-        uses: getsentry/action-release@ff07929a6537bac57790c3451cf4d364aca38528 # v3.7.0
+        uses: getsentry/action-release@6fb9aeade7061441cf3864e34fbe11a1457ad7dc # v3.7.1
         continue-on-error: true # release tracking must never block shipping a build to users
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
