@@ -22,14 +22,15 @@
   "lockFileMaintenance": { "enabled": false },
   "packageRules": [
     {
-      // Do NOT pin devDependencies. Renovate's pin step ignores release age,
-      // which sidesteps the 7-day cooldown. These are npm dev tooling only, so
-      // keep semver ranges and let the normal (cooled) update flow govern.
-      // This overrides config:best-practices' :pinDevDependencies; a bare
-      // :preserveSemverRanges would not, since a packageRule beats a top-level
-      // rangeStrategy.
-      "matchDepTypes": ["devDependencies"],
-      "rangeStrategy": "bump"
+      // Exact npm versions produce age-checked patch/minor/major updates, not
+      // in-range bumps. Pin existing vetted versions manually: initial pin
+      // updates themselves do not support minimumReleaseAge.
+      // Override the npm-specific three-day rule inherited from best-practices.
+      "matchManagers": ["npm"],
+      "rangeStrategy": "pin",
+      "minimumReleaseAge": "7 days",
+      "minimumReleaseAgeBehaviour": "timestamp-required",
+      "internalChecksFilter": "strict"
     },
     {
       // JCommander 2.x requires Java 11; the launcher still supports Java 8.
