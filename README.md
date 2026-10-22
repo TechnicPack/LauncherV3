@@ -84,6 +84,68 @@ interface, ARM64/Intel results, and unavailable or malformed query results. They
 without a Mac or C compiler. They do **not** verify Apple's actual `sysctl` implementation or
 Rosetta; that still requires an Apple Silicon Mac, such as a suitable hosted macOS runner.
 
+### Bundled HTTPS trust and release refresh
+
+Launcher-process HTTPS uses only the Mozilla roots in `src/main/resources/tls/cacert.pem`,
+filtered by the bundled Mozilla OneCRL snapshot in `onecrl.json`. Both URLConnection (including
+Sentry) and the Apache authentication clients use this policy. It is installed before services
+start; invalid or missing TLS inputs stop startup rather than falling back to Java's trust store.
+Private/company CAs installed only in Java or OS trust stores, including a store selected through
+`javax.net.ssl.trustStore`, are intentionally not trusted.
+
+Before each release, explicitly refresh and review all three versioned inputs:
+
+```sh
+python3 scripts/refresh-tls-data.py
+python3 scripts/refresh-tls-data.py --check
+python3 -B scripts/test_refresh_tls_data.py
+BUILD_NUMBER=0 ./gradlew check shadowJar
+```
+
+The standard-library-only Python utility downloads over verified HTTPS, verifies curl's published
+PEM SHA-256, validates OneCRL records and pagination, and stages files only after validation succeeds.
+`--check` works offline and never modifies the files. Ordinary builds use the versioned snapshot;
+Gradle does not download trust data. `sources.json` records UTC retrieval time, source URLs, the
+collection ETag, counts and hashes of the exact shipped bytes. These checks/provenance do not
+constitute independent cryptographic authentication. A refresh interrupted during file replacement
+must not be released: rerun `--check` and complete a successful refresh.
+
+Release verification must also execute the packaged policy on **both Java 8 and Java 25**.
+With `JAVA25_HOME` and `JAVA8_HOME` pointing to those installed JDKs:
+
+```sh
+"$JAVA25_HOME/bin/javac" --release 8 -cp build/libs/launcher-4.0-0.jar \
+  -d build/tls-smoke \
+  src/test/java/net/technicpack/utilslib/TlsTestFixture.java \
+  src/test/java/net/technicpack/utilslib/TlsSmoke.java
+"$JAVA8_HOME/bin/java" \
+  -cp build/tls-smoke:src/test/resources:build/libs/launcher-4.0-0.jar \
+  net.technicpack.utilslib.TlsSmoke
+"$JAVA25_HOME/bin/java" \
+  -cp build/tls-smoke:src/test/resources:build/libs/launcher-4.0-0.jar \
+  net.technicpack.utilslib.TlsSmoke
+```
+
+Use `;` instead of `:` as the classpath separator on Windows. The smoke uses loopback HTTPS,
+loads production classes/data from the shadow JAR, checks both transports and startup failure,
+and exits nonzero on failure. A `--release 8` compile alone is not Java 8 runtime proof.
+If `DISPLAY` points at a nonexistent X server in a headless environment, unset it for Gradle tests.
+
+The test-only TLS fixtures use RSA-2048/SHA-256, normal validity from 2020-01-01 to 2120-01-01
+and an expired leaf valid from 2000-01-01 to 2001-01-01. Only the test server's leaf private key
+is stored; CA private keys were not retained. Twelve public eMudhra TLS certificates from
+[Mozilla bug 2083449](https://bugzilla.mozilla.org/show_bug.cgi?id=2083449) are regression evidence,
+not trust anchors; source attachment IDs and certificate fingerprints are recorded in
+`TlsTestFixture.java`. Tests must continue to reject every one against the current bundled feed:
+missing coverage is a security-data release blocker, not a reason to remove a fixture.
+Neither these certificates nor the test server key belong in the shipped JAR.
+
+The snapshot remains enforced indefinitely; it is neither refreshed nor disabled based on age at
+runtime. Newly discovered revocations require a launcher update. This protects against the bundled
+known revocations, not all website/leaf revocations. It does not import all Firefox trust-policy
+constraints ([curl export limitations](https://curl.se/docs/caextract.html)), repair other old-Java
+vulnerabilities, or change the separate Minecraft JVM's TLS configuration.
+
 ## Project layout
 
 - `src/main/java/net/technicpack/` — launcher UI, installation and update flows, and shared utilities.

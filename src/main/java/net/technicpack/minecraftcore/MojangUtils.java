@@ -20,7 +20,6 @@
 package net.technicpack.minecraftcore;
 
 import com.google.api.client.http.*;
-import com.google.api.client.http.apache.v5.Apache5HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.gson.GsonFactory;
@@ -46,12 +45,13 @@ import net.technicpack.minecraftcore.mojang.version.io.RuleAdapter;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentList;
 import net.technicpack.minecraftcore.mojang.version.io.argument.ArgumentListAdapter;
 import net.technicpack.utilslib.DateTypeAdapter;
+import net.technicpack.utilslib.LauncherTls;
 import net.technicpack.utilslib.LowerCaseEnumTypeAdapterFactory;
 import net.technicpack.utilslib.Utils;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 
 public class MojangUtils {
-  private static final HttpTransport HTTP_TRANSPORT = new Apache5HttpTransport();
+  private static final HttpTransport HTTP_TRANSPORT = LauncherTls.createHttpTransport();
   private static final JsonFactory JSON_FACTORY = new GsonFactory();
   private static final HttpRequestFactory REQUEST_FACTORY;
   private static final Pattern WINDOWS_DEVICE_NAME =

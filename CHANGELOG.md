@@ -17,6 +17,17 @@ If master advances during rollover, the workflow fails its push rather than reba
 
 ## [Unreleased]
 
+### Security
+
+- Launcher HTTPS now uses current bundled Mozilla roots and a release-bundled Mozilla OneCRL
+  snapshot, including revocations for the compromised eMudhra TLS intermediates and their cross-signs.
+  The policy covers authentication, downloads, updates and telemetry on Java 8 and newer, and startup
+  stops if bundled TLS security data cannot be loaded.
+- Java/OS trust stores are no longer merged into launcher trust. Private or corporate certificate
+  authorities installed only there are intentionally no longer trusted. Revocation data is refreshed
+  with launcher releases, not at runtime; this is not comprehensive website-certificate revocation
+  checking and does not change the separate Minecraft JVM's TLS configuration.
+
 ## [v4.0-1170] - 2026-10-09
 
 ### Changed

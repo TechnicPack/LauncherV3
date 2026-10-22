@@ -36,15 +36,10 @@ import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.*;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Handler;
@@ -52,9 +47,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
 import javax.swing.*;
 import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.autoupdate.Relauncher;
@@ -118,6 +110,7 @@ import net.technicpack.ui.components.ConsoleFrame;
 import net.technicpack.ui.controls.installation.SplashScreen;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.JavaUtils;
+import net.technicpack.utilslib.LauncherTls;
 import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.IOUtils;
@@ -185,6 +178,16 @@ public class LauncherMain {
       jc.parse(argv);
     } catch (ParameterException e) {
       System.err.println("Invalid launcher arguments: " + e.getMessage());
+      System.exit(1);
+      return;
+    }
+
+    try {
+      LauncherTls.install();
+    } catch (IllegalStateException e) {
+      e.printStackTrace(System.err);
+      System.err.println(
+          "Unable to initialize secure HTTPS. Please reinstall or update the Technic Launcher.");
       System.exit(1);
       return;
     }
@@ -286,12 +289,8 @@ public class LauncherMain {
       // This is probably a debug build or something, build number is invalid
     }
 
-    // These 2 need to happen *before* the launcher or the updater run so we have valuable debug
-    // information and so
-    // we can properly use websites that use Let's Encrypt (and other current certs not supported by
-    // old Java versions)
+    // Collect startup diagnostics before the launcher or updater runs.
     runStartupDebug();
-    updateJavaTrustStore();
 
     Relauncher launcher =
         new Relauncher(
@@ -554,120 +553,6 @@ public class LauncherMain {
 
     // Wait for all DNS resolution tasks to complete
     CompletableFuture.allOf(dnsFutures).join();
-  }
-
-  private static String getCertificateFingerprint(Certificate cert) {
-    try {
-      MessageDigest md = MessageDigest.getInstance("SHA-256");
-      byte[] der = cert.getEncoded();
-      md.update(der);
-      byte[] digest = md.digest();
-      StringBuilder sb = new StringBuilder();
-      for (byte b : digest) {
-        sb.append(String.format("%02X:", b));
-      }
-      sb.setLength(sb.length() - 1);
-      return sb.toString();
-    } catch (CertificateEncodingException | NoSuchAlgorithmException e) {
-      Utils.getLogger().log(Level.WARNING, "Failed to get certificate fingerprint", e);
-      return "unknown";
-    }
-  }
-
-  private static void updateJavaTrustStore() {
-    final String javaVersion = System.getProperty("java.version");
-
-    final char[] defaultTrustStorePassword = "changeit".toCharArray();
-
-    try {
-      // Load the default trust store
-      KeyStore defaultTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-      final Path defaultKsPath =
-          Paths.get(System.getProperty("java.home"), "lib", "security", "cacerts");
-      try (InputStream is = Files.newInputStream(defaultKsPath)) {
-        defaultTrustStore.load(is, defaultTrustStorePassword);
-      }
-
-      // Load our custom trust store
-      KeyStore technicTrustStore = KeyStore.getInstance("JKS");
-      try (InputStream is =
-          LauncherMain.class.getResourceAsStream(
-              "/net/technicpack/launcher/resources/technicKeystore.jks")) {
-        technicTrustStore.load(is, defaultTrustStorePassword);
-      }
-
-      // Create a new, empty trust store to merge the default and custom ones
-      KeyStore mergedTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-      mergedTrustStore.load(null, null);
-
-      // Copy the default trust store entries
-      Enumeration<String> defaultAliases = defaultTrustStore.aliases();
-      while (defaultAliases.hasMoreElements()) {
-        String alias = defaultAliases.nextElement();
-        Certificate cert = defaultTrustStore.getCertificate(alias);
-        if (cert == null) {
-          Utils.getLogger()
-              .log(
-                  Level.WARNING,
-                  String.format(
-                      "Certificate for alias '%s' in default trust store is null", alias));
-          continue;
-        }
-        mergedTrustStore.setCertificateEntry(alias, cert);
-      }
-
-      boolean updated = false;
-
-      // Copy the custom trust store entries
-      Enumeration<String> technicAliases = technicTrustStore.aliases();
-      while (technicAliases.hasMoreElements()) {
-        String alias = technicAliases.nextElement();
-        Certificate cert = technicTrustStore.getCertificate(alias);
-        if (cert == null) {
-          Utils.getLogger()
-              .log(
-                  Level.WARNING,
-                  String.format(
-                      "Certificate for alias '%s' in Technic trust store is null", alias));
-          continue;
-        }
-        if (!mergedTrustStore.containsAlias(alias)) {
-          Utils.getLogger()
-              .log(
-                  Level.FINE,
-                  String.format(
-                      "Adding certificate with alias '%s', fingerprint %s",
-                      alias, getCertificateFingerprint(cert)));
-          mergedTrustStore.setCertificateEntry(alias, cert);
-          updated = true;
-        }
-      }
-
-      // Initialize the SSL context with the merged trust store
-      TrustManagerFactory tmf =
-          TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-      tmf.init(mergedTrustStore);
-
-      SSLContext sslContext = SSLContext.getInstance("TLS");
-      sslContext.init(null, tmf.getTrustManagers(), new SecureRandom());
-
-      HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
-
-      if (updated) {
-        Utils.getLogger()
-            .log(Level.INFO, "Updated Java trust store with new root certificates successfully");
-      }
-    } catch (KeyStoreException
-        | IOException
-        | NoSuchAlgorithmException
-        | CertificateException
-        | KeyManagementException e) {
-      Utils.getLogger()
-          .log(
-              Level.WARNING,
-              "Failed to update Java trust store. Problems might happen with TLS connections",
-              e);
-    }
   }
 
   /**

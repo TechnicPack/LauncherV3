@@ -6,7 +6,6 @@ import com.google.api.client.auth.oauth2.*;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.http.*;
-import com.google.api.client.http.apache.v5.Apache5HttpTransport;
 import com.google.api.client.http.json.JsonHttpContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
@@ -37,11 +36,12 @@ import net.technicpack.launchercore.exception.MicrosoftAuthException;
 import net.technicpack.launchercore.exception.SessionException;
 import net.technicpack.minecraftcore.microsoft.auth.model.*;
 import net.technicpack.utilslib.DesktopUtils;
+import net.technicpack.utilslib.LauncherTls;
 import net.technicpack.utilslib.Utils;
 import org.apache.commons.io.FileUtils;
 
 public class MicrosoftAuthenticator {
-  private static final HttpTransport HTTP_TRANSPORT = new Apache5HttpTransport();
+  private static final HttpTransport HTTP_TRANSPORT = LauncherTls.createHttpTransport();
   private static final JsonFactory JSON_FACTORY = new GsonFactory();
   private final HttpRequestFactory REQUEST_FACTORY;
 
