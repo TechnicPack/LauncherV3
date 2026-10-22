@@ -17,6 +17,8 @@ If master advances during rollover, the workflow fails its push rather than reba
 
 ## [Unreleased]
 
+## [v4.0-1172] - 2026-10-22
+
 ### Security
 
 - Launcher HTTPS now uses current bundled Mozilla roots and a release-bundled Mozilla OneCRL
@@ -492,7 +494,8 @@ If master advances during rollover, the workflow fails its push rather than reba
 For the full list of historical stable releases (pre-dating this file), see [HISTORY.md](HISTORY.md) or the
 [Releases page](https://github.com/TechnicPack/LauncherV3/releases).
 
-[Unreleased]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1170...HEAD
+[Unreleased]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1172...HEAD
+[v4.0-1172]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1170...v4.0-1172
 [v4.0-1170]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1169...v4.0-1170
 [v4.0-1169]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1168...v4.0-1169
 [v4.0-1168]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1166...v4.0-1168
