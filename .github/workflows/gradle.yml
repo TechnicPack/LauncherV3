@@ -41,6 +41,25 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: ./gradlew clean test spotlessCheck package --no-daemon
 
+      - name: Verify packaged TLS on legacy Java 8 and Java 25
+        run: |
+          set -euo pipefail
+          # Keep this old runtime: current Java 8 has APIs absent from users' older installations.
+          legacy_java="$RUNNER_TEMP/launcher-java8u202"
+          archive="$RUNNER_TEMP/launcher-java8u202.tar.gz"
+          curl --fail --location --output "$archive" \
+            https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u202-b08/OpenJDK8U-jre_x64_linux_hotspot_8u202b08.tar.gz
+          echo "b3f9934c6fc83fb2e76a4ded31367e5312013e27d36eac82a6fe1423aae394ce  $archive" | sha256sum --check -
+          mkdir -p "$legacy_java"
+          tar -xzf "$archive" -C "$legacy_java" --strip-components=1
+          jar="build/libs/launcher-4.0-${BUILD_NUMBER}.jar"
+          "$JAVA_HOME/bin/javac" --release 8 -cp "$jar" -d build/tls-smoke \
+            src/test/java/net/technicpack/utilslib/TlsTestFixture.java \
+            src/test/java/net/technicpack/utilslib/TlsSmoke.java
+          for java in "$legacy_java/bin/java" "$JAVA_HOME/bin/java"; do
+            "$java" -cp "build/tls-smoke:src/test/resources:$jar" net.technicpack.utilslib.TlsSmoke
+          done
+
       - name: Add promotion shortcuts
         env:
           REPOSITORY: ${{ github.repository }}

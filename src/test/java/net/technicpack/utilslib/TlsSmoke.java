@@ -113,7 +113,7 @@ public final class TlsSmoke {
               .setReadTimeout(5000)
               .execute()
               .disconnect();
-          throw new AssertionError("Apache before install used unrelated default context");
+          throw new AssertionError("HTTP transport before install used unrelated default context");
         } catch (javax.net.ssl.SSLException expected) {
           /* bundled roots reject test CA */
         }
@@ -139,7 +139,7 @@ public final class TlsSmoke {
       HttpsURLConnection.setDefaultSSLSocketFactory(savedFactory);
     }
     System.out.println(
-        "PASS Apache before install and process defaults use authoritative bundled trust");
+        "PASS HTTP transport before install and process defaults use authoritative bundled trust");
   }
 
   private static void startupFailure(Path jar) throws Exception {

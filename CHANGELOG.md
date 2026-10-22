@@ -17,6 +17,12 @@ If master advances during rollover, the workflow fails its push rather than reba
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed a startup crash (`NoSuchFieldError: TCP_KEEPIDLE`) on older Java 8 installations.
+  Authentication and Mojang requests retain the bundled HTTPS security policy without requiring
+  users to update Java.
+
 ## [v4.0-1172] - 2026-10-22
 
 ### Security

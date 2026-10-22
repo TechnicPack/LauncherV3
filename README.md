@@ -88,7 +88,8 @@ Rosetta; that still requires an Apple Silicon Mac, such as a suitable hosted mac
 
 Launcher-process HTTPS uses only the Mozilla roots in `src/main/resources/tls/cacert.pem`,
 filtered by the bundled Mozilla OneCRL snapshot in `onecrl.json`. Both URLConnection (including
-Sentry) and the Apache authentication clients use this policy. It is installed before services
+Sentry) and the Google HTTP authentication clients use this policy. Authentication uses the
+JDK-backed `NetHttpTransport` to support older Java 8 runtimes. The policy is installed before services
 start; invalid or missing TLS inputs stop startup rather than falling back to Java's trust store.
 Private/company CAs installed only in Java or OS trust stores, including a store selected through
 `javax.net.ssl.trustStore`, are intentionally not trusted.
@@ -110,8 +111,11 @@ collection ETag, counts and hashes of the exact shipped bytes. These checks/prov
 constitute independent cryptographic authentication. A refresh interrupted during file replacement
 must not be released: rerun `--check` and complete a successful refresh.
 
-Release verification must also execute the packaged policy on **both Java 8 and Java 25**.
-With `JAVA25_HOME` and `JAVA8_HOME` pointing to those installed JDKs:
+Release verification must execute the packaged policy on **legacy Java 8u202 and Java 25**.
+CI runs this smoke before uploading artifacts, using a checksum-pinned 8u202 runtime.
+A current Java 8 update alone is insufficient: it contains APIs absent from older installations.
+This legacy runtime is only an offline compatibility-test fixture, not a recommended runtime or a
+new minimum Java requirement. With `JAVA25_HOME` and `JAVA8_HOME` pointing to Java 25 and 8u202:
 
 ```sh
 "$JAVA25_HOME/bin/javac" --release 8 -cp build/libs/launcher-4.0-0.jar \

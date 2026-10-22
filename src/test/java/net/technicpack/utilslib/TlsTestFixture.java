@@ -3,7 +3,6 @@ package net.technicpack.utilslib;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.apache.v5.Apache5HttpTransport;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpsConfigurator;
@@ -28,7 +27,6 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
-import org.apache.hc.client5.http.classic.methods.HttpGet;
 
 /** Real offline RSA-2048/SHA-256 fixtures; only the leaf private key is committed. */
 final class TlsTestFixture {
@@ -173,8 +171,8 @@ final class TlsTestFixture {
     }
   }
 
-  static String request(SSLContext context, boolean apache, String url) throws Exception {
-    if (apache) {
+  static String request(SSLContext context, boolean googleTransport, String url) throws Exception {
+    if (googleTransport) {
       HttpTransport transport = LauncherTls.createHttpTransport(context);
       try {
         HttpResponse response =
@@ -211,14 +209,14 @@ final class TlsTestFixture {
   static void scenario(
       String label,
       SSLContext context,
-      boolean apache,
+      boolean googleTransport,
       String leaf,
       String intermediate,
       boolean accepted)
       throws Exception {
     try (Server server = new Server(leaf, intermediate)) {
       try {
-        String body = request(context, apache, server.url());
+        String body = request(context, googleTransport, server.url());
         require(accepted, label + " unexpectedly accepted");
         require(body.equals("tls-ok"), label + " wrong body: " + body);
         require(server.requests.get() == 1, label + " request count");
@@ -232,65 +230,88 @@ final class TlsTestFixture {
         require(server.requests.get() == 0, label + " reached HTTP handler");
       }
     }
-    System.out.println("PASS " + (apache ? "Apache " : "URLConnection ") + label);
+    System.out.println("PASS " + (googleTransport ? "Google HTTP " : "URLConnection ") + label);
   }
 
-  static void handshakes(boolean apache) throws Exception {
+  static void handshakes(boolean googleTransport) throws Exception {
     SSLContext clean = context(cleanPolicy(), "root-a.pem", "root-b.pem");
     scenario(
         "ordinary PKIX accepts OneCRL-blocked identity (before policy)",
         ordinaryContext(),
-        apache,
+        googleTransport,
         "leaf.pem",
         "intermediate-a.pem",
         true);
-    scenario("clean", clean, apache, "leaf.pem", "intermediate-a.pem", true);
+    scenario("clean", clean, googleTransport, "leaf.pem", "intermediate-a.pem", true);
     scenario(
         "blocked leaf",
         context(policy(issuerRecord(certificate("leaf.pem"))), "root-a.pem", "root-b.pem"),
-        apache,
+        googleTransport,
         "leaf.pem",
         "intermediate-a.pem",
         false);
     SSLContext intermediate =
         context(
             policy(subjectRecord(certificate("intermediate-a.pem"))), "root-a.pem", "root-b.pem");
-    scenario("blocked intermediate", intermediate, apache, "leaf.pem", "intermediate-a.pem", false);
-    scenario("blocked cross-sign", intermediate, apache, "leaf.pem", "intermediate-b.pem", false);
+    scenario(
+        "blocked intermediate",
+        intermediate,
+        googleTransport,
+        "leaf.pem",
+        "intermediate-a.pem",
+        false);
+    scenario(
+        "blocked cross-sign",
+        intermediate,
+        googleTransport,
+        "leaf.pem",
+        "intermediate-b.pem",
+        false);
     scenario(
         "blocked root omitted from peer chain",
         context(policy(subjectRecord(certificate("root-a.pem"))), "root-a.pem", "root-b.pem"),
-        apache,
+        googleTransport,
         "leaf.pem",
         "intermediate-a.pem",
         false);
     scenario(
         "unknown issuer",
         context(cleanPolicy(), "root-b.pem"),
-        apache,
+        googleTransport,
         "leaf.pem",
         "intermediate-a.pem",
         false);
-    scenario("expired leaf", clean, apache, "expired.pem", "intermediate-a.pem", false);
-    scenario("wrong hostname", clean, apache, "wrong-host.pem", "intermediate-a.pem", false);
+    scenario("expired leaf", clean, googleTransport, "expired.pem", "intermediate-a.pem", false);
+    scenario(
+        "wrong hostname", clean, googleTransport, "wrong-host.pem", "intermediate-a.pem", false);
   }
 
   static void redirects() throws Exception {
     try (Server server = new Server("leaf.pem", "intermediate-a.pem")) {
-      Apache5HttpTransport transport =
-          (Apache5HttpTransport)
-              LauncherTls.createHttpTransport(context(cleanPolicy(), "root-a.pem"));
+      HttpTransport transport =
+          LauncherTls.createHttpTransport(context(cleanPolicy(), "root-a.pem"));
       try {
-        int status =
+        HttpResponse response =
             transport
-                .getHttpClient()
-                .execute(new HttpGet(server.url() + "redirect"), response -> response.getCode());
-        require(status == 302 && server.requests.get() == 1, "Apache followed redirect");
+                .createRequestFactory()
+                .buildGetRequest(new GenericUrl(server.url() + "redirect"))
+                .setFollowRedirects(false)
+                .setThrowExceptionOnExecuteError(false)
+                .setConnectTimeout(5000)
+                .setReadTimeout(5000)
+                .execute();
+        try {
+          require(
+              response.getStatusCode() == 302 && server.requests.get() == 1,
+              "Transport followed redirect despite request policy");
+        } finally {
+          response.disconnect();
+        }
       } finally {
         transport.shutdown();
       }
     }
-    System.out.println("PASS Apache redirects remain disabled");
+    System.out.println("PASS transport respects disabled redirects");
   }
 
   static void publicRevocations() throws Exception {

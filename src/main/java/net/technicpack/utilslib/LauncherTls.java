@@ -1,10 +1,9 @@
 package net.technicpack.utilslib;
 
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.apache.v5.Apache5HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.ProxySelector;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.MessageDigest;
@@ -15,16 +14,10 @@ import java.security.cert.PKIXBuilderParameters;
 import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.concurrent.TimeUnit;
 import javax.net.ssl.CertPathTrustManagerParameters;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
-import org.apache.hc.client5.http.config.ConnectionConfig;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
-import org.apache.hc.client5.http.impl.routing.SystemDefaultRoutePlanner;
-import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
 
 /**
  * Launcher-process HTTPS policy. Bundled roots are authoritative, including on old Java runtimes.
@@ -105,21 +98,7 @@ public final class LauncherTls {
   }
 
   static HttpTransport createHttpTransport(SSLContext policy) {
-    return new Apache5HttpTransport(
-        HttpClients.custom()
-            .useSystemProperties()
-            .setConnectionManager(
-                PoolingHttpClientConnectionManagerBuilder.create()
-                    .setTlsSocketStrategy(
-                        ClientTlsStrategyBuilder.create().setSslContext(policy).buildClassic())
-                    .setMaxConnTotal(200)
-                    .setMaxConnPerRoute(20)
-                    .setDefaultConnectionConfig(
-                        ConnectionConfig.custom().setTimeToLive(-1, TimeUnit.MILLISECONDS).build())
-                    .build())
-            .setRoutePlanner(new SystemDefaultRoutePlanner(ProxySelector.getDefault()))
-            .disableRedirectHandling()
-            .disableAutomaticRetries()
-            .build());
+    // Use Java 8's URLConnection rather than HttpClient's newer JDK socket-option APIs.
+    return new NetHttpTransport.Builder().setSslSocketFactory(policy.getSocketFactory()).build();
   }
 }

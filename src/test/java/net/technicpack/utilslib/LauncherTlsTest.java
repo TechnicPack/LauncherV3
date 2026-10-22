@@ -22,12 +22,13 @@ class LauncherTlsTest {
 
   @ParameterizedTest
   @ValueSource(booleans = {false, true})
-  void preservesNormalTlsChecksAndRejectsRevokedConstructedPaths(boolean apache) throws Exception {
-    handshakes(apache);
+  void preservesNormalTlsChecksAndRejectsRevokedConstructedPaths(boolean googleTransport)
+      throws Exception {
+    handshakes(googleTransport);
   }
 
   @Test
-  void apacheDoesNotFollowRedirectsInternally() throws Exception {
+  void transportRespectsDisabledRedirects() throws Exception {
     redirects();
   }
 
@@ -75,11 +76,11 @@ class LauncherTlsTest {
       ordinary.init(null, factory.getTrustManagers(), null);
       scenario(
           "simulated Java store baseline", ordinary, false, "leaf.pem", "intermediate-a.pem", true);
-      for (boolean apache : new boolean[] {false, true}) {
+      for (boolean googleTransport : new boolean[] {false, true}) {
         scenario(
             "Java-only private root is not trusted",
             context(cleanPolicy(), "root-b.pem"),
-            apache,
+            googleTransport,
             "leaf.pem",
             "intermediate-a.pem",
             false);

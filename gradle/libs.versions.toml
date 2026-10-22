@@ -17,7 +17,6 @@ guava = "33.7.2-jre"
 maven-artifact = "3.10.0"
 google-oauth-client = "1.39.0"
 google-http-client = "2.2.0"
-httpclient5 = "5.6.5"
 slf4j = "2.0.20"
 sentry = "8.61.0"
 sentry-gradle-plugin = "6.23.0"
@@ -43,9 +42,7 @@ google-oauth-client = { module = "com.google.oauth-client:google-oauth-client", 
 google-oauth-client-jetty = { module = "com.google.oauth-client:google-oauth-client-jetty", version.ref = "google-oauth-client" }
 google-oauth-client-java6 = { module = "com.google.oauth-client:google-oauth-client-java6", version.ref = "google-oauth-client" }
 google-http-client = { module = "com.google.http-client:google-http-client", version.ref = "google-http-client" }
-google-http-client-apache-v5 = { module = "com.google.http-client:google-http-client-apache-v5", version.ref = "google-http-client" }
 google-http-client-gson = { module = "com.google.http-client:google-http-client-gson", version.ref = "google-http-client" }
-httpclient5 = { module = "org.apache.httpcomponents.client5:httpclient5", version.ref = "httpclient5" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 slf4j-nop = { module = "org.slf4j:slf4j-nop", version.ref = "slf4j" }
 sentry = { module = "io.sentry:sentry", version.ref = "sentry" }
