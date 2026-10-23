@@ -6,7 +6,7 @@
     "sha256": "67bb0f07d94a3acf8d5771c74cac8ff10d5d0d66f4dc72f8a216c7c81ff3b779",
     "url": "https://firefox.settings.services.mozilla.com/v1/buckets/security-state/collections/onecrl/records"
   },
-  "retrievedAt": "2026-10-22T10:34:37.554724Z",
+  "retrievedAt": "2026-10-23T16:20:58.003657Z",
   "roots": {
     "certificateCount": 118,
     "sha256": "796f1389bfea13c0ed78f663b765baaff54a508e5483786bd6ece73c5e3e3cbe",
