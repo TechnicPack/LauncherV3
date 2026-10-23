@@ -10,6 +10,7 @@ import com.google.api.client.http.json.JsonHttpContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.util.Data;
 import com.google.api.client.util.Key;
 import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
@@ -586,7 +587,7 @@ public class MicrosoftAuthenticator {
     HttpResponse httpResponse = null;
     try {
       httpResponse = request.execute();
-      return httpResponse.parseAs(XboxResponse.class);
+      return parseXboxResponse(httpResponse);
     } catch (IOException e) {
       Utils.getLogger().log(Level.SEVERE, "Failed to get Xbox authentication.", e);
       throw new MicrosoftAuthException(XBOX, "Failed to get Xbox authentication.", e);
@@ -597,6 +598,22 @@ public class MicrosoftAuthenticator {
         } catch (IOException ignored) {
         }
       }
+    }
+  }
+
+  static XboxResponse parseXboxResponse(HttpResponse response) throws IOException {
+    try {
+      if (response.getContent() == null) {
+        throw new IOException("Missing Xbox authentication response body");
+      }
+      XboxResponse xboxResponse = response.parseAs(XboxResponse.class);
+      if (xboxResponse == null || Data.isNull(xboxResponse)) {
+        throw new IOException("Missing Xbox authentication response body");
+      }
+      return xboxResponse;
+    } catch (IOException | IllegalArgumentException e) {
+      throw new IOException(
+          "Invalid Xbox authentication response (HTTP " + response.getStatusCode() + ")", e);
     }
   }
 

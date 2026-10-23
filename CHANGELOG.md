@@ -17,6 +17,12 @@ If master advances during rollover, the workflow fails its push rather than reba
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed saved-account login failing with an uncaught exception when Xbox authentication returns
+  an empty or malformed response. These failures now use the normal authentication-error handling,
+  allowing users to choose offline mode.
+
 ## [v4.0-1173] - 2026-10-22
 
 ### Fixed
