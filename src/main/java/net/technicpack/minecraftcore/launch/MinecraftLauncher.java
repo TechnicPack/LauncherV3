@@ -20,6 +20,7 @@
 package net.technicpack.minecraftcore.launch;
 
 import io.sentry.Sentry;
+import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -109,6 +110,10 @@ public class MinecraftLauncher {
             .redirectErrorStream(true);
 
     Process process = processBuilder.start();
+    if (options.getOptions().getLaunchWindowType() == WindowType.MAXIMIZED
+        && OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS) {
+      WindowsWindowMaximizer.watch(process);
+    }
     GameProcess mcProcess = new GameProcess(process, userAccessToken);
     if (exitListener != null) mcProcess.setExitListener(exitListener);
 
@@ -381,8 +386,9 @@ public class MinecraftLauncher {
         fileSystem.getLibrariesDirectory().toAbsolutePath().normalize().toString());
     params.put("classpath_separator", File.pathSeparator);
 
-    params.put("resolution_width", Integer.toString(launchOpts.getCustomWidth()));
-    params.put("resolution_height", Integer.toString(launchOpts.getCustomHeight()));
+    Dimension resolution = LaunchOptions.getLaunchResolution(launchOpts);
+    params.put("resolution_width", Integer.toString(resolution.width));
+    params.put("resolution_height", Integer.toString(resolution.height));
 
     String targetAssets = fileSystem.getAssetsDirectory().toString();
 

@@ -19,7 +19,33 @@
 
 package net.technicpack.minecraftcore.launch;
 
+import java.awt.Dimension;
+import java.awt.GraphicsEnvironment;
+import java.awt.HeadlessException;
+import java.awt.Rectangle;
+
 public class LaunchOptions {
+
+  /**
+   * The window size passed to the game. A maximized window starts at the primary screen's usable
+   * area (excluding the taskbar or dock); on Windows it is then maximized once it appears.
+   */
+  public static Dimension getLaunchResolution(ILaunchOptions options) {
+    if (options.getLaunchWindowType() == WindowType.MAXIMIZED) {
+      try {
+        if (!GraphicsEnvironment.isHeadless()) {
+          Rectangle bounds =
+              GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+          if (bounds.width > 0 && bounds.height > 0) {
+            return new Dimension(bounds.width, bounds.height);
+          }
+        }
+      } catch (HeadlessException ignored) {
+        // Fall through to the configured dimensions.
+      }
+    }
+    return new Dimension(options.getCustomWidth(), options.getCustomHeight());
+  }
 
   private String title;
   private String iconPath;
@@ -48,10 +74,12 @@ public class LaunchOptions {
       commands.addUnique("--title", title);
     }
 
-    if (options.getLaunchWindowType() == WindowType.FULLSCREEN) commands.addUnique("--fullscreen");
-    else if (options.getLaunchWindowType() == WindowType.CUSTOM) {
-      commands.addUnique("--width", Integer.toString(options.getCustomWidth()));
-      commands.addUnique("--height", Integer.toString(options.getCustomHeight()));
+    WindowType windowType = options.getLaunchWindowType();
+    if (windowType == WindowType.FULLSCREEN) commands.addUnique("--fullscreen");
+    else if (windowType != null && windowType.hasCustomResolution()) {
+      Dimension size = getLaunchResolution(options);
+      commands.addUnique("--width", Integer.toString(size.width));
+      commands.addUnique("--height", Integer.toString(size.height));
     }
 
     if (getIconPath() != null) {
