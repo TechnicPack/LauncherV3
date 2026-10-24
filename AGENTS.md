@@ -29,3 +29,44 @@ Recent history follows Conventional Commit style such as `feat(ui): ...` and `fi
 `BUILD_NUMBER` controls the launcher version suffix. `SENTRY_AUTH_TOKEN` enables source bundle upload, and signing during `package` requires `CERT_KEYSTORE`, `CERT_ALIAS`, `CERT_STOREPASS`, and `CERT_KEYPASS`. Do not commit secrets or generated artifacts.
 
 `CHANGELOG.md` must describe end-user-relevant changes: user-visible features, fixes, security changes, and compatibility impacts. Omit internal refactors, CI/build tooling, dependency maintenance, and automation configuration unless they have a concrete end-user impact; describe that impact rather than the implementation details.
+
+## Promotion & Release Workflow
+Use `.github/workflows/gradle.yml` to build and `.github/workflows/promote.yml` to publish a stable release.
+
+1. Ensure user-facing release notes are under `CHANGELOG.md` → `[Unreleased]`, then push the approved commit:
+   ```sh
+   git push origin master
+   gh run list --workflow gradle.yml --branch master --limit 5 \
+     --json databaseId,headSha,status,conclusion,number,url
+   ```
+   Match the run's full `headSha` to the pushed commit. CI builds on `master` pushes, except ignored-path-only
+   changes. The launcher build number is the Gradle workflow run number plus `1050`; versions are `v4.0-<build>`.
+2. Wait for that exact build to succeed:
+   ```sh
+   gh run watch <build-run-id> --exit-status --interval 15
+   ```
+   CI runs tests, formatting checks, packaging, and packaged TLS smoke checks on legacy Java 8 and Java 25.
+   Do not promote a failed or unfinished build.
+3. Promote the verified run explicitly rather than relying on the latest-successful-build default:
+   ```sh
+   gh workflow run promote.yml --ref master -f run_id=<build-run-id>
+   gh run watch <promotion-run-id> --exit-status --interval 10
+   ```
+   Use the promotion run ID returned by dispatch. `build_number` is an alternative input; `run_id` takes precedence.
+   Promotion validates release notes against the selected build and previous published release, uploads the
+   Windows executable, JAR, and macOS ZIP, updates the stable symlink and launcher APIs, notifies Discord,
+   creates the GitHub release, registers the Sentry release, and rolls over the changelog on `master`.
+   Existing releases cannot be overwritten. Discord and Sentry failures are non-fatal; inspect their step results.
+4. Verify the published release and live update metadata:
+   ```sh
+   gh release view v4.0-<build> --json url,isDraft,isPrerelease,assets
+   ```
+   Read `https://api.technicpack.net/launcher/version/stable4` and confirm its `build` matches the promoted build
+   and its download URLs reference that build. A successful build alone is not a completed deployment.
+5. Fast-forward the local checkout to include the automated changelog rollover:
+   ```sh
+   git pull --ff-only origin master
+   ```
+   Preserve unrelated local changes. If rollover fails because `master` advanced, inspect the release state
+   before retrying anything: artifacts and the release may already be live. Never blindly re-promote or rebase
+   release-note boundaries.
