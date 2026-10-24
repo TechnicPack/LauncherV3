@@ -45,6 +45,7 @@ public class TechnicSettings implements ILaunchOptions {
   private transient File settingsFile;
   private transient File technicRoot;
   private int memory = Memory.DEFAULT_SETTINGS_ID;
+  private boolean memoryWarningEnabled = true;
   private LaunchAction launchAction = LaunchAction.HIDE;
   private boolean showConsole = true;
   private String languageCode = "default";
@@ -113,6 +114,15 @@ public class TechnicSettings implements ILaunchOptions {
 
   public void setMemory(int memory) {
     this.memory = memory;
+    save();
+  }
+
+  public boolean isMemoryWarningEnabled() {
+    return memoryWarningEnabled;
+  }
+
+  public void setMemoryWarningEnabled(boolean memoryWarningEnabled) {
+    this.memoryWarningEnabled = memoryWarningEnabled;
     save();
   }
 

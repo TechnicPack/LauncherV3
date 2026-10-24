@@ -17,6 +17,11 @@ If master advances during rollover, the workflow fails its push rather than reba
 
 ## [Unreleased]
 
+### Added
+
+- Low available memory warnings can now be disabled with “Don't show this warning again” when launching anyway.
+  Re-enable them in Launcher Options → Java Settings. Warnings remain enabled by default.
+
 ## [v4.0-1174] - 2026-10-23
 
 ### Fixed

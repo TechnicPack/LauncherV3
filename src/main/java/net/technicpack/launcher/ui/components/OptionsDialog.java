@@ -157,6 +157,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
   JTextField heightInput;
   JTextField wrapperCommand;
   JCheckBox useMojangJava;
+  JCheckBox memoryWarning;
 
   public OptionsDialog(
       final Frame owner,
@@ -175,6 +176,14 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     this.buildNumber = buildNumber;
 
     relocalize(resourceLoader);
+  }
+
+  @Override
+  public void setVisible(boolean visible) {
+    if (visible && memoryWarning != null) {
+      memoryWarning.setSelected(settings.isMemoryWarningEnabled());
+    }
+    super.setVisible(visible);
   }
 
   protected void closeDialog() {
@@ -274,6 +283,11 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
 
   protected void changeAskFirst() {
     settings.setAutoAcceptModpackRequirements(!askFirstBox.isSelected());
+    settings.save();
+  }
+
+  protected void changeMemoryWarning() {
+    settings.setMemoryWarningEnabled(memoryWarning.isSelected());
     settings.save();
   }
 
@@ -463,6 +477,11 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
       useMojangJava.removeActionListener(listener);
     useMojangJava.setSelected(settings.shouldUseMojangJava());
     useMojangJava.addActionListener(e -> changeUseMojangJava());
+
+    for (ActionListener listener : memoryWarning.getActionListeners())
+      memoryWarning.removeActionListener(listener);
+    memoryWarning.setSelected(settings.isMemoryWarningEnabled());
+    memoryWarning.addActionListener(e -> changeMemoryWarning());
 
     for (ActionListener listener : launchToModpacks.getActionListeners())
       launchToModpacks.removeActionListener(listener);
@@ -1790,11 +1809,55 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
             0,
             0));
 
+    JLabel memoryWarningLabel =
+        new JLabel(resources.getString("launcheroptions.java.memoryWarning"));
+    memoryWarningLabel.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16));
+    memoryWarningLabel.setForeground(UIConstants.COLOR_WHITE_TEXT);
+    panel.add(
+        memoryWarningLabel,
+        new GridBagConstraints(
+            0,
+            7,
+            1,
+            1,
+            0,
+            0,
+            GridBagConstraints.EAST,
+            GridBagConstraints.NONE,
+            new Insets(0, 20, 0, 0),
+            0,
+            0));
+
+    memoryWarning = new JCheckBox("", false);
+    memoryWarning.setOpaque(false);
+    memoryWarning.setHorizontalAlignment(SwingConstants.RIGHT);
+    memoryWarning.setBorder(BorderFactory.createEmptyBorder());
+    memoryWarning.setIconTextGap(0);
+    memoryWarning.setSelectedIcon(resources.getIcon("checkbox_closed.png"));
+    memoryWarning.setIcon(resources.getIcon("checkbox_open.png"));
+    memoryWarning.setFocusPainted(false);
+    memoryWarningLabel.setLabelFor(memoryWarning);
+    memoryWarning.getAccessibleContext().setAccessibleName(memoryWarningLabel.getText());
+    panel.add(
+        memoryWarning,
+        new GridBagConstraints(
+            1,
+            7,
+            6,
+            1,
+            0,
+            0,
+            GridBagConstraints.WEST,
+            GridBagConstraints.NONE,
+            new Insets(8, 16, 8, 8),
+            0,
+            0));
+
     panel.add(
         Box.createGlue(),
         new GridBagConstraints(
             4,
-            7,
+            8,
             1,
             1,
             1,

@@ -15,12 +15,14 @@ public final class ProcessorHashWarningDialog {
   public static Result show(Component parent, ResourceLoader resources, String javaExecutable)
       throws InterruptedException {
     return LauncherWarningDialog.confirm(
-            parent,
-            resources,
-            resources.getString("launcher.processorhashwarning.title"),
-            resources.getString("launcher.processorhashwarning"),
-            resources.getString("launcher.processorhashwarning.disableChecks"),
-            resources.getString("launcher.processorhashwarning.details", javaExecutable))
+                parent,
+                resources,
+                resources.getString("launcher.processorhashwarning.title"),
+                resources.getString("launcher.processorhashwarning"),
+                resources.getString("launcher.processorhashwarning.disableChecks"),
+                resources.getString("launcher.processorhashwarning.details", javaExecutable),
+                null)
+            != LauncherWarningDialog.Result.CANCEL
         ? Result.DISABLE_CHECKS
         : Result.CANCEL;
   }

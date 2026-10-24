@@ -341,8 +341,9 @@ public class Installer {
 
           // Sample after installation and requirement dialogs, immediately before launch.
           // A warning never clamps the heap or writes the user's saved memory selection.
-          if (!MemoryWarningDialog.confirmLaunch(
-              frame, resources, memory, MemoryPressure.getAvailableMemoryMb())) {
+          if (settings.isMemoryWarningEnabled()
+              && !MemoryWarningDialog.confirmLaunch(
+                  frame, resources, settings, memory, MemoryPressure.getAvailableMemoryMb())) {
             return;
           }
           if (isCancelledByUser || Thread.currentThread().isInterrupted()) {

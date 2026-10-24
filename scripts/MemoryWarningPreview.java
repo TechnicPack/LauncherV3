@@ -1,5 +1,6 @@
 import java.util.Locale;
 import javax.swing.UIManager;
+import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.components.MemoryWarningDialog;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.MemoryPressure;
@@ -32,7 +33,15 @@ public final class MemoryWarningPreview {
     System.out.println(
         "No memory pressure is generated. No settings are loaded or saved, and no game is started.");
     boolean warning = MemoryPressure.shouldWarn(heapMb, availableMb);
-    boolean accepted = MemoryWarningDialog.confirmLaunch(null, resources, heapMb, availableMb);
+    TechnicSettings settings =
+        new TechnicSettings() {
+          @Override
+          public void save() {
+            // Preview choices are kept in memory only.
+          }
+        };
+    boolean accepted =
+        MemoryWarningDialog.confirmLaunch(null, resources, settings, heapMb, availableMb);
     if (!warning) {
       System.out.println(
           "No warning: the reading is unknown or covers the heap plus advisory headroom.");

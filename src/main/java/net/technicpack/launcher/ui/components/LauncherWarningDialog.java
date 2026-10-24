@@ -14,9 +14,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -32,19 +34,26 @@ import net.technicpack.ui.lang.ResourceLoader;
 
 /** Launcher-styled, per-attempt confirmation with cancellation as the default. */
 final class LauncherWarningDialog {
+  enum Result {
+    CANCEL,
+    CONTINUE,
+    CONTINUE_WITH_OPTION
+  }
+
   private LauncherWarningDialog() {}
 
-  static boolean confirm(
+  static Result confirm(
       Component parent,
       ResourceLoader resources,
       String title,
       String message,
       String continueLabel,
-      String technicalDetails)
+      String technicalDetails,
+      String optionLabel)
       throws InterruptedException {
     if (Thread.interrupted()) throw new InterruptedException();
     AtomicBoolean cancelled = new AtomicBoolean();
-    AtomicBoolean accepted = new AtomicBoolean();
+    AtomicReference<Result> result = new AtomicReference<>(Result.CANCEL);
     JDialog[] activeDialog = new JDialog[1];
     Runnable prompt =
         () -> {
@@ -103,12 +112,29 @@ final class LauncherWarningDialog {
                   });
             }
 
+            JCheckBox option = optionLabel == null ? null : new JCheckBox(optionLabel, false);
+            if (option != null) {
+              option.setOpaque(false);
+              option.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
+              option.setForeground(UIConstants.COLOR_WHITE_TEXT);
+              option.setIcon(resources.getIcon("checkbox_open.png"));
+              option.setSelectedIcon(resources.getIcon("checkbox_closed.png"));
+              constraints.gridy++;
+              constraints.insets = new Insets(16, 0, 0, 0);
+              content.add(option, constraints);
+            }
+
             JButton cancel = button(resources, resources.getString("launcher.pack.cancel"));
             JButton proceed = button(resources, continueLabel);
             cancel.addActionListener(event -> dialog.dispose());
             proceed.addActionListener(
                 event -> {
-                  if (!cancelled.get()) accepted.set(true);
+                  if (!cancelled.get()) {
+                    result.set(
+                        option != null && option.isSelected()
+                            ? Result.CONTINUE_WITH_OPTION
+                            : Result.CONTINUE);
+                  }
                   dialog.dispose();
                 });
             JPanel actions = new JPanel(new FlowLayout(FlowLayout.TRAILING, 8, 0));
@@ -167,7 +193,7 @@ final class LauncherWarningDialog {
         throw new IllegalStateException("Could not display the launcher warning", e.getCause());
       }
     }
-    return !cancelled.get() && accepted.get();
+    return cancelled.get() ? Result.CANCEL : result.get();
   }
 
   private static JTextArea textArea(ResourceLoader resources, String text) {
