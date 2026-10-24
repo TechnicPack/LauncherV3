@@ -337,7 +337,9 @@ public class Rule {
     @Override
     public boolean test(ILaunchOptions opts, IJavaRuntime runtime) {
       return opts != null
-          && (opts.getLaunchWindowType() == WindowType.CUSTOM) == shouldHaveCustomResolution;
+          && (opts.getLaunchWindowType() == WindowType.CUSTOM
+                  || opts.getLaunchWindowType() == WindowType.FIT_TO_SCREEN)
+              == shouldHaveCustomResolution;
     }
 
     @Override

@@ -20,6 +20,7 @@
 package net.technicpack.minecraftcore.launch;
 
 import io.sentry.Sentry;
+import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -142,6 +143,8 @@ public class MinecraftLauncher {
     OperatingSystem operatingSystem = OperatingSystem.getOperatingSystem();
     String nativesDir = new File(pack.getBinDir(), "natives").getAbsolutePath();
     ILaunchOptions launchOpts = options.getOptions();
+    boolean legacy = "net.technicpack.legacywrapper.Launch".equals(version.getMainClass());
+    Dimension resolution = options.resolveResolution(legacy);
     String cpString = buildClassPath(pack, version, launchOpts);
 
     Utils.getLogger()
@@ -151,7 +154,7 @@ public class MinecraftLauncher {
 
     // build arg parameter map
     StringSubstitutor paramDereferencer =
-        createParamDereferencer(pack, version, nativesDir, cpString, launchOpts);
+        createParamDereferencer(pack, version, nativesDir, cpString, resolution);
 
     for (String launcherJvmArg :
         resolveLauncherJvmArgs(version, launchOpts, javaRuntime, paramDereferencer, memory)) {
@@ -236,6 +239,20 @@ public class MinecraftLauncher {
         next = null;
       }
 
+      // Fit mode owns dimensions, including metadata that hard-codes a different size.
+      // The legacy wrapper must receive only --maximize, never width/height.
+      if (launchOpts.getLaunchWindowType() == WindowType.FIT_TO_SCREEN) {
+        if (current.equals("--width") || current.equals("--height")) {
+          if (next != null && !next.startsWith("--")) {
+            mcArgsIterator.next();
+          }
+          continue;
+        }
+        if (current.startsWith("--width=") || current.startsWith("--height=")) {
+          continue;
+        }
+      }
+
       // For 1.2.1 through 1.5.2, not all of it is a named argument (--argument):
       // ${auth_player_name} ${auth_session} --gameDir ${game_directory} --assetsDir ${game_assets}
       if (current.startsWith("--")) {
@@ -266,7 +283,7 @@ public class MinecraftLauncher {
       }
     }
 
-    options.appendToCommands(commands);
+    options.appendToCommands(commands, legacy, resolution);
 
     // TODO: Add all the other less important commands
     return commands.collect();
@@ -357,7 +374,7 @@ public class MinecraftLauncher {
       IMinecraftVersionInfo version,
       String nativesDir,
       String cpString,
-      ILaunchOptions launchOpts) {
+      Dimension resolution) {
     Map<String, String> params = new HashMap<>();
     IUserType user = userModel.getCurrentUser();
     File gameDirectory = pack.getInstalledDirectory();
@@ -381,8 +398,8 @@ public class MinecraftLauncher {
         fileSystem.getLibrariesDirectory().toAbsolutePath().normalize().toString());
     params.put("classpath_separator", File.pathSeparator);
 
-    params.put("resolution_width", Integer.toString(launchOpts.getCustomWidth()));
-    params.put("resolution_height", Integer.toString(launchOpts.getCustomHeight()));
+    params.put("resolution_width", Integer.toString(resolution.width));
+    params.put("resolution_height", Integer.toString(resolution.height));
 
     String targetAssets = fileSystem.getAssetsDirectory().toString();
 

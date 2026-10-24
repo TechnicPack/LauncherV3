@@ -407,6 +407,9 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         settings.setLaunchWindowType(WindowType.CUSTOM);
         changeWindowDimensions();
         break;
+      case 3:
+        settings.setLaunchWindowType(WindowType.FIT_TO_SCREEN);
+        break;
     }
 
     updateDimensionsEnabled();
@@ -585,6 +588,7 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     windowSelect.addItem(resources.getString("launcheroptions.video.windowSize.default"));
     windowSelect.addItem(resources.getString("launcheroptions.video.windowSize.fullscreen"));
     windowSelect.addItem(resources.getString("launcheroptions.video.windowSize.custom"));
+    windowSelect.addItem(resources.getString("launcheroptions.video.windowSize.fitToScreen"));
     switch (settings.getLaunchWindowType()) {
       case DEFAULT:
         windowSelect.setSelectedIndex(0);
@@ -594,6 +598,9 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
         break;
       case CUSTOM:
         windowSelect.setSelectedIndex(2);
+        break;
+      case FIT_TO_SCREEN:
+        windowSelect.setSelectedIndex(3);
         break;
     }
     windowSelect.addActionListener(e -> changeWindowType());

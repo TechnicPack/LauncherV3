@@ -19,6 +19,8 @@
 
 package net.technicpack.minecraftcore.launch;
 
+import java.awt.Dimension;
+
 public class LaunchOptions {
 
   private String title;
@@ -43,15 +45,25 @@ public class LaunchOptions {
     return options;
   }
 
-  public void appendToCommands(LaunchCommandCollector commands) {
+  Dimension resolveResolution(boolean legacy) {
+    if (options.getLaunchWindowType() == WindowType.FIT_TO_SCREEN && !legacy) {
+      return ScreenResolution.fitToScreen();
+    }
+    return new Dimension(options.getCustomWidth(), options.getCustomHeight());
+  }
+
+  void appendToCommands(LaunchCommandCollector commands, boolean legacy, Dimension resolution) {
     if (getTitle() != null) {
       commands.addUnique("--title", title);
     }
 
     if (options.getLaunchWindowType() == WindowType.FULLSCREEN) commands.addUnique("--fullscreen");
-    else if (options.getLaunchWindowType() == WindowType.CUSTOM) {
-      commands.addUnique("--width", Integer.toString(options.getCustomWidth()));
-      commands.addUnique("--height", Integer.toString(options.getCustomHeight()));
+    else if (options.getLaunchWindowType() == WindowType.FIT_TO_SCREEN && legacy) {
+      commands.addUnique("--maximize");
+    } else if (options.getLaunchWindowType() == WindowType.CUSTOM
+        || options.getLaunchWindowType() == WindowType.FIT_TO_SCREEN) {
+      commands.addUnique("--width", Integer.toString(resolution.width));
+      commands.addUnique("--height", Integer.toString(resolution.height));
     }
 
     if (getIconPath() != null) {

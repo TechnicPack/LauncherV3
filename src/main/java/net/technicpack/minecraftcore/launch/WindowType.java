@@ -3,5 +3,6 @@ package net.technicpack.minecraftcore.launch;
 public enum WindowType {
   DEFAULT,
   FULLSCREEN,
-  CUSTOM
+  CUSTOM,
+  FIT_TO_SCREEN
 }

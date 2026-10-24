@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -302,6 +303,108 @@ class MinecraftLauncherTest {
         Collections.singletonList("-Xmx4096m"), MinecraftLauncher.buildLauncherMemoryArgs(4096));
   }
 
+  @ParameterizedTest
+  @ValueSource(
+      strings = {"net.minecraft.client.main.Main", "cpw.mods.bootstraplauncher.BootstrapLauncher"})
+  void fitToScreenResolvesOnceAndUsesSameDimensionsForPlaceholdersAndOptions(String mainClass)
+      throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("fit-modern"));
+    ModpackModel pack = createPack(fileSystem);
+    writeFile(pack.getBinDir().toPath().resolve("minecraft.jar"));
+    ChainedMinecraftVersionInfo version = windowVersion(mainClass);
+    int[] resolutions = {0};
+    LaunchOptions options =
+        new LaunchOptions(null, null, new TestLaunchOptions(WindowType.FIT_TO_SCREEN)) {
+          @Override
+          Dimension resolveResolution(boolean legacy) {
+            assertFalse(legacy);
+            resolutions[0]++;
+            return new Dimension(1904, 1001);
+          }
+        };
+
+    List<String> commands = buildCommands(fileSystem, pack, version, options);
+
+    assertEquals(1, resolutions[0]);
+    assertEquals("1904x1001", valueAfter(commands, "--resolved-size"));
+    assertEquals("1904", valueAfter(commands, "--width"));
+    assertEquals("1001", valueAfter(commands, "--height"));
+    assertEquals(1, Collections.frequency(commands, "--width"));
+    assertEquals(1, Collections.frequency(commands, "--height"));
+    assertFalse(commands.contains("--maximize"));
+    assertFalse(commands.contains("--width=640"));
+    assertFalse(commands.contains("--height=480"));
+    assertTrue(commands.contains("--custom-resolution-active"));
+  }
+
+  @Test
+  void legacyFitToScreenOnlyPassesMaximizeWithoutAnyDimensionArguments() throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("fit-legacy"));
+    ModpackModel pack = createPack(fileSystem);
+    writeFile(pack.getBinDir().toPath().resolve("minecraft.jar"));
+    List<String> commands =
+        buildCommands(
+            fileSystem,
+            pack,
+            windowVersion("net.technicpack.legacywrapper.Launch"),
+            new LaunchOptions(null, null, new TestLaunchOptions(WindowType.FIT_TO_SCREEN)));
+
+    assertEquals(1, Collections.frequency(commands, "--maximize"));
+    assertFalse(
+        commands.stream().anyMatch(arg -> arg.equals("--width") || arg.startsWith("--width=")));
+    assertFalse(
+        commands.stream().anyMatch(arg -> arg.equals("--height") || arg.startsWith("--height=")));
+    assertFalse(commands.contains("--fullscreen"));
+    assertTrue(commands.contains("--custom-resolution-active"));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"net.minecraft.client.main.Main", "net.technicpack.legacywrapper.Launch"})
+  void otherWindowModesRetainTheirArguments(String mainClass) throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("other-modes"));
+    ModpackModel pack = createPack(fileSystem);
+    writeFile(pack.getBinDir().toPath().resolve("minecraft.jar"));
+    for (WindowType type : List.of(WindowType.DEFAULT, WindowType.FULLSCREEN, WindowType.CUSTOM)) {
+      ChainedMinecraftVersionInfo version =
+          new ChainedMinecraftVersionInfo(
+              version(
+                  "{\"id\":\"1.5.2\",\"type\":\"release\",\"mainClass\":\""
+                      + mainClass
+                      + "\",\"libraries\":[],\"arguments\":{\"game\":[],\"jvm\":[]}}"));
+      version.setJavaRuntime(new FakeJavaRuntime());
+      List<String> commands =
+          buildCommands(
+              fileSystem,
+              pack,
+              version,
+              new LaunchOptions(null, null, new TestLaunchOptions(type)));
+      assertFalse(commands.contains("--maximize"));
+      assertEquals(type == WindowType.FULLSCREEN, commands.contains("--fullscreen"));
+      assertEquals(type == WindowType.CUSTOM, commands.contains("--width"));
+      assertEquals(type == WindowType.CUSTOM, commands.contains("--height"));
+      if (type == WindowType.CUSTOM) {
+        assertEquals("1024", valueAfter(commands, "--width"));
+        assertEquals("768", valueAfter(commands, "--height"));
+      }
+    }
+  }
+
+  private static ChainedMinecraftVersionInfo windowVersion(String mainClass) {
+    ChainedMinecraftVersionInfo version =
+        new ChainedMinecraftVersionInfo(
+            version(
+                "{\"id\":\"1.5.2\",\"type\":\"release\",\"mainClass\":\""
+                    + mainClass
+                    + "\",\"libraries\":[],\"arguments\":{\"jvm\":[],\"game\":["
+                    + "\"--resolved-size\",\"${resolution_width}x${resolution_height}\","
+                    + "\"--width\",\"320\",\"--height\",\"240\",\"--width=640\",\"--height=480\","
+                    + "{\"rules\":[{\"action\":\"allow\",\"features\":{\"has_custom_resolution\":true}}],"
+                    + "\"value\":[\"--custom-resolution-active\",\"--width\",\"${resolution_width}\","
+                    + "\"--height\",\"${resolution_height}\"]}]}}"));
+    version.setJavaRuntime(new FakeJavaRuntime());
+    return version;
+  }
+
   private ModpackModel createPack(LauncherFileSystem fileSystem) {
     ModpackModel pack =
         new ModpackModel(
@@ -357,6 +460,16 @@ class MinecraftLauncherTest {
   private static List<String> buildCommands(
       LauncherFileSystem fileSystem, ModpackModel pack, IMinecraftVersionInfo version)
       throws Exception {
+    return buildCommands(
+        fileSystem, pack, version, new LaunchOptions(null, null, new TestLaunchOptions(false, "")));
+  }
+
+  private static List<String> buildCommands(
+      LauncherFileSystem fileSystem,
+      ModpackModel pack,
+      IMinecraftVersionInfo version,
+      LaunchOptions options)
+      throws Exception {
     MicrosoftUser offline = new MicrosoftUser("00000000000000000000000000000000", "OfflinePlayer");
     UserModel users =
         new UserModel(null, null) {
@@ -376,14 +489,7 @@ class MinecraftLauncherTest {
     method.setAccessible(true);
     try {
       @SuppressWarnings("unchecked")
-      List<String> commands =
-          (List<String>)
-              method.invoke(
-                  launcher,
-                  pack,
-                  4096L,
-                  version,
-                  new LaunchOptions(null, null, new TestLaunchOptions(false, "")));
+      List<String> commands = (List<String>) method.invoke(launcher, pack, 4096L, version, options);
       return commands;
     } catch (InvocationTargetException failure) {
       if (failure.getCause() instanceof Exception) {
@@ -475,6 +581,12 @@ class MinecraftLauncherTest {
   private static final class TestLaunchOptions implements ILaunchOptions {
     private final boolean usingDefaultJavaArgs;
     private final String javaArgs;
+    private WindowType windowType = WindowType.DEFAULT;
+
+    private TestLaunchOptions(WindowType windowType) {
+      this(false, "");
+      this.windowType = windowType;
+    }
 
     private TestLaunchOptions(boolean usingDefaultJavaArgs, String javaArgs) {
       this.usingDefaultJavaArgs = usingDefaultJavaArgs;
@@ -488,17 +600,17 @@ class MinecraftLauncherTest {
 
     @Override
     public WindowType getLaunchWindowType() {
-      return WindowType.DEFAULT;
+      return windowType;
     }
 
     @Override
     public int getCustomWidth() {
-      return 0;
+      return windowType == WindowType.CUSTOM ? 1024 : 0;
     }
 
     @Override
     public int getCustomHeight() {
-      return 0;
+      return windowType == WindowType.CUSTOM ? 768 : 0;
     }
 
     @Override

@@ -1082,11 +1082,11 @@ class ImmutableInstallerPlanner {
     if (isLegacy) {
       Library legacyWrapper =
           new Library(
-              "net.technicpack:legacywrapper:1.2.1",
+              "net.technicpack:legacywrapper:1.2.2",
               TechnicConstants.TECHNIC_LIB_REPO
-                  + "net/technicpack/legacywrapper/1.2.1/legacywrapper-1.2.1.jar",
-              "741cbc946421a5a59188a51108e1ce5cb5674681",
-              77327);
+                  + "net/technicpack/legacywrapper/1.2.2/legacywrapper-1.2.2.jar",
+              "fbb72b621e521ce2eaa1da6033e7a052a72472e1",
+              77314);
       version.addLibrary(legacyWrapper);
       version.setMainClass("net.technicpack.legacywrapper.Launch");
     }
