@@ -17,6 +17,8 @@ If master advances during rollover, the workflow fails its push rather than reba
 
 ## [Unreleased]
 
+## [v4.0-1175] - 2026-10-24
+
 ### Added
 
 - Low available memory warnings can now be disabled with “Don't show this warning again” when launching anyway.
@@ -515,7 +517,8 @@ If master advances during rollover, the workflow fails its push rather than reba
 For the full list of historical stable releases (pre-dating this file), see [HISTORY.md](HISTORY.md) or the
 [Releases page](https://github.com/TechnicPack/LauncherV3/releases).
 
-[Unreleased]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1174...HEAD
+[Unreleased]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1175...HEAD
+[v4.0-1175]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1174...v4.0-1175
 [v4.0-1174]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1173...v4.0-1174
 [v4.0-1173]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1172...v4.0-1173
 [v4.0-1172]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1170...v4.0-1172
