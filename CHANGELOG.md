@@ -21,7 +21,10 @@ If master advances during rollover, the workflow fails its push rather than reba
 
 ### Added
 
-- Added **Fit to Screen** in Launcher Options → Video Settings. Modern Minecraft starts with dimensions based on the primary screen's usable area, allowing for window borders; this approximates a maximized window without forcing fullscreen. Legacy Minecraft versions before 1.6 open maximized and remain resizable. The option also works when the launcher is configured to close after launching.
+- Added **Fit to Screen** in Launcher Options → Video Settings. Modern Minecraft starts with dimensions based on the
+  primary screen's usable area, allowing for window borders; this approximates a maximized window without forcing
+  fullscreen. Legacy Minecraft versions before 1.6 open maximized and remain resizable. The option also works when the
+  launcher is configured to close after launching.
 
 ## [v4.0-1175] - 2026-10-24
 
