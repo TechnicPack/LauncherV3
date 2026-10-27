@@ -55,6 +55,17 @@ Signing during `package` is enabled when `CERT_KEYSTORE` is set and also require
 `CERT_STOREPASS`, and `CERT_KEYPASS`. Setting `SENTRY_AUTH_TOKEN` enables Sentry source bundle
 upload. Keep credentials and generated files out of version control.
 
+### Dependency maintenance
+
+Dependency updates must retain Java 8 runtime compatibility and the seven-day release cooldown
+configured in `renovate.json5` and `pnpm-workspace.yaml`. Keep the compatibility pins documented
+in the build files, including the Java formatter pin.
+
+After updating the Gradle catalog, plugins, or wrapper, run `./gradlew check package :buildSrc:test`
+and the packaged Java 8u202/Java 25 smoke checks below. For Node-based commit tooling, update the
+exact versions and lockfile with pnpm, then run `pnpm install --frozen-lockfile`, `pnpm audit`, and
+`printf 'build: update dependencies\n' | pnpm exec commitlint`.
+
 ### Memory warning preview
 
 ```sh
