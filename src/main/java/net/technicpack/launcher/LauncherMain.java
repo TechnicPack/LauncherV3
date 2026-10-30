@@ -94,6 +94,7 @@ import net.technicpack.launchercore.modpacks.resources.resourcetype.IconResource
 import net.technicpack.launchercore.modpacks.resources.resourcetype.LogoResourceType;
 import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
 import net.technicpack.minecraftcore.launch.MinecraftLauncher;
+import net.technicpack.minecraftcore.launch.WindowsWindowMaximizerLauncher;
 import net.technicpack.minecraftcore.microsoft.auth.MicrosoftAuthenticator;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.IPlatformSearchApi;
@@ -167,6 +168,9 @@ public class LauncherMain {
   }
 
   public static void main(String[] argv) {
+    if (WindowsWindowMaximizerLauncher.runIfRequested(argv)) {
+      return;
+    }
     StartupParameters params = new StartupParameters(argv);
     try {
       JCommander jc = JCommander.newBuilder().addObject(params).build();

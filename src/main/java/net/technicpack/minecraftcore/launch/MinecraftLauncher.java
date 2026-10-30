@@ -116,7 +116,10 @@ public class MinecraftLauncher {
     if (options.getOptions().getLaunchWindowType() == WindowType.FIT_TO_SCREEN
         && OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS
         && !"net.technicpack.legacywrapper.Launch".equals(version.getMainClass())) {
-      WindowsWindowMaximizer.watch(process);
+      WindowsWindowMaximizerLauncher.watch(
+          process,
+          StringUtils.isNotEmpty(options.getOptions().getWrapperCommand()),
+          fileSystem.getLogsDirectory().resolve("window-maximizer.log").toFile());
     }
 
     platformApi.incrementPackRuns(pack.getName());
