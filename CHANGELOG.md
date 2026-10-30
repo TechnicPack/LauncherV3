@@ -21,6 +21,8 @@ If master advances during rollover, the workflow fails its push rather than reba
 
 - Fixed **Fit to Screen** on Windows for modern Minecraft, including 26.3. The game window now maximizes when it appears,
   even after the launcher closes, and can still be restored or resized normally.
+- Fixed saved sign-in becoming inaccessible on Windows after running the launcher as administrator. A new
+  **Repair permissions** option restores access without deleting saved credentials.
 
 ## [v4.0-1176] - 2026-10-24
 
