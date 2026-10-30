@@ -21,11 +21,8 @@ import java.io.IOException;
 import java.io.StreamCorruptedException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.FileOwnerAttributeView;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +36,6 @@ import net.technicpack.minecraftcore.microsoft.auth.model.*;
 import net.technicpack.utilslib.DesktopUtils;
 import net.technicpack.utilslib.LauncherTls;
 import net.technicpack.utilslib.Utils;
-import org.apache.commons.io.FileUtils;
 
 public class MicrosoftAuthenticator {
   private static final HttpTransport HTTP_TRANSPORT = LauncherTls.createHttpTransport();
@@ -60,12 +56,10 @@ public class MicrosoftAuthenticator {
   private final DataStoreFactory dataStoreFactory;
 
   /**
-   * Non-null when the on-disk credential store at this path could not be initialised (usually
-   * Windows ACL corruption), and we fell back to an in-memory store. Callers should surface a
-   * warning to the user telling them how to clean up the folder manually; in-memory mode means the
-   * user has to sign in every launch until the path is resolvable again.
+   * Non-null when persistent credentials could not be opened. The existing store is left intact;
+   * callers may offer explicit permission repair while authentication uses an in-memory store.
    */
-  private final String corruptedCredentialStorePath;
+  private final String unavailableCredentialStorePath;
 
   // XBOX
   private static final String XBOX_AUTH_URL = "https://user.auth.xboxlive.com/user/authenticate";
@@ -107,108 +101,50 @@ public class MicrosoftAuthenticator {
               request.setCurlLoggingEnabled(true);
             });
 
-    // Work around the Access Denied exception that sometimes happens due to Windows ACL permission
-    // issues. FileDataStoreFactory probes ownership of the datastore folder on init, and fails
-    // hard if it can't read it. If the folder is in a corrupt ACL state (stale owner, permissions
-    // rewritten by a cleaner, profile SID changed after a reinstall), try to reset it. If every
-    // recovery strategy fails, fall back to an in-memory credential store so the launcher can
-    // still run: the user has to sign in each launch until they fix the folder by hand, but the
-    // launcher does not crash. The caller is expected to check getCorruptedCredentialStorePath()
-    // and surface a warning dialog explaining how to clean up.
-    Path dataStorePath = Paths.get(dataStore.getAbsolutePath());
-    DataStoreFactory factory = null;
-    String corruptedPath = null;
-
-    if (Files.exists(dataStorePath)) {
-      try {
-        FileOwnerAttributeView fileAttributeView =
-            Files.getFileAttributeView(dataStorePath, FileOwnerAttributeView.class);
-        fileAttributeView.getOwner();
-      } catch (AccessDeniedException e) {
-        if (!resetCorruptedDataStore(dataStorePath)) {
-          Sentry.captureException(e);
-          Utils.getLogger()
-              .log(
-                  Level.WARNING,
-                  "Credential store at "
-                      + dataStorePath
-                      + " is in a corrupt permission state and could not be reset. "
-                      + "Falling back to an in-memory credential store.",
-                  e);
-          factory = MemoryDataStoreFactory.getDefaultInstance();
-          corruptedPath = dataStorePath.toString();
+    Path dataStorePath = dataStore.toPath().toAbsolutePath();
+    DataStoreFactory factory;
+    String unavailablePath = null;
+    try {
+      if (Files.exists(dataStorePath) && !Files.isDirectory(dataStorePath)) {
+        throw new IOException("Credential store path is not a directory: " + dataStorePath);
+      }
+      if (WindowsCredentialStore.isSupported()) {
+        WindowsCredentialStore.prepare(dataStorePath);
+      }
+      factory = new FileDataStoreFactory(dataStore);
+      if (WindowsCredentialStore.isSupported()) {
+        boolean createdCredentialFile =
+            Files.notExists(dataStorePath.resolve(StoredCredential.DEFAULT_DATA_STORE_ID));
+        // Opening the factory alone does not probe or create the credential file.
+        factory.getDataStore(StoredCredential.DEFAULT_DATA_STORE_ID);
+        if (createdCredentialFile) {
+          // An elevated JVM also defaults newly created files to Administrators ownership.
+          WindowsCredentialStore.prepare(dataStorePath);
         }
-      } catch (IOException e) {
-        Sentry.captureException(e);
-        // Ignore other IO exceptions; FileDataStoreFactory will either succeed or fall back below.
       }
-    }
-
-    if (factory == null) {
-      try {
-        factory = new FileDataStoreFactory(dataStore);
-      } catch (IOException e) {
-        Sentry.captureException(e);
-        Utils.getLogger()
-            .log(
-                Level.WARNING,
-                "Failed to create file-backed credential store at "
-                    + dataStorePath
-                    + ". Falling back to an in-memory credential store.",
-                e);
-        factory = MemoryDataStoreFactory.getDefaultInstance();
-        corruptedPath = dataStorePath.toString();
-      }
-    }
-
-    this.dataStoreFactory = factory;
-    this.corruptedCredentialStorePath = corruptedPath;
-  }
-
-  /**
-   * Returns the on-disk path that the credential store could not use, or null if the credential
-   * store is healthy (on-disk, persistent). When non-null, the launcher is running with an
-   * in-memory credential store: the user has to sign in every launch until this folder is cleaned
-   * up manually. Callers should surface a warning dialog with cleanup guidance.
-   */
-  public String getCorruptedCredentialStorePath() {
-    return corruptedCredentialStorePath;
-  }
-
-  /**
-   * Try progressively harder strategies to clear a credential-store folder that is in a corrupt
-   * permission state. Returns true if the folder is now absent (so FileDataStoreFactory can create
-   * a fresh one) or false if every strategy failed.
-   */
-  static boolean resetCorruptedDataStore(Path dataStorePath) {
-    // Strategy 1: recursive delete. Handles both empty and non-empty folders, and succeeds when
-    // the folder contents are accessible but the folder itself has stale ownership.
-    try {
-      FileUtils.deleteDirectory(dataStorePath.toFile());
-      return true;
     } catch (IOException e) {
-      Utils.getLogger().log(Level.WARNING, "Recursive delete of " + dataStorePath + " failed", e);
-    }
-
-    // Strategy 2: rename the folder aside. Windows file rename uses different NTFS permission
-    // bits than delete in some configurations, so rename can succeed where delete does not.
-    // FileDataStoreFactory will then create a fresh empty folder at the original path.
-    Path renamed =
-        dataStorePath.resolveSibling(
-            dataStorePath.getFileName() + ".corrupted." + System.currentTimeMillis());
-    try {
-      Files.move(dataStorePath, renamed);
+      Sentry.captureException(e);
       Utils.getLogger()
           .log(
               Level.WARNING,
-              "Renamed corrupted credential store to " + renamed + "; creating fresh folder");
-      return true;
-    } catch (IOException e) {
-      Utils.getLogger()
-          .log(Level.WARNING, "Rename of " + dataStorePath + " to " + renamed + " failed", e);
+              "Failed to open file-backed credential store at "
+                  + dataStorePath
+                  + ". Leaving existing credentials intact and using an in-memory store.",
+              e);
+      factory = new MemoryDataStoreFactory();
+      unavailablePath = dataStorePath.toString();
     }
 
-    return false;
+    this.dataStoreFactory = factory;
+    this.unavailableCredentialStorePath = unavailablePath;
+  }
+
+  /**
+   * Returns the unavailable persistent credential path, or null when it opened successfully. A
+   * non-null result means credentials are only held in memory until the store is accessible.
+   */
+  public String getUnavailableCredentialStorePath() {
+    return unavailableCredentialStorePath;
   }
 
   public MicrosoftUser loginNewUser() throws MicrosoftAuthException {

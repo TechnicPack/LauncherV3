@@ -96,6 +96,7 @@ import net.technicpack.launchercore.modpacks.sources.IAuthoritativePackSource;
 import net.technicpack.minecraftcore.launch.MinecraftLauncher;
 import net.technicpack.minecraftcore.launch.WindowsWindowMaximizerLauncher;
 import net.technicpack.minecraftcore.microsoft.auth.MicrosoftAuthenticator;
+import net.technicpack.minecraftcore.microsoft.auth.WindowsCredentialStore;
 import net.technicpack.platform.IPlatformApi;
 import net.technicpack.platform.IPlatformSearchApi;
 import net.technicpack.platform.PlatformPackInfoRepository;
@@ -603,6 +604,79 @@ public class LauncherMain {
     return cleanupLogsThread;
   }
 
+  private static MicrosoftAuthenticator openCredentialStore(
+      Path credentialStorePath, ResourceLoader resources) {
+    MicrosoftAuthenticator authenticator = new MicrosoftAuthenticator(credentialStorePath.toFile());
+    String unavailablePath = authenticator.getUnavailableCredentialStorePath();
+    if (unavailablePath == null) {
+      return authenticator;
+    }
+
+    String title = resources.getString("auth.error.unavailablestore.title");
+    if (!WindowsCredentialStore.isSupported()) {
+      JOptionPane.showMessageDialog(
+          null,
+          resources.getString("auth.error.unavailablestore", unavailablePath),
+          title,
+          JOptionPane.WARNING_MESSAGE);
+      return authenticator;
+    }
+
+    Object[] options = {
+      resources.getString("auth.error.unavailablestore.repair"),
+      resources.getString("auth.error.unavailablestore.continue")
+    };
+    int choice =
+        JOptionPane.showOptionDialog(
+            null,
+            resources.getString("auth.error.unavailablestore.windows", unavailablePath),
+            title,
+            JOptionPane.DEFAULT_OPTION,
+            JOptionPane.WARNING_MESSAGE,
+            null,
+            options,
+            options[1]);
+    if (choice != 0) {
+      return authenticator;
+    }
+
+    // Startup runs on the main thread, so the elevated helper does not block the EDT.
+    String outcome = "auth.error.unavailablestore.failed";
+    boolean repaired = false;
+    boolean interrupted = false;
+    try {
+      if (WindowsCredentialStore.repair(credentialStorePath)) {
+        MicrosoftAuthenticator reopened = new MicrosoftAuthenticator(credentialStorePath.toFile());
+        if (reopened.getUnavailableCredentialStorePath() == null) {
+          authenticator = reopened;
+          repaired = true;
+          outcome = "auth.error.unavailablestore.repaired";
+        }
+      } else {
+        outcome = "auth.error.unavailablestore.cancelled";
+      }
+    } catch (InterruptedException e) {
+      interrupted = true;
+      outcome = "auth.error.unavailablestore.interrupted";
+      Utils.getLogger().log(Level.WARNING, "Credential folder permission repair interrupted", e);
+    } catch (IOException | SecurityException e) {
+      Utils.getLogger().log(Level.WARNING, "Could not repair credential folder permissions", e);
+    }
+
+    try {
+      JOptionPane.showMessageDialog(
+          null,
+          resources.getString(outcome, unavailablePath),
+          title,
+          repaired ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE);
+    } finally {
+      if (interrupted) {
+        Thread.currentThread().interrupt();
+      }
+    }
+    return authenticator;
+  }
+
   private static void startLauncher(
       final TechnicSettings settings,
       StartupParameters startupParameters,
@@ -654,17 +728,7 @@ public class LauncherMain {
 
     UserStore userStore = UserStore.load(fileSystem.getRootDirectory().resolve("users.json"));
     MicrosoftAuthenticator microsoftAuthenticator =
-        new MicrosoftAuthenticator(fileSystem.getRootDirectory().resolve("oauth").toFile());
-    String corruptedCredentialStorePath = microsoftAuthenticator.getCorruptedCredentialStorePath();
-    if (corruptedCredentialStorePath != null) {
-      // In-memory fallback is active: show a warning so the user knows they have to re-sign-in
-      // every launch until they clean up the corrupted folder.
-      JOptionPane.showMessageDialog(
-          null,
-          resources.getString("auth.error.corruptstore", corruptedCredentialStorePath),
-          resources.getString("auth.error.corruptstore.title"),
-          JOptionPane.WARNING_MESSAGE);
-    }
+        openCredentialStore(fileSystem.getRootDirectory().resolve("oauth"), resources);
     UserModel userModel = new UserModel(userStore, microsoftAuthenticator);
 
     IModpackResourceType iconType = new IconResourceType();
