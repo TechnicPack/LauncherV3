@@ -19,8 +19,8 @@ If master advances during rollover, the workflow fails its push rather than reba
 
 ### Fixed
 
-- Fixed **Fit to Screen** on Windows leaving modern Minecraft windows offset from the screen edges. The game window now
-  maximizes when it appears, even after the launcher closes, and can still be restored or resized normally.
+- Fixed **Fit to Screen** on Windows for modern Minecraft, including 26.3. The game window now maximizes when it appears,
+  even after the launcher closes, and can still be restored or resized normally.
 
 ## [v4.0-1176] - 2026-10-24
 

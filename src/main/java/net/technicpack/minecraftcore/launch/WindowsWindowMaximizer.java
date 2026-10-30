@@ -373,7 +373,9 @@ final class WindowsWindowMaximizer {
   }
 
   static boolean isGameClass(Memory name, int length) {
-    return matchesClass(name, length, "LWJGL") || matchesClass(name, length, "GLFW30");
+    return matchesClass(name, length, "LWJGL")
+        || matchesClass(name, length, "GLFW30")
+        || matchesClass(name, length, "SDL_app");
   }
 
   private static boolean matchesClass(Memory name, int length, String expected) {

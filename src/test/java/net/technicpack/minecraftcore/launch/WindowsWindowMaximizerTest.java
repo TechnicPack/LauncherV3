@@ -19,13 +19,22 @@ class WindowsWindowMaximizerTest {
   @Test
   void acceptsOnlyExactGameWindowClassesNotArbitraryNonAwtWindows() {
     try (Memory name = new Memory(512)) {
-      for (String expected : new String[] {"LWJGL", "GLFW30"}) {
+      for (String expected : new String[] {"LWJGL", "GLFW30", "SDL_app"}) {
         putClassName(name, expected);
         assertTrue(WindowsWindowMaximizer.isGameClass(name, expected.length()));
       }
       for (String rejected :
           new String[] {
-            "", "SunAwtFrame", "java", "ConsoleWindowClass", "GLFW", "GLFW30Splash", "LWJGL2"
+            "",
+            "SunAwtFrame",
+            "java",
+            "ConsoleWindowClass",
+            "GLFW",
+            "GLFW30Splash",
+            "LWJGL2",
+            "SDL",
+            "SDL_appSplash",
+            "sdl_app"
           }) {
         putClassName(name, rejected);
         assertFalse(WindowsWindowMaximizer.isGameClass(name, rejected.length()), rejected);
