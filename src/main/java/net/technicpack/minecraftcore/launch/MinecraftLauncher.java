@@ -113,6 +113,15 @@ public class MinecraftLauncher {
     GameProcess mcProcess = new GameProcess(process, userAccessToken);
     if (exitListener != null) mcProcess.setExitListener(exitListener);
 
+    if (options.getOptions().getLaunchWindowType() == WindowType.FIT_TO_SCREEN
+        && OperatingSystem.getOperatingSystem() == OperatingSystem.WINDOWS
+        && !"net.technicpack.legacywrapper.Launch".equals(version.getMainClass())) {
+      WindowsWindowMaximizerLauncher.watch(
+          process,
+          StringUtils.isNotEmpty(options.getOptions().getWrapperCommand()),
+          fileSystem.getLogsDirectory().resolve("window-maximizer.log").toFile());
+    }
+
     platformApi.incrementPackRuns(pack.getName());
     if (!Utils.sendTracking(
         "runModpack",
