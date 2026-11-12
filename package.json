@@ -1,6 +1,6 @@
 {
 	"engines": {
-		"node": ">=26 <27"
+		"node": "v26.13.1"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "21.2.4",
