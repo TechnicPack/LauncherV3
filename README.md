@@ -57,6 +57,8 @@ upload. Keep credentials and generated files out of version control.
 
 ### Dependency maintenance
 
+Node-based commit tooling requires Node.js 26 LTS (see `.node-version`) and pnpm.
+
 Dependency updates must retain Java 8 runtime compatibility and the seven-day release cooldown
 configured in `renovate.json5` and `pnpm-workspace.yaml`. Keep the compatibility pins documented
 in the build files, including the Java formatter pin.
