@@ -17,6 +17,8 @@ If master advances during rollover, the workflow fails its push rather than reba
 
 ## [Unreleased]
 
+## [v4.0-1182] - 2026-11-18
+
 ### Security
 
 - Added the Java4Shell workaround when launching games with Java 17 or newer, including older modpacks
@@ -540,7 +542,8 @@ If master advances during rollover, the workflow fails its push rather than reba
 For the full list of historical stable releases (pre-dating this file), see [HISTORY.md](HISTORY.md) or the
 [Releases page](https://github.com/TechnicPack/LauncherV3/releases).
 
-[Unreleased]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1180...HEAD
+[Unreleased]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1182...HEAD
+[v4.0-1182]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1180...v4.0-1182
 [v4.0-1180]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1176...v4.0-1180
 [v4.0-1176]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1175...v4.0-1176
 [v4.0-1175]: https://github.com/TechnicPack/LauncherV3/compare/v4.0-1174...v4.0-1175
