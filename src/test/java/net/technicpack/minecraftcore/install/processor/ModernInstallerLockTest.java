@@ -34,18 +34,17 @@ class ModernInstallerLockTest {
       Future<Boolean> waiter;
       try (ModernInstallerLock ignored = ModernInstallerLock.acquire(cache, () -> false)) {
         waiter =
-            executor.submit(
-                () -> {
-                  try (ModernInstallerLock next =
-                      ModernInstallerLock.acquire(
-                          cache,
-                          () -> {
-                            attempting.countDown();
-                            return false;
-                          })) {
-                    return true;
-                  }
-                });
+            executor.submit(() -> {
+              try (ModernInstallerLock next =
+                  ModernInstallerLock.acquire(
+                      cache,
+                      () -> {
+                        attempting.countDown();
+                        return false;
+                      })) {
+                return true;
+              }
+            });
         assertTrue(attempting.await(5, TimeUnit.SECONDS));
         assertThrows(TimeoutException.class, () -> waiter.get(250, TimeUnit.MILLISECONDS));
       }
@@ -65,18 +64,17 @@ class ModernInstallerLockTest {
     try {
       try (ModernInstallerLock ignored = ModernInstallerLock.acquire(cache, () -> false)) {
         Future<?> waiter =
-            executor.submit(
-                () -> {
-                  try (ModernInstallerLock next =
-                      ModernInstallerLock.acquire(
-                          cache,
-                          () -> {
-                            attempting.countDown();
-                            return cancelled.get();
-                          })) {
-                    return null;
-                  }
-                });
+            executor.submit(() -> {
+              try (ModernInstallerLock next =
+                  ModernInstallerLock.acquire(
+                      cache,
+                      () -> {
+                        attempting.countDown();
+                        return cancelled.get();
+                      })) {
+                return null;
+              }
+            });
         assertTrue(attempting.await(5, TimeUnit.SECONDS));
         assertThrows(TimeoutException.class, () -> waiter.get(250, TimeUnit.MILLISECONDS));
         cancelled.set(true);
@@ -104,19 +102,18 @@ class ModernInstallerLockTest {
     try {
       try (ModernInstallerLock ignored = ModernInstallerLock.acquire(cache, () -> false)) {
         Future<?> waiter =
-            executor.submit(
-                () -> {
-                  waitingThread.set(Thread.currentThread());
-                  try (ModernInstallerLock next =
-                      ModernInstallerLock.acquire(
-                          cache,
-                          () -> {
-                            attempting.countDown();
-                            return false;
-                          })) {
-                    return null;
-                  }
-                });
+            executor.submit(() -> {
+              waitingThread.set(Thread.currentThread());
+              try (ModernInstallerLock next =
+                  ModernInstallerLock.acquire(
+                      cache,
+                      () -> {
+                        attempting.countDown();
+                        return false;
+                      })) {
+                return null;
+              }
+            });
         assertTrue(attempting.await(5, TimeUnit.SECONDS));
         assertThrows(TimeoutException.class, () -> waiter.get(250, TimeUnit.MILLISECONDS));
         waitingThread.get().interrupt();

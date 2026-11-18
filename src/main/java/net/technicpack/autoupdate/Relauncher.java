@@ -358,12 +358,11 @@ public class Relauncher {
     // way to tell which NIO call actually refused the operation.
     String failedStep = e.getOtherFile() != null ? "rename" : "copy";
     boolean retryExhausted = finalAttempt >= totalAttempts;
-    Sentry.configureScope(
-        scope -> {
-          scope.setTag("moverFailedStep", failedStep);
-          scope.setTag("moverRetryAttempts", String.valueOf(finalAttempt));
-          scope.setTag("moverRetryExhausted", String.valueOf(retryExhausted));
-        });
+    Sentry.configureScope(scope -> {
+      scope.setTag("moverFailedStep", failedStep);
+      scope.setTag("moverRetryAttempts", String.valueOf(finalAttempt));
+      scope.setTag("moverRetryExhausted", String.valueOf(retryExhausted));
+    });
   }
 
   private static void replaceLauncherPackageOnce(Path currentPath, Path targetPath)

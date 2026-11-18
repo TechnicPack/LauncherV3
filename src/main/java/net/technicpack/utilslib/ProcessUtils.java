@@ -73,19 +73,18 @@ public class ProcessUtils {
       throws IOException, InterruptedException {
     Process process = createProcessBuilder(command).redirectErrorStream(true).start();
     FutureTask<String> output =
-        new FutureTask<>(
-            () -> {
-              StringBuilder response = new StringBuilder();
-              try (Reader reader =
-                  new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8)) {
-                char[] buffer = new char[4096];
-                int length;
-                while ((length = reader.read(buffer)) != -1) {
-                  response.append(buffer, 0, length);
-                }
-              }
-              return response.toString();
-            });
+        new FutureTask<>(() -> {
+          StringBuilder response = new StringBuilder();
+          try (Reader reader =
+              new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8)) {
+            char[] buffer = new char[4096];
+            int length;
+            while ((length = reader.read(buffer)) != -1) {
+              response.append(buffer, 0, length);
+            }
+          }
+          return response.toString();
+        });
     Thread reader = new Thread(output, "process-output");
     reader.setDaemon(true);
     try {

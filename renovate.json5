@@ -20,6 +20,19 @@
   // resolvable versions and bypasses minimumReleaseAge, so disable it to keep
   // the 7-day cooldown airtight (Dependabot covers vulnerable transitives).
   "lockFileMaintenance": { "enabled": false },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^buildSrc/src/main/kotlin/net/technicpack/gradle/LauncherPackagingPlugin\\.kt$/"
+      ],
+      "matchStrings": [
+        "WINDOWS_INSTALLER_DOCKER_IMAGE\\s*=\\s*\"(?<depName>[^\"\\s:]+):(?<currentValue>[^\"\\s@]+)@(?<currentDigest>sha256:[a-f0-9]{64})\""
+      ],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "docker"
+    }
+  ],
   "packageRules": [
     {
       // Exact npm versions produce age-checked patch/minor/major updates, not

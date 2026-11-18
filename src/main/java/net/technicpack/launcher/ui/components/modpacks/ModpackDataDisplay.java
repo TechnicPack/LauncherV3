@@ -105,11 +105,10 @@ public class ModpackDataDisplay extends JPanel implements IImageJobListener<Modp
     job.addJobListener(this);
     packImage.setIcon(new ImageIcon(ImageUtils.fitImage(job.getImage(), 370, 220)));
 
-    SwingUtilities.invokeLater(
-        () -> {
-          description.scrollRectToVisible(new Rectangle(new Dimension(1, 1)));
-          repaint();
-        });
+    SwingUtilities.invokeLater(() -> {
+      description.scrollRectToVisible(new Rectangle(new Dimension(1, 1)));
+      repaint();
+    });
 
     discordPanel.setVisible(false);
     if (modpack.getDiscordId() != null && !modpack.getDiscordId().isEmpty())

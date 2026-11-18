@@ -611,12 +611,11 @@ class LibraryCacheMigrationTest {
       Future<Boolean> waiter;
       try (ModernInstallerLock ignored = ModernInstallerLock.acquire(fixture.cache, () -> false)) {
         waiter =
-            executor.submit(
-                () -> {
-                  attempting.countDown();
-                  return new LibraryCacheMigration()
-                      .migrate(fixture.settings, null, fixture.fileSystem, null);
-                });
+            executor.submit(() -> {
+              attempting.countDown();
+              return new LibraryCacheMigration()
+                  .migrate(fixture.settings, null, fixture.fileSystem, null);
+            });
         assertTrue(attempting.await(5, TimeUnit.SECONDS));
         assertThrows(TimeoutException.class, () -> waiter.get(250, TimeUnit.MILLISECONDS));
         assertBytes(source, bytes("locked payload"));
@@ -642,19 +641,18 @@ class LibraryCacheMigrationTest {
     try {
       try (ModernInstallerLock ignored = ModernInstallerLock.acquire(fixture.cache, () -> false)) {
         Future<boolean[]> waiter =
-            executor.submit(
-                () -> {
-                  waitingThread.set(Thread.currentThread());
-                  attempting.countDown();
-                  try {
-                    boolean complete =
-                        new LibraryCacheMigration()
-                            .migrate(fixture.settings, null, fixture.fileSystem, null);
-                    return new boolean[] {complete, Thread.currentThread().isInterrupted()};
-                  } finally {
-                    Thread.interrupted();
-                  }
-                });
+            executor.submit(() -> {
+              waitingThread.set(Thread.currentThread());
+              attempting.countDown();
+              try {
+                boolean complete =
+                    new LibraryCacheMigration()
+                        .migrate(fixture.settings, null, fixture.fileSystem, null);
+                return new boolean[] {complete, Thread.currentThread().isInterrupted()};
+              } finally {
+                Thread.interrupted();
+              }
+            });
         assertTrue(attempting.await(5, TimeUnit.SECONDS));
         assertThrows(TimeoutException.class, () -> waiter.get(250, TimeUnit.MILLISECONDS));
         waitingThread.get().interrupt();
@@ -665,10 +663,9 @@ class LibraryCacheMigrationTest {
         assertFalse(Files.exists(fixture.libraries));
       }
       Future<Boolean> retry =
-          executor.submit(
-              () ->
-                  new LibraryCacheMigration()
-                      .migrate(fixture.settings, null, fixture.fileSystem, null));
+          executor.submit(() ->
+              new LibraryCacheMigration()
+                  .migrate(fixture.settings, null, fixture.fileSystem, null));
       assertTrue(retry.get(5, TimeUnit.SECONDS));
       assertBytes(fixture.libraries.resolve(SAMPLE), bytes("interrupted payload"));
       assertFalse(Files.exists(source));

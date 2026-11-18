@@ -141,17 +141,16 @@ class DiscoverInfoPanelTest {
       XHTMLPanel panel = createPanel("<html><head></head><body>" + body + "</body></html>");
       render(panel);
       // The failure listener installs the fallback in a subsequent EDT task.
-      SwingUtilities.invokeAndWait(
-          () -> {
-            try (InputStream input = resources().getResourceAsStream("/discoverFallback.html")) {
-              Document fallback = XMLResource.load(input).getDocument();
-              assertTrue(
-                  fallback.isEqualNode(panel.getDocument()),
-                  "failed image loading should display the bundled offline page");
-            } catch (IOException e) {
-              throw new AssertionError(e);
-            }
-          });
+      SwingUtilities.invokeAndWait(() -> {
+        try (InputStream input = resources().getResourceAsStream("/discoverFallback.html")) {
+          Document fallback = XMLResource.load(input).getDocument();
+          assertTrue(
+              fallback.isEqualNode(panel.getDocument()),
+              "failed image loading should display the bundled offline page");
+        } catch (IOException e) {
+          throw new AssertionError(e);
+        }
+      });
       render(panel);
     } finally {
       server.stop(0);
@@ -164,30 +163,29 @@ class DiscoverInfoPanelTest {
     try (ServerSocket server = new ServerSocket()) {
       server.bind(new InetSocketAddress("127.0.0.1", 0));
       Future<Boolean> connectionClosed =
-          serverExecutor.submit(
-              () -> {
-                try (Socket socket = server.accept()) {
-                  socket.setSoTimeout(2_000);
-                  InputStream input = socket.getInputStream();
-                  readRequestHeaders(input);
+          serverExecutor.submit(() -> {
+            try (Socket socket = server.accept()) {
+              socket.setSoTimeout(2_000);
+              InputStream input = socket.getInputStream();
+              readRequestHeaders(input);
 
-                  OutputStream output = socket.getOutputStream();
-                  output.write(
-                      ("HTTP/1.1 404 Not Found\r\n"
-                              + "Content-Length: 1\r\n"
-                              + "Connection: keep-alive\r\n"
-                              + "\r\n"
-                              + "x")
-                          .getBytes(StandardCharsets.ISO_8859_1));
-                  output.flush();
+              OutputStream output = socket.getOutputStream();
+              output.write(
+                  ("HTTP/1.1 404 Not Found\r\n"
+                          + "Content-Length: 1\r\n"
+                          + "Connection: keep-alive\r\n"
+                          + "\r\n"
+                          + "x")
+                      .getBytes(StandardCharsets.ISO_8859_1));
+              output.flush();
 
-                  try {
-                    return input.read() == -1;
-                  } catch (SocketTimeoutException e) {
-                    return false;
-                  }
-                }
-              });
+              try {
+                return input.read() == -1;
+              } catch (SocketTimeoutException e) {
+                return false;
+              }
+            }
+          });
 
       String uri = "http://127.0.0.1:" + server.getLocalPort() + "/missing.png";
       assertThrows(
@@ -206,20 +204,19 @@ class DiscoverInfoPanelTest {
 
   private XHTMLPanel createPanel(String html, String baseUri) throws Exception {
     AtomicReference<XHTMLPanel> result = new AtomicReference<>();
-    SwingUtilities.invokeAndWait(
-        () -> {
-          DiscoverInfoPanel discover =
-              new DiscoverInfoPanel(
-                  resources(), baseUri, null, new LauncherFileSystem(directory), null) {
-                @Override
-                protected Document getDiscoverDocument(String url, Path localCache) {
-                  return XMLResource.load(new StringReader(html)).getDocument();
-                }
-              };
-          discover.setSize(320, 240);
-          discover.doLayout();
-          result.set((XHTMLPanel) discover.getComponent(0));
-        });
+    SwingUtilities.invokeAndWait(() -> {
+      DiscoverInfoPanel discover =
+          new DiscoverInfoPanel(
+              resources(), baseUri, null, new LauncherFileSystem(directory), null) {
+            @Override
+            protected Document getDiscoverDocument(String url, Path localCache) {
+              return XMLResource.load(new StringReader(html)).getDocument();
+            }
+          };
+      discover.setSize(320, 240);
+      discover.doLayout();
+      result.set((XHTMLPanel) discover.getComponent(0));
+    });
     // The constructor queues initial document loading on the EDT.
     SwingUtilities.invokeAndWait(() -> {});
     return result.get();
@@ -252,15 +249,14 @@ class DiscoverInfoPanelTest {
 
   private static BufferedImage render(XHTMLPanel panel) throws Exception {
     BufferedImage image = new BufferedImage(320, 240, BufferedImage.TYPE_INT_RGB);
-    SwingUtilities.invokeAndWait(
-        () -> {
-          Graphics2D graphics = image.createGraphics();
-          try {
-            panel.paint(graphics);
-          } finally {
-            graphics.dispose();
-          }
-        });
+    SwingUtilities.invokeAndWait(() -> {
+      Graphics2D graphics = image.createGraphics();
+      try {
+        panel.paint(graphics);
+      } finally {
+        graphics.dispose();
+      }
+    });
     return image;
   }
 

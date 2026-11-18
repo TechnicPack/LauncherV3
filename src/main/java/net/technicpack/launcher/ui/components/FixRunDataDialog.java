@@ -603,11 +603,10 @@ public class FixRunDataDialog extends LauncherDialog {
     okButton.setBorder(BorderFactory.createEmptyBorder(5, 25, 5, 25));
     okButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
     okButton.setHoverForeground(UIConstants.COLOR_BLUE);
-    okButton.addActionListener(
-        e -> {
-          result = Result.REQUIREMENTS_UNMET;
-          dispose();
-        });
+    okButton.addActionListener(e -> {
+      result = Result.REQUIREMENTS_UNMET;
+      dispose();
+    });
     buttonPanel.add(okButton);
   }
 
@@ -665,11 +664,10 @@ public class FixRunDataDialog extends LauncherDialog {
     cancelButton.setContentAreaFilled(false);
     cancelButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
     cancelButton.setHoverForeground(UIConstants.COLOR_BLUE);
-    cancelButton.addActionListener(
-        e -> {
-          result = Result.CANCEL;
-          dispose();
-        });
+    cancelButton.addActionListener(e -> {
+      result = Result.CANCEL;
+      dispose();
+    });
     buttonPanel.add(cancelButton);
 
     buttonPanel.add(Box.createHorizontalGlue());
@@ -679,11 +677,10 @@ public class FixRunDataDialog extends LauncherDialog {
     okButton.setContentAreaFilled(false);
     okButton.setForeground(UIConstants.COLOR_BUTTON_BLUE);
     okButton.setHoverForeground(UIConstants.COLOR_BLUE);
-    okButton.addActionListener(
-        e -> {
-          result = Result.APPLY;
-          dispose();
-        });
+    okButton.addActionListener(e -> {
+      result = Result.APPLY;
+      dispose();
+    });
     buttonPanel.add(okButton);
   }
 

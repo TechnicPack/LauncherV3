@@ -50,12 +50,11 @@ public class JavaRuntimesIndex {
         if (OSUtils.isArm64OS()) {
           // Combine the arm64 and x64 entries, with the arm64 ones taking precedence
           Map<String, List<JavaRuntime>> combinedMac = new HashMap<>(mac);
-          macArm64.forEach(
-              (key, value) -> {
-                if (!value.isEmpty()) {
-                  combinedMac.put(key, value);
-                }
-              });
+          macArm64.forEach((key, value) -> {
+            if (!value.isEmpty()) {
+              combinedMac.put(key, value);
+            }
+          });
 
           return combinedMac;
         }

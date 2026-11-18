@@ -39,21 +39,20 @@ class ModpackInfoPanelDeleteTest {
             new InstalledPackStore(tempDir.resolve("installedpacks.json")),
             new LauncherFileSystem(tempDir.resolve("launcher")));
 
-    SwingUtilities.invokeAndWait(
-        () -> {
-          ModpackInfoPanel panel = panel();
-          panel.setModpack(modpack);
-          assertTrue(panel.getDeleteButton().isVisible());
+    SwingUtilities.invokeAndWait(() -> {
+      ModpackInfoPanel panel = panel();
+      panel.setModpack(modpack);
+      assertTrue(panel.getDeleteButton().isVisible());
 
-          panel.clearSelection();
-          assertFalse(panel.getDeleteButton().isVisible());
+      panel.clearSelection();
+      assertFalse(panel.getDeleteButton().isVisible());
 
-          panel.setModpackIfSame(modpack);
-          assertFalse(panel.getDeleteButton().isVisible());
+      panel.setModpackIfSame(modpack);
+      assertFalse(panel.getDeleteButton().isVisible());
 
-          panel.setModpack(modpack);
-          assertTrue(panel.getDeleteButton().isVisible());
-        });
+      panel.setModpack(modpack);
+      assertTrue(panel.getDeleteButton().isVisible());
+    });
   }
 
   private static ModpackInfoPanel panel() {

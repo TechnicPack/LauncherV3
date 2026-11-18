@@ -168,90 +168,82 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
     glassPane.setVisible(true);
 
     Thread thread =
-        new Thread(
-            () -> {
-              File oldSettings = settings.getFilePath();
-              File newSettings =
-                  new File(
-                      OperatingSystem.getOperatingSystem().getTechnicDirectory(), "settings.json");
+        new Thread(() -> {
+          File oldSettings = settings.getFilePath();
+          File newSettings =
+              new File(OperatingSystem.getOperatingSystem().getTechnicDirectory(), "settings.json");
 
-              if (oldSettings.exists()
-                  && !oldSettings.getAbsolutePath().equals(newSettings.getAbsolutePath())) {
-                oldSettings.delete();
-              }
+          if (oldSettings.exists()
+              && !oldSettings.getAbsolutePath().equals(newSettings.getAbsolutePath())) {
+            oldSettings.delete();
+          }
 
-              File oldRoot = settings.getTechnicRoot();
-              File newRoot = new File(standardInstallDir.getText());
-              boolean rootHasChanged = false;
+          File oldRoot = settings.getTechnicRoot();
+          File newRoot = new File(standardInstallDir.getText());
+          boolean rootHasChanged = false;
 
-              if (oldRoot.exists()
-                  && !oldRoot.getAbsolutePath().equals(newRoot.getAbsolutePath())) {
-                rootHasChanged = true;
-                try {
-                  copyInstallRoot(oldRoot, newRoot, false);
-                  LauncherMain.moveLogFileTo(new LauncherFileSystem(newRoot.toPath()));
-                  cleanupInstallRoot(
-                      oldRoot,
-                      shouldKeepSettingsFileOnStandardCleanup(
-                          oldRoot, OperatingSystem.getOperatingSystem().getTechnicDirectory()));
-                } catch (IOException e) {
-                  Utils.getLogger()
-                      .log(Level.SEVERE, "Copying install to new directory failed: ", e);
-                }
-              }
+          if (oldRoot.exists() && !oldRoot.getAbsolutePath().equals(newRoot.getAbsolutePath())) {
+            rootHasChanged = true;
+            try {
+              copyInstallRoot(oldRoot, newRoot, false);
+              LauncherMain.moveLogFileTo(new LauncherFileSystem(newRoot.toPath()));
+              cleanupInstallRoot(
+                  oldRoot,
+                  shouldKeepSettingsFileOnStandardCleanup(
+                      oldRoot, OperatingSystem.getOperatingSystem().getTechnicDirectory()));
+            } catch (IOException e) {
+              Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ", e);
+            }
+          }
 
-              settings.setFilePath(newSettings);
+          settings.setFilePath(newSettings);
 
-              if (settings.isPortable()
-                  || rootHasChanged
-                  || !standardInstallDir
-                      .getText()
-                      .equals(
-                          OperatingSystem.getOperatingSystem()
-                              .getTechnicDirectory()
-                              .getAbsolutePath())) settings.installTo(standardInstallDir.getText());
-              settings.getTechnicRoot();
-              settings.setLanguageCode(
-                  ((LanguageItem) standardLanguages.getSelectedItem()).getLangCode());
-              settings.save();
+          if (settings.isPortable()
+              || rootHasChanged
+              || !standardInstallDir
+                  .getText()
+                  .equals(
+                      OperatingSystem.getOperatingSystem().getTechnicDirectory().getAbsolutePath()))
+            settings.installTo(standardInstallDir.getText());
+          settings.getTechnicRoot();
+          settings.setLanguageCode(
+              ((LanguageItem) standardLanguages.getSelectedItem()).getLangCode());
+          settings.save();
 
-              // FIXME: temporary workaround to suppress the "file not found" warning on first run
-              Path installedPacks = newRoot.toPath().resolve("installedPacks");
-              try {
-                if (!Files.exists(installedPacks)) {
-                  Files.createFile(installedPacks);
-                }
-              } catch (IOException e) {
-                // ignore for now
-              }
-              Path usersJson = newRoot.toPath().resolve("users.json");
-              try {
-                if (!Files.exists(usersJson)) {
-                  Files.createFile(usersJson);
-                }
-              } catch (IOException e) {
-                // ignore for now
-              }
+          // FIXME: temporary workaround to suppress the "file not found" warning on first run
+          Path installedPacks = newRoot.toPath().resolve("installedPacks");
+          try {
+            if (!Files.exists(installedPacks)) {
+              Files.createFile(installedPacks);
+            }
+          } catch (IOException e) {
+            // ignore for now
+          }
+          Path usersJson = newRoot.toPath().resolve("users.json");
+          try {
+            if (!Files.exists(usersJson)) {
+              Files.createFile(usersJson);
+            }
+          } catch (IOException e) {
+            // ignore for now
+          }
 
-              VersionFileBuildNumber buildNumber = new VersionFileBuildNumber(resources);
-              Utils.sendTracking(
-                  "installLauncher",
-                  "standard",
-                  buildNumber.getBuildNumber(),
-                  settings.getClientId());
+          VersionFileBuildNumber buildNumber = new VersionFileBuildNumber(resources);
+          Utils.sendTracking(
+              "installLauncher", "standard", buildNumber.getBuildNumber(), settings.getClientId());
 
-              Relauncher relauncher =
-                  new Relauncher(
-                      null,
-                      "stable4",
-                      0,
-                      new LauncherFileSystem(settings.getTechnicRootPath()),
-                      resources,
-                      params);
-              String currentPath = relauncher.getRunningPath();
-              relauncher.launch(currentPath, params.getArgs());
-              System.exit(0);
-            });
+          Relauncher relauncher =
+              new Relauncher(
+                  null,
+                  "stable4",
+                  0,
+                  new LauncherFileSystem(settings.getTechnicRootPath()),
+                  resources,
+                  params);
+          String currentPath = relauncher.getRunningPath();
+          relauncher.launch(currentPath, params.getArgs());
+          System.exit(0);
+        });
     thread.start();
   }
 
@@ -298,65 +290,59 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
 
     final String threadTargetPath = targetPath;
     Thread thread =
-        new Thread(
-            () -> {
-              File oldRoot = settings.getTechnicRoot();
-              File newRoot = new File(portableInstallDir.getText(), "technic");
+        new Thread(() -> {
+          File oldRoot = settings.getTechnicRoot();
+          File newRoot = new File(portableInstallDir.getText(), "technic");
 
-              File oldSettingsFile = settings.getFilePath();
-              File newSettingsFile = new File(newRoot, "settings.json");
+          File oldSettingsFile = settings.getFilePath();
+          File newSettingsFile = new File(newRoot, "settings.json");
 
-              if (oldSettingsFile.exists()
-                  && !oldSettingsFile.getAbsolutePath().equals(newSettingsFile.getAbsolutePath()))
-                oldSettingsFile.delete();
+          if (oldSettingsFile.exists()
+              && !oldSettingsFile.getAbsolutePath().equals(newSettingsFile.getAbsolutePath()))
+            oldSettingsFile.delete();
 
-              if (oldRoot.exists()
-                  && !oldRoot.getAbsolutePath().equals(newRoot.getAbsolutePath())) {
-                try {
-                  copyInstallRoot(oldRoot, newRoot, true);
-                  LauncherMain.moveLogFileTo(new LauncherFileSystem(newRoot.toPath()));
-                  cleanupInstallRoot(oldRoot, false);
-                } catch (IOException e) {
-                  Utils.getLogger()
-                      .log(Level.SEVERE, "Copying install to new directory failed: ", e);
-                }
-              }
+          if (oldRoot.exists() && !oldRoot.getAbsolutePath().equals(newRoot.getAbsolutePath())) {
+            try {
+              copyInstallRoot(oldRoot, newRoot, true);
+              LauncherMain.moveLogFileTo(new LauncherFileSystem(newRoot.toPath()));
+              cleanupInstallRoot(oldRoot, false);
+            } catch (IOException e) {
+              Utils.getLogger().log(Level.SEVERE, "Copying install to new directory failed: ", e);
+            }
+          }
 
-              settings.setPortable();
-              settings.setFilePath(newSettingsFile);
-              settings.getTechnicRoot();
-              settings.setLanguageCode(
-                  ((LanguageItem) portableLanguages.getSelectedItem()).getLangCode());
-              settings.save();
+          settings.setPortable();
+          settings.setFilePath(newSettingsFile);
+          settings.getTechnicRoot();
+          settings.setLanguageCode(
+              ((LanguageItem) portableLanguages.getSelectedItem()).getLangCode());
+          settings.save();
 
-              // FIXME: temporary workaround to suppress the "file not found" warning on first run
-              Path installedPacks = newRoot.toPath().resolve("installedPacks");
-              try {
-                if (!Files.exists(installedPacks)) {
-                  Files.createFile(installedPacks);
-                }
-              } catch (IOException e) {
-                // ignore for now
-              }
-              Path usersJson = newRoot.toPath().resolve("users.json");
-              try {
-                if (!Files.exists(usersJson)) {
-                  Files.createFile(usersJson);
-                }
-              } catch (IOException e) {
-                // ignore for now
-              }
+          // FIXME: temporary workaround to suppress the "file not found" warning on first run
+          Path installedPacks = newRoot.toPath().resolve("installedPacks");
+          try {
+            if (!Files.exists(installedPacks)) {
+              Files.createFile(installedPacks);
+            }
+          } catch (IOException e) {
+            // ignore for now
+          }
+          Path usersJson = newRoot.toPath().resolve("users.json");
+          try {
+            if (!Files.exists(usersJson)) {
+              Files.createFile(usersJson);
+            }
+          } catch (IOException e) {
+            // ignore for now
+          }
 
-              VersionFileBuildNumber buildNumber = new VersionFileBuildNumber(resources);
-              Utils.sendTracking(
-                  "installLauncher",
-                  "portable",
-                  buildNumber.getBuildNumber(),
-                  settings.getClientId());
+          VersionFileBuildNumber buildNumber = new VersionFileBuildNumber(resources);
+          Utils.sendTracking(
+              "installLauncher", "portable", buildNumber.getBuildNumber(), settings.getClientId());
 
-              relauncher.launch(threadTargetPath, params.getArgs());
-              System.exit(0);
-            });
+          relauncher.launch(threadTargetPath, params.getArgs());
+          System.exit(0);
+        });
     thread.start();
   }
 
@@ -491,11 +477,10 @@ public class InstallerFrame extends DraggableFrame implements IRelocalizableReso
     closeButton.setContentAreaFilled(false);
     closeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     closeButton.setFocusPainted(false);
-    closeButton.addActionListener(
-        e -> {
-          if (mainFrame != null) mainFrame.setVisible(true);
-          dispose();
-        });
+    closeButton.addActionListener(e -> {
+      if (mainFrame != null) mainFrame.setVisible(true);
+      dispose();
+    });
     header.add(closeButton);
 
     registerDragHandle(header);

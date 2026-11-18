@@ -819,11 +819,10 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     textPane.setHighlighter(null);
     textPane.setAlignmentX(LEFT_ALIGNMENT);
     textPane.setContentType("text/html");
-    textPane.addHyperlinkListener(
-        e -> {
-          if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED)
-            DesktopUtils.browseUrl(e.getURL().toString());
-        });
+    textPane.addHyperlinkListener(e -> {
+      if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED)
+        DesktopUtils.browseUrl(e.getURL().toString());
+    });
     MutableAttributeSet attributes = new SimpleAttributeSet(textPane.getParagraphAttributes());
     StyleConstants.setLineSpacing(attributes, StyleConstants.getLineSpacing(attributes) * 1.3f);
     textPane.setParagraphAttributes(attributes, true);
@@ -1888,10 +1887,9 @@ public class OptionsDialog extends LauncherDialog implements IRelocalizableResou
     initComponents();
     initControlValues();
 
-    SwingUtilities.invokeLater(
-        () -> {
-          invalidate();
-          repaint();
-        });
+    SwingUtilities.invokeLater(() -> {
+      invalidate();
+      repaint();
+    });
   }
 }

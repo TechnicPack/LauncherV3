@@ -333,25 +333,24 @@ public class ModpackSelector extends TintablePanel
       }
     }
 
-    sortedPacks.sort(
-        (o1, o2) -> {
-          int priorityCompare =
-              Integer.compare(o2.getModpack().getPriority(), o1.getModpack().getPriority());
-          if (priorityCompare != 0) {
-            return priorityCompare;
-          } else if (o1.getModpack().getDisplayName() == null
-              && o2.getModpack().getDisplayName() == null) {
-            return 0;
-          } else if (o1.getModpack().getDisplayName() == null) {
-            return -1;
-          } else if (o2.getModpack().getDisplayName() == null) {
-            return 1;
-          } else {
-            return o1.getModpack()
-                .getDisplayName()
-                .compareToIgnoreCase(o2.getModpack().getDisplayName());
-          }
-        });
+    sortedPacks.sort((o1, o2) -> {
+      int priorityCompare =
+          Integer.compare(o2.getModpack().getPriority(), o1.getModpack().getPriority());
+      if (priorityCompare != 0) {
+        return priorityCompare;
+      } else if (o1.getModpack().getDisplayName() == null
+          && o2.getModpack().getDisplayName() == null) {
+        return 0;
+      } else if (o1.getModpack().getDisplayName() == null) {
+        return -1;
+      } else if (o2.getModpack().getDisplayName() == null) {
+        return 1;
+      } else {
+        return o1.getModpack()
+            .getDisplayName()
+            .compareToIgnoreCase(o2.getModpack().getDisplayName());
+      }
+    });
     return sortedPacks;
   }
 
@@ -371,12 +370,11 @@ public class ModpackSelector extends TintablePanel
     if (modpack.hasRecommendedUpdate()) {
       widget.setToolTipText(resources.getString("launcher.packselector.updatetip"));
     }
-    widget.addActionListener(
-        e -> {
-          if (e.getSource() instanceof ModpackWidget) {
-            selectWidget((ModpackWidget) e.getSource());
-          }
-        });
+    widget.addActionListener(e -> {
+      if (e.getSource() instanceof ModpackWidget) {
+        selectWidget((ModpackWidget) e.getSource());
+      }
+    });
 
     if (widget.getModpack().isSelected()) {
       selectedWidget = widget;
@@ -392,14 +390,13 @@ public class ModpackSelector extends TintablePanel
     rebuildUI();
 
     if (selectedWidget != null) {
-      SwingUtilities.invokeLater(
-          () -> {
-            if (widget == selectedWidget) {
-              selectWidget(widget);
-            } else if (selectedWidget != null) {
-              selectedWidget.scrollRectToVisible(new Rectangle(selectedWidget.getSize()));
-            }
-          });
+      SwingUtilities.invokeLater(() -> {
+        if (widget == selectedWidget) {
+          selectWidget(widget);
+        } else if (selectedWidget != null) {
+          selectedWidget.scrollRectToVisible(new Rectangle(selectedWidget.getSize()));
+        }
+      });
     }
   }
 
@@ -424,31 +421,28 @@ public class ModpackSelector extends TintablePanel
             try {
               updatePackInfoFromNetwork(refreshWidget.getModpack(), false);
 
-              SwingUtilities.invokeLater(
-                  () -> {
-                    if (modpackInfoPanel != null) {
-                      modpackInfoPanel.setModpackIfSame(refreshWidget.getModpack());
-                    }
+              SwingUtilities.invokeLater(() -> {
+                if (modpackInfoPanel != null) {
+                  modpackInfoPanel.setModpackIfSame(refreshWidget.getModpack());
+                }
 
-                    maybePromptForClientId(refreshWidget);
+                maybePromptForClientId(refreshWidget);
 
-                    if (refreshWidget.getModpack().hasRecommendedUpdate()) {
-                      refreshWidget.setToolTipText(
-                          resources.getString("launcher.packselector.updatetip"));
-                    } else {
-                      refreshWidget.setToolTipText(null);
-                    }
+                if (refreshWidget.getModpack().hasRecommendedUpdate()) {
+                  refreshWidget.setToolTipText(
+                      resources.getString("launcher.packselector.updatetip"));
+                } else {
+                  refreshWidget.setToolTipText(null);
+                }
 
-                    iconRepo.refreshRetry(refreshWidget.getModpack());
-                    refreshWidget.updateFromPack(
-                        iconRepo.startImageJob(refreshWidget.getModpack()));
+                iconRepo.refreshRetry(refreshWidget.getModpack());
+                refreshWidget.updateFromPack(iconRepo.startImageJob(refreshWidget.getModpack()));
 
-                    SwingUtilities.invokeLater(
-                        () -> {
-                          revalidate();
-                          repaint();
-                        });
-                  });
+                SwingUtilities.invokeLater(() -> {
+                  revalidate();
+                  repaint();
+                });
+              });
 
             } catch (RestfulAPIException e) {
               e.printStackTrace();
@@ -748,10 +742,9 @@ public class ModpackSelector extends TintablePanel
 
     initComponents();
 
-    SwingUtilities.invokeLater(
-        () -> {
-          invalidate();
-          repaint();
-        });
+    SwingUtilities.invokeLater(() -> {
+      invalidate();
+      repaint();
+    });
   }
 }

@@ -153,12 +153,11 @@ public class NewsInfoPanel extends JPanel implements PropertyChangeListener {
     newsText.setHighlighter(null);
     newsText.setAlignmentX(LEFT_ALIGNMENT);
     newsText.setContentType("text/html");
-    newsText.addHyperlinkListener(
-        e -> {
-          if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-            if (e.getURL() != null) DesktopUtils.browseUrl(e.getURL().toString());
-          }
-        });
+    newsText.addHyperlinkListener(e -> {
+      if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+        if (e.getURL() != null) DesktopUtils.browseUrl(e.getURL().toString());
+      }
+    });
     newsText.addComponentListener(
         new ComponentListener() {
           @Override

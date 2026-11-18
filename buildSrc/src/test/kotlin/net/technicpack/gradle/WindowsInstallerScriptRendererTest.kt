@@ -22,26 +22,30 @@ class WindowsInstallerScriptRendererTest {
     }
 
     @Test
-    fun buildsInnoCompilerCommandLine() {
+    fun buildsInnoCompilerCommandLineWithPinnedImage() {
+        val command =
+            buildWindowsInstallerCommandLine(
+                projectDir = "/repo with spaces",
+                installerScriptPath = "/repo with spaces/build/installer/windows/TechnicLauncherBootstrap.iss",
+                installerOutputDir = "/repo with spaces/build/distributions",
+            )
+
+        assertEquals(
+            listOf("docker", "run", "--rm", "-i", "-v", "/repo with spaces:/work"),
+            command.take(6),
+        )
+        assertTrue(
+            Regex("amake/innosetup:[^@\\s]+@sha256:[a-f0-9]{64}").matches(command[6]),
+            "The installer compiler image must have a tag and an immutable SHA-256 digest",
+        )
         assertEquals(
             listOf(
-                "docker",
-                "run",
-                "--rm",
-                "-i",
-                "-v",
-                "/repo:/work",
-                "amake/innosetup",
                 "/Qp",
                 "/Obuild/distributions",
                 "/FTechnicLauncherBootstrap",
                 "build/installer/windows/TechnicLauncherBootstrap.iss",
             ),
-            buildWindowsInstallerCommandLine(
-                projectDir = "/repo",
-                installerScriptPath = "/repo/build/installer/windows/TechnicLauncherBootstrap.iss",
-                installerOutputDir = "/repo/build/distributions",
-            ),
+            command.drop(7),
         )
     }
 

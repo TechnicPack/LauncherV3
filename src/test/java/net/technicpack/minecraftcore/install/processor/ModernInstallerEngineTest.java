@@ -196,11 +196,10 @@ class ModernInstallerEngineTest {
       Future<Throwable> first = executor.submit(() -> executeFailure(request));
       awaitFile(output.resolveSibling("started"));
       Future<Throwable> second =
-          executor.submit(
-              () -> {
-                secondStarted.countDown();
-                return executeFailure(request);
-              });
+          executor.submit(() -> {
+            secondStarted.countDown();
+            return executeFailure(request);
+          });
       assertTrue(secondStarted.await(5, TimeUnit.SECONDS));
       write(output.resolveSibling("release"), "release");
       assertNull(first.get(15, TimeUnit.SECONDS));
@@ -652,11 +651,10 @@ class ModernInstallerEngineTest {
       Path acquiredTool = maven(root.resolve("libraries"), TOOL);
       write(acquiredTool, "corrupted while another engine waits");
       Future<Throwable> second =
-          executor.submit(
-              () -> {
-                secondStarted.countDown();
-                return executeFailure(request);
-              });
+          executor.submit(() -> {
+            secondStarted.countDown();
+            return executeFailure(request);
+          });
       assertTrue(secondStarted.await(5, TimeUnit.SECONDS));
       write(root.resolve("release"), "release");
       assertNull(first.get(15, TimeUnit.SECONDS));
@@ -927,10 +925,9 @@ class ModernInstallerEngineTest {
   private void assertWorkCleaned() throws IOException {
     try (Stream<Path> children = Files.list(root.resolve("cache"))) {
       assertFalse(
-          children.anyMatch(
-              path ->
-                  Files.isDirectory(path)
-                      && path.getFileName().toString().startsWith("modern-installer-")));
+          children.anyMatch(path ->
+              Files.isDirectory(path)
+                  && path.getFileName().toString().startsWith("modern-installer-")));
     }
   }
 

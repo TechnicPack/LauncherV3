@@ -343,24 +343,23 @@ public class MicrosoftLoginDialog extends JDialog {
     this.challenge = c;
     this.expiryDeadlineMillis = System.currentTimeMillis() + (c.expiresInSeconds * 1000L);
     BufferedImage qrImage = renderQrCode(c.verificationUri, 160);
-    SwingUtilities.invokeLater(
-        () -> {
-          deviceCodeField.setText(c.userCode);
-          copyCodeButton.setEnabled(true);
-          openBrowserButton.setEnabled(true);
-          deviceCodeExpired = false;
-          getNewCodeButton.setVisible(false);
-          if (qrImage != null) {
-            qrLabel.setIcon(new ImageIcon(qrImage));
-          }
-          expiryBar.setMinimum(0);
-          expiryBar.setMaximum((int) c.expiresInSeconds);
-          expiryBar.setValue((int) c.expiresInSeconds);
-          expiryBar.setVisible(true);
-          startExpiryTimer();
-          updateExpiryCountdown();
-          pack();
-        });
+    SwingUtilities.invokeLater(() -> {
+      deviceCodeField.setText(c.userCode);
+      copyCodeButton.setEnabled(true);
+      openBrowserButton.setEnabled(true);
+      deviceCodeExpired = false;
+      getNewCodeButton.setVisible(false);
+      if (qrImage != null) {
+        qrLabel.setIcon(new ImageIcon(qrImage));
+      }
+      expiryBar.setMinimum(0);
+      expiryBar.setMaximum((int) c.expiresInSeconds);
+      expiryBar.setValue((int) c.expiresInSeconds);
+      expiryBar.setVisible(true);
+      startExpiryTimer();
+      updateExpiryCountdown();
+      pack();
+    });
   }
 
   /**

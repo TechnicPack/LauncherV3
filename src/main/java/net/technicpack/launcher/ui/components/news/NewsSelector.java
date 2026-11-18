@@ -169,10 +169,9 @@ public class NewsSelector extends JPanel {
               resources,
               news.getArticles().get(i),
               avatarRepo.startImageJob(news.getArticles().get(i).getAuthorshipInfo()));
-      widget.addActionListener(
-          e -> {
-            if (e.getSource() instanceof NewsWidget) selectNewsItem((NewsWidget) e.getSource());
-          });
+      widget.addActionListener(e -> {
+        if (e.getSource() instanceof NewsWidget) selectNewsItem((NewsWidget) e.getSource());
+      });
       widgetHost.add(widget, constraints);
       constraints.gridy++;
 
@@ -185,14 +184,13 @@ public class NewsSelector extends JPanel {
 
   private void downloadItems() {
     Thread thread =
-        new Thread(
-            () -> {
-              try {
-                loadNewsItems(platformApi.getNews());
-              } catch (RestfulAPIException e) {
-                Utils.getLogger().log(Level.WARNING, "Unable to load news", e);
-              }
-            });
+        new Thread(() -> {
+          try {
+            loadNewsItems(platformApi.getNews());
+          } catch (RestfulAPIException e) {
+            Utils.getLogger().log(Level.WARNING, "Unable to load news", e);
+          }
+        });
 
     thread.start();
   }

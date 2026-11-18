@@ -113,11 +113,10 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
 
     refreshSelectedUsers();
 
-    SwingUtilities.invokeLater(
-        () -> {
-          invalidate();
-          repaint();
-        });
+    SwingUtilities.invokeLater(() -> {
+      invalidate();
+      repaint();
+    });
   }
 
   @Override
@@ -130,11 +129,10 @@ public class LoginFrame extends DraggableFrame implements IRelocalizableResource
 
       enableLoginButton();
 
-      SwingUtilities.invokeLater(
-          () -> {
-            invalidate();
-            repaint();
-          });
+      SwingUtilities.invokeLater(() -> {
+        invalidate();
+        repaint();
+      });
     } else this.setVisible(false);
   }
 

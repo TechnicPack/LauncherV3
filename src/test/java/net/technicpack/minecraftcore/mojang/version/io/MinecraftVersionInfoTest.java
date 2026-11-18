@@ -115,8 +115,7 @@ class MinecraftVersionInfoTest {
                 library -> library.getName().equals("org.lwjgl:lwjgl:3.3.1:natives-macos-arm64")));
     assertTrue(
         version.getLibraries().stream()
-            .anyMatch(
-                library ->
-                    library.getName().equals("org.lwjgl:lwjgl:3.3.1:natives-windows-arm64")));
+            .anyMatch(library ->
+                library.getName().equals("org.lwjgl:lwjgl:3.3.1:natives-windows-arm64")));
   }
 }

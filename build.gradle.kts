@@ -2,7 +2,7 @@ import org.gradle.jvm.toolchain.JavaLanguageVersion
 import java.nio.charset.StandardCharsets
 
 plugins {
-    id("com.diffplug.spotless") version "8.10.4"
+    id("com.diffplug.spotless") version "8.11.0"
     id("net.technicpack.launcher-packaging")
     alias(libs.plugins.sentry.jvm)
 }
@@ -20,9 +20,7 @@ repositories {
 spotless {
     java {
         target("src/*/java/**/*.java", "scripts/*.java")
-        // 1.37.0 removed Style.valueOf; retain 1.36.1 until the upstream compatibility fix ships.
-        // https://github.com/diffplug/spotless/issues/3126
-        googleJavaFormat("1.36.1")
+        googleJavaFormat("2.0.0")
     }
 
     kotlin {

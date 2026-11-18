@@ -98,18 +98,17 @@ final class LauncherWarningDialog {
               constraints.gridy++;
               constraints.insets = new Insets(12, 0, 0, 0);
               content.add(details, constraints);
-              disclosure.addActionListener(
-                  event -> {
-                    boolean expanded = !details.isVisible();
-                    details.setVisible(expanded);
-                    disclosure.setText(
-                        resources.getString(
-                            expanded
-                                ? "launcher.warning.hideDetails"
-                                : "launcher.warning.showDetails"));
-                    dialog.pack();
-                    dialog.setLocationRelativeTo(parent);
-                  });
+              disclosure.addActionListener(event -> {
+                boolean expanded = !details.isVisible();
+                details.setVisible(expanded);
+                disclosure.setText(
+                    resources.getString(
+                        expanded
+                            ? "launcher.warning.hideDetails"
+                            : "launcher.warning.showDetails"));
+                dialog.pack();
+                dialog.setLocationRelativeTo(parent);
+              });
             }
 
             JCheckBox option = optionLabel == null ? null : new JCheckBox(optionLabel, false);
@@ -127,16 +126,15 @@ final class LauncherWarningDialog {
             JButton cancel = button(resources, resources.getString("launcher.pack.cancel"));
             JButton proceed = button(resources, continueLabel);
             cancel.addActionListener(event -> dialog.dispose());
-            proceed.addActionListener(
-                event -> {
-                  if (!cancelled.get()) {
-                    result.set(
-                        option != null && option.isSelected()
-                            ? Result.CONTINUE_WITH_OPTION
-                            : Result.CONTINUE);
-                  }
-                  dialog.dispose();
-                });
+            proceed.addActionListener(event -> {
+              if (!cancelled.get()) {
+                result.set(
+                    option != null && option.isSelected()
+                        ? Result.CONTINUE_WITH_OPTION
+                        : Result.CONTINUE);
+              }
+              dialog.dispose();
+            });
             JPanel actions = new JPanel(new FlowLayout(FlowLayout.TRAILING, 8, 0));
             actions.setOpaque(false);
             actions.add(cancel);
@@ -184,10 +182,9 @@ final class LauncherWarningDialog {
         SwingUtilities.invokeAndWait(prompt);
       } catch (InterruptedException e) {
         cancelled.set(true);
-        SwingUtilities.invokeLater(
-            () -> {
-              if (activeDialog[0] != null) activeDialog[0].dispose();
-            });
+        SwingUtilities.invokeLater(() -> {
+          if (activeDialog[0] != null) activeDialog[0].dispose();
+        });
         throw e;
       } catch (InvocationTargetException e) {
         throw new IllegalStateException("Could not display the launcher warning", e.getCause());

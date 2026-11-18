@@ -31,22 +31,21 @@ class UIUtilsTest {
   }
 
   private void assertSelectionAfterRebuild(String savedCode, String expectedCode) throws Exception {
-    SwingUtilities.invokeAndWait(
-        () -> {
-          TechnicSettings settings = new TechnicSettings();
-          settings.setFilePath(tempDir.resolve("settings.json").toFile());
-          settings.setLanguageCode(savedCode);
-          ResourceLoader resources =
-              new ResourceLoader(null, "net", "technicpack", "launcher", "resources");
-          resources.setSupportedLanguages(
-              new Locale[] {Locale.ENGLISH, new Locale("pt", "PT"), new Locale("pt", "BR")});
-          resources.setLocale(savedCode);
-          JComboBox<LanguageItem> languages = new JComboBox<>();
-          UIUtils.populateLanguageSelector("OS Default", languages, resources, settings);
-          languages.removeAllItems();
-          UIUtils.populateLanguageSelector("OS Default", languages, resources, settings);
-          assertEquals(expectedCode, ((LanguageItem) languages.getSelectedItem()).getLangCode());
-          assertEquals(savedCode, settings.getLanguageCode());
-        });
+    SwingUtilities.invokeAndWait(() -> {
+      TechnicSettings settings = new TechnicSettings();
+      settings.setFilePath(tempDir.resolve("settings.json").toFile());
+      settings.setLanguageCode(savedCode);
+      ResourceLoader resources =
+          new ResourceLoader(null, "net", "technicpack", "launcher", "resources");
+      resources.setSupportedLanguages(
+          new Locale[] {Locale.ENGLISH, new Locale("pt", "PT"), new Locale("pt", "BR")});
+      resources.setLocale(savedCode);
+      JComboBox<LanguageItem> languages = new JComboBox<>();
+      UIUtils.populateLanguageSelector("OS Default", languages, resources, settings);
+      languages.removeAllItems();
+      UIUtils.populateLanguageSelector("OS Default", languages, resources, settings);
+      assertEquals(expectedCode, ((LanguageItem) languages.getSelectedItem()).getLangCode());
+      assertEquals(savedCode, settings.getLanguageCode());
+    });
   }
 }

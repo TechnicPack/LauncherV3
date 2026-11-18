@@ -198,30 +198,29 @@ public class LauncherMain {
     }
 
     // Initialize Sentry
-    Sentry.init(
-        options -> {
-          options.setDsn("https://c9b34c6f367b5b4061a1bfdb8bde3ef7@sentry.technicpack.net/3");
+    Sentry.init(options -> {
+      options.setDsn("https://c9b34c6f367b5b4061a1bfdb8bde3ef7@sentry.technicpack.net/3");
 
-          // Tag events with the semver release so Sentry can order builds: this is what
-          // makes commit-trailer auto-resolve and regression detection work, and what stops
-          // an event from a straggler on an older build reopening a resolved issue. Null on
-          // dev/source builds, which correctly leaves the release unset.
-          String release = resolveSentryRelease();
-          if (release != null) {
-            options.setRelease(release);
-          }
+      // Tag events with the semver release so Sentry can order builds: this is what
+      // makes commit-trailer auto-resolve and regression detection work, and what stops
+      // an event from a straggler on an older build reopening a resolved issue. Null on
+      // dev/source builds, which correctly leaves the release unset.
+      String release = resolveSentryRelease();
+      if (release != null) {
+        options.setRelease(release);
+      }
 
-          options.setTag(
-              "launcherPath",
-              LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-          // Mirror os.name / os.version / os.arch into searchable tags. The SDK's auto-
-          // captured `os` context wasn't surfacing reliably for diagnostic queries, so tag
-          // them explicitly. Java 8 on Windows 11 reports os.name as "Windows 10" (compat
-          // shim) — correlate with runtime.name/version if the distinction matters.
-          options.setTag("os.name", System.getProperty("os.name"));
-          options.setTag("os.version", System.getProperty("os.version"));
-          options.setTag("os.arch", System.getProperty("os.arch"));
-        });
+      options.setTag(
+          "launcherPath",
+          LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+      // Mirror os.name / os.version / os.arch into searchable tags. The SDK's auto-
+      // captured `os` context wasn't surfacing reliably for diagnostic queries, so tag
+      // them explicitly. Java 8 on Windows 11 reports os.name as "Windows 10" (compat
+      // shim) — correlate with runtime.name/version if the distinction matters.
+      options.setTag("os.name", System.getProperty("os.name"));
+      options.setTag("os.version", System.getProperty("os.version"));
+      options.setTag("os.arch", System.getProperty("os.arch"));
+    });
 
     // Initialize the AWT desktop properties on Linux before any invocations are done
     // https://github.com/JFormDesigner/FlatLaf/issues/405#issuecomment-960242342
@@ -270,10 +269,9 @@ public class LauncherMain {
       buildNumber = new CommandLineBuildNumber(params);
     else buildNumber = new VersionFileBuildNumber(resources);
 
-    Sentry.configureScope(
-        scope -> {
-          scope.setTag("buildNumber", buildNumber.getBuildNumber());
-        });
+    Sentry.configureScope(scope -> {
+      scope.setTag("buildNumber", buildNumber.getBuildNumber());
+    });
 
     TechnicConstants.setBuildNumber(buildNumber);
 
@@ -467,11 +465,10 @@ public class LauncherMain {
     System.setOut(new PrintStream(new LoggerOutputStream(Level.INFO, logger), true));
     System.setErr(new PrintStream(new LoggerOutputStream(Level.SEVERE, logger), true));
 
-    Thread.setDefaultUncaughtExceptionHandler(
-        (t, e) -> {
-          logger.log(Level.SEVERE, String.format("Unhandled exception in thread %s", t), e);
-          Sentry.captureException(e);
-        });
+    Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+      logger.log(Level.SEVERE, String.format("Unhandled exception in thread %s", t), e);
+      Sentry.captureException(e);
+    });
   }
 
   public static synchronized void moveLogFileTo(LauncherFileSystem fileSystem) {
@@ -536,24 +533,19 @@ public class LauncherMain {
     // Run DNS resolution asynchronously
     CompletableFuture<?>[] dnsFutures =
         Arrays.stream(domains)
-            .map(
-                domain ->
-                    CompletableFuture.runAsync(
-                        () -> {
-                          try {
-                            String ips =
-                                Arrays.stream(InetAddress.getAllByName(domain))
-                                    .map(InetAddress::getHostAddress)
-                                    .collect(Collectors.joining(", "));
-                            Utils.getLogger()
-                                .info(String.format("%s resolves to [%s]", domain, ips));
-                          } catch (UnknownHostException e) {
-                            Utils.getLogger()
-                                .log(
-                                    Level.SEVERE,
-                                    String.format("Failed to resolve %s: %s", domain, e));
-                          }
-                        }))
+            .map(domain ->
+                CompletableFuture.runAsync(() -> {
+                  try {
+                    String ips =
+                        Arrays.stream(InetAddress.getAllByName(domain))
+                            .map(InetAddress::getHostAddress)
+                            .collect(Collectors.joining(", "));
+                    Utils.getLogger().info(String.format("%s resolves to [%s]", domain, ips));
+                  } catch (UnknownHostException e) {
+                    Utils.getLogger()
+                        .log(Level.SEVERE, String.format("Failed to resolve %s: %s", domain, e));
+                  }
+                }))
             .toArray(CompletableFuture[]::new);
 
     // Wait for all DNS resolution tasks to complete
@@ -568,38 +560,36 @@ public class LauncherMain {
    */
   private static Thread createCleanupLogsThread(LauncherFileSystem fileSystem) {
     Thread cleanupLogsThread =
-        new Thread(
-            () -> {
-              final Path logsDir = fileSystem.getLogsDirectory();
+        new Thread(() -> {
+          final Path logsDir = fileSystem.getLogsDirectory();
 
-              if (!Files.exists(logsDir)) {
-                // Directory doesn't exist, nothing to clean up
-                return;
-              }
+          if (!Files.exists(logsDir)) {
+            // Directory doesn't exist, nothing to clean up
+            return;
+          }
 
-              final Instant aWeekAgo = Instant.now().minus(7, ChronoUnit.DAYS);
-              try (Stream<Path> walk = Files.walk(logsDir, 1)) {
-                walk.filter(p -> Files.isRegularFile(p) && p.toString().endsWith(".log"))
-                    .forEach(
-                        p -> {
-                          try {
-                            Instant dateTime = Files.getLastModifiedTime(p).toInstant();
+          final Instant aWeekAgo = Instant.now().minus(7, ChronoUnit.DAYS);
+          try (Stream<Path> walk = Files.walk(logsDir, 1)) {
+            walk.filter(p -> Files.isRegularFile(p) && p.toString().endsWith(".log"))
+                .forEach(p -> {
+                  try {
+                    Instant dateTime = Files.getLastModifiedTime(p).toInstant();
 
-                            if (dateTime.isBefore(aWeekAgo)) {
-                              Files.deleteIfExists(p);
-                            }
-                          } catch (IOException e) {
-                            Utils.getLogger()
-                                .log(
-                                    Level.WARNING,
-                                    String.format("Failed to delete old log file: %s", p),
-                                    e);
-                          }
-                        });
-              } catch (IOException e) {
-                Utils.getLogger().log(Level.WARNING, "Failed to clean up log files", e);
-              }
-            });
+                    if (dateTime.isBefore(aWeekAgo)) {
+                      Files.deleteIfExists(p);
+                    }
+                  } catch (IOException e) {
+                    Utils.getLogger()
+                        .log(
+                            Level.WARNING,
+                            String.format("Failed to delete old log file: %s", p),
+                            e);
+                  }
+                });
+          } catch (IOException e) {
+            Utils.getLogger().log(Level.WARNING, "Failed to clean up log files", e);
+          }
+        });
     cleanupLogsThread.setDaemon(true);
     return cleanupLogsThread;
   }
@@ -843,10 +833,9 @@ public class LauncherMain {
 
     LoginFrame login = new LoginFrame(resources, settings, userModel, skinRepo);
     userModel.addAuthListener(login);
-    userModel.addAuthListener(
-        user -> {
-          if (user == null) splash.dispose();
-        });
+    userModel.addAuthListener(user -> {
+      if (user == null) splash.dispose();
+    });
 
     userModel.startupAuth();
 

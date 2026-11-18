@@ -79,9 +79,8 @@ public class DiscoverInfoPanel extends JPanel {
           public void run() {
             if (!hasReloaded) {
               hasReloaded = true;
-              SwingUtilities.invokeLater(
-                  () ->
-                      panel.setDocument(getDiscoverDocumentFromResource(), runnableAccessDiscover));
+              SwingUtilities.invokeLater(() ->
+                  panel.setDocument(getDiscoverDocumentFromResource(), runnableAccessDiscover));
             }
           }
         };
@@ -137,19 +136,18 @@ public class DiscoverInfoPanel extends JPanel {
         .getSharedContext()
         .setFontMapping("Raleway", resources.getFont(ResourceLoader.FONT_RALEWAY, 12));
 
-    SwingUtilities.invokeLater(
-        () -> {
-          try {
-            Path localCache = fileSystem.getCacheDirectory().resolve("discover.html");
-            panel.setDocument(
-                getDiscoverDocument(runnableAccessDiscover, localCache), runnableAccessDiscover);
-          } catch (Exception e) {
-            // Can't load document from internet- don't beef
-            e.printStackTrace();
+    SwingUtilities.invokeLater(() -> {
+      try {
+        Path localCache = fileSystem.getCacheDirectory().resolve("discover.html");
+        panel.setDocument(
+            getDiscoverDocument(runnableAccessDiscover, localCache), runnableAccessDiscover);
+      } catch (Exception e) {
+        // Can't load document from internet- don't beef
+        e.printStackTrace();
 
-            triggerLoadListener();
-          }
-        });
+        triggerLoadListener();
+      }
+    });
 
     add(panel, BorderLayout.CENTER);
   }

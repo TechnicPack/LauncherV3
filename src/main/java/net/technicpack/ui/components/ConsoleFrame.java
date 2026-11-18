@@ -124,11 +124,10 @@ public class ConsoleFrame extends JFrame implements MouseListener {
     if (!autoScroll) {
       return;
     }
-    SwingUtilities.invokeLater(
-        () -> {
-          JScrollBar vertical = scrollPane.getVerticalScrollBar();
-          vertical.setValue(vertical.getMaximum());
-        });
+    SwingUtilities.invokeLater(() -> {
+      JScrollBar vertical = scrollPane.getVerticalScrollBar();
+      vertical.setValue(vertical.getMaximum());
+    });
   }
 
   /** Build the interface. */
@@ -239,13 +238,12 @@ public class ConsoleFrame extends JFrame implements MouseListener {
 
       JCheckBoxMenuItem autoScrollItem = new JCheckBoxMenuItem("Auto-scroll", autoScroll);
       add(autoScrollItem);
-      autoScrollItem.addActionListener(
-          e -> {
-            autoScroll = autoScrollItem.isSelected();
-            if (autoScroll) {
-              autoScrollToBottom(); // snap straight to the bottom when re-enabled
-            }
-          });
+      autoScrollItem.addActionListener(e -> {
+        autoScroll = autoScrollItem.isSelected();
+        if (autoScroll) {
+          autoScrollToBottom(); // snap straight to the bottom when re-enabled
+        }
+      });
     }
   }
 

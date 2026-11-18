@@ -117,18 +117,14 @@ class PackLoadJobTest {
     SwingUtilities.invokeAndWait(() -> resolvingJob.addPack(null, discovered, 1));
     assertTrue(firstLookup.await(5, TimeUnit.SECONDS));
 
-    SwingUtilities.invokeAndWait(
-        () ->
-            resolvingJob.addPack(
-                new InstalledPack("testpack", InstalledPack.RECOMMENDED), null, 1));
+    SwingUtilities.invokeAndWait(() ->
+        resolvingJob.addPack(new InstalledPack("testpack", InstalledPack.RECOMMENDED), null, 1));
 
     assertTrue(resolved.await(5, TimeUnit.SECONDS));
-    SwingUtilities.invokeAndWait(
-        () -> {
-          assertEquals(1, container.getModpacks().size());
-          assertEquals(
-              "Resolved title", container.getModpacks().iterator().next().getDisplayName());
-        });
+    SwingUtilities.invokeAndWait(() -> {
+      assertEquals(1, container.getModpacks().size());
+      assertEquals("Resolved title", container.getModpacks().iterator().next().getDisplayName());
+    });
   }
 
   private static class OfflinePackSource implements IAuthoritativePackSource {

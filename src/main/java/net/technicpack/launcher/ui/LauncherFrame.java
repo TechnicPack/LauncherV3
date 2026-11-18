@@ -585,30 +585,28 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     modpackSelector.setInfoPanel(modpackPanel);
     modpackSelector.setLauncherFrame(this);
     playButton = modpackPanel.getPlayButton();
-    playButton.addActionListener(
-        e -> {
-          if (e.getSource() instanceof ModpackModel) {
-            setupPlayButtonText((ModpackModel) e.getSource(), userModel.getCurrentUser());
-          } else if (installer.isCurrentlyRunning()) {
-            installer.cancel();
-            setupPlayButtonText(modpackSelector.getSelectedPack(), userModel.getCurrentUser());
-          } else {
-            launchModpack();
-          }
-        });
+    playButton.addActionListener(e -> {
+      if (e.getSource() instanceof ModpackModel) {
+        setupPlayButtonText((ModpackModel) e.getSource(), userModel.getCurrentUser());
+      } else if (installer.isCurrentlyRunning()) {
+        installer.cancel();
+        setupPlayButtonText(modpackSelector.getSelectedPack(), userModel.getCurrentUser());
+      } else {
+        launchModpack();
+      }
+    });
 
     modpackPanel
         .getDeleteButton()
-        .addActionListener(
-            e -> {
-              ModpackModel selectedPack = modpackSelector.getSelectedPack();
-              if (selectedPack == null || selectedPack.getInstalledPack() == null) {
-                return;
-              }
-              if (ModpackDeleteDialog.confirmDelete(LauncherFrame.this, selectedPack, resources)) {
-                modpackSelector.forceRefresh();
-              }
-            });
+        .addActionListener(e -> {
+          ModpackModel selectedPack = modpackSelector.getSelectedPack();
+          if (selectedPack == null || selectedPack.getInstalledPack() == null) {
+            return;
+          }
+          if (ModpackDeleteDialog.confirmDelete(LauncherFrame.this, selectedPack, resources)) {
+            modpackSelector.forceRefresh();
+          }
+        });
 
     infoSwap = new JPanel();
     infoLayout = new CardLayout();
@@ -748,11 +746,10 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     if (currentTabName != null) selectTab(currentTabName);
 
-    SwingUtilities.invokeLater(
-        () -> {
-          invalidate();
-          repaint();
-        });
+    SwingUtilities.invokeLater(() -> {
+      invalidate();
+      repaint();
+    });
   }
 
   @Override

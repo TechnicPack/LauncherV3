@@ -76,7 +76,6 @@ public class RenameJnilibToDylibTask implements IInstallTask<IMinecraftVersionIn
         throw new IOException(
             "Failed to rename " + file.getAbsolutePath() + " to " + newFile.getAbsolutePath());
       }
-      ;
     }
   }
 }

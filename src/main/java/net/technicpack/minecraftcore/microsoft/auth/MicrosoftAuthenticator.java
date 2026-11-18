@@ -93,13 +93,12 @@ public class MicrosoftAuthenticator {
     //            }
     //        });
     REQUEST_FACTORY =
-        HTTP_TRANSPORT.createRequestFactory(
-            request -> {
-              request.setParser(new JsonObjectParser(JSON_FACTORY));
+        HTTP_TRANSPORT.createRequestFactory(request -> {
+          request.setParser(new JsonObjectParser(JSON_FACTORY));
 
-              request.setLoggingEnabled(true);
-              request.setCurlLoggingEnabled(true);
-            });
+          request.setLoggingEnabled(true);
+          request.setCurlLoggingEnabled(true);
+        });
 
     Path dataStorePath = dataStore.toPath().toAbsolutePath();
     DataStoreFactory factory;

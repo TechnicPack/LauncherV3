@@ -160,25 +160,24 @@ class ProcessorProcessRunnerTest {
     long pid = -1;
     try {
       Future<?> result =
-          executor.submit(
-              () -> {
-                worker.set(Thread.currentThread());
-                try {
-                  runner.run(
-                      new CurrentJavaRuntime(),
-                      root,
-                      work,
-                      bootstrap,
-                      "fixture:sleep:1",
-                      Collections.singletonList(processor),
-                      Arrays.asList("sleep", pidFile.toString()),
-                      cancelled::get);
-                } catch (InterruptedException failure) {
-                  interruptPreserved.set(Thread.currentThread().isInterrupted());
-                  throw failure;
-                }
-                return null;
-              });
+          executor.submit(() -> {
+            worker.set(Thread.currentThread());
+            try {
+              runner.run(
+                  new CurrentJavaRuntime(),
+                  root,
+                  work,
+                  bootstrap,
+                  "fixture:sleep:1",
+                  Collections.singletonList(processor),
+                  Arrays.asList("sleep", pidFile.toString()),
+                  cancelled::get);
+            } catch (InterruptedException failure) {
+              interruptPreserved.set(Thread.currentThread().isInterrupted());
+              throw failure;
+            }
+            return null;
+          });
       pid = awaitPid(pidFile);
       assertTrue(ProcessHandle.of(pid).orElseThrow().isAlive());
       if (interrupt) worker.get().interrupt();
@@ -203,11 +202,10 @@ class ProcessorProcessRunnerTest {
     long pid = -1;
     try {
       Future<?> result =
-          executor.submit(
-              () -> {
-                run(Arrays.asList("inherited-pipe", pidFile.toString()));
-                return null;
-              });
+          executor.submit(() -> {
+            run(Arrays.asList("inherited-pipe", pidFile.toString()));
+            return null;
+          });
       pid = awaitPid(pidFile);
       result.get(12, TimeUnit.SECONDS);
       // Java 8 Process deliberately does not promise arbitrary descendant-tree cleanup.

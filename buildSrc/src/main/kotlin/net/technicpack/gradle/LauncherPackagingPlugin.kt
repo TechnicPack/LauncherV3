@@ -23,7 +23,8 @@ import java.util.jar.JarFile
 
 private const val WINDOWS_INSTALLER_INPUT_DIRECTORY = "installer/windows"
 private const val WINDOWS_INSTALLER_SCRIPT_FILE = "TechnicLauncherBootstrap.iss"
-private const val WINDOWS_INSTALLER_DOCKER_IMAGE = "amake/innosetup"
+private const val WINDOWS_INSTALLER_DOCKER_IMAGE =
+    "amake/innosetup:latest@sha256:e003376ba818547275fe10c95e2a29be0f2d12d45e9eb8f205b6672dc5685bb1"
 private const val WINDOWS_INSTALLER_DOCKER_WORKDIR = "/work"
 
 class LauncherPackagingPlugin : Plugin<Project> {

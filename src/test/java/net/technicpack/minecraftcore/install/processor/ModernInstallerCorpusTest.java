@@ -102,17 +102,16 @@ class ModernInstallerCorpusTest {
           variable + " at " + root,
           Stream.concat(
               installers.stream()
-                  .map(
-                      installer ->
-                          (Executable)
-                              () -> {
-                                try {
-                                  validateInstaller(installer, runtime, counts);
-                                } catch (Exception | AssertionError failure) {
-                                  throw new AssertionError(
-                                      "Installer corpus failure: " + installer, failure);
-                                }
-                              }),
+                  .map(installer ->
+                      (Executable)
+                          () -> {
+                            try {
+                              validateInstaller(installer, runtime, counts);
+                            } catch (Exception | AssertionError failure) {
+                              throw new AssertionError(
+                                  "Installer corpus failure: " + installer, failure);
+                            }
+                          }),
               Stream.of((Executable) () -> counts.requireCoverage(variable, root))));
     } finally {
       System.out.println(variable + " at " + root + ": " + counts);

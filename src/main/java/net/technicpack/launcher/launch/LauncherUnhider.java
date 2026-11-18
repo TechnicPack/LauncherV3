@@ -44,13 +44,12 @@ public class LauncherUnhider implements ProcessExitListener {
 
     LaunchAction action = settings.getLaunchAction();
 
-    SwingUtilities.invokeLater(
-        () -> {
-          if (action == LaunchAction.HIDE) {
-            frame.setVisible(true);
-          }
+    SwingUtilities.invokeLater(() -> {
+      if (action == LaunchAction.HIDE) {
+        frame.setVisible(true);
+      }
 
-          frame.launchCompleted();
-        });
+      frame.launchCompleted();
+    });
   }
 }
