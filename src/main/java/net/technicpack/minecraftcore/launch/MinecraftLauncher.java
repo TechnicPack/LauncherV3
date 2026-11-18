@@ -223,6 +223,14 @@ public class MinecraftLauncher {
           "-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump");
     }
 
+    // Mitigate Java4Shell on the selected runtime, including older packs on newer Java.
+    // https://github.com/PrismLauncher/meta/pull/165
+    // Append after user and metadata arguments so they cannot re-enable the intrinsic.
+    if (RunData.isJavaVersionAtLeast(launchJavaVersion, "17")) {
+      commands.addRaw("-XX:+UnlockDiagnosticVMOptions");
+      commands.addRaw("-XX:-UseBASE64Intrinsics");
+    }
+
     // build game args
     commands.addUnique("-cp", cpString);
     commands.addRaw(version.getMainClass());

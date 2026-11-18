@@ -17,6 +17,11 @@ If master advances during rollover, the workflow fails its push rather than reba
 
 ## [Unreleased]
 
+### Security
+
+- Added the Java4Shell workaround when launching games with Java 17 or newer, including older modpacks
+  using newer Java runtimes.
+
 ## [v4.0-1180] - 2026-10-30
 
 ### Fixed

@@ -43,6 +43,59 @@ class MinecraftLauncherTest {
   @TempDir Path tempDir;
 
   @ParameterizedTest
+  @ValueSource(strings = {"1.8.0_472", "11.0.29", "16.0.2", "17.0.17", "21.0.9", "25"})
+  void mitigatesJava4ShellBasedOnSelectedRuntime(String javaVersion) throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher"));
+    ModpackModel pack = createPack(fileSystem);
+    MinecraftVersionInfo version =
+        version(
+            "{\"id\":\"1.7.10\",\"type\":\"release\","
+                + "\"mainClass\":\"net.minecraft.launchwrapper.Launch\",\"libraries\":[],"
+                + "\"arguments\":{\"game\":[],\"jvm\":[\"-Dmetadata.option=kept\"]}}");
+    version.setJavaRuntime(new FakeJavaRuntime(javaVersion));
+    writeFile(pack.getBinDir().toPath().resolve("minecraft.jar"));
+
+    List<String> commands = buildCommands(fileSystem, pack, version);
+
+    boolean needsMitigation = Integer.parseInt(javaVersion.split("\\.")[0]) >= 17;
+    assertEquals(needsMitigation, commands.contains("-XX:+UnlockDiagnosticVMOptions"));
+    assertEquals(needsMitigation, commands.contains("-XX:-UseBASE64Intrinsics"));
+    if (needsMitigation) {
+      int unlock = commands.lastIndexOf("-XX:+UnlockDiagnosticVMOptions");
+      assertTrue(unlock > commands.indexOf("-Dmetadata.option=kept"));
+      assertEquals("-XX:-UseBASE64Intrinsics", commands.get(unlock + 1));
+      assertTrue(unlock + 1 < commands.indexOf(version.getMainClass()));
+    }
+  }
+
+  @Test
+  void mitigationOverridesUserAndMetadataIntrinsicSettings() throws Exception {
+    LauncherFileSystem fileSystem = new LauncherFileSystem(tempDir.resolve("launcher"));
+    ModpackModel pack = createPack(fileSystem);
+    MinecraftVersionInfo version =
+        version(
+            "{\"id\":\"1.21\",\"type\":\"release\",\"mainClass\":\"example.Main\",\"libraries\":[],"
+                + "\"arguments\":{\"game\":[],\"jvm\":[\"-XX:+UseBASE64Intrinsics\","
+                + "\"-XX:-UnlockDiagnosticVMOptions\"]}}");
+    version.setJavaRuntime(new FakeJavaRuntime());
+    writeFile(pack.getBinDir().toPath().resolve("minecraft.jar"));
+
+    List<String> commands =
+        buildCommands(
+            fileSystem,
+            pack,
+            version,
+            new LaunchOptions(
+                null, null, new TestLaunchOptions(false, "-XX:+UseBASE64Intrinsics")));
+
+    int disable = commands.lastIndexOf("-XX:-UseBASE64Intrinsics");
+    assertTrue(disable > commands.lastIndexOf("-XX:+UseBASE64Intrinsics"));
+    assertEquals("-XX:+UnlockDiagnosticVMOptions", commands.get(disable - 1));
+    assertTrue(disable - 1 > commands.lastIndexOf("-XX:-UnlockDiagnosticVMOptions"));
+    assertTrue(disable < commands.indexOf("example.Main"));
+  }
+
+  @ParameterizedTest
   @ValueSource(strings = {"1.12.2-forge-14.23.5.2851", "1.17.1-forge-37.1.1", "neoforge-26.2.0.75"})
   void buildsNativeLoaderCommandUsingPreparedAliasAndOriginalMetadata(String versionId)
       throws Exception {
@@ -640,6 +693,16 @@ class MinecraftLauncherTest {
   }
 
   private static final class FakeJavaRuntime implements IJavaRuntime {
+    private final String version;
+
+    private FakeJavaRuntime() {
+      this("21");
+    }
+
+    private FakeJavaRuntime(String version) {
+      this.version = version;
+    }
+
     @Override
     public File getExecutableFile() {
       return new File("java");
@@ -647,7 +710,7 @@ class MinecraftLauncherTest {
 
     @Override
     public String getVersion() {
-      return "21";
+      return version;
     }
 
     @Override
