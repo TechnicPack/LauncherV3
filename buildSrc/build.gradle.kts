@@ -10,7 +10,7 @@ repositories {
 dependencies {
     // Keep the existing build-tool minimum; Shadow 9.6.1 still requests Plexus 4.0.3.
     constraints {
-        implementation("org.codehaus.plexus:plexus-utils:4.1.0")
+        implementation("org.codehaus.plexus:plexus-utils:4.2.0")
     }
 
     implementation("com.gradleup.shadow:shadow-gradle-plugin:9.6.1")
